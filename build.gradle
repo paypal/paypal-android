@@ -14,6 +14,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'io.gitlab.arturbosch.detekt' version '1.18.0-RC2'
+}
+
 allprojects {
     repositories {
         google()
@@ -24,4 +28,25 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+dependencies {
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.18.0-RC2"
+}
+
+detekt {
+    toolVersion = "1.18.0-RC2"
+    config = files("detekt/detekt-config.yml")
+    input = files(
+            "Core/src",
+            "Card/src",
+            "Demo/src"
+    )
+    autoCorrect = project.hasProperty('detektAutoCorrect')
+    reports {
+        html {
+            enabled = true
+            destination = file("build/reports/destination.html")
+        }
+    }
 }
