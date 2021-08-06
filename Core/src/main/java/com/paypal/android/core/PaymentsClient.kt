@@ -1,5 +1,3 @@
 package com.paypal.android.core
 
-class PaymentsClient {
-
-}
+class PaymentsClient
