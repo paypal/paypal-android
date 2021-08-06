@@ -14,6 +14,7 @@ jobs:
           distribution: 'zulu'
       - name: Run Detekt
         run: ./gradlew detekt
+      - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: detekt-output
