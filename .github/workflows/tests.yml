@@ -2,8 +2,8 @@ name: Tests
 on: [push]
 jobs:
   unit_test_job:
-    name: Unit
-    runs-on: ubuntu-latest
+    name: Unit Tests
+    runs-on: macOS-11
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
