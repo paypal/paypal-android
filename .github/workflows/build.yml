@@ -1,8 +1,8 @@
-name: Tests
+name: Build
 on: [push]
 jobs:
-  unit_test_job:
-    name: Unit Tests
+  build_aar:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -12,5 +12,5 @@ jobs:
         with:
           java-version: '8'
           distribution: 'zulu'
-      - name: Run Unit Tests
-        run: ./gradlew --stacktrace testRelease
+      - name: Assemble
+        run: ./gradlew --stacktrace assemble
