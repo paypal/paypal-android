@@ -1,5 +1,5 @@
 name: Tests
-on: [pull_request, workflow_dispatch]
+on: [push]
 jobs:
   unit_test_job:
     name: Unit
