@@ -46,7 +46,7 @@ detekt {
     reports {
         html {
             enabled = true
-            destination = file("build/reports/destination.html")
+            destination = file("build/reports/detekt_report.html")
         }
     }
 }
