@@ -12,9 +12,9 @@ jobs:
         with:
           java-version: '8'
           distribution: 'zulu'
-      - uses: actions/upload-artifact@v2
+      - name: Run Detekt
+        run: ./gradlew detekt
+        uses: actions/upload-artifact@v2
         with:
           name: detekt-output
           path: build/reports/
-      - name: Run Detekt
-        run: ./gradlew detekt
