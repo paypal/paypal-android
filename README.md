@@ -15,3 +15,16 @@ Running the gradle task with the `-PdetektAutoCorrect` parameter, will automatic
 ```
 
 Detekt rules are configured in `detekt/detekt-config.yml`.
+
+### Jacoco
+
+This project uses [Jacoco](https://www.jacoco.org/jacoco/) for gathering code coverage metrics. We leverage the 3rd-party [jacoco-android-gradle-plugin](https://github.com/arturdm/jacoco-android-gradle-plugin) to integrate Jacoco into our project.
+
+To run code coverage analysis:
+
+```
+./gradlew jacocoTestReport
+```
+
+The results are then generated in each module's respective `build/jacoco` folder (e.g. `Card/build/jacoco`).
+
