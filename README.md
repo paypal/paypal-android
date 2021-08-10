@@ -1,7 +1,43 @@
-# android-sdk
-[WIP] One merchant integration point for all of PayPal's services
+# PayPal Android SDK
+Welcome to the PayPal Android SDK. This library will help you accept card, PayPal, Venmo, and alternative payments in your Android app.
+
+## Support
+The PayPal Android SDK is available for Android SDK 21+. See our [Client Deprecation policy](https://developer.paypal.com/braintree/docs/guides/client-sdk/deprecation-policy/android/v4) to plan for updates.
+
+## Languages
+This SDK is written in Kotlin and supports Kotlin and Java integrations. See the [Java Demo App](#TODO: link demo when created) and [Kotlin Demo App](/Demo) for sample integrations. 
+
+## Release Process
+This SDK follows [Semantic Versioning](https://semver.org/). The release process is automated via GitHub Actions.
+
+### Including the SDK
+This SDK is published to Maven Central in separate modules that can be included in your `build.gradle`. 
+For an integration offering card and PayPal payments, include the following:
+
+```groovy
+dependencies {
+  implementation 'com.paypal.android:card:1.0.0'
+  implementation 'com.paypal.android:paypal:1.0.0'
+}
+```
+
+### Snapshot Builds
+Snapshot builds of the latest SDK features are published from the `main` branch weekly. The snapshot builds can be used to test upcoming features before they have been released. To include a snapshot build:
+
+```groovy
+dependencies {
+  implementation 'com.paypal.android:card:1.0.0-SNAPSHOT'
+}
+```
+
+## Testing
+
+This repository includes unit tests, integration tests, and end to end tests.
+
+// TODO: Add sections with commands for running each type of tests (via Rake or Fastlane?)
 
 ## Static Analysis Tools
+
 ### Detekt
 This project uses [Detekt](https://github.com/detekt/detekt) for Kotlin code analysis. To run the code analysis:
 ```
