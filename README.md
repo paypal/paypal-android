@@ -99,3 +99,4 @@ The results are then generated in each module's respective `build/jacoco` folder
 ## Contributing
 
 See our [GitHub Guidelines](#TODO: determine where this document will live and update link) for git practices followed in this project.
+
