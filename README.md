@@ -7,11 +7,8 @@ The PayPal Android SDK is available for Android SDK 21+. See our [Client Depreca
 ## Languages
 This SDK is written in Kotlin and supports Kotlin and Java integrations. See the [Java Demo App](#TODO: link demo when created) and [Kotlin Demo App](/Demo) for sample integrations. 
 
-## Release Process
-This SDK follows [Semantic Versioning](https://semver.org/). The release process is automated via GitHub Actions.
-
-### Including the SDK
-This SDK is published to Maven Central in separate modules that can be included in your `build.gradle`. 
+## Including the SDK
+To accept a certain payment method in your app, you only need to include that payment-specific dependency in your `build.gradle`. 
 For an integration offering card and PayPal payments, include the following:
 
 ```groovy
@@ -20,6 +17,41 @@ dependencies {
   implementation 'com.paypal.android:paypal:1.0.0'
 }
 ```
+
+## Sample Code
+
+// TODO: Update code snippet after finalizing integration
+
+```kotlin
+// STEP 0: Fetch an ACCESS_TOKEN and ORDER_ID from your server.
+
+// STEP 1: Create a PaymentConfiguration object
+paymentConfig = PaymentConfig(ACCESS_TOKEN)
+
+// STEP 2: Create payment method client objects
+cardClient = CardClient(paymentConfig)
+
+// STEP 3: Collect relevant payment method details
+card = Card()
+card.number = "4111111111111111"
+card.cvv = "123"
+
+// STEP 4: Call checkout method
+cardClient.checkoutWithCard(ORDER_ID, card) { result, error _>
+    error?.let {
+        // handle checkout error
+        return
+    }
+    result?.let {
+        val orderID = it.orderID 
+        // Send orderID to your server to process the payment
+    }
+}
+
+// STEP 5: Send orderID to your server to capture/authorize
+```
+## Release Process
+This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.
 
 ### Snapshot Builds
 Snapshot builds of the latest SDK features are published from the `main` branch weekly. The snapshot builds can be used to test upcoming features before they have been released. To include a snapshot build:
