@@ -8,7 +8,7 @@ The PayPal Android SDK is available for Android SDK 21+. See our [Client Depreca
 This SDK is written in Kotlin and supports both Kotlin and Java integrations. See the [Java Demo App](#TODO: link demo when created) and [Kotlin Demo App](/Demo) for sample integrations. 
 
 ## Including the SDK
-To accept a certain payment method in your app, you only need to include that payment-specific dependency in your `build.gradle`. 
+You can support a specific payment method by adding its corresponding feature module as a dependency in your app's `build.gradle` file.
 For an integration offering card and PayPal payments, include the following:
 
 ```groovy
