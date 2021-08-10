@@ -66,7 +66,7 @@ dependencies {
 
 This repository includes unit tests, integration tests, and end to end tests.
 
-// TODO: Add sections with commands for running each type of tests (via Rake or Fastlane?)
+// TODO: Add sections with commands for running each type of tests 
 
 ## Static Analysis Tools
 
@@ -96,3 +96,6 @@ To run code coverage analysis:
 
 The results are then generated in each module's respective `build/jacoco` folder (e.g. `Card/build/jacoco`).
 
+## Contributing
+
+See our [GitHub Guidelines](#TODO: determine where this document will live and update link) for git practices followed in this project.
