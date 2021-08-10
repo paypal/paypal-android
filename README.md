@@ -25,7 +25,7 @@ dependencies {
 ```kotlin
 // STEP 0: Fetch an ACCESS_TOKEN and ORDER_ID from your server.
 
-// STEP 1: Create a PaymentConfiguration object
+// STEP 1: Create a PaymentConfig object
 paymentConfig = PaymentConfig(ACCESS_TOKEN)
 
 // STEP 2: Create payment method client objects
