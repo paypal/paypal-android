@@ -5,7 +5,7 @@ Welcome to the PayPal Android SDK. This library will help you accept Card, PayPa
 The PayPal Android SDK is available for Android SDK 21+. See our [Client Deprecation policy](https://developer.paypal.com/braintree/docs/guides/client-sdk/deprecation-policy/android/v4) to plan for updates.
 
 ## Languages
-This SDK is written in Kotlin and supports Kotlin and Java integrations. See the [Java Demo App](#TODO: link demo when created) and [Kotlin Demo App](/Demo) for sample integrations. 
+This SDK is written in Kotlin and supports both Kotlin and Java integrations. See the [Java Demo App](#TODO: link demo when created) and [Kotlin Demo App](/Demo) for sample integrations. 
 
 ## Including the SDK
 To accept a certain payment method in your app, you only need to include that payment-specific dependency in your `build.gradle`. 
