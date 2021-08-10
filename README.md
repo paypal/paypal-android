@@ -9,7 +9,7 @@ This SDK is written in Kotlin and supports both Kotlin and Java integrations. Se
 
 ## Including the SDK
 You can support a specific payment method by adding its corresponding feature module as a dependency in your app's `build.gradle` file.
-For an integration offering card and PayPal payments, include the following:
+For example, to support both Card and PayPal payments in your app include the following:
 
 ```groovy
 dependencies {
