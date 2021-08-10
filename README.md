@@ -1,5 +1,5 @@
 # PayPal Android SDK
-Welcome to the PayPal Android SDK. This library will help you accept card, PayPal, Venmo, and alternative payments in your Android app.
+Welcome to the PayPal Android SDK. This library will help you accept Card, PayPal, and Venmo payments in your Android app.
 
 ## Support
 The PayPal Android SDK is available for Android SDK 21+. See our [Client Deprecation policy](https://developer.paypal.com/braintree/docs/guides/client-sdk/deprecation-policy/android/v4) to plan for updates.
