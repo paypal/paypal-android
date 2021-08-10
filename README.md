@@ -64,7 +64,7 @@ dependencies {
 
 ## Testing
 
-This repository includes unit tests, integration tests, and end to end tests.
+This repository includes unit tests, integration tests, and end-to-end tests.
 
 // TODO: Add sections with commands for running each type of tests 
 
