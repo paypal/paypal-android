@@ -45,7 +45,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Main Card AAR
+          name: main-card-aar 
           path: Card/build/outputs/aar/Card-release.aar
       - name: Checkout Current Branch
         uses: actions/checkout@v2
@@ -59,7 +59,11 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Current Card AAR
+          name: current-card-aar
           path: Card/build/outputs/aar/Card-release.aar
       - name: Install Diffuse
         run: brew install JakeWharton/repo/diffuse
+      - name: Download Workflow Artifacts 
+        uses: actions/download-artifact@v2
+      - name: Run Diffuse Analysis
+        run: diffuse diff --aar main-card-aar current-card-aar
