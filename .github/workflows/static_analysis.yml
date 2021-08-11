@@ -27,9 +27,9 @@ jobs:
           distribution: 'zulu'
       - name: Lint
         run: ./gradlew lint
-  build_main_and_current:
-    name: Build Main Branch
-    runs-on: ubuntu-latest
+  diffuse:
+    name: Diffuse AAR Analysis 
+    runs-on: macOS-11
     steps:
       - name: Checkout Main Branch
         uses: actions/checkout@v2
@@ -47,9 +47,6 @@ jobs:
         with:
           name: Main Card AAR
           path: Card/build/outputs/aar/Card-release.aar
-    name: Build Current Branch
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout Current Branch
         uses: actions/checkout@v2
       - name: Set up Java 8
@@ -64,8 +61,5 @@ jobs:
         with:
           name: Current Card AAR
           path: Card/build/outputs/aar/Card-release.aar
-  diffuse:
-    name: Diffuse AAR Analysis
-    runs-on: macOS-11
-    steps:
-      - run: brew install JakeWharton/repo/diffuse
+      - name: Install Diffuse
+        run: brew install JakeWharton/repo/diffuse
