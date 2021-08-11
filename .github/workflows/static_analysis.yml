@@ -71,6 +71,6 @@ jobs:
           java-version: '11'
       - name: Run Diffuse Analysis - Card
 #        run: diffuse diff --aar main-aar/Card-release.aar current-aar/Card-release.aar
-        run: ls current-aar
-#      - name: Run Diffuse Analysis - Core
-#        run: diffuse diff --aar main-aar/Core-release.aar current-aar/Core-release.aar
+        run: ls current-aar/Card
+      - name: Run Diffuse Analysis - Core
+        run: diffuse diff --aar main-aar/Core/Core-release.aar current-aar/Core/Core-release.aar
