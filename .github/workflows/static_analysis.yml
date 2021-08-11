@@ -42,20 +42,30 @@ jobs:
           ref: main
       - name: Assemble Release AAR
         run: ./gradlew clean assembleRelease
-      - name: Upload Artifacts
+      - name: Upload Main Card Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: main-card-aar 
           path: Card/build/outputs/aar/Card-release.aar
+      - name: Upload Main Core Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: main-core-aar
+          path: Core/build/outputs/aar/Core-release.aar
       - name: Checkout Current Branch
         uses: actions/checkout@v2
       - name: Assemble Release AAR
         run: ./gradlew clean assembleRelease
-      - name: Upload Artifacts
+      - name: Upload Current Card Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: current-card-aar
           path: Card/build/outputs/aar/Card-release.aar
+      - name: Upload Current Core Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: current-core-aar
+          path: Core/build/outputs/aar/Core-release.aar
       - name: Install Diffuse
         run: brew install JakeWharton/repo/diffuse
       - name: Download Workflow Artifacts 
@@ -65,5 +75,9 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - name: Run Diffuse Analysis
+      - name: Run Diffuse Analysis - Card
         run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar
+      - name: Run Diffuse Analysis - Core
+        run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar
+      - name: Diffuse Help
+        run: diffuse diff --help
