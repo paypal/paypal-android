@@ -1,32 +1,32 @@
 name: Static Analysis
 on: [push, pull_request, workflow_dispatch]
 jobs:
-#  detekt:
-#    name: Detekt
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout Repository
-#        uses: actions/checkout@v2
-#      - name: Set up Java 8
-#        uses: actions/setup-java@v2
-#        with:
-#          java-version: '8'
-#          distribution: 'zulu'
-#      - name: Run Detekt
-#        run: ./gradlew detekt
-#  android_lint:
-#    name: Android Lint
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout Repository
-#        uses: actions/checkout@v2
-#      - name: Set up Java 8
-#        uses: actions/setup-java@v2
-#        with:
-#          java-version: '8'
-#          distribution: 'zulu'
-#      - name: Lint
-#        run: ./gradlew lint
+  detekt:
+    name: Detekt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Run Detekt
+        run: ./gradlew detekt
+  android_lint:
+    name: Android Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Lint
+        run: ./gradlew lint
   diffuse:
     name: Diffuse AAR Analysis 
     runs-on: macOS-11
@@ -76,6 +76,6 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
       - name: Run Diffuse Analysis - Card
-        run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar --text output.txt
+        run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar
       - name: Run Diffuse Analysis - Core
-        run: diffuse diff --aar main-core-aar/Core-release.aar current-core-aar/Core-release.aar --html output.html
+        run: diffuse diff --aar main-core-aar/Core-release.aar current-core-aar/Core-release.aar
