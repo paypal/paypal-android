@@ -62,7 +62,7 @@ jobs:
         uses: actions/download-artifact@v2
       - name: Run Diffuse Analysis
         uses: actions/setup-java@v2
-          with:
-            distribution: 'zulu'
-            java-version: '11'
+        with:
+          distribution: 'zulu'
+          java-version: '11'
         run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar
