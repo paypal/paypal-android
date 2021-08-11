@@ -76,6 +76,6 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
       - name: Run Diffuse Analysis - Card
-        run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar --stdout --text output.txt
+        run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar --text output.txt
       - name: Run Diffuse Analysis - Core
-        run: diffuse diff --aar main-core-aar/Core-release.aar current-core-aar/Core-release.aar --stdout --html output.html
+        run: diffuse diff --aar main-core-aar/Core-release.aar current-core-aar/Core-release.aar --html output.html
