@@ -1,32 +1,32 @@
 name: Static Analysis
 on: [push, pull_request, workflow_dispatch]
 jobs:
-  detekt:
-    name: Detekt
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'zulu'
-      - name: Run Detekt
-        run: ./gradlew detekt
-  android_lint:
-    name: Android Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'zulu'
-      - name: Lint
-        run: ./gradlew lint
+#  detekt:
+#    name: Detekt
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v2
+#      - name: Set up Java 8
+#        uses: actions/setup-java@v2
+#        with:
+#          java-version: '8'
+#          distribution: 'zulu'
+#      - name: Run Detekt
+#        run: ./gradlew detekt
+#  android_lint:
+#    name: Android Lint
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout Repository
+#        uses: actions/checkout@v2
+#      - name: Set up Java 8
+#        uses: actions/setup-java@v2
+#        with:
+#          java-version: '8'
+#          distribution: 'zulu'
+#      - name: Lint
+#        run: ./gradlew lint
   diffuse:
     name: Diffuse AAR Analysis 
     runs-on: macOS-11
@@ -42,30 +42,23 @@ jobs:
           ref: main
       - name: Assemble Release AAR
         run: ./gradlew clean assembleRelease
-      - name: Upload Main Card Artifacts
+      - name: Upload Main Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: main-card-aar 
-          path: Card/build/outputs/aar/Card-release.aar
-      - name: Upload Main Core Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: main-core-aar
-          path: Core/build/outputs/aar/Core-release.aar
+          name: main-aar
+          path: |
+          Core/build/outputs/aar/Core-release.aar
+          Card/build/outputs/aar/Card-release.aar
       - name: Checkout Current Branch
         uses: actions/checkout@v2
       - name: Assemble Release AAR
         run: ./gradlew clean assembleRelease
-      - name: Upload Current Card Artifacts
+      - name: Upload Current Branch Artifacts
         uses: actions/upload-artifact@v2
-        with:
-          name: current-card-aar
-          path: Card/build/outputs/aar/Card-release.aar
-      - name: Upload Current Core Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: current-core-aar
-          path: Core/build/outputs/aar/Core-release.aar
+          name: current-aar
+          path: |
+          Core/build/outputs/aar/Core-release.aar
+          Card/build/outputs/aar/Card-release.aar
       - name: Install Diffuse
         run: brew install JakeWharton/repo/diffuse
       - name: Download Workflow Artifacts 
@@ -76,6 +69,6 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
       - name: Run Diffuse Analysis - Card
-        run: diffuse diff --aar main-card-aar/Card-release.aar current-card-aar/Card-release.aar
+        run: diffuse diff --aar main-aar/Card-release.aar current-aar/Card-release.aar
       - name: Run Diffuse Analysis - Core
-        run: diffuse diff --aar main-core-aar/Core-release.aar current-core-aar/Core-release.aar
+        run: diffuse diff --aar main-aar/Core-release.aar current-aar/Core-release.aar
