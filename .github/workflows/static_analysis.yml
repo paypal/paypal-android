@@ -1,5 +1,5 @@
 name: Static Analysis
-on: [pull_request, workflow_dispatch]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   detekt:
     name: Detekt
@@ -27,3 +27,8 @@ jobs:
           distribution: 'zulu'
       - name: Lint
         run: ./gradlew lint
+  diffuse:
+    name: Diffuse AAR Analysis
+    runs-on: macOS-11
+    steps:
+      - run: brew install JakeWharton/repo/diffuse
