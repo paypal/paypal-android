@@ -55,6 +55,7 @@ jobs:
         run: ./gradlew clean assembleRelease
       - name: Upload Current Branch Artifacts
         uses: actions/upload-artifact@v2
+        with:
           name: current-aar
           path: |
             Core/build/outputs/aar/Core-release.aar
