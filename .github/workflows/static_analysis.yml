@@ -27,7 +27,7 @@ jobs:
           distribution: 'zulu'
       - name: Lint
         run: ./gradlew lint
-  build_main:
+  build_main_and_current:
     name: Build Main Branch
     runs-on: ubuntu-latest
     steps:
@@ -45,7 +45,24 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Card AAR
+          name: Main Card AAR
+          path: Card/build/outputs/aar/Card-release.aar
+    name: Build Current Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Current Branch
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Assemble Release AAR
+        run: ./gradlew clean assembleRelease
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Current Card AAR
           path: Card/build/outputs/aar/Card-release.aar
   diffuse:
     name: Diffuse AAR Analysis
