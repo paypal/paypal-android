@@ -41,8 +41,8 @@ jobs:
           java-version: '8'
           distribution: 'zulu'
       - name: Assemble Release AAR
-        run: ./gradlew clean assembleRelease
-        uses: actions/upload-artifact@v2
+      - run: ./gradlew clean assembleRelease
+      - uses: actions/upload-artifact@v2
         with:
           name: Card AAR
           path: Card/build/outputs/aar/Card-release.aar
