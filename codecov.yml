@@ -14,6 +14,7 @@ coverage:
       card:
         target: 80%
         paths: "Card/"
+    patch: off
 
 
 parsers:
