@@ -18,3 +18,15 @@ comment:
   layout: "reach,diff,flags,files,footer"
   behavior: default
   require_changes: no
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - name_prefix: project-
+        type: project
+        target: auto
+        threshold: 1%
+      - name_prefix: patch-
+        type: patch
+        target: 90%
