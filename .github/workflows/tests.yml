@@ -14,3 +14,22 @@ jobs:
           distribution: 'zulu'
       - name: Run Unit Tests
         run: ./gradlew --stacktrace testRelease
+
+  unit_test_coverage_job:
+    name: Unit Test Code Coverage
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Generate Code Coverage Reports
+        run: ./gradlew jacocoTestReport
+      - name: Upload coverage to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          chmod +x codecov
+          ./codecov
