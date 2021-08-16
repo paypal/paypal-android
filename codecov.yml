@@ -10,10 +10,12 @@ coverage:
       default: false
       core:
         target: 80%
-        paths: "Core/"
+        paths:
+          - Core/
       card:
         target: 80%
-        paths: "Card/"
+        paths:
+          - Card/
     patch: off
 
 
