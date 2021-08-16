@@ -28,8 +28,13 @@ jobs:
           distribution: 'zulu'
       - name: Generate Code Coverage Reports
         run: ./gradlew jacocoTestReport
-      - name: Upload coverage to Codecov
+      - name: Upload Core coverage to Codecov
         run: |
           curl -Os https://uploader.codecov.io/latest/macos/codecov
           chmod +x codecov
-          ./codecov
+          ./codecov -f Core/build/jacoco/jacoco.xml -F core
+      - name: Upload Card coverage to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/macos/codecov
+          chmod +x codecov
+          ./codecov -f Card/build/jacoco/jacoco.xml -F card

@@ -2,22 +2,9 @@ codecov:
   require_ci_to_pass: no
 
 coverage:
-#  precision: 2
-#  round: down
-#  range: "70...100"
-  status:
-    project:
-      default: false
-      core:
-        target: 80%
-        paths:
-          - Core/
-      card:
-        target: 80%
-        paths:
-          - Card/
-    patch: off
-
+  precision: 2
+  round: down
+  range: "70...100"
 
 parsers:
   gcov:
