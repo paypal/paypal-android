@@ -3,8 +3,12 @@ codecov:
 
 coverage:
   status:
-    project: off
-    patch: off
+    project:
+      default:
+        target: 80%
+    patch:
+      default:
+        target: 80%
 
 parsers:
   gcov:
