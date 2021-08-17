@@ -50,3 +50,7 @@ detekt {
         }
     }
 }
+
+subprojects {
+    group = "com.paypal.android"
+}
