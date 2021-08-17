@@ -1,0 +1,25 @@
+name: Publish to Maven
+on: [workflow_dispatch]
+jobs:
+  publish:
+    name: Publish to Maven
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Publish Card Module
+        run: ./gradlew --stacktrace clean :Card:publishReleasePublicationToMavenRepository
+        env:
+          SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+
+      - name: Publish Core Module
+        run: ./gradlew --stacktrace clean :Core:publishReleasePublicationToMavenRepository
+        env:
+          SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
