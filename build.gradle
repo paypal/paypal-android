@@ -22,7 +22,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.2.2"
+        classpath 'com.android.tools.build:gradle:4.1.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
     }
@@ -62,4 +62,8 @@ detekt {
             destination = file("build/reports/detekt_report.html")
         }
     }
+}
+
+subprojects {
+    group = "com.paypal.android"
 }
