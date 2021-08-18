@@ -4,6 +4,8 @@ jobs:
   build_aar:
     name: Build
     runs-on: ubuntu-latest
+    env:
+      SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -16,10 +18,10 @@ jobs:
       - name: Decode secret key
         run: |
             echo "${{secrets.SIGNING_KEY_FILE}}" > ~/secretKey.gpg.b64
-            base64 -d ~/secretKey.gpg.b64 > /home/runner/secretKey.gpg
+            base64 -d ~/secretKey.gpg.b64 > ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Assemble
         run: ./gradlew --stacktrace assemble
         env:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_KEY_FILE: /home/runner/secretKey.gpg
+          SIGNING_KEY_FILE: ${{ env.SIGNING_KEY_FILE_PATH }}
