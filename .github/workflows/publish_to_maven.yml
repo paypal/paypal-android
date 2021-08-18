@@ -17,7 +17,7 @@ jobs:
       - name: Decode secret key
         run: |
             echo "${{secrets.SIGNING_KEY_FILE}}" > ~/secretKey.gpg.b64
-            base64 -d ~/secretKey.gpg.b64 > ~/secretKey.gpg
+            base64 -d ~/secretKey.gpg.b64 > /home/runner/work/Android-SDK/Android-SDK/secretKey.gpg
       - name: Publish Card Module
         run: ./gradlew --stacktrace clean :Card:publishReleasePublicationToMavenRepository
         env:
@@ -25,7 +25,7 @@ jobs:
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_KEY_FILE: $(echo ~/secretKey.gpg)
+          SIGNING_KEY_FILE: /home/runner/work/Android-SDK/Android-SDK/secretKey.gpg
 
       - name: Publish Core Module
         run: ./gradlew --stacktrace clean :Core:publishReleasePublicationToMavenRepository
@@ -34,4 +34,4 @@ jobs:
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_KEY_FILE: $(echo ~/secretKey.gpg)
+          SIGNING_KEY_FILE: /home/runner/work/Android-SDK/Android-SDK/secretKey.gpg
