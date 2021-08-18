@@ -15,7 +15,7 @@ jobs:
 
       #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
       - name: Decode secret key
-        - run: |
+        run: |
             echo "${{secrets.SIGNING_KEY_FILE}}" > ~/.gradle/secretKey.gpg.b64
             base64 -d ~/.gradle/secretKey.gpg.b64 > ~/.gradle/secretKey.gpg
       - name: Publish Card Module
