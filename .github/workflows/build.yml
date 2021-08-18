@@ -24,4 +24,4 @@ jobs:
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_KEY_FILE: $(echo ~/secretKey.gpg)
+          SIGNING_KEY_FILE: ~/secretKey.gpg
