@@ -17,7 +17,7 @@ afterEvaluate {
             println "$variantName resolvedVersion: ${resolvedVersion}  ${group} ${project.name}"
             groupId group
             version resolvedVersion
-            artifactId project.name
+            artifactId project.name.toLowerCase()
             from components."$variantName"
             artifact androidSourcesJar
 
@@ -64,10 +64,10 @@ afterEvaluate {
         }
     }
 
-//    signing {
-//        sign publishing.publications
-//        sign configurations.archives
-//    }
+    signing {
+        sign publishing.publications
+        sign configurations.archives
+    }
 }
 
 task androidSourcesJar(type: Jar) {

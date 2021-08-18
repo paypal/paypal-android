@@ -1,4 +1,10 @@
 buildscript {
+
+    ext.modules = [
+            "cardVersionName": "0.0.0-test-card",
+            "coreVersionName": "0.0.0-test-core"
+    ]
+
     ext.versions = [
             "kotlin": "1.5.21"
     ]
