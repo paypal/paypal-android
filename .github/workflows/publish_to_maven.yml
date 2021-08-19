@@ -21,22 +21,22 @@ jobs:
             base64 -d ~/secretKey.gpg.b64 > ${{ env.SIGNING_KEY_FILE_PATH }}
 
   publish_core:
-    - needs: decode
-    - runs-on: ubuntu-latest
-    - name: Publish Core Module
-    - run: ./gradlew --stacktrace clean :Core:publishReleasePublicationToMavenRepository
-    - env:
+    needs: decode
+    runs-on: ubuntu-latest
+    name: Publish Core Module
+    run: ./gradlew --stacktrace clean :Core:publishReleasePublicationToMavenRepository
+    env:
         SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
         SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
         SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
         SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         SIGNING_KEY_FILE: ${{ env.SIGNING_KEY_FILE_PATH }}
   publish_card:
-    - needs: decode
-    - runs-on: ubuntu-latest
-    - name: Publish Card Module
-    - run: ./gradlew --stacktrace clean :Card:publishReleasePublicationToMavenRepository
-    - env:
+    needs: decode
+    runs-on: ubuntu-latest
+    name: Publish Card Module
+    run: ./gradlew --stacktrace clean :Card:publishReleasePublicationToMavenRepository
+    env:
         SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
         SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
         SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
