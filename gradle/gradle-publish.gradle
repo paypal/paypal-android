@@ -11,20 +11,17 @@ ext["SONATYPE_NEXUS_PASSWORD"] = System.getenv('SONATYPE_NEXUS_PASSWORD') ?: ''
 
 afterEvaluate {
     android.libraryVariants.each { variant ->
-        def variantName = variant.name
-        def resolvedVersion = project.version
-        publishing.publications.create variantName, MavenPublication, {
-            println "$variantName resolvedVersion: ${resolvedVersion}  ${group} ${project.name}"
+        publishing.publications.create variant.name, MavenPublication, {
             groupId group
-            version resolvedVersion
+            version project.version
             artifactId project.name.toLowerCase()
-            from components."$variantName"
+            from components."${variant.name}"
             artifact androidSourcesJar
 
             pom {
                 name = POM_NAME
                 packaging = POM_PACKAGING
-                description = POM_DESCRIPTION
+                description = "PayPal payment methods: ${project.name}"
                 url = POM_URL
                 licenses {
                     license {
@@ -36,7 +33,6 @@ afterEvaluate {
                     developer {
                         id = POM_DEVELOPER_ID
                         name = POM_DEVELOPER_NAME
-                        email = POM_DEVELOPER_EMAIL
                     }
                 }
                 scm {
