@@ -4,7 +4,7 @@ env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
   publish_core:
-    needs: Publish Core
+    name: Publish Core
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -28,7 +28,6 @@ jobs:
           SIGNING_KEY_FILE: ${{ env.SIGNING_KEY_FILE_PATH }}
   publish_card:
     name: Publish Card
-    needs: decode
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
