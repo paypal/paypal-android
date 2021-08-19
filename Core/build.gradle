@@ -9,9 +9,9 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 2
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
+        versionCode modules.sdkVersionCode
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -48,5 +48,9 @@ dependencies {
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }
+
+project.ext.name = "core"
+project.ext.pom_name = "PayPal SDK - Core"
+project.ext.pom_desc = "Core library for PayPal payment methods"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")

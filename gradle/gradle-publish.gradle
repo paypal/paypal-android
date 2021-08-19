@@ -14,14 +14,14 @@ afterEvaluate {
         publishing.publications.create variant.name, MavenPublication, {
             groupId group
             version project.version
-            artifactId project.name.toLowerCase()
+            artifactId project.ext.name
             from components."${variant.name}"
-            artifact androidSourcesJar
+            artifact androidSourcesJar //TODO: add javadocs
 
             pom {
-                name = POM_NAME
+                name = project.ext.pom_name ?: ''
                 packaging = POM_PACKAGING
-                description = "PayPal payment methods: ${project.name}"
+                description = project.ext.pom_desc ?: ''
                 url = POM_URL
                 licenses {
                     license {
@@ -33,6 +33,7 @@ afterEvaluate {
                     developer {
                         id = POM_DEVELOPER_ID
                         name = POM_DEVELOPER_NAME
+                        email = POM_DEVELOPER_EMAIL
                     }
                 }
                 scm {
