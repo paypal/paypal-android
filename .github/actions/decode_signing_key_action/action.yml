@@ -1,4 +1,5 @@
 name: Decode signing key
+description: 'Decodes gpg key into file'
 inputs:
   signing_key_file:
     description: 'Signing key file'
@@ -11,7 +12,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
     - run: |
         echo "${{inputs.signing_key_file}}" > ~/secretKey.gpg.b64
         base64 -d ~/secretKey.gpg.b64 > ${{ inputs.signing_file_path }}

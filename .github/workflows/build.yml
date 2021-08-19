@@ -15,8 +15,8 @@ jobs:
           java-version: '8'
           distribution: 'zulu'
             #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
-      - uses: actions/checkout@v1
-      - uses: ./.github/actions/decode_signing_key_action
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
