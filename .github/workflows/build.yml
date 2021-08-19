@@ -15,7 +15,7 @@ jobs:
           java-version: '8'
           distribution: 'zulu'
             #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
-      - uses: actions/checkout
+      - uses: actions/checkout@v1
       - uses: ./.github/actions/decode_signing_key_action
       - name: Assemble
         run: ./gradlew --stacktrace assemble
