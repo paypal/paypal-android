@@ -14,18 +14,20 @@ jobs:
         with:
           java-version: '8'
           distribution: 'zulu'
-      - name: Decode signing key
-        run: |
-            echo "${{secrets.SIGNING_KEY_FILE}}" > ~/secretKey.gpg.b64
-            base64 -d ~/secretKey.gpg.b64 > ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Publish Core Module
-        run: ./gradlew --stacktrace clean :Core:publishReleasePublicationToMavenRepository
-        env:
-          SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_KEY_FILE: ${{ env.SIGNING_KEY_FILE_PATH }}
+        uses: ./.github/actions/publish_module
+        with:
+          module: Core
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
   publish_card:
     name: Publish Card
     runs-on: ubuntu-latest
