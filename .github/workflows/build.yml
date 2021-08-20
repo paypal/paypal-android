@@ -1,5 +1,5 @@
 name: Build
-on: [push, pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 jobs:
   build_aar:
     name: Build
