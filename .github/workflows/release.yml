@@ -43,8 +43,8 @@ jobs:
           distribution: 'zulu'
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
-          with:
-            module: Card
+        with:
+          module: Card
 
   unit_test_card:
     needs: build_arr
