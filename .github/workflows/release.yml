@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - runs: echo "Unit test finished"
+      - run: echo "Unit test finished"
 
   #Once all the tests have finished, we publish every module in parallel
   publish_core:
