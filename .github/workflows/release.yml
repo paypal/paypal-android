@@ -68,7 +68,6 @@ jobs:
     name: All Unit Test finished
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - run: echo "Unit test finished"
 
   #Once all the tests have finished, we publish every module in parallel
