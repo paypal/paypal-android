@@ -30,7 +30,7 @@ jobs:
 
   #Once building is finished, we unit test every module in parallel
   unit_test_core:
-    needs: build_arr
+    needs: build_aar
     name: Core Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +47,7 @@ jobs:
           module: Card
 
   unit_test_card:
-    needs: build_arr
+    needs: build_aar
     name: Card Unit Tests
     runs-on: ubuntu-latest
     steps:
