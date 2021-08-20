@@ -30,6 +30,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
     lintOptions {
         lintConfig file('../lint.xml')
         abortOnError true
@@ -45,6 +46,7 @@ dependencies {
     implementation deps.androidxAppcompat
     implementation deps.material
     implementation deps.constraintLayout
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
