@@ -27,7 +27,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ./gradlew --stacktrace :${{ inputs.module }}:publishReleasePublicationToMavenRepository
+    - run: ./gradlew --stacktrace clean :${{ inputs.module }}:publishReleasePublicationToMavenRepository
       shell: bash
       env:
         SONATYPE_NEXUS_USERNAME: ${{ inputs.sonatype_usr }}

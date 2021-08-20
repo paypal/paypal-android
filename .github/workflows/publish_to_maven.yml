@@ -19,7 +19,7 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Publish Core Module
+      - name: Publish Core
         uses: ./.github/actions/publish_module
         with:
           module: Core
