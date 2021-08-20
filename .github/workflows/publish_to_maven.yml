@@ -1,5 +1,5 @@
 name: Publish to Maven
-on: [pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch, push]
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
