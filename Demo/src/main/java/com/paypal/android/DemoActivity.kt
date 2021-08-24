@@ -16,9 +16,9 @@ class DemoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_demo)
 
         lifecycleScope.launch {
-//            val request = HttpRequest("GET")
-//            val result = http.send(request)
-//            print(result.responseCode)
+            val request = HttpRequest("https://www.google.com")
+            val result = http.send(request)
+            print(result.responseCode)
         }
     }
 }

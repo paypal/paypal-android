@@ -2,12 +2,6 @@ package com.paypal.android.core
 
 import java.net.URL
 
-data class HttpRequest(var method: String, var host: String, var path: String) {
-
-    constructor() : this("GET", "", "")
-
-    val url: URL
-        get() {
-            return URL("https://${host}${path}")
-        }
+data class HttpRequest(val url: URL, val method: String) {
+    constructor(url: String): this(URL(url), "GET")
 }

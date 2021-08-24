@@ -35,11 +35,7 @@ class HttpIT {
     @Test
     fun itMakesAnHttpRequest() = runBlockingTest {
         val http = Http()
-        val request = HttpRequest().apply {
-            method = "GET"
-            host = "www.google.com"
-            path = "/"
-        }
+        val request = HttpRequest("https://www.google.com")
 
         val result = http.send(request, testDispatcher)
         assertEquals(200, result.responseCode)
