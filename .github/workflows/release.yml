@@ -1,5 +1,5 @@
 name: Publish Release
-on: [pull_request, workflow_dispatch]
+on: [workflow_dispatch]
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
