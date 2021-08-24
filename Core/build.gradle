@@ -37,18 +37,23 @@ android {
         abortOnError true
         warningsAsErrors true
     }
+    packagingOptions {
+        // Ref: https://stackoverflow.com/a/44767574
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+    }
 }
 
 dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.9"
 }
 
 project.ext.name = "core"

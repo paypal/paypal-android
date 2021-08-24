@@ -17,17 +17,6 @@ function base64Encode(input) {
   return Buffer.from(input).toString('base64');
 }
 
-  const auth = `${CLIENT_ID}:${CLIENT_SECRET}`;
-  superagent
-    .post('https://api-m.sandbox.paypal.com/v1/oauth2/token?grant_type=client_credentials')
-    .set('Accept', 'application/json')
-    .set('Accept-Language', 'en_US')
-    .set('Authorization', `Basic ${ base64Encode(auth) }`)
-    .end((err, res) => {
-      console.log(res.status);
-      console.log(res.body);
-    });
-
 const app = express();
 app.post('/client_token', (req, res) => {
   const auth = `${CLIENT_ID}:${CLIENT_SECRET}`;
