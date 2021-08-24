@@ -34,6 +34,7 @@ class HttpIT {
     @ExperimentalCoroutinesApi
     @Test
     fun itMakesAnHttpRequest() = runBlockingTest {
+        val http = Http()
         val request = HttpRequest().apply {
             method = "GET"
             host = "www.google.com"
