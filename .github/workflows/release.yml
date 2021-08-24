@@ -1,0 +1,125 @@
+name: Publish Release
+on: [workflow_dispatch]
+env:
+  SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
+jobs:
+  #First we build
+  build_aar:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+          #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Assemble
+        run: ./gradlew --stacktrace assemble
+        env:
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_FILE: ${{ env.SIGNING_KEY_FILE_PATH }}
+
+  #Once building is finished, we unit test every module in parallel
+  unit_test_core:
+    needs: build_aar
+    name: Core Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: Card
+
+  unit_test_card:
+    needs: build_aar
+    name: Card Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: Card
+
+  unit_test_finished:
+    needs: [unit_test_card, unit_test_core]
+    name: All Unit Test finished
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Unit test finished"
+
+  #Once all the tests have finished, we publish every module in parallel
+  publish_core:
+    needs: [unit_test_finished]
+    name: Publish Core
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Publish Core
+        uses: ./.github/actions/publish_module
+        with:
+          module: Core
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+  publish_card:
+    needs: [ unit_test_finished ]
+    name: Publish Card
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'zulu'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Publish Card
+        uses: ./.github/actions/publish_module
+        with:
+          module: Card
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}

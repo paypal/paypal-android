@@ -1,4 +1,12 @@
 buildscript {
+
+    ext.modules = [
+            "sdkVersionName": "0.0.0-test-sdk",
+            "sdkVersionCode": 1,
+            "androidMinSdkVersion": 21,
+            "androidTargetVersion": 30
+    ]
+
     ext.versions = [
             "kotlin": "1.5.21"
     ]
@@ -62,4 +70,8 @@ detekt {
             destination = file("build/reports/detekt_report.html")
         }
     }
+}
+
+subprojects {
+    group = "com.paypal.android"
 }

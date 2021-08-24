@@ -9,17 +9,17 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
+        versionCode modules.sdkVersionCode
+        versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
         release {
+            version = android.defaultConfig.versionName //had to add this to get the version in the build
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -49,3 +49,9 @@ dependencies {
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }
+
+project.ext.name = "card"
+project.ext.pom_name = "PayPal SDK - Card"
+project.ext.pom_desc = "Library for PayPal card payment method"
+
+apply from: rootProject.file("gradle/gradle-publish.gradle")
