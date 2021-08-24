@@ -34,10 +34,10 @@ class HttpIT {
     @ExperimentalCoroutinesApi
     @Test
     fun itMakesAnHttpRequest() = runBlockingTest {
-        val http = Http()
         val request = HttpRequest("https://www.google.com")
 
-        val result = http.send(request, testDispatcher)
+        val sut = Http()
+        val result = sut.send(request, testDispatcher)
         assertEquals(200, result.responseCode)
     }
 }
