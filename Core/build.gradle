@@ -30,7 +30,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
     lintOptions {
         lintConfig file('../lint.xml')
@@ -51,6 +51,9 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
     testImplementation deps.junit
+    testImplementation "io.mockk:mockk:1.12.0"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0"
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0"
