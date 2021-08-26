@@ -7,7 +7,7 @@ import java.net.HttpURLConnection
 
 class Http {
 
-    suspend fun send( request: HttpRequest, dispatcher: CoroutineDispatcher = Dispatchers.IO) =
+    suspend fun send(request: HttpRequest, dispatcher: CoroutineDispatcher = Dispatchers.IO) =
         withContext(dispatcher) {
             val url = request.url
             val connection = url.openConnection() as HttpURLConnection
