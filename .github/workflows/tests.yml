@@ -1,5 +1,5 @@
 name: Tests
-on: [pull_request, workflow_dispatch]
+on: [ pull_request, workflow_dispatch ]
 jobs:
   unit_test_job:
     name: Unit Tests
@@ -14,27 +14,3 @@ jobs:
           distribution: 'zulu'
       - name: Run Unit Tests
         run: ./gradlew --stacktrace testRelease
-
-  test_coverage_job:
-    name: Test Code Coverage
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'zulu'
-      - name: Generate Code Coverage Reports
-        run: ./gradlew jacocoTestReport
-      - name: Upload Core coverage to Codecov
-        run: |
-          curl -Os https://uploader.codecov.io/latest/macos/codecov
-          chmod +x codecov
-          ./codecov -f Core/build/jacoco/jacoco.xml -F core
-      - name: Upload Card coverage to Codecov
-        run: |
-          curl -Os https://uploader.codecov.io/latest/macos/codecov
-          chmod +x codecov
-          ./codecov -f Card/build/jacoco/jacoco.xml -F card
