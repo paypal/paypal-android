@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HttpIT {
 
-    lateinit var testDispatcher: TestCoroutineDispatcher
+    private lateinit var testDispatcher: TestCoroutineDispatcher
 
     @Before
     fun beforeEach() {
