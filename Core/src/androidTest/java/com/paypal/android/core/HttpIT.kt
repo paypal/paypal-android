@@ -10,25 +10,22 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class HttpIT {
 
-    @ExperimentalCoroutinesApi
     lateinit var testDispatcher: TestCoroutineDispatcher
 
-    @ExperimentalCoroutinesApi
     @Before
     fun beforeEach() {
         testDispatcher = TestCoroutineDispatcher()
     }
 
-    @ExperimentalCoroutinesApi
     @After
     fun afterEach() {
         testDispatcher.cleanupTestCoroutines()
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun itMakesAnHttpRequest() = runBlockingTest {
         val request = HttpRequest("https://www.google.com")
