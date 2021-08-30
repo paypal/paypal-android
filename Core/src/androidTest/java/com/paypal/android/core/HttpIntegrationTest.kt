@@ -27,7 +27,7 @@ class HttpIntegrationTest {
     }
 
     @Test
-    fun itMakesAnHttpRequest() = runBlockingTest {
+    fun send_makesAnHttpRequest() = runBlockingTest {
         val request = HttpRequest("https://www.google.com")
 
         val sut = Http()
