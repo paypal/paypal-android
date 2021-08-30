@@ -4,9 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -31,10 +34,12 @@ class HttpUnitTest {
         every { url.openConnection() } returns urlConnection
 
         sut = Http()
+        Dispatchers.setMain(testCoroutineDispatcher)
     }
 
     @After
     fun afterEach() {
+        Dispatchers.resetMain()
         testCoroutineDispatcher.cleanupTestCoroutines()
     }
 
