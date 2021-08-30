@@ -46,7 +46,7 @@ dependencies {
     implementation deps.androidxAppcompat
     implementation deps.material
     implementation deps.constraintLayout
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation deps.androidxLifecycleRuntimeKtx
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
