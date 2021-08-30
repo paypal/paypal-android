@@ -7,48 +7,48 @@ import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import java.net.HttpURLConnection
 import java.net.URL
 
+@ExperimentalCoroutinesApi
 class HttpUnitTest {
 
-    @ExperimentalCoroutinesApi
-    val testCoroutineDispatcher = TestCoroutineDispatcher()
+    private val url = mockk<URL>()
+    private val urlConnection = mockk<HttpURLConnection>(relaxed = true)
+    private val httpRequest = spyk(HttpRequest("https://www.example.com"))
 
-    @ExperimentalCoroutinesApi
-    @Test
-    fun `send sets request method on url connection`() = runBlockingTest {
-        val httpRequest = spyk(HttpRequest("https://www.example.com"))
+    private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-        val url = mockk<URL>()
+    private lateinit var sut: Http
+
+    @Before
+    fun beforeEach() {
         every { httpRequest.url } returns url
-
-        val urlConnection = mockk<HttpURLConnection>(relaxed = true)
         every { url.openConnection() } returns urlConnection
 
-        val sut = Http()
-        sut.send(httpRequest, testCoroutineDispatcher)
+        sut = Http()
+    }
 
+    @After
+    fun afterEach() {
+        testCoroutineDispatcher.cleanupTestCoroutines()
+    }
+
+    @Test
+    fun `send sets request method on url connection`() = runBlockingTest {
+        sut.send(httpRequest, testCoroutineDispatcher)
         verify { urlConnection.requestMethod = "GET" }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `send returns an http result`() = runBlockingTest {
-        val httpRequest = spyk(HttpRequest("https://www.example.com"))
-
-        val url = mockk<URL>()
-        every { httpRequest.url } returns url
-
-        val urlConnection = mockk<HttpURLConnection>(relaxed = true)
-        every { url.openConnection() } returns urlConnection
         every { urlConnection.responseCode } returns 123
 
-        val sut = Http()
         val result = sut.send(httpRequest, testCoroutineDispatcher)
-
         assertEquals(123, result.responseCode)
     }
 }
