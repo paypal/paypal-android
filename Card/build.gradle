@@ -18,6 +18,10 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
+    buildFeatures {
+        compose = true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -31,6 +35,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.0.1'
+    }
+
     lintOptions {
         lintConfig file('../lint.xml')
         abortOnError true
@@ -44,6 +53,12 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+
+    implementation 'androidx.compose.ui:ui:1.0.1'
+    implementation 'androidx.compose.ui:ui-tooling:1.0.1'
+    implementation 'androidx.compose.foundation:foundation:1.0.1'
+    implementation 'androidx.compose.material:material:1.0.1'
+    implementation 'androidx.activity:activity-compose:1.3.1'
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
