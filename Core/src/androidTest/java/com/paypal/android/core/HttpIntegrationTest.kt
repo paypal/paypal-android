@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
-class HttpIT {
+class HttpIntegrationTest {
 
     private lateinit var testDispatcher: TestCoroutineDispatcher
 
