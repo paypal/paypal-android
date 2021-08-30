@@ -48,15 +48,15 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
+    implementation deps.kotlinxAndroidCoroutines
 
     testImplementation deps.junit
-    testImplementation "io.mockk:mockk:1.12.0"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0"
+    testImplementation deps.mockk
+    testImplementation deps.kotlinxAndroidCoroutinesTest
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0"
+    androidTestImplementation deps.kotlinxAndroidCoroutinesTest
 }
 
 project.ext.name = "core"
