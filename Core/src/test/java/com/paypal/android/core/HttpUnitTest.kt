@@ -33,7 +33,7 @@ class HttpUnitTest {
         every { httpRequest.url } returns url
         every { url.openConnection() } returns urlConnection
 
-        sut = Http()
+        sut = Http(testCoroutineDispatcher)
         Dispatchers.setMain(testCoroutineDispatcher)
     }
 
@@ -45,7 +45,7 @@ class HttpUnitTest {
 
     @Test
     fun `send sets request method on url connection`() = runBlockingTest {
-        sut.send(httpRequest, testCoroutineDispatcher)
+        sut.send(httpRequest)
         verify { urlConnection.requestMethod = "GET" }
     }
 
@@ -53,7 +53,7 @@ class HttpUnitTest {
     fun `send returns an http result`() = runBlockingTest {
         every { urlConnection.responseCode } returns 123
 
-        val result = sut.send(httpRequest, testCoroutineDispatcher)
+        val result = sut.send(httpRequest)
         assertEquals(123, result.responseCode)
     }
 }

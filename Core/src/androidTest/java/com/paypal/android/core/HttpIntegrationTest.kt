@@ -30,8 +30,8 @@ class HttpIntegrationTest {
     fun send_makesAnHttpRequest() = runBlockingTest {
         val request = HttpRequest("https://www.google.com")
 
-        val sut = Http()
-        val result = sut.send(request, testDispatcher)
+        val sut = Http(testDispatcher)
+        val result = sut.send(request)
         assertEquals(200, result.responseCode)
     }
 }
