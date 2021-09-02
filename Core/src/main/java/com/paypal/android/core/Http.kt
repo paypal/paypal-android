@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 
-class Http {
+class Http(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
     suspend fun send(request: HttpRequest, dispatcher: CoroutineDispatcher = Dispatchers.IO) =
         withContext(dispatcher) {
