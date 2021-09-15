@@ -30,12 +30,17 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
     lintOptions {
         lintConfig file('../lint.xml')
         abortOnError true
         warningsAsErrors true
+    }
+    packagingOptions {
+        // Ref: https://stackoverflow.com/a/44767574
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
     }
 }
 
@@ -43,10 +48,15 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+    implementation deps.kotlinxAndroidCoroutines
 
     testImplementation deps.junit
+    testImplementation deps.mockk
+    testImplementation deps.kotlinxAndroidCoroutinesTest
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation deps.kotlinxAndroidCoroutinesTest
 }
 
 project.ext.name = "core"
