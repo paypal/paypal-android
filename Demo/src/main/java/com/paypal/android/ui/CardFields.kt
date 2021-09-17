@@ -1,4 +1,4 @@
-package com.paypal.android.card.ui
+package com.paypal.android.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,12 +17,12 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun CardFields() {
+fun CardFields(modifier: Modifier = Modifier) {
     var cardNumber by remember { mutableStateOf("") }
     var expiry by remember { mutableStateOf("") }
     var securityCode by remember { mutableStateOf("") }
 
-    Column {
+    Column(modifier = modifier) {
         CardField(
             cardNumber = cardNumber,
             onNumberChange = { cardNumber = it },
