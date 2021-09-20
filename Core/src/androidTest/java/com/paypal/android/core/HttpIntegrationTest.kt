@@ -32,6 +32,6 @@ class HttpIntegrationTest {
 
         val sut = Http(testDispatcher)
         val result = sut.send(request)
-        assertEquals(200, result.responseCode)
+        assertEquals(200, result.status)
     }
 }

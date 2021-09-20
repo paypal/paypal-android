@@ -54,6 +54,6 @@ class HttpUnitTest {
         every { urlConnection.responseCode } returns 123
 
         val result = sut.send(httpRequest)
-        assertEquals(123, result.responseCode)
+        assertEquals(123, result.status)
     }
 }
