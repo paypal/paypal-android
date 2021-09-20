@@ -45,6 +45,7 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+    implementation deps.kotlinxAndroidCoroutines
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
