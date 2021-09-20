@@ -10,9 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import com.paypal.android.R
 
 @Composable
 fun CardFields(
@@ -37,7 +39,7 @@ fun CardFields(
                         cardViewModel.onExpirationDateChange(it.text)
                     }
                 },
-                label = { Text("Expiration") },
+                label = { Text(stringResource(R.string.card_field_expiration)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
                 modifier = Modifier.weight(1F)
@@ -56,7 +58,7 @@ fun CardField(cardNumber: String, onNumberChange: (String) -> Unit, modifier: Mo
     TextField(
         value = cardNumber,
         onValueChange = { if (it.length <= MAX_CARD_LENGTH) onNumberChange(it) },
-        label = { Text("Card Number") },
+        label = { Text(stringResource(R.string.card_field_card_number)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         modifier = modifier
@@ -72,7 +74,7 @@ fun SecurityCodeField(
     TextField(
         value = securityCode,
         onValueChange = { if (it.length <= MAX_SECURITY_CODE_LENGTH) onSecurityCodeChange(it) },
-        label = { Text("Security Code") },
+        label = { Text(stringResource(R.string.card_field_security_code)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         modifier = modifier
