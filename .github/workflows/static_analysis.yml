@@ -7,10 +7,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-      - name: Set up Java 8
+      - name: Set up Java 11
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'zulu'
       - name: Run Detekt
         run: ./gradlew detekt
@@ -21,10 +21,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-      - name: Set up Java 8
+      - name: Set up Java 11
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'zulu'
       - name: Lint
         run: ./gradlew lint
@@ -34,10 +34,10 @@ jobs:
     runs-on: macOS-11
     steps:
       # Set up environment to assemble SDK
-      - name: Set up Java 8
+      - name: Set up Java 11
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'zulu'
 
       # Assemble artifacts from main branch
