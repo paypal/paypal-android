@@ -1,4 +1,4 @@
-package com.paypal.android.ui
+package com.paypal.android.ui.card
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,30 +8,35 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.TextFieldValue
 
-@Preview
 @Composable
-fun CardFields(modifier: Modifier = Modifier) {
-    var cardNumber by remember { mutableStateOf("") }
-    var expiry by remember { mutableStateOf("") }
-    var securityCode by remember { mutableStateOf("") }
+fun CardFields(
+    cardViewModel: CardViewModel,
+    modifier: Modifier = Modifier
+) {
+    val cardNumber: String by cardViewModel.cardNumber.observeAsState("")
+    val expirationDate: String by cardViewModel.expirationDate.observeAsState("")
+    val securityCode: String by cardViewModel.securityCode.observeAsState("")
 
     Column(modifier = modifier) {
         CardField(
             cardNumber = cardNumber,
-            onNumberChange = { cardNumber = it },
+            onNumberChange = { cardViewModel.onCardNumberChange(it) },
             modifier = Modifier.fillMaxWidth()
         )
         Row {
             TextField(
-                value = expiry,
-                onValueChange = { expiry = it },
+                value = TextFieldValue(expirationDate, TextRange(expirationDate.length)),
+                onValueChange = {
+                    if (it.text.length <= MAX_EXPIRATION_LENGTH) {
+                        cardViewModel.onExpirationDateChange(it.text)
+                    }
+                },
                 label = { Text("Expiration") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -39,7 +44,7 @@ fun CardFields(modifier: Modifier = Modifier) {
             )
             SecurityCodeField(
                 securityCode = securityCode,
-                onSecurityCodeChange = { securityCode = it },
+                onSecurityCodeChange = { cardViewModel.onSecurityCodeChange(it) },
                 modifier = Modifier.weight(1F)
             )
         }
@@ -48,11 +53,9 @@ fun CardFields(modifier: Modifier = Modifier) {
 
 @Composable
 fun CardField(cardNumber: String, onNumberChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    val maxCardLength = 16
-
     TextField(
         value = cardNumber,
-        onValueChange = { if (it.length <= maxCardLength) onNumberChange(it) },
+        onValueChange = { if (it.length <= MAX_CARD_LENGTH) onNumberChange(it) },
         label = { Text("Card Number") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
@@ -66,14 +69,16 @@ fun SecurityCodeField(
     onSecurityCodeChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val maxSecurityCodeLength = 3
-
     TextField(
         value = securityCode,
-        onValueChange = { if (it.length <= maxSecurityCodeLength) onSecurityCodeChange(it) },
+        onValueChange = { if (it.length <= MAX_SECURITY_CODE_LENGTH) onSecurityCodeChange(it) },
         label = { Text("Security Code") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         modifier = modifier
     )
 }
+
+const val MAX_CARD_LENGTH = 19
+const val MAX_EXPIRATION_LENGTH = 5
+const val MAX_SECURITY_CODE_LENGTH = 4

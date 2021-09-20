@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.2"
 
     defaultConfig {
@@ -55,12 +55,13 @@ dependencies {
     implementation deps.material
     implementation deps.constraintLayout
     implementation deps.androidxLifecycleRuntimeKtx
+    implementation deps.fragmentKtx
 
-    implementation 'androidx.compose.ui:ui:1.0.1'
-    implementation 'androidx.compose.ui:ui-tooling:1.0.1'
-    implementation 'androidx.compose.foundation:foundation:1.0.1'
-    implementation 'androidx.compose.material:material:1.0.1'
-    implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation deps.composeUi
+    implementation deps.composeUiTooling
+    implementation deps.composeRuntimeLivedata
+    implementation deps.composeFoundation
+    implementation deps.composeMaterial
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
