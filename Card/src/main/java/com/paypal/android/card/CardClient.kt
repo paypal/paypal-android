@@ -9,8 +9,12 @@ import kotlin.coroutines.CoroutineContext
 
 class CardClient(val paymentsClient: PaymentsClient) {
 
+    private val http = Http()
+    private val baseUrl = Environment.SANDBOX.url
+
     fun approveOrder(orderId: String, card: Card, completion: (CardResult) -> Unit) {
-        val url = "/v2/checkout/orders/${orderId}/confirm-payment-source"
+
+        val confirmPaymentSourceUrl = "${baseUrl}/v2/checkout/orders/${orderId}/confirm-payment-source"
         val body = """
             {
                 "payment_source": {
@@ -21,10 +25,12 @@ class CardClient(val paymentsClient: PaymentsClient) {
                 }
             }
         """.trimIndent()
-        val finalURL = Environment.SANDBOX.url + url;
-        val request = HttpRequest(URL(finalURL), "POST", body)
-        val http = Http()
+
+        val request = HttpRequest(URL(confirmPaymentSourceUrl), "POST", body)
         CoroutineScope(Dispatchers.Main).launch {
+            val clientToken = fetchClientToken()
+            request.headers["Authorization"] = "Basic ${clientToken}"
+
             val response = http.send(request)
             //response to CardResult
             //
@@ -33,5 +39,23 @@ class CardClient(val paymentsClient: PaymentsClient) {
 
 
         //paymentsClients.approveOrder(orderId, PaymentSource(card))
+    }
+
+    private suspend fun fetchClientToken(): String {
+        // fetch lsat
+        val fetchClientTokenUrl = URL("${baseUrl}/v1/oauth2/token")
+        val body = """
+            {
+                "grant_type": "client_credentials",
+                "response_type": "id_token"
+            }
+        """.trimIndent()
+
+        val request = HttpRequest(fetchClientTokenUrl, "POST", body)
+
+        val orderID = "sample-order-id"
+        request.headers["Authorization"] = "Basic ${orderID}"
+
+        return http.send(request).body
     }
 }
