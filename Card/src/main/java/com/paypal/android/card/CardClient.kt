@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import java.net.URL
 import kotlin.coroutines.CoroutineContext
 
-class CardClient(val paymentsClient: PaymentsClient) {
+class CardClient(val paymentConfig: PaymentsConfiguration) {
 
     private val apiClient = CardAPIClient()
 
