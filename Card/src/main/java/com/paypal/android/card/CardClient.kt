@@ -5,8 +5,7 @@ import com.paypal.android.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.net.URL
-import kotlin.coroutines.CoroutineContext
+
 
 class CardClient(val paymentConfig: PaymentsConfiguration) {
 
@@ -14,7 +13,7 @@ class CardClient(val paymentConfig: PaymentsConfiguration) {
 
     fun approveOrder(orderId: String, card: Card, completion: (CardResult) -> Unit) {
         CoroutineScope(Dispatchers.Main).launch {
-            val cardResult = apiClient.confirmPaymentSource(orderId, card)
+            val cardResult = apiClient.confirmPaymentSource(paymentConfig, orderId, card)
             completion(cardResult)
         }
     }
