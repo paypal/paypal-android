@@ -8,16 +8,17 @@ import com.paypal.android.core.HttpRequest
 import com.paypal.android.core.PaymentsConfiguration
 import java.net.URL
 
-class CardAPIClient {
+class CardAPIClient(private val config: PaymentsConfiguration) {
+    private val paymentSourceRequestFactory = ConfirmPaymentSourceRequestFactory(config)
     private val http = Http()
 
-    suspend fun confirmPaymentSource(config: PaymentsConfiguration, orderId: String, card: Card): CardResult {
-        val request = ConfirmPaymentSourceRequestFactory(config).create(orderId, card.toJson())
-        val clientToken = fetchClientToken()
+    suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
+        val request = paymentSourceRequestFactory.create(orderId, card.toJson())
+        val clientToken = fetchClientToken(config)
         request.headers["Authorization"] = "Basic $clientToken"
 
         val response = http.send(request)
-            //response to CardResult
+        //response to CardResult
         return CardResult(response, null)
     }
 
