@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.ui.card.CardFields
 import com.paypal.android.ui.card.CardViewModel
@@ -68,6 +69,7 @@ class PaymentMethodsFragment : Fragment() {
     }
 
     fun launchCardFragment() {
-
+        val action = PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToCardFragment()
+        findNavController().navigate(action)
     }
 }

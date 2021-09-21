@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'androidx.navigation.safeargs.kotlin'
 }
 
 android {
@@ -63,6 +64,8 @@ dependencies {
     implementation deps.composeFoundation
     implementation deps.composeMaterial
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation deps.navigationFragment
+    implementation deps.navigationUI
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
