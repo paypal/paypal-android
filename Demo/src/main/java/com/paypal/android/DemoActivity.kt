@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class DemoActivity : AppCompatActivity() {
 
-    val http = Http()
+    private val http = Http()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

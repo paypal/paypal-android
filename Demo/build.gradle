@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.2"
 
     defaultConfig {
@@ -15,6 +15,10 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     buildTypes {
@@ -29,6 +33,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "${versions.compose}"
     }
 
     lintOptions {
@@ -47,6 +55,13 @@ dependencies {
     implementation deps.material
     implementation deps.constraintLayout
     implementation deps.androidxLifecycleRuntimeKtx
+    implementation deps.fragmentKtx
+
+    implementation deps.composeUi
+    implementation deps.composeUiTooling
+    implementation deps.composeRuntimeLivedata
+    implementation deps.composeFoundation
+    implementation deps.composeMaterial
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
