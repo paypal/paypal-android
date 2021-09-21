@@ -62,6 +62,7 @@ dependencies {
     implementation deps.composeRuntimeLivedata
     implementation deps.composeFoundation
     implementation deps.composeMaterial
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit

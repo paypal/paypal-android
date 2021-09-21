@@ -11,7 +11,7 @@
         android:theme="@style/Theme.AndroidSDK">
         <activity
             android:name=".DemoActivity"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

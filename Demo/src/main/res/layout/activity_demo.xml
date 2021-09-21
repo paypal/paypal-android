@@ -7,7 +7,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container_view"
-        android:name="com.paypal.android.ui.card.CardFragment"
+        android:name="com.paypal.android.ui.PaymentMethodsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
