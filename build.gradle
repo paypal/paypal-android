@@ -37,6 +37,9 @@ buildscript {
             "navigationFragment"          : "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",
             "navigationUI"                : "androidx.navigation:navigation-ui-ktx:${versions.navigation}",
 
+            // Jetpack
+            "preference"                  : "androidx.preference:preference-ktx:1.1.1",
+
             // Testing
             "junit"                       : "junit:junit:4.13.2",
             "androidxJUnit"               : "androidx.test.ext:junit:1.1.3",

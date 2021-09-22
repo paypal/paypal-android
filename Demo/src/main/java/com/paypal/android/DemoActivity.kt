@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import androidx.preference.PreferenceManager
 
 class DemoActivity : AppCompatActivity() {
 
@@ -22,6 +23,8 @@ class DemoActivity : AppCompatActivity() {
 
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
     }
 
     override fun onSupportNavigateUp(): Boolean {

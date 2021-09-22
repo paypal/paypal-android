@@ -7,10 +7,9 @@
         <entry key="../../../../../layout/compose-model-1631731131942.xml" value="0.5638888888888889" />
         <entry key="../../../../../layout/compose-model-1631886742866.xml" value="0.1" />
         <entry key="../../../../../layout/compose-model-1631908005804.xml" value="1.0824074074074075" />
-        <entry key="Demo/src/main/res/drawable/ic_settings.xml" value="0.38333333333333336" />
         <entry key="Demo/src/main/res/layout/activity_demo.xml" value="0.325" />
         <entry key="Demo/src/main/res/layout/fragment_pay_pal.xml" value="0.3671875" />
-        <entry key="Demo/src/main/res/menu/payment_methods_menu.xml" value="0.3671875" />
+        <entry key="Demo/src/main/res/xml/root_preferences.xml" value="0.32382246376811596" />
       </map>
     </option>
   </component>

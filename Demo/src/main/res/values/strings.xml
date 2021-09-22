@@ -12,4 +12,8 @@
     <string name="card_field_expiration">Expiration</string>
     <string name="card_field_security_code">Security Code</string>
 
+    <!-- Preference Titles -->
+    <string name="environment_title">Environment</string>
+    <string name="sync_header">Sync</string>
+
 </resources>
