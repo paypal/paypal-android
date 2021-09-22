@@ -13,6 +13,6 @@ class ConfirmPaymentSourceRequestFactory(private val configuration: PaymentsConf
         """.trimIndent()
 
         //add client id and all that stuff to the request.
-        return HttpRequest(URL(confirmPaymentSourceUrl), "POST", body)
+        return HttpRequest(URL(confirmPaymentSourceUrl), HttpMethod.POST, body)
     }
 }

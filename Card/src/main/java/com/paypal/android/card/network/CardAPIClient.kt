@@ -1,7 +1,7 @@
 package com.paypal.android.card.network
 
 import com.paypal.android.card.Card
-import com.paypal.android.card.CardResult
+import com.paypal.android.card.CardOrderApproval
 import com.paypal.android.core.ConfirmPaymentSourceRequestFactory
 import com.paypal.android.core.Http
 import com.paypal.android.core.HttpRequest
@@ -12,14 +12,14 @@ class CardAPIClient(private val config: PaymentsConfiguration) {
     private val paymentSourceRequestFactory = ConfirmPaymentSourceRequestFactory(config)
     private val http = Http()
 
-    suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
+    suspend fun confirmPaymentSource(orderId: String, card: Card): CardOrderApproval {
         val request = paymentSourceRequestFactory.create(orderId, card.toJson())
         val clientToken = fetchClientToken(config)
         request.headers["Authorization"] = "Basic $clientToken"
 
         val response = http.send(request)
         //response to CardResult
-        return CardResult(response, null)
+        return CardOrderApproval(response, null)
     }
 
     private suspend fun fetchClientToken(config: PaymentsConfiguration): String {

@@ -3,11 +3,11 @@ package com.paypal.android.core
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
-class PaymentsClientUnitTest {
+class APIClientUnitTest {
 
     @Test
     fun constructor() {
-        val sut = PaymentsClient()
+        val sut = APIClient()
         assertNotNull(sut)
     }
 }

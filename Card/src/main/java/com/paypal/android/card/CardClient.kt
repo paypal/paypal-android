@@ -1,15 +1,13 @@
 package com.paypal.android.card
 
-import com.paypal.android.card.network.CardAPIClient
-import com.paypal.android.core.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.paypal.android.core.APIClient
+import com.paypal.android.core.PaymentsConfiguration
 
+class CardClient(private val apiClient: APIClient) {
 
-class CardClient(val paymentConfig: PaymentsConfiguration) {
+//    private val apiClient = CardAPIClient()
 
-    private val apiClient = CardAPIClient()
+    constructor(clientId: String) : this(APIClient(PaymentsConfiguration(clientId)))
 
 //    fun approveOrder(orderId: String, card: Card, completion: (CardResult) -> Unit) {
 //        CoroutineScope(Dispatchers.Main).launch {
@@ -18,7 +16,20 @@ class CardClient(val paymentConfig: PaymentsConfiguration) {
 //        }
 //    }
 
-    fun approveOrder(orderId: String, card: Card, completion: (Result<CardResult>) -> Unit) {
+    suspend fun approveOrder(orderId: String, card: Card): CardOrderApproval {
+        val path = "v2/checkout/orders/${orderId}/confirm-payment-source"
+        val body = """
+            {
+                "payment_source": {
+                    "card": {
+                        "number": "${card.number}",
+                        "expiry": "${card.expiry}"
+                    }
+                }
+            }
+        """.trimIndent()
 
+        val httpResponse = apiClient.post(path, body)
+        return CardOrderApproval(httpResponse, null)
     }
 }
