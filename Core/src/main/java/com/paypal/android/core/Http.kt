@@ -8,6 +8,8 @@ import java.net.HttpURLConnection
 
 class Http(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
 
+    private val httpResponseParser = HttpResponseParser()
+
     suspend fun send(request: HttpRequest) =
         withContext(dispatcher) {
             val url = request.url
@@ -25,7 +27,8 @@ class Http(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
                     //do something
                 }
             }
-            val responseCode = connection.responseCode //actual call
-            HttpResponse(responseCode)
+
+            connection.connect()
+            httpResponseParser.parse(connection)
         }
 }
