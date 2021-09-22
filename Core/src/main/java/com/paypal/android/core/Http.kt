@@ -26,6 +26,6 @@ class Http(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
                 }
             }
             val responseCode = connection.responseCode //actual call
-            HttpResponse(responseCode)
+            HttpResponse(responseCode, "")
         }
 }
