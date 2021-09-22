@@ -33,6 +33,13 @@ class CardFragment : Fragment() {
                     Column {
                         CardFields(cardViewModel, Modifier.padding(16.dp))
 
+                        DropDown(
+                            cardViewModel.autoFillCards.map { it.first },
+                            stringResource(R.string.card_field_prefill_card_fields),
+                            { selectedCard -> cardViewModel.onPrefillCardSelected(selectedCard) },
+                            Modifier.padding(16.dp)
+                        )
+
                         Button(
                             onClick = { cardViewModel.onCardFieldSubmit() },
                             modifier = Modifier

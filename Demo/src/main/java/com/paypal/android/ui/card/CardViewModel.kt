@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.paypal.android.data.card.PrefillCardData
 
 class CardViewModel : ViewModel() {
 
@@ -15,6 +16,8 @@ class CardViewModel : ViewModel() {
 
     private val _securityCode = MutableLiveData("")
     val securityCode: LiveData<String> = _securityCode
+
+    val autoFillCards = PrefillCardData.cards
 
     fun onCardNumberChange(newCardNumber: String) {
         _cardNumber.value = newCardNumber
@@ -34,6 +37,14 @@ class CardViewModel : ViewModel() {
         Log.d(TAG, "${securityCode.value}")
 
         // Invoke Card SDK
+    }
+
+    fun onPrefillCardSelected(cardName: String) {
+        autoFillCards.find { it.first == cardName }?.second?.apply {
+            _cardNumber.value = cardNumber
+            _expirationDate.value = expirationDate
+            _securityCode.value = securityCode
+        }
     }
 
     private fun formatExpirationDate(expirationDate: String): String {
