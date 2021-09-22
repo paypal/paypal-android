@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import android.util.Base64
 import java.net.URL
 
 class HttpRequestFactory {
@@ -18,7 +19,9 @@ class HttpRequestFactory {
         }
 
         val clientId = configuration.clientId
-        httpRequest.headers["Authorization"] = "Basic ${clientId}"
+        val encodedClientId =
+            Base64.encodeToString(clientId.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+        httpRequest.headers["Authorization"] = "Basic $encodedClientId"
 
         return httpRequest
     }

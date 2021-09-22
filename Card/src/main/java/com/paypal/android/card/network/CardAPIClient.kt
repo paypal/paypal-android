@@ -1,42 +1,26 @@
 package com.paypal.android.card.network
 
 import com.paypal.android.card.Card
-import com.paypal.android.card.CardOrderApproval
-import com.paypal.android.core.ConfirmPaymentSourceRequestFactory
-import com.paypal.android.core.Http
-import com.paypal.android.core.HttpRequest
-import com.paypal.android.core.PaymentsConfiguration
+import com.paypal.android.card.CardResult
+import com.paypal.android.core.*
 import java.net.URL
 
-class CardAPIClient(private val config: PaymentsConfiguration) {
-    private val paymentSourceRequestFactory = ConfirmPaymentSourceRequestFactory(config)
-    private val http = Http()
+class CardAPIClient(private val api: APIClient) {
 
-    suspend fun confirmPaymentSource(orderId: String, card: Card): CardOrderApproval {
-        val request = paymentSourceRequestFactory.create(orderId, card.toJson())
-        val clientToken = fetchClientToken(config)
-        request.headers["Authorization"] = "Basic $clientToken"
-
-        val response = http.send(request)
-        //response to CardResult
-        return CardOrderApproval(response, null)
-    }
-
-    private suspend fun fetchClientToken(config: PaymentsConfiguration): String {
-        // fetch lsat
-        val fetchClientTokenUrl = URL("${config.environment.url}/v1/oauth2/token")
+    suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
+        val path = "v2/checkout/orders/${orderId}/confirm-payment-source"
         val body = """
             {
-                "grant_type": "client_credentials",
-                "response_type": "id_token"
+                "payment_source": {
+                    "card": {
+                        "number": "${card.number}",
+                        "expiry": "${card.expiry}"
+                    }
+                }
             }
         """.trimIndent()
 
-        val request = HttpRequest(fetchClientTokenUrl, "POST", body)
-
-        val orderID = "sample-order-id"
-        request.headers["Authorization"] = "Basic ${orderID}"
-
-        return http.send(request).body
+        val httpResponse = api.post(path, body)
+        return CardResult(httpResponse, null)
     }
 }
