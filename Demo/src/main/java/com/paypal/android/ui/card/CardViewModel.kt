@@ -22,6 +22,12 @@ class CardViewModel @Inject constructor (
     private val payPalDemoApi: PayPalDemoApi
 ) : ViewModel() {
 
+    companion object {
+        private val TAG = CardViewModel::class.qualifiedName
+        private const val ORDER_ID = "45413380SJ116311E"
+        private const val CLIENT_ID = "ASUApeBhpz9-IhrBRpHbBfVBklK4XOr1lvZdgu1UlSK0OvoJut6R-zPUP7iufxso55Yvyl6IZYV3yr0g"
+    }
+
     private val _cardNumber = MutableLiveData("")
     val cardNumber: LiveData<String> = _cardNumber
 
@@ -33,6 +39,9 @@ class CardViewModel @Inject constructor (
 
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
+
+    private val configuration = PaymentsConfiguration(CLIENT_ID, Environment.SANDBOX, AUTH_TOKEN)
+    private val cardClient = CardClient(configuration)
 
     fun onCardNumberChange(newCardNumber: String) {
         _cardNumber.value = CardFormatter.formatCardNumber(newCardNumber, _cardNumber.value ?: "")
@@ -56,7 +65,15 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "Environment = $environment")
 
         // Invoke Card SDK
-        fetchOrderId()
+        val card = Card("4032036247327321", "2024-11")
+        cardClient.approveOrder(ORDER_ID, card) { result ->
+            if (result.response != null) {
+                Log.e("DemoActivity", "SUCCESS")
+                Log.e("DemoActivity", "${result.response!!.lastDigits}")
+            } else {
+                Log.e("DemoActivity", "ERRRORRRR")
+            }
+        }
     }
 
     private fun fetchOrderId() {
@@ -88,9 +105,5 @@ class CardViewModel @Inject constructor (
             _expirationDate.value = expirationDate
             _securityCode.value = securityCode
         }
-    }
-
-    companion object {
-        private val TAG = CardViewModel::class.qualifiedName
     }
 }
