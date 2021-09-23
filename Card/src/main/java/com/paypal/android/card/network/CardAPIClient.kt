@@ -4,14 +4,14 @@ import com.paypal.android.card.Card
 import com.paypal.android.card.CardError
 import com.paypal.android.card.CardResponse
 import com.paypal.android.card.CardResult
-import com.paypal.android.core.*
+import com.paypal.android.core.APIClient
 import org.json.JSONObject
-import java.net.URL
+import java.net.HttpURLConnection.HTTP_OK
 
 class CardAPIClient(private val api: APIClient) {
 
     suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
-        val path = "v2/checkout/orders/${orderId}/confirm-payment-source"
+        val path = "v2/checkout/orders/$orderId/confirm-payment-source"
         val body = """
             {
                 "payment_source": {
@@ -24,8 +24,8 @@ class CardAPIClient(private val api: APIClient) {
         """.trimIndent()
 
         val httpResponse = api.post(path, body)
-        return if (httpResponse.status == 200) {
-            val bodyJson =  httpResponse.body?.let { JSONObject(it) } ?: JSONObject()
+        return if (httpResponse.status == HTTP_OK) {
+            val bodyJson = httpResponse.body?.let { JSONObject(it) } ?: JSONObject()
             val status = bodyJson.getString("status")
             val id = bodyJson.getString("id")
             val paymentSourceCard = bodyJson

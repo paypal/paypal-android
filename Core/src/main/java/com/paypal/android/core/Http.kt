@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -10,6 +11,10 @@ class Http(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val httpResponseParser: HttpResponseParser = HttpResponseParser()
 ) {
+
+    companion object {
+        private val TAG = Http::class.qualifiedName
+    }
 
     suspend fun send(httpRequest: HttpRequest) =
         withContext(dispatcher) {
@@ -30,8 +35,9 @@ class Http(
                     connection.outputStream.write(httpRequest.body?.toByteArray())
                     connection.outputStream.flush()
                     connection.outputStream.close()
-                } catch (e:IOException) {
-                    //do something
+                } catch (e: IOException) {
+                    Log.d(TAG, "Error closing connection output stream:")
+                    Log.d(TAG, e.stackTrace.toString())
                 }
             }
 

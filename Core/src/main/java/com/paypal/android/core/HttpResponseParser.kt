@@ -52,18 +52,20 @@ class HttpResponseParser {
     private fun getInputStream(connection: HttpURLConnection): InputStream? {
         return connection.inputStream?.let { inputStream ->
             if (connection.contentEncoding == "gzip") {
-                return GZIPInputStream(inputStream)
+                GZIPInputStream(inputStream)
+            } else {
+                inputStream
             }
-            return inputStream
         }
     }
 
     private fun getErrorStream(connection: HttpURLConnection): InputStream? {
         return connection.errorStream?.let { inputStream ->
             if (connection.contentEncoding == "gzip") {
-                return GZIPInputStream(inputStream)
+                GZIPInputStream(inputStream)
+            } else {
+                inputStream
             }
-            return inputStream
         }
     }
 }
