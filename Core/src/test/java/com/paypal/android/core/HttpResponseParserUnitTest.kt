@@ -2,6 +2,8 @@ package com.paypal.android.core
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
@@ -50,6 +52,8 @@ class HttpResponseParserUnitTest {
             val result = sut.parse(connection)
             assertEquals(responseCode, result.status)
             assertEquals(expectedBody, result.body)
+
+            verify { inputStream.close() }
         }
     }
 
@@ -90,6 +94,8 @@ class HttpResponseParserUnitTest {
             val result = sut.parse(connection)
             assertEquals(responseCode, result.status)
             assertEquals(expectedBody, result.body)
+
+            verify { errorStream.close() }
         }
     }
 }
@@ -101,9 +107,9 @@ private fun createGzippedInputStream(input: String): InputStream {
     gzipOutputStream.close()
     val gzippedBytes = byteArrayOutputStream.toByteArray()
     byteArrayOutputStream.close()
-    return ByteArrayInputStream(gzippedBytes)
+    return spyk(ByteArrayInputStream(gzippedBytes))
 }
 
 private fun createPlainTextInputStream(input: String): InputStream {
-    return ByteArrayInputStream(input.toByteArray(Charsets.UTF_8))
+    return spyk(ByteArrayInputStream(input.toByteArray(Charsets.UTF_8)))
 }
