@@ -6,7 +6,7 @@ import java.util.Locale
 data class HttpRequest(
     val url: URL,
     val method: HttpMethod,
-    val body: String?,
+    val body: String? = null,
     val language: String = Locale.getDefault().language
 ) {
 

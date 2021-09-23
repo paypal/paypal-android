@@ -8,13 +8,15 @@ import java.util.zip.GZIPInputStream
 
 class HttpResponseParser {
 
-    val EOF = -1
-    val BUFFER_SIZE = 1024
+    companion object {
+        private const val EOF = -1
+        private const val BUFFER_SIZE = 1024
+    }
 
     fun parse(connection: HttpURLConnection): HttpResponse {
         val status = connection.responseCode
         val body = parseBody(connection)
-        return HttpResponse(connection.responseCode, body)
+        return HttpResponse(status, body)
     }
 
     private fun parseBody(connection: HttpURLConnection): String? {

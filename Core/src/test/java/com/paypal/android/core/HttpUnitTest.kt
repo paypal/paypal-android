@@ -22,7 +22,7 @@ class HttpUnitTest {
 
     private val url = mockk<URL>()
     private val urlConnection = mockk<HttpURLConnection>(relaxed = true)
-    private val httpRequest = spyk(HttpRequest("https://www.example.com"))
+    private val httpRequest = spyk(HttpRequest(URL("https://www.example.com"), HttpMethod.GET))
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 

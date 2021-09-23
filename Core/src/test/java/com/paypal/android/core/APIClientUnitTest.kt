@@ -7,7 +7,7 @@ class APIClientUnitTest {
 
     @Test
     fun constructor() {
-        val sut = APIClient()
+        val sut = APIClient(PaymentsConfiguration("sample-client-id"))
         assertNotNull(sut)
     }
 }
