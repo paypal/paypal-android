@@ -1,6 +1,10 @@
 package com.paypal.android.card
 
-class CardResult(val response: Any?, val error: Any?) {
-    //error
-    //response
-}
+data class CardResult(val response: CardResponse? = null, val error: CardError? = null)
+
+data class CardResponse(
+    val status: String?,
+    val lastDigits: String?,
+    val brand: String?,
+    val type: String?
+)

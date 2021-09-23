@@ -21,6 +21,6 @@ class CardAPIClient(private val api: APIClient) {
         """.trimIndent()
 
         val httpResponse = api.post(path, body)
-        return CardResult(httpResponse, null)
+        return CardResult()
     }
 }
