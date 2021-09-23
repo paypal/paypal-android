@@ -15,16 +15,21 @@ class HttpResponseParser {
 
     fun parse(connection: HttpURLConnection): HttpResponse {
         val status = connection.responseCode
-        val body = when (status) {
-            in 200..299 -> getInputStream(connection)
-            else -> getErrorStream(connection)
-        }?.let {
+
+        val body = kotlin.runCatching {
+            getInputStream(connection)
+        }.recover {
+            getErrorStream(connection)
+        }.map {
             parseInputStream(it)
-        }
+        }.getOrNull()
+
         return HttpResponse(status, body)
     }
 
-    private fun parseInputStream(inputStream: InputStream): String {
+    private fun parseInputStream(inputStream: InputStream?): String? {
+        if (inputStream == null) return null
+
         val outputStream = ByteArrayOutputStream()
         val buffer = ByteArray(BUFFER_SIZE)
         while (true) {
