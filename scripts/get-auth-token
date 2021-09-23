@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function display_insufficent_params {
-  echo "usage: ./get-access-token <CLIENT_ID> <CLIENT_SECRET>"
+  echo "usage: ./get-auth-token <CLIENT_ID> <CLIENT_SECRET>"
   echo "insufficient params"
 }
 
