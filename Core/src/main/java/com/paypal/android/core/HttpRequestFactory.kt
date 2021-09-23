@@ -18,7 +18,7 @@ class HttpRequestFactory {
             httpRequest.contentType = HttpContentType.JSON
         }
 
-        val credentials = "${configuration.clientId}:${configuration.secret}"
+        val credentials = "${configuration.clientId}:${configuration.authToken}"
         val encodedClientId =
             Base64.encodeToString(credentials.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
         httpRequest.headers["Authorization"] = "Basic $encodedClientId"
