@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import java.net.HttpURLConnection
@@ -20,9 +20,11 @@ import java.net.URL
 @ExperimentalCoroutinesApi
 class HttpUnitTest {
 
-    private val url = mockk<URL>()
+    private val url = spyk(URL("https://www.example.com"))
     private val urlConnection = mockk<HttpURLConnection>(relaxed = true)
-    private val httpRequest = spyk(HttpRequest(URL("https://www.example.com"), HttpMethod.GET))
+
+    private val httpResponse = HttpResponse(123)
+    private val httpResponseParser = mockk<HttpResponseParser>()
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -30,10 +32,10 @@ class HttpUnitTest {
 
     @Before
     fun beforeEach() {
-        every { httpRequest.url } returns url
         every { url.openConnection() } returns urlConnection
+        every { httpResponseParser.parse(urlConnection) } returns httpResponse
 
-        sut = Http(testCoroutineDispatcher)
+        sut = Http(testCoroutineDispatcher, httpResponseParser)
         Dispatchers.setMain(testCoroutineDispatcher)
     }
 
@@ -45,15 +47,34 @@ class HttpUnitTest {
 
     @Test
     fun `send sets request method on url connection`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+
         sut.send(httpRequest)
         verify { urlConnection.requestMethod = "GET" }
     }
 
     @Test
-    fun `send returns an http result`() = runBlockingTest {
-        every { urlConnection.responseCode } returns 123
+    fun `send sets request headers on url connection`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        httpRequest.headers["Sample-Header"] = "sample-value"
 
+        sut.send(httpRequest)
+        verify { urlConnection.addRequestProperty("Sample-Header", "sample-value") }
+    }
+
+    @Test
+    fun `send calls connect on http url connection to initiate request`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+
+        sut.send(httpRequest)
+        verify { urlConnection.connect() }
+    }
+
+    @Test
+    fun `send forwards http response from http parser`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
         val result = sut.send(httpRequest)
-        assertEquals(123, result.status)
+
+        assertSame(httpResponse, result)
     }
 }

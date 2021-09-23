@@ -6,12 +6,14 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.HttpURLConnection
 
-class Http(private val dispatcher: CoroutineDispatcher = Dispatchers.IO) {
-
-    private val httpResponseParser = HttpResponseParser()
+class Http(
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val httpResponseParser: HttpResponseParser = HttpResponseParser()
+) {
 
     suspend fun send(httpRequest: HttpRequest) =
         withContext(dispatcher) {
+
             val url = httpRequest.url
             val connection = url.openConnection() as HttpURLConnection
 
