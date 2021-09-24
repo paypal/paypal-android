@@ -5,6 +5,7 @@ import com.paypal.android.card.CardError
 import com.paypal.android.card.CardResponse
 import com.paypal.android.card.CardResult
 import com.paypal.android.core.APIClient
+import com.paypal.android.core.PayPalJSON
 import org.json.JSONObject
 import java.net.HttpURLConnection.HTTP_OK
 
@@ -25,15 +26,14 @@ class CardAPIClient(private val api: APIClient) {
 
         val httpResponse = api.post(path, body)
         return if (httpResponse.status == HTTP_OK) {
-            val bodyJson = httpResponse.body?.let { JSONObject(it) } ?: JSONObject()
-            val status = bodyJson.getString("status")
-            val id = bodyJson.getString("id")
-            val paymentSourceCard = bodyJson
-                .getJSONObject("payment_source")
-                .getJSONObject("card")
-            val lastDigits = paymentSourceCard.getString("last_digits")
-            val brand = paymentSourceCard.getString("brand")
-            val type = paymentSourceCard.getString("type")
+            val json = PayPalJSON(httpResponse.body)
+
+            val status = json.optString("status")
+            val id = json.optString("id")
+            val lastDigits = json.optString("payment_source.card.last_digits")
+            val brand = json.optString("payment_source.card.brand")
+            val type = json.optString("payment_source.card.type")
+
             CardResult(response = CardResponse(id, status, lastDigits, brand, type))
         } else {
             CardResult(error = CardError())

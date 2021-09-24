@@ -13,7 +13,7 @@ if [ -z "${CLIENT_ID}" ] || [ -z "${CLIENT_SECRET}" ]; then
   exit 1
 fi
 
-ACCESS_TOKEN=$(./get-access-token "${CLIENT_ID}" "${CLIENT_SECRET}" | jq -r '.access_token')
+ACCESS_TOKEN=$(./get-auth-token "${CLIENT_ID}" "${CLIENT_SECRET}" | jq -r '.access_token')
 
 ORDER_URL="https://api.sandbox.paypal.com/v2/checkout/orders"
 CREDENTIALS=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64)
