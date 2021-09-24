@@ -4,7 +4,7 @@ import org.json.JSONObject
 
 class PayPalJSON(private val json: JSONObject) {
 
-    constructor(input: String?): this (JSONObject(input ?: "{}"))
+    constructor(input: String?) : this(JSONObject(input ?: "{}"))
 
     fun optString(keyPath: String): String? {
         var node: JSONObject = json

@@ -6,7 +6,6 @@ import com.paypal.android.card.CardResponse
 import com.paypal.android.card.CardResult
 import com.paypal.android.core.APIClient
 import com.paypal.android.core.PayPalJSON
-import org.json.JSONObject
 import java.net.HttpURLConnection.HTTP_OK
 
 class CardAPIClient(private val api: APIClient) {
