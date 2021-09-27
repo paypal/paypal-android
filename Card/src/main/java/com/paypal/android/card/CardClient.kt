@@ -7,13 +7,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CardClient(val configuration: PaymentsConfiguration) {
+class CardClient(configuration: PaymentsConfiguration) {
 
     private val cardAPI: CardAPIClient = CardAPIClient(APIClient(configuration))
 
-    fun approveOrder(orderId: String, card: Card, completion: (CardResult) -> Unit) {
+    fun approveOrder(orderID: String, card: Card, completion: (CardResult) -> Unit) {
         CoroutineScope(Dispatchers.Main).launch {
-            val cardResult = cardAPI.confirmPaymentSource(orderId, card)
+            val cardResult = cardAPI.confirmPaymentSource(orderID, card)
             completion(cardResult)
         }
     }
