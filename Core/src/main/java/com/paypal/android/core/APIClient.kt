@@ -5,12 +5,8 @@ class APIClient(
     private val http: Http = Http(),
     private val httpRequestFactory: HttpRequestFactory = HttpRequestFactory()
 ) {
-    suspend fun post(path: String, body: String): HttpResponse {
-        val apiRequest = APIRequest(path, HttpMethod.POST, body)
-        return send(apiRequest)
-    }
 
-    private suspend fun send(apiRequest: APIRequest): HttpResponse {
+    suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         return http.send(httpRequest)

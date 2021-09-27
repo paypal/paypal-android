@@ -8,33 +8,13 @@ import com.paypal.android.core.APIClient
 import com.paypal.android.core.PayPalJSON
 import java.net.HttpURLConnection.HTTP_OK
 
-class CardAPIClient(private val api: APIClient) {
-
+class CardAPIClient(
+    private val api: APIClient,
+    private val requestBuilder: CardAPIRequestBuilder
+) {
     suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
-
-        val expirationDate = card.run {
-            val parsedSecurityCode = expirationDate.split("/")
-            val month = parsedSecurityCode[0]
-            val year = parsedSecurityCode[1]
-            "20$year-$month"
-        }
-
-        val cardNumber = card.number.replace("\\s".toRegex(), "")
-
-        val path = "v2/checkout/orders/$orderId/confirm-payment-source"
-        val body = """
-            {
-                "payment_source": {
-                    "card": {
-                        "number": "$cardNumber",
-                        "expiry": "$expirationDate",
-                        "security_code": "${card.securityCode}"
-                    }
-                }
-            }
-        """.trimIndent()
-
-        val httpResponse = api.post(path, body)
+        val apiRequest = requestBuilder.buildConfirmPaymentSourceRequest(orderId, card)
+        val httpResponse = api.send(apiRequest)
         return if (httpResponse.status == HTTP_OK) {
             val json = PayPalJSON(httpResponse.body)
 
