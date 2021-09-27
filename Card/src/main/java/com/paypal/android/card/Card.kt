@@ -1,7 +1,7 @@
 package com.paypal.android.card
 
 data class Card(
-    val cardNumber: String,
+    val number: String,
     val expirationDate: String,
     val securityCode: String
 )

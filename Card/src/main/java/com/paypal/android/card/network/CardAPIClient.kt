@@ -16,7 +16,7 @@ class CardAPIClient(private val api: APIClient) {
             {
                 "payment_source": {
                     "card": {
-                        "number": "${card.cardNumber}",
+                        "number": "${card.number}",
                         "expiry": "${card.expirationDate}",
                         "security_code": "${card.securityCode}"
                     }

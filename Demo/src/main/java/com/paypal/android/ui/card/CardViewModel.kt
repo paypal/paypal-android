@@ -112,7 +112,7 @@ class CardViewModel @Inject constructor (
 
     fun onPrefillCardSelected(cardName: String) {
         autoFillCards.find { it.first == cardName }?.second?.apply {
-            _cardNumber.value = CardFormatter.formatCardNumber(cardNumber)
+            _cardNumber.value = CardFormatter.formatCardNumber(number)
             _expirationDate.value = expirationDate
             _securityCode.value = securityCode
         }
