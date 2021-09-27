@@ -7,6 +7,9 @@ import com.paypal.android.core.HttpMethod
 class CardAPIRequestBuilder {
 
     fun buildConfirmPaymentSourceRequest(orderID: String, card: Card): APIRequest {
+        val path = "v2/checkout/orders/$orderID/confirm-payment-source"
+
+        val cardNumber = card.number.replace("\\s".toRegex(), "")
         val expirationDate = card.run {
             val parsedSecurityCode = expirationDate.split("/")
             val month = parsedSecurityCode[0]
@@ -14,8 +17,6 @@ class CardAPIRequestBuilder {
             "20$year-$month"
         }
 
-        val cardNumber = card.number.replace("\\s".toRegex(), "")
-        val path = "v2/checkout/orders/$orderID/confirm-payment-source"
         val body = """
             {
                 "payment_source": {
