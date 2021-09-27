@@ -56,8 +56,8 @@ fun CardFields(
 @Composable
 fun CardField(cardNumber: String, onNumberChange: (String) -> Unit, modifier: Modifier = Modifier) {
     TextField(
-        value = cardNumber,
-        onValueChange = { if (it.length <= MAX_CARD_LENGTH) onNumberChange(it) },
+        value = TextFieldValue(cardNumber, TextRange(cardNumber.length)),
+        onValueChange = { onNumberChange(it.text) },
         label = { Text(stringResource(R.string.card_field_card_number)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
@@ -81,6 +81,5 @@ fun SecurityCodeField(
     )
 }
 
-const val MAX_CARD_LENGTH = 19
 const val MAX_EXPIRATION_LENGTH = 5
 const val MAX_SECURITY_CODE_LENGTH = 4
