@@ -1,9 +1,5 @@
-package com.paypal.android.card.network
+package com.paypal.android.card
 
-import com.paypal.android.card.Card
-import com.paypal.android.card.CardError
-import com.paypal.android.card.CardResponse
-import com.paypal.android.card.CardResult
 import com.paypal.android.core.APIClient
 import com.paypal.android.core.PayPalJSON
 import java.net.HttpURLConnection.HTTP_OK
