@@ -72,7 +72,7 @@ class CardViewModel @Inject constructor (
 
         val orderID = _orderID.value ?: ""
 
-        val cardNumber = (_cardNumber.value ?: "").replace("\\s".toRegex(), "")
+        val cardNumber = _cardNumber.value ?: ""
         val expirationDate = _expirationDate.value ?: ""
         val securityCode = _securityCode.value ?: ""
         val card = Card(cardNumber, expirationDate, securityCode)

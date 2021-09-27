@@ -11,13 +11,23 @@ import java.net.HttpURLConnection.HTTP_OK
 class CardAPIClient(private val api: APIClient) {
 
     suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
+
+        val expirationDate = card.run {
+            val parsedSecurityCode = expirationDate.split("/")
+            val month = parsedSecurityCode[0]
+            val year = parsedSecurityCode[1]
+            "20$year-$month"
+        }
+
+        val cardNumber = card.number.replace("\\s".toRegex(), "")
+
         val path = "v2/checkout/orders/$orderId/confirm-payment-source"
         val body = """
             {
                 "payment_source": {
                     "card": {
-                        "number": "${card.number}",
-                        "expiry": "${card.expirationDate}",
+                        "number": "$cardNumber",
+                        "expiry": "$expirationDate",
                         "security_code": "${card.securityCode}"
                     }
                 }
