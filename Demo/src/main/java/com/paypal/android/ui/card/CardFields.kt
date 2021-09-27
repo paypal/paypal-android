@@ -3,6 +3,7 @@ package com.paypal.android.ui.card
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -14,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 
 @Composable
@@ -21,11 +23,23 @@ fun CardFields(
     cardViewModel: CardViewModel,
     modifier: Modifier = Modifier
 ) {
+    val orderID: String by cardViewModel.orderID.observeAsState("")
     val cardNumber: String by cardViewModel.cardNumber.observeAsState("")
     val expirationDate: String by cardViewModel.expirationDate.observeAsState("")
     val securityCode: String by cardViewModel.securityCode.observeAsState("")
 
     Column(modifier = modifier) {
+        TextField(
+            label = { Text(stringResource(R.string.card_field_order_id)) },
+            value = orderID,
+            onValueChange = {
+                cardViewModel.onOrderIDChange(it)
+            },
+            singleLine = true,
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .fillMaxWidth()
+        )
         CardField(
             cardNumber = cardNumber,
             onNumberChange = { cardViewModel.onCardNumberChange(it) },

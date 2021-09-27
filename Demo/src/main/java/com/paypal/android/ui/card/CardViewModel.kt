@@ -24,8 +24,10 @@ class CardViewModel @Inject constructor (
 
     companion object {
         private val TAG = CardViewModel::class.qualifiedName
-        private const val ORDER_ID = "45413380SJ116311E"
     }
+
+    private val _orderID = MutableLiveData("")
+    val orderID: LiveData<String> = _orderID
 
     private val _cardNumber = MutableLiveData("")
     val cardNumber: LiveData<String> = _cardNumber
@@ -42,6 +44,10 @@ class CardViewModel @Inject constructor (
     private val configuration =
         PaymentsConfiguration(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
+
+    fun onOrderIDChange(newOrderId: String) {
+        _orderID.value = newOrderId
+    }
 
     fun onCardNumberChange(newCardNumber: String) {
         _cardNumber.value = CardFormatter.formatCardNumber(newCardNumber, _cardNumber.value ?: "")
@@ -64,9 +70,14 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "${securityCode.value}")
         Log.d(TAG, "Environment = $environment")
 
-        // Invoke Card SDK
-        val card = Card("4032036247327321", "2024-11", "123")
-        cardClient.approveOrder(ORDER_ID, card) { result ->
+        val orderID = _orderID.value ?: ""
+
+        val cardNumber = (_cardNumber.value ?: "").replace("\\s".toRegex(), "")
+        val expirationDate = _expirationDate.value ?: ""
+        val securityCode = _securityCode.value ?: ""
+        val card = Card(cardNumber, expirationDate, securityCode)
+
+        cardClient.approveOrder(orderID, card) { result ->
             if (result.response != null) {
                 Log.e("DemoActivity", "SUCCESS")
                 Log.e("DemoActivity", "${result.response!!.lastDigits}")
