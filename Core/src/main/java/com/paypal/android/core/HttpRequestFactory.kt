@@ -1,6 +1,8 @@
 package com.paypal.android.core
 
+import android.util.Base64.encodeToString
 import java.net.URL
+import java.util.*
 
 class HttpRequestFactory {
 
@@ -20,7 +22,8 @@ class HttpRequestFactory {
             httpRequest.contentType = HttpContentType.JSON
         }
 
-        httpRequest.headers["Authorization"] = "Bearer ${configuration.authToken}"
+        val credentials = configuration.run { "${clientId}:${clientSecret}" }
+        httpRequest.headers["Authorization"] = "Basic ${credentials.base64encoded()}"
         return httpRequest
     }
 }

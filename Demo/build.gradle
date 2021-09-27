@@ -6,6 +6,9 @@ plugins {
     id 'dagger.hilt.android.plugin'
 }
 
+def paypalProperties = new Properties()
+paypalProperties.load(new FileInputStream(rootProject.file("paypal.properties")))
+
 android {
     compileSdkVersion 31
     buildToolsVersion "30.0.2"
@@ -16,8 +19,10 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"])
+        buildConfigField("String", "CLIENT_SECRET", paypalProperties["CLIENT_SECRET"])
     }
 
     buildFeatures {
