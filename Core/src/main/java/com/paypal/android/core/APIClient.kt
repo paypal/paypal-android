@@ -1,10 +1,10 @@
 package com.paypal.android.core
 
-class APIClient(private val configuration: PaymentsConfiguration) {
-
-    private val http = Http()
-    private val httpRequestFactory = HttpRequestFactory()
-
+class APIClient(
+    private val configuration: PaymentsConfiguration,
+    private val http: Http = Http(),
+    private val httpRequestFactory: HttpRequestFactory = HttpRequestFactory()
+) {
     suspend fun post(path: String, body: String): HttpResponse {
         val apiRequest = APIRequest(path, HttpMethod.POST, body)
         return send(apiRequest)
