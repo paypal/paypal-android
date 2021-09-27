@@ -77,7 +77,7 @@ class CardViewModel @Inject constructor (
         val securityCode = _securityCode.value ?: ""
         val card = Card(cardNumber, expirationDate, securityCode)
 
-        cardClient.approveOrder(orderID, card) { result ->
+        cardClient.confirmPaymentSource(orderID, card) { result ->
             if (result.response != null) {
                 Log.e("DemoActivity", "SUCCESS")
                 Log.e("DemoActivity", "${result.response!!.lastDigits}")

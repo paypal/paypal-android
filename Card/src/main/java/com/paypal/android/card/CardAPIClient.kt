@@ -8,7 +8,7 @@ class CardAPIClient(
     private val api: APIClient,
     private val requestBuilder: CardAPIRequestBuilder = CardAPIRequestBuilder()
 ) {
-    suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
+    suspend fun confirmPaymentSource(orderId: String, card: Card): ConfirmPaymentSourceResult {
         val apiRequest = requestBuilder.buildConfirmPaymentSourceRequest(orderId, card)
         val httpResponse = api.send(apiRequest)
         return if (httpResponse.status == HTTP_OK) {
@@ -20,9 +20,9 @@ class CardAPIClient(
             val brand = json.optString("payment_source.card.brand")
             val type = json.optString("payment_source.card.type")
 
-            CardResult(response = CardResponse(id, status, lastDigits, brand, type))
+            ConfirmPaymentSourceResult(response = ConfirmedPaymentSource(id, status, lastDigits, brand, type))
         } else {
-            CardResult(error = CardError())
+            ConfirmPaymentSourceResult(error = ConfirmPaymentSourceError())
         }
     }
 }
