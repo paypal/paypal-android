@@ -1,6 +1,7 @@
 package com.paypal.android
 
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -27,7 +28,6 @@ class DemoActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
-
 
         val authCredentialsMissing =
             BuildConfig.CLIENT_ID.isEmpty() || BuildConfig.CLIENT_SECRET.isEmpty()

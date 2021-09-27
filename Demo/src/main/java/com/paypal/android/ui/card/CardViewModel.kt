@@ -42,7 +42,8 @@ class CardViewModel @Inject constructor (
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
-    private val configuration = PaymentsConfiguration(CLIENT_ID, Environment.SANDBOX, AUTH_TOKEN)
+    private val configuration =
+        PaymentsConfiguration(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
 
     fun onCardNumberChange(newCardNumber: String) {
@@ -67,7 +68,7 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "Environment = $environment")
 
         // Invoke Card SDK
-        val card = Card("4032036247327321", "2024-11")
+        val card = Card("4032036247327321", "2024-11", "123")
         cardClient.approveOrder(ORDER_ID, card) { result ->
             if (result.response != null) {
                 Log.e("DemoActivity", "SUCCESS")

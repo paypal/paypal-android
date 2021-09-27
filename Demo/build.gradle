@@ -6,7 +6,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
 }
 
-def paypalProperties = loadPropertiesFromFile("notpaypal.properties")
+def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
     compileSdkVersion 31
