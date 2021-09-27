@@ -9,10 +9,10 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to approve an order with a [Card].
  */
-class CardClient(
-    configuration: PaymentsConfiguration,
-    private val cardAPI: CardAPIClient = CardAPIClient(APIClient(configuration))
-) {
+class CardClient internal constructor(private val cardAPI: CardAPIClient) {
+
+    constructor(configuration: PaymentsConfiguration):
+        this(CardAPIClient(APIClient(configuration)))
 
     /**
      * Confirm [Card] payment source for an order.
