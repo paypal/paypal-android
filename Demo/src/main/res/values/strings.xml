@@ -6,5 +6,6 @@
     <string name="card_field_card_number">Card Number</string>
     <string name="card_field_expiration">Expiration</string>
     <string name="card_field_security_code">Security Code</string>
+    <string name="card_field_prefill_card_fields">"Prefill Card Fields"</string>
 
 </resources>
