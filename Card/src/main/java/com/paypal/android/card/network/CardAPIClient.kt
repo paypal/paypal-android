@@ -10,7 +10,7 @@ import java.net.HttpURLConnection.HTTP_OK
 
 class CardAPIClient(
     private val api: APIClient,
-    private val requestBuilder: CardAPIRequestBuilder
+    private val requestBuilder: CardAPIRequestBuilder = CardAPIRequestBuilder()
 ) {
     suspend fun confirmPaymentSource(orderId: String, card: Card): CardResult {
         val apiRequest = requestBuilder.buildConfirmPaymentSourceRequest(orderId, card)
