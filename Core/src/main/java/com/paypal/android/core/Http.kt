@@ -22,7 +22,7 @@ class Http(
             val url = httpRequest.url
             val connection = url.openConnection() as HttpURLConnection
 
-            connection.requestMethod = httpRequest.method.asString
+            connection.requestMethod = httpRequest.method.name
 
             // add headers
             for ((key, value) in httpRequest.headers) {
