@@ -1,8 +1,6 @@
 package com.paypal.android.ui.card
 
-import android.content.DialogInterface
 import android.util.Log
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,7 +25,6 @@ class CardViewModel @Inject constructor (
     companion object {
         private val TAG = CardViewModel::class.qualifiedName
         private const val ORDER_ID = "45413380SJ116311E"
-        private const val CLIENT_ID = "ASUApeBhpz9-IhrBRpHbBfVBklK4XOr1lvZdgu1UlSK0OvoJut6R-zPUP7iufxso55Yvyl6IZYV3yr0g"
     }
 
     private val _cardNumber = MutableLiveData("")
