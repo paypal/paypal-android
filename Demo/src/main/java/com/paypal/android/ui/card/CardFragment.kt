@@ -15,12 +15,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.preference.PreferenceManager
 import com.paypal.android.R
+import com.paypal.android.data.PreferenceConstants
 import com.paypal.android.ui.theme.DemoTheme
 
 class CardFragment : Fragment() {
 
     private val cardViewModel: CardViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
+        cardViewModel.environment = sharedPreferences.getString(PreferenceConstants.ENVIRONMENT_KEY, "")
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

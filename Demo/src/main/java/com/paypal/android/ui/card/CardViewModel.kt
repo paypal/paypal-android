@@ -19,6 +19,7 @@ class CardViewModel : ViewModel() {
     private val _securityCode = MutableLiveData("")
     val securityCode: LiveData<String> = _securityCode
 
+    var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
     fun onCardNumberChange(newCardNumber: String) {
@@ -40,6 +41,7 @@ class CardViewModel : ViewModel() {
         Log.d(TAG, "${cardNumber.value}")
         Log.d(TAG, "${expirationDate.value}")
         Log.d(TAG, "${securityCode.value}")
+        Log.d(TAG, "Environment = $environment")
 
         // Invoke Card SDK
     }

@@ -2,23 +2,32 @@ package com.paypal.android
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.paypal.android.core.Http
-import com.paypal.android.core.HttpRequest
-import kotlinx.coroutines.launch
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import androidx.preference.PreferenceManager
 
 class DemoActivity : AppCompatActivity() {
 
-    private val http = Http()
+    private lateinit var navHostFragment: NavHostFragment
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_demo)
 
-        lifecycleScope.launch {
-            val request = HttpRequest("https://www.google.com")
-            val result = http.send(request)
-            print(result.responseCode)
-        }
+        navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
