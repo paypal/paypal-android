@@ -27,9 +27,25 @@ class DemoActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+
+
+        val authCredentialsMissing =
+            BuildConfig.CLIENT_ID.isEmpty() || BuildConfig.CLIENT_SECRET.isEmpty()
+        if (authCredentialsMissing) {
+            showAuthCredentialsMissingDialog()
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    private fun showAuthCredentialsMissingDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.auth_credentials_missing_title)
+            .setMessage(R.string.auth_credentials_missing_message)
+            .setPositiveButton("OK", null)
+            .create()
+            .show()
     }
 }
