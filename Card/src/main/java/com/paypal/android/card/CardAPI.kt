@@ -1,11 +1,11 @@
 package com.paypal.android.card
 
-import com.paypal.android.core.APIClient
+import com.paypal.android.core.API
 import com.paypal.android.core.PayPalJSON
 import java.net.HttpURLConnection.HTTP_OK
 
-internal class CardAPIClient(
-    private val api: APIClient,
+internal class CardAPI(
+    private val api: API,
     private val requestBuilder: CardAPIRequestBuilder = CardAPIRequestBuilder()
 ) {
     suspend fun confirmPaymentSource(orderID: String, card: Card): ConfirmPaymentSourceResult {

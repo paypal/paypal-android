@@ -1,6 +1,6 @@
 package com.paypal.android.core
 
-class APIClient internal constructor(
+class API internal constructor(
     private val configuration: PaymentsConfiguration,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory

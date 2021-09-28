@@ -1,6 +1,6 @@
 package com.paypal.android.card
 
-import com.paypal.android.core.APIClient
+import com.paypal.android.core.API
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.HttpResponse
@@ -25,9 +25,9 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class CardAPIClientUnitTest {
+class CardAPIUnitTest {
 
-    private val apiClient = mockk<APIClient>(relaxed = true)
+    private val apiClient = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<CardAPIRequestBuilder>()
 
     private val card = Card()
@@ -36,11 +36,11 @@ class CardAPIClientUnitTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private lateinit var sut: CardAPIClient
+    private lateinit var sut: CardAPI
 
     @Before
     fun beforeEach() {
-        sut = CardAPIClient(apiClient, requestBuilder)
+        sut = CardAPI(apiClient, requestBuilder)
         every { requestBuilder.buildConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
 
         Dispatchers.setMain(testCoroutineDispatcher)

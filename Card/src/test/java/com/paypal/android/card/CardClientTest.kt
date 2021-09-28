@@ -19,7 +19,7 @@ class CardClientTest {
     private val orderID = "sample-order-id"
     private val confirmPaymentSourceResult = ConfirmPaymentSourceResult()
 
-    private val cardAPIClient = mockk<CardAPIClient>(relaxed = true)
+    private val cardAPIClient = mockk<CardAPI>(relaxed = true)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 

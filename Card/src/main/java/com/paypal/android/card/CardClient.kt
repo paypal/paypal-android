@@ -1,6 +1,6 @@
 package com.paypal.android.card
 
-import com.paypal.android.core.APIClient
+import com.paypal.android.core.API
 import com.paypal.android.core.PaymentsConfiguration
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -11,12 +11,12 @@ import kotlinx.coroutines.launch
  * Use this client to approve an order with a [Card].
  */
 class CardClient internal constructor(
-    private val cardAPI: CardAPIClient,
+    private val cardAPI: CardAPI,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     constructor(configuration: PaymentsConfiguration) :
-            this(CardAPIClient(APIClient(configuration)))
+            this(CardAPI(API(configuration)))
 
     /**
      * Confirm [Card] payment source for an order.

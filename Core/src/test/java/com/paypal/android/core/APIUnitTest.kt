@@ -16,7 +16,7 @@ import org.junit.Test
 import java.net.URL
 
 @ExperimentalCoroutinesApi
-class APIClientUnitTest {
+class APIUnitTest {
 
     companion object {
         private const val CLIENT_ID = "sample-client-id"
@@ -31,11 +31,11 @@ class APIClientUnitTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private lateinit var sut: APIClient
+    private lateinit var sut: API
 
     @Before
     fun beforeEach() {
-        sut = APIClient(configuration, http, httpRequestFactory)
+        sut = API(configuration, http, httpRequestFactory)
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
