@@ -13,13 +13,6 @@ import java.net.URL
 @RunWith(Enclosed::class)
 class HttpRequestFactoryUnitTest {
 
-    private lateinit var sut: HttpRequestFactory
-
-    @Before
-    fun beforeEach() {
-        sut = HttpRequestFactory()
-    }
-
     @RunWith(ParameterizedRobolectricTestRunner::class)
     class URLTests(private val configuration: PaymentsConfiguration, private val expected: URL, private val envName: String) {
 
