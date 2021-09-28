@@ -3,7 +3,7 @@ package com.paypal.android.core
 import org.json.JSONException
 import org.json.JSONObject
 
-class PayPalJSON(private val json: JSONObject) {
+class PaymentsJSON(private val json: JSONObject) {
 
     @Throws(JSONException::class)
     constructor(input: String?) : this(JSONObject(input ?: "{}"))

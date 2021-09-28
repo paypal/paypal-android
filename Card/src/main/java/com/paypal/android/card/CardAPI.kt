@@ -1,7 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.API
-import com.paypal.android.core.PayPalJSON
+import com.paypal.android.core.PaymentsJSON
 import java.net.HttpURLConnection.HTTP_OK
 
 internal class CardAPI(
@@ -13,7 +13,7 @@ internal class CardAPI(
         val httpResponse = api.send(apiRequest)
         return if (httpResponse.status == HTTP_OK) {
             runCatching {
-                val json = PayPalJSON(httpResponse.body)
+                val json = PaymentsJSON(httpResponse.body)
                 val status = json.getString("status")
                 val id = json.getString("id")
                 val lastDigits = json.getString("payment_source.card.last_digits")

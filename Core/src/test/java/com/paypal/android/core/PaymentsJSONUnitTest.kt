@@ -8,9 +8,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class PayPalJSONUnitTest {
+class PaymentsJSONUnitTest {
 
-    private lateinit var sut: PayPalJSON
+    private lateinit var sut: PaymentsJSON
 
     @Before
     fun beforeEach() {
@@ -24,7 +24,7 @@ class PayPalJSONUnitTest {
               }
             }
         """.trimIndent()
-        sut = PayPalJSON(json)
+        sut = PaymentsJSON(json)
     }
 
     @Test
