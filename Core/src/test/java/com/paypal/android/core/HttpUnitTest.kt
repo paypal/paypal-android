@@ -11,11 +11,13 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.UnknownHostException
 
 @ExperimentalCoroutinesApi
 class HttpUnitTest {
@@ -76,5 +78,29 @@ class HttpUnitTest {
         val result = sut.send(httpRequest)
 
         assertSame(httpResponse, result)
+    }
+
+    @Test
+    fun `it returns unknown host http status when UnknownHostException thrown`() = runBlockingTest {
+        val error = UnknownHostException()
+        every { urlConnection.connect() } throws error
+
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        val result = sut.send(httpRequest)
+
+        assertEquals(HttpResponse.STATUS_UNKNOWN_HOST, result.status)
+        assertSame(error, result.error)
+    }
+
+    @Test
+    fun `it returns status undetermined when the status cannot be determined`() = runBlockingTest {
+        val error = Exception()
+        every { urlConnection.connect() } throws error
+
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        val result = sut.send(httpRequest)
+
+        assertEquals(HttpResponse.STATUS_UNDETERMINED, result.status)
+        assertSame(error, result.error)
     }
 }

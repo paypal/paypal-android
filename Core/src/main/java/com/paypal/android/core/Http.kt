@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.UnknownHostException
 
 internal class Http(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -44,7 +45,11 @@ internal class Http(
                 connection.connect()
                 httpResponseParser.parse(connection)
             }.recover {
-                HttpResponse(status = HttpResponse.STATUS_UNKNOWN, error = it)
+                val status = when (it) {
+                    is UnknownHostException -> HttpResponse.STATUS_UNKNOWN_HOST
+                    else -> HttpResponse.STATUS_UNDETERMINED
+                }
+                HttpResponse(status = status, error = it)
             }.getOrNull()!!
         }
 }

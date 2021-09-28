@@ -7,20 +7,6 @@ internal data class HttpRequest(
     val url: URL,
     val method: HttpMethod,
     val body: String? = null,
+    val headers: MutableMap<String, String> = mutableMapOf(),
     val language: String = Locale.getDefault().language
-) {
-
-    // default headers
-    val headers: MutableMap<String, String> = mutableMapOf(
-        "Accept-Encoding" to "gzip",
-        "Accept-Language" to language
-    )
-
-    var contentType: HttpContentType? = null
-        set(value) {
-            field = value
-            value?.let {
-                headers["Content-Type"] = it.asString
-            }
-        }
-}
+)

@@ -6,7 +6,7 @@ internal class HttpRequestFactory {
 
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
-        configuration: PaymentsConfiguration
+        configuration: PaymentsConfiguration,
     ): HttpRequest {
         val path = apiRequest.path
         val baseUrl = configuration.environment.url
@@ -16,12 +16,19 @@ internal class HttpRequestFactory {
         val body = apiRequest.body
 
         val httpRequest = HttpRequest(url, method, body)
-        if (method == HttpMethod.POST) {
-            httpRequest.contentType = HttpContentType.JSON
-        }
+
+        // default headers
+        val headers: MutableMap<String, String> = mutableMapOf(
+            "Accept-Encoding" to "gzip",
+            "Accept-Language" to httpRequest.language,
+        )
 
         val credentials = configuration.run { "$clientId:$clientSecret" }
-        httpRequest.headers["Authorization"] = "Basic ${credentials.base64encoded()}"
+        headers["Authorization"] = "Basic ${credentials.base64encoded()}"
+
+        if (method == HttpMethod.POST) {
+            headers["Content-Type"] = "application/json"
+        }
         return httpRequest
     }
 }
