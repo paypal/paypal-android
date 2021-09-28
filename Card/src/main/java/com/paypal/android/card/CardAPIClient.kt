@@ -8,19 +8,29 @@ internal class CardAPIClient(
     private val api: APIClient,
     private val requestBuilder: CardAPIRequestBuilder = CardAPIRequestBuilder()
 ) {
-    suspend fun confirmPaymentSource(orderId: String, card: Card): ConfirmPaymentSourceResult {
-        val apiRequest = requestBuilder.buildConfirmPaymentSourceRequest(orderId, card)
+    suspend fun confirmPaymentSource(orderID: String, card: Card): ConfirmPaymentSourceResult {
+        val apiRequest = requestBuilder.buildConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
         return if (httpResponse.status == HTTP_OK) {
-            val json = PayPalJSON(httpResponse.body)
-
-            val status = json.optString("status")
-            val id = json.optString("id")
-            val lastDigits = json.optString("payment_source.card.last_digits")
-            val brand = json.optString("payment_source.card.brand")
-            val type = json.optString("payment_source.card.type")
-
-            ConfirmPaymentSourceResult(response = ConfirmedPaymentSource(id, status, lastDigits, brand, type))
+            runCatching {
+                val json = PayPalJSON(httpResponse.body)
+                val status = json.getString("status")
+                val id = json.getString("id")
+                val lastDigits = json.getString("payment_source.card.last_digits")
+                val brand = json.getString("payment_source.card.brand")
+                val type = json.getString("payment_source.card.type")
+                ConfirmPaymentSourceResult(
+                    response = ConfirmedPaymentSource(
+                        id,
+                        status,
+                        lastDigits,
+                        brand,
+                        type
+                    )
+                )
+            }.recover {
+                ConfirmPaymentSourceResult(error = ConfirmPaymentSourceError())
+            }.getOrNull()!!
         } else {
             ConfirmPaymentSourceResult(error = ConfirmPaymentSourceError())
         }

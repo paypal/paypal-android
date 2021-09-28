@@ -16,7 +16,7 @@ internal class Http(
         private val TAG = Http::class.qualifiedName
     }
 
-    suspend fun send(httpRequest: HttpRequest) =
+    suspend fun send(httpRequest: HttpRequest): HttpResponse =
         withContext(dispatcher) {
             runCatching {
                 val url = httpRequest.url
@@ -45,6 +45,6 @@ internal class Http(
                 httpResponseParser.parse(connection)
             }.recover {
                 HttpResponse(status = HttpResponse.STATUS_UNKNOWN, error = it)
-            }
+            }.getOrNull()!!
         }
 }

@@ -1,12 +1,15 @@
 package com.paypal.android.core
 
+import org.json.JSONException
 import org.json.JSONObject
 
 class PayPalJSON(private val json: JSONObject) {
 
+    @Throws(JSONException::class)
     constructor(input: String?) : this(JSONObject(input ?: "{}"))
 
-    fun optString(keyPath: String): String? {
+    @Throws(JSONException::class)
+    fun getString(keyPath: String): String {
         var node: JSONObject = json
 
         val keys = keyPath.split(".").toMutableList()
@@ -14,6 +17,6 @@ class PayPalJSON(private val json: JSONObject) {
             node = node.getJSONObject(keys[0])
             keys.removeFirst()
         }
-        return node.optString(keys[0])
+        return node.getString(keys[0])
     }
 }

@@ -46,6 +46,10 @@ dependencies {
     implementation deps.kotlinxAndroidCoroutines
 
     testImplementation deps.junit
+    testImplementation deps.mockk
+    testImplementation deps.robolectric
+    testImplementation deps.kotlinxAndroidCoroutinesTest
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }
