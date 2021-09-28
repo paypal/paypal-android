@@ -14,22 +14,31 @@ import java.net.URL
 class HttpRequestFactoryUnitTest {
 
     @RunWith(ParameterizedRobolectricTestRunner::class)
-    class URLTests(private val configuration: PaymentsConfiguration, private val expected: URL, private val envName: String) {
+    class URLTests(private val configuration: PaymentsConfiguration, private val expected: URL) {
 
         companion object {
             private const val CLIENT_ID = "sample-client-id"
             private const val CLIENT_SECRET = "sample-client-secret"
 
-            private val SANDBOX_CONFIGURATION = PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.SANDBOX)
-            private val STAGING_CONFIGURATION = PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.STAGING)
-            private val LIVE_CONFIGURATION = PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.LIVE)
+            private val SANDBOX_CONFIGURATION =
+                PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.SANDBOX)
+            private val STAGING_CONFIGURATION =
+                PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.STAGING)
+            private val LIVE_CONFIGURATION =
+                PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.LIVE)
 
             @JvmStatic
-            @ParameterizedRobolectricTestRunner.Parameters(name = "{2}")
+            @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
             fun configurationScenarios() = listOf(
-                arrayOf(SANDBOX_CONFIGURATION, URL("https://api.sandbox.paypal.com/sample/path"), "Sandbox"),
-                arrayOf(STAGING_CONFIGURATION, URL("https://api.msmaster.qa.paypal.com/sample/path"), "Staging"),
-                arrayOf(LIVE_CONFIGURATION, URL("https://api.paypal.com/sample/path"), "Live")
+                arrayOf(
+                    SANDBOX_CONFIGURATION,
+                    URL("https://api.sandbox.paypal.com/sample/path")
+                ),
+                arrayOf(
+                    STAGING_CONFIGURATION,
+                    URL("https://api.msmaster.qa.paypal.com/sample/path")
+                ),
+                arrayOf(LIVE_CONFIGURATION, URL("https://api.paypal.com/sample/path"))
             )
         }
 
