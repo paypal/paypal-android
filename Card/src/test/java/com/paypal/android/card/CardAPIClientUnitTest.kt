@@ -15,7 +15,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,20 +56,6 @@ class CardAPIClientUnitTest {
     fun `it sends a confirm payment source api request`() = runBlockingTest {
         sut.confirmPaymentSource(orderID, card)
         coVerify { apiClient.send(apiRequest) }
-
-//        val apiRequestSlot = slot<APIRequest>()
-//        coEvery { apiClient.send(capture(apiRequestSlot)) }
-//
-//        sut.confirmPaymentSource(orderID, card)
-//
-//        val httpRequest = apiRequestSlot.captured
-//        assertEquals("", httpRequest.path)
-//
-//        coEvery {
-//            apiClient.send(withArg { person ->
-////                assertEquals("Sarah Jane", person.captured.name)
-//            })
-//        }
     }
 
     @Test
@@ -108,7 +96,7 @@ class CardAPIClientUnitTest {
                 "details": [
                     {
                         "issue": "INVALID_RESOURCE_ID",
-                        "description": "Specified resource ID does not exist. Please check the resource ID and try again."
+                        "description": "Specified resource ID does not exist. "
                     }
                 ],
                 "message": "The specified resource does not exist.",
