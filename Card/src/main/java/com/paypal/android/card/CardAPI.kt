@@ -6,10 +6,10 @@ import java.net.HttpURLConnection.HTTP_OK
 
 internal class CardAPI(
     private val api: API,
-    private val requestBuilder: CardAPIRequestBuilder = CardAPIRequestBuilder()
+    private val requestFactory: CardAPIRequestFactory = CardAPIRequestFactory()
 ) {
     suspend fun confirmPaymentSource(orderID: String, card: Card): ConfirmPaymentSourceResult {
-        val apiRequest = requestBuilder.buildConfirmPaymentSourceRequest(orderID, card)
+        val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
         return if (httpResponse.status == HTTP_OK) {
             runCatching {

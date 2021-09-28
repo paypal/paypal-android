@@ -3,11 +3,11 @@ package com.paypal.android.card
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 
-internal class CardAPIRequestBuilder(
+internal class CardAPIRequestFactory(
     private val dateParser: DateParser = DateParser()
 ) {
 
-    fun buildConfirmPaymentSourceRequest(orderID: String, card: Card): APIRequest {
+    fun createConfirmPaymentSourceRequest(orderID: String, card: Card): APIRequest {
         val path = "v2/checkout/orders/$orderID/confirm-payment-source"
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")

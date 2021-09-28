@@ -10,18 +10,18 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CardAPIRequestBuilderUnitTest {
+class CardAPIRequestFactoryUnitTest {
 
     private val orderID = "sample-order-id"
     private val card = Card("4111 1111 1111 1111", "01/22", "123")
 
     private val dateParser = mockk<DateParser>()
 
-    private lateinit var sut: CardAPIRequestBuilder
+    private lateinit var sut: CardAPIRequestFactory
 
     @Before
     fun beforeEach() {
-        sut = CardAPIRequestBuilder(dateParser)
+        sut = CardAPIRequestFactory(dateParser)
     }
 
     @Test
@@ -29,7 +29,7 @@ class CardAPIRequestBuilderUnitTest {
         val cardExpiry = CardExpiry("01", "2022")
         every { dateParser.parseCardExpiry("01/22") } returns cardExpiry
 
-        val apiRequest = sut.buildConfirmPaymentSourceRequest(orderID, card)
+        val apiRequest = sut.createConfirmPaymentSourceRequest(orderID, card)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
         val json = JSONObject(apiRequest.body!!)

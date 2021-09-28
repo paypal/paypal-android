@@ -28,7 +28,7 @@ import org.robolectric.RobolectricTestRunner
 class CardAPIUnitTest {
 
     private val apiClient = mockk<API>(relaxed = true)
-    private val requestBuilder = mockk<CardAPIRequestBuilder>()
+    private val requestBuilder = mockk<CardAPIRequestFactory>()
 
     private val card = Card()
     private val orderID = "sample-order-id"
@@ -41,7 +41,7 @@ class CardAPIUnitTest {
     @Before
     fun beforeEach() {
         sut = CardAPI(apiClient, requestBuilder)
-        every { requestBuilder.buildConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
+        every { requestBuilder.createConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
