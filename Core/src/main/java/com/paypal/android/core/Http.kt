@@ -18,30 +18,33 @@ internal class Http(
 
     suspend fun send(httpRequest: HttpRequest) =
         withContext(dispatcher) {
+            runCatching {
+                val url = httpRequest.url
+                val connection = url.openConnection() as HttpURLConnection
 
-            val url = httpRequest.url
-            val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = httpRequest.method.name
 
-            connection.requestMethod = httpRequest.method.name
-
-            // add headers
-            for ((key, value) in httpRequest.headers) {
-                connection.addRequestProperty(key, value)
-            }
-
-            if (httpRequest.method == HttpMethod.POST) {
-                try {
-                    connection.doOutput = true
-                    connection.outputStream.write(httpRequest.body?.toByteArray())
-                    connection.outputStream.flush()
-                    connection.outputStream.close()
-                } catch (e: IOException) {
-                    Log.d(TAG, "Error closing connection output stream:")
-                    Log.d(TAG, e.stackTrace.toString())
+                // add headers
+                for ((key, value) in httpRequest.headers) {
+                    connection.addRequestProperty(key, value)
                 }
-            }
 
-            connection.connect()
-            httpResponseParser.parse(connection)
+                if (httpRequest.method == HttpMethod.POST) {
+                    try {
+                        connection.doOutput = true
+                        connection.outputStream.write(httpRequest.body?.toByteArray())
+                        connection.outputStream.flush()
+                        connection.outputStream.close()
+                    } catch (e: IOException) {
+                        Log.d(TAG, "Error closing connection output stream:")
+                        Log.d(TAG, e.stackTrace.toString())
+                    }
+                }
+
+                connection.connect()
+                httpResponseParser.parse(connection)
+            }.recover {
+                HttpResponse(status = HttpResponse.STATUS_UNKNOWN, error = it)
+            }
         }
 }

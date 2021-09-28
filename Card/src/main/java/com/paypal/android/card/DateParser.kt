@@ -1,6 +1,6 @@
 package com.paypal.android.card
 
-class DateParser {
+internal class DateParser {
 
     fun parseCardExpiry(input: String): CardExpiry {
         val parsedSecurityCode = input.split("/")
