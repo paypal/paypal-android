@@ -3,7 +3,7 @@ package com.paypal.android.core
 import java.net.URL
 import java.util.Locale
 
-data class HttpRequest(
+internal data class HttpRequest(
     val url: URL,
     val method: HttpMethod,
     val body: String? = null,

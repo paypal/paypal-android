@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.HttpURLConnection
 
-class Http(
+internal class Http(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val httpResponseParser: HttpResponseParser = HttpResponseParser()
 ) {

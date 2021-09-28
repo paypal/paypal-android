@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
  */
 class CardClient internal constructor(private val cardAPI: CardAPIClient) {
 
-    constructor(configuration: PaymentsConfiguration):
-        this(CardAPIClient(APIClient(configuration)))
+    constructor(configuration: PaymentsConfiguration) :
+            this(CardAPIClient(APIClient(configuration)))
 
     /**
      * Confirm [Card] payment source for an order.
@@ -21,7 +21,11 @@ class CardClient internal constructor(private val cardAPI: CardAPIClient) {
      * @param card The card to use for approval
      * @param completion A completion handler for receiving a [ConfirmPaymentSourceResult]
      */
-    fun confirmPaymentSource(orderID: String, card: Card, completion: (ConfirmPaymentSourceResult) -> Unit) {
+    fun confirmPaymentSource(
+        orderID: String,
+        card: Card,
+        completion: (ConfirmPaymentSourceResult) -> Unit
+    ) {
         CoroutineScope(Dispatchers.Main).launch {
             val cardResult = cardAPI.confirmPaymentSource(orderID, card)
             completion(cardResult)

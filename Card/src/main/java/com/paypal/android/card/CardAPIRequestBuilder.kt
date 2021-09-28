@@ -3,7 +3,7 @@ package com.paypal.android.card
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 
-class CardAPIRequestBuilder {
+internal class CardAPIRequestBuilder {
 
     fun buildConfirmPaymentSourceRequest(orderID: String, card: Card): APIRequest {
         val path = "v2/checkout/orders/$orderID/confirm-payment-source"

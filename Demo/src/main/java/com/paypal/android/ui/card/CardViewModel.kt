@@ -71,11 +71,11 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "Environment = $environment")
 
         val orderID = _orderID.value ?: ""
-
-        val cardNumber = _cardNumber.value ?: ""
-        val expirationDate = _expirationDate.value ?: ""
-        val securityCode = _securityCode.value ?: ""
-        val card = Card(cardNumber, expirationDate, securityCode)
+        val card = Card().apply {
+            number = _cardNumber.value ?: ""
+            expirationDate = _expirationDate.value ?: ""
+            securityCode = _securityCode.value ?: ""
+        }
 
         cardClient.confirmPaymentSource(orderID, card) { result ->
             if (result.response != null) {

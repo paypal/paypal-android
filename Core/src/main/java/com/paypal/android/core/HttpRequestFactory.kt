@@ -2,7 +2,7 @@ package com.paypal.android.core
 
 import java.net.URL
 
-class HttpRequestFactory {
+internal class HttpRequestFactory {
 
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,

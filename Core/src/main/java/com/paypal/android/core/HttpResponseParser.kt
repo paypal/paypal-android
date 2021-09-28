@@ -7,7 +7,7 @@ import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
 
-class HttpResponseParser {
+internal class HttpResponseParser {
 
     companion object {
         private const val EOF = -1

@@ -4,7 +4,7 @@ import com.paypal.android.core.APIClient
 import com.paypal.android.core.PayPalJSON
 import java.net.HttpURLConnection.HTTP_OK
 
-class CardAPIClient(
+internal class CardAPIClient(
     private val api: APIClient,
     private val requestBuilder: CardAPIRequestBuilder = CardAPIRequestBuilder()
 ) {
