@@ -26,9 +26,6 @@ class CardViewModel @Inject constructor (
         private val TAG = CardViewModel::class.qualifiedName
     }
 
-    private val _orderID = MutableLiveData("")
-    val orderID: LiveData<String> = _orderID
-
     private val _cardNumber = MutableLiveData("")
     val cardNumber: LiveData<String> = _cardNumber
 
@@ -44,10 +41,6 @@ class CardViewModel @Inject constructor (
     private val configuration =
         PaymentsConfiguration(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
-
-    fun onOrderIDChange(newOrderId: String) {
-        _orderID.value = newOrderId
-    }
 
     fun onCardNumberChange(newCardNumber: String) {
         _cardNumber.value = CardFormatter.formatCardNumber(newCardNumber, _cardNumber.value ?: "")
@@ -70,7 +63,7 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "${securityCode.value}")
         Log.d(TAG, "Environment = $environment")
 
-        val orderID = _orderID.value ?: ""
+        val orderID = "4X773848H4207832N"
         val card = Card().apply {
             number = _cardNumber.value ?: ""
             expirationDate = _expirationDate.value ?: ""
