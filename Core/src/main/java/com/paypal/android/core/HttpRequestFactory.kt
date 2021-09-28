@@ -3,7 +3,7 @@ package com.paypal.android.core
 import java.net.URL
 import java.util.Locale
 
-internal class HttpRequestFactory(private val locale: Locale = Locale.getDefault()) {
+internal class HttpRequestFactory(private val language: String = Locale.getDefault().language) {
 
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
@@ -19,7 +19,7 @@ internal class HttpRequestFactory(private val locale: Locale = Locale.getDefault
         // default headers
         val headers: MutableMap<String, String> = mutableMapOf(
             "Accept-Encoding" to "gzip",
-            "Accept-Language" to locale.language
+            "Accept-Language" to language
         )
 
         val credentials = configuration.run { "$clientId:$clientSecret" }
