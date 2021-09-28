@@ -1,8 +1,9 @@
 package com.paypal.android.core
 
 import java.net.URL
+import java.util.Locale
 
-internal class HttpRequestFactory {
+internal class HttpRequestFactory(private val locale: Locale = Locale.getDefault()) {
 
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
@@ -15,12 +16,10 @@ internal class HttpRequestFactory {
         val method = apiRequest.method
         val body = apiRequest.body
 
-        val httpRequest = HttpRequest(url, method, body)
-
         // default headers
         val headers: MutableMap<String, String> = mutableMapOf(
             "Accept-Encoding" to "gzip",
-            "Accept-Language" to httpRequest.language,
+            "Accept-Language" to locale.language
         )
 
         val credentials = configuration.run { "$clientId:$clientSecret" }
@@ -29,6 +28,6 @@ internal class HttpRequestFactory {
         if (method == HttpMethod.POST) {
             headers["Content-Type"] = "application/json"
         }
-        return httpRequest
+        return HttpRequest(url, method, body, headers)
     }
 }
