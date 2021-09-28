@@ -3,18 +3,16 @@ package com.paypal.android.card
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 
-internal class CardAPIRequestBuilder {
+internal class CardAPIRequestBuilder(
+    private val dateParser: DateParser = DateParser()
+) {
 
     fun buildConfirmPaymentSourceRequest(orderID: String, card: Card): APIRequest {
         val path = "v2/checkout/orders/$orderID/confirm-payment-source"
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
-        val expirationDate = card.run {
-            val parsedSecurityCode = expirationDate.split("/")
-            val month = parsedSecurityCode[0]
-            val year = parsedSecurityCode[1]
-            "20$year-$month"
-        }
+        val cardExpiry = dateParser.parseCardExpiry(card.expirationDate)
+        val expirationDate = "${cardExpiry.year}-${cardExpiry.month}"
 
         val body = """
             {
