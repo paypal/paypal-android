@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/paymentMethodsFragment">
+
+    <fragment
+        android:id="@+id/paymentMethodsFragment"
+        android:name="com.paypal.android.ui.PaymentMethodsFragment"
+        android:label="PaymentMethodsFragment">
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_cardFragment"
+            app:destination="@id/cardFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalFragment"
+            app:destination="@id/payPalFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/cardFragment"
+        android:name="com.paypal.android.ui.card.CardFragment"
+        android:label="CardFragment" />
+    <fragment
+        android:id="@+id/payPalFragment"
+        android:name="com.paypal.android.ui.paypal.PayPalFragment"
+        android:label="PayPalFragment" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.paypal.android.ui.SettingsFragment"
+        android:label="SettingsFragment" />
+</navigation>

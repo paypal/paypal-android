@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'androidx.navigation.safeargs.kotlin'
 }
 
 android {
@@ -62,6 +63,9 @@ dependencies {
     implementation deps.composeRuntimeLivedata
     implementation deps.composeFoundation
     implementation deps.composeMaterial
+    implementation deps.navigationFragment
+    implementation deps.navigationUI
+    implementation deps.preference
 
     // Networking
     implementation deps.retrofit
