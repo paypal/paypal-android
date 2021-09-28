@@ -4,8 +4,8 @@ internal class DateParser {
 
     fun parseCardExpiry(input: String): CardExpiry {
         val parsedSecurityCode = input.split("/")
-        val month = "20${parsedSecurityCode[0]}"
-        val year = parsedSecurityCode[1]
+        val month = parsedSecurityCode[0]
+        val year = "20${parsedSecurityCode[1]}"
         return CardExpiry(month, year)
     }
 }
