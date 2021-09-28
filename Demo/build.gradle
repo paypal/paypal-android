@@ -63,6 +63,13 @@ dependencies {
     implementation deps.composeFoundation
     implementation deps.composeMaterial
 
+    // Networking
+    implementation deps.retrofit
+    implementation deps.gson
+
+    // Dependency Injection
+    implementation deps.koin
+
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
