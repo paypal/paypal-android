@@ -67,11 +67,8 @@ dependencies {
     implementation deps.navigationUI
     implementation deps.preference
 
-    // Networking
     implementation deps.retrofit
     implementation deps.gson
-
-    // Dependency Injection
     implementation deps.koin
 
     testImplementation deps.junit

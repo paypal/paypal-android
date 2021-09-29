@@ -10,7 +10,6 @@ val apiModule = module {
     single {
         provideApi<PayPalDemoApi>(RetrofitClient.instance)
     }
-
 }
 
 inline fun <reified T> provideApi(retrofit: Retrofit): T {

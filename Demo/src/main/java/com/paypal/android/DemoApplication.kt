@@ -6,7 +6,7 @@ import com.paypal.android.di.networkModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
-class DemoApplication: Application() {
+class DemoApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()

@@ -5,8 +5,6 @@ import okhttp3.OkHttpClient
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
-private const val AUTH_HEADER_VALUE_START = "Token "
-
 private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
@@ -32,8 +30,4 @@ private fun initHttpClientAndInterceptor(): OkHttpClient {
         .writeTimeout(WRITE_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
 
     return okHttpBuilder.build()
-}
-
-private fun prepareTokenHeaderValue(token: String): String {
-    return AUTH_HEADER_VALUE_START + token
 }
