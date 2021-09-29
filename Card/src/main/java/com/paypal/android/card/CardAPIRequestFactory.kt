@@ -11,15 +11,17 @@ internal class CardAPIRequestFactory(
         val path = "v2/checkout/orders/$orderID/confirm-payment-source"
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
-        val cardExpiry = dateParser.parseCardExpiry(card.expirationDate)
-        val expirationDate = "${cardExpiry.year}-${cardExpiry.month}"
+        val expirationDate = dateParser.parseExpirationDate(card.expirationDate)
+
+        val monthString = "%02d".format(expirationDate.month)
+        val cardExpiry = "${expirationDate.year}-$monthString"
 
         val body = """
             {
                 "payment_source": {
                     "card": {
                         "number": "$cardNumber",
-                        "expiry": "$expirationDate",
+                        "expiry": "$cardExpiry",
                         "security_code": "${card.securityCode}"
                     }
                 }

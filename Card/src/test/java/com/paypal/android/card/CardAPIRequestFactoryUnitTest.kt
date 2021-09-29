@@ -26,8 +26,8 @@ class CardAPIRequestFactoryUnitTest {
 
     @Test
     fun `it builds a confirm payment source request`() {
-        val cardExpiry = CardExpiry("01", "2022")
-        every { dateParser.parseCardExpiry("01/22") } returns cardExpiry
+        val cardExpiry = ExpirationDate(1, 2022)
+        every { dateParser.parseExpirationDate("01/22") } returns cardExpiry
 
         val apiRequest = sut.createConfirmPaymentSourceRequest(orderID, card)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
