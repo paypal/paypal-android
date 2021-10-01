@@ -19,7 +19,9 @@ import androidx.preference.PreferenceManager
 import com.paypal.android.R
 import com.paypal.android.data.PreferenceConstants
 import com.paypal.android.ui.theme.DemoTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CardFragment : Fragment() {
 
     private val cardViewModel: CardViewModel by viewModels()
