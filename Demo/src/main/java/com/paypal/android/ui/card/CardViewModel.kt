@@ -5,11 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.Amount
-import com.paypal.android.api.model.CreateOrderRequest
-import com.paypal.android.api.model.Payee
-import com.paypal.android.api.model.PurchaseUnit
+import com.paypal.android.BuildConfig
+import com.paypal.android.api.model.*
 import com.paypal.android.api.services.PayPalDemoApi
+import com.paypal.android.card.Card
+import com.paypal.android.card.CardClient
+import com.paypal.android.core.PaymentsConfiguration
 import com.paypal.android.data.card.PrefillCardData
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
@@ -63,44 +64,43 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "${securityCode.value}")
         Log.d(TAG, "Environment = $environment")
 
-        val orderID = "4X773848H4207832N"
         val card = Card().apply {
             number = _cardNumber.value ?: ""
             expirationDate = _expirationDate.value ?: ""
             securityCode = _securityCode.value ?: ""
         }
 
-        cardClient.confirmPaymentSource(orderID, card) { result ->
-            if (result.response != null) {
-                Log.e("DemoActivity", "SUCCESS")
-                Log.e("DemoActivity", "${result.response!!.lastDigits}")
-            } else {
-                Log.e("DemoActivity", "ERRRORRRR")
+        viewModelScope.launch {
+            val order = fetchOrder()
+            cardClient.confirmPaymentSource(order.id!!, card) { result ->
+                if (result.response != null) {
+                    Log.e("DemoActivity", "SUCCESS")
+                    Log.e("DemoActivity", "${result.response!!.lastDigits}")
+                } else {
+                    Log.e("DemoActivity", "ERRRORRRR")
+                }
             }
         }
     }
 
-    private fun fetchOrderId() {
-        viewModelScope.launch {
-            val order = payPalDemoApi.fetchOrderId(
-                countryCode = "CO",
-                orderRequest = CreateOrderRequest(
-                    intent = "CAPTURE",
-                    purchaseUnit = listOf(
-                        PurchaseUnit(
-                            amount = Amount(
-                                currencyCode = "USD",
-                                value = "10.99"
-                            )
+    private suspend fun fetchOrder(): Order {
+        return payPalDemoApi.fetchOrderId(
+            countryCode = "CO",
+            orderRequest = CreateOrderRequest(
+                intent = "CAPTURE",
+                purchaseUnit = listOf(
+                    PurchaseUnit(
+                        amount = Amount(
+                            currencyCode = "USD",
+                            value = "10.99"
                         )
-                    ),
-                    payee = Payee(
-                        emailAddress = "anpelaez@paypal.com"
                     )
+                ),
+                payee = Payee(
+                    emailAddress = "anpelaez@paypal.com"
                 )
             )
-            Log.d(TAG, "$order")
-        }
+        )
     }
 
     fun onPrefillCardSelected(cardName: String) {
