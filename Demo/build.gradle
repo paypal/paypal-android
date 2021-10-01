@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'androidx.navigation.safeargs.kotlin'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -66,6 +68,12 @@ dependencies {
     implementation deps.navigationFragment
     implementation deps.navigationUI
     implementation deps.preference
+
+    implementation deps.retrofit
+    implementation deps.gson
+
+    implementation deps.hilt
+    kapt deps.hiltKapt
 
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit

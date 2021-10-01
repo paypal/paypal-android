@@ -7,7 +7,9 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.preference.PreferenceManager
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DemoActivity : AppCompatActivity() {
 
     private lateinit var navHostFragment: NavHostFragment

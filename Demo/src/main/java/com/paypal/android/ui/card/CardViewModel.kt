@@ -4,11 +4,23 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.paypal.android.api.model.Amount
+import com.paypal.android.api.model.CreateOrderRequest
+import com.paypal.android.api.model.Payee
+import com.paypal.android.api.model.PurchaseUnit
+import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.data.card.PrefillCardData
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CardViewModel : ViewModel() {
+@HiltViewModel
+class CardViewModel @Inject constructor (
+    private val payPalDemoApi: PayPalDemoApi
+) : ViewModel() {
 
     private val _cardNumber = MutableLiveData("")
     val cardNumber: LiveData<String> = _cardNumber
@@ -44,6 +56,30 @@ class CardViewModel : ViewModel() {
         Log.d(TAG, "Environment = $environment")
 
         // Invoke Card SDK
+        fetchOrderId()
+    }
+
+    private fun fetchOrderId() {
+        viewModelScope.launch {
+            val order = payPalDemoApi.fetchOrderId(
+                countryCode = "CO",
+                orderRequest = CreateOrderRequest(
+                    intent = "CAPTURE",
+                    purchaseUnit = listOf(
+                        PurchaseUnit(
+                            amount = Amount(
+                                currencyCode = "USD",
+                                value = "10.99"
+                            )
+                        )
+                    ),
+                    payee = Payee(
+                        emailAddress = "anpelaez@paypal.com"
+                    )
+                )
+            )
+            Log.d(TAG, "$order")
+        }
     }
 
     fun onPrefillCardSelected(cardName: String) {
