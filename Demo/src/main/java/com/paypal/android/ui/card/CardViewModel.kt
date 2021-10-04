@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CardViewModel @Inject constructor (
+class CardViewModel @Inject constructor(
     private val payPalDemoApi: PayPalDemoApi
 ) : ViewModel() {
 
@@ -68,9 +68,13 @@ class CardViewModel @Inject constructor (
         Log.d(TAG, "${securityCode.value}")
         Log.d(TAG, "Environment = $environment")
 
+        val (monthString, yearString) =
+            _expirationDate.value?.split("/") ?: listOf("", "")
+
         val card = Card().apply {
             number = _cardNumber.value ?: ""
-            expirationDate = _expirationDate.value ?: ""
+            expirationMonth = monthString
+            expirationYear = yearString
             securityCode = _securityCode.value ?: ""
         }
 
@@ -110,7 +114,7 @@ class CardViewModel @Inject constructor (
     fun onPrefillCardSelected(cardName: String) {
         autoFillCards.find { it.first == cardName }?.second?.apply {
             _cardNumber.value = CardFormatter.formatCardNumber(number)
-            _expirationDate.value = expirationDate
+            _expirationDate.value = "$expirationMonth/$expirationYear"
             _securityCode.value = securityCode
         }
     }

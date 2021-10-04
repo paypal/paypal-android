@@ -15,7 +15,7 @@ class CardAPIRequestFactoryUnitTest {
     private val orderID = "sample-order-id"
     private val card = Card("4111 1111 1111 1111", "01/22", "123")
 
-    private val dateParser = mockk<DateParser>()
+    private val dateParser = mockk<com.paypal.android.ui.card.DateParser>()
 
     private lateinit var sut: CardAPIRequestFactory
 
@@ -26,7 +26,7 @@ class CardAPIRequestFactoryUnitTest {
 
     @Test
     fun `it builds a confirm payment source request`() {
-        val cardExpiry = ExpirationDate(1, 2022)
+        val cardExpiry = com.paypal.android.ui.card.ExpirationDate(1, 2022)
         every { dateParser.parseExpirationDate("01/22") } returns cardExpiry
 
         val apiRequest = sut.createConfirmPaymentSourceRequest(orderID, card)

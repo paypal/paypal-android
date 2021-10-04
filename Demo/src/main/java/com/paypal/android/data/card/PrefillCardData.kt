@@ -8,17 +8,20 @@ object PrefillCardData {
         listOf(
             "Visa" to Card(
                 number = "4111111111111111",
-                expirationDate = "01/26",
+                expirationMonth = "01",
+                expirationYear = "2026",
                 securityCode = "123"
             ),
             "3DS2" to Card(
                 number = "4000000000001091",
-                expirationDate = "01/26",
+                expirationMonth = "01",
+                expirationYear = "2026",
                 securityCode = "123"
             ),
             "3DS1" to Card(
                 number = "4000000000000002",
-                expirationDate = "01/26",
+                expirationMonth = "01",
+                expirationYear = "2026",
                 securityCode = "123"
             )
         )
