@@ -1,6 +1,9 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.API
+import com.paypal.android.core.OrderData
+import com.paypal.android.core.OrderError
+import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PaymentsJSON
 import java.net.HttpURLConnection.HTTP_OK
 
@@ -16,23 +19,12 @@ internal class CardAPI(
                 val json = PaymentsJSON(httpResponse.body)
                 val status = json.getString("status")
                 val id = json.getString("id")
-                val lastDigits = json.getString("payment_source.card.last_digits")
-                val brand = json.getString("payment_source.card.brand")
-                val type = json.getString("payment_source.card.type")
-                ConfirmPaymentSourceResult(
-                    response = ConfirmedPaymentSource(
-                        id,
-                        status,
-                        lastDigits,
-                        brand,
-                        type
-                    )
-                )
+                ConfirmPaymentSourceResult(response = OrderData(id, OrderStatus.valueOf(status)))
             }.recover {
-                ConfirmPaymentSourceResult(error = ConfirmPaymentSourceError())
+                ConfirmPaymentSourceResult(error = OrderError())
             }.getOrNull()!!
         } else {
-            ConfirmPaymentSourceResult(error = ConfirmPaymentSourceError())
+            ConfirmPaymentSourceResult(error = OrderError())
         }
     }
 }

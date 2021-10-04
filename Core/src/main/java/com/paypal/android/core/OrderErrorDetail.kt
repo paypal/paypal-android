@@ -1,6 +1,6 @@
-package com.paypal.android.card
+package com.paypal.android.core
 
-data class ConfirmPaymentSourceErrorDetail(
+data class OrderErrorDetail(
     val field: String?,
     val location: String?,
     val issue: String?,

@@ -4,6 +4,7 @@ import com.paypal.android.core.API
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.HttpResponse
+import com.paypal.android.core.OrderStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -16,8 +17,8 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -81,10 +82,7 @@ class CardAPIUnitTest {
 
         val confirmedPaymentSource = result.response
         assertEquals("testOrderID", confirmedPaymentSource?.orderID)
-        assertEquals("APPROVED", confirmedPaymentSource?.status)
-        assertEquals("7321", confirmedPaymentSource?.lastDigits)
-        assertEquals("VISA", confirmedPaymentSource?.brand)
-        assertEquals("CREDIT", confirmedPaymentSource?.type)
+        assertEquals(OrderStatus.APPROVED, confirmedPaymentSource?.status)
     }
 
     @Test

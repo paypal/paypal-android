@@ -79,7 +79,7 @@ class CardViewModel @Inject constructor (
             cardClient.confirmPaymentSource(order.id!!, card) { result ->
                 if (result.response != null) {
                     Log.e("DemoActivity", "SUCCESS")
-                    Log.e("DemoActivity", "${result.response!!.lastDigits}")
+                    Log.e("DemoActivity", "${result.response!!.status}")
                 } else {
                     Log.e("DemoActivity", "ERRRORRRR")
                 }
