@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdkVersion 31
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion modules.androidTargetVersion
+        versionCode modules.sdkVersionCode
+        versionName modules.sdkVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            version = android.defaultConfig.versionName
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+}
+
+dependencies {
+    api project(':Core')
+    //implementation 'org.jfrog.cardinalcommerce.gradle:cardinalmobilesdk:2.2.4-1'
+
+
+    implementation 'com.paypal.checkout:android-sdk:0.5.0'
+
+    implementation deps.kotlinStdLib
+    implementation deps.androidxCoreKtx
+    implementation deps.androidxAppcompat
+
+    testImplementation deps.junit
+    androidTestImplementation deps.androidxJUnit
+    androidTestImplementation deps.androidxEspressoCore
+}
+
+project.ext.name = "checkout"
+project.ext.pom_name = "PayPal SDK - Checkout"
+project.ext.pom_desc = "Library for PayPal checkout"
+
+apply from: rootProject.file("gradle/gradle-publish.gradle")

@@ -68,6 +68,14 @@ allprojects {
         google()
         mavenCentral()
         mavenLocal()
+
+        maven {
+            url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
+            credentials {
+                username cardinalUsername
+                password cardinalPassword
+            }
+        }
     }
 }
 
@@ -85,6 +93,7 @@ detekt {
     input = files(
             "Core/src",
             "Card/src",
+            "PayPalCheckout/src",
             "Demo/src"
     )
     autoCorrect = project.hasProperty('detektAutoCorrect')
