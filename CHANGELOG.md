@@ -4,8 +4,10 @@
 
 * Card
   * Add `CardClient`
-  * Add `ConfirmPaymentSourceError`
-  * Add `ConfirmPaymentSourceErrorDetail`
   * Add `ConfirmPaymentSourceResult`
-  * Add `ConfirmedPaymentSource`
+* Core
+  * Add `OrderData`
+  * Add `OrderError`
+  * Add `OrderErrorDetail`
+  * Add `OrderStatus`
 
