@@ -31,7 +31,7 @@ internal class CardAPI(
 
             val errorDetails = mutableListOf<OrderErrorDetail>()
             val errorDetailsJson = json.getJSONArray("details")
-            for (i in 0..errorDetailsJson.length()) {
+            for (i in 0 until errorDetailsJson.length()) {
                 val errorJson = errorDetailsJson.getJSONObject(i)
                 val issue = errorJson.getString("issue")
                 val description = errorJson.getString("description")
