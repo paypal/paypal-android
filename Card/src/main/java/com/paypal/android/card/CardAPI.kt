@@ -3,6 +3,7 @@ package com.paypal.android.card
 import com.paypal.android.core.API
 import com.paypal.android.core.OrderData
 import com.paypal.android.core.OrderError
+import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PaymentsJSON
 import java.net.HttpURLConnection.HTTP_OK
@@ -21,10 +22,23 @@ internal class CardAPI(
                 val id = json.getString("id")
                 ConfirmPaymentSourceResult(response = OrderData(id, OrderStatus.valueOf(status)))
             }.recover {
-                ConfirmPaymentSourceResult(error = OrderError())
+                ConfirmPaymentSourceResult(error = OrderError("PARSING_ERROR", "Error parsing json response."))
             }.getOrNull()!!
         } else {
-            ConfirmPaymentSourceResult(error = OrderError())
+            val json = PaymentsJSON(httpResponse.body)
+            val name = json.getString("name")
+            val message = json.getString("message")
+
+            val errorDetails = mutableListOf<OrderErrorDetail>()
+            val errorDetailsJson = json.getJSONArray("details")
+            for (i in 0..errorDetailsJson.length()) {
+                val errorJson = errorDetailsJson.getJSONObject(i)
+                val issue = errorJson.getString("issue")
+                val description = errorJson.getString("description")
+                errorDetails += OrderErrorDetail(issue, description)
+            }
+
+            ConfirmPaymentSourceResult(error = OrderError(name, message, errorDetails))
         }
     }
 }

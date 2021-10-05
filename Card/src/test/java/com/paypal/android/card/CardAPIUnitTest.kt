@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
@@ -55,6 +54,9 @@ class CardAPIUnitTest {
 
     @Test
     fun `it sends a confirm payment source api request`() = runBlockingTest {
+        val httpResponse = HttpResponse(200)
+        coEvery { apiClient.send(apiRequest) } returns httpResponse
+
         sut.confirmPaymentSource(orderID, card)
         coVerify { apiClient.send(apiRequest) }
     }
@@ -94,7 +96,7 @@ class CardAPIUnitTest {
                 "details": [
                     {
                         "issue": "INVALID_RESOURCE_ID",
-                        "description": "Specified resource ID does not exist. "
+                        "description": "Specified resource ID does not exist."
                     }
                 ],
                 "message": "The specified resource does not exist.",
@@ -106,7 +108,12 @@ class CardAPIUnitTest {
 
         val result = sut.confirmPaymentSource(orderID, card)
         assertNull(result.response)
-        assertNotNull(result.error)
+        assertEquals("RESOURCE_NOT_FOUND", result.error!!.name)
+        assertEquals("The specified resource does not exist.", result.error!!.message)
+
+        val firstErrorDetail = result.error!!.details.first()
+        assertEquals("INVALID_RESOURCE_ID", firstErrorDetail.issue)
+        assertEquals("Specified resource ID does not exist.", firstErrorDetail.description)
     }
 
     @Test
@@ -122,6 +129,7 @@ class CardAPIUnitTest {
 
         val result = sut.confirmPaymentSource(orderID, card)
         assertNull(result.response)
-        assertNotNull(result.error)
+        assertEquals("PARSING_ERROR", result.error!!.name)
+        assertEquals("Error parsing json response.", result.error!!.message)
     }
 }

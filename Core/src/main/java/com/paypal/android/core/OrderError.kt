@@ -1,7 +1,7 @@
 package com.paypal.android.core
 
 data class OrderError(
-    val name: String? = null,
-    val details: List<OrderErrorDetail>? = null,
-    val message: String? = null
+    val name: String,
+    val message: String,
+    val details: List<OrderErrorDetail> = emptyList()
 )
