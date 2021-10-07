@@ -2,6 +2,7 @@ package com.paypal.android.card
 
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
+import org.json.JSONObject
 
 internal class CardAPIRequestFactory {
 
@@ -11,17 +12,16 @@ internal class CardAPIRequestFactory {
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
 
-        val body = """
-            {
-                "payment_source": {
-                    "card": {
-                        "number": "$cardNumber",
-                        "expiry": "$cardExpiry",
-                        "security_code": "${card.securityCode}"
-                    }
-                }
-            }
-        """.trimIndent()
+        val cardJSON = JSONObject()
+            .put("number", cardNumber)
+            .put("expiry", cardExpiry)
+
+        card.securityCode?.let { cardJSON.put("security_code", it) }
+
+        val paymentSourceJSON = JSONObject().put("card", cardJSON)
+        val bodyJSON = JSONObject().put("payment_source", paymentSourceJSON)
+        val body = bodyJSON.toString()
+
         return APIRequest(path, HttpMethod.POST, body)
     }
 }
