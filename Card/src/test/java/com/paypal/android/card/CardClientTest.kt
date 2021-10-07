@@ -45,7 +45,7 @@ class CardClientTest {
         } returns confirmPaymentSourceResult
 
         lateinit var capturedResult: ConfirmPaymentSourceResult
-        sut.confirmPaymentSource(orderID, card) { capturedResult = it }
+        sut.approveOrder(orderID, card) { capturedResult = it }
 
         assertSame(capturedResult, confirmPaymentSourceResult)
     }

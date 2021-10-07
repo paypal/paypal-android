@@ -27,7 +27,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardAPIUnitTest {
 
-    private val apiClient = mockk<API>(relaxed = true)
+    private val api = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<CardAPIRequestFactory>()
 
     private val card = Card()
@@ -40,7 +40,7 @@ class CardAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = CardAPI(apiClient, requestBuilder)
+        sut = CardAPI(api, requestBuilder)
         every { requestBuilder.createConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
 
         Dispatchers.setMain(testCoroutineDispatcher)
@@ -55,10 +55,10 @@ class CardAPIUnitTest {
     @Test
     fun `it sends a confirm payment source api request`() = runBlockingTest {
         val httpResponse = HttpResponse(200)
-        coEvery { apiClient.send(apiRequest) } returns httpResponse
+        coEvery { api.send(apiRequest) } returns httpResponse
 
         sut.confirmPaymentSource(orderID, card)
-        coVerify { apiClient.send(apiRequest) }
+        coVerify { api.send(apiRequest) }
     }
 
     @Test
@@ -78,7 +78,7 @@ class CardAPIUnitTest {
             }
         """
         val httpResponse = HttpResponse(200, body)
-        coEvery { apiClient.send(apiRequest) } returns httpResponse
+        coEvery { api.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(orderID, card)
 
@@ -104,7 +104,7 @@ class CardAPIUnitTest {
             }
         """
         val httpResponse = HttpResponse(404, body)
-        coEvery { apiClient.send(apiRequest) } returns httpResponse
+        coEvery { api.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(orderID, card)
         assertNull(result.response)
@@ -125,7 +125,7 @@ class CardAPIUnitTest {
             }
         """
         val httpResponse = HttpResponse(200, body)
-        coEvery { apiClient.send(apiRequest) } returns httpResponse
+        coEvery { api.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(orderID, card)
         assertNull(result.response)

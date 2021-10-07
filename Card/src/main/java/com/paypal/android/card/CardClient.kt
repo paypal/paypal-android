@@ -25,7 +25,7 @@ class CardClient internal constructor(
      * @param card The card to use for approval
      * @param completion A completion handler for receiving a [ConfirmPaymentSourceResult]
      */
-    fun confirmPaymentSource(
+    fun approveOrder(
         orderID: String,
         card: Card,
         completion: (ConfirmPaymentSourceResult) -> Unit

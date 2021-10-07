@@ -80,7 +80,7 @@ class CardViewModel @Inject constructor(
 
         viewModelScope.launch {
             val order = fetchOrder()
-            cardClient.confirmPaymentSource(order.id!!, card) { result ->
+            cardClient.approveOrder(order.id!!, card) { result ->
                 result.response?.let { response ->
                     Log.d(TAG, "SUCCESS")
                     Log.d(TAG, "${response.status}")
