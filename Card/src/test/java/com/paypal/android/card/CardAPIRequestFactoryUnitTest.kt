@@ -24,6 +24,7 @@ class CardAPIRequestFactoryUnitTest {
     @Test
     fun `it builds a confirm payment source request`() {
         val card = Card(
+            name = "Cardholder Name",
             number = "4111111111111111",
             expirationMonth = "01",
             expirationYear = "2022",
@@ -46,6 +47,7 @@ class CardAPIRequestFactoryUnitTest {
             {
               "payment_source": {
                 "card": {
+                  "name": "Cardholder Name",
                   "number": "4111111111111111",
                   "expiry": "2022-01",
                   "security_code": "123",

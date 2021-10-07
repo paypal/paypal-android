@@ -7,8 +7,6 @@ import org.json.JSONObject
 internal class CardAPIRequestFactory {
 
     fun createConfirmPaymentSourceRequest(orderID: String, card: Card): APIRequest {
-        val path = "v2/checkout/orders/$orderID/confirm-payment-source"
-
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
 
@@ -16,6 +14,7 @@ internal class CardAPIRequestFactory {
             .put("number", cardNumber)
             .put("expiry", cardExpiry)
 
+        card.name?.let { cardJSON.put("name", it) }
         card.securityCode?.let { cardJSON.put("security_code", it) }
 
         card.billingAddress?.let { billingAddress ->
@@ -33,6 +32,7 @@ internal class CardAPIRequestFactory {
         val bodyJSON = JSONObject().put("payment_source", paymentSourceJSON)
         val body = bodyJSON.toString()
 
+        val path = "v2/checkout/orders/$orderID/confirm-payment-source"
         return APIRequest(path, HttpMethod.POST, body)
     }
 }
