@@ -16,4 +16,7 @@
     <!-- Preference Titles -->
     <string name="environment_title">Environment</string>
 
+    <!-- PayPal Native-->
+    <string name="start_checkout">Start Checkout</string>
+
 </resources>

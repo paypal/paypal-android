@@ -1,9 +1,9 @@
 package com.paypal.android.checkout
 
-import com.paypal.checkout.approve.Approval
-import com.paypal.checkout.error.ErrorInfo
+import com.paypal.android.checkout.pojo.Approval
+import com.paypal.android.checkout.pojo.ErrorInfo
+import com.paypal.android.checkout.pojo.ShippingChangeData
 import com.paypal.checkout.shipping.ShippingChangeActions
-import com.paypal.checkout.shipping.ShippingChangeData
 
 //might be subject to change, we could go to callback pattern
 //are we going to wrap the objects PayPal returns?

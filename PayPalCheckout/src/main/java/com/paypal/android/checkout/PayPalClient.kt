@@ -1,8 +1,9 @@
 package com.paypal.android.checkout
 
-import android.app.Application
+import com.paypal.android.checkout.pojo.Approval
+import com.paypal.android.checkout.pojo.ErrorInfo
+import com.paypal.android.checkout.pojo.ShippingChangeData
 import com.paypal.android.core.Environment
-import com.paypal.android.core.PaymentsConfiguration
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -13,18 +14,18 @@ import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
 
-//If we make it an instance, we might be giving the wrong signal to the merchant, beliving that he
-//might instanciate more than one paypal client, but under the hood, is just only one.
-class PayPalClient(application: Application, paymentConfig: PaymentsConfiguration) {
-
-    var payPalClientListener: PayPalClientListener? = null //if its a necessary condition
+class PayPalClient(payPalConfig: PayPalConfiguration) {
 
     init {
         val config = CheckoutConfig(
-            application = application,
-            clientId = paymentConfig.clientId,
-            environment =  getPayPalEnvironment(paymentConfig.environment),
-            returnUrl = paymentConfig.returnUrl //this might not be necessary
+            application = payPalConfig.application,
+            clientId = payPalConfig.paymentsConfiguration.clientId,
+            environment =  getPayPalEnvironment(payPalConfig.paymentsConfiguration.environment),
+            returnUrl = payPalConfig.returnUrl,
+            currencyCode = payPalConfig.currencyCode?.asNativeCheckout,
+            paymentButtonIntent = payPalConfig.paymentButtonIntent?.asNativeCheckout,
+            settingsConfig = payPalConfig.settingsConfig.asNativeCheckout,
+            userAction = payPalConfig.userAction?.asNativeCheckout
         )
         PayPalCheckout.setConfig(config)
     }
@@ -34,21 +35,22 @@ class PayPalClient(application: Application, paymentConfig: PaymentsConfiguratio
         Environment.SANDBOX -> SANDBOX
     }
 
-    fun checkout(orderId: String) {
+    // usea a stream of data as an alternative to callbacks
+    fun checkout(orderId: String, payPalClientListener: PayPalClientListener) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
         },
         OnApprove { approval ->
-            payPalClientListener?.onPayPalApprove(approval)
+            payPalClientListener.onPayPalApprove(Approval(approval))
         },
         OnShippingChange { shippingChangeData, shippingChangeActions ->
-            payPalClientListener?.onPayPalShippingAddressChange(shippingChangeData, shippingChangeActions)
+            payPalClientListener.onPayPalShippingAddressChange(ShippingChangeData(shippingChangeData), shippingChangeActions)
         },
         OnCancel {
-            payPalClientListener?.onPayPalCancel()
+            payPalClientListener.onPayPalCancel()
         },
         OnError { errorInfo ->
-            payPalClientListener?.onPayPalError(errorInfo)
+            payPalClientListener.onPayPalError(ErrorInfo(errorInfo))
         })
     }
 }

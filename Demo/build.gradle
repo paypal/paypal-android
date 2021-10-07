@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.paypal.android"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -49,6 +49,7 @@ android {
 
 dependencies {
     implementation project(':Card')
+    implementation project(':PayPalCheckout')
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
