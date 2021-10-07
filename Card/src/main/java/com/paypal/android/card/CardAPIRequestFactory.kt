@@ -18,6 +18,17 @@ internal class CardAPIRequestFactory {
 
         card.securityCode?.let { cardJSON.put("security_code", it) }
 
+        card.billingAddress?.let { billingAddress ->
+            val billingAddressJSON = JSONObject()
+                .put("address_line_1", billingAddress.addressLine1)
+                .put("address_line_2", billingAddress.addressLine2)
+                .put("admin_area_1", billingAddress.state)
+                .put("admin_area_2", billingAddress.city)
+                .put("postal_code", billingAddress.postalCode)
+                .put("country_code", billingAddress.countryCode)
+            cardJSON.put("billing_address", billingAddressJSON)
+        }
+
         val paymentSourceJSON = JSONObject().put("card", cardJSON)
         val bodyJSON = JSONObject().put("payment_source", paymentSourceJSON)
         val body = bodyJSON.toString()
