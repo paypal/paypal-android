@@ -47,6 +47,7 @@ dependencies {
 
     testImplementation deps.junit
     testImplementation deps.mockk
+    testImplementation deps.jsonAssert
     testImplementation deps.robolectric
     testImplementation deps.kotlinxAndroidCoroutinesTest
 
