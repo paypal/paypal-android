@@ -68,15 +68,12 @@ class CardViewModel @Inject constructor(
         Log.d(TAG, "${securityCode.value}")
         Log.d(TAG, "Environment = $environment")
 
+        val number = _cardNumber.value ?: ""
         val (monthString, yearString) =
             _expirationDate.value?.split("/") ?: listOf("", "")
 
-        val card = Card().apply {
-            number = _cardNumber.value ?: ""
-            expirationMonth = monthString
-            expirationYear = yearString
-            securityCode = _securityCode.value ?: ""
-        }
+        val card = Card(number, monthString, yearString)
+        card.securityCode = _securityCode.value ?: ""
 
         viewModelScope.launch {
             val order = fetchOrder()

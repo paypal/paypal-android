@@ -8,17 +8,17 @@ data class Card(
     /**
      * The card number
      */
-    var number: String = "",
+    var number: String,
 
     /**
      * 2-digit card expiration month
      */
-    var expirationMonth: String = "",
+    val expirationMonth: String,
 
     /**
      * 4-digit card expiration year
      */
-    var expirationYear: String = "",
+    val expirationYear: String,
 
     /**
      * The card's security code (CVV, CVC, CVN, CVE, or CID)

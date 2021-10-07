@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 class CardAPIRequestFactoryUnitTest {
 
     private val orderID = "sample-order-id"
-    private val card = Card("4111 1111 1111 1111", "01", "2022", "123")
+    private val card = Card("4111111111111111", "01", "2022", "123")
 
     private lateinit var sut: CardAPIRequestFactory
 

@@ -30,7 +30,7 @@ class CardAPIUnitTest {
     private val api = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<CardAPIRequestFactory>()
 
-    private val card = Card()
+    private val card = Card("4111111111111111", "01", "24")
     private val orderID = "sample-order-id"
     private val apiRequest = APIRequest("/sample/path", HttpMethod.POST, null)
 

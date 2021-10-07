@@ -16,7 +16,7 @@ import org.junit.Test
 @ExperimentalCoroutinesApi
 class CardClientUnitTest {
 
-    private val card = Card()
+    private val card = Card("4111111111111111", "01", "24")
     private val orderID = "sample-order-id"
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
