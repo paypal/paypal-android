@@ -36,6 +36,12 @@ class CardAPIRequestFactoryUnitTest {
                 state = "CA",
                 postalCode = "95131",
                 countryCode = "US"
+            ),
+            attributes = CardAttributes(
+                customerId = "1234",
+                customerEmail = "sample@user.com",
+                vaultOnOrderCompletion = true,
+                verificationMethod = CardVerificationMethod.THREED_SECURE
             )
         )
 
@@ -58,6 +64,18 @@ class CardAPIRequestFactoryUnitTest {
                     "admin_area_2": "San Jose",
                     "postal_code": "95131",
                     "country_code": "US"
+                  },
+                  "attributes": {
+                    "customer": {
+                      "id": "1234",
+                      "email": "sample@user.com"
+                    },
+                    "vault": {
+                      "confirm_payment_token": "ON_ORDER_COMPLETION"
+                    },
+                    "verification": {
+                      "method": "3D_SECURE"
+                    }
                   }
                 }
               }
