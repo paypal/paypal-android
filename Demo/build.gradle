@@ -6,6 +6,8 @@ plugins {
     id 'dagger.hilt.android.plugin'
 }
 
+def paypalProperties = loadPropertiesFromFile("paypal.properties")
+
 android {
     compileSdkVersion 31
     buildToolsVersion "30.0.2"
@@ -16,8 +18,10 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
+        buildConfigField("String", "CLIENT_SECRET", paypalProperties["CLIENT_SECRET"] ?: "\"\"")
     }
 
     buildFeatures {
@@ -78,4 +82,18 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+}
+
+
+/**
+ * Loads properties at the specified file path. If the file does not exist,
+ * this method returns an empty properties object.
+ * @param filePath
+ */
+def loadPropertiesFromFile(filePath) {
+    def result = new Properties()
+    try {
+        result.load(new FileInputStream(rootProject.file(filePath)))
+    } catch (e) { /* ignored */ }
+    return result
 }
