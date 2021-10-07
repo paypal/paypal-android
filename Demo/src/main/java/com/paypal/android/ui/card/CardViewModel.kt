@@ -14,7 +14,7 @@ import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
-import com.paypal.android.core.PaymentsConfiguration
+import com.paypal.android.core.CoreConfig
 import com.paypal.android.data.card.PrefillCardData
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
@@ -44,7 +44,7 @@ class CardViewModel @Inject constructor(
     val autoFillCards = PrefillCardData.cards
 
     private val configuration =
-        PaymentsConfiguration(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
+        CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
 
     fun onCardNumberChange(newCardNumber: String) {

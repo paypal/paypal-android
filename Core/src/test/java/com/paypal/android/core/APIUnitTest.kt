@@ -27,7 +27,7 @@ class APIUnitTest {
     private val httpRequestFactory = mockk<HttpRequestFactory>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
-    private val configuration = PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET)
+    private val configuration = CoreConfig(CLIENT_ID, CLIENT_SECRET)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 

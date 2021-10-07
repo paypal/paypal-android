@@ -1,7 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.API
-import com.paypal.android.core.PaymentsConfiguration
+import com.paypal.android.core.CoreConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +15,7 @@ class CardClient internal constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
-    constructor(configuration: PaymentsConfiguration) :
+    constructor(configuration: CoreConfig) :
             this(CardAPI(API(configuration)))
 
     /**

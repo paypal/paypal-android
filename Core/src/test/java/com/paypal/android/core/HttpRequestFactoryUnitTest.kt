@@ -14,18 +14,18 @@ import java.net.URL
 class HttpRequestFactoryUnitTest {
 
     @RunWith(ParameterizedRobolectricTestRunner::class)
-    class URLTests(private val configuration: PaymentsConfiguration, private val expected: URL) {
+    class URLTests(private val configuration: CoreConfig, private val expected: URL) {
 
         companion object {
             private const val CLIENT_ID = "sample-client-id"
             private const val CLIENT_SECRET = "sample-client-secret"
 
             private val SANDBOX_CONFIGURATION =
-                PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.SANDBOX)
+                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.SANDBOX)
             private val STAGING_CONFIGURATION =
-                PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.STAGING)
+                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.STAGING)
             private val LIVE_CONFIGURATION =
-                PaymentsConfiguration(CLIENT_ID, CLIENT_SECRET, Environment.LIVE)
+                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.LIVE)
 
             @JvmStatic
             @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
@@ -62,7 +62,7 @@ class HttpRequestFactoryUnitTest {
     class NonParameterizedTests {
 
         private val configuration =
-            PaymentsConfiguration("sample-client-id", "sample-client-secret")
+            CoreConfig("sample-client-id", "sample-client-secret")
 
         private val requestBody = """{ "sample": "json" }"""
 

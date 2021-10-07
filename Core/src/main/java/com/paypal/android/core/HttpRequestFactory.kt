@@ -7,7 +7,7 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
 
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
-        configuration: PaymentsConfiguration,
+        configuration: CoreConfig,
     ): HttpRequest {
         val path = apiRequest.path
         val baseUrl = configuration.environment.url
