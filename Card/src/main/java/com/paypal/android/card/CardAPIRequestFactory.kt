@@ -28,6 +28,36 @@ internal class CardAPIRequestFactory {
             cardJSON.put("billing_address", billingAddressJSON)
         }
 
+        val attributesJSON = JSONObject()
+        card.attributes?.let { cardAttributes ->
+
+            // customer attributes
+            val customerJSON = JSONObject()
+            customerJSON.putOpt("id", cardAttributes.customerId)
+            customerJSON.putOpt("email", cardAttributes.customerEmail)
+            if (customerJSON.length() > 0) {
+                attributesJSON.put("customer", customerJSON)
+            }
+
+            // vault attributes
+            if (cardAttributes.vaultOnOrderCompletion) {
+                val vaultJSON = JSONObject()
+                    .put("confirm_payment_token", "ON_ORDER_COMPLETION")
+                attributesJSON.put("vault", vaultJSON)
+            }
+
+            // verification attributes
+            cardAttributes.verificationMethod?.let {
+                val verificationJSON = JSONObject()
+                    .put("method", it.asString)
+                attributesJSON.put("verification", verificationJSON)
+            }
+        }
+
+        if (attributesJSON.length() > 0) {
+            cardJSON.put("attributes", attributesJSON)
+        }
+
         val paymentSourceJSON = JSONObject().put("card", cardJSON)
         val bodyJSON = JSONObject().put("payment_source", paymentSourceJSON)
         val body = bodyJSON.toString()
