@@ -36,9 +36,4 @@ data class Card(
      * Optional. The portable international postal address
      */
     var billingAddress: Address? = null,
-
-    /**
-     * Optional. Additional attributes associated with the use of this card
-     */
-    var attributes: CardAttributes? = null
 )
