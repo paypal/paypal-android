@@ -23,22 +23,22 @@ data class Card(
     val expirationYear: String,
 
     /**
-     * The card's security code (CVV, CVC, CVN, CVE, or CID)
+     * Optional. The card's security code (CVV, CVC, CVN, CVE, or CID)
      */
     var securityCode: String? = null,
 
     /**
-     * The card holder's name as it appears on the card
+     * Optional. The card holder's name as it appears on the card
      */
     var name: String? = null,
 
     /**
-     * The portable international postal address
+     * Optional. The portable international postal address
      */
     var billingAddress: Address? = null,
 
     /**
-     * Additional attributes associated with the use of this card
+     * Optional. Additional attributes associated with the use of this card
      */
     var attributes: CardAttributes? = null
 )
