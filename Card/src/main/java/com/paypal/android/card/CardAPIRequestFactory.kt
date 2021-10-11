@@ -14,7 +14,7 @@ internal class CardAPIRequestFactory {
             .put("number", cardNumber)
             .put("expiry", cardExpiry)
 
-        card.name?.let { cardJSON.put("name", it) }
+        card.cardholderName?.let { cardJSON.put("name", it) }
         card.securityCode?.let { cardJSON.put("security_code", it) }
 
         card.billingAddress?.let { billingAddress ->

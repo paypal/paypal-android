@@ -30,7 +30,7 @@ data class Card(
     /**
      * Optional. The card holder's name as it appears on the card
      */
-    var name: String? = null,
+    var cardholderName: String? = null,
 
     /**
      * Optional. The portable international postal address
