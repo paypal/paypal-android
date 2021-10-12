@@ -30,10 +30,10 @@ class CardAPIRequestFactoryUnitTest {
             expirationYear = "2022",
             securityCode = "123",
             billingAddress = Address(
-                addressLine1 = "2211 N 1st St.",
-                addressLine2 = "Apt. 1A",
-                city = "San Jose",
-                state = "CA",
+                streetAddress = "2211 N 1st St.",
+                extendedAddress = "Apt. 1A",
+                locality = "San Jose",
+                region = "CA",
                 postalCode = "95131",
                 countryCode = "US"
             )
