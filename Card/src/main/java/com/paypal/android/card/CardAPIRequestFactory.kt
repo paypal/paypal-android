@@ -17,14 +17,14 @@ internal class CardAPIRequestFactory {
         card.cardholderName?.let { cardJSON.put("name", it) }
         card.securityCode?.let { cardJSON.put("security_code", it) }
 
-        card.billingAddress?.let { billingAddress ->
+        card.billingAddress?.apply {
             val billingAddressJSON = JSONObject()
-                .put("address_line_1", billingAddress.streetAddress)
-                .put("address_line_2", billingAddress.extendedAddress)
-                .put("admin_area_1", billingAddress.region)
-                .put("admin_area_2", billingAddress.locality)
-                .put("postal_code", billingAddress.postalCode)
-                .put("country_code", billingAddress.countryCode)
+                .put("address_line_1", streetAddress)
+                .put("address_line_2", extendedAddress)
+                .put("admin_area_1", region)
+                .put("admin_area_2", locality)
+                .put("postal_code", postalCode)
+                .put("country_code", countryCode)
             cardJSON.put("billing_address", billingAddressJSON)
         }
 
