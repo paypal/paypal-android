@@ -1,7 +1,10 @@
 package com.paypal.android.checkout.pojo
 
 import com.paypal.android.checkout.CurrencyCode
+import com.paypal.android.checkout.asNativeCheckout
 import com.paypal.android.checkout.asPaypalCheckout
+import com.paypal.checkout.order.Items
+import com.paypal.checkout.order.Order
 
 
 /**
@@ -59,44 +62,66 @@ data class ShippingAddress(
     val adminArea1: String? = null,
     val adminArea2: String? = null,
     val postalCode: String? = null,
-    val countryCode: String? = null
+    val countryCode: String
 ) {
-    internal constructor(address: com.paypal.checkout.order.Address?) : this(
-        addressLine1 = address?.addressLine1,
-        addressLine2 = address?.addressLine2,
-        adminArea1 = address?.adminArea1,
-        adminArea2 = address?.adminArea2,
-        postalCode = address?.postalCode,
-        countryCode = address?.countryCode
+    internal constructor(address: com.paypal.checkout.order.Address) : this(
+        addressLine1 = address.addressLine1,
+        addressLine2 = address.addressLine2,
+        adminArea1 = address.adminArea1,
+        adminArea2 = address.adminArea2,
+        postalCode = address.postalCode,
+        countryCode = address.countryCode
     )
+
+    internal val asNativeCheckout: com.paypal.checkout.order.Address
+        get() = com.paypal.checkout.order.Address(
+            addressLine1 = this.addressLine1,
+            addressLine2 = this.addressLine2,
+            adminArea1 = this.adminArea1,
+            adminArea2 = this.adminArea2,
+            postalCode = this.postalCode,
+            countryCode = this.countryCode
+        )
 }
 
 
 data class Options(
-    val id: String? = null,
-    val selected: Boolean? = null,
-    val label: String? = null,
+    val id: String,
+    val selected: Boolean,
+    val label: String,
     val type: ShippingType? = null,
     val amount: UnitAmount? = null
 ) {
-    internal constructor(options: com.paypal.checkout.order.Options?) : this(
-        id = options?.id,
-        selected = options?.selected,
-        label = options?.label,
-        type = options?.type?.asPaypalCheckout,
-        amount = UnitAmount(options?.amount)
+    internal constructor(options: com.paypal.checkout.order.Options) : this(
+        id = options.id,
+        selected = options.selected,
+        label = options.label,
+        type = options.type?.asPaypalCheckout,
+        amount = if (options.amount != null) UnitAmount(options.amount!!) else null
     )
+
+    internal val toNativeCheckout: com.paypal.checkout.order.Options
+        get() = com.paypal.checkout.order.Options(
+            this.id,
+            this.selected,
+            this.label,
+            this.type?.asNativeCheckout,
+            this.amount?.toNativeCheckout
+        )
 }
 
 
 data class UnitAmount(
-    val currencyCode: CurrencyCode? = null,
-    val value: String? = null
+    val currencyCode: CurrencyCode,
+    val value: String
 ) {
-    internal constructor(unitAmount: com.paypal.checkout.order.UnitAmount?) : this(
-        currencyCode = unitAmount?.currencyCode?.asPaypalCheckout,
-        value = unitAmount?.value
+    internal constructor(unitAmount: com.paypal.checkout.order.UnitAmount) : this(
+        currencyCode = unitAmount.currencyCode.asPaypalCheckout,
+        value = unitAmount.value
     )
+
+    internal val toNativeCheckout: com.paypal.checkout.order.UnitAmount
+        get() = com.paypal.checkout.order.UnitAmount(this.currencyCode.asNativeCheckout, this.value)
 }
 
 
@@ -116,16 +141,10 @@ enum class ShippingType {
 }
 
 internal val ShippingType.asNativeCheckout: com.paypal.checkout.createorder.ShippingType
-    get() = when (this) {
-        ShippingType.SHIPPING -> com.paypal.checkout.createorder.ShippingType.SHIPPING
-        ShippingType.PICKUP -> com.paypal.checkout.createorder.ShippingType.PICKUP
-    }
+    get() = enumValueOf(this.name)
 
 internal val com.paypal.checkout.createorder.ShippingType.asPaypalCheckout: ShippingType
-    get() = when (this) {
-        com.paypal.checkout.createorder.ShippingType.SHIPPING -> ShippingType.SHIPPING
-        com.paypal.checkout.createorder.ShippingType.PICKUP -> ShippingType.PICKUP
-    }
+    get() = enumValueOf(this.name)
 
 
 /**
@@ -145,13 +164,104 @@ enum class ShippingChangeType {
 }
 
 internal val ShippingChangeType.asNativeCheckout: com.paypal.checkout.shipping.ShippingChangeType
-    get() = when (this) {
-        ShippingChangeType.ADDRESS_CHANGE -> com.paypal.checkout.shipping.ShippingChangeType.ADDRESS_CHANGE
-        ShippingChangeType.OPTION_CHANGE -> com.paypal.checkout.shipping.ShippingChangeType.OPTION_CHANGE
-    }
+    get() = enumValueOf(this.name)
 
 internal val com.paypal.checkout.shipping.ShippingChangeType.asPaypalCheckout: ShippingChangeType
-    get() = when (this) {
-        com.paypal.checkout.shipping.ShippingChangeType.ADDRESS_CHANGE -> ShippingChangeType.ADDRESS_CHANGE
-        com.paypal.checkout.shipping.ShippingChangeType.OPTION_CHANGE -> ShippingChangeType.OPTION_CHANGE
-    }
+    get() = enumValueOf(this.name)
+
+
+/**
+ * The total order amount with an optional breakdown that provides details, such as the total
+ * item amount, total tax amount, shipping, handling, and discounts, if any.
+ *
+ * If you specify [breakdown], the amount equals [BreakDown.itemTotal] plus [BreakDown.taxTotal]
+ * plus [BreakDown.shipping] plus [BreakDown.handling] minus [BreakDown.shippingDiscount] minus
+ * [BreakDown.discount].
+ *
+ * The amount must be a positive number.
+ */
+data class OrderAmount constructor(
+
+    /**
+     * The three-character ISO-4217 currency code that identifies the currency. See [CurrencyCode].
+     */
+    val currencyCode: CurrencyCode,
+
+    /**
+     * The value, which might be:
+     *    - An integer for currencies like JPY that are not typically fractional.
+     *    - A decimal fraction for currencies like TND that are subdivided into thousandths.
+     *
+     * For the required number of decimal places for a currency code, see Currency Codes.
+     */
+    val value: String,
+
+    /**
+     * The breakdown of the amount. Breakdown provides details such as total item amount, total tax
+     * amount, shipping, handling, insurance, and discounts, if any.
+     */
+    val breakdown: BreakDown? = null
+) {
+    internal val asNativeCheckout: com.paypal.checkout.order.Amount
+        get() = com.paypal.checkout.order.Amount(
+            currencyCode = currencyCode.asNativeCheckout,
+            value = value,
+            breakdown = breakdown?.asNativeCheckout
+        )
+}
+
+
+/**
+ * The breakdown of the amount. Breakdown provides details such as total item amount, total tax
+ * amount, shipping, handling, insurance, and discounts, if any.
+ */
+data class BreakDown(
+
+    /**
+     * The subtotal for all items. Required if the [Order] includes [Items.unitAmount]. Must equal
+     * the sum of ([Items.unitAmount] * [Items.quantity]) for all items. [itemTotal]'s value can not
+     * be a negative number.
+     */
+    val itemTotal: UnitAmount? = null,
+
+    /**
+     * The shipping fee for all items within a given purchase unit. [shipping]' value can not be a
+     * negative number.
+     */
+    val shipping: UnitAmount? = null,
+
+    /**
+     * The handling fee for all items within a given purchase unit. [handling]'s value can not be a
+     * negative number.
+     */
+    val handling: UnitAmount? = null,
+
+    /**
+     * The total tax for all items. Required if the order includes [Items.tax]. Must equal the sum
+     * of ([Items.tax] * [Items.quantity]) for all items. [taxTotal]'s value can not be a negative
+     * number.
+     */
+    val taxTotal: UnitAmount? = null,
+
+    /**
+     * The shipping discount for all items within a given purchase unit. [shippingDiscount]'s value
+     * can not be a negative number.
+     */
+    val shippingDiscount: UnitAmount? = null,
+
+    /**
+     * The discount for all items within a given purchase unit. [discount]'s value can not be a
+     * negative number.
+     */
+    val discount: UnitAmount? = null
+) {
+    internal val asNativeCheckout: com.paypal.checkout.order.BreakDown
+        get() = com.paypal.checkout.order.BreakDown(
+            itemTotal = itemTotal?.toNativeCheckout,
+            shipping = shipping?.toNativeCheckout,
+            handling = handling?.toNativeCheckout,
+            taxTotal = taxTotal?.toNativeCheckout,
+            shippingDiscount = shippingDiscount?.toNativeCheckout,
+            discount = discount?.toNativeCheckout
+        )
+}

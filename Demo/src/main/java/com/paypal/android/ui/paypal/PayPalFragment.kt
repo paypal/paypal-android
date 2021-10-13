@@ -20,9 +20,12 @@ import com.paypal.android.R
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalClientListener
 import com.paypal.android.checkout.PayPalConfiguration
+import com.paypal.android.checkout.patch.PatchOrderRequest
+import com.paypal.android.checkout.shipping.ShippingChangeActions
 import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.checkout.pojo.ErrorInfo
 import com.paypal.android.checkout.pojo.ShippingChangeData
+import com.paypal.android.checkout.shipping.OnPatchComplete
 import com.paypal.android.core.Environment
 import com.paypal.android.ui.theme.DemoTheme
 
@@ -71,21 +74,17 @@ class PayPalFragment : Fragment(), PayPalClientListener {
     }
 
     override fun onPayPalApprove(approval: Approval) {
-        TODO("Not yet implemented")
     }
 
     override fun onPayPalError(errorInfo: ErrorInfo) {
-        TODO("Not yet implemented")
     }
 
     override fun onPayPalCancel() {
-        TODO("Not yet implemented")
     }
 
     override fun onPayPalShippingAddressChange(
         shippingChangeData: ShippingChangeData,
-        shippingChangeActions: com.paypal.checkout.shipping.ShippingChangeActions
+        shippingChangeActions: ShippingChangeActions
     ) {
-        TODO("Not yet implemented")
     }
 }

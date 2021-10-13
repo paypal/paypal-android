@@ -3,6 +3,7 @@ package com.paypal.android.checkout
 import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.checkout.pojo.ErrorInfo
 import com.paypal.android.checkout.pojo.ShippingChangeData
+import com.paypal.android.checkout.shipping.ShippingChangeActions
 import com.paypal.android.core.Environment
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
@@ -44,7 +45,7 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
             payPalClientListener.onPayPalApprove(Approval(approval))
         },
         OnShippingChange { shippingChangeData, shippingChangeActions ->
-            payPalClientListener.onPayPalShippingAddressChange(ShippingChangeData(shippingChangeData), shippingChangeActions)
+            payPalClientListener.onPayPalShippingAddressChange(ShippingChangeData(shippingChangeData), ShippingChangeActions(shippingChangeActions))
         },
         OnCancel {
             payPalClientListener.onPayPalCancel()

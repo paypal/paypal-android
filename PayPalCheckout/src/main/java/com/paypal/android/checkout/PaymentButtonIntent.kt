@@ -28,8 +28,4 @@ enum class PaymentButtonIntent {
 }
 
 internal val PaymentButtonIntent.asNativeCheckout: com.paypal.checkout.config.PaymentButtonIntent
-    get() = when (this) {
-        PaymentButtonIntent.CAPTURE -> com.paypal.checkout.config.PaymentButtonIntent.CAPTURE
-        PaymentButtonIntent.AUTHORIZE -> com.paypal.checkout.config.PaymentButtonIntent.AUTHORIZE
-        PaymentButtonIntent.SUBSCRIPTION -> com.paypal.checkout.config.PaymentButtonIntent.SUBSCRIPTION
-    }
+    get() = enumValueOf(this.name)

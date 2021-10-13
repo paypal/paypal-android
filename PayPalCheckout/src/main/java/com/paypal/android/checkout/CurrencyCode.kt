@@ -158,61 +158,7 @@ enum class CurrencyCode {
 }
 
 internal val CurrencyCode.asNativeCheckout: com.paypal.checkout.createorder.CurrencyCode
-    get() = when (this) {
-        CurrencyCode.AUD -> com.paypal.checkout.createorder.CurrencyCode.AUD
-        CurrencyCode.BRL -> com.paypal.checkout.createorder.CurrencyCode.BRL
-        CurrencyCode.CAD -> com.paypal.checkout.createorder.CurrencyCode.CAD
-        CurrencyCode.CNY -> com.paypal.checkout.createorder.CurrencyCode.CNY
-        CurrencyCode.CZK -> com.paypal.checkout.createorder.CurrencyCode.CZK
-        CurrencyCode.DKK -> com.paypal.checkout.createorder.CurrencyCode.DKK
-        CurrencyCode.EUR -> com.paypal.checkout.createorder.CurrencyCode.EUR
-        CurrencyCode.HKD -> com.paypal.checkout.createorder.CurrencyCode.HKD
-        CurrencyCode.HUF -> com.paypal.checkout.createorder.CurrencyCode.HUF
-        CurrencyCode.INR -> com.paypal.checkout.createorder.CurrencyCode.INR
-        CurrencyCode.ILS -> com.paypal.checkout.createorder.CurrencyCode.ILS
-        CurrencyCode.JPY -> com.paypal.checkout.createorder.CurrencyCode.JPY
-        CurrencyCode.MYR -> com.paypal.checkout.createorder.CurrencyCode.MYR
-        CurrencyCode.MXN -> com.paypal.checkout.createorder.CurrencyCode.MXN
-        CurrencyCode.TWD -> com.paypal.checkout.createorder.CurrencyCode.TWD
-        CurrencyCode.NZD -> com.paypal.checkout.createorder.CurrencyCode.NZD
-        CurrencyCode.NOK -> com.paypal.checkout.createorder.CurrencyCode.NOK
-        CurrencyCode.PHP -> com.paypal.checkout.createorder.CurrencyCode.PHP
-        CurrencyCode.PLN -> com.paypal.checkout.createorder.CurrencyCode.PLN
-        CurrencyCode.GBP -> com.paypal.checkout.createorder.CurrencyCode.GBP
-        CurrencyCode.RUB -> com.paypal.checkout.createorder.CurrencyCode.RUB
-        CurrencyCode.SGD -> com.paypal.checkout.createorder.CurrencyCode.SGD
-        CurrencyCode.SEK -> com.paypal.checkout.createorder.CurrencyCode.SEK
-        CurrencyCode.CHF -> com.paypal.checkout.createorder.CurrencyCode.CHF
-        CurrencyCode.THB -> com.paypal.checkout.createorder.CurrencyCode.THB
-        CurrencyCode.USD -> com.paypal.checkout.createorder.CurrencyCode.USD
-    }
+    get() = enumValueOf(this.name)
 
 internal val com.paypal.checkout.createorder.CurrencyCode.asPaypalCheckout: CurrencyCode
-    get() = when (this) {
-        com.paypal.checkout.createorder.CurrencyCode.AUD -> CurrencyCode.AUD
-        com.paypal.checkout.createorder.CurrencyCode.BRL -> CurrencyCode.BRL
-        com.paypal.checkout.createorder.CurrencyCode.CAD -> CurrencyCode.CAD
-        com.paypal.checkout.createorder.CurrencyCode.CNY -> CurrencyCode.CNY
-        com.paypal.checkout.createorder.CurrencyCode.CZK -> CurrencyCode.CZK
-        com.paypal.checkout.createorder.CurrencyCode.DKK -> CurrencyCode.DKK
-        com.paypal.checkout.createorder.CurrencyCode.EUR -> CurrencyCode.EUR
-        com.paypal.checkout.createorder.CurrencyCode.HKD -> CurrencyCode.HKD
-        com.paypal.checkout.createorder.CurrencyCode.HUF -> CurrencyCode.HUF
-        com.paypal.checkout.createorder.CurrencyCode.INR -> CurrencyCode.INR
-        com.paypal.checkout.createorder.CurrencyCode.ILS -> CurrencyCode.ILS
-        com.paypal.checkout.createorder.CurrencyCode.JPY -> CurrencyCode.JPY
-        com.paypal.checkout.createorder.CurrencyCode.MYR -> CurrencyCode.MYR
-        com.paypal.checkout.createorder.CurrencyCode.MXN -> CurrencyCode.MXN
-        com.paypal.checkout.createorder.CurrencyCode.TWD -> CurrencyCode.TWD
-        com.paypal.checkout.createorder.CurrencyCode.NZD -> CurrencyCode.NZD
-        com.paypal.checkout.createorder.CurrencyCode.NOK -> CurrencyCode.NOK
-        com.paypal.checkout.createorder.CurrencyCode.PHP -> CurrencyCode.PHP
-        com.paypal.checkout.createorder.CurrencyCode.PLN -> CurrencyCode.PLN
-        com.paypal.checkout.createorder.CurrencyCode.GBP -> CurrencyCode.GBP
-        com.paypal.checkout.createorder.CurrencyCode.RUB -> CurrencyCode.RUB
-        com.paypal.checkout.createorder.CurrencyCode.SGD -> CurrencyCode.SGD
-        com.paypal.checkout.createorder.CurrencyCode.SEK -> CurrencyCode.SEK
-        com.paypal.checkout.createorder.CurrencyCode.CHF -> CurrencyCode.CHF
-        com.paypal.checkout.createorder.CurrencyCode.THB -> CurrencyCode.THB
-        com.paypal.checkout.createorder.CurrencyCode.USD -> CurrencyCode.USD
-    }
+    get() = enumValueOf(this.name)

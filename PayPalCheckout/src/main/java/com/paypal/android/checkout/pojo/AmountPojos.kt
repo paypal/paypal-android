@@ -126,14 +126,24 @@ class Amount(
     val currencyCode: String? = null,
     val currencySymbol: String? = null,
     val currencyValue: String? = null,
-    val additionalProperties: Map<String, Any>? = HashMap()
+    val additionalProperties: MutableMap<String, Any> = HashMap()
 ) {
-    internal constructor(amount: com.paypal.pyplcheckout.pojo.Amount?) : this(
-        currencyCode = amount?.currencyCode,
-        currencyFormat = amount?.currencyFormat,
-        currencyFormatSymbolISOCurrency = amount?.currencyFormatSymbolISOCurrency,
-        currencyValue = amount?.currencyValue,
-        currencySymbol = amount?.currencySymbol,
-        additionalProperties = amount?.getAdditionalProperties()
+    internal constructor(amount: com.paypal.pyplcheckout.pojo.Amount) : this(
+        currencyCode = amount.currencyCode,
+        currencyFormat = amount.currencyFormat,
+        currencyFormatSymbolISOCurrency = amount.currencyFormatSymbolISOCurrency,
+        currencyValue = amount.currencyValue,
+        currencySymbol = amount.currencySymbol,
+        additionalProperties = amount.getAdditionalProperties().toMutableMap()
     )
+
+    internal val asNativeCheckout: com.paypal.pyplcheckout.pojo.Amount
+        get() = com.paypal.pyplcheckout.pojo.Amount(
+            this.currencyFormat,
+            this.currencyFormatSymbolISOCurrency,
+            this.currencyCode,
+            this.currencySymbol,
+            this.currencyValue,
+            this.additionalProperties
+        )
 }

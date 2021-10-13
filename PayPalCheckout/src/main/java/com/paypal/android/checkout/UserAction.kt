@@ -27,7 +27,4 @@ enum class UserAction {
 }
 
 internal val UserAction.asNativeCheckout: com.paypal.checkout.createorder.UserAction
-    get() = when(this) {
-        UserAction.CONTINUE -> com.paypal.checkout.createorder.UserAction.CONTINUE
-        UserAction.PAY_NOW -> com.paypal.checkout.createorder.UserAction.PAY_NOW
-    }
+    get() = enumValueOf(this.name)
