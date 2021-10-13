@@ -2,6 +2,7 @@ package com.paypal.android.card
 
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.OrderData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +24,12 @@ class CardClient internal constructor(
      *
      * @param orderID The id of the order
      * @param card The card to use for approval
-     * @param completion A completion handler for receiving a [ConfirmPaymentSourceResult]
+     * @param completion A completion handler for receiving a [ApproveOrderResult]
      */
     fun approveOrder(
         orderID: String,
         card: Card,
-        completion: (ConfirmPaymentSourceResult) -> Unit
+        completion: (ApproveOrderResult) -> Unit
     ) {
         CoroutineScope(dispatcher).launch {
             val cardResult = cardAPI.confirmPaymentSource(orderID, card)

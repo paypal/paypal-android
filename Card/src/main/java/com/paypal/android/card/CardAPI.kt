@@ -1,7 +1,6 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.API
-import com.paypal.android.core.OrderData
 import com.paypal.android.core.OrderError
 import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
@@ -12,7 +11,7 @@ internal class CardAPI(
     private val api: API,
     private val requestFactory: CardAPIRequestFactory = CardAPIRequestFactory()
 ) {
-    suspend fun confirmPaymentSource(orderID: String, card: Card): ConfirmPaymentSourceResult {
+    suspend fun confirmPaymentSource(orderID: String, card: Card): ApproveOrderResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
         return if (httpResponse.status == HTTP_OK) {
@@ -20,9 +19,22 @@ internal class CardAPI(
                 val json = PaymentsJSON(httpResponse.body)
                 val status = json.getString("status")
                 val id = json.getString("id")
-                ConfirmPaymentSourceResult(response = OrderData(id, OrderStatus.valueOf(status)))
+
+                ApproveOrderResult.Success(
+                    cardOrder = CardOrder(
+                        orderID = id,
+                        status = OrderStatus.valueOf(status),
+                    ),
+                    correlationID = ""
+                )
             }.recover {
-                ConfirmPaymentSourceResult(error = OrderError("PARSING_ERROR", "Error parsing json response."))
+                ApproveOrderResult.Error(
+                    orderError = OrderError(
+                        "PARSING_ERROR",
+                        "Error parsing json response."
+                    ),
+                    correlationID = ""
+                )
             }.getOrNull()!!
         } else {
             val json = PaymentsJSON(httpResponse.body)
@@ -38,7 +50,10 @@ internal class CardAPI(
                 errorDetails += OrderErrorDetail(issue, description)
             }
 
-            ConfirmPaymentSourceResult(error = OrderError(name, message, errorDetails))
+            ApproveOrderResult.Error(
+                orderError = OrderError(name, message, errorDetails),
+                correlationID = ""
+            )
         }
     }
 }

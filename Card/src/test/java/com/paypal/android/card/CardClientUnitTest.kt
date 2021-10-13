@@ -20,7 +20,7 @@ class CardClientUnitTest {
     private val orderID = "sample-order-id"
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
-    private val confirmPaymentSourceResult = ConfirmPaymentSourceResult()
+    private val confirmPaymentSourceResult = ApproveOrderResult()
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -42,7 +42,7 @@ class CardClientUnitTest {
 
     @Test
     fun `approve order confirms payment source using card api`() = runBlockingTest {
-        lateinit var capturedResult: ConfirmPaymentSourceResult
+        lateinit var capturedResult: ApproveOrderResult
         sut.approveOrder(orderID, card) { result ->
             capturedResult = result
         }
