@@ -8,9 +8,10 @@ buildscript {
     ]
 
     ext.versions = [
-            "kotlin" : "1.5.21",
-            "compose": "1.0.2",
-            "navigation": "2.3.5"
+            "kotlin"    : "1.5.21",
+            "compose"   : "1.0.2",
+            "navigation": "2.3.5",
+            "hilt"      : "2.38.1"
     ]
 
     ext.deps = [
@@ -40,12 +41,21 @@ buildscript {
             // Jetpack
             "preference"                  : "androidx.preference:preference-ktx:1.1.1",
 
+            // Networking
+            "retrofit"                    : "com.squareup.retrofit2:retrofit:2.9.0",
+            "gson"                        : "com.squareup.retrofit2:converter-gson:2.3.0",
+
+            // Dependency Injection
+            "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
+            "hiltKapt"                   : "com.google.dagger:hilt-compiler:${versions.hilt}",
+
             // Testing
             "junit"                       : "junit:junit:4.13.2",
             "androidxJUnit"               : "androidx.test.ext:junit:1.1.3",
             "androidxEspressoCore"        : "androidx.test.espresso:espresso-core:3.4.0",
             "mockk"                       : "io.mockk:mockk:1.12.0",
-            "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0"
+            "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0",
+            "robolectric"                 : "org.robolectric:robolectric:4.6.1"
     ]
 
     repositories {
@@ -56,6 +66,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.navigation}"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"
     }
 }
 

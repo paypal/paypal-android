@@ -94,3 +94,7 @@ lint/tmp/
 
 # DS_Store
 .DS_Store
+
+# PayPal
+paypal.properties
+

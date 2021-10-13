@@ -7,7 +7,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AndroidSDK">
+        android:theme="@style/Theme.AndroidSDK"
+        android:name=".DemoApplication">
         <activity
             android:name=".DemoActivity"
             android:exported="true">

@@ -7,18 +7,21 @@ object PrefillCardData {
     val cards by lazy {
         listOf(
             "Visa" to Card(
-                cardNumber = "4111111111111111",
-                expirationDate = "01/26",
+                number = "4111111111111111",
+                expirationMonth = "01",
+                expirationYear = "2026",
                 securityCode = "123"
             ),
             "3DS2" to Card(
-                cardNumber = "4000000000001091",
-                expirationDate = "01/26",
+                number = "4000000000001091",
+                expirationMonth = "01",
+                expirationYear = "2026",
                 securityCode = "123"
             ),
             "3DS1" to Card(
-                cardNumber = "4000000000000002",
-                expirationDate = "01/26",
+                number = "4000000000000002",
+                expirationMonth = "01",
+                expirationYear = "2026",
                 securityCode = "123"
             )
         )

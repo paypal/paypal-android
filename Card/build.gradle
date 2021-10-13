@@ -11,8 +11,6 @@ android {
     defaultConfig {
         minSdkVersion modules.androidMinSdkVersion
         targetSdkVersion modules.androidTargetVersion
-        versionCode modules.sdkVersionCode
-        versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -45,8 +43,13 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+    implementation deps.kotlinxAndroidCoroutines
 
     testImplementation deps.junit
+    testImplementation deps.mockk
+    testImplementation deps.robolectric
+    testImplementation deps.kotlinxAndroidCoroutinesTest
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }

@@ -12,17 +12,21 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.UnknownHostException
 
 @ExperimentalCoroutinesApi
 class HttpUnitTest {
 
-    private val url = mockk<URL>()
+    private val url = spyk(URL("https://www.example.com"))
     private val urlConnection = mockk<HttpURLConnection>(relaxed = true)
-    private val httpRequest = spyk(HttpRequest("https://www.example.com"))
+
+    private val httpResponse = HttpResponse(123)
+    private val httpResponseParser = mockk<HttpResponseParser>()
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -30,10 +34,10 @@ class HttpUnitTest {
 
     @Before
     fun beforeEach() {
-        every { httpRequest.url } returns url
         every { url.openConnection() } returns urlConnection
+        every { httpResponseParser.parse(urlConnection) } returns httpResponse
 
-        sut = Http(testCoroutineDispatcher)
+        sut = Http(testCoroutineDispatcher, httpResponseParser)
         Dispatchers.setMain(testCoroutineDispatcher)
     }
 
@@ -45,15 +49,58 @@ class HttpUnitTest {
 
     @Test
     fun `send sets request method on url connection`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+
         sut.send(httpRequest)
         verify { urlConnection.requestMethod = "GET" }
     }
 
     @Test
-    fun `send returns an http result`() = runBlockingTest {
-        every { urlConnection.responseCode } returns 123
+    fun `send sets request headers on url connection`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        httpRequest.headers["Sample-Header"] = "sample-value"
 
+        sut.send(httpRequest)
+        verify { urlConnection.addRequestProperty("Sample-Header", "sample-value") }
+    }
+
+    @Test
+    fun `send calls connect on http url connection to initiate request`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+
+        sut.send(httpRequest)
+        verify { urlConnection.connect() }
+    }
+
+    @Test
+    fun `send forwards http response from http parser`() = runBlockingTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
         val result = sut.send(httpRequest)
-        assertEquals(123, result.responseCode)
+
+        assertSame(httpResponse, result)
+    }
+
+    @Test
+    fun `it returns unknown host http status when UnknownHostException thrown`() = runBlockingTest {
+        val error = UnknownHostException()
+        every { urlConnection.connect() } throws error
+
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        val result = sut.send(httpRequest)
+
+        assertEquals(HttpResponse.STATUS_UNKNOWN_HOST, result.status)
+        assertSame(error, result.error)
+    }
+
+    @Test
+    fun `it returns status undetermined when the status cannot be determined`() = runBlockingTest {
+        val error = Exception()
+        every { urlConnection.connect() } throws error
+
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        val result = sut.send(httpRequest)
+
+        assertEquals(HttpResponse.STATUS_UNDETERMINED, result.status)
+        assertSame(error, result.error)
     }
 }

@@ -19,4 +19,7 @@
     <!-- PayPal Native-->
     <string name="start_checkout">Start Checkout</string>
 
+    <string name="auth_credentials_missing_title">Auth Credentials Required</string>
+    <string name="auth_credentials_missing_message">You can set authentication credentials in the <b><i>paypal.properties</i></b> file in the root of the project directory.</string>
+
 </resources>
