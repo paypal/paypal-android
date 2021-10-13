@@ -2,7 +2,7 @@ package com.paypal.android.checkout
 
 import android.app.Application
 import com.paypal.android.core.Environment
-import com.paypal.android.core.PaymentsConfiguration
+import com.paypal.android.core.CoreConfig
 
 class PayPalConfiguration(
     /**
@@ -66,5 +66,6 @@ class PayPalConfiguration(
      */
     val settingsConfig: SettingsConfig = SettingsConfig()
 ) {
-    val paymentsConfiguration = PaymentsConfiguration(clientId, environment)
+    val paymentsConfiguration =
+        CoreConfig(clientId = clientId, clientSecret = "", environment = environment)
 }

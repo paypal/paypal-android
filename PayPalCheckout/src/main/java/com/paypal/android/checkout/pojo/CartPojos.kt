@@ -104,34 +104,17 @@ data class CartShippingAddress(
 
 
 data class ShippingMethods(
-    val id: String?,
-    val label: String?,
-    var selected: Boolean?,
+    val id: String,
+    val label: String,
+    var selected: Boolean,
     val amount: Amount?,
-    val type: String?
+    val type: String
 ) {
-    internal constructor(shippingMethods: com.paypal.pyplcheckout.pojo.ShippingMethods?) : this(
-        id = shippingMethods?.id,
-        label = shippingMethods?.label,
-        selected = shippingMethods?.selected,
-        amount = Amount(shippingMethods?.amount),
-        type = shippingMethods?.type
+    internal constructor(shippingMethods: com.paypal.pyplcheckout.pojo.ShippingMethods) : this(
+        id = shippingMethods.id,
+        label = shippingMethods.label,
+        selected = shippingMethods.selected,
+        amount = if (shippingMethods.amount != null) Amount(shippingMethods.amount!!) else null,
+        type = shippingMethods.type
     )
-
-    //TODO: check later for mapping Options object
-//    fun toOptions(currencyCode: CurrencyCode): Options {
-//        if (amount?.currencyValue == null) throw IllegalArgumentException("Currency Value is not set")
-//        return Options.Builder()
-//            .id(id)
-//            .amount(
-//                UnitAmount.Builder()
-//                    .value(amount.currencyValue)
-//                    .currencyCode(currencyCode)
-//                    .build()
-//            )
-//            .type(if (type == ShippingMethodType.SHIPPING) ShippingType.SHIPPING else ShippingType.PICKUP)
-//            .label(label)
-//            .selected(selected)
-//            .build()
-//    }
 }

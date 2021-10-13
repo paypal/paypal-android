@@ -11,6 +11,7 @@ import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.config.Environment.LIVE
 import com.paypal.checkout.config.Environment.SANDBOX
+import com.paypal.checkout.config.Environment.STAGE
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
@@ -34,6 +35,7 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
     private fun getPayPalEnvironment(environment:Environment) = when(environment) {
         Environment.LIVE -> LIVE
         Environment.SANDBOX -> SANDBOX
+        Environment.STAGING -> STAGE
     }
 
     // usea a stream of data as an alternative to callbacks

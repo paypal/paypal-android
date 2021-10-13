@@ -52,7 +52,7 @@ data class ShippingChangeData(
      * Shipping option the buyer has selected
      */
     val selectedShippingOption: Options?
-        get() = shippingOptions.find { it.selected ?: false }
+        get() = shippingOptions.find { it.selected }
 }
 
 
