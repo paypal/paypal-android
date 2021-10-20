@@ -56,7 +56,8 @@ buildscript {
             "androidxEspressoCore"        : "androidx.test.espresso:espresso-core:3.4.0",
             "mockk"                       : "io.mockk:mockk:1.12.0",
             "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0",
-            "robolectric"                 : "org.robolectric:robolectric:4.6.1"
+            "robolectric"                 : "org.robolectric:robolectric:4.6.1",
+            "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0"
     ]
 
     repositories {
