@@ -19,6 +19,16 @@
     <!-- PayPal Native-->
     <string name="start_checkout">Start Checkout</string>
 
+    <string name="user_action">User Action</string>
+    <string name="order_intent">Order Intent</string>
+    <string name="user_action_pay_now">PAY NOW</string>
+    <string name="user_action_continue">CONTINUE</string>
+    <string name="order_intent_authorize">AUTHORIZE</string>
+    <string name="order_intent_capture">CAPTURE</string>
+
+    <string name="checkout_error_message">Error with checkout: %s</string>
+
+
     <string name="auth_credentials_missing_title">Auth Credentials Required</string>
     <string name="auth_credentials_missing_message">You can set authentication credentials in the <b><i>paypal.properties</i></b> file in the root of the project directory.</string>
 

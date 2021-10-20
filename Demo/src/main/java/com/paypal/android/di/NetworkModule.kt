@@ -1,11 +1,16 @@
 package com.paypal.android.di
 
+import com.paypal.android.api.interceptors.TokenRefreshInterceptor
+import com.paypal.android.api.services.AuthApi
+import com.paypal.android.api.services.OrdersV2Api
 import com.paypal.android.api.services.PayPalDemoApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -18,27 +23,49 @@ private const val WRITE_TIMEOUT_IN_SEC = 30L
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides
-    fun provideRetrofitService(): Retrofit {
+    private fun provideRetrofitService(
+        baseUrl: String,
+        vararg interceptors: Interceptor
+    ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://ppcp-sample-merchant-sand.herokuapp.com")
-            .client(initHttpClientAndInterceptor())
+            .baseUrl(baseUrl)
+            .client(initHttpClientAndInterceptor(*interceptors))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
     @Provides
     fun providePaypalApi(): PayPalDemoApi {
-        return provideApi<PayPalDemoApi>(provideRetrofitService())
+        return provideApi(provideRetrofitService("https://ppcp-sample-merchant-sand.herokuapp.com"))
     }
 
-    private fun initHttpClientAndInterceptor(): OkHttpClient {
+    @Provides
+    fun provideOrdersV2Api(): OrdersV2Api {
+        return provideApi(
+            provideRetrofitService(
+                "https://api.sandbox.paypal.com",
+                TokenRefreshInterceptor(
+                    provideAuthApi()
+                )
+            )
+        )
+    }
+
+    @Provides
+    fun provideAuthApi(): AuthApi {
+        return provideApi(provideRetrofitService("https://api.sandbox.paypal.com"))
+    }
+
+    private fun initHttpClientAndInterceptor(vararg interceptors: Interceptor): OkHttpClient {
         val okHttpBuilder = OkHttpClient.Builder()
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         // Timeouts
         okHttpBuilder.connectTimeout(CONNECT_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
             .writeTimeout(WRITE_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
-
+        interceptors.forEach { interceptor -> okHttpBuilder.addInterceptor(interceptor) }
+        okHttpBuilder.addInterceptor(httpLoggingInterceptor)
         return okHttpBuilder.build()
     }
 }

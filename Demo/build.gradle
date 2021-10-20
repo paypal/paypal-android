@@ -76,6 +76,7 @@ dependencies {
 
     implementation deps.retrofit
     implementation deps.gson
+    implementation deps.loggingInterceptor
 
     implementation deps.hilt
     kapt deps.hiltKapt

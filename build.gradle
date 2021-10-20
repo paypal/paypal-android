@@ -44,6 +44,7 @@ buildscript {
             // Networking
             "retrofit"                    : "com.squareup.retrofit2:retrofit:2.9.0",
             "gson"                        : "com.squareup.retrofit2:converter-gson:2.3.0",
+            "loggingInterceptor"          : "com.squareup.okhttp3:logging-interceptor:4.9.2",
 
             // Dependency Injection
             "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",

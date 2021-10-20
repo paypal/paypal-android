@@ -3,8 +3,12 @@ package com.paypal.android.checkout.pojo
 import com.paypal.checkout.approve.Approval
 
 
-data class Approval(val approvalData: ApprovalData? = null) {
-    internal constructor(approval: Approval) : this(approvalData = ApprovalData(approval.data))
+data class Approval(
+    val approvalData: ApprovalData? = null,
+) {
+    internal constructor(approval: Approval) : this(
+        approvalData = ApprovalData(approval.data),
+    )
 }
 
 

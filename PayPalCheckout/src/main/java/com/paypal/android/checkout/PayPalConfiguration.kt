@@ -64,8 +64,10 @@ class PayPalConfiguration(
     /**
      * SettingsConfig sets additional flags for debugging and testing.
      */
-    val settingsConfig: SettingsConfig = SettingsConfig()
+    val settingsConfig: SettingsConfig = SettingsConfig(),
+
+    val clientSecret: String  //TODO: this will not ve necessary
 ) {
     val paymentsConfiguration =
-        CoreConfig(clientId = clientId, clientSecret = "", environment = environment)
+        CoreConfig(clientId = clientId, clientSecret = clientSecret, environment = environment)
 }

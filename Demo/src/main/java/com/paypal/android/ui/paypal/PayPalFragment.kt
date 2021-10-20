@@ -5,50 +5,56 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
+import com.paypal.android.BuildConfig
 import com.paypal.android.R
-import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalClientListener
 import com.paypal.android.checkout.PayPalConfiguration
-import com.paypal.android.checkout.patch.PatchOrderRequest
 import com.paypal.android.checkout.shipping.ShippingChangeActions
 import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.checkout.pojo.ErrorInfo
 import com.paypal.android.checkout.pojo.ShippingChangeData
-import com.paypal.android.checkout.shipping.OnPatchComplete
 import com.paypal.android.core.Environment
 import com.paypal.android.ui.theme.DemoTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-class PayPalFragment : Fragment(), PayPalClientListener {
+@AndroidEntryPoint
+class PayPalFragment : Fragment() {
 
-    private val orderId = ""
-    private val clientId = ""
-    private val returnUrl = ""
+    private val payPalViewModel: PayPalViewModel by viewModels()
 
-    private val paypalConfig = PayPalConfiguration(
-        application = requireActivity().application,
-        clientId = clientId,
-        returnUrl = returnUrl,
-        environment = Environment.SANDBOX
-    )
 
-    private val payPalClient = PayPalClient(payPalConfig = paypalConfig)
-
+    private lateinit var paypalConfig: PayPalConfiguration
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        paypalConfig = PayPalConfiguration(
+            application = requireActivity().application,
+            clientId = BuildConfig.CLIENT_ID,
+            clientSecret = BuildConfig.CLIENT_SECRET,
+            returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay",
+            environment = Environment.SANDBOX,
+        )
+        payPalViewModel.setPayPalConfig(paypalConfig)
         return ComposeView(requireContext()).apply {
             setContent {
                 PayPalFragmentView()
@@ -60,6 +66,40 @@ class PayPalFragment : Fragment(), PayPalClientListener {
     @Composable
     fun PayPalFragmentView() = DemoTheme {
         Column {
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.user_action))
+                LabelRadioButton(
+                    label = stringResource(id = R.string.user_action_pay_now),
+                    onClick = { payPalViewModel.userActionSelected(getString(R.string.user_action_pay_now)) },
+                    selectedLiveData = payPalViewModel.userAction
+                )
+                LabelRadioButton(
+                    label = stringResource(id = R.string.user_action_continue),
+                    onClick = { payPalViewModel.userActionSelected(getString(R.string.user_action_continue)) },
+                    selectedLiveData = payPalViewModel.userAction
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.order_intent))
+                LabelRadioButton(
+                    label = stringResource(id = R.string.order_intent_capture),
+                    onClick = { payPalViewModel.orderIntentSelected(getString(R.string.order_intent_capture)) },
+                    selectedLiveData = payPalViewModel.orderIntent
+                )
+                LabelRadioButton(
+                    label = stringResource(id = R.string.order_intent_authorize),
+                    onClick = { payPalViewModel.orderIntentSelected(getString(R.string.order_intent_authorize)) },
+                    selectedLiveData = payPalViewModel.orderIntent
+                )
+            }
             Button(
                 onClick = { launchNativeCheckout() },
                 modifier = Modifier
@@ -69,22 +109,21 @@ class PayPalFragment : Fragment(), PayPalClientListener {
         }
     }
 
+    @Composable
+    private fun LabelRadioButton(
+        label: String,
+        onClick: () -> Unit,
+        selectedLiveData: LiveData<String>
+    ) =
+        Row(modifier = Modifier.padding(horizontal = 12.dp)) {
+            RadioButton(
+                selected = selectedLiveData.observeAsState().value == label,
+                onClick = onClick
+            )
+            Text(text = label)
+        }
+
     private fun launchNativeCheckout() {
-
-    }
-
-    override fun onPayPalApprove(approval: Approval) {
-    }
-
-    override fun onPayPalError(errorInfo: ErrorInfo) {
-    }
-
-    override fun onPayPalCancel() {
-    }
-
-    override fun onPayPalShippingAddressChange(
-        shippingChangeData: ShippingChangeData,
-        shippingChangeActions: ShippingChangeActions
-    ) {
+        payPalViewModel.startPayPalCheckout()
     }
 }
