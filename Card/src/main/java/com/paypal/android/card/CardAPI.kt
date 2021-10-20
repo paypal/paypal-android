@@ -11,29 +11,27 @@ internal class CardAPI(
     private val api: API,
     private val requestFactory: CardAPIRequestFactory = CardAPIRequestFactory()
 ) {
-    suspend fun confirmPaymentSource(orderID: String, card: Card): ApproveOrderResult {
+    suspend fun confirmPaymentSource(orderID: String, card: Card): CardResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
+        val correlationId = httpResponse.headers["Paypal-Debug-Id"]
         return if (httpResponse.status == HTTP_OK) {
             runCatching {
                 val json = PaymentsJSON(httpResponse.body)
                 val status = json.getString("status")
                 val id = json.getString("id")
 
-                ApproveOrderResult.Success(
-                    cardOrder = CardOrder(
-                        orderID = id,
-                        status = OrderStatus.valueOf(status),
-                    ),
-                    correlationID = ""
+                CardResult.Success(
+                    orderID = id,
+                    status = OrderStatus.valueOf(status)
                 )
             }.recover {
-                ApproveOrderResult.Error(
+                CardResult.Error(
                     orderError = OrderError(
                         "PARSING_ERROR",
                         "Error parsing json response."
                     ),
-                    correlationID = ""
+                    correlationID = correlationId
                 )
             }.getOrNull()!!
         } else {
@@ -50,9 +48,9 @@ internal class CardAPI(
                 errorDetails += OrderErrorDetail(issue, description)
             }
 
-            ApproveOrderResult.Error(
+            CardResult.Error(
                 orderError = OrderError(name, message, errorDetails),
-                correlationID = ""
+                correlationID = correlationId
             )
         }
     }
