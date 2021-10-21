@@ -194,6 +194,7 @@ class HttpResponseParserUnitTest {
         fun setUp() {
             every { connection.responseCode } returns 200
             every { connection.contentEncoding } returns "gzip"
+            every { connection.inputStream } returns createGzippedInputStream("200_ok_gzip")
             every { connection.headerFields } returns headers
 
             subject = HttpResponseParser()
@@ -201,8 +202,6 @@ class HttpResponseParserUnitTest {
 
         @Test
         fun `when parse is called for a success, headers are returned in the HttpResponse`() {
-            every { connection.inputStream } returns createGzippedInputStream("200_ok_gzip")
-
             val result = subject.parse(connection)
 
             assertEquals(expectedHeaders, result.headers)
@@ -216,6 +215,13 @@ class HttpResponseParserUnitTest {
             val result = subject.parse(connection)
 
             assertEquals(expectedHeaders, result.headers)
+        }
+
+        @Test
+        fun `when parse is called, getHeaderFields is called on connection`() {
+            subject.parse(connection)
+
+            verify { connection.headerFields }
         }
     }
 }
