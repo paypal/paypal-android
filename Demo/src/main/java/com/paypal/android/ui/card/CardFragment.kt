@@ -22,8 +22,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CardFragment @Inject constructor(private val preferenceUtil: SharedPreferenceUtil): Fragment() {
+class CardFragment: Fragment() {
 
+    @Inject
+    lateinit var preferenceUtil: SharedPreferenceUtil
     private val cardViewModel: CardViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import javax.inject.Inject
 import com.google.gson.JsonParser
+import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.UserAction
 import com.paypal.android.checkout.OrderIntent
 import com.paypal.android.checkout.pojo.Approval
@@ -28,7 +29,7 @@ import com.paypal.android.checkout.shipping.ShippingChangeActions
 
 @HiltViewModel
 class PayPalViewModel @Inject constructor(
-    private val ordersV2Api: OrdersV2Api,
+    private val payPalDemoApi: PayPalDemoApi,
 ) : ViewModel(), PayPalClientListener {
 
     companion object {
@@ -51,8 +52,8 @@ class PayPalViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val order = fetchOrder()
-                order.id?.let {
-                    payPalClient.checkout(it, this@PayPalViewModel)
+                order.id?.let { orderId ->
+                    payPalClient.checkout(orderId, this@PayPalViewModel)
                 }
             } catch (e: Exception) {
                 onPayPalError(
@@ -61,7 +62,6 @@ class PayPalViewModel @Inject constructor(
                         reason = e.message!!,
                         correlationIds = CorrelationIds(),
                         orderId = "",
-                        nativeSdkVersion = "0.5.1"
                     )
                 )
                 Log.e(TAG, e.message!!)
@@ -81,7 +81,7 @@ class PayPalViewModel @Inject constructor(
                 _orderIntent.value?.name
             )
         ) as JsonObject
-        return ordersV2Api.postCheckoutOrder(orderJson)
+        return payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
     }
 
     fun userActionSelected(action: String) {

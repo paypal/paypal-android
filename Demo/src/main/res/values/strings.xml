@@ -25,6 +25,7 @@
     <string name="user_action_continue">CONTINUE</string>
     <string name="order_intent_authorize">AUTHORIZE</string>
     <string name="order_intent_capture">CAPTURE</string>
+    <string name="minimum_sdk_needed">Checkout SDK only available for API 23+</string>
 
     <string name="checkout_error_message">Error with checkout: %s</string>
 

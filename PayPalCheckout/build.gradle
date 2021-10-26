@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion modules.androidTargetVersion
         versionCode modules.sdkVersionCode
         versionName modules.sdkVersionName
@@ -35,13 +35,19 @@ android {
 dependencies {
     api project(':Core')
 
-    implementation 'com.paypal.checkout:android-sdk:0.5.1'
+    implementation deps.paypalNativeCheckout
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
 
     testImplementation deps.junit
+    testImplementation deps.mockk
+    testImplementation deps.robolectric
+    testImplementation deps.kotlinxAndroidCoroutinesTest
+    testImplementation 'io.strikt:strikt-core:0.30.1'
+    testImplementation 'io.strikt:strikt-mockk:0.30.1'
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }

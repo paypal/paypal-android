@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypal
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -39,7 +40,7 @@ class PayPalFragment : Fragment() {
 
     private val payPalViewModel: PayPalViewModel by viewModels()
 
-
+    private val canRunPayPalCheckout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     private lateinit var paypalConfig: PayPalConfiguration
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,7 +55,9 @@ class PayPalFragment : Fragment() {
             returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay",
             environment = Environment.SANDBOX,
         )
-        payPalViewModel.setPayPalConfig(paypalConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            payPalViewModel.setPayPalConfig(paypalConfig)
+        }
         return ComposeView(requireContext()).apply {
             setContent {
                 PayPalFragmentView()
@@ -100,12 +103,15 @@ class PayPalFragment : Fragment() {
                     selectedLiveData = payPalViewModel.orderIntent
                 )
             }
-            Button(
-                onClick = { launchNativeCheckout() },
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
-                    .fillMaxWidth()
-            ) { Text(stringResource(R.string.start_checkout)) }
+                Button(
+                    enabled = canRunPayPalCheckout,
+                    onClick = { launchNativeCheckout() },
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
+                        .fillMaxWidth()
+                ) { Text(stringResource(R.string.start_checkout)) }
+            if (!canRunPayPalCheckout) Text(text = stringResource(id = R.string.minimum_sdk_needed))
+
         }
     }
 

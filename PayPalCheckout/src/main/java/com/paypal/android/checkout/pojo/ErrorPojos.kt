@@ -26,7 +26,7 @@ data class ErrorInfo(
     /**
      * Version of the PayPal Checkout SDK.
      */
-    val nativeSdkVersion: String
+    val nativeSdkVersion: String? = null
 ) {
     internal constructor(errorInfo: com.paypal.checkout.error.ErrorInfo) : this(
         error = errorInfo.error,

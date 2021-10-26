@@ -23,6 +23,9 @@ private const val WRITE_TIMEOUT_IN_SEC = 30L
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
+    private const val SAMPLE_SERVER_BASE_URL = "https://ppcp-sample-merchant-sand.herokuapp.com"
+    private const val SANDBOX_BASE_URL = "https://api.sandbox.paypal.com"
+
     private fun provideRetrofitService(
         baseUrl: String,
         vararg interceptors: Interceptor
@@ -36,14 +39,14 @@ object NetworkModule {
 
     @Provides
     fun providePaypalApi(): PayPalDemoApi {
-        return provideApi(provideRetrofitService("https://ppcp-sample-merchant-sand.herokuapp.com"))
+        return provideApi(provideRetrofitService(SAMPLE_SERVER_BASE_URL))
     }
 
     @Provides
     fun provideOrdersV2Api(): OrdersV2Api {
         return provideApi(
             provideRetrofitService(
-                "https://api.sandbox.paypal.com",
+                SANDBOX_BASE_URL,
                 TokenRefreshInterceptor(
                     provideAuthApi()
                 )
@@ -53,7 +56,7 @@ object NetworkModule {
 
     @Provides
     fun provideAuthApi(): AuthApi {
-        return provideApi(provideRetrofitService("https://api.sandbox.paypal.com"))
+        return provideApi(provideRetrofitService(SANDBOX_BASE_URL))
     }
 
     private fun initHttpClientAndInterceptor(vararg interceptors: Interceptor): OkHttpClient {

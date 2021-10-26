@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.paypal.android"
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -80,7 +80,6 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
-
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore

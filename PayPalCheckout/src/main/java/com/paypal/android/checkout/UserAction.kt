@@ -28,3 +28,6 @@ enum class UserAction {
 
 internal val UserAction.asNativeCheckout: com.paypal.checkout.createorder.UserAction
     get() = enumValueOf(this.name)
+
+internal val com.paypal.checkout.createorder.UserAction.asPaypalCheckout: UserAction
+    get() = enumValueOf(this.name)

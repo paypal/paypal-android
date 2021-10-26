@@ -1,5 +1,6 @@
 package com.paypal.android.api.services
 
+import com.google.gson.JsonObject
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import retrofit2.http.Body
@@ -12,5 +13,11 @@ interface PayPalDemoApi {
     suspend fun fetchOrderId(
         @Query("countryCode") countryCode: String,
         @Body orderRequest: CreateOrderRequest?
+    ): Order
+
+    @POST("/order")
+    suspend fun fetchOrderId(
+        @Query("countryCode") countryCode: String,
+        @Body jsonObject: JsonObject
     ): Order
 }

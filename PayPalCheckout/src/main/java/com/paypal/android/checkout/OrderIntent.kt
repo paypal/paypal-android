@@ -25,3 +25,6 @@ enum class OrderIntent {
 
 internal val OrderIntent.asNativeCheckout: com.paypal.checkout.createorder.OrderIntent
     get() = enumValueOf(this.name)
+
+internal val com.paypal.checkout.createorder.OrderIntent.asPaypalCheckout: OrderIntent
+    get() = enumValueOf(this.name)

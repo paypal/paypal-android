@@ -38,7 +38,6 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
         Environment.STAGING -> STAGE
     }
 
-    // usea a stream of data as an alternative to callbacks
     fun checkout(orderId: String, payPalClientListener: PayPalClientListener) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
