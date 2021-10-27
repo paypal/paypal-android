@@ -34,7 +34,7 @@ class TokenRefreshInterceptor @Inject constructor(
             authToken = newAuthToken
         }
         val builder: Request.Builder =
-            mainRequest.newBuilder().header("Authorization", "Bearer ${authToken?.accessToken}")
+            mainRequest.newBuilder().header("Authorization", "Bearer ${authToken.accessToken}")
         return chain.proceed(builder.build())
     }
 }

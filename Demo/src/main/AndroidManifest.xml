@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.paypal.android">
     <application
         android:allowBackup="true"
@@ -8,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidSDK"
-        android:name=".DemoApplication">
+        android:name=".DemoApplication"
+        tools:ignore="MediaCapabilities">
         <activity
             android:name=".DemoActivity"
             android:exported="true">

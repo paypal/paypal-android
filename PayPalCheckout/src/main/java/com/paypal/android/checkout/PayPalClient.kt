@@ -1,5 +1,7 @@
 package com.paypal.android.checkout
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.checkout.pojo.ErrorInfo
 import com.paypal.android.checkout.pojo.ShippingChangeData
@@ -16,6 +18,7 @@ import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
 
+@RequiresApi(Build.VERSION_CODES.M)
 class PayPalClient(payPalConfig: PayPalConfiguration) {
 
     init {

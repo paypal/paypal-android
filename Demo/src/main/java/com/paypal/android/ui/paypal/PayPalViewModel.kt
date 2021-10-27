@@ -1,6 +1,8 @@
 package com.paypal.android.ui.paypal
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
@@ -45,6 +47,7 @@ class PayPalViewModel @Inject constructor(
     private val orderJson = OrderUtils.orderWithShipping
     private lateinit var payPalClient: PayPalClient
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun startPayPalCheckout() {
         viewModelScope.launch {
             try {
@@ -66,6 +69,7 @@ class PayPalViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun setPayPalConfig(paypalConfig: PayPalConfiguration) {
         payPalClient = PayPalClient(paypalConfig)
     }

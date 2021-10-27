@@ -30,6 +30,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+    lintOptions {
+        lintConfig file('../lint.xml')
+        abortOnError true
+        warningsAsErrors true
+    }
 }
 
 dependencies {
