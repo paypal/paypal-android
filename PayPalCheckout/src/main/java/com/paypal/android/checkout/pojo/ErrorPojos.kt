@@ -1,6 +1,5 @@
 package com.paypal.android.checkout.pojo
 
-
 data class ErrorInfo(
 
     /**

@@ -1,6 +1,5 @@
 package com.paypal.android.checkout
 
-
 /**
  * Configures a Continue or Pay Now checkout flow.
  */

@@ -6,7 +6,9 @@ import com.paypal.android.checkout.patch.PatchOrderRequest
  * The actions that can be performed when the [OnShippingChange.onShippingChanged] callback is
  * invoked.
  */
-class ShippingChangeActions internal constructor(private val mChangeActions: com.paypal.checkout.shipping.ShippingChangeActions) {
+class ShippingChangeActions internal constructor(
+    private val mChangeActions: com.paypal.checkout.shipping.ShippingChangeActions
+) {
 
     /**
      * Call patchOrder() to update an order. The patch action will only work for orders with the
@@ -49,7 +51,6 @@ class ShippingChangeActions internal constructor(private val mChangeActions: com
     fun reject() {
         mChangeActions.reject()
     }
-
 }
 
 /**

@@ -22,7 +22,7 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
         val config = CheckoutConfig(
             application = payPalConfig.application,
             clientId = payPalConfig.paymentsConfiguration.clientId,
-            environment =  getPayPalEnvironment(payPalConfig.paymentsConfiguration.environment),
+            environment = getPayPalEnvironment(payPalConfig.paymentsConfiguration.environment),
             returnUrl = payPalConfig.returnUrl,
             currencyCode = payPalConfig.currencyCode?.asNativeCheckout,
             paymentButtonIntent = payPalConfig.paymentButtonIntent?.asNativeCheckout,
@@ -32,7 +32,7 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
         PayPalCheckout.setConfig(config)
     }
 
-    private fun getPayPalEnvironment(environment:Environment) = when(environment) {
+    private fun getPayPalEnvironment(environment: Environment) = when (environment) {
         Environment.LIVE -> LIVE
         Environment.SANDBOX -> SANDBOX
         Environment.STAGING -> STAGE
@@ -42,17 +42,21 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
         },
-        OnApprove { approval ->
-            payPalClientListener.onPayPalApprove(Approval(approval))
-        },
-        OnShippingChange { shippingChangeData, shippingChangeActions ->
-            payPalClientListener.onPayPalShippingAddressChange(ShippingChangeData(shippingChangeData), ShippingChangeActions(shippingChangeActions))
-        },
-        OnCancel {
-            payPalClientListener.onPayPalCancel()
-        },
-        OnError { errorInfo ->
-            payPalClientListener.onPayPalError(ErrorInfo(errorInfo))
-        })
+            OnApprove { approval ->
+                payPalClientListener.onPayPalApprove(Approval(approval))
+            },
+            OnShippingChange { shippingChangeData, shippingChangeActions ->
+                payPalClientListener.onPayPalShippingAddressChange(
+                    ShippingChangeData(
+                        shippingChangeData
+                    ), ShippingChangeActions(shippingChangeActions)
+                )
+            },
+            OnCancel {
+                payPalClientListener.onPayPalCancel()
+            },
+            OnError { errorInfo ->
+                payPalClientListener.onPayPalError(ErrorInfo(errorInfo))
+            })
     }
 }

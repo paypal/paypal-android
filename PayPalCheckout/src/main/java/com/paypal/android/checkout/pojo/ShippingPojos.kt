@@ -6,7 +6,6 @@ import com.paypal.android.checkout.asPaypalCheckout
 import com.paypal.checkout.order.Items
 import com.paypal.checkout.order.Order
 
-
 /**
  * This is the data returned when the [OnShippingChange.onShippingChanged] callback is invoked.
  */
@@ -55,7 +54,6 @@ data class ShippingChangeData(
         get() = shippingOptions.find { it.selected }
 }
 
-
 data class ShippingAddress(
     val addressLine1: String? = null,
     val addressLine2: String? = null,
@@ -84,7 +82,6 @@ data class ShippingAddress(
         )
 }
 
-
 data class Options(
     val id: String,
     val selected: Boolean,
@@ -110,7 +107,6 @@ data class Options(
         )
 }
 
-
 data class UnitAmount(
     val currencyCode: CurrencyCode,
     val value: String
@@ -123,7 +119,6 @@ data class UnitAmount(
     internal val toNativeCheckout: com.paypal.checkout.order.UnitAmount
         get() = com.paypal.checkout.order.UnitAmount(this.currencyCode.asNativeCheckout, this.value)
 }
-
 
 /*
 * The method by which the payer wants to get their items.
@@ -146,7 +141,6 @@ internal val ShippingType.asNativeCheckout: com.paypal.checkout.createorder.Ship
 internal val com.paypal.checkout.createorder.ShippingType.asPaypalCheckout: ShippingType
     get() = enumValueOf(this.name)
 
-
 /**
  * Indicates the type of shipping change
  */
@@ -168,7 +162,6 @@ internal val ShippingChangeType.asNativeCheckout: com.paypal.checkout.shipping.S
 
 internal val com.paypal.checkout.shipping.ShippingChangeType.asPaypalCheckout: ShippingChangeType
     get() = enumValueOf(this.name)
-
 
 /**
  * The total order amount with an optional breakdown that provides details, such as the total
@@ -209,7 +202,6 @@ data class OrderAmount constructor(
             breakdown = breakdown?.asNativeCheckout
         )
 }
-
 
 /**
  * The breakdown of the amount. Breakdown provides details such as total item amount, total tax

@@ -8,11 +8,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.gson.Gson
 
-
-
-
 @Singleton
-class SharedPreferenceUtil @Inject constructor(@ApplicationContext context : Context) {
+class SharedPreferenceUtil @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
     fun getEnvironment(): String? {
@@ -35,9 +32,8 @@ class SharedPreferenceUtil @Inject constructor(@ApplicationContext context : Con
         prefs.edit().putString(AUTH_TOKEN, json).apply()
     }
 
-    companion object  {
+    companion object {
         private const val ENVIRONMENT_KEY = "environment"
         private const val AUTH_TOKEN = "auth_token"
     }
-
 }

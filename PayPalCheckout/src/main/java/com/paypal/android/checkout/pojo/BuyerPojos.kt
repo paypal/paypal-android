@@ -1,6 +1,5 @@
 package com.paypal.android.checkout.pojo
 
-
 data class Buyer(
     val userId: String?,
     val email: Email?,
@@ -19,7 +18,6 @@ data class Buyer(
     )
 }
 
-
 data class Address(
     val isPrimary: Boolean?,
     val fullAddress: String?,
@@ -32,13 +30,11 @@ data class Address(
     )
 }
 
-
 data class Phone(
     val number: String?
 ) {
     internal constructor(phone: com.paypal.pyplcheckout.pojo.Phone) : this(number = phone.number)
 }
-
 
 data class Email(
     val stringValue: String?,
@@ -49,7 +45,6 @@ data class Email(
         additionalProperties = email?.additionalProperties
     )
 }
-
 
 data class Name(
     var fullName: String?,

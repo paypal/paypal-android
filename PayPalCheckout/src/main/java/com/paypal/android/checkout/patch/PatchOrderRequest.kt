@@ -18,9 +18,10 @@ data class PatchOrderRequest internal constructor(
     internal val toNativeCheckout: com.paypal.checkout.order.patch.PatchOrderRequest
         get() = this.transform()
 
-    private fun transform() : com.paypal.checkout.order.patch.PatchOrderRequest {
-        val orderUpdateNativeList = orderUpdates.map { orderUpdate -> orderUpdate.toNativeCheckout()  }
-        return com.paypal.checkout.order.patch.PatchOrderRequest(*orderUpdateNativeList.toTypedArray())
+    @SuppressWarnings("SpreadOperator")
+    private fun transform(): com.paypal.checkout.order.patch.PatchOrderRequest {
+        val orderUpdateNativeList = orderUpdates.map { orderUpdate -> orderUpdate.toNativeCheckout() }.toTypedArray()
+        return com.paypal.checkout.order.patch.PatchOrderRequest(*orderUpdateNativeList)
     }
 }
 
@@ -35,7 +36,7 @@ abstract class OrderUpdate(
         const val DEFAULT_PURCHASE_UNIT_ID = "default"
     }
 
-    abstract fun toNativeCheckout() : com.paypal.checkout.order.patch.OrderUpdate
+    abstract fun toNativeCheckout(): com.paypal.checkout.order.patch.OrderUpdate
 }
 
 /**

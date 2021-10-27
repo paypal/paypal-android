@@ -2,7 +2,6 @@ package com.paypal.android.checkout.pojo
 
 import com.paypal.checkout.approve.Approval
 
-
 data class Approval(
     val approvalData: ApprovalData? = null,
 ) {
@@ -10,7 +9,6 @@ data class Approval(
         approvalData = ApprovalData(approval.data),
     )
 }
-
 
 data class ApprovalData(
     val payerId: String?,
@@ -27,5 +25,3 @@ data class ApprovalData(
         cart = Cart(approvalData.cart)
     )
 }
-
-

@@ -2,7 +2,6 @@ package com.paypal.android.checkout.patch
 
 import com.paypal.android.checkout.pojo.ShippingAddress
 
-
 /**
  * Class containing the different operations that can be performed with an [Address].
  */
@@ -50,7 +49,6 @@ sealed class PatchShippingAddress(
                 address.asNativeCheckout,
                 purchaseUnitReferenceId
             )
-
     }
 
     override fun getPath() =

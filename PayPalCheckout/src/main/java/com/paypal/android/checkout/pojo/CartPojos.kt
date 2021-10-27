@@ -2,7 +2,6 @@ package com.paypal.android.checkout.pojo
 
 import java.util.HashMap
 
-
 data class Cart(
     val cartId: String? = null,
     val intent: String? = null,
@@ -32,7 +31,6 @@ data class Cart(
     )
 }
 
-
 data class Item(
     val description: String? = null,
     val name: String? = null,
@@ -53,7 +51,6 @@ data class Item(
     )
 }
 
-
 data class CancelUrl(
     val href: String? = null,
     val additionalProperties: Map<String, Any>? = HashMap()
@@ -64,7 +61,6 @@ data class CancelUrl(
     )
 }
 
-
 data class ReturnUrl(
     val href: String? = null,
     val additionalProperties: Map<String, Any>? = HashMap()
@@ -74,7 +70,6 @@ data class ReturnUrl(
         additionalProperties = returnUrl?.additionalProperties
     )
 }
-
 
 data class CartShippingAddress(
     val firstName: String? = null,
@@ -101,7 +96,6 @@ data class CartShippingAddress(
         isStoreAddress = cartShippingAddress?.isStoreAddress
     )
 }
-
 
 data class ShippingMethods(
     val id: String,

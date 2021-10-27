@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.services.OrdersV2Api
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalClientListener
 import com.paypal.android.checkout.PayPalConfiguration
@@ -16,7 +15,6 @@ import com.paypal.android.checkout.pojo.CorrelationIds
 import com.paypal.android.checkout.pojo.ErrorInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 import com.google.gson.JsonParser
 import com.paypal.android.api.services.PayPalDemoApi
@@ -25,7 +23,7 @@ import com.paypal.android.checkout.OrderIntent
 import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.checkout.pojo.ShippingChangeData
 import com.paypal.android.checkout.shipping.ShippingChangeActions
-
+import retrofit2.HttpException
 
 @HiltViewModel
 class PayPalViewModel @Inject constructor(
@@ -47,7 +45,6 @@ class PayPalViewModel @Inject constructor(
     private val orderJson = OrderUtils.orderWithShipping
     private lateinit var payPalClient: PayPalClient
 
-
     fun startPayPalCheckout() {
         viewModelScope.launch {
             try {
@@ -55,7 +52,7 @@ class PayPalViewModel @Inject constructor(
                 order.id?.let { orderId ->
                     payPalClient.checkout(orderId, this@PayPalViewModel)
                 }
-            } catch (e: Exception) {
+            } catch (e: HttpException) {
                 onPayPalError(
                     ErrorInfo(
                         error = e,
@@ -101,7 +98,7 @@ class PayPalViewModel @Inject constructor(
     }
 
     override fun onPayPalCancel() {
-        Log.i(TAG, "User cancelled");
+        Log.i(TAG, "User cancelled")
     }
 
     override fun onPayPalShippingAddressChange(

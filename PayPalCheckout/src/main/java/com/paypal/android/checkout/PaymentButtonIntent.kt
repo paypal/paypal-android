@@ -1,6 +1,5 @@
 package com.paypal.android.checkout
 
-
 /**
  * This intent will be used for determining payment button eligibility.
  */

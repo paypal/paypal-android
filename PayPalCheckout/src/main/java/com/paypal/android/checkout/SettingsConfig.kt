@@ -1,6 +1,5 @@
 package com.paypal.android.checkout
 
-
 /**
  * [SettingsConfig] holds additional config values that are used for debugging and testing.
  */

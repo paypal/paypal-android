@@ -1,8 +1,6 @@
 package com.paypal.android.checkout.pojo
 
-
 import java.util.HashMap
-
 
 data class Amounts(
     val handlingFee: HandlingFee? = null,
@@ -36,7 +34,6 @@ class HandlingFee(
     )
 }
 
-
 data class Insurance(
     val currencyFormatSymbolISOCurrency: String? = null,
     val additionalProperties: Map<String, Any>? = HashMap()
@@ -46,7 +43,6 @@ data class Insurance(
         additionalProperties = insurance?.additionalProperties
     )
 }
-
 
 data class ShippingAndHandling(
     val currencyFormatSymbolISOCurrency: String? = null,
@@ -58,7 +54,6 @@ data class ShippingAndHandling(
     )
 }
 
-
 data class ShippingDiscount(
     val currencyFormatSymbolISOCurrency: String? = null,
     val additionalProperties: Map<String, Any>? = HashMap()
@@ -68,7 +63,6 @@ data class ShippingDiscount(
         additionalProperties = shippingDiscount?.additionalProperties
     )
 }
-
 
 data class Subtotal(
     val currencyFormatSymbolISOCurrency: String? = null,
@@ -80,7 +74,6 @@ data class Subtotal(
     )
 }
 
-
 data class Tax(
     val currencyFormatSymbolISOCurrency: String? = null,
     val additionalProperties: Map<String, Any>? = HashMap()
@@ -91,7 +84,6 @@ data class Tax(
     )
 }
 
-
 data class UnitPrice(
     val currencyFormatSymbolISOCurrency: String? = null,
     val additionalProperties: Map<String, Any>? = HashMap()
@@ -101,7 +93,6 @@ data class UnitPrice(
         additionalProperties = unitPrice?.additionalProperties
     )
 }
-
 
 data class Total(
     val currencyCode: String? = null,
@@ -118,7 +109,6 @@ data class Total(
         additionalProperties = total?.additionalProperties
     )
 }
-
 
 class Amount(
     val currencyFormat: String? = null,

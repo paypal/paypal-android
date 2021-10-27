@@ -22,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CardFragment: Fragment() {
+class CardFragment : Fragment() {
 
     @Inject
     lateinit var preferenceUtil: SharedPreferenceUtil

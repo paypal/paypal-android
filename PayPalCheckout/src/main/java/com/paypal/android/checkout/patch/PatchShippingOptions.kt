@@ -30,7 +30,6 @@ sealed class PatchShippingOptions(
                 purchaseUnitReferenceId = purchaseUnitReferenceId
             )
         }
-
     }
 
     override fun getPath() =

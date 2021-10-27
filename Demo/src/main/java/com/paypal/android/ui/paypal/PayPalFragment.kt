@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,12 +24,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
-import com.paypal.android.checkout.PayPalClientListener
 import com.paypal.android.checkout.PayPalConfiguration
-import com.paypal.android.checkout.shipping.ShippingChangeActions
-import com.paypal.android.checkout.pojo.Approval
-import com.paypal.android.checkout.pojo.ErrorInfo
-import com.paypal.android.checkout.pojo.ShippingChangeData
 import com.paypal.android.core.Environment
 import com.paypal.android.ui.theme.DemoTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -111,7 +105,6 @@ class PayPalFragment : Fragment() {
                         .fillMaxWidth()
                 ) { Text(stringResource(R.string.start_checkout)) }
             if (!canRunPayPalCheckout) Text(text = stringResource(id = R.string.minimum_sdk_needed))
-
         }
     }
 

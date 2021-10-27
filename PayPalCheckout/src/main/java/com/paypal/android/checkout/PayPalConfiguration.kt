@@ -6,16 +6,12 @@ import com.paypal.android.core.CoreConfig
 
 class PayPalConfiguration(
     /**
-     * [Application] instance that is required to use the SDK.
-     */
-    val application: Application,
-
-    /**
      * Client ID is used to connect the Checkout SDK to your PayPal app. Your app's Client ID can be
      * found in the PayPal Developer Portal.
      *
      * @see [Developer Portal](https://developer.paypal.com/developer/applications/)
-     * @see [Managing Sandbox Apps](https://developer.paypal.com/docs/api-basics/manage-apps/#create-or-edit-sandbox-and-live-apps)
+     * @see [Managing Sandbox Apps]
+     * (https://developer.paypal.com/docs/api-basics/manage-apps/#create-or-edit-sandbox-and-live-apps)
      */
     clientId: String,
 
@@ -26,6 +22,11 @@ class PayPalConfiguration(
      * Use [Environment.SANDBOX] for development and testing.
      */
     environment: Environment,
+
+    /**
+     * [Application] instance that is required to use the SDK.
+     */
+    val application: Application,
 
     /**
      * This is the Return URL value that was added to your app in the PayPal Developer Portal.
@@ -66,7 +67,7 @@ class PayPalConfiguration(
      */
     val settingsConfig: SettingsConfig = SettingsConfig(),
 
-    val clientSecret: String  //TODO: this will not ve necessary
+    val clientSecret: String
 ) {
     val paymentsConfiguration =
         CoreConfig(clientId = clientId, clientSecret = clientSecret, environment = environment)

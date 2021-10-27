@@ -3,14 +3,13 @@ package com.paypal.android.checkout.patch
 import com.paypal.android.checkout.pojo.Amount
 import com.paypal.android.checkout.pojo.OrderAmount
 
-
 /**
  * Class containing the different operations that can be performed with [Amount].
  */
 sealed class PatchAmount(
     purchaseUnitReferenceId: String,
     patchOperation: PatchOperation,
-    val amount: OrderAmount //TODO: change pojo amount
+    val amount: OrderAmount
 ) : OrderUpdate(purchaseUnitReferenceId, patchOperation, amount) {
 
     /**
@@ -30,7 +29,6 @@ sealed class PatchAmount(
                 amount.asNativeCheckout,
                 purchaseUnitReferenceId
             )
-
     }
 
     override fun getPath() = "/purchase_units/@reference_id=='$purchaseUnitReferenceId'/amount"

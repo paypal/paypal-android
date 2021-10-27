@@ -21,7 +21,12 @@ class ShippingChangeActionsTest {
     @Test
     fun `when patchOrder is invoked with OnPatchComplete, nested patchOrder is called and callback invoked`() {
         val patchCompleteSlot = slot<com.paypal.checkout.order.actions.OnPatchComplete>()
-        every { shippingActions.patchOrder(patchOrderRequest.toNativeCheckout, capture(patchCompleteSlot)) } answers { patchCompleteSlot.captured.onPatchComplete() }
+        every {
+            shippingActions.patchOrder(
+                patchOrderRequest.toNativeCheckout,
+                capture(patchCompleteSlot)
+            )
+        } answers { patchCompleteSlot.captured.onPatchComplete() }
         subject.patchOrder(patchOrderRequest, onPatchComplete)
         verify {
             shippingActions.patchOrder(

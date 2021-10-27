@@ -9,5 +9,8 @@ interface PayPalClientListener {
     fun onPayPalApprove(approval: Approval)
     fun onPayPalError(errorInfo: ErrorInfo)
     fun onPayPalCancel()
-    fun onPayPalShippingAddressChange(shippingChangeData: ShippingChangeData, shippingChangeActions: ShippingChangeActions)
+    fun onPayPalShippingAddressChange(
+        shippingChangeData: ShippingChangeData,
+        shippingChangeActions: ShippingChangeActions
+    )
 }
