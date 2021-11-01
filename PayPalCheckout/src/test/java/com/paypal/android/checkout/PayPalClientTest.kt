@@ -1,7 +1,6 @@
 package com.paypal.android.checkout
 
 import android.app.Application
-import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.core.Environment
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
@@ -23,6 +22,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import strikt.api.expectThat
+import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
 
@@ -39,8 +39,6 @@ class PayPalClientTest {
         returnUrl = mockReturnUrl,
         clientSecret = mockClientSecret
     )
-
-    private val payPalClientListener = mockk<PayPalClientListener>(relaxed = true)
 
     @Before
     fun setUp() {
@@ -156,7 +154,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(payPalConfiguration)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(orderId, payPalClientListener)
+        paypalClient.checkout(orderId) {}
 
         verify {
             createOrderActions.set(orderId)
@@ -170,7 +168,6 @@ class PayPalClientTest {
         val paymentId = generateRandomString()
         val approval = mockk<com.paypal.checkout.approve.Approval>()
         val onApproveSlot = slot<OnApprove>()
-        val approvalSlot = slot<Approval>()
 
         val approvalDataMock = mockk<com.paypal.checkout.approve.ApprovalData>(relaxed = true)
         every { approvalDataMock.payerId } returns payerId
@@ -189,21 +186,16 @@ class PayPalClientTest {
             )
         } answers { onApproveSlot.captured.onApprove(approval) }
 
-        every { payPalClientListener.onPayPalApprove(capture(approvalSlot)) } answers { approvalSlot.captured }
-
         val paypalClient = PayPalClient(payPalConfiguration)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString(), payPalClientListener)
-
-        verify {
-            payPalClientListener.onPayPalApprove(any())
-        }
-
-        expectThat(approvalSlot.captured) {
-            get { approvalData?.payerId }.isEqualTo(payerId)
-            get { approvalData?.orderId }.isEqualTo(orderId)
-            get { approvalData?.paymentId }.isEqualTo(paymentId)
+        paypalClient.checkout(generateRandomString()) { result ->
+            expectThat(result) {
+                isA<PayPalCheckoutResult.Success>()
+                get { approval.data.payerId }.isEqualTo(payerId)
+                get { approval.data.orderId }.isEqualTo(orderId)
+                get { approval.data.paymentId }.isEqualTo(paymentId)
+            }
         }
     }
 
@@ -234,10 +226,8 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(payPalConfiguration)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString(), payPalClientListener)
-
-        verify {
-            payPalClientListener.onPayPalShippingAddressChange(any(), any())
+        paypalClient.checkout(generateRandomString()) { result ->
+            expectThat(result).isA<PayPalCheckoutResult.ShippingChange>()
         }
     }
 
@@ -258,10 +248,8 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(payPalConfiguration)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString(), payPalClientListener)
-
-        verify {
-            payPalClientListener.onPayPalCancel()
+        paypalClient.checkout(generateRandomString()) { result ->
+            expectThat(result).isA<PayPalCheckoutResult.Cancellation>()
         }
     }
 
@@ -282,10 +270,8 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(payPalConfiguration)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString(), payPalClientListener)
-
-        verify {
-            payPalClientListener.onPayPalError(any())
+        paypalClient.checkout(generateRandomString()) { result ->
+            expectThat(result).isA<PayPalCheckoutResult.Failure>()
         }
     }
 

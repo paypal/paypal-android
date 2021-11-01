@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import com.paypal.android.checkout.pojo.Approval
 import com.paypal.android.checkout.pojo.ErrorInfo
 import com.paypal.android.checkout.pojo.ShippingChangeData
-import com.paypal.android.checkout.shipping.ShippingChangeActions
 import com.paypal.android.core.Environment
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
@@ -41,25 +40,21 @@ class PayPalClient(payPalConfig: PayPalConfiguration) {
         Environment.STAGING -> STAGE
     }
 
-    fun checkout(orderId: String, payPalClientListener: PayPalClientListener) {
+    fun checkout(orderId: String, complete: (PayPalCheckoutResult) -> Unit) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
         },
-            OnApprove { approval ->
-                payPalClientListener.onPayPalApprove(Approval(approval))
+            onApprove = OnApprove { approval ->
+                complete(PayPalCheckoutResult.Success(Approval(approval)))
             },
-            OnShippingChange { shippingChangeData, shippingChangeActions ->
-                payPalClientListener.onPayPalShippingAddressChange(
-                    ShippingChangeData(
-                        shippingChangeData
-                    ), ShippingChangeActions(shippingChangeActions)
-                )
+            onShippingChange = OnShippingChange { shippingChangeData, _ ->
+                complete(PayPalCheckoutResult.ShippingChange(ShippingChangeData(shippingChangeData)))
             },
-            OnCancel {
-                payPalClientListener.onPayPalCancel()
+            onCancel = OnCancel {
+                complete(PayPalCheckoutResult.Cancellation)
             },
-            OnError { errorInfo ->
-                payPalClientListener.onPayPalError(ErrorInfo(errorInfo))
+            onError = OnError { errorInfo ->
+                complete(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
             })
     }
 }
