@@ -45,7 +45,6 @@ class PayPalFragment : Fragment() {
         paypalConfig = PayPalConfiguration(
             application = requireActivity().application,
             clientId = BuildConfig.CLIENT_ID,
-            clientSecret = BuildConfig.CLIENT_SECRET,
             returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay",
             environment = Environment.SANDBOX,
         )

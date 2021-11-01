@@ -67,8 +67,7 @@ class PayPalConfiguration(
      */
     val settingsConfig: SettingsConfig = SettingsConfig(),
 
-    val clientSecret: String
 ) {
     val paymentsConfiguration =
-        CoreConfig(clientId = clientId, clientSecret = clientSecret, environment = environment)
+        CoreConfig(clientId = clientId, environment = environment)
 }
