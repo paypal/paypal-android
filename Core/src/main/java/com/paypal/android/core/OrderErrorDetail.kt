@@ -5,7 +5,7 @@ data class OrderErrorDetail(
     val description: String
 ) {
     override fun toString(): String {
-        return "Issue: $issue." +
-                "\nError description: ${description}."
+        return "Issue: $issue.\n" +
+                "Error description: $description."
     }
 }

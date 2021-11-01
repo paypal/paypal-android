@@ -81,7 +81,10 @@ internal class CardAPI(
                 }
 
                 CardResult.Error(
-                    payPalSDKError = APIClientError.httpURLConnectionError(httpResponse.status, "$message -> $errorDetails"),
+                    payPalSDKError = APIClientError.httpURLConnectionError(
+                        httpResponse.status,
+                        "$message -> $errorDetails"
+                    ),
                     correlationID = correlationId
                 )
             }
