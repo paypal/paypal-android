@@ -30,14 +30,12 @@ class PayPalClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
-    private val mockClientSecret = generateRandomString()
     private val mockReturnUrl = "com.example://paypalpay"
     private val payPalConfiguration = PayPalConfiguration(
         application = mockApplication,
         clientId = mockClientId,
         environment = Environment.SANDBOX,
         returnUrl = mockReturnUrl,
-        clientSecret = mockClientSecret
     )
 
     @Before
@@ -80,7 +78,6 @@ class PayPalClientTest {
                 clientId = mockClientId,
                 environment = Environment.LIVE,
                 returnUrl = mockReturnUrl,
-                clientSecret = mockClientSecret
             )
         )
 
@@ -105,7 +102,6 @@ class PayPalClientTest {
                 clientId = mockClientId,
                 environment = Environment.STAGING,
                 returnUrl = mockReturnUrl,
-                clientSecret = mockClientSecret
             )
         )
 

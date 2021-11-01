@@ -11,7 +11,6 @@ class PayPalConfigurationTest {
 
     private val applicationMock = mockk<Application>(relaxed = true)
     private val clientIdMock = generateRandomString()
-    private val clientSecretMock = generateRandomString()
     private val returnUrlMock = "com.example://paypalpay"
     private val currencyCodeMock = mockk<CurrencyCode>(relaxed = true)
     private val userActionMock = mockk<UserAction>(relaxed = true)
@@ -25,7 +24,6 @@ class PayPalConfigurationTest {
             clientId = clientIdMock,
             environment = environmentMock,
             returnUrl = returnUrlMock,
-            clientSecret = clientSecretMock,
             currencyCode = currencyCodeMock,
             userAction = userActionMock,
             settingsConfig = settingsConfigMock
@@ -35,7 +33,6 @@ class PayPalConfigurationTest {
             get { application }.isEqualTo(applicationMock)
             get { paymentsConfiguration.clientId }.isEqualTo(clientIdMock)
             get { paymentsConfiguration.environment }.isEqualTo(environmentMock)
-            get { paymentsConfiguration.clientSecret }.isEqualTo(clientSecretMock)
             get { returnUrl }.isEqualTo(returnUrlMock)
             get { currencyCode }.isEqualTo(currencyCodeMock)
             get { userAction }.isEqualTo(userActionMock)
