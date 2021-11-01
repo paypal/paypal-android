@@ -6,6 +6,6 @@ data class OrderErrorDetail(
 ) {
     override fun toString(): String {
         return "Issue: $issue.\n" +
-                "Error description: $description."
+                "Error description: $description"
     }
 }
