@@ -2,7 +2,6 @@ package com.paypal.android.core
 
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.lang.Exception
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
@@ -17,6 +16,10 @@ internal class HttpResponseParser {
     fun parse(connection: HttpURLConnection): HttpResponse {
         val status = connection.responseCode
 
+        val headers = connection.headerFields.mapValues {
+            it.value.joinToString(", ")
+        }
+
         val inputStream = runCatching {
             getInputStream(connection)
         }.recover {
@@ -28,10 +31,11 @@ internal class HttpResponseParser {
             body = parseInputStream(it)
             try {
                 it.close()
-            } catch (ignored: Exception) {}
+            } catch (ignored: Exception) {
+            }
         }
 
-        return HttpResponse(status, body)
+        return HttpResponse(status, headers, body)
     }
 
     private fun parseInputStream(inputStream: InputStream?): String? {

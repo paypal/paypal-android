@@ -23,12 +23,12 @@ class CardClient internal constructor(
      *
      * @param orderID The id of the order
      * @param card The card to use for approval
-     * @param completion A completion handler for receiving a [ConfirmPaymentSourceResult]
+     * @param completion A completion handler for receiving a [CardResult]
      */
     fun approveOrder(
         orderID: String,
         card: Card,
-        completion: (ConfirmPaymentSourceResult) -> Unit
+        completion: (CardResult) -> Unit
     ) {
         CoroutineScope(dispatcher).launch {
             val cardResult = cardAPI.confirmPaymentSource(orderID, card)
