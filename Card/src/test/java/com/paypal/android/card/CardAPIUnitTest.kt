@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +32,31 @@ class CardAPIUnitTest {
     private val card = Card("4111111111111111", "01", "24")
     private val orderID = "sample-order-id"
     private val apiRequest = APIRequest("/sample/path", HttpMethod.POST, null)
+
+    // language=JSON
+    private val errorBody = """
+            {
+                "name": "RESOURCE_NOT_FOUND",
+                "details": [
+                    {
+                        "issue": "INVALID_RESOURCE_ID",
+                        "description": "Specified resource ID does not exist."
+                    }
+                ],
+                "message": "The specified resource does not exist.",
+                "debug_id": "81db5c4ddfa35"
+            }
+        """
+
+    // language=JSON
+    private val unexpectedBody = """
+            {
+                "some_unexpected_response": "something"
+            }
+        """
+
+    private val correlationId = "expected correlation ID"
+    private val headers = mapOf("Paypal-Debug-Id" to correlationId)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -77,59 +101,55 @@ class CardAPIUnitTest {
                 }
             }
         """
-        val httpResponse = HttpResponse(200, body)
+        val httpResponse = HttpResponse(200, headers, body)
         coEvery { api.send(apiRequest) } returns httpResponse
 
-        val result = sut.confirmPaymentSource(orderID, card)
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Success
 
-        val confirmedPaymentSource = result.response
-        assertEquals("testOrderID", confirmedPaymentSource?.orderID)
-        assertEquals(OrderStatus.APPROVED, confirmedPaymentSource?.status)
+        assertEquals("testOrderID", result.orderID)
+        assertEquals(OrderStatus.APPROVED, result.status)
     }
 
     @Test
     fun `it returns an error when the order is not found`() = runBlockingTest {
-        // language=JSON
-        val body = """
-            {
-                "name": "RESOURCE_NOT_FOUND",
-                "details": [
-                    {
-                        "issue": "INVALID_RESOURCE_ID",
-                        "description": "Specified resource ID does not exist."
-                    }
-                ],
-                "message": "The specified resource does not exist.",
-                "debug_id": "81db5c4ddfa35"
-            }
-        """
-        val httpResponse = HttpResponse(404, body)
+        val httpResponse = HttpResponse(404, headers, errorBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
-        val result = sut.confirmPaymentSource(orderID, card)
-        assertNull(result.response)
-        assertEquals("RESOURCE_NOT_FOUND", result.error!!.name)
-        assertEquals("The specified resource does not exist.", result.error!!.message)
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+        assertEquals("RESOURCE_NOT_FOUND", result.orderError.name)
+        assertEquals("The specified resource does not exist.", result.orderError.message)
 
-        val firstErrorDetail = result.error!!.details.first()
+        val firstErrorDetail = result.orderError.details.first()
         assertEquals("INVALID_RESOURCE_ID", firstErrorDetail.issue)
         assertEquals("Specified resource ID does not exist.", firstErrorDetail.description)
     }
 
     @Test
     fun `it returns an error when the response is malformed`() = runBlockingTest {
-        // language=JSON
-        val body = """
-            {
-                "some_unexpected_response": "something"
-            }
-        """
-        val httpResponse = HttpResponse(200, body)
+        val httpResponse = HttpResponse(200, headers, unexpectedBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
-        val result = sut.confirmPaymentSource(orderID, card)
-        assertNull(result.response)
-        assertEquals("PARSING_ERROR", result.error!!.name)
-        assertEquals("Error parsing json response.", result.error!!.message)
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+        assertEquals("PARSING_ERROR", result.orderError.name)
+        assertEquals("Error parsing json response.", result.orderError.message)
+    }
+
+    @Test
+    fun `when confirmPaymentSource fails to parse response, correlation ID is set in Error`() =
+        runBlockingTest {
+            coEvery { api.send(apiRequest) } returns HttpResponse(200, headers, unexpectedBody)
+
+            val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+
+            assertEquals(correlationId, result.correlationID)
+        }
+
+    @Test
+    fun `when confirmPaymentSource is errors, correlation ID is set in Error`() = runBlockingTest {
+        coEvery { api.send(apiRequest) } returns HttpResponse(400, headers, errorBody)
+
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+
+        assertEquals(correlationId, result.correlationID)
     }
 }

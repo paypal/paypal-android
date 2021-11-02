@@ -109,5 +109,17 @@ detekt {
 }
 
 subprojects {
+    configurations.all {
+        resolutionStrategy {
+            eachDependency { details ->
+                if ('org.jacoco' == details.requested.group) {
+                    details.useVersion "0.8.7"
+                }
+            }
+        }
+    }
+}
+
+subprojects {
     group = "com.paypal.android"
 }

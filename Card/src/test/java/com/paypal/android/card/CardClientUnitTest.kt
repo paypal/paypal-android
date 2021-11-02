@@ -1,5 +1,6 @@
 package com.paypal.android.card
 
+import com.paypal.android.core.OrderStatus
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +21,7 @@ class CardClientUnitTest {
     private val orderID = "sample-order-id"
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
-    private val confirmPaymentSourceResult = ConfirmPaymentSourceResult()
+    private val cardResult = CardResult.Success("orderId", OrderStatus.APPROVED)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -29,7 +30,7 @@ class CardClientUnitTest {
     @Before
     fun beforeEach() {
         sut = CardClient(cardAPI, testCoroutineDispatcher)
-        coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns confirmPaymentSourceResult
+        coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns cardResult
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
@@ -42,10 +43,10 @@ class CardClientUnitTest {
 
     @Test
     fun `approve order confirms payment source using card api`() = runBlockingTest {
-        lateinit var capturedResult: ConfirmPaymentSourceResult
+        lateinit var capturedResult: CardResult
         sut.approveOrder(orderID, card) { result ->
             capturedResult = result
         }
-        assertSame(confirmPaymentSourceResult, capturedResult)
+        assertSame(cardResult, capturedResult)
     }
 }

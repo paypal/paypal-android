@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
@@ -14,13 +15,13 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
-import java.net.HttpURLConnection.HTTP_OK
-import java.net.HttpURLConnection.HTTP_CREATED
 import java.net.HttpURLConnection.HTTP_ACCEPTED
 import java.net.HttpURLConnection.HTTP_BAD_REQUEST
-import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
+import java.net.HttpURLConnection.HTTP_CREATED
 import java.net.HttpURLConnection.HTTP_FORBIDDEN
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_OK
+import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import java.net.HttpURLConnection.HTTP_UNAVAILABLE
 import java.util.zip.GZIPOutputStream
 
@@ -75,7 +76,7 @@ class HttpResponseParserUnitTest {
 
         @Test
         fun parse() {
-            val connection = mockk<HttpURLConnection>()
+            val connection = mockk<HttpURLConnection>(relaxed = true)
             every { connection.responseCode } returns responseCode
             every { connection.contentEncoding } returns contentEncoding
             every { connection.inputStream } returns inputStream
@@ -159,7 +160,7 @@ class HttpResponseParserUnitTest {
 
         @Test
         fun parse() {
-            val connection = mockk<HttpURLConnection>()
+            val connection = mockk<HttpURLConnection>(relaxed = true)
             every { connection.responseCode } returns responseCode
             every { connection.contentEncoding } returns contentEncoding
             every { connection.inputStream } throws IOException("http unsuccessful")
@@ -171,6 +172,56 @@ class HttpResponseParserUnitTest {
             assertEquals(expectedBody, result.body)
 
             verify { errorStream.close() }
+        }
+    }
+
+    class HttpNonParameterizedTest {
+
+        private lateinit var subject: HttpResponseParser
+        private val connection = mockk<HttpURLConnection>(relaxed = true)
+
+        private val headers = mapOf(
+            "key_1" to listOf("value_1", "value_2"),
+            "key_2" to listOf("value_3")
+        )
+
+        private val expectedHeaders = mapOf(
+            "key_1" to "value_1, value_2",
+            "key_2" to "value_3"
+        )
+
+        @Before
+        fun setUp() {
+            every { connection.responseCode } returns 200
+            every { connection.contentEncoding } returns "gzip"
+            every { connection.inputStream } returns createGzippedInputStream("200_ok_gzip")
+            every { connection.headerFields } returns headers
+
+            subject = HttpResponseParser()
+        }
+
+        @Test
+        fun `when parse is called for a success, headers are returned in the HttpResponse`() {
+            val result = subject.parse(connection)
+
+            assertEquals(expectedHeaders, result.headers)
+        }
+
+        @Test
+        fun `when parse is called for an error, headers are returned in the HttpResponse`() {
+            every { connection.errorStream } returns createGzippedInputStream("500_internal_server_error_gzip")
+            every { connection.inputStream } throws IOException("http unsuccessful")
+
+            val result = subject.parse(connection)
+
+            assertEquals(expectedHeaders, result.headers)
+        }
+
+        @Test
+        fun `when parse is called, getHeaderFields is called on connection`() {
+            subject.parse(connection)
+
+            verify { connection.headerFields }
         }
     }
 }
