@@ -7,7 +7,7 @@ import org.json.JSONObject
 class PaymentsJSON(private val json: JSONObject) {
 
     @Throws(JSONException::class)
-    constructor(input: String?) : this(JSONObject(input ?: "{}"))
+    constructor(input: String) : this(JSONObject(input))
 
     @Throws(JSONException::class)
     fun getString(keyPath: String): String {

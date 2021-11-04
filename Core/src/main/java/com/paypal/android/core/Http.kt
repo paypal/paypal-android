@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
 
@@ -47,6 +48,7 @@ internal class Http(
             }.recover {
                 val status = when (it) {
                     is UnknownHostException -> HttpResponse.STATUS_UNKNOWN_HOST
+                    is IllegalStateException -> HttpResponse.SERVER_ERROR
                     else -> HttpResponse.STATUS_UNDETERMINED
                 }
                 HttpResponse(status = status, error = it)
