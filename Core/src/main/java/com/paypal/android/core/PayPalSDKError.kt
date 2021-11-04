@@ -1,4 +1,4 @@
-package com.paypal.android.card
+package com.paypal.android.core
 
 data class PayPalSDKError(
     val code: Int?,

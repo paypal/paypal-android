@@ -1,4 +1,4 @@
-package com.paypal.android.card
+package com.paypal.android.core
 
 object APIClientError {
 

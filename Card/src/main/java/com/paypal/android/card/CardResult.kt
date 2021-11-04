@@ -1,6 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.OrderStatus
+import com.paypal.android.core.PayPalSDKError
 
 sealed class CardResult {
 

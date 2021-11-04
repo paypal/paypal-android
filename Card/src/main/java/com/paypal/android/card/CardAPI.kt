@@ -2,6 +2,7 @@ package com.paypal.android.card
 
 import android.webkit.URLUtil
 import com.paypal.android.core.API
+import com.paypal.android.core.APIClientError
 import com.paypal.android.core.HttpResponse.Companion.SERVER_ERROR
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNDETERMINED
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
@@ -18,7 +19,7 @@ internal class CardAPI(
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
         val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-        if (URLUtil.isValidUrl(apiRequest.path).not()) {
+        if (!URLUtil.isValidUrl(apiRequest.path)) {
             CardResult.Error(APIClientError.invalidUrlRequest, correlationId)
         }
         val bodyResponse = httpResponse.body
