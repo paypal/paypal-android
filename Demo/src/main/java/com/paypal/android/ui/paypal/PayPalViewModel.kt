@@ -3,6 +3,8 @@ package com.paypal.android.ui.paypal
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
@@ -28,6 +30,9 @@ class PayPalViewModel @Inject constructor(
     private val orderJson = OrderUtils.orderWithShipping
     private lateinit var payPalClient: PayPalClient
 
+    private val _checkoutResult = MutableLiveData<PayPalCheckoutResult>()
+    val checkoutResult: LiveData<PayPalCheckoutResult> = _checkoutResult
+
     @RequiresApi(Build.VERSION_CODES.M)
     fun startPayPalCheckout() {
         viewModelScope.launch {
@@ -46,6 +51,7 @@ class PayPalViewModel @Inject constructor(
                             )
                             is PayPalCheckoutResult.Cancellation -> Log.i(TAG, "User cancelled")
                         }
+                        _checkoutResult.value = result
                     }
                 }
             } catch (e: HttpException) {
