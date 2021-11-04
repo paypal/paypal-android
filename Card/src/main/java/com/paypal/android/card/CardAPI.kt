@@ -1,7 +1,11 @@
 package com.paypal.android.card
 
+import android.webkit.URLUtil
 import com.paypal.android.core.API
-import com.paypal.android.core.OrderError
+import com.paypal.android.core.APIClientError
+import com.paypal.android.core.HttpResponse.Companion.SERVER_ERROR
+import com.paypal.android.core.HttpResponse.Companion.STATUS_UNDETERMINED
+import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
 import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PaymentsJSON
@@ -15,43 +19,54 @@ internal class CardAPI(
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
         val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-        return if (httpResponse.status == HTTP_OK) {
-            runCatching {
-                val json = PaymentsJSON(httpResponse.body)
-                val status = json.getString("status")
-                val id = json.getString("id")
+        if (!URLUtil.isValidUrl(apiRequest.path)) {
+            CardResult.Error(APIClientError.invalidUrlRequest, correlationId)
+        }
+        val bodyResponse = httpResponse.body
+        if (bodyResponse.isNullOrBlank()) {
+            return CardResult.Error(APIClientError.noResponseData, correlationId)
+        }
+        return when (httpResponse.status) {
+            HTTP_OK -> {
+                runCatching {
+                    val json = PaymentsJSON(bodyResponse)
+                    val status = json.getString("status")
+                    val id = json.getString("id")
 
-                CardResult.Success(
-                    orderID = id,
-                    status = OrderStatus.valueOf(status)
-                )
-            }.recover {
-                CardResult.Error(
-                    orderError = OrderError(
-                        "PARSING_ERROR",
-                        "Error parsing json response."
-                    ),
-                    correlationID = correlationId
-                )
-            }.getOrNull()!!
-        } else {
-            val json = PaymentsJSON(httpResponse.body)
-            val name = json.getString("name")
-            val message = json.getString("message")
-
-            val errorDetails = mutableListOf<OrderErrorDetail>()
-            val errorDetailsJson = json.getJSONArray("details")
-            for (i in 0 until errorDetailsJson.length()) {
-                val errorJson = errorDetailsJson.getJSONObject(i)
-                val issue = errorJson.getString("issue")
-                val description = errorJson.getString("description")
-                errorDetails += OrderErrorDetail(issue, description)
+                    CardResult.Success(id, OrderStatus.valueOf(status))
+                }.recover {
+                    CardResult.Error(APIClientError.dataParsingError, correlationId)
+                }.getOrNull()!!
             }
+            STATUS_UNKNOWN_HOST -> {
+                CardResult.Error(APIClientError.unknownHost, correlationId)
+            }
+            STATUS_UNDETERMINED -> {
+                CardResult.Error(APIClientError.unknownError, correlationId)
+            }
+            SERVER_ERROR -> {
+                CardResult.Error(APIClientError.serverResponseError, correlationId)
+            }
+            else -> {
+                val json = PaymentsJSON(bodyResponse)
+                val message = json.getString("message")
 
-            CardResult.Error(
-                orderError = OrderError(name, message, errorDetails),
-                correlationID = correlationId
-            )
+                val errorDetails = mutableListOf<OrderErrorDetail>()
+                val errorDetailsJson = json.getJSONArray("details")
+                for (i in 0 until errorDetailsJson.length()) {
+                    val errorJson = errorDetailsJson.getJSONObject(i)
+                    val issue = errorJson.getString("issue")
+                    val description = errorJson.getString("description")
+                    errorDetails += OrderErrorDetail(issue, description)
+                }
+
+                CardResult.Error(
+                    APIClientError.httpURLConnectionError(
+                        httpResponse.status,
+                        "$message -> $errorDetails"
+                    ), correlationId
+                )
+            }
         }
     }
 }
