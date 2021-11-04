@@ -18,13 +18,6 @@
 
     <!-- PayPal Native-->
     <string name="start_checkout">Start Checkout</string>
-
-    <string name="user_action">User Action</string>
-    <string name="order_intent">Order Intent</string>
-    <string name="user_action_pay_now">PAY NOW</string>
-    <string name="user_action_continue">CONTINUE</string>
-    <string name="order_intent_authorize">AUTHORIZE</string>
-    <string name="order_intent_capture">CAPTURE</string>
     <string name="minimum_sdk_needed">Checkout SDK only available for API 23+</string>
 
     <string name="auth_credentials_missing_title">Auth Credentials Required</string>

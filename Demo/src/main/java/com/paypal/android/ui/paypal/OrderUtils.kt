@@ -11,9 +11,9 @@ object OrderUtils {
         		"locale": "de-DE",
         		"return_url": "https://example.com/return",
         		"shipping_preference": "GET_FROM_FILE",
-        		"user_action": "%s"
+        		"user_action": "PAY_NOW"
         	},
-        	"intent": "%s",
+        	"intent": "AUTHORIZE",
         	"purchase_units": [{
         			"amount": {
         				"breakdown": {
