@@ -1,10 +1,12 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.API
+import com.paypal.android.core.APIClientError
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.HttpResponse
 import com.paypal.android.core.OrderStatus
+import com.paypal.android.core.PaymentsJSON
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -15,6 +17,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
+import org.json.JSONException
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -28,6 +31,7 @@ class CardAPIUnitTest {
 
     private val api = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<CardAPIRequestFactory>()
+    private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24")
     private val orderID = "sample-order-id"
@@ -54,6 +58,8 @@ class CardAPIUnitTest {
                 "some_unexpected_response": "something"
             }
         """
+
+    private val emptyErrorBody = ""
 
     private val correlationId = "expected correlation ID"
     private val headers = mapOf("Paypal-Debug-Id" to correlationId)
@@ -116,22 +122,78 @@ class CardAPIUnitTest {
         coEvery { api.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
-        assertEquals("RESOURCE_NOT_FOUND", result.orderError.name)
-        assertEquals("The specified resource does not exist.", result.orderError.message)
-
-        val firstErrorDetail = result.orderError.details.first()
-        assertEquals("INVALID_RESOURCE_ID", firstErrorDetail.issue)
-        assertEquals("Specified resource ID does not exist.", firstErrorDetail.description)
+        assertEquals(
+            "The specified resource does not exist. -> [Issue: INVALID_RESOURCE_ID.\n" +
+                    "Error description: Specified resource ID does not exist.]",
+            result.payPalSDKError.errorDescription
+        )
     }
 
     @Test
-    fun `it returns an error when the response is malformed`() = runBlockingTest {
-        val httpResponse = HttpResponse(200, headers, unexpectedBody)
+    fun `it returns unknownError when the order api call returns an error body`() = runBlockingTest {
+        // Status: STATUS_UNDETERMINED
+        val httpResponse = HttpResponse(-1, headers, errorBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
-        assertEquals("PARSING_ERROR", result.orderError.name)
-        assertEquals("Error parsing json response.", result.orderError.message)
+        assertEquals(
+            APIClientError.unknownError.errorDescription,
+            result.payPalSDKError.errorDescription
+        )
+    }
+
+    @Test
+    fun `it returns noResponseData when the order api call returns an empty body`() = runBlockingTest {
+        // Status: ANY
+        val httpResponse = HttpResponse(-10, headers, emptyErrorBody)
+        coEvery { api.send(apiRequest) } returns httpResponse
+
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+        assertEquals(
+            APIClientError.noResponseData.errorDescription,
+            result.payPalSDKError.errorDescription
+        )
+    }
+
+    @Test
+    fun `it returns dataParsingError when the order api call returns an error body`() = runBlockingTest {
+        // Status: OK
+        val httpResponse = HttpResponse(200, headers, errorBody)
+        val parsingException = JSONException("Parsing Error")
+        coEvery { api.send(apiRequest) } returns httpResponse
+        every { paymentsJSON.getString(any()) } throws parsingException
+
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+        assertEquals(
+            APIClientError.dataParsingError.errorDescription,
+            result.payPalSDKError.errorDescription
+        )
+    }
+
+    @Test
+    fun `it returns unknownHost when the order api call returns an error body`() = runBlockingTest {
+        // Status: STATUS_UNKNOWN_HOST
+        val httpResponse = HttpResponse(-2, headers, errorBody)
+        coEvery { api.send(apiRequest) } returns httpResponse
+
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+        assertEquals(
+            APIClientError.unknownHost.errorDescription,
+            result.payPalSDKError.errorDescription
+        )
+    }
+
+    @Test
+    fun `it returns serverError when the order api call returns an error body`() = runBlockingTest {
+        // Status: SERVER_ERROR
+        val httpResponse = HttpResponse(-3, headers, errorBody)
+        coEvery { api.send(apiRequest) } returns httpResponse
+
+        val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
+        assertEquals(
+            APIClientError.serverResponseError.errorDescription,
+            result.payPalSDKError.errorDescription
+        )
     }
 
     @Test
