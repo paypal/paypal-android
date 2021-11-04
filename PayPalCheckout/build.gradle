@@ -57,7 +57,7 @@ dependencies {
     androidTestImplementation deps.androidxEspressoCore
 }
 
-project.ext.name = "checkout"
+project.ext.name = "paypal-checkout"
 project.ext.pom_name = "PayPal SDK - Checkout"
 project.ext.pom_desc = "Library for PayPal checkout"
 
