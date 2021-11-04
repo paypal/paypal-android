@@ -38,7 +38,7 @@ class PayPalFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
+        val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
         val application = requireActivity().application
         val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
 
