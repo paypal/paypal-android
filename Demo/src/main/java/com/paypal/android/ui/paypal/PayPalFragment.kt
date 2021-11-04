@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -43,14 +44,14 @@ class PayPalFragment : Fragment() {
 
     private val payPalViewModel: PayPalViewModel by viewModels()
 
-    private val canRunPayPalCheckout = true //Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+    private val canRunPayPalCheckout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-        val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
+        val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
         val application = requireActivity().application
         val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
 
@@ -67,16 +68,28 @@ class PayPalFragment : Fragment() {
     @Preview
     @Composable
     fun PayPalFragmentView() = DemoTheme {
+        val isLoading by payPalViewModel.isLoading.observeAsState(initial = false)
         ConstraintLayout(
             modifier = Modifier.fillMaxHeight(),
         ) {
             val (button, text, result) = createRefs()
-            CheckoutResult(payPalViewModel.checkoutResult, modifier = Modifier.constrainAs(result) {
-                top.linkTo(parent.top)
-                bottom.linkTo(button.top)
-            })
+            if (isLoading) {
+                LoadingComposable(modifier = Modifier.constrainAs(result) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(button.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                })
+            } else {
+                CheckoutResult(
+                    payPalViewModel.checkoutResult,
+                    modifier = Modifier.constrainAs(result) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(button.top)
+                    })
+            }
             Button(
-                enabled = canRunPayPalCheckout,
+                enabled = canRunPayPalCheckout && !isLoading,
                 onClick = { launchNativeCheckout() },
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
@@ -175,6 +188,14 @@ class PayPalFragment : Fragment() {
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
             )
+        }
+    }
+
+    @Composable
+    private fun LoadingComposable(modifier: Modifier) {
+        Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(modifier = Modifier.padding(bottom = 8.dp))
+            Text(text = "Creating order...")
         }
     }
 

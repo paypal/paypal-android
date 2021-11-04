@@ -33,8 +33,12 @@ class PayPalViewModel @Inject constructor(
     private val _checkoutResult = MutableLiveData<PayPalCheckoutResult>()
     val checkoutResult: LiveData<PayPalCheckoutResult> = _checkoutResult
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     @RequiresApi(Build.VERSION_CODES.M)
     fun startPayPalCheckout() {
+        _isLoading.value = true
         viewModelScope.launch {
             try {
                 val order = fetchOrder()
@@ -52,10 +56,12 @@ class PayPalViewModel @Inject constructor(
                             is PayPalCheckoutResult.Cancellation -> Log.i(TAG, "User cancelled")
                         }
                         _checkoutResult.value = result
+                        _isLoading.value = false
                     }
                 }
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
+                _isLoading.value = false
             }
         }
     }
