@@ -50,8 +50,8 @@ dependencies {
     testImplementation deps.mockk
     testImplementation deps.robolectric
     testImplementation deps.kotlinxAndroidCoroutinesTest
-    testImplementation 'io.strikt:strikt-core:0.30.1'
-    testImplementation 'io.strikt:strikt-mockk:0.30.1'
+    testImplementation deps.striktCore
+    testImplementation deps.striktMockk
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
