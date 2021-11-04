@@ -33,6 +33,7 @@ buildscript {
             "composeRuntimeLivedata"      : "androidx.compose.runtime:runtime-livedata:${versions.compose}",
             "composeFoundation"           : "androidx.compose.foundation:foundation:${versions.compose}",
             "composeMaterial"             : "androidx.compose.material:material:${versions.compose}",
+            "composeConstraintLayout"     : "androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha07",
 
             // Navigation Component
             "navigationFragment"          : "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",

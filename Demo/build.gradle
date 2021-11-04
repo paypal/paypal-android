@@ -70,7 +70,7 @@ dependencies {
     implementation deps.composeRuntimeLivedata
     implementation deps.composeFoundation
     implementation deps.composeMaterial
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha07"
+    implementation deps.composeConstraintLayout
     implementation deps.navigationFragment
     implementation deps.navigationUI
     implementation deps.preference

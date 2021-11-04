@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -130,26 +129,25 @@ class PayPalFragment : Fragment() {
             )
             PayPalCheckoutResult.Cancellation -> CheckoutCancelled(modifier = modifier)
         }
-
     }
 
     @Composable
     private fun CheckoutSuccess(result: PayPalCheckoutResult.Success, modifier: Modifier) {
         Column(modifier = modifier.padding(horizontal = 16.dp)) {
             Text(
-                text = "Order Approved",
+                text = getString(R.string.order_approved),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = "Payer Id: ${result.payerId}",
+                text = getString(R.string.payer_id, result.payerId),
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = "Order Id: ${result.orderId}",
+                text = getString(R.string.order_id, result.orderId),
                 fontSize = 16.sp,
                 color = Color.Gray,
             )
@@ -160,13 +158,13 @@ class PayPalFragment : Fragment() {
     private fun CheckoutFailure(result: PayPalCheckoutResult.Failure, modifier: Modifier) {
         Column(modifier = modifier.padding(horizontal = 16.dp)) {
             Text(
-                text = "Order Failed",
+                text = getString(R.string.order_failed),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             Text(
-                text = "Reason: ${result.error.reason}",
+                text = getString(R.string.reason, result.error.reason),
                 fontSize = 16.sp,
                 color = Color.Gray,
             )
@@ -177,13 +175,13 @@ class PayPalFragment : Fragment() {
     private fun CheckoutCancelled(modifier: Modifier) {
         Column(modifier = modifier.padding(horizontal = 8.dp)) {
             Text(
-                text = "Checkout Cancelled",
+                text = getString(R.string.checkout_cancelled),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             Text(
-                text = "User cancelled the checkout ",
+                text = getString(R.string.user_cancelled),
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
@@ -195,7 +193,7 @@ class PayPalFragment : Fragment() {
     private fun LoadingComposable(modifier: Modifier) {
         Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(modifier = Modifier.padding(bottom = 8.dp))
-            Text(text = "Creating order...")
+            Text(text = getString(R.string.creating_order))
         }
     }
 
