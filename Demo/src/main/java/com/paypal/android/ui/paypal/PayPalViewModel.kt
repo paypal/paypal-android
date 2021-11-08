@@ -16,7 +16,10 @@ import javax.inject.Inject
 import com.google.gson.JsonParser
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
+import com.paypal.android.checkout.pojo.CorrelationIds
+import com.paypal.android.checkout.pojo.ErrorInfo
 import retrofit2.HttpException
+import java.net.UnknownHostException
 
 @HiltViewModel
 class PayPalViewModel @Inject constructor(
@@ -59,8 +62,15 @@ class PayPalViewModel @Inject constructor(
                         _isLoading.value = false
                     }
                 }
+            } catch (e: UnknownHostException) {
+                Log.e(TAG, e.message!!)
+                val error = PayPalCheckoutResult.Failure(error = ErrorInfo(e, e.message!!, CorrelationIds(), null))
+                _checkoutResult.value = error
+                _isLoading.value = false
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
+                val error = PayPalCheckoutResult.Failure(error = ErrorInfo(e, e.message!!, CorrelationIds(), null))
+                _checkoutResult.value = error
                 _isLoading.value = false
             }
         }
