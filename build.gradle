@@ -33,6 +33,7 @@ buildscript {
             "composeRuntimeLivedata"      : "androidx.compose.runtime:runtime-livedata:${versions.compose}",
             "composeFoundation"           : "androidx.compose.foundation:foundation:${versions.compose}",
             "composeMaterial"             : "androidx.compose.material:material:${versions.compose}",
+            "composeConstraintLayout"     : "androidx.constraintlayout:constraintlayout-compose:1.0.0-alpha07",
 
             // Navigation Component
             "navigationFragment"          : "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",
@@ -44,6 +45,7 @@ buildscript {
             // Networking
             "retrofit"                    : "com.squareup.retrofit2:retrofit:2.9.0",
             "gson"                        : "com.squareup.retrofit2:converter-gson:2.3.0",
+            "loggingInterceptor"          : "com.squareup.okhttp3:logging-interceptor:4.9.2",
 
             // Dependency Injection
             "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
@@ -56,7 +58,12 @@ buildscript {
             "mockk"                       : "io.mockk:mockk:1.12.0",
             "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0",
             "robolectric"                 : "org.robolectric:robolectric:4.6.1",
-            "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0"
+            "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",
+            "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
+            "striktCore"                  : "io.strikt:strikt-core:0.30.1",
+
+            //PayPal
+            "paypalNativeCheckout"        : "com.paypal.checkout:android-sdk:0.5.1"
     ]
 
     repositories {
@@ -80,6 +87,14 @@ allprojects {
         google()
         mavenCentral()
         mavenLocal()
+
+        maven {
+            url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
+            credentials {
+                username cardinalUsername
+                password cardinalPassword
+            }
+        }
     }
 }
 
@@ -97,6 +112,7 @@ detekt {
     input = files(
             "Core/src",
             "Card/src",
+            "PayPalCheckout/src",
             "Demo/src"
     )
     autoCorrect = project.hasProperty('detektAutoCorrect')

@@ -16,6 +16,19 @@
     <!-- Preference Titles -->
     <string name="environment_title">Environment</string>
 
+    <!-- PayPal Native-->
+    <string name="start_checkout">Start Checkout</string>
+    <string name="minimum_sdk_needed">Checkout SDK only available for API 23+</string>
+    <string name="order_approved">Order Approved</string>
+    <string name="order_id">Order Id: %s</string>
+    <string name="payer_id">Payer Id: %S</string>
+    <string name="checkout_cancelled">Checkout Cancelled</string>
+    <string name="user_cancelled">User cancelled the checkout</string>
+    <string name="order_failed">Order Failed</string>
+    <string name="reason">Reason: %s</string>
+    <string name="creating_order">Creating order…</string>
+
+
     <string name="auth_credentials_missing_title">Auth Credentials Required</string>
     <string name="auth_credentials_missing_message">You can set authentication credentials in the <b><i>paypal.properties</i></b> file in the root of the project directory.</string>
 

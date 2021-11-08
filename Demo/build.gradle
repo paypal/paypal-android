@@ -55,6 +55,7 @@ android {
 
 dependencies {
     implementation project(':Card')
+    implementation project(':PayPalCheckout')
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
@@ -69,16 +70,17 @@ dependencies {
     implementation deps.composeRuntimeLivedata
     implementation deps.composeFoundation
     implementation deps.composeMaterial
+    implementation deps.composeConstraintLayout
     implementation deps.navigationFragment
     implementation deps.navigationUI
     implementation deps.preference
 
     implementation deps.retrofit
     implementation deps.gson
+    implementation deps.loggingInterceptor
 
     implementation deps.hilt
     kapt deps.hiltKapt
-
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore

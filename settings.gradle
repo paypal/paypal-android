@@ -2,3 +2,4 @@ include ':Card'
 include ':Core'
 include ':Demo'
 rootProject.name = "AndroidSDK"
+include ':PayPalCheckout'
