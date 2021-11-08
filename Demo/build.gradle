@@ -70,6 +70,7 @@ dependencies {
     implementation deps.composeRuntimeLivedata
     implementation deps.composeFoundation
     implementation deps.composeMaterial
+    implementation deps.composeConstraintLayout
     implementation deps.navigationFragment
     implementation deps.navigationUI
     implementation deps.preference
