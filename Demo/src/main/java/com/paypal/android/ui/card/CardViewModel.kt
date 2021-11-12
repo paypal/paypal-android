@@ -44,7 +44,8 @@ class CardViewModel @Inject constructor(
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
-    private val configuration = CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
+    private val configuration =
+        CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
 
     fun onCardNumberChange(newCardNumber: String) {
@@ -77,16 +78,14 @@ class CardViewModel @Inject constructor(
 
         viewModelScope.launch {
             val order = fetchOrder()
-            cardClient.approveOrder(order.id!!, card) { result ->
-                when (result) {
-                    is CardResult.Success -> {
-                        Log.d(TAG, "SUCCESS")
-                        Log.d(TAG, "${result.status}")
-                    }
-                    is CardResult.Error -> {
-                        Log.e(TAG, "ERROR")
-                        Log.e(TAG, result.payPalSDKError.errorDescription.orEmpty())
-                    }
+            when (val result = cardClient.approveOrder(order.id!!, card)) {
+                is CardResult.Success -> {
+                    Log.d(TAG, "SUCCESS")
+                    Log.d(TAG, "${result.status}")
+                }
+                is CardResult.Error -> {
+                    Log.e(TAG, "ERROR")
+                    Log.e(TAG, result.payPalSDKError.errorDescription.orEmpty())
                 }
             }
         }

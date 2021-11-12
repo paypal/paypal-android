@@ -29,7 +29,7 @@ class CardClientUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = CardClient(cardAPI, testCoroutineDispatcher)
+        sut = CardClient(cardAPI)
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns cardResult
 
         Dispatchers.setMain(testCoroutineDispatcher)
@@ -43,10 +43,7 @@ class CardClientUnitTest {
 
     @Test
     fun `approve order confirms payment source using card api`() = runBlockingTest {
-        lateinit var capturedResult: CardResult
-        sut.approveOrder(orderID, card) { result ->
-            capturedResult = result
-        }
-        assertSame(cardResult, capturedResult)
+        val result = sut.approveOrder(orderID, card)
+        assertSame(cardResult, result)
     }
 }
