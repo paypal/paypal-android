@@ -78,14 +78,16 @@ class CardViewModel @Inject constructor(
 
         viewModelScope.launch {
             val order = fetchOrder()
-            when (val result = cardClient.approveOrder(order.id!!, card)) {
-                is CardResult.Success -> {
-                    Log.d(TAG, "SUCCESS")
-                    Log.d(TAG, "${result.status}")
-                }
-                is CardResult.Error -> {
-                    Log.e(TAG, "ERROR")
-                    Log.e(TAG, result.payPalSDKError.errorDescription.orEmpty())
+            cardClient.approveOrder(order.id!!, card) { result ->
+                when (result) {
+                    is CardResult.Success -> {
+                        Log.d(TAG, "SUCCESS")
+                        Log.d(TAG, "${result.status}")
+                    }
+                    is CardResult.Error -> {
+                        Log.e(TAG, "ERROR")
+                        Log.e(TAG, result.payPalSDKError.errorDescription.orEmpty())
+                    }
                 }
             }
         }
