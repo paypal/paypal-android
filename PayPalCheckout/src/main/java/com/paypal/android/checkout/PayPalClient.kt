@@ -25,18 +25,20 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
         PayPalCheckout.setConfig(config)
     }
 
-    fun checkout(orderId: String, complete: (PayPalCheckoutResult) -> Unit) {
+    fun checkout(orderId: String, callback: PayPalCheckoutResultCallback) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
         },
             onApprove = OnApprove { approval ->
-                complete(PayPalCheckoutResult.Success(approval.data.orderId, approval.data.payerId))
+                val result =
+                    PayPalCheckoutResult.Success(approval.data.orderId, approval.data.payerId)
+                callback.onPayPalCheckoutResult(result)
             },
             onCancel = OnCancel {
-                complete(PayPalCheckoutResult.Cancellation)
+                callback.onPayPalCheckoutResult(PayPalCheckoutResult.Cancellation)
             },
             onError = OnError { errorInfo ->
-                complete(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
+                callback.onPayPalCheckoutResult(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
             })
     }
 }

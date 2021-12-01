@@ -28,11 +28,11 @@ class CardClient internal constructor(
     fun approveOrder(
         orderID: String,
         card: Card,
-        completion: (CardResult) -> Unit
+        callback: CardResultCallback
     ) {
         CoroutineScope(dispatcher).launch {
             val cardResult = cardAPI.confirmPaymentSource(orderID, card)
-            completion(cardResult)
+            callback.onCardResult(cardResult)
         }
     }
 }

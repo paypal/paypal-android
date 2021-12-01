@@ -44,7 +44,8 @@ class CardViewModel @Inject constructor(
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
-    private val configuration = CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
+    private val configuration =
+        CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
 
     fun onCardNumberChange(newCardNumber: String) {
