@@ -78,7 +78,7 @@ class CardViewModel @Inject constructor(
 
         viewModelScope.launch {
             val order = fetchOrder()
-            cardClient.approveOrder(order.id!!, card) { result ->
+            cardClient.approveOrder() { result ->
                 when (result) {
                     is CardResult.Success -> {
                         Log.d(TAG, "SUCCESS")
