@@ -43,8 +43,10 @@ class CardClientUnitTest {
 
     @Test
     fun `approve order confirms payment source using card api`() = runBlockingTest {
+        val request = CardRequest(orderID, card)
+
         lateinit var capturedResult: CardResult
-        sut.approveOrder(orderID, card) { result ->
+        sut.approveOrder(request) { result ->
             capturedResult = result
         }
         assertSame(cardResult, capturedResult)
