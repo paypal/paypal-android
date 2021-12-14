@@ -74,7 +74,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      * provided function will be invoked with the current value of [eligibilityStatus]. This is the
      * preferred way of observing on status changes for Kotlin.
      */
-    var onEligibilityStatusChanged: ((buttonEligibilityStatus: PaymentButtonEligibilityStatus) -> Unit)? = null
+    private var onEligibilityStatusChanged: ((buttonEligibilityStatus: PaymentButtonEligibilityStatus) -> Unit)? = null
         set(value) {
             field = value
             field?.invoke(eligibilityStatus)
@@ -85,7 +85,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      * provided interface will be invoked with the current value of [eligibilityStatus]. This is the
      * preferred way of observing on status changes for Java.
      */
-    var paymentButtonEligibilityStatusChanged: PaymentButtonEligibilityStatusChanged? = null
+    private var paymentButtonEligibilityStatusChanged: PaymentButtonEligibilityStatusChanged? = null
         set(value) {
             field = value
             field?.onPaymentButtonEligibilityStatusChanged(eligibilityStatus)
@@ -225,7 +225,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      *
      */
     private fun updateEligibilityStatus(fundingEligibilityResponse: Boolean) {
-        fundingEligibilityResponse?.let { _ ->
+        fundingEligibilityResponse.let {
             val isEligible = when (fundingType) {
                 PaymentButtonFundingType.PAYPAL -> {
                     fundingEligibilityResponse
@@ -240,10 +240,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 PaymentButtonEligibilityStatus.Ineligible
             }
         }
-    }
-
-    private fun noEligibilityFound() {
-        eligibilityStatus = PaymentButtonEligibilityStatus.Error
     }
 
     override fun onAttachedToWindow() {

@@ -25,19 +25,6 @@ import com.paypal.pyplcheckout.R
  * Optionally you can provide the following attributes: `paypal_color`, `paypal_label`,
  * `payment_button_shape`, and `payment_button_size`.
  *
- * Within your Activity, Fragment, or View that contains the [PayPalButton] instance you can invoke
- * the [setup] function:
- *
- * ```
- * val createOrder: CreateOrder //...
- * val onApprove: OnApprove //...
- * val onCancel: OnCancel //...
- * payLaterButton.setup(
- *      createOrder = createOrder,
- *      onApprove = onApprove
- *      onCancel = onCancel
- * )
- * ```
  */
 @RequiresApi(Build.VERSION_CODES.M)
 open class PayPalButton @JvmOverloads constructor(
@@ -169,7 +156,7 @@ enum class PayPalButtonColor(
                 WHITE.value -> WHITE
                 BLACK.value -> BLACK
                 SILVER.value -> SILVER
-                else -> throw createFormattedIllegalArgumentException("PayPalButtonColor", 4)
+                else -> throw createFormattedIllegalArgumentException("PayPalButtonColor", values().size)
             }
         }
     }
@@ -182,10 +169,6 @@ enum class PayPalButtonColor(
  * the end of the button.
  *
  * @see PAYPAL this is the default label which does not display a label at all.
- * @see CHECKOUT this will display "Checkout" at the end of the button.
- * @see BUY_NOW this will display "Buy Now" at the end of the button.
- * @see PAY this will display "Pay with" at the start of the button.
- * @see PAY_LATER this will display "Pay Later" and is only supported by the PayLater variant of the
  * PayPalButton.
  */
 enum class PayPalButtonLabel(
@@ -194,10 +177,26 @@ enum class PayPalButtonLabel(
     private val stringResId: Int? = null
 ) {
     PAYPAL(value = 0),
-    CHECKOUT(value = 1, position = Position.END, stringResId = R.string.paypal_checkout_smart_payment_button_label_checkout),
-    BUY_NOW(value = 2, position = Position.END, stringResId = R.string.paypal_checkout_smart_payment_button_label_buy_now),
-    PAY(value = 3, position = Position.START, stringResId = R.string.paypal_checkout_smart_payment_button_label_pay),
-    PAY_LATER(value = 4, position = Position.END, stringResId = R.string.paypal_checkout_smart_payment_button_label_pay_later);
+    CHECKOUT(
+        value = 1,
+        position = Position.END,
+        stringResId = R.string.paypal_checkout_smart_payment_button_label_checkout
+    ),
+    BUY_NOW(
+        value = 2,
+        position = Position.END,
+        stringResId = R.string.paypal_checkout_smart_payment_button_label_buy_now
+    ),
+    PAY(
+        value = 3,
+        position = Position.START,
+        stringResId = R.string.paypal_checkout_smart_payment_button_label_pay
+    ),
+    PAY_LATER(
+        value = 4,
+        position = Position.END,
+        stringResId = R.string.paypal_checkout_smart_payment_button_label_pay_later
+    );
 
     fun retrieveLabel(context: Context): String? {
         return stringResId?.let { context.getString(it) }
@@ -226,7 +225,7 @@ enum class PayPalButtonLabel(
                 BUY_NOW.value -> BUY_NOW
                 PAY.value -> PAY
                 PAY_LATER.value -> PAY_LATER
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonLabel", 4)
+                else -> throw createFormattedIllegalArgumentException("PaymentButtonLabel", values().size)
             }
         }
     }

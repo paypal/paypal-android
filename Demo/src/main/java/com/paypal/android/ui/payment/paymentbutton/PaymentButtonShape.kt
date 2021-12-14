@@ -27,7 +27,7 @@ enum class PaymentButtonShape(val value: Int) {
                 ROUNDED.value -> ROUNDED
                 PILL.value -> PILL
                 RECTANGLE.value -> RECTANGLE
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonShape", 3)
+                else -> throw createFormattedIllegalArgumentException("PaymentButtonShape", values().size)
             }
         }
     }

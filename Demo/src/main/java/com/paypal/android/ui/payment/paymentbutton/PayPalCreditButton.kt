@@ -44,7 +44,7 @@ class PayPalCreditButton @JvmOverloads constructor(
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
     override val wordmarkLightLuminanceResId: Int
-        get() = throw UnsupportedOperationException("PayPalCreditButton does not have a light luminance compatible wordmark.")
+        get() = throw UnsupportedOperationException(LUMINANCE_ERROR)
 
     override val fundingType: PaymentButtonFundingType
         get() = PaymentButtonFundingType.PAYPAL_CREDIT
@@ -61,6 +61,10 @@ class PayPalCreditButton @JvmOverloads constructor(
             PayPalCreditButtonColor.DARK_BLUE.value
         )
         color = PayPalCreditButtonColor(attribute)
+    }
+
+    companion object {
+        const val LUMINANCE_ERROR = "PayPalCreditButton does not have a light luminance compatible wordmark."
     }
 }
 
@@ -90,7 +94,7 @@ enum class PayPalCreditButtonColor(
             return when (attributeIndex) {
                 DARK_BLUE.value -> DARK_BLUE
                 BLACK.value -> BLACK
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", 3)
+                else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", values().size)
             }
         }
     }

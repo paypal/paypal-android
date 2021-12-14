@@ -53,7 +53,7 @@ enum class PaymentButtonSize(
                 SMALL.value -> SMALL
                 MEDIUM.value -> MEDIUM
                 LARGE.value -> LARGE
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", 3)
+                else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", values().size)
             }
         }
     }
