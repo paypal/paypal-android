@@ -1,4 +1,4 @@
-package com.paypal.android.ui.payment.paymentbutton
+package com.paypal.android.checkout.paymentbutton
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
@@ -20,7 +19,7 @@ import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.paypal.android.R
+import com.paypal.android.checkout.R
 
 @Suppress("TooManyFunctions")
 @RequiresApi(Build.VERSION_CODES.M)
@@ -58,41 +57,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     abstract var color: C
 
     /**
-     * Provides the current [PaymentButtonEligibilityStatus]. This value can change after the button
-     * has been rendered, those changes can be observed on by using either
-     * [onEligibilityStatusChanged] or [paymentButtonEligibilityStatusChanged].
-     */
-    private var eligibilityStatus: PaymentButtonEligibilityStatus = PaymentButtonEligibilityStatus.Loading
-        private set(value) {
-            field = value
-            renderButtonForEligibility()
-            onEligibilityStatusChanged?.invoke(field)
-            paymentButtonEligibilityStatusChanged?.onPaymentButtonEligibilityStatusChanged(field)
-        }
-
-    /**
-     * Used for observing on [eligibilityStatus] changes. As soon as this property is set, the
-     * provided function will be invoked with the current value of [eligibilityStatus]. This is the
-     * preferred way of observing on status changes for Kotlin.
-     */
-    private var onEligibilityStatusChanged: ((buttonEligibilityStatus: PaymentButtonEligibilityStatus) -> Unit)? = null
-        set(value) {
-            field = value
-            field?.invoke(eligibilityStatus)
-        }
-
-    /**
-     * Used for observing on [eligibilityStatus] changes. As soon as this property is set, the
-     * provided interface will be invoked with the current value of [eligibilityStatus]. This is the
-     * preferred way of observing on status changes for Java.
-     */
-    private var paymentButtonEligibilityStatusChanged: PaymentButtonEligibilityStatusChanged? = null
-        set(value) {
-            field = value
-            field?.onPaymentButtonEligibilityStatusChanged(eligibilityStatus)
-        }
-
-    /**
      * Provides the current value of the prefix text which is displayed before the button's wordmark.
      */
     var prefixText: String? = null
@@ -108,7 +72,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     var prefixTextVisibility: Int = View.GONE
         protected set(value) {
             field = value
-            updatePrefixTextVisibility()
+            prefixTextView.visibility = prefixTextVisibility
         }
 
     /**
@@ -160,7 +124,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     var suffixTextVisibility: Int = View.GONE
         protected set(value) {
             field = value
-            updateSuffixTextVisibility()
+            suffixTextView.visibility = suffixTextVisibility
         }
 
     protected abstract val wordmarkDarkLuminanceResId: Int
@@ -170,7 +134,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     internal abstract val fundingType: PaymentButtonFundingType
 
     private var payPalWordmarkImage: ImageView
-    private var progressBar: ProgressBar
     private var prefixTextView: TextView
     private var suffixTextView: TextView
 
@@ -202,50 +165,25 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         prefixTextView = findViewById(R.id.prefixText)
         suffixTextView = findViewById(R.id.suffixText)
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
-        progressBar = findViewById(R.id.progressBar)
 
         orientation = HORIZONTAL
         gravity = Gravity.CENTER
 
-        eligibilityStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PaymentButtonEligibilityStatus.Loading
-        } else {
-            PaymentButtonEligibilityStatus.Ineligible
-        }
-
         initAttributes(attributeSet, defStyleAttr)
-    }
-
-    private fun updateEligibility() {
-        updateEligibilityStatus(true)
-    }
-
-    /**
-     * [fundingEligibilityResponse]: Should get a response from the PayPal SDK whether you could use
-     * the listed Payment Methods
-     *
-     */
-    private fun updateEligibilityStatus(fundingEligibilityResponse: Boolean) {
-        fundingEligibilityResponse.let {
-            val isEligible = when (fundingType) {
-                PaymentButtonFundingType.PAYPAL -> {
-                    fundingEligibilityResponse
-                }
-                PaymentButtonFundingType.PAYPAL_CREDIT -> {
-                    fundingEligibilityResponse
-                }
-            }
-            eligibilityStatus = if (isEligible) {
-                PaymentButtonEligibilityStatus.Eligible
-            } else {
-                PaymentButtonEligibilityStatus.Ineligible
-            }
-        }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        updateEligibility()
+        renderButton()
+    }
+
+    private fun renderButton() {
+        payPalWordmarkImage.visibility = VISIBLE
+        updateShapeDrawableFillColor(color)
+        suffixTextView.visibility = suffixTextVisibility
+        prefixTextView.visibility = prefixTextVisibility
+        isEnabled = true
+        visibility = VISIBLE
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -289,22 +227,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             .build()
     }
 
-    /**
-     * setVisibility will first check to see if the button is eligible, if it's not then the button
-     * will always be set to [View.GONE]. If the button is eligible then it will use the value of
-     * [visibility] that was provided.
-     */
-    override fun setVisibility(visibility: Int) {
-        val resolvedVisibility = when (eligibilityStatus) {
-            is PaymentButtonEligibilityStatus.Eligible, PaymentButtonEligibilityStatus.Loading -> {
-                visibility
-            }
-            else -> View.GONE
-        }
-
-        super.setVisibility(resolvedVisibility)
-    }
-
     private fun updateButtonStroke() {
         materialShapeDrawable = if (color.hasOutline) {
             val strokeColor = ContextCompat.getColor(context, R.color.paypal_spb_on_white_stroke)
@@ -318,8 +240,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 
     protected fun updateShapeDrawableFillColor(updatedColor: C) {
-        if (eligibilityStatus != PaymentButtonEligibilityStatus.Eligible) return
-
         materialShapeDrawable = materialShapeDrawable.apply {
             fillColor = updatedColor.retrieveColorResource(context)
 
@@ -353,105 +273,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         prefixTextView.setTextColor(textColor)
         suffixTextView.setTextColor(textColor)
     }
-
-    private fun updatePrefixTextVisibility() {
-        when (eligibilityStatus) {
-            is PaymentButtonEligibilityStatus.Loading -> prefixTextView.visibility = View.GONE
-            else ->
-                prefixTextView.visibility = prefixTextVisibility
-        }
-    }
-
-    private fun updateSuffixTextVisibility() {
-        when (eligibilityStatus) {
-            is PaymentButtonEligibilityStatus.Loading -> suffixTextView.visibility = View.GONE
-            else ->
-                suffixTextView.visibility = suffixTextVisibility
-        }
-    }
-
-    private fun renderButtonForEligibility() {
-        when (eligibilityStatus) {
-            PaymentButtonEligibilityStatus.Eligible -> {
-                progressBar.visibility = GONE
-                payPalWordmarkImage.visibility = VISIBLE
-                updateShapeDrawableFillColor(color)
-                updateSuffixTextVisibility()
-                updatePrefixTextVisibility()
-                isEnabled = true
-                visibility = VISIBLE
-            }
-            PaymentButtonEligibilityStatus.Ineligible, PaymentButtonEligibilityStatus.Error -> {
-                isEnabled = false
-                visibility = GONE
-            }
-            PaymentButtonEligibilityStatus.Loading -> {
-                isEnabled = false
-                payPalWordmarkImage.visibility = GONE
-                progressBar.visibility = VISIBLE
-                materialShapeDrawable = materialShapeDrawable.apply {
-                    fillColor = ContextCompat.getColorStateList(context, R.color.paypal_silver)
-                }
-                visibility = VISIBLE
-            }
-        }.exhaustive
-    }
-}
-
-/**
- * Provides the current eligibility status of a [PaymentButton]. Instances of [PaymentButton] are
- * reliant on funding eligibility requirements, while we are retrieving eligibility information the
- * button will be in the [Loading] status, and will be visible with a progress bar. If a button is
- * not eligible for display then it will have a status of [Ineligible] and the button's visibility
- * will be set to [View.GONE]. When a [PaymentButton] is [Eligible] then it's visibility will remain
- * unchanged (if it was [View.VISIBLE] it will remain in that state).
- */
-sealed class PaymentButtonEligibilityStatus {
-    /**
-     * [Eligible] means that the [PaymentButton] can be rendered and interacted with.
-     */
-    object Eligible : PaymentButtonEligibilityStatus()
-
-    /**
-     * [Ineligible] means that the [PaymentButton] cannot be rendered and buyer's won't be able to
-     * interact with it.
-     */
-    object Ineligible : PaymentButtonEligibilityStatus()
-
-    /**
-     * [Loading] means that the [PaymentButton] is currently retrieving the eligibility status and
-     * will appear with a loading indicator if the button is set to visible.
-     */
-    object Loading : PaymentButtonEligibilityStatus()
-
-    /**
-     * [Error] means that the [PaymentButton] was unable to determine its eligibility status after
-     * 30 seconds. This generally happens if there was an error with the funding eligibility network
-     * request and is not expected to occur at any meaningful interval. In general a button is able
-     * to determine its funding eligibility with 250ms, providing the SDK has been initialized at
-     * app startup then eligibility information should be available before the button even renders.
-     */
-    object Error : PaymentButtonEligibilityStatus()
-
-    override fun toString(): String = this::class.java.simpleName
 }
 
 internal enum class PaymentButtonFundingType {
     PAYPAL,
     PAYPAL_CREDIT;
-}
-
-/**
- * Provides a way to observe on eligibility status changes.
- */
-interface PaymentButtonEligibilityStatusChanged {
-
-    /**
-     * Invoked whenever the [PaymentButtonEligibilityStatus] changes for a given [PaymentButton].
-     */
-    fun onPaymentButtonEligibilityStatusChanged(
-        paymentButtonEligibilityStatus: PaymentButtonEligibilityStatus
-    )
 }
 
 /**

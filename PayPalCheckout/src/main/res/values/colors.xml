@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black_56">#8f000000</color>
+
+    <color name="paypal_spb_on_light_surface">#000000</color>
+    <color name="paypal_spb_on_dark_surface">#FFFFFF</color>
+    <color name="paypal_spb_on_white_stroke">#000000</color>
+</resources>

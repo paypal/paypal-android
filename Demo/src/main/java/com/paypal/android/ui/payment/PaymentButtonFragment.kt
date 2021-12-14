@@ -12,8 +12,8 @@ import com.paypal.android.R
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
-import com.paypal.android.ui.payment.paymentbutton.PayPalButton
-import com.paypal.android.ui.payment.paymentbutton.PayPalCreditButton
+import com.paypal.android.checkout.paymentbutton.PayPalButton
+import com.paypal.android.checkout.paymentbutton.PayPalCreditButton
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -11,14 +11,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.paypal.android.ui.payment.paymentbutton.PayPalButton
+        <com.paypal.android.checkout.paymentbutton.PayPalButton
             android:id="@+id/payPalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_16x"
             android:tag="PayPal" />
 
-        <com.paypal.android.ui.payment.paymentbutton.PayPalCreditButton
+        <com.paypal.android.checkout.paymentbutton.PayPalCreditButton
             android:id="@+id/payPalCreditButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

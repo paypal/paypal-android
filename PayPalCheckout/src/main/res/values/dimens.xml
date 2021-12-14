@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Margin Sizes -->
     <dimen name="margin_8x">8dp</dimen>
-    <dimen name="margin_16x">16dp</dimen>
 
     <!-- Payment Buttons -->
     <dimen name="paypal_payment_button_corner_radius_rounded">4dp</dimen>
@@ -20,6 +17,4 @@
     <dimen name="paypal_payment_button_vertical_padding_large">15dp</dimen>
     <dimen name="paypal_payment_button_label_text_size">14sp</dimen>
     <dimen name="paypal_payment_button_label_text_size_large">18sp</dimen>
-
-
 </resources>

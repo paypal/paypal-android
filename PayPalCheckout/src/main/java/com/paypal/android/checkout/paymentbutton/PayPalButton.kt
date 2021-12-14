@@ -1,4 +1,4 @@
-package com.paypal.android.ui.payment.paymentbutton
+package com.paypal.android.checkout.paymentbutton
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
-import com.paypal.android.ui.payment.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
 import com.paypal.pyplcheckout.R
 
 /**
