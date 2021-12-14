@@ -279,10 +279,3 @@ internal enum class PaymentButtonFundingType {
     PAYPAL,
     PAYPAL_CREDIT;
 }
-
-/**
- * Should be used if a `when` statement must be exhaustive but the expression is unused. Using this
- * property will result in a compile error if the `when` statement is not exhaustive.
- */
-internal val Any?.exhaustive: Unit
-    get() = Unit
