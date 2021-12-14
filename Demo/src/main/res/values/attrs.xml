@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PaymentButton">
+        <attr name="payment_button_size" format="enum">
+            <enum name="small" value="0" />
+            <enum name="medium" value="1" />
+            <enum name="large" value="2" />
+        </attr>
+
+        <attr name="payment_button_shape" format="enum">
+            <enum name="rounded" value="0" />
+            <enum name="pill" value="1" />
+            <enum name="rectangle" value="2" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="PayPalButton">
+        <attr name="paypal_color" format="enum">
+            <enum name="gold" value="0" />
+            <enum name="blue" value="1" />
+            <enum name="white" value="2" />
+            <enum name="black" value="3" />
+            <enum name="silver" value="4" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="PayPalCreditButton">
+        <attr name="paypal_credit_color" format="enum">
+            <enum name="dark_blue" value="0" />
+            <enum name="black" value="1" />
+        </attr>
+    </declare-styleable>
+</resources>

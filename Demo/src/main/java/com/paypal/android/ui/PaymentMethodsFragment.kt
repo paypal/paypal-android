@@ -50,6 +50,12 @@ class PaymentMethodsFragment : Fragment() {
                                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                                 .fillMaxWidth()
                         ) { Text(stringResource(R.string.payment_methods_paypal)) }
+                        Button(
+                            onClick = { launchPayPalButtonFragment() },
+                            modifier = Modifier
+                                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                                .fillMaxWidth()
+                        ) { Text(stringResource(R.string.payment_methods_paypal_button)) }
                     }
                 }
             }
@@ -76,6 +82,10 @@ class PaymentMethodsFragment : Fragment() {
 
     private fun launchCardFragment() {
         navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToCardFragment())
+    }
+
+    private fun launchPayPalButtonFragment() {
+        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToPayPalButtonFragment())
     }
 
     private fun launchSettingsFragment() {

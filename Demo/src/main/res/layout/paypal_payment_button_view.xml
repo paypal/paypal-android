@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:background="@color/black_56"
+    tools:gravity="center"
+    tools:layout_height="wrap_content"
+    tools:layout_width="match_parent"
+    tools:minHeight="48dp"
+    tools:orientation="horizontal"
+    tools:parentTag="LinearLayout">
+
+    <TextView
+        android:id="@+id/prefixText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/paypal_payment_button_text_margin"
+        android:fontFamily="@font/paypal_sans_small_medium"
+        android:visibility="gone"
+        tools:text="Buy turnips with"
+        tools:textColor="@color/paypal_spb_on_light_surface"
+        tools:visibility="gone" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressBar"
+        style="@style/Widget.MaterialComponents.CircularProgressIndicator.ExtraSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="visible"
+        app:indicatorColor="@color/paypal_spb_on_light_surface"/>
+
+    <ImageView
+        android:id="@+id/payPalWordmarkImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        android:visibility="gone"
+        tools:srcCompat="@drawable/wordmark_paypal_credit_monochrome"
+        tools:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/suffixText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/paypal_payment_button_text_margin"
+        android:fontFamily="@font/paypal_sans_small_medium"
+        android:visibility="gone"
+        tools:text="Checkout"
+        tools:textColor="@color/paypal_spb_on_light_surface"
+        tools:visibility="gone" />
+
+</merge>
