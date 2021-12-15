@@ -164,7 +164,7 @@ enum class PayPalButtonColor(
 
 /**
  * Defines the labels available for payment buttons. If no label is provided then it will
- * default to [PAYPAL] which will default to no label and only displaying the PayPal wordmark. For
+ * default to [PAYPAL] which will not display a label and will only display the PayPal wordmark. For
  * other labels they will have the label value itself along with a position either at the start or
  * the end of the button.
  *
