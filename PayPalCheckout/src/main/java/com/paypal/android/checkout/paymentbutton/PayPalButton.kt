@@ -168,8 +168,6 @@ enum class PayPalButtonColor(
  * other labels they will have the label value itself along with a position either at the start or
  * the end of the button.
  *
- * @see PAYPAL this is the default label which does not display a label at all.
- * PayPalButton.
  */
 enum class PayPalButtonLabel(
     val value: Int,
