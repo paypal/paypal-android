@@ -30,12 +30,12 @@ class PayPalCreditButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : PaymentButton<PayPalCreditButtonColor>(context, attributeSet, defStyleAttr) {
+) : PaymentButton<PayPalButtonColor>(context, attributeSet, defStyleAttr) {
 
     /**
      * Updates the color of the Payment Button with the provided [PayPalCreditButtonColor].
      */
-    override var color: PayPalCreditButtonColor = PayPalCreditButtonColor.DARK_BLUE
+    override var color: PaymentButtonColor = PayPalCreditButtonColor.DARK_BLUE
         set(value) {
             field = value
             updateShapeDrawableFillColor(field)

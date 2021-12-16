@@ -40,7 +40,7 @@ open class PayPalButton @JvmOverloads constructor(
      * WHITE it will be updated to the traditional wordmark. When updated to BLUE or BLACK it will
      * be updated to the monochrome wordmark.
      */
-    override var color: PayPalButtonColor = PayPalButtonColor.GOLD
+    override var color: PaymentButtonColor = PayPalButtonColor.GOLD
         set(value) {
             field = value
             updateShapeDrawableFillColor(field)
@@ -90,7 +90,7 @@ open class PayPalButton @JvmOverloads constructor(
         label = PayPalButtonLabel(paypalLabelAttribute)
     }
 
-    protected fun updateLabel(updatedLabel: PayPalButtonLabel) {
+    private fun updateLabel(updatedLabel: PayPalButtonLabel) {
         when (updatedLabel.position) {
             PayPalButtonLabel.Position.START -> {
                 suffixTextVisibility = View.GONE

@@ -54,10 +54,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     /**
      * Updates the color of the Payment Button with the provided [PaymentButtonColor].
      */
-    abstract var color: C
+    abstract var color: PaymentButtonColor
 
     /**
-     * Provides the current value of the prefix text which is displayed before the button's wordmark.
+     * The prefix text which is displayed before the button's wordmark.
      */
     var prefixText: String? = null
         protected set(value) {
@@ -66,7 +66,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
 
     /**
-     * Provides the current visibility of the prefix text which is displayed before the button's
+     * Visibility of the prefix text which is displayed before the button's
      * wordmark.
      */
     var prefixTextVisibility: Int = View.GONE
@@ -109,7 +109,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
 
     /**
-     * Provides the current value of the suffix text which is displayed after the button's wordmark.
+     * Value of the suffix text which is displayed after the button's wordmark.
      */
     var suffixText: String? = null
         protected set(value) {
@@ -118,7 +118,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
 
     /**
-     * Provides the current visibility of the suffix text which is displayed before the button's
+     * Visibility of the suffix text which is displayed before the button's
      * wordmark.
      */
     var suffixTextVisibility: Int = View.GONE
@@ -239,7 +239,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
     }
 
-    protected fun updateShapeDrawableFillColor(updatedColor: C) {
+    protected fun updateShapeDrawableFillColor(updatedColor: PaymentButtonColor) {
         materialShapeDrawable = materialShapeDrawable.apply {
             fillColor = updatedColor.retrieveColorResource(context)
 

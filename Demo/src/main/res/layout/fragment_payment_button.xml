@@ -25,6 +25,11 @@
             android:layout_margin="@dimen/margin_16x"
             android:tag="PayPal Credit" />
 
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/compose_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
     </LinearLayout>
 
 </ScrollView>

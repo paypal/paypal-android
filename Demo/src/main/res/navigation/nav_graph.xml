@@ -15,9 +15,6 @@
             android:id="@+id/action_paymentMethodsFragment_to_payPalFragment"
             app:destination="@id/payPalFragment" />
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_payPalButtonFragment"
-            app:destination="@id/payPalButtonFragment" />
-        <action
             android:id="@+id/action_paymentMethodsFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
@@ -29,10 +26,6 @@
         android:id="@+id/payPalFragment"
         android:name="com.paypal.android.ui.paypal.PayPalFragment"
         android:label="PayPalFragment" />
-    <fragment
-        android:id="@+id/payPalButtonFragment"
-        android:name="com.paypal.android.ui.payment.PaymentButtonFragment"
-        android:label="PayPalButtonFragment" />
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.paypal.android.ui.SettingsFragment"
