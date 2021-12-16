@@ -6,8 +6,8 @@ import android.os.Build
 import android.util.AttributeSet
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
+import com.paypal.android.checkout.R
 import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
-import com.paypal.pyplcheckout.R
 
 /**
  * PayPalCreditButton provides a PayPal Credit button with the ability to modify the [color], [shape],
@@ -53,6 +53,7 @@ class PayPalCreditButton @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PayPalCreditButton).use { typedArray ->
             updateColorFrom(typedArray)
         }
+        contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {

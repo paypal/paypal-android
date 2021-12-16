@@ -22,6 +22,13 @@
             <enum name="black" value="3" />
             <enum name="silver" value="4" />
         </attr>
+
+        <attr name="paypal_label" format="enum">
+            <enum name="paypal" value="0" />
+            <enum name="checkout" value="1" />
+            <enum name="buy_now" value="2" />
+            <enum name="pay" value="3" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="PayPalCreditButton">

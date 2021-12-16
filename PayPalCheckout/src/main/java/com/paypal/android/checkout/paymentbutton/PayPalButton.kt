@@ -7,8 +7,8 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
+import com.paypal.android.checkout.R
 import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
-import com.paypal.pyplcheckout.R
 
 /**
  * PayPalButton provides a PayPal button with the ability to modify the [color], [label], [shape],
@@ -73,6 +73,7 @@ open class PayPalButton @JvmOverloads constructor(
             updateColorFrom(typedArray)
             updateLabelFrom(typedArray)
         }
+        contentDescription = context.getString(R.string.paypal_payment_button_description)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {
