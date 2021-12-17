@@ -175,22 +175,41 @@ enum class PayPalButtonLabel(
     val position: Position? = null,
     private val stringResId: Int? = null
 ) {
+    /**
+     * Label for PayPal text
+     */
     PAYPAL(value = 0),
+
+    /**
+     * Label for Checkout text
+     */
     CHECKOUT(
         value = 1,
         position = Position.END,
         stringResId = R.string.paypal_checkout_smart_payment_button_label_checkout
     ),
+
+    /**
+     * Label for Buy Now text
+     */
     BUY_NOW(
         value = 2,
         position = Position.END,
         stringResId = R.string.paypal_checkout_smart_payment_button_label_buy_now
     ),
+
+    /**
+     * Label for Pay text
+     */
     PAY(
         value = 3,
         position = Position.START,
         stringResId = R.string.paypal_checkout_smart_payment_button_label_pay
     ),
+
+    /**
+     * Label for Pay Later text
+     */
     PAY_LATER(
         value = 4,
         position = Position.END,
