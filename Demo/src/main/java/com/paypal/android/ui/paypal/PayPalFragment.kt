@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +50,7 @@ class PayPalFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val view = inflater.inflate(R.layout.fragment_payment_button, container, false)
 
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
         val application = requireActivity().application
@@ -57,11 +59,27 @@ class PayPalFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             payPalViewModel.setPayPalClient(PayPalClient(application, coreConfig, returnUrl))
         }
-        return ComposeView(requireContext()).apply {
+
+        view.findViewById<View>(R.id.payPalButton).setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                launchNativeCheckout()
+            }
+        }
+
+        view.findViewById<View>(R.id.payPalCreditButton).setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                launchNativeCheckout()
+            }
+        }
+
+        view.findViewById<ComposeView>(R.id.compose_view).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 PayPalFragmentView()
             }
         }
+
+        return view
     }
 
     @Preview

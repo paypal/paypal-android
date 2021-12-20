@@ -23,7 +23,7 @@ import java.net.UnknownHostException
 
 @HiltViewModel
 class PayPalViewModel @Inject constructor(
-    private val payPalDemoApi: PayPalDemoApi,
+    private val payPalDemoApi: PayPalDemoApi
 ) : ViewModel() {
 
     companion object {

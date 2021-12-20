@@ -45,6 +45,7 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+    implementation deps.material
 
     testImplementation deps.junit
     testImplementation deps.mockk
