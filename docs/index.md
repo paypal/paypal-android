@@ -10,27 +10,32 @@ You need to have a server integration to create an order and capture the funds u
 
 ## Eligibility
 ```
-# Product Placeholder
+# Placeholder: Product Eligibility
 what kind of merchants are we targetting?
 what features do we offer right now/what features are we missing?
 ```
 
 ## Integration methods
 
-- [Card fields UI integration](#card-fields-ui-integration)
-- [Fully customizable integration](#fully-customizable-integration)
+- [Card Fields UI Integration](#card-fields-ui-integration)
+- [Fully Customizable Integration](#fully-customizable-integration)
 
-## Card fields UI integration
+## Card Fields UI Integration
 
 Accept card payments using our card fields UI
 
-`Placeholder: Include images of card fields`
+```
+# Placeholder: Include images of card fields
+```
 
 **Requirements:**
 Card fields UI offers a low effort integration where you can use our card fields UI, and our card fields will handle ...
 
+## Fully Customizable Integration
 
-### Code sample
+Process card payments with PayPal Payments SDK using your own UI.
+
+### Steps
 
 #### 1. Create an order
 Call `v2/checkout/orders` to create an order an obtain an order ID
@@ -54,7 +59,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 #### 2. Approve the order using Payments SDK:
 
-#### iOS
+##### iOS
 ```swift
 import PaymentsSDK
 
@@ -84,9 +89,10 @@ cardClient.approveOrder(request: cardRequest) { result in
 }
 ```
 
-#### Android
-```kotlin=
-// placeholder
+##### Android
+
+```
+# Placeholder: Android SDK Card Approve Order Sample Code
 ```
 
 #### 3. Capture/authorize the order
@@ -107,149 +113,3 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --header 'Authorization: Bearer <access_token>' \
 --data-raw ''
 ```
-
-
-### 1. Initial code sample
-Answers the question: What is the minimum code required for this integration?
-
-#### Android
-```
-Code sample placeholder
-```
-
-#### iOS
-```
-
-
-
-Code sample placeholder
-```
-
-### 2. Intermediate steps
-
-Answers the question: What are the key elements from this code sample that I need to modify for this integration?
-
-#### Android
-```
-Code sample placeholder
-```
-
-#### iOS
-```
-Code sample placeholder
-```
-
-### 3. Complete code sample
-
-Answers the question: What are all possible coding options for this solution?
-
-#### Android
-```
-Code sample placeholder
-```
-
-#### iOS
-```
-Code sample placeholder
-```
-
-### 4. Test
-
-- Use application portal + sandbox account
-
-### 5. Go live
-
-- Obtain live credentials
-
-
-
-
-
-
-## Fully customizable integration
-
-The PayPal Payments SDK offers functionalities to approve an order ...
-
-Process card payments with PayPal Payments SDK using your own UI.
-
-**Requirements:**
-
-### 1. Initial code sample
-Answers the question: What is the minimum code required for this integration?
-
-#### Android
-```
-Code sample
-```
-
-#### iOS
-```
-Code sample
-```
-
-### 2. Intermediate steps
-
-Answers the question: What are the key elements from this code sample that I need to modify for this integration?
-
-#### Android
-```
-Code sample
-```
-
-#### iOS
-```
-Code sample
-```
-
-### 3. Complete code sample
-
-Questions:
-- Should document server steps in here? (create/capture/authorize)
-
-#### Android
-```
-Code sample
-```
-
-#### iOS
-```swift
-import PaymentsSDK
-
-let config = CoreConfig(clientID: <your_client_id>, evironment: <environment>)
-let cardClient = CardClient(config: config)
-
-let card = Card(
-    number: <card_number>,
-    expirationMonth: <expiration_month>,
-    expirationYear: <expiration_year>,
-    securityCode: <security_code>
-)
-
-let cardRequest = CardRequest(orderID: <order_id>, card: card)
-
-cardClient.approveOrder(request: cardRequest) { result in
-    switch result {
-        case .success(let result):
-            // Order is successfully approved with card and ready to be capture/authorize.
-        case .failure(let error):
-            // Encountered error when approving order.
-    }
-}
-```
-
-### 4. Test
-
-Answers the question: How do I test the integration?
-
-> **Note:** You can point to the existing Test and Go Live guide - https://developer.paypal.com/docs/business/test-and-go-live/
-
-For example - https://developer.paypal.com/docs/checkout/standard/
-
-### 5. Go live
-
-Answers the question: How do I go live with this integration?
-
-> **Note:** You can point to the existing Test and Go Live guides:
->
-> * Business: https://developer.paypal.com/docs/business/test-and-go-live/
-> * Marketplaces and Platforms: https://developer.paypal.com/docs/multiparty/test-and-go-live/
