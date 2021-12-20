@@ -14,6 +14,7 @@ import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
+import com.paypal.android.card.CardRequest
 import com.paypal.android.card.CardResult
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.data.card.PrefillCardData
@@ -44,7 +45,8 @@ class CardViewModel @Inject constructor(
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
-    private val configuration = CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
+    private val configuration =
+        CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
 
     fun onCardNumberChange(newCardNumber: String) {
@@ -77,7 +79,8 @@ class CardViewModel @Inject constructor(
 
         viewModelScope.launch {
             val order = fetchOrder()
-            cardClient.approveOrder(order.id!!, card) { result ->
+            val request = CardRequest(order.id!!, card)
+            cardClient.approveOrder(request) { result ->
                 when (result) {
                     is CardResult.Success -> {
                         Log.d(TAG, "SUCCESS")
