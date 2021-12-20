@@ -1,16 +1,4 @@
-# Document – Pay with Card
-
-## Get started
-
-```---
-title: Pay with Card
-subtitle: Accept card payments in your app
-layout: docs
-sdkVersion: 1.0.0
-keywords: PayPal, SDK, Card, Credit Card, Payments
-contentType: SDK
-productStatus: Current
-```
+# Pay with Card
 
 Accept card payments in your app using the PayPal In-App Payments SDK.
 
@@ -18,12 +6,12 @@ Accept card payments in your app using the PayPal In-App Payments SDK.
 
 The In-App payments SDK allows for merchant apps to integrate easily with PayPal payment services on both the client and server.
 
-You need to have a server integration to create an order and capture the funds using [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2). The Payments SDK will allow you to approve the order in your client side using the buyer's card information.
+You need to have a server integration to create an order and capture the funds using [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2). The Payments SDK will allow you to approve the order on the client side of your app by using the buyer's card information.
 
 ## Eligibility
 ```
-placeholder - Question for product (Rahul?)
-what kinda merchants are we targetting?
+# Product Placeholder
+what kind of merchants are we targetting?
 what features do we offer right now/what features are we missing?
 ```
 
@@ -32,19 +20,7 @@ what features do we offer right now/what features are we missing?
 - [Card fields UI integration](#card-fields-ui-integration)
 - [Fully customizable integration](#fully-customizable-integration)
 
-
-
 ## Card fields UI integration
-```---
-title: Card fields UI integration
-subtitle: 
-layout: docs
-sdkVersion: 1.0.0
-keywords: PayPal, SDK, Card, Credit Card, Payments
-contentType: SDK
-productStatus: Current
-```
-
 
 Accept card payments using our card fields UI
 
@@ -191,15 +167,6 @@ Code sample placeholder
 
 
 ## Fully customizable integration
-```---
-title: Fully customizable integration
-subtitle: Accept card payments in your app
-layout: docs
-sdkVersion: 1.0.0
-keywords: PayPal, SDK, Card, Credit Card, Payments
-contentType: SDK
-productStatus: Current
-```
 
 The PayPal Payments SDK offers functionalities to approve an order ...
 
