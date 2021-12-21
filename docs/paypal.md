@@ -1,6 +1,6 @@
 # Pay with PayPal
 
-Accept card payments in your Android app using the PayPal Payments SDK.
+Accept PayPal payments in your Android app using the PayPal Payments SDK.
 
 ## How it works
 
@@ -26,7 +26,7 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 Follow the steps in [Enable the SDK](https://developer.paypal.com/sdk/in-app/android/#link-enablethesdk) to set up your account and application for PayPal payments.
 
 You will need a server integration to create an order and capture the funds using [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2). 
-To test your initial integration and account setup, the `curl` commands below can be used in place of a server SDK.
+For initial setup, the `curl` commands below can be used in place of a server SDK.
 
 ### Technical steps - custom integration
 
@@ -64,7 +64,7 @@ Add a `PayPalButton` to your layout XML:
 
 #### 3. Initiate the Payments SDK
 
-Create a `CoreConfig` using your client ID obtained from the PayPal Developer Portal:
+Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 
 ```kotlin
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
@@ -84,7 +84,7 @@ val payPalClient = PayPalClient(application, config, returnUrl)
 
 #### 4. Create an order
 
-When a user enters the payment flow, call `v2/checkout/orders` to create an order an obtain an order ID:
+When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
 ```bash
 curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
@@ -117,7 +117,7 @@ findViewById<View>(R.id.payPalButton).setOnClickListener {
 }
 ```
 
-Call `PayPalClient#checkout` to approve the order, and handle results:
+Call `PayPalClient#checkout` to approve the order, and then handle results:
 
 ```kotlin
 fun launchPayPal(orderID: String) {
