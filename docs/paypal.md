@@ -1,18 +1,18 @@
 # Pay with PayPal
 
-Accept card payments in your Android app using the PayPal In-App Payments SDK.
+Accept card payments in your Android app using the PayPal Payments SDK.
 
 ## How it works
 
 This diagram shows how your client, your server, and PayPal interact:
 
-// TODO - Get a diagram of the payment flow
+// TODO - Get a diagram of the payment flow similar to [this](https://developer.paypal.com/braintree/docs/start/overview#how-it-works)
 
 ## Eligibility
 
 PayPal is available as a payment method to merchants in multiple [countries and currencies](https://developer.paypal.com/docs/checkout/payment-methods/).
 
-This SDK supports a minimum Android API of 21 or higher.
+This SDK supports a minimum Android API of 23 or higher.
 Android apps can be written in Kotlin or Java 8 or higher.
 
 ## How to integrate
@@ -22,10 +22,11 @@ Android apps can be written in Kotlin or Java 8 or higher.
 ### Know before you code
 
 You will need to set up authorization to use the PayPal Payments SDK. 
-Follow [these setup steps](https://github.com/paypal/paypal-sdk-spec/blob/main/spec/client/prerequisites.md) to create a free PayPal Developer Account and create a client ID for use in the SDK.
+Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and generate an access token. 
+Follow the steps in [Enable the SDK](https://developer.paypal.com/sdk/in-app/android/#link-enablethesdk) to set up your account and application for PayPal payments.
 
 You will need a server integration to create an order and capture the funds using [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2). 
-The Payments SDK allows for client-side approval of an order with the user's PayPal account information.
+To test your initial integration and account setup, the `curl` commands below can be used in place of a server SDK.
 
 ### Technical steps - custom integration
 
@@ -35,7 +36,18 @@ In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android.checkout:1.0.0"
+   implementation "com.paypal.android:paypal-checkout:1.0.0"
+}
+```
+
+Add the following maven credentials to your `build.gradle`:
+```groovy
+maven {
+    url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
+    credentials {
+        username 'paypal_sgerritz'
+        password 'AKCp8jQ8tAahqpT5JjZ4FRP2mW7GMoFZ674kGqHmupTesKeAY2G8NcmPKLuTxTGkKjDLRzDUQ'
+    }
 }
 ```
 
@@ -67,7 +79,7 @@ val returnUrl = "<APPLICATION_ID>" + "://paypalpay"
 Create a `PayPalClient` to approve an order with a PayPal payment method:
 
 ```kotlin
-val payPalClient = PayPalClient(requireActivity().application, config, returnUrl)
+val payPalClient = PayPalClient(application, config, returnUrl)
 ```
 
 #### 4. Create an order
@@ -77,7 +89,7 @@ When a user enters the payment flow, call `v2/checkout/orders` to create an orde
 ```bash
 curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer <CLIENT_ID>' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw '{
     "intent": "CAPTURE",
     "purchase_units": [
@@ -91,6 +103,8 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 }'
 ```
 
+The `id` field of the response contains the order ID to pass to your client.
+
 #### 5. Approve the order through the Payments SDK
 
 When a user taps the PayPal button created above, approve the order using your `PayPalClient`.
@@ -98,7 +112,7 @@ When a user taps the PayPal button created above, approve the order using your `
 Attach your PayPal button to the PayPal payment flow:
 
 ```kotlin
-view.findViewById<View>(R.id.payPalButton).setOnClickListener {
+findViewById<View>(R.id.payPalButton).setOnClickListener {
     launchPayPal(orderID)
 }
 ```
@@ -107,7 +121,7 @@ Call `PayPalClient#checkout` to approve the order, and handle results:
 
 ```kotlin
 fun launchPayPal(orderID: String) {
-    payPalClient.checkout(orderId) { result ->
+    payPalClient.checkout(orderID) { result ->
         when (result) {
             is PayPalCheckoutResult.Success -> {
                 // capture/authorize the order (see step 6)
@@ -130,17 +144,21 @@ If you receive a successful result in the client-side flow, you can then capture
 Call `authorize` to place funds on hold:
 
 ```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<orderID>/authorize' \
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer <CLIENT_ID>' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw ''
 ```
 
 Call `capture` to capture funds immediately:
 
 ```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<orderID>/capture' \
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture' \
 --header 'Content-Type: application/json' \
---header 'Authorization: Bearer <CLIENT_ID>' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw ''
 ```
+
+### Testing your integration
+
+### Go live
