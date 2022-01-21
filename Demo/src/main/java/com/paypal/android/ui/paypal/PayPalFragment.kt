@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import com.paypal.android.BuildConfig
@@ -42,7 +43,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class PayPalFragment : Fragment() {
 
-    private val payPalViewModel: PayPalViewModel by viewModels()
+    private val payPalViewModel: PayPalViewModel by activityViewModels()
 
     private val canRunPayPalCheckout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     override fun onCreateView(

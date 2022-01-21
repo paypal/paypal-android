@@ -34,7 +34,7 @@ internal class BrowserSwitchHelper {
         return BrowserSwitchOptions()
             .requestCode(123)
             .url(buildPayPalCheckoutUri(orderId, config))
-            .returnUrlScheme(REDIRECT_URI_PAYPAL_CHECKOUT)
+            .returnUrlScheme(URL_SCHEME)
             .metadata(metadata)
     }
 

@@ -3,6 +3,7 @@ package com.paypal.android.ui.paypal
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,7 +33,7 @@ class PayPalViewModel @Inject constructor(
     }
 
     private val orderJson = OrderUtils.orderWithShipping
-    private lateinit var payPalClient: PayPalClient
+    private var payPalClient: PayPalClient? = null
 
     private val _checkoutResult = MutableLiveData<PayPalCheckoutResult>()
     val checkoutResult: LiveData<PayPalCheckoutResult> = _checkoutResult
@@ -47,7 +48,7 @@ class PayPalViewModel @Inject constructor(
                 val order = fetchOrder()
                 order.id?.let { orderId ->
                     val payPalRequest = PayPalRequest(orderId)
-                    payPalClient.approveOrder(payPalRequest) { result ->
+                    payPalClient?.approveOrder(payPalRequest) { result ->
                         when (result) {
                             is PayPalCheckoutResult.Success -> Log.i(
                                 TAG,
@@ -79,6 +80,10 @@ class PayPalViewModel @Inject constructor(
 
     fun setPayPalClient(payPalClient: PayPalClient) {
         this.payPalClient = payPalClient
+    }
+
+    fun handlePayPalBrowserSwitchResult(activity: FragmentActivity) {
+        payPalClient?.handleBrowserSwitchResult(activity)
     }
 
     private suspend fun fetchOrder(): Order {
