@@ -112,7 +112,7 @@ class PayPalClientTest {
 
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString(), mockk())
+        paypalClient.approveOrder(, mockk())
 
         verify {
             PayPalCheckout.start(any(), any(), any(), any(), any())
@@ -138,7 +138,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(orderId) {}
+        paypalClient.approveOrder() {}
 
         verify {
             createOrderActions.set(orderId)
@@ -173,7 +173,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString()) { result ->
+        paypalClient.approveOrder() { result ->
             expectThat(result) {
                 isA<PayPalCheckoutResult.Success>()
                 get { approval.data.payerId }.isEqualTo(payerId)
@@ -200,7 +200,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString()) { result ->
+        paypalClient.approveOrder() { result ->
             expectThat(result).isA<PayPalCheckoutResult.Cancellation>()
         }
     }
@@ -222,7 +222,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString()) { result ->
+        paypalClient.approveOrder() { result ->
             expectThat(result).isA<PayPalCheckoutResult.Failure>()
         }
     }

@@ -14,6 +14,8 @@
         <entry key="../../../../layout/compose-model-1634583168940.xml" value="0.25" />
         <entry key="../../../../layout/compose-model-1635341082643.xml" value="0.1" />
         <entry key="../../../../layout/compose-model-1636026003097.xml" value="0.3296296296296296" />
+        <entry key="../../../../layout/compose-model-1642781110101.xml" value="0.1259259259259259" />
+        <entry key="../../../../layout/compose-model-1642784690401.xml" value="0.1259259259259259" />
         <entry key="../../../../layout/custom_preview.xml" value="0.14629629629629629" />
         <entry key="Demo/src/main/res/layout/activity_demo.xml" value="0.325" />
         <entry key="Demo/src/main/res/layout/fragment_pay_pal.xml" value="0.3671875" />
@@ -22,6 +24,7 @@
       </map>
     </option>
   </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>

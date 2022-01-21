@@ -16,6 +16,7 @@ import javax.inject.Inject
 import com.google.gson.JsonParser
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
+import com.paypal.android.checkout.PayPalRequest
 import com.paypal.android.checkout.pojo.CorrelationIds
 import com.paypal.android.checkout.pojo.ErrorInfo
 import retrofit2.HttpException
@@ -39,14 +40,14 @@ class PayPalViewModel @Inject constructor(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun startPayPalCheckout() {
         _isLoading.value = true
         viewModelScope.launch {
             try {
                 val order = fetchOrder()
                 order.id?.let { orderId ->
-                    payPalClient.checkout(orderId) { result ->
+                    val payPalRequest = PayPalRequest(orderId)
+                    payPalClient.approveOrder(payPalRequest) { result ->
                         when (result) {
                             is PayPalCheckoutResult.Success -> Log.i(
                                 TAG,
@@ -76,7 +77,6 @@ class PayPalViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun setPayPalClient(payPalClient: PayPalClient) {
         this.payPalClient = payPalClient
     }

@@ -56,9 +56,7 @@ class PayPalFragment : Fragment() {
         val application = requireActivity().application
         val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            payPalViewModel.setPayPalClient(PayPalClient(application, coreConfig, returnUrl))
-        }
+        payPalViewModel.setPayPalClient(PayPalClient(requireActivity(), coreConfig, returnUrl))
 
         view.findViewById<View>(R.id.payPalButton).setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -216,8 +214,6 @@ class PayPalFragment : Fragment() {
     }
 
     private fun launchNativeCheckout() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            payPalViewModel.startPayPalCheckout()
-        }
+        payPalViewModel.startPayPalCheckout()
     }
 }
