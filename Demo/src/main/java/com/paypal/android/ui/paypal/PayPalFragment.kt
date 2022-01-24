@@ -29,10 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.checkout.PayPalCheckoutResult
@@ -59,7 +56,7 @@ class PayPalFragment : Fragment() {
         val application = requireActivity().application
         val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
 
-        payPalViewModel.setPayPalClient(PayPalClient(requireActivity(), coreConfig, returnUrl))
+        payPalViewModel.setPayPalClient(PayPalClient(requireActivity(), coreConfig))
 
         view.findViewById<View>(R.id.payPalButton).setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

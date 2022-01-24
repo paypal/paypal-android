@@ -62,9 +62,6 @@ buildscript {
             "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
             "striktCore"                  : "io.strikt:strikt-core:0.30.1",
 
-            // PayPal
-            "paypalNativeCheckout"        : "com.paypal.checkout:android-sdk:0.5.2",
-
             // Browser Switch
             "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.1.1"
     ]
@@ -90,14 +87,6 @@ allprojects {
         google()
         mavenCentral()
         mavenLocal()
-
-        maven {
-            url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
-            credentials {
-                username cardinalUsername
-                password cardinalPassword
-            }
-        }
     }
 }
 

@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.annotation.NonNull
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
-import com.paypal.authcore.BuildConfig
 import com.braintreepayments.api.BrowserSwitchOptions
 import org.json.JSONObject
 
@@ -39,6 +38,7 @@ internal class BrowserSwitchHelper {
     }
 
     companion object {
+        // TODO: don't hard code this
         private const val URL_SCHEME = "com.paypal.android.demo"
 
         private val REDIRECT_URI_PAYPAL_CHECKOUT =

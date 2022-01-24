@@ -40,7 +40,6 @@ android {
 dependencies {
     api project(':Core')
 
-    implementation deps.paypalNativeCheckout
     implementation deps.browserSwitch
 
     implementation deps.kotlinStdLib

@@ -21,6 +21,7 @@
         <entry key="Demo/src/main/res/layout/fragment_pay_pal.xml" value="0.3671875" />
         <entry key="Demo/src/main/res/xml/preferences.xml" value="0.3188405797101449" />
         <entry key="Demo/src/main/res/xml/root_preferences.xml" value="0.32382246376811596" />
+        <entry key="PayPalCheckout/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.10740740740740741" />
       </map>
     </option>
   </component>

@@ -5,46 +5,23 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.paypal.android.core.CoreConfig
 
 
-class PayPalClient(val activity: FragmentActivity, val coreConfig: CoreConfig, returnUrl: String) {
+// TODO: doc string and unit test
+class PayPalClient(val activity: FragmentActivity, val coreConfig: CoreConfig) {
 
     private val browserSwitchClient: BrowserSwitchClient
     private val browserSwitchHelper: BrowserSwitchHelper
-    // TODO: confirm if this approach works well for process/activity destroy scenarios
+    //TODO: Implement a listener instead
     private var callback: PayPalCheckoutResultCallback? = null
 
     init {
-//        val config = CheckoutConfig(
-//            application = context,
-//            clientId = coreConfig.clientId,
-//            environment = getPayPalEnvironment(coreConfig.environment),
-//            returnUrl = returnUrl,
-//        )
         browserSwitchClient = BrowserSwitchClient()
         browserSwitchHelper = BrowserSwitchHelper()
-//        PayPalCheckout.setConfig(config)
     }
 
     fun approveOrder(payPalRequest: PayPalRequest, callback: PayPalCheckoutResultCallback) {
         this.callback = callback
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(payPalRequest.orderID, coreConfig)
         browserSwitchClient.start(activity, browserSwitchOptions)
-
-
-        // TODO: Native Checkout will be re-integrated in the future
-//        PayPalCheckout.start(CreateOrder { createOrderActions ->
-//            createOrderActions.set(orderId)
-//        },
-//            onApprove = OnApprove { approval ->
-//                val result =
-//                    PayPalCheckoutResult.Success(approval.data.orderId, approval.data.payerId)
-//                callback.onPayPalCheckoutResult(result)
-//            },
-//            onCancel = OnCancel {
-//                callback.onPayPalCheckoutResult(PayPalCheckoutResult.Cancellation)
-//            },
-//            onError = OnError { errorInfo ->
-//                callback.onPayPalCheckoutResult(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
-//            })
     }
 
     fun handleBrowserSwitchResult(activity: FragmentActivity) {
