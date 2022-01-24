@@ -45,11 +45,10 @@ class DemoActivity : AppCompatActivity() {
         super.onResume()
 
         payPalViewModel.handlePayPalBrowserSwitchResult(this)
-
     }
 
     override fun onNewIntent(newIntent: Intent?) {
-        super.onNewIntent(newIntent)
+        super.onNewIntent(intent)
 
         intent = newIntent
     }

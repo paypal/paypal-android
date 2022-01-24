@@ -1,27 +1,25 @@
 package com.paypal.android.ui.paypal
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.JsonObject
-import com.paypal.android.api.model.Order
-import com.paypal.android.checkout.PayPalClient
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.google.gson.JsonParser
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
+import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalRequest
 import com.paypal.android.checkout.pojo.CorrelationIds
 import com.paypal.android.checkout.pojo.ErrorInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
+import javax.inject.Inject
 
 @HiltViewModel
 class PayPalViewModel @Inject constructor(
