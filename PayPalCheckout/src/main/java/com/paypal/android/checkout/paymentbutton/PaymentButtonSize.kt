@@ -1,7 +1,7 @@
 package com.paypal.android.checkout.paymentbutton
 
+import com.paypal.android.checkout.R
 import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
-import com.paypal.pyplcheckout.R
 
 /**
  * Defines the sizes available for payment buttons. If no size is provided then it will

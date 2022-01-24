@@ -180,7 +180,7 @@ class PayPalFragment : Fragment() {
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             Text(
-                text = getString(R.string.reason, result.error.reason),
+                text = getString(R.string.reason, result.error.message),
                 fontSize = 16.sp,
                 color = Color.Gray,
             )

@@ -13,8 +13,6 @@ import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalRequest
-import com.paypal.android.checkout.pojo.CorrelationIds
-import com.paypal.android.checkout.pojo.ErrorInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -54,7 +52,7 @@ class PayPalViewModel @Inject constructor(
                             )
                             is PayPalCheckoutResult.Failure -> Log.i(
                                 TAG,
-                                "Checkout Error: ${result.error.reason}"
+                                "Checkout Error: ${result.error.message}"
                             )
                             is PayPalCheckoutResult.Cancellation -> Log.i(TAG, "User cancelled")
                         }
@@ -64,12 +62,12 @@ class PayPalViewModel @Inject constructor(
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(error = ErrorInfo(e, e.message!!, CorrelationIds(), null))
+                val error = PayPalCheckoutResult.Failure(error = Error(e.message))
                 _checkoutResult.value = error
                 _isLoading.value = false
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(error = ErrorInfo(e, e.message!!, CorrelationIds(), null))
+                val error = PayPalCheckoutResult.Failure(error = Error(e.message))
                 _checkoutResult.value = error
                 _isLoading.value = false
             }
@@ -85,7 +83,8 @@ class PayPalViewModel @Inject constructor(
     }
 
     private suspend fun fetchOrder(): Order {
-        val orderJson = JsonParser.parseString(orderJson) as JsonObject
+        val parser = JsonParser()
+        val orderJson = parser.parse(orderJson) as JsonObject
         return payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
     }
 }
