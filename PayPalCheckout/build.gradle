@@ -35,6 +35,9 @@ android {
         abortOnError true
         warningsAsErrors true
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -53,6 +56,7 @@ dependencies {
     testImplementation deps.kotlinxAndroidCoroutinesTest
     testImplementation deps.striktCore
     testImplementation deps.striktMockk
+    testImplementation deps.jsonMock
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore

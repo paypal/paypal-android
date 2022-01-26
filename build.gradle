@@ -61,6 +61,7 @@ buildscript {
             "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",
             "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
             "striktCore"                  : "io.strikt:strikt-core:0.30.1",
+            "jsonMock"                    : "org.json:json:20211205",
 
             // Browser Switch
             "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.1.1"
