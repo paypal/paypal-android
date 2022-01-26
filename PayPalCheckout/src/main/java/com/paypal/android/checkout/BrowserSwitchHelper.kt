@@ -8,9 +8,11 @@ import com.braintreepayments.api.BrowserSwitchOptions
 import org.json.JSONObject
 
 
-internal class BrowserSwitchHelper {
+internal class BrowserSwitchHelper(private val urlScheme: String) {
 
-    fun buildPayPalCheckoutUri(@NonNull orderId: String?, @NonNull config: CoreConfig): Uri {
+    private val redirectUriPayPalCheckout = String.format("%s://x-callback-url/paypal-sdk/paypal-checkout", urlScheme)
+
+    private fun buildPayPalCheckoutUri(@NonNull orderId: String?, @NonNull config: CoreConfig): Uri {
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
@@ -20,7 +22,7 @@ internal class BrowserSwitchHelper {
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
-            .appendQueryParameter("redirect_uri", REDIRECT_URI_PAYPAL_CHECKOUT)
+            .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
             .appendQueryParameter("native_xo", "1")
             .build()
     }
@@ -31,17 +33,8 @@ internal class BrowserSwitchHelper {
     ): BrowserSwitchOptions {
         val metadata = JSONObject().put("order_id", orderId)
         return BrowserSwitchOptions()
-            .requestCode(123)
             .url(buildPayPalCheckoutUri(orderId, config))
-            .returnUrlScheme(URL_SCHEME)
+            .returnUrlScheme(urlScheme)
             .metadata(metadata)
-    }
-
-    companion object {
-        // TODO: don't hard code this
-        private const val URL_SCHEME = "com.paypal.android.demo"
-
-        private val REDIRECT_URI_PAYPAL_CHECKOUT =
-            String.format("%s://x-callback-url/paypal-sdk/paypal-checkout", URL_SCHEME)
     }
 }

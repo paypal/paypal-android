@@ -125,7 +125,7 @@ class CardAPIUnitTest {
         assertEquals(
             "The specified resource does not exist. -> [Issue: INVALID_RESOURCE_ID.\n" +
                     "Error description: Specified resource ID does not exist.]",
-            result.payPalSDKError.errorDescription
+            result.coreSDKError.errorDescription
         )
     }
 
@@ -138,7 +138,7 @@ class CardAPIUnitTest {
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
         assertEquals(
             APIClientError.unknownError.errorDescription,
-            result.payPalSDKError.errorDescription
+            result.coreSDKError.errorDescription
         )
     }
 
@@ -151,7 +151,7 @@ class CardAPIUnitTest {
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
         assertEquals(
             APIClientError.noResponseData.errorDescription,
-            result.payPalSDKError.errorDescription
+            result.coreSDKError.errorDescription
         )
     }
 
@@ -166,7 +166,7 @@ class CardAPIUnitTest {
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
         assertEquals(
             APIClientError.dataParsingError.errorDescription,
-            result.payPalSDKError.errorDescription
+            result.coreSDKError.errorDescription
         )
     }
 
@@ -179,7 +179,7 @@ class CardAPIUnitTest {
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
         assertEquals(
             APIClientError.unknownHost.errorDescription,
-            result.payPalSDKError.errorDescription
+            result.coreSDKError.errorDescription
         )
     }
 
@@ -192,7 +192,7 @@ class CardAPIUnitTest {
         val result = sut.confirmPaymentSource(orderID, card) as CardResult.Error
         assertEquals(
             APIClientError.serverResponseError.errorDescription,
-            result.payPalSDKError.errorDescription
+            result.coreSDKError.errorDescription
         )
     }
 

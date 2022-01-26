@@ -53,10 +53,8 @@ class PayPalFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_payment_button, container, false)
 
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
-        val application = requireActivity().application
-        val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
 
-        payPalViewModel.setPayPalClient(PayPalClient(requireActivity(), coreConfig))
+        payPalViewModel.setPayPalClient(PayPalClient(requireActivity(), coreConfig, "com.paypal.android.demo"))
 
         view.findViewById<View>(R.id.payPalButton).setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

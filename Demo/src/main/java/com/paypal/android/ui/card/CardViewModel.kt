@@ -88,7 +88,7 @@ class CardViewModel @Inject constructor(
                     }
                     is CardResult.Error -> {
                         Log.e(TAG, "ERROR")
-                        Log.e(TAG, result.payPalSDKError.errorDescription.orEmpty())
+                        Log.e(TAG, result.coreSDKError.errorDescription.orEmpty())
                     }
                 }
             }

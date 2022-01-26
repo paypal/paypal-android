@@ -1,7 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.OrderStatus
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.CoreSDKError
 
 sealed class CardResult {
 
@@ -11,7 +11,7 @@ sealed class CardResult {
     ) : CardResult()
 
     class Error(
-        val payPalSDKError: PayPalSDKError,
+        val coreSDKError: CoreSDKError,
         val correlationID: String?
     ) : CardResult()
 }

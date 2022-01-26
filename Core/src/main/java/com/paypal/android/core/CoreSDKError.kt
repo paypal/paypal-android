@@ -1,6 +1,6 @@
 package com.paypal.android.core
 
-data class PayPalSDKError(
+open class CoreSDKError(
     val code: Int?,
     val errorDescription: String?
 ) : Exception("Error: $code - Description: $errorDescription")
