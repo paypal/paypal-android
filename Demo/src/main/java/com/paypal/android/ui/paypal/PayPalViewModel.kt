@@ -1,7 +1,6 @@
 package com.paypal.android.ui.paypal
 
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +9,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.PayPalDemoApi
+import com.paypal.android.checkout.PayPalCheckoutListener
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalRequest
@@ -63,10 +63,7 @@ class PayPalViewModel @Inject constructor(
 
     fun setPayPalClient(payPalClient: PayPalClient) {
         this.payPalClient = payPalClient
-    }
-
-    fun handlePayPalBrowserSwitchResult(activity: FragmentActivity) {
-        payPalClient?.handleBrowserSwitchResult(activity) { result ->
+        this.payPalClient?.listener = PayPalCheckoutListener { result ->
             when (result) {
                 is PayPalCheckoutResult.Success -> Log.i(
                     TAG,

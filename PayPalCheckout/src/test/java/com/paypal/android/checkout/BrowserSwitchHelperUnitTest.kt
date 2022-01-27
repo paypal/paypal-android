@@ -16,7 +16,7 @@ class BrowserSwitchHelperUnitTest {
 
     @Test
     fun `when configurePayPalBrowserSwitchOptions is executed, the correct BrowserSwitchOptions is returned`() {
-        val mockOrderId = generateRandomString()
+        val mockOrderId = "fake_order_id"
         val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
 
         val urlScheme = "com.android.test.scheme"

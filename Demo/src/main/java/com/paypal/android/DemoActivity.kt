@@ -2,22 +2,18 @@ package com.paypal.android
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import androidx.preference.PreferenceManager
-import com.paypal.android.ui.paypal.PayPalViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DemoActivity : AppCompatActivity() {
 
-    private val payPalViewModel: PayPalViewModel by viewModels()
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
 
@@ -39,12 +35,6 @@ class DemoActivity : AppCompatActivity() {
         if (authCredentialsMissing) {
             showAuthCredentialsMissingDialog()
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        payPalViewModel.handlePayPalBrowserSwitchResult(this)
     }
 
     override fun onNewIntent(newIntent: Intent?) {

@@ -13,11 +13,11 @@ class PayPalCheckoutWebResultUnitTest {
 
     @Test
     fun `given an Uri and metadata, checkoutWebResult should contain the same fields`() {
-        val mockPayerId = generateRandomString()
-        val mockIntent = generateRandomString()
-        val mockOpType = generateRandomString()
-        val mockToken = generateRandomString()
-        val mockOrderId = generateRandomString();
+        val mockPayerId = "fake_payer_id"
+        val mockIntent = "fake_intent"
+        val mockOpType = "fake_op_type"
+        val mockToken = "fake_token"
+        val mockOrderId = "fake_order_id"
 
         val url = "http://testurl.com/checkout?PayerID=$mockPayerId&intent=$mockIntent&opType=$mockOpType&token=$mockToken"
 

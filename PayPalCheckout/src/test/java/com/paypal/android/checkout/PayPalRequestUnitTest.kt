@@ -7,7 +7,7 @@ class PayPalRequestUnitTest {
 
     @Test
     fun `given an order id, PayPalRequest should return the same orderId`() {
-        val orderId = generateRandomString();
+        val orderId = "fake_order_id"
         val payPalRequest = PayPalRequest(orderId)
         assertEquals(orderId, payPalRequest.orderID)
     }
