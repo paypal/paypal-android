@@ -16,6 +16,7 @@ import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
 import com.paypal.android.card.CardResult
+import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.data.card.PrefillCardData
 import com.paypal.android.ui.card.validation.CardFormatter
@@ -42,6 +43,12 @@ class CardViewModel @Inject constructor(
     private val _securityCode = MutableLiveData("")
     val securityCode: LiveData<String> = _securityCode
 
+    private val _cardResult = MutableLiveData<CardResult>()
+    val cardResult: LiveData<CardResult> = _cardResult
+
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
@@ -65,6 +72,8 @@ class CardViewModel @Inject constructor(
     }
 
     fun onCardFieldSubmit() {
+        _isLoading.value = true
+
         Log.d(TAG, "${cardNumber.value}")
         Log.d(TAG, "${expirationDate.value}")
         Log.d(TAG, "${securityCode.value}")
@@ -91,6 +100,8 @@ class CardViewModel @Inject constructor(
                         Log.e(TAG, result.coreSDKError.errorDescription.orEmpty())
                     }
                 }
+                _isLoading.value = false
+                _cardResult.value = result
             }
         }
     }
