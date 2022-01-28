@@ -25,11 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import com.paypal.android.R
 import com.paypal.android.card.CardResult
-import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.ui.theme.DemoTheme
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -92,7 +90,6 @@ class CardFragment : Fragment() {
                         if (isLoading) {
                             LoadingComposable(modifier = Modifier.constrainAs(result) {
                                 top.linkTo(button.bottom)
-//                                bottom.linkTo(button.top)
                                 start.linkTo(parent.start)
                                 end.linkTo(parent.end)
                             })
@@ -101,28 +98,9 @@ class CardFragment : Fragment() {
                                 cardViewModel.cardResult,
                                 modifier = Modifier.constrainAs(result) {
                                     top.linkTo(button.bottom)
-//                                    bottom.linkTo(button.top)
                                 })
                         }
                     }
-//                    Column {
-//                        DropDown(
-//                            cardViewModel.autoFillCards.map { it.first },
-//                            stringResource(R.string.card_field_prefill_card_fields),
-//                            { selectedCard -> cardViewModel.onPrefillCardSelected(selectedCard) },
-//                            Modifier.padding(16.dp)
-//                        )
-//                        CardFields(
-//                            cardViewModel,
-//                            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-//                        )
-//                        Button(
-//                            onClick = { cardViewModel.onCardFieldSubmit() },
-//                            modifier = Modifier
-//                                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-//                                .fillMaxWidth()
-//                        ) { Text(stringResource(R.string.card_field_submit)) }
-//                    }
                 }
             }
         }
