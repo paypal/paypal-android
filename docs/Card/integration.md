@@ -75,14 +75,27 @@ The `id` field of the response contains the order ID to pass to your client.
 Create a `Card` object containing the user's card details.
 
 ```kotlin
-val card = Card()
+val card = Card(
+    number = "4111111111111111",
+    expirationMonth = "01",
+    expirationYear = "25",
+    securityCode = "123",
+    billingAddress = Address(
+        streetAddress = "123 Main St.",
+        extendedAddress = "Apt. 1A",
+        locality = "city",
+        region = "IL",
+        postalCode = "12345",
+        countryCode = "US"
+    )
+)
 ```
 
-Attach the card to a `CardRequest`.
+Attach the card and the order ID (step 3) to a `CardRequest`.
 
 
 ```kotlin
-val cardRequest  = CardRequest(card)
+val cardRequest  = CardRequest(orderID, card)
 ```
 
 ### 5. Approve the order through the Payments SDK
@@ -94,14 +107,11 @@ Call `CardClient#approveOrder` to approve the order, and then handle results:
 ```kotlin
 cardClient.approveOrder(cardRequest) { result ->
     when (result) {
-        is PayPalCheckoutResult.Success -> {
+        is CardResult.Success -> {
             // capture/authorize the order (see step 6)
         } 
-        is PayPalCheckoutResult.Failure -> {
+        is CardResult.Error -> {
             // handle the error by accessing `result.error`
-        } 
-        is PayPalCheckoutResult.Cancellation -> {
-            // the user canceled
         } 
     }
 }
