@@ -110,7 +110,7 @@ Call `CardClient#approveOrder` to approve the order, and then handle results:
 cardClient.approveOrder(cardRequest) { result ->
     when (result) {
         is CardResult.Success -> {
-            // order was successfully approved with the card and is ready to be captured/authorized (see step 6)
+            // order was successfully approved and is ready to be captured/authorized (see step 6)
         } 
         is CardResult.Error -> {
             // inspect `result.error` for more information
