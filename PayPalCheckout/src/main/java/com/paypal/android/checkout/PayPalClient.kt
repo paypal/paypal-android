@@ -8,15 +8,20 @@ import com.paypal.android.checkout.paymentbutton.error.PayPalSDKError
 import com.paypal.android.core.CoreConfig
 
 
-// TODO: doc string and unit test
-class PayPalClient(
+// TODO: doc string
+class PayPalClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
-    urlScheme: String
+    private val browserSwitchClient: BrowserSwitchClient,
+    private val browserSwitchHelper: BrowserSwitchHelper
 ) {
 
-    private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient()
-    private val browserSwitchHelper: BrowserSwitchHelper = BrowserSwitchHelper(urlScheme)
+    constructor(
+        activity: FragmentActivity,
+        coreConfig: CoreConfig,
+        urlScheme: String
+    ) : this(activity, coreConfig, BrowserSwitchClient(), BrowserSwitchHelper(urlScheme))
+
     private var browserSwitchResult: BrowserSwitchResult? = null
     var listener: PayPalCheckoutListener? = null
         set(value) {
@@ -60,7 +65,7 @@ class PayPalClient(
                 if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
                     PayPalCheckoutResult.Success(webResult.orderId, webResult.payerId)
                 } else {
-                    PayPalCheckoutResult.Failure(PayPalSDKError("PayerId or OrderId are null - PayerId: ${webResult.orderId}, orderId: ${webResult.payerId}"))
+                    PayPalCheckoutResult.Failure(PayPalSDKError("PayerId or OrderId are null - PayerId: ${webResult.payerId}, orderId: ${webResult.orderId}"))
                 }
             } else {
                 PayPalCheckoutResult.Failure(PayPalSDKError("Something went wrong"))
