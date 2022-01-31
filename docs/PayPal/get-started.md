@@ -21,7 +21,7 @@ This diagram shows how your client, server, and PayPal interact:
 PayPal is available as a payment method to merchants in multiple [countries and currencies](https://developer.paypal.com/docs/checkout/payment-methods/).
 
 This SDK supports a minimum Android API of 21 or higher.
-Android apps can be written in Kotlin or Java 8 or higher.
+Android apps can be written in Kotlin or Java 8 and higher.
 
 ## Integration methods
 
