@@ -93,7 +93,7 @@ val card = Card(
 )
 ```
 
-Attach the card and the order ID (step 3) to a `CardRequest`.
+Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardRequest`.
 
 
 ```kotlin
