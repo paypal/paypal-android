@@ -7,6 +7,8 @@ apiVersion: TODO
 sdkVersion: TODO
 ---
 
+# Pay with Card Custom Integration
+
 Follow these steps to add Card payments.
 
 1. [Know before you code](#know-before-you-code)

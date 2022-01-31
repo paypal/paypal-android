@@ -7,6 +7,8 @@ apiVersion: TODO
 sdkVersion: TODO
 ---
 
+# Pay with Card
+
 Accept Card payments in your Android app using the PayPal Payments SDK.
 
 ## How it works
