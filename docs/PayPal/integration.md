@@ -90,7 +90,7 @@ Set a listener on your `PayPalClient` to handle results:
 payPalClient.listener = PayPalCheckoutListener { result ->
     when (result) {
         is PayPalCheckoutResult.Success -> {
-            // capture/authorize the order (see step 8)
+            // order was successfully approved with the card and is ready to be captured/authorized (see step 8)
         } 
         is PayPalCheckoutResult.Failure -> {
             // handle the error by accessing `result.error`
@@ -111,7 +111,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw '{
-    "intent": "CAPTURE",
+    "intent": "<CAPTURE|AUTHORIZE>",
     "purchase_units": [
         {
             "amount": {
@@ -130,7 +130,7 @@ The `id` field of the response contains the order ID to pass to your client.
 Configure your `PayPalRequest` and include the order ID generated (step 5):
 
 ```kotlin
-val payPalRequest = PayPalRequest(orderID)
+val payPalRequest = PayPalRequest("<ORDER_ID>")
 ```
 
 ### 7. Approve the order through the Payments SDK
