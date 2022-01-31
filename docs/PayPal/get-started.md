@@ -12,7 +12,7 @@ Accept PayPal payments in your Android app using the PayPal Payments SDK.
 
 ## How it works
 
-This diagram shows how your client, your server, and PayPal interact:
+This diagram shows how your client, server, and PayPal interact:
 
 // TODO - Get a diagram of the payment flow similar to [this](https://developer.paypal.com/braintree/docs/start/overview#how-it-works)
 
