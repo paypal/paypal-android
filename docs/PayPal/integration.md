@@ -1,36 +1,30 @@
-# Pay with PayPal
+---
+title: Pay with PayPal Custom Integration
+keywords: 
+contentType: docs
+productStatus: current
+apiVersion: TODO
+sdkVersion: TODO
+---
+# Pay with PayPal Custom Integration
 
-Accept PayPal payments in your Android app using the PayPal Payments SDK.
+Follow these steps to add Card payments.
 
-## How it works
+1. [Know before you code](#know-before-you-code)
+1. [Add PayPal Payments](#add-paypal-payments)
+1. [Test and go live](#test-and-go-live)
 
-This diagram shows how your client, your server, and PayPal interact:
-
-// TODO - Get a diagram of the payment flow similar to [this](https://developer.paypal.com/braintree/docs/start/overview#how-it-works)
-
-## Eligibility
-
-PayPal is available as a payment method to merchants in multiple [countries and currencies](https://developer.paypal.com/docs/checkout/payment-methods/).
-
-This SDK supports a minimum Android API of 23 or higher.
-Android apps can be written in Kotlin or Java 8 or higher.
-
-## How to integrate
-
-- [Custom Integration](#technical-steps---custom-integration)
-
-### Know before you code
+## Know before you code
 
 You will need to set up authorization to use the PayPal Payments SDK. 
 Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and generate an access token. 
-Follow the steps in [Enable the SDK](https://developer.paypal.com/sdk/in-app/android/#link-enablethesdk) to set up your account and application for PayPal payments.
 
 You will need a server integration to create an order and capture the funds using [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2). 
 For initial setup, the `curl` commands below can be used in place of a server SDK.
 
-### Technical steps - custom integration
+## Add PayPal Payments
 
-#### 1. Add the Payments SDK  to your app
+### 1. Add the Payments SDK  to your app
 
 In your `build.gradle` file, add the following dependency:
 
@@ -40,18 +34,26 @@ dependencies {
 }
 ```
 
-Add the following maven credentials to your `build.gradle`:
-```groovy
-maven {
-    url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
-    credentials {
-        username 'paypal_sgerritz'
-        password 'AKCp8jQ8tAahqpT5JjZ4FRP2mW7GMoFZ674kGqHmupTesKeAY2G8NcmPKLuTxTGkKjDLRzDUQ'
-    }
-}
+### 2. Configure your app to handle browser switching
+
+Some of our payment flows utilize a browser switch. A URL scheme must be defined to return to your app from the browser.
+
+Edit your `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on your Activity that will be responsible for handling the deep link back into the app:
+
+```xml
+<activity android:name="com.company.app.MyPaymentsActivity"
+    android:exported="true">
+    ...
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <data android:scheme="custom-url-scheme"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+    </intent-filter>
+</activity>
 ```
 
-#### 2. Create a PayPal button 
+### 3. Create a PayPal button 
 
 Add a `PayPalButton` to your layout XML:
 
@@ -62,7 +64,7 @@ Add a `PayPalButton` to your layout XML:
     android:layout_height="wrap_content" />
 ```
 
-#### 3. Initiate the Payments SDK
+### 4. Initiate the Payments SDK
 
 Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 
@@ -70,19 +72,37 @@ Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
 ```
 
-Configure a return URL using your application ID:
+Set the return URL from the URL scheme you configured in the `ActivityManifest.xml` (step 2):
 
 ```kotlin
-val returnUrl = "<APPLICATION_ID>" + "://paypalpay"
+val returnUrl = "custom-url-scheme"
 ```
 
 Create a `PayPalClient` to approve an order with a PayPal payment method:
 
 ```kotlin
-val payPalClient = PayPalClient(application, config, returnUrl)
+val payPalClient = PayPalClient(requireActivity(), config, returnUrl)
 ```
 
-#### 4. Create an order
+Set a listener on your `PayPalClient` to handle results:
+
+```kotlin
+payPalClient.listener = PayPalCheckoutListener { result ->
+    when (result) {
+        is PayPalCheckoutResult.Success -> {
+            // capture/authorize the order (see step 8)
+        } 
+        is PayPalCheckoutResult.Failure -> {
+            // handle the error by accessing `result.error`
+        } 
+        is PayPalCheckoutResult.Cancellation -> {
+            // the user canceled
+        } 
+    }
+}
+```
+
+#### 5. Create an order
 
 When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
@@ -105,7 +125,15 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 The `id` field of the response contains the order ID to pass to your client.
 
-#### 5. Approve the order through the Payments SDK
+#### 6. Create a request object for launching the PayPal flow
+
+Configure your `PayPalRequest` and include the order ID generated (step 5):
+
+```kotlin
+val payPalRequest = PayPalRequest(orderID)
+```
+
+#### 7. Approve the order through the Payments SDK
 
 When a user taps the PayPal button created above, approve the order using your `PayPalClient`.
 
@@ -113,31 +141,13 @@ Attach your PayPal button to the PayPal payment flow:
 
 ```kotlin
 findViewById<View>(R.id.payPalButton).setOnClickListener {
-    launchPayPal(orderID)
+    payPalClient.checkout(payPalRequest) 
 }
 ```
 
-Call `PayPalClient#checkout` to approve the order, and then handle results:
+When the user completes the PayPal payment flow, the result will be returned to the listener set in (step 4).
 
-```kotlin
-fun launchPayPal(orderID: String) {
-    payPalClient.checkout(orderID) { result ->
-        when (result) {
-            is PayPalCheckoutResult.Success -> {
-                // capture/authorize the order (see step 6)
-            } 
-            is PayPalCheckoutResult.Failure -> {
-                // handle the error by accessing `result.error`
-            } 
-            is PayPalCheckoutResult.Cancellation -> {
-                // the user canceled
-            } 
-        }
-    }
-}
-```
-
-#### 6. Capture/authorize the order
+#### 8. Capture/authorize the order
 
 If you receive a successful result in the client-side flow, you can then capture or authorize the order. 
 
