@@ -90,7 +90,7 @@ Set a listener on your `PayPalClient` to handle results:
 payPalClient.listener = PayPalCheckoutListener { result ->
     when (result) {
         is PayPalCheckoutResult.Success -> {
-            // order was successfully approved with the card and is ready to be captured/authorized (see step 8)
+            // order was successfully approved and is ready to be captured/authorized [see step 8](#8-Capture-authorize-the-order)
         } 
         is PayPalCheckoutResult.Failure -> {
             // handle the error by accessing `result.error`
