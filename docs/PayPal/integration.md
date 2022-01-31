@@ -72,7 +72,7 @@ Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
 ```
 
-Set the return URL from the URL scheme you configured in the `ActivityManifest.xml` (step 2):
+Set the return URL from the URL scheme you configured in the `ActivityManifest.xml` [step 2](#2-configure-your-app-to-handle-browser-switching):
 
 ```kotlin
 val returnUrl = "custom-url-scheme"
@@ -90,7 +90,7 @@ Set a listener on your `PayPalClient` to handle results:
 payPalClient.listener = PayPalCheckoutListener { result ->
     when (result) {
         is PayPalCheckoutResult.Success -> {
-            // order was successfully approved and is ready to be captured/authorized [see step 8](#8-Capture-authorize-the-order)
+            // order was successfully approved and is ready to be captured/authorized (see step 8)
         } 
         is PayPalCheckoutResult.Failure -> {
             // handle the error by accessing `result.error`
