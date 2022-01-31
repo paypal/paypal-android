@@ -36,7 +36,7 @@ dependencies {
 
 ### 2. Configure your app to handle browser switching
 
-Some of our payment flows utilize a browser switch. A URL scheme must be defined to return to your app from the browser.
+The PayPal payment flow utilizes a browser switch. A URL scheme must be defined to return to your app from the browser.
 
 Edit your `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on your Activity that will be responsible for handling the deep link back into the app:
 
@@ -102,7 +102,7 @@ payPalClient.listener = PayPalCheckoutListener { result ->
 }
 ```
 
-#### 5. Create an order
+### 5. Create an order
 
 When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
@@ -125,7 +125,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 The `id` field of the response contains the order ID to pass to your client.
 
-#### 6. Create a request object for launching the PayPal flow
+### 6. Create a request object for launching the PayPal flow
 
 Configure your `PayPalRequest` and include the order ID generated (step 5):
 
@@ -133,7 +133,7 @@ Configure your `PayPalRequest` and include the order ID generated (step 5):
 val payPalRequest = PayPalRequest(orderID)
 ```
 
-#### 7. Approve the order through the Payments SDK
+### 7. Approve the order through the Payments SDK
 
 When a user taps the PayPal button created above, approve the order using your `PayPalClient`.
 
@@ -147,7 +147,7 @@ findViewById<View>(R.id.payPalButton).setOnClickListener {
 
 When the user completes the PayPal payment flow, the result will be returned to the listener set in (step 4).
 
-#### 8. Capture/authorize the order
+### 8. Capture/authorize the order
 
 If you receive a successful result in the client-side flow, you can then capture or authorize the order. 
 
@@ -169,11 +169,11 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --data-raw ''
 ```
 
-### Testing your integration
+## Testing your integration
 
 Follow the [Create sandbox accounts](https://developer.paypal.com/api/rest/#link-createsandboxaccounts) instructions to create PayPal test accounts.
 When prompted to login with PayPal during the payment flow on your mobile app, you can log in with the test account credentials created above to complete the Sandbox payment flow. 
 
-### Go live
+## Go live
 
 Follow [these instructions](https://developer.paypal.com/api/rest/production/) to prepare your integration to go live.
