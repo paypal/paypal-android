@@ -30,7 +30,7 @@ In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-checkout:1.0.0"
+   implementation "com.paypal.android:paypal-checkout:1.0.0"[see step 8](#8-Capture-authorize-the-order)
 }
 ```
 
@@ -127,7 +127,7 @@ The `id` field of the response contains the order ID to pass to your client.
 
 ### 6. Create a request object for launching the PayPal flow
 
-Configure your `PayPalRequest` and include the order ID generated (step 5):
+Configure your `PayPalRequest` and include the order ID generated [step 5](#5-create-an-order):
 
 ```kotlin
 val payPalRequest = PayPalRequest("<ORDER_ID>")
