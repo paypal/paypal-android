@@ -21,7 +21,7 @@ This diagram shows how your client, your server, and PayPal interact:
 
 // TODO - What are the merchant eligibility requirements for Card payments?
 
-This SDK supports a minimum Android API of 23 or higher.
+This SDK supports a minimum Android API of 21 or higher.
 Android apps can be written in Kotlin or Java 8 and higher.
 
 ## Integration methods
