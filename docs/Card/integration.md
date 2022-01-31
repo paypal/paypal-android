@@ -58,7 +58,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw '{
-    "intent": "CAPTURE",
+    "intent": "<CAPTURE|AUTHORIZE>",
     "purchase_units": [
         {
             "amount": {
@@ -97,7 +97,7 @@ Attach the card and the order ID (step 3) to a `CardRequest`.
 
 
 ```kotlin
-val cardRequest  = CardRequest(orderID, card)
+val cardRequest  = CardRequest("<ORDER_ID>", card)
 ```
 
 ### 5. Approve the order through the Payments SDK
@@ -110,7 +110,7 @@ Call `CardClient#approveOrder` to approve the order, and then handle results:
 cardClient.approveOrder(cardRequest) { result ->
     when (result) {
         is CardResult.Success -> {
-            // capture/authorize the order (see step 6)
+            // order was successfully approved with the card and is ready to be captured/authorized (see step 6)
         } 
         is CardResult.Error -> {
             // handle the error by accessing `result.error`
