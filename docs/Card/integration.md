@@ -113,7 +113,7 @@ cardClient.approveOrder(cardRequest) { result ->
             // order was successfully approved with the card and is ready to be captured/authorized (see step 6)
         } 
         is CardResult.Error -> {
-            // handle the error by accessing `result.error`
+            // inspect `result.error` for more information
         } 
     }
 }
