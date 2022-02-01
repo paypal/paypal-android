@@ -16,7 +16,6 @@ import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
 import com.paypal.android.card.CardResult
-import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.data.card.PrefillCardData
 import com.paypal.android.ui.card.validation.CardFormatter
