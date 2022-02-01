@@ -2,7 +2,6 @@ package com.paypal.android.ui.paypal
 
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import com.paypal.android.BuildConfig
@@ -81,11 +80,23 @@ class PayPalFragment : Fragment() {
         ConstraintLayout(
             modifier = Modifier.fillMaxHeight(),
         ) {
-            val (button, text, result) = createRefs()
+            val (text, result) = createRefs()
             if (isLoading) {
+                if (isLoading) {
+                    LoadingComposable(modifier = Modifier.constrainAs(result) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    })
+                } else {
+                    CheckoutResult(
+                        payPalViewModel.checkoutResult,
+                        modifier = Modifier.constrainAs(result) {
+                            top.linkTo(parent.top)
+                        })
+                }
                 LoadingComposable(modifier = Modifier.constrainAs(result) {
                     top.linkTo(parent.top)
-                    bottom.linkTo(button.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 })
@@ -94,24 +105,7 @@ class PayPalFragment : Fragment() {
                     payPalViewModel.checkoutResult,
                     modifier = Modifier.constrainAs(result) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(button.top)
                     })
-            }
-            Button(
-                enabled = canRunPayPalCheckout && !isLoading,
-                onClick = { launchPayPal() },
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
-                    .fillMaxWidth()
-                    .constrainAs(button) {
-                        if (canRunPayPalCheckout) {
-                            bottom.linkTo(parent.bottom)
-                        } else {
-                            bottom.linkTo(text.top)
-                        }
-                    }
-            ) {
-                Text(stringResource(R.string.start_checkout))
             }
             if (!canRunPayPalCheckout) Text(
                 text = stringResource(id = R.string.minimum_sdk_needed),
