@@ -51,6 +51,9 @@ buildscript {
             "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
             "hiltKapt"                   : "com.google.dagger:hilt-compiler:${versions.hilt}",
 
+            // Browser Switch
+            "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.1.1",
+
             // Testing
             "junit"                       : "junit:junit:4.13.2",
             "androidxJUnit"               : "androidx.test.ext:junit:1.1.3",
@@ -61,10 +64,7 @@ buildscript {
             "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",
             "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
             "striktCore"                  : "io.strikt:strikt-core:0.30.1",
-            "jsonMock"                    : "org.json:json:20211205",
-
-            // Browser Switch
-            "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.1.1"
+            "jsonMock"                    : "org.json:json:20211205"
     ]
 
     repositories {
