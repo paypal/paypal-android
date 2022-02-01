@@ -48,13 +48,9 @@ class PayPalViewModel @Inject constructor(
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(PayPalError(e.message!!))
-                _checkoutResult.value = error
                 _isLoading.value = false
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(PayPalError(e.message!!))
-                _checkoutResult.value = error
                 _isLoading.value = false
             }
         }

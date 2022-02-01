@@ -57,15 +57,11 @@ class PayPalFragment : Fragment() {
         payPalViewModel.setPayPalClient(PayPalClient(requireActivity(), coreConfig, "com.paypal.android.demo"))
 
         view.findViewById<View>(R.id.payPalButton).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                launchNativeCheckout()
-            }
+            launchPayPal()
         }
 
         view.findViewById<View>(R.id.payPalCreditButton).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                launchNativeCheckout()
-            }
+            launchPayPal()
         }
 
         view.findViewById<ComposeView>(R.id.compose_view).apply {
@@ -103,7 +99,7 @@ class PayPalFragment : Fragment() {
             }
             Button(
                 enabled = canRunPayPalCheckout && !isLoading,
-                onClick = { launchNativeCheckout() },
+                onClick = { launchPayPal() },
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
                     .fillMaxWidth()
@@ -211,7 +207,7 @@ class PayPalFragment : Fragment() {
         }
     }
 
-    private fun launchNativeCheckout() {
+    private fun launchPayPal() {
         payPalViewModel.startPayPalCheckout()
     }
 }
