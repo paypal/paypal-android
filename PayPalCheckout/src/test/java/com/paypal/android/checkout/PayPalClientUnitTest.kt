@@ -106,7 +106,7 @@ class PayPalClientUnitTest {
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
         assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription,
-            "PayerId or OrderId are null - PayerId: $payerId, orderId: $orderId")
+            "Result did not contain the expected data. Payer ID or Order ID is null.")
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -137,7 +137,7 @@ class PayPalClientUnitTest {
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
         assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription,
-            "PayerId or OrderId are null - PayerId: $payerId, orderId: $orderId")
+            "Result did not contain the expected data. Payer ID or Order ID is null.")
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -162,7 +162,7 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "Something went wrong")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "An unknown error occurred. Contact developer.paypal.com/support.")
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -187,7 +187,7 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "Something went wrong")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "An unknown error occurred. Contact developer.paypal.com/support.")
 
         assertNullBrowserSwitchResult(payPalClient)
     }

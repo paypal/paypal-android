@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
 import com.paypal.android.checkout.R
-import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.checkout.error.createFormattedIllegalArgumentException
 
 /**
  * PayPalCreditButton provides a PayPal Credit button with the ability to modify the [color], [shape],

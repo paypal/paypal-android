@@ -1,6 +1,6 @@
 package com.paypal.android.checkout.paymentbutton
 
-import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.checkout.error.createFormattedIllegalArgumentException
 
 /**
  * Defines the shapes available for payment buttons. If no shape is provided then the default

@@ -1,4 +1,4 @@
-package com.paypal.android.checkout.paymentbutton.error
+package com.paypal.android.checkout.error
 
 internal fun createFormattedIllegalArgumentException(enumName: String, enumValues: Int): IllegalArgumentException {
     val exceptionMessage = "Attempted to create a $enumName with an invalid index. Please use an" +

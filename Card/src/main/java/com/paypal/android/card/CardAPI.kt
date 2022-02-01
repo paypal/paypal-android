@@ -61,7 +61,7 @@ internal class CardAPI(
                 }
 
                 CardResult.Error(
-                    APIClientError.HTTP_URL_CONNECTION_ERROR(
+                    APIClientError.httpURLConnectionError(
                         httpResponse.status,
                         "$message -> $errorDetails"
                     ), correlationId

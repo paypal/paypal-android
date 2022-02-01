@@ -39,7 +39,7 @@ object APIClientError {
     )
 
     // Error returned from HttpURLConnection while making request.
-    val HTTP_URL_CONNECTION_ERROR: (code: Int, description: String) -> CoreSDKError = { code, description ->
+    val httpURLConnectionError: (code: Int, description: String) -> CoreSDKError = { code, description ->
         CoreSDKError(
             code = code,
             errorDescription = description

@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.checkout.paymentbutton.error.PayPalSDKError
+import com.paypal.android.checkout.error.PayPalError
 import com.paypal.android.core.CoreConfig
 
 
@@ -79,10 +79,10 @@ class PayPalClient internal constructor(
                 if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
                     PayPalCheckoutResult.Success(webResult.orderId, webResult.payerId)
                 } else {
-                    PayPalCheckoutResult.Failure(PayPalSDKError("PayerId or OrderId are null - PayerId: ${webResult.payerId}, orderId: ${webResult.orderId}"))
+                    PayPalCheckoutResult.Failure(PayPalError.malformedResultError)
                 }
             } else {
-                PayPalCheckoutResult.Failure(PayPalSDKError("Something went wrong"))
+                PayPalCheckoutResult.Failure(PayPalError.unknownError)
             }
         browserSwitchResult = null
         listener?.onPayPalCheckoutResult(payPalCheckoutResult)
