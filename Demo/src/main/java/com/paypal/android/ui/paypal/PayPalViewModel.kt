@@ -13,7 +13,6 @@ import com.paypal.android.checkout.PayPalCheckoutListener
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalRequest
-import com.paypal.android.checkout.paymentbutton.error.PayPalSDKError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -49,13 +48,9 @@ class PayPalViewModel @Inject constructor(
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(PayPalSDKError(e.message!!))
-                _checkoutResult.value = error
                 _isLoading.value = false
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(PayPalSDKError(e.message!!))
-                _checkoutResult.value = error
                 _isLoading.value = false
             }
         }

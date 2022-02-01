@@ -15,6 +15,11 @@ class CardClient internal constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
+    /**
+     * Create a new instance of [CardClient].
+     *
+     * @param configuration a [CoreConfig] object
+     */
     constructor(configuration: CoreConfig) :
             this(CardAPI(API(configuration)))
 

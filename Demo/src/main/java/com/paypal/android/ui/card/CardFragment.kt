@@ -131,15 +131,10 @@ class CardFragment : Fragment() {
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = getString(R.string.payer_id, result.orderID),
+                text = getString(R.string.order_id, result.orderID),
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                text = getString(R.string.order_id, result.status),
-                fontSize = 16.sp,
-                color = Color.Gray,
             )
         }
     }

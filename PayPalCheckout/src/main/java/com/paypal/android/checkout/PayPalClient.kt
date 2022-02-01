@@ -4,21 +4,38 @@ import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.checkout.paymentbutton.error.PayPalSDKError
+import com.paypal.android.checkout.error.PayPalError
 import com.paypal.android.core.CoreConfig
 
-
-// TODO: doc string and unit test
-class PayPalClient(
+/**
+ * Use this client to approve an order with a [PayPalRequest].
+ */
+class PayPalClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
-    urlScheme: String
+    private val browserSwitchClient: BrowserSwitchClient,
+    private val browserSwitchHelper: BrowserSwitchHelper
 ) {
 
-    private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient()
-    private val browserSwitchHelper: BrowserSwitchHelper = BrowserSwitchHelper(urlScheme)
+    /**
+     * Create a new instance of [PayPalClient].
+     *
+     * @param activity a [FragmentActivity]
+     * @param configuration a [CoreConfig] object
+     * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
+    */
+    constructor(
+        activity: FragmentActivity,
+        configuration: CoreConfig,
+        urlScheme: String
+    ) : this(activity, configuration, BrowserSwitchClient(), BrowserSwitchHelper(urlScheme))
+
     private var browserSwitchResult: BrowserSwitchResult? = null
+
     var listener: PayPalCheckoutListener? = null
+        /**
+         * @param value a [PayPalCheckoutListener] to receive results from the PayPal flow
+         */
         set(value) {
             field = value
             browserSwitchResult?.also {
@@ -30,9 +47,14 @@ class PayPalClient(
         activity.lifecycle.addObserver(PayPalLifeCycleObserver(this))
     }
 
-    fun approveOrder(payPalRequest: PayPalRequest) {
+    /**
+     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalCheckoutListener].
+     *
+     * @param request [PayPalRequest] for requesting an order approval
+     */
+    fun approveOrder(request: PayPalRequest) {
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-            payPalRequest.orderID,
+            request.orderID,
             coreConfig
         )
         browserSwitchClient.start(activity, browserSwitchOptions)
@@ -53,17 +75,17 @@ class PayPalClient(
     private fun deliverSuccess() {
         val payPalCheckoutResult =
             if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
-                val webResult = PayPalCheckoutWebResult(
+                val webResult = PayPalWebResult(
                     browserSwitchResult?.deepLinkUrl!!,
                     browserSwitchResult?.requestMetadata!!
                 )
                 if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
                     PayPalCheckoutResult.Success(webResult.orderId, webResult.payerId)
                 } else {
-                    PayPalCheckoutResult.Failure(PayPalSDKError("PayerId or OrderId are null - PayerId: ${webResult.orderId}, orderId: ${webResult.payerId}"))
+                    PayPalCheckoutResult.Failure(PayPalError.malformedResultError)
                 }
             } else {
-                PayPalCheckoutResult.Failure(PayPalSDKError("Something went wrong"))
+                PayPalCheckoutResult.Failure(PayPalError.unknownError)
             }
         browserSwitchResult = null
         listener?.onPayPalCheckoutResult(payPalCheckoutResult)

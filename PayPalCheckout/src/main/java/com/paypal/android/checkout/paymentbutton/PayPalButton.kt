@@ -8,7 +8,7 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
 import com.paypal.android.checkout.R
-import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.checkout.error.createFormattedIllegalArgumentException
 
 /**
  * PayPalButton provides a PayPal button with the ability to modify the [color], [label], [shape],
