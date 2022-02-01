@@ -21,7 +21,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.lang.reflect.Field
 
-
 @RunWith(RobolectricTestRunner::class)
 class PayPalClientUnitTest {
 
@@ -162,7 +161,8 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "An unknown error occurred. Contact developer.paypal.com/support.")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription,
+            "An unknown error occurred. Contact developer.paypal.com/support.")
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -187,7 +187,8 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "An unknown error occurred. Contact developer.paypal.com/support.")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription,
+            "An unknown error occurred. Contact developer.paypal.com/support.")
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -206,7 +207,8 @@ class PayPalClientUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(ofType(PayPalCheckoutResult.Cancellation::class)) }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(
+            ofType(PayPalCheckoutResult.Cancellation::class)) }
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -280,5 +282,4 @@ class PayPalClientUnitTest {
         val result = privateResult.get(payPalClient)
         assertNull(result)
     }
-
 }

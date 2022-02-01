@@ -20,7 +20,10 @@ class BrowserSwitchHelperUnitTest {
         val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
 
         val urlScheme = "com.android.test.scheme"
-        val finalUrl = "https://www.sandbox.paypal.com/checkoutnow?token=$mockOrderId&redirect_uri=$urlScheme%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
+        val finalUrl = "https://www.sandbox.paypal.com/checkoutnow?" +
+                "token=$mockOrderId" +
+                "&redirect_uri=$urlScheme" +
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
         val uri = Uri.parse(finalUrl)
 
         every { mockCoreConfig.environment } returns Environment.SANDBOX
@@ -41,7 +44,10 @@ class BrowserSwitchHelperUnitTest {
         val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
 
         val urlScheme = "com.android.test.scheme"
-        val finalUrl = "https://www.msmaster.qa.paypal.com/checkoutnow?token=$mockOrderId&redirect_uri=$urlScheme%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
+        val finalUrl = "https://www.msmaster.qa.paypal.com/checkoutnow?" +
+                "token=$mockOrderId" +
+                "&redirect_uri=$urlScheme" +
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
         val uri = Uri.parse(finalUrl)
 
         every { mockCoreConfig.environment } returns Environment.STAGING
@@ -60,7 +66,10 @@ class BrowserSwitchHelperUnitTest {
         val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
 
         val urlScheme = "com.android.test.scheme"
-        val finalUrl = "https://www.paypal.com/checkoutnow?token=$mockOrderId&redirect_uri=$urlScheme%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
+        val finalUrl = "https://www.paypal.com/checkoutnow?" +
+                "token=$mockOrderId" +
+                "&redirect_uri=$urlScheme" +
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
         val uri = Uri.parse(finalUrl)
 
         every { mockCoreConfig.environment } returns Environment.LIVE

@@ -19,11 +19,14 @@ class PayPalWebResultUnitTest {
         val mockToken = "fake_token"
         val mockOrderId = "fake_order_id"
 
-        val url = "http://testurl.com/checkout?PayerID=$mockPayerId&intent=$mockIntent&opType=$mockOpType&token=$mockToken"
+        val url = "http://testurl.com/checkout?" +
+                "PayerID=$mockPayerId" +
+                "&intent=$mockIntent" +
+                "&opType=$mockOpType" +
+                "&token=$mockToken"
 
         val metadata = JSONObject()
         metadata.put("order_id", mockOrderId)
-
 
         val webResult = PayPalWebResult(Uri.parse(url), metadata)
         expectThat(webResult) {

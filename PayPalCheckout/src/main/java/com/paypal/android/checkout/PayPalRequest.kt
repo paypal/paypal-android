@@ -1,6 +1,5 @@
 package com.paypal.android.checkout
 
-
 /**
  * Creates an instance of a PayPalRequest.
  *

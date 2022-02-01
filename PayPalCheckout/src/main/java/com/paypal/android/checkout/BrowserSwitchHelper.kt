@@ -7,10 +7,9 @@ import com.paypal.android.core.Environment
 import com.braintreepayments.api.BrowserSwitchOptions
 import org.json.JSONObject
 
-
 internal class BrowserSwitchHelper(private val urlScheme: String) {
 
-    private val redirectUriPayPalCheckout = String.format("%s://x-callback-url/paypal-sdk/paypal-checkout", urlScheme)
+    private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
     private fun buildPayPalCheckoutUri(@NonNull orderId: String?, @NonNull config: CoreConfig): Uri {
         val baseURL = when (config.environment) {
