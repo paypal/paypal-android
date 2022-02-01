@@ -32,7 +32,11 @@ class PayPalClient internal constructor(
     ) : this(activity, configuration, BrowserSwitchClient(), BrowserSwitchHelper(urlScheme))
 
     private var browserSwitchResult: BrowserSwitchResult? = null
+
     var listener: PayPalCheckoutListener? = null
+        /**
+         * @param value a [PayPalCheckoutListener] to receive results from the PayPal flow
+         */
         set(value) {
             field = value
             browserSwitchResult?.also {
