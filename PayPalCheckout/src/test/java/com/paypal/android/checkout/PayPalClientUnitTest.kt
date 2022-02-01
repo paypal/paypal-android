@@ -13,6 +13,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNull
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,10 +74,10 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Success)
-        assert((slot.captured as PayPalCheckoutResult.Success).orderId == orderId)
-        assert((slot.captured as PayPalCheckoutResult.Success).payerId == payerId)
+        assertEquals((slot.captured as PayPalCheckoutResult.Success).orderId, orderId)
+        assertEquals((slot.captured as PayPalCheckoutResult.Success).payerId, payerId)
 
-        checkBrowserSwitchResult(payPalClient)
+        assertNullBrowserSwitchResult(payPalClient)
     }
 
     @Test
@@ -103,9 +105,10 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assert((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription == "PayerId or OrderId are null - PayerId: $payerId, orderId: $orderId")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription,
+            "PayerId or OrderId are null - PayerId: $payerId, orderId: $orderId")
 
-        checkBrowserSwitchResult(payPalClient)
+        assertNullBrowserSwitchResult(payPalClient)
     }
 
     @Test
@@ -133,9 +136,10 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assert((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription == "PayerId or OrderId are null - PayerId: $payerId, orderId: $orderId")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription,
+            "PayerId or OrderId are null - PayerId: $payerId, orderId: $orderId")
 
-        checkBrowserSwitchResult(payPalClient)
+        assertNullBrowserSwitchResult(payPalClient)
     }
 
     @Test
@@ -158,9 +162,9 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assert((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription == "Something went wrong")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "Something went wrong")
 
-        checkBrowserSwitchResult(payPalClient)
+        assertNullBrowserSwitchResult(payPalClient)
     }
 
     @Test
@@ -183,9 +187,9 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(capture(slot)) }
         assert(slot.captured is PayPalCheckoutResult.Failure)
-        assert((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription == "Something went wrong")
+        assertEquals((slot.captured as PayPalCheckoutResult.Failure).error.errorDescription, "Something went wrong")
 
-        checkBrowserSwitchResult(payPalClient)
+        assertNullBrowserSwitchResult(payPalClient)
     }
 
     @Test
@@ -204,7 +208,7 @@ class PayPalClientUnitTest {
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalCheckoutResult(ofType(PayPalCheckoutResult.Cancellation::class)) }
 
-        checkBrowserSwitchResult(payPalClient)
+        assertNullBrowserSwitchResult(payPalClient)
     }
 
     @Test
@@ -270,11 +274,11 @@ class PayPalClientUnitTest {
         verify { lifeCycle.addObserver(ofType(PayPalLifeCycleObserver::class)) }
     }
 
-    private fun checkBrowserSwitchResult(payPalClient: PayPalClient) {
+    private fun assertNullBrowserSwitchResult(payPalClient: PayPalClient) {
         val privateResult: Field = PayPalClient::class.java.getDeclaredField("browserSwitchResult")
         privateResult.isAccessible = true
         val result = privateResult.get(payPalClient)
-        assert(result == null)
+        assertNull(result)
     }
 
 }
