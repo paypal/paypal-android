@@ -8,7 +8,9 @@ import com.paypal.android.checkout.paymentbutton.error.PayPalSDKError
 import com.paypal.android.core.CoreConfig
 
 
-// TODO: doc string
+/**
+ * Use this client to approve an order with a [PayPalRequest].
+ */
 class PayPalClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
@@ -16,11 +18,18 @@ class PayPalClient internal constructor(
     private val browserSwitchHelper: BrowserSwitchHelper
 ) {
 
+    /**
+     * Create a new instance of [PayPalClient].
+     *
+     * @param activity a [FragmentActivity]
+     * @param configuration a [CoreConfig] object
+     * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
+    */
     constructor(
         activity: FragmentActivity,
-        coreConfig: CoreConfig,
+        configuration: CoreConfig,
         urlScheme: String
-    ) : this(activity, coreConfig, BrowserSwitchClient(), BrowserSwitchHelper(urlScheme))
+    ) : this(activity, configuration, BrowserSwitchClient(), BrowserSwitchHelper(urlScheme))
 
     private var browserSwitchResult: BrowserSwitchResult? = null
     var listener: PayPalCheckoutListener? = null
@@ -35,9 +44,14 @@ class PayPalClient internal constructor(
         activity.lifecycle.addObserver(PayPalLifeCycleObserver(this))
     }
 
-    fun approveOrder(payPalRequest: PayPalRequest) {
+    /**
+     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalCheckoutListener].
+     *
+     * @param request [PayPalRequest] for requesting an order approval
+     */
+    fun approveOrder(request: PayPalRequest) {
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-            payPalRequest.orderID,
+            request.orderID,
             coreConfig
         )
         browserSwitchClient.start(activity, browserSwitchOptions)
@@ -58,7 +72,7 @@ class PayPalClient internal constructor(
     private fun deliverSuccess() {
         val payPalCheckoutResult =
             if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
-                val webResult = PayPalCheckoutWebResult(
+                val webResult = PayPalWebResult(
                     browserSwitchResult?.deepLinkUrl!!,
                     browserSwitchResult?.requestMetadata!!
                 )

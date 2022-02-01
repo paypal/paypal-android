@@ -9,7 +9,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
 @RunWith(RobolectricTestRunner::class)
-class PayPalCheckoutWebResultUnitTest {
+class PayPalWebResultUnitTest {
 
     @Test
     fun `given an Uri and metadata, checkoutWebResult should contain the same fields`() {
@@ -25,7 +25,7 @@ class PayPalCheckoutWebResultUnitTest {
         metadata.put("order_id", mockOrderId)
 
 
-        val webResult = PayPalCheckoutWebResult(Uri.parse(url), metadata)
+        val webResult = PayPalWebResult(Uri.parse(url), metadata)
         expectThat(webResult) {
             get { payerId }.isEqualTo(mockPayerId)
             get { intent }.isEqualTo(mockIntent)
