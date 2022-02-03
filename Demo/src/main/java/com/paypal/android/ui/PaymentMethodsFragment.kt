@@ -22,7 +22,7 @@ import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.ui.theme.DemoTheme
 
-class PaymentMethodsFragment : Fragment() {
+class PaymentMethodsFragment : Fragment(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,5 +84,9 @@ class PaymentMethodsFragment : Fragment() {
 
     private fun navigate(action: NavDirections) {
         findNavController().navigate(action)
+    }
+
+    override fun onClick(p0: View?) {
+        TODO("Not yet implemented")
     }
 }

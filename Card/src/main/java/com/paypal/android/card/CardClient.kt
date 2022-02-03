@@ -10,10 +10,7 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to approve an order with a [Card].
  */
-class CardClient internal constructor(
-    private val cardAPI: CardAPI,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
-) {
+class CardClient internal constructor(private val cardAPI: CardAPI) {
 
     constructor(configuration: CoreConfig) :
             this(CardAPI(API(configuration)))
@@ -22,15 +19,7 @@ class CardClient internal constructor(
      * Confirm [Card] payment source for an order.
      *
      * @param request [CardRequest] for requesting an order approval
-     * @param callback [CardResultCallback] for receiving a [CardResult]
      */
-    fun approveOrder(
-        request: CardRequest,
-        callback: CardResultCallback
-    ) {
-        CoroutineScope(dispatcher).launch {
-            val cardResult = cardAPI.confirmPaymentSource(request.orderID, request.card)
-            callback.onCardResult(cardResult)
-        }
-    }
+    suspend fun approveOrder(request: CardRequest): CardResult =
+        cardAPI.confirmPaymentSource(request.orderID, request.card)
 }
