@@ -124,6 +124,7 @@ jobs:
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
   publish_checkout:
+    needs: [ unit_test_finished ]
     name: Publish PayPal Checkout
     runs-on: ubuntu-latest
     steps:
