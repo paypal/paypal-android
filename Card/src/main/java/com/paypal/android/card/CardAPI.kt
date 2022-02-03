@@ -8,6 +8,7 @@ import com.paypal.android.core.HttpResponse.Companion.STATUS_UNDETERMINED
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
 import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
+import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
 import java.net.HttpURLConnection.HTTP_OK
 
@@ -15,16 +16,19 @@ internal class CardAPI(
     private val api: API,
     private val requestFactory: CardAPIRequestFactory = CardAPIRequestFactory()
 ) {
+    @Throws(PayPalSDKError::class)
     suspend fun confirmPaymentSource(orderID: String, card: Card): CardResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
-        val correlationId = httpResponse.headers["Paypal-Debug-Id"]
+//        val correlationId = httpResponse.headers["Paypal-Debug-Id"]
         if (!URLUtil.isValidUrl(apiRequest.path)) {
-            CardResult.Error(APIClientError.invalidUrlRequest, correlationId)
+            // TODO: include correlationId
+            throw APIClientError.invalidUrlRequest
         }
         val bodyResponse = httpResponse.body
         if (bodyResponse.isNullOrBlank()) {
-            return CardResult.Error(APIClientError.noResponseData, correlationId)
+            // TODO: include correlationId
+            throw APIClientError.noResponseData
         }
         return when (httpResponse.status) {
             HTTP_OK -> {
@@ -35,17 +39,21 @@ internal class CardAPI(
 
                     CardResult.Success(id, OrderStatus.valueOf(status))
                 }.recover {
-                    CardResult.Error(APIClientError.dataParsingError, correlationId)
+                    // TODO: include correlationId
+                    throw APIClientError.dataParsingError
                 }.getOrNull()!!
             }
             STATUS_UNKNOWN_HOST -> {
-                CardResult.Error(APIClientError.unknownHost, correlationId)
+                // TODO: include correlationId
+                throw APIClientError.unknownHost
             }
             STATUS_UNDETERMINED -> {
-                CardResult.Error(APIClientError.unknownError, correlationId)
+                // TODO: include correlationId
+                throw APIClientError.unknownError
             }
             SERVER_ERROR -> {
-                CardResult.Error(APIClientError.serverResponseError, correlationId)
+                // TODO: include correlationId
+                throw APIClientError.serverResponseError
             }
             else -> {
                 val json = PaymentsJSON(bodyResponse)
@@ -60,12 +68,9 @@ internal class CardAPI(
                     errorDetails += OrderErrorDetail(issue, description)
                 }
 
-                CardResult.Error(
-                    APIClientError.httpURLConnectionError(
-                        httpResponse.status,
-                        "$message -> $errorDetails"
-                    ), correlationId
-                )
+                // TODO: include correlationId
+                val description = "$message -> $errorDetails"
+                throw APIClientError.httpURLConnectionError(httpResponse.status, description)
             }
         }
     }
