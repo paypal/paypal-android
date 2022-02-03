@@ -37,7 +37,7 @@ internal class CardAPI(
                     val status = json.getString("status")
                     val id = json.getString("id")
 
-                    CardResult.Success(id, OrderStatus.valueOf(status))
+                    CardResult(id, OrderStatus.valueOf(status))
                 }.recover {
                     // TODO: include correlationId
                     throw APIClientError.dataParsingError
