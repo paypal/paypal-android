@@ -62,18 +62,9 @@ jobs:
         uses: ./.github/actions/unit_test_module
         with:
           module: Card
-
-  unit_test_finished:
-    needs: [unit_test_card, unit_test_core]
-    name: All Unit Test finished
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Unit test finished"
-
-  #Once all the tests have finished, we publish every module in parallel
-  publish_core:
-    needs: [unit_test_finished]
-    name: Publish Core
+  unit_test_paypal:
+    needs: build_aar
+    name: PayPal Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -83,20 +74,19 @@ jobs:
         with:
           java-version: '11'
           distribution: 'zulu'
-      - name: Decode Signing Key
-        uses: ./.github/actions/decode_signing_key_action
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
         with:
-          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
-          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Publish Core
-        uses: ./.github/actions/publish_module
-        with:
-          module: Core
-          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
-          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+          module: PayPalCheckout
+
+  unit_test_finished:
+    needs: [unit_test_card, unit_test_core, unit_test_paypal]
+    name: All Unit Test finished
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Unit test finished"
+
+  #Once all the tests have finished, we publish every module in parallel
   publish_card:
     needs: [ unit_test_finished ]
     name: Publish Card
