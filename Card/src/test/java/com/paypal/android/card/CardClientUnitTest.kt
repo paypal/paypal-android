@@ -21,7 +21,7 @@ class CardClientUnitTest {
     private val orderID = "sample-order-id"
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
-    private val cardResult = CardResult.Success("orderId", OrderStatus.APPROVED)
+    private val cardResult = CardResult("orderId", OrderStatus.APPROVED)
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
