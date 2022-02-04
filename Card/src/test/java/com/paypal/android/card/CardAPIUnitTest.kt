@@ -1,7 +1,6 @@
 package com.paypal.android.card
 
 import com.paypal.android.core.API
-import com.paypal.android.core.APIClientError
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.HttpResponse
