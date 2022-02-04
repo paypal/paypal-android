@@ -20,15 +20,10 @@ internal class CardAPI(
     suspend fun confirmPaymentSource(orderID: String, card: Card): CardResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
-//        val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-        if (!URLUtil.isValidUrl(apiRequest.path)) {
-            // TODO: include correlationId
-            throw APIClientError.invalidUrlRequest
-        }
+        val correlationID = httpResponse.headers["Paypal-Debug-Id"]
         val bodyResponse = httpResponse.body
         if (bodyResponse.isNullOrBlank()) {
-            // TODO: include correlationId
-            throw APIClientError.noResponseData
+            throw APIClientError.noResponseData(correlationID)
         }
         return when (httpResponse.status) {
             HTTP_OK -> {
@@ -39,21 +34,17 @@ internal class CardAPI(
 
                     CardResult(id, OrderStatus.valueOf(status))
                 }.recover {
-                    // TODO: include correlationId
-                    throw APIClientError.dataParsingError
+                    throw APIClientError.dataParsingError(correlationID)
                 }.getOrNull()!!
             }
             STATUS_UNKNOWN_HOST -> {
-                // TODO: include correlationId
-                throw APIClientError.unknownHost
+                throw APIClientError.unknownHost(correlationID)
             }
             STATUS_UNDETERMINED -> {
-                // TODO: include correlationId
-                throw APIClientError.unknownError
+                throw APIClientError.unknownError(correlationID)
             }
             SERVER_ERROR -> {
-                // TODO: include correlationId
-                throw APIClientError.serverResponseError
+                throw APIClientError.serverResponseError(correlationID)
             }
             else -> {
                 val json = PaymentsJSON(bodyResponse)
@@ -68,9 +59,12 @@ internal class CardAPI(
                     errorDetails += OrderErrorDetail(issue, description)
                 }
 
-                // TODO: include correlationId
                 val description = "$message -> $errorDetails"
-                throw APIClientError.httpURLConnectionError(httpResponse.status, description)
+                throw APIClientError.httpURLConnectionError(
+                    httpResponse.status,
+                    description,
+                    correlationID
+                )
             }
         }
     }

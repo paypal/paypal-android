@@ -30,6 +30,21 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardAPIUnitTest {
 
+    // language=JSON
+    private val successBody = """
+            {
+                "id": "testOrderID",
+                "status": "APPROVED",
+                "payment_source": {
+                    "card": {
+                        "last_digits": "7321",
+                        "brand": "VISA",
+                        "type": "CREDIT"
+                    }
+                }
+            }
+        """
+
     private val api = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<CardAPIRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
@@ -85,7 +100,7 @@ class CardAPIUnitTest {
 
     @Test
     fun `it sends a confirm payment source api request`() = runBlockingTest {
-        val httpResponse = HttpResponse(200)
+        val httpResponse = HttpResponse(200, emptyMap(), successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
         sut.confirmPaymentSource(orderID, card)
@@ -94,21 +109,7 @@ class CardAPIUnitTest {
 
     @Test
     fun `it returns a confirm payment source result`() = runBlockingTest {
-        // language=JSON
-        val body = """
-            {
-                "id": "testOrderID",
-                "status": "APPROVED",
-                "payment_source": {
-                    "card": {
-                        "last_digits": "7321",
-                        "brand": "VISA",
-                        "type": "CREDIT"
-                    }
-                }
-            }
-        """
-        val httpResponse = HttpResponse(200, headers, body)
+        val httpResponse = HttpResponse(200, headers, successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(orderID, card)
@@ -151,7 +152,7 @@ class CardAPIUnitTest {
             }
 
             assertEquals(
-                APIClientError.unknownError.errorDescription,
+                "An unknown error occurred. Contact developer.paypal.com/support.",
                 capturedError.errorDescription
             )
         }
@@ -171,7 +172,7 @@ class CardAPIUnitTest {
             }
 
             assertEquals(
-                APIClientError.noResponseData.errorDescription,
+                "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support.",
                 capturedError.errorDescription
             )
         }
@@ -193,7 +194,7 @@ class CardAPIUnitTest {
             }
 
             assertEquals(
-                APIClientError.dataParsingError.errorDescription,
+                "An error occurred parsing HTTP response data. Contact developer.paypal.com/support.",
                 capturedError.errorDescription
             )
         }
@@ -212,7 +213,7 @@ class CardAPIUnitTest {
         }
 
         assertEquals(
-            APIClientError.unknownHost.errorDescription,
+            "An error occurred due to an invalid HTTP response. Contact developer.paypal.com/support.",
             capturedError.errorDescription
         )
     }
@@ -231,7 +232,7 @@ class CardAPIUnitTest {
         }
 
         assertEquals(
-            APIClientError.serverResponseError.errorDescription,
+            "A server occurred. Contact developer.paypal.com/support.",
             capturedError.errorDescription
         )
     }
