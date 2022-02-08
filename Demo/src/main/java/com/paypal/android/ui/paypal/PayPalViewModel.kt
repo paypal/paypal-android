@@ -16,6 +16,7 @@ import javax.inject.Inject
 import com.google.gson.JsonParser
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
+import com.paypal.android.checkout.PayPalListener
 import com.paypal.android.checkout.pojo.CorrelationIds
 import com.paypal.android.checkout.pojo.ErrorInfo
 import retrofit2.HttpException
@@ -24,7 +25,7 @@ import java.net.UnknownHostException
 @HiltViewModel
 class PayPalViewModel @Inject constructor(
     private val payPalDemoApi: PayPalDemoApi
-) : ViewModel() {
+) : ViewModel(), PayPalListener {
 
     companion object {
         private val TAG = PayPalViewModel::class.qualifiedName
@@ -50,12 +51,26 @@ class PayPalViewModel @Inject constructor(
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(error = ErrorInfo(e, e.message!!, CorrelationIds(), null))
+                val error = PayPalCheckoutResult.Failure(
+                    error = ErrorInfo(
+                        e,
+                        e.message!!,
+                        CorrelationIds(),
+                        null
+                    )
+                )
                 _checkoutResult.value = error
                 _isLoading.value = false
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(error = ErrorInfo(e, e.message!!, CorrelationIds(), null))
+                val error = PayPalCheckoutResult.Failure(
+                    error = ErrorInfo(
+                        e,
+                        e.message!!,
+                        CorrelationIds(),
+                        null
+                    )
+                )
                 _checkoutResult.value = error
                 _isLoading.value = false
             }
@@ -65,10 +80,29 @@ class PayPalViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.M)
     fun setPayPalClient(payPalClient: PayPalClient) {
         this.payPalClient = payPalClient
+        this.payPalClient.listener = this
     }
 
     private suspend fun fetchOrder(): Order {
         val orderJson = JsonParser.parseString(orderJson) as JsonObject
         return payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
+    }
+
+    override fun onPayPalSuccess(result: PayPalCheckoutResult.Success) {
+        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
+        _checkoutResult.value = result
+        _isLoading.value = false
+    }
+
+    override fun onPayPalFailure(failure: PayPalCheckoutResult.Failure) {
+        Log.i(TAG, "Checkout Error: ${failure.error.reason}")
+        _checkoutResult.value = failure
+        _isLoading.value = false
+    }
+
+    override fun onPayPalCanceled() {
+        Log.i(TAG, "User cancelled")
+        _checkoutResult.value = PayPalCheckoutResult.Cancellation
+        _isLoading.value = false
     }
 }
