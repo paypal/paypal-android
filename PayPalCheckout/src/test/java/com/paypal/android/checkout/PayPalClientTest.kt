@@ -22,7 +22,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import strikt.api.expectThat
-import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
 
@@ -112,7 +111,7 @@ class PayPalClientTest {
 
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString(), mockk())
+        paypalClient.checkout(generateRandomString())
 
         verify {
             PayPalCheckout.start(any(), any(), any(), any(), any())
@@ -138,7 +137,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(orderId) {}
+        paypalClient.checkout(orderId)
 
         verify {
             createOrderActions.set(orderId)
@@ -173,14 +172,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString()) { result ->
-            expectThat(result) {
-                isA<PayPalCheckoutResult.Success>()
-                get { approval.data.payerId }.isEqualTo(payerId)
-                get { approval.data.orderId }.isEqualTo(orderId)
-                get { approval.data.paymentId }.isEqualTo(paymentId)
-            }
-        }
+        paypalClient.checkout(generateRandomString())
     }
 
     @Test
@@ -200,9 +192,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString()) { result ->
-            expectThat(result).isA<PayPalCheckoutResult.Cancellation>()
-        }
+        paypalClient.checkout(generateRandomString())
     }
 
     @Test
@@ -222,9 +212,7 @@ class PayPalClientTest {
         val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        paypalClient.checkout(generateRandomString()) { result ->
-            expectThat(result).isA<PayPalCheckoutResult.Failure>()
-        }
+        paypalClient.checkout(generateRandomString())
     }
 
     /**

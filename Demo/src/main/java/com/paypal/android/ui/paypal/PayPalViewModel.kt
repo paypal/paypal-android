@@ -46,21 +46,7 @@ class PayPalViewModel @Inject constructor(
             try {
                 val order = fetchOrder()
                 order.id?.let { orderId ->
-                    payPalClient.checkout(orderId) { result ->
-                        when (result) {
-                            is PayPalCheckoutResult.Success -> Log.i(
-                                TAG,
-                                "Order Approved: ${result.orderId} && ${result.payerId}"
-                            )
-                            is PayPalCheckoutResult.Failure -> Log.i(
-                                TAG,
-                                "Checkout Error: ${result.error.reason}"
-                            )
-                            is PayPalCheckoutResult.Cancellation -> Log.i(TAG, "User cancelled")
-                        }
-                        _checkoutResult.value = result
-                        _isLoading.value = false
-                    }
+                    payPalClient.checkout(orderId)
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)

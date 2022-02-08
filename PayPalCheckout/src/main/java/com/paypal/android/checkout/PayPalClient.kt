@@ -15,6 +15,8 @@ import com.paypal.checkout.error.OnError
 @RequiresApi(Build.VERSION_CODES.M)
 class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: String) {
 
+    var listener: PayPalListener? = null
+
     init {
         val config = CheckoutConfig(
             application = application,
@@ -25,20 +27,21 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
         PayPalCheckout.setConfig(config)
     }
 
-    fun checkout(orderId: String, callback: PayPalCheckoutResultCallback) {
+    fun checkout(orderId: String) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
         },
             onApprove = OnApprove { approval ->
-                val result =
-                    PayPalCheckoutResult.Success(approval.data.orderId, approval.data.payerId)
-                callback.onPayPalCheckoutResult(result)
+                val result = approval.run {
+                    PayPalCheckoutResult.Success(data.orderId, data.payerId)
+                }
+                listener?.onPayPalSuccess(result)
             },
             onCancel = OnCancel {
-                callback.onPayPalCheckoutResult(PayPalCheckoutResult.Cancellation)
+                listener?.onPayPalCanceled()
             },
             onError = OnError { errorInfo ->
-                callback.onPayPalCheckoutResult(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
+                listener?.onPayPalFailure(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
             })
     }
 }
