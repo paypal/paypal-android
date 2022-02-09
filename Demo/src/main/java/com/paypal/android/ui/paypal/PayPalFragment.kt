@@ -101,7 +101,7 @@ class PayPalFragment : Fragment(), PayPalListener {
                     end.linkTo(parent.end)
                 })
             } else {
-                CheckoutStatusText(
+                CheckoutResult(
                     modifier = Modifier.constrainAs(result) {
                         top.linkTo(parent.top)
                         bottom.linkTo(button.top)
@@ -123,7 +123,7 @@ class PayPalFragment : Fragment(), PayPalListener {
     }
 
     @Composable
-    private fun CheckoutStatusText(modifier: Modifier) {
+    private fun CheckoutResult(modifier: Modifier) {
         val statusTitle by payPalViewModel.statusTitle.observeAsState(initial = "")
         val statusText by payPalViewModel.statusText.observeAsState(initial = "")
         Column(modifier = modifier.padding(horizontal = 16.dp)) {
@@ -185,7 +185,6 @@ class PayPalFragment : Fragment(), PayPalListener {
         payPalViewModel.statusText.value = statusText
         hideLoader()
     }
-
 
     private suspend fun fetchOrder(): Order {
         val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
