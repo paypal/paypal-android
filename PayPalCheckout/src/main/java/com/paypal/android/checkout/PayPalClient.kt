@@ -3,7 +3,7 @@ package com.paypal.android.checkout
 import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.paypal.android.checkout.pojo.ErrorInfo
+import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
@@ -32,16 +32,15 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
             createOrderActions.set(orderId)
         },
             onApprove = OnApprove { approval ->
-                val result = approval.run {
-                    PayPalCheckoutResult.Success(data.orderId, data.payerId)
-                }
+                val result = approval.run { PayPalCheckoutResult(data.orderId, data.payerId) }
                 listener?.onPayPalSuccess(result)
             },
             onCancel = OnCancel {
                 listener?.onPayPalCanceled()
             },
             onError = OnError { errorInfo ->
-                listener?.onPayPalFailure(PayPalCheckoutResult.Failure(ErrorInfo(errorInfo)))
+                val error = APIClientError.payPalCheckoutError(errorInfo.reason)
+                listener?.onPayPalFailure(error)
             })
     }
 }

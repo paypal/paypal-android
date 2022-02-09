@@ -38,10 +38,10 @@ import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalListener
-import com.paypal.android.checkout.pojo.CorrelationIds
-import com.paypal.android.checkout.pojo.ErrorInfo
+import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
+import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.ui.theme.DemoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -150,7 +150,7 @@ class PayPalFragment : Fragment(), PayPalListener {
         }
     }
 
-    override fun onPayPalSuccess(result: PayPalCheckoutResult.Success) {
+    override fun onPayPalSuccess(result: PayPalCheckoutResult) {
         Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
 
         val title = getString(R.string.order_approved)
@@ -164,11 +164,11 @@ class PayPalFragment : Fragment(), PayPalListener {
         hideLoader()
     }
 
-    override fun onPayPalFailure(failure: PayPalCheckoutResult.Failure) {
-        Log.i(TAG, "Checkout Error: ${failure.error.reason}")
+    override fun onPayPalFailure(error: PayPalSDKError) {
+        Log.i(TAG, "Checkout Error: ${error.errorDescription}")
 
         val title = getString(R.string.order_failed)
-        val statusText = getString(R.string.reason, failure.error.reason)
+        val statusText = getString(R.string.reason, error.errorDescription)
 
         payPalViewModel.statusTitle.value = title
         payPalViewModel.statusText.value = statusText
@@ -202,25 +202,11 @@ class PayPalFragment : Fragment(), PayPalListener {
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(
-                    error = ErrorInfo(
-                        e,
-                        e.message!!,
-                        CorrelationIds(),
-                        null
-                    )
-                )
+                val error = APIClientError.payPalCheckoutError(e.message!!)
                 onPayPalFailure(error)
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
-                val error = PayPalCheckoutResult.Failure(
-                    error = ErrorInfo(
-                        e,
-                        e.message!!,
-                        CorrelationIds(),
-                        null
-                    )
-                )
+                val error = APIClientError.payPalCheckoutError(e.message!!)
                 onPayPalFailure(error)
             }
         }
