@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -58,7 +57,7 @@ class PayPalFragment : Fragment(), PayPalListener {
     }
 
     @Inject
-    private lateinit var payPalDemoApi: PayPalDemoApi
+    lateinit var payPalDemoApi: PayPalDemoApi
 
     private val payPalViewModel: PayPalViewModel by viewModels()
     private lateinit var paypalClient: PayPalClient
@@ -102,8 +101,7 @@ class PayPalFragment : Fragment(), PayPalListener {
                     end.linkTo(parent.end)
                 })
             } else {
-                CheckoutResult(
-                    payPalViewModel.checkoutResult,
+                CheckoutStatusText(
                     modifier = Modifier.constrainAs(result) {
                         top.linkTo(parent.top)
                         bottom.linkTo(button.top)
@@ -125,75 +123,21 @@ class PayPalFragment : Fragment(), PayPalListener {
     }
 
     @Composable
-    private fun CheckoutResult(resultLiveData: LiveData<PayPalCheckoutResult>, modifier: Modifier) {
-        val result by resultLiveData.observeAsState(initial = null)
-        when (result) {
-            is PayPalCheckoutResult.Success -> CheckoutSuccess(
-                result as PayPalCheckoutResult.Success,
-                modifier = modifier
-            )
-            is PayPalCheckoutResult.Failure -> CheckoutFailure(
-                result as PayPalCheckoutResult.Failure,
-                modifier = modifier
-            )
-            PayPalCheckoutResult.Cancellation -> CheckoutCancelled(modifier = modifier)
-        }
-    }
-
-    @Composable
-    private fun CheckoutSuccess(result: PayPalCheckoutResult.Success, modifier: Modifier) {
+    private fun CheckoutStatusText(modifier: Modifier) {
+        val statusTitle by payPalViewModel.statusTitle.observeAsState(initial = "")
+        val statusText by payPalViewModel.statusText.observeAsState(initial = "")
         Column(modifier = modifier.padding(horizontal = 16.dp)) {
             Text(
-                text = getString(R.string.order_approved),
+                text = statusTitle,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = getString(R.string.payer_id, result.payerId),
+                text = statusText,
                 fontSize = 16.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                text = getString(R.string.order_id, result.orderId),
-                fontSize = 16.sp,
-                color = Color.Gray,
-            )
-        }
-    }
-
-    @Composable
-    private fun CheckoutFailure(result: PayPalCheckoutResult.Failure, modifier: Modifier) {
-        Column(modifier = modifier.padding(horizontal = 16.dp)) {
-            Text(
-                text = getString(R.string.order_failed),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Text(
-                text = getString(R.string.reason, result.error.reason),
-                fontSize = 16.sp,
-                color = Color.Gray,
-            )
-        }
-    }
-
-    @Composable
-    private fun CheckoutCancelled(modifier: Modifier) {
-        Column(modifier = modifier.padding(horizontal = 8.dp)) {
-            Text(
-                text = getString(R.string.checkout_cancelled),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Text(
-                text = getString(R.string.user_cancelled),
-                fontSize = 16.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
             )
         }
     }
@@ -205,6 +149,43 @@ class PayPalFragment : Fragment(), PayPalListener {
             Text(text = getString(R.string.creating_order))
         }
     }
+
+    override fun onPayPalSuccess(result: PayPalCheckoutResult.Success) {
+        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
+
+        val title = getString(R.string.order_approved)
+
+        val payerId = getString(R.string.payer_id, result.payerId)
+        val orderId = getString(R.string.order_id, result.orderId)
+        val statusText = "$payerId\n$orderId"
+
+        payPalViewModel.statusTitle.value = title
+        payPalViewModel.statusText.value = statusText
+        hideLoader()
+    }
+
+    override fun onPayPalFailure(failure: PayPalCheckoutResult.Failure) {
+        Log.i(TAG, "Checkout Error: ${failure.error.reason}")
+
+        val title = getString(R.string.order_failed)
+        val statusText = getString(R.string.reason, failure.error.reason)
+
+        payPalViewModel.statusTitle.value = title
+        payPalViewModel.statusText.value = statusText
+        hideLoader()
+    }
+
+    override fun onPayPalCanceled() {
+        Log.i(TAG, "User cancelled")
+
+        val title = getString(R.string.checkout_cancelled)
+        val statusText = getString(R.string.user_cancelled)
+
+        payPalViewModel.statusTitle.value = title
+        payPalViewModel.statusText.value = statusText
+        hideLoader()
+    }
+
 
     private suspend fun fetchOrder(): Order {
         val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
@@ -244,24 +225,6 @@ class PayPalFragment : Fragment(), PayPalListener {
                 onPayPalFailure(error)
             }
         }
-    }
-
-    override fun onPayPalSuccess(result: PayPalCheckoutResult.Success) {
-        TODO("Update result text")
-        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
-        hideLoader()
-    }
-
-    override fun onPayPalFailure(failure: PayPalCheckoutResult.Failure) {
-        TODO("Update result text")
-        Log.i(TAG, "Checkout Error: ${failure.error.reason}")
-        hideLoader()
-    }
-
-    override fun onPayPalCanceled() {
-        TODO("Update result text")
-        Log.i(TAG, "User cancelled")
-        hideLoader()
     }
 
     private fun showLoader() {
