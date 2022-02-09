@@ -1,8 +1,7 @@
 package com.paypal.android.ui.paypal
 
-import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,28 +22,47 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
+import com.paypal.android.api.model.Order
+import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
+import com.paypal.android.checkout.PayPalListener
+import com.paypal.android.checkout.pojo.CorrelationIds
+import com.paypal.android.checkout.pojo.ErrorInfo
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
 import com.paypal.android.ui.theme.DemoTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.net.UnknownHostException
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class PayPalFragment : Fragment() {
+class PayPalFragment : Fragment(), PayPalListener {
+
+    companion object {
+        private val TAG = PayPalFragment::class.qualifiedName
+    }
+
+    @Inject
+    private lateinit var payPalDemoApi: PayPalDemoApi
 
     private val payPalViewModel: PayPalViewModel by viewModels()
+    private lateinit var paypalClient: PayPalClient
 
-    private val canRunPayPalCheckout = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,22 +73,8 @@ class PayPalFragment : Fragment() {
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
         val application = requireActivity().application
         val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            payPalViewModel.setPayPalClient(PayPalClient(application, coreConfig, returnUrl))
-        }
-
-        view.findViewById<View>(R.id.payPalButton).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                launchNativeCheckout()
-            }
-        }
-
-        view.findViewById<View>(R.id.payPalCreditButton).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                launchNativeCheckout()
-            }
-        }
+        paypalClient = PayPalClient(application, coreConfig, returnUrl)
+        paypalClient.listener = this
 
         view.findViewById<ComposeView>(R.id.compose_view).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -106,30 +110,17 @@ class PayPalFragment : Fragment() {
                     })
             }
             Button(
-                enabled = canRunPayPalCheckout && !isLoading,
+                enabled = !isLoading,
                 onClick = { launchNativeCheckout() },
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp)
                     .fillMaxWidth()
                     .constrainAs(button) {
-                        if (canRunPayPalCheckout) {
-                            bottom.linkTo(parent.bottom)
-                        } else {
-                            bottom.linkTo(text.top)
-                        }
+                        bottom.linkTo(text.top)
                     }
             ) {
                 Text(stringResource(R.string.start_checkout))
             }
-            if (!canRunPayPalCheckout) Text(
-                text = stringResource(id = R.string.minimum_sdk_needed),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(text) {
-                        bottom.linkTo(parent.bottom, margin = 16.dp)
-                    },
-                textAlign = TextAlign.Center,
-            )
         }
     }
 
@@ -215,9 +206,69 @@ class PayPalFragment : Fragment() {
         }
     }
 
+    private suspend fun fetchOrder(): Order {
+        val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
+        return payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
+    }
+
     private fun launchNativeCheckout() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            payPalViewModel.startPayPalCheckout()
+        showLoader()
+
+        lifecycleScope.launch {
+            try {
+                val order = fetchOrder()
+                order.id?.let { orderId ->
+                    paypalClient.checkout(orderId)
+                }
+            } catch (e: UnknownHostException) {
+                Log.e(TAG, e.message!!)
+                val error = PayPalCheckoutResult.Failure(
+                    error = ErrorInfo(
+                        e,
+                        e.message!!,
+                        CorrelationIds(),
+                        null
+                    )
+                )
+                onPayPalFailure(error)
+            } catch (e: HttpException) {
+                Log.e(TAG, e.message!!)
+                val error = PayPalCheckoutResult.Failure(
+                    error = ErrorInfo(
+                        e,
+                        e.message!!,
+                        CorrelationIds(),
+                        null
+                    )
+                )
+                onPayPalFailure(error)
+            }
         }
+    }
+
+    override fun onPayPalSuccess(result: PayPalCheckoutResult.Success) {
+        TODO("Update result text")
+        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
+        hideLoader()
+    }
+
+    override fun onPayPalFailure(failure: PayPalCheckoutResult.Failure) {
+        TODO("Update result text")
+        Log.i(TAG, "Checkout Error: ${failure.error.reason}")
+        hideLoader()
+    }
+
+    override fun onPayPalCanceled() {
+        TODO("Update result text")
+        Log.i(TAG, "User cancelled")
+        hideLoader()
+    }
+
+    private fun showLoader() {
+        payPalViewModel.isLoading.value = true
+    }
+
+    private fun hideLoader() {
+        payPalViewModel.isLoading.value = false
     }
 }
