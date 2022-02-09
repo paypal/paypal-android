@@ -33,7 +33,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
@@ -186,17 +185,13 @@ class PayPalFragment : Fragment(), PayPalListener {
         hideLoader()
     }
 
-    private suspend fun fetchOrder(): Order {
-        val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
-        return payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
-    }
-
     private fun launchNativeCheckout() {
         showLoader()
 
         lifecycleScope.launch {
             try {
-                val order = fetchOrder()
+                val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
+                val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
                     paypalClient.checkout(orderId)
                 }
