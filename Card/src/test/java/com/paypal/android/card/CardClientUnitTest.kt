@@ -23,22 +23,12 @@ class CardClientUnitTest {
     private val cardAPI = mockk<CardAPI>(relaxed = true)
     private val cardResult = CardResult("orderId", OrderStatus.APPROVED)
 
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
-
     private lateinit var sut: CardClient
 
     @Before
     fun beforeEach() {
         sut = CardClient(cardAPI)
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns cardResult
-
-        Dispatchers.setMain(testCoroutineDispatcher)
-    }
-
-    @After
-    fun afterEach() {
-        Dispatchers.resetMain()
-        testCoroutineDispatcher.cleanupTestCoroutines()
     }
 
     @Test
