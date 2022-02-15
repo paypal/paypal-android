@@ -12,9 +12,14 @@ import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 
-@RequiresApi(Build.VERSION_CODES.M)
+/**
+ * Use this client to checkout with PayPal.
+ */
 class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: String) {
 
+    /**
+     * Sets a listener to receive notifications when a PayPal event occurs.
+     */
     var listener: PayPalListener? = null
 
     init {
@@ -27,6 +32,11 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
         PayPalCheckout.setConfig(config)
     }
 
+    /**
+     * Initiate a PayPal checkout for an order.
+     *
+     * @param orderId the id of the order
+     */
     fun checkout(orderId: String) {
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
