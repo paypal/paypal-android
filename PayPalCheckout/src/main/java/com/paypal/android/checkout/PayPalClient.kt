@@ -1,8 +1,6 @@
 package com.paypal.android.checkout
 
 import android.app.Application
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.checkout.PayPalCheckout
