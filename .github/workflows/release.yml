@@ -2,8 +2,8 @@ name: Publish Release
 on:
   workflow_dispatch:
     inputs:
-      new_version:
-        description: 'New Version'
+      version:
+        description: 'Version to release'
         required: true
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
@@ -21,15 +21,15 @@ jobs:
           git config user.email jose.noriega.defferrari@gmail.com
       - name: Update Version
         run: |
-          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.new_version }}\"/' ./build.gradle
+          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
           code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
           code=$(expr $code + 1)
-          echo $code
           sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
 
           git add .
-          git commit -m 'Testing version ${{ github.event.inputs.new_version }}'
-          git push
+          git commit -m 'Testing version ${{ github.event.inputs.version }}'
+          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}'
+          git push origin HEAD ${{ github.event.inputs.version }}
 
 
 #  build_aar:
