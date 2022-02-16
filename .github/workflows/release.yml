@@ -8,30 +8,30 @@ on:
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
-  #First we build
+  #Once all the tests have finished, we update version and tag it
   change_version:
     name: Change Version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-      - name: Set github user
-        run: |
-          git config user.name jcnoriega
-          git config user.email jose.noriega.defferrari@gmail.com
+#      - name: Set github user
+#        run: |
+#          git config user.name jcnoriega
+#          git config user.email jose.noriega.defferrari@gmail.com
       - name: Update Version
         run: |
-          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
-          code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
-          code=$(expr $code + 1)
-          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
-
-          git add .
-          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
-          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}'
-          git push origin HEAD ${{ github.event.inputs.version }}
-
-
+          echo "${{ github.actor }}"
+#          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
+#          code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
+#          code=$(expr $code + 1)
+#          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
+#
+#          git add .
+#          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
+#          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}'
+#          git push origin HEAD ${{ github.event.inputs.version }}
+#  #First we build
 #  build_aar:
 #    name: Build
 #    runs-on: ubuntu-latest
@@ -114,9 +114,9 @@ jobs:
 #    steps:
 #      - run: echo "Unit test finished"
 #
-#  #Once all the tests have finished, we publish every module in parallel
+#  #Once the version is updated, we publish all modules in parallel
 #  publish_core:
-#    needs: [ unit_test_finished ]
+#    needs: [ change_version ]
 #    name: Publish Core
 #    runs-on: ubuntu-latest
 #    steps:
@@ -142,7 +142,7 @@ jobs:
 #          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
 #          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
 #  publish_card:
-#    needs: [ unit_test_finished ]
+#    needs: [ change_version ]
 #    name: Publish Card
 #    runs-on: ubuntu-latest
 #    steps:
@@ -168,7 +168,7 @@ jobs:
 #          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
 #          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
 #  publish_checkout:
-#    needs: [ unit_test_finished ]
+#    needs: [ change_version ]
 #    name: Publish PayPal Checkout
 #    runs-on: ubuntu-latest
 #    steps:
