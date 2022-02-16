@@ -1,8 +1,8 @@
 buildscript {
 
     ext.modules = [
-            "sdkVersionName"      : "0.0.0-test-sdk",
-            "sdkVersionCode"      : 10000,
+            "sdkVersionName"      : "0.0.0-test-version-1",
+            "sdkVersionCode"      : 10001,
             "androidMinSdkVersion": 21,
             "androidTargetVersion": 30
     ]
