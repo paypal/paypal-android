@@ -27,7 +27,7 @@ jobs:
           sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
 
           git add .
-          git commit -m 'Testing version ${{ github.event.inputs.version }}'
+          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
           git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}'
           git push origin HEAD ${{ github.event.inputs.version }}
 
