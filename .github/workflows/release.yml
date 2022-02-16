@@ -21,10 +21,10 @@ jobs:
           git config user.email jose.noriega.defferrari@gmail.com
       - name: Update Version
         run: |
-          sed -i "" "s/(\"sdkVersionName\"[ \t]: )\"[0-9].\"/\1\"${{ github.event.inputs.new_version }} \"/" build.gradle
+          sed -i '' 's/(\"sdkVersionName\"[ \t]: )\"[0-9].\"/\1\"${{ github.event.inputs.new_version }} \"/' build.gradle
           code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
           code=$(expr $code + 1)
-          sed -i "" "s/(\"sdkVersionCode\"[ \t]*: )[0-9]/\1$code/" build.gradle
+          sed -i '' 's/(\"sdkVersionCode\"[ \t]*: )[0-9]/\1$code/' build.gradle
 
           git add .
           git commit -m 'Bump version to ${{ github.event.inputs.new_version }}'
