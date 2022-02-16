@@ -25,7 +25,7 @@ jobs:
           code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
           code=$(expr $code + 1)
           echo $code
-          sed -ri -e 's/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/' ./build.gradle
+          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
 
           git add .
           git commit -m 'Testing version ${{ github.event.inputs.new_version }}'
