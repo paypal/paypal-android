@@ -15,22 +15,21 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-#      - name: Set github user
-#        run: |
-#          git config user.name jcnoriega
-#          git config user.email jose.noriega.defferrari@gmail.com
+      - name: Set github user
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - name: Update Version
         run: |
-          echo "${{ github.actor }}"
-#          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
-#          code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
-#          code=$(expr $code + 1)
-#          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
-#
-#          git add .
-#          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
-#          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}'
-#          git push origin HEAD ${{ github.event.inputs.version }}
+          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
+          code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
+          code=$(expr $code + 1)
+          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
+
+          git add .
+          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
+          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
+          git push origin HEAD ${{ github.event.inputs.version }}
 #  #First we build
 #  build_aar:
 #    name: Build
