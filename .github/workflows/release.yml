@@ -99,7 +99,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
-
+      - name: Set github user
+          # We set these credentials because we have no way of getting the users (that started the workflow) email
+          # Reference: https://github.com/actions/checkout/issues/13
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
       - name: Update Version
         run: |
           sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
