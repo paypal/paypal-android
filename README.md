@@ -1,4 +1,3 @@
-# PayPal Android SDK
 Welcome to the PayPal Android SDK. This library will help you accept Card, PayPal, and Venmo payments in your Android app.
 
 ## FAQ
@@ -44,15 +43,16 @@ card.number = "4111111111111111"
 card.cvv = "123"
 
 // STEP 4: Call checkout method
-cardClient.checkoutWithCard(ORDER_ID, card) { result, error _>
-    error?.let {
-        // handle checkout error
-        return
-    }
-    result?.let {
-        val orderID = it.orderID 
-        // Send orderID to your server to process the payment
-    }
+lifecycleScope.launch {
+  try {
+    let result = cardClient.checkoutWithCard(ORDER_ID, card)
+  
+    // send orderID to your server to process the payment
+    val orderID = result.orderID 
+  
+  } catch (e: PayPalSDKError) {
+    // handle checkout error
+  }
 }
 
 // STEP 5: Send orderID to your server to capture/authorize
