@@ -107,15 +107,13 @@ Approve the order using your `CardClient`.
 Call `CardClient#approveOrder` to approve the order, and then handle results:
 
 ```kotlin
-cardClient.approveOrder(cardRequest) { result ->
-    when (result) {
-        is CardResult.Success -> {
-            // order was successfully approved and is ready to be captured/authorized (see step 6)
-        } 
-        is CardResult.Error -> {
-            // inspect `result.error` for more information
-        } 
-    }
+viewLifecycleOwner.lifecycleScope.launch {
+  try {
+    val result = cardClient.approveOrder(cardRequest)
+    // order was successfully approved and is ready to be captured/authorized (see step 6)
+  } catch (error: PayPalSDKError) {
+    // inspect `error` for more information
+  }
 }
 ```
 

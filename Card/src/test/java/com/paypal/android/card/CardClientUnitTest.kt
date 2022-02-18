@@ -3,13 +3,8 @@ package com.paypal.android.card
 import com.paypal.android.core.OrderStatus
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
@@ -21,34 +16,21 @@ class CardClientUnitTest {
     private val orderID = "sample-order-id"
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
-    private val cardResult = CardResult.Success("orderId", OrderStatus.APPROVED)
-
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
+    private val cardResult = CardResult("orderId", OrderStatus.APPROVED)
 
     private lateinit var sut: CardClient
 
     @Before
     fun beforeEach() {
-        sut = CardClient(cardAPI, testCoroutineDispatcher)
+        sut = CardClient(cardAPI)
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns cardResult
-
-        Dispatchers.setMain(testCoroutineDispatcher)
-    }
-
-    @After
-    fun afterEach() {
-        Dispatchers.resetMain()
-        testCoroutineDispatcher.cleanupTestCoroutines()
     }
 
     @Test
     fun `approve order confirms payment source using card api`() = runBlockingTest {
         val request = CardRequest(orderID, card)
 
-        lateinit var capturedResult: CardResult
-        sut.approveOrder(request) { result ->
-            capturedResult = result
-        }
-        assertSame(cardResult, capturedResult)
+        val actualResult = sut.approveOrder(request)
+        assertSame(actualResult, cardResult)
     }
 }

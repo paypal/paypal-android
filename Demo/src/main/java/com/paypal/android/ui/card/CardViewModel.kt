@@ -15,8 +15,8 @@ import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
-import com.paypal.android.card.CardResult
 import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.data.card.PrefillCardData
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
@@ -80,17 +80,14 @@ class CardViewModel @Inject constructor(
         viewModelScope.launch {
             val order = fetchOrder()
             val request = CardRequest(order.id!!, card)
-            cardClient.approveOrder(request) { result ->
-                when (result) {
-                    is CardResult.Success -> {
-                        Log.d(TAG, "SUCCESS")
-                        Log.d(TAG, "${result.status}")
-                    }
-                    is CardResult.Error -> {
-                        Log.e(TAG, "ERROR")
-                        Log.e(TAG, result.payPalSDKError.errorDescription.orEmpty())
-                    }
-                }
+
+            try {
+                val result = cardClient.approveOrder(request)
+                Log.d(TAG, "SUCCESS")
+                Log.d(TAG, "${result.status}")
+            } catch (error: PayPalSDKError) {
+                Log.e(TAG, "ERROR")
+                Log.e(TAG, error.errorDescription.orEmpty())
             }
         }
     }
