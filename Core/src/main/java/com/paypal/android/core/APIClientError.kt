@@ -50,6 +50,13 @@ object APIClientError {
             errorDescription = description,
             correlationID = correlationID
         )
+
+    val payPalCheckoutError: (description: String) -> PayPalSDKError = { description ->
+        PayPalSDKError(
+            code = Code.CHECKOUT_ERROR.ordinal,
+            errorDescription = description
+        )
+    }
 }
 
 internal enum class Code {
@@ -58,5 +65,6 @@ internal enum class Code {
     UNKNOWN_HOST,
     NO_RESPONSE_DATA,
     INVALID_URL_REQUEST,
-    SERVER_RESPONSE_ERROR
+    SERVER_RESPONSE_ERROR,
+    CHECKOUT_ERROR
 }
