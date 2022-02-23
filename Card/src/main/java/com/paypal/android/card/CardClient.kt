@@ -2,6 +2,14 @@ package com.paypal.android.card
 
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.PayPalSDKError
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.future.future
+import kotlinx.coroutines.launch
+import java.lang.Exception
 
 /**
  * Use this client to approve an order with a [Card].
@@ -18,4 +26,26 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
      */
     suspend fun approveOrder(request: CardRequest): CardResult =
         cardAPI.confirmPaymentSource(request.orderID, request.card)
+
+    /**
+     * Confirm [Card] payment source for an order. Use this method for Java integrations
+     *
+     * @param request [CardRequest] for requesting an order approval
+     * @param callback callback to get response
+     */
+    fun approveOrder(request: CardRequest, callback: ApproveOrderCallback) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val result = approveOrder(request)
+                callback.success(result)
+            } catch (e: PayPalSDKError) {
+                callback.failure(e)
+            }
+        }
+    }
+}
+
+interface ApproveOrderCallback {
+    fun success(result: CardResult)
+    fun failure(error: PayPalSDKError)
 }
