@@ -45,6 +45,9 @@ android {
 }
 
 dependencies {
+    dependencies {
+        implementation files('libs/android-magnessdk-5.1.1.jar')
+    }
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
