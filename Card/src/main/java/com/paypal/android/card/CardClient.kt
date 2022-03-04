@@ -4,12 +4,8 @@ import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 /**
  * Use this client to approve an order with a [Card].
