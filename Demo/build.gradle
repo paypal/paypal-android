@@ -83,11 +83,15 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
+
     testImplementation deps.junit
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation "androidx.test:runner:1.4.0"
+    androidTestImplementation "androidx.test:rules:1.4.0"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:2.2.0"
 }
-
 
 /**
  * Loads properties at the specified file path. If the file does not exist,
