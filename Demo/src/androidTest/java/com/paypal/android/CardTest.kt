@@ -3,12 +3,11 @@ package com.paypal.android
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.view.KeyCharacterMap
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.Until
+import androidx.test.uiautomator.*
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,6 +38,32 @@ class CardTest {
 
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+
+        waitForText("Card")
+        findText("Card").click()
+
+        waitForText("Card Number")
+        findText("Card Number").click()
+
+//        val charMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
+//        val charEvents = charMap.getEvents("4111111111111111".toCharArray())
+//        val keyCodes = charEvents.map { it.keyCode }
+//
+//        for (keyCode in keyCodes) {
+//            device.pressKeyCode(keyCode)
+//        }
+
+//        findText("Card Number").text = "4111111111111111"
+//        findText("Expiration").text = "0223"
+//        findText("Security Code").text = "123"
+    }
+
+    private fun findText(buttonText: String): UiObject {
+        return device.findObject(UiSelector().text(buttonText))
+    }
+
+    private fun waitForText(buttonText: String) {
+        device.wait(Until.hasObject(By.text(buttonText)), LAUNCH_TIMEOUT)
     }
 
     private fun getLauncherPackageName(): String {
