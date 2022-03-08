@@ -3,7 +3,7 @@ package com.paypal.android.paypaldatacollector
 import android.content.Context
 import java.util.*
 
-class UUIDHelper {
+internal class UUIDHelper {
 
     companion object {
         private const val INSTALL_GUID: String = "InstallationGUID"

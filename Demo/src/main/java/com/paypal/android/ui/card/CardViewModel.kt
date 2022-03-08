@@ -26,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CardViewModel @Inject constructor(
-    private val payPalDemoApi: PayPalDemoApi
+    private val payPalDemoApi: PayPalDemoApi,
+    private val dataCollectorHandler: DataCollectorHandler
 ) : ViewModel() {
 
     companion object {
@@ -77,10 +78,13 @@ class CardViewModel @Inject constructor(
         val card = Card(number, monthString, yearString)
         card.securityCode = _securityCode.value ?: ""
 
+        System.setProperty("magnes.debug.mode", true.toString()) // check this
+
         viewModelScope.launch {
             val order = fetchOrder()
-            val request = CardRequest(order.id!!, card)
-
+            val clientMetadataId = dataCollectorHandler.getClientMetadataId(clientMetadataId = order.id!!)
+            Log.d(TAG, "Client metadata: $clientMetadataId")
+            val request = CardRequest(order.id, card)
             try {
                 val result = cardClient.approveOrder(request)
                 Log.d(TAG, "SUCCESS")
