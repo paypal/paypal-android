@@ -16,7 +16,7 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
             this(CardAPI(API(configuration)))
 
     /**
-     * Confirm [Card] payment source for an order.
+     * Confirm [Card] payment source for an order. Use this method for Kotlin integrations
      *
      * @param request [CardRequest] for requesting an order approval
      */
@@ -39,9 +39,4 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
             }
         }
     }
-}
-
-interface ApproveOrderCallback {
-    fun success(result: CardResult)
-    fun failure(error: PayPalSDKError)
 }
