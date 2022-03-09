@@ -3,7 +3,6 @@ package com.paypal.android
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.view.KeyCharacterMap
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
@@ -39,23 +38,12 @@ class CardTest {
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
 
-        waitForText("Card")
-        findText("Card").click()
+        waitForText("CARD")
+        findText("CARD").click()
 
-        waitForText("Card Number")
-        findText("Card Number").click()
-
-//        val charMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
-//        val charEvents = charMap.getEvents("4111111111111111".toCharArray())
-//        val keyCodes = charEvents.map { it.keyCode }
-//
-//        for (keyCode in keyCodes) {
-//            device.pressKeyCode(keyCode)
-//        }
-
-//        findText("Card Number").text = "4111111111111111"
-//        findText("Expiration").text = "0223"
-//        findText("Security Code").text = "123"
+        findText("Card Number").text = "4111111111111111"
+        findText("Expiration").text = "0223"
+        findText("Security Code").text = "123"
     }
 
     private fun findText(buttonText: String): UiObject {

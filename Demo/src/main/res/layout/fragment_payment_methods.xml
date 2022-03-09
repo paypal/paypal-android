@@ -10,6 +10,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:insetTop="0dp"
         android:insetBottom="0dp"
         android:padding="16dp"
         android:text="@string/payment_methods_card"

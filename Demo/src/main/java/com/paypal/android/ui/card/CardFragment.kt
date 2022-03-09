@@ -2,26 +2,16 @@ package com.paypal.android.ui.card
 
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.paypal.android.R
 import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.SimpleTextWatcher
-import com.paypal.android.ui.theme.DemoTheme
+import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -46,18 +36,7 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCardBinding.inflate(inflater, container, false)
-
-        binding.run {
-            val autoFillCardNames = cardViewModel.autoFillCards.map { it.first }
-            val adapter = ArrayAdapter(requireActivity(), R.layout.dropdown_item, autoFillCardNames)
-            autoCompleteTextView.setAdapter(adapter)
-            autoCompleteTextView.addTextChangedListener(object: SimpleTextWatcher() {
-                override fun afterTextChanged(p0: Editable?) {
-                    cardViewModel.onPrefillCardSelected(autoCompleteTextView.text.toString())
-                }
-            })
-        }
-
+        initializeDropDown()
         return binding.root
 //        return ComposeView(requireContext()).apply {
 //            setContent {
@@ -83,5 +62,31 @@ class CardFragment : Fragment() {
 //                }
 //            }
 //        }
+    }
+
+    private fun initializeDropDown() {
+        // set drop down menu items
+        val autoFillCardNames = cardViewModel.autoFillCards.map { it.first }
+        val adapter = ArrayAdapter(requireActivity(), R.layout.dropdown_item, autoFillCardNames)
+
+        binding.run {
+            autoCompleteTextView.setAdapter(adapter)
+            autoCompleteTextView.addTextChangedListener(object: SimpleTextWatcher() {
+                override fun afterTextChanged(p0: Editable?) {
+                    cardViewModel.selectedPrefillCard.value = autoCompleteTextView.text.toString()
+                }
+            })
+        }
+
+        cardViewModel.selectedPrefillCard.observe(viewLifecycleOwner) { cardName ->
+            cardViewModel.run {
+                autoFillCards.find { it.first == cardName }?.second?.apply {
+
+//                    _cardNumber.value = CardFormatter.formatCardNumber(number)
+//                    _expirationDate.value = "$expirationMonth/$expirationYear"
+//                    _securityCode.value = securityCode
+                }
+            }
+        }
     }
 }

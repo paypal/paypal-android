@@ -42,6 +42,8 @@ class CardViewModel @Inject constructor(
     private val _securityCode = MutableLiveData("")
     val securityCode: LiveData<String> = _securityCode
 
+    var selectedPrefillCard = MutableLiveData("")
+
     var environment: String? = null
     val autoFillCards = PrefillCardData.cards
 
