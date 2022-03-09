@@ -5,7 +5,8 @@ import com.paypal.android.core.Address
 /**
  * Initialize a card object
  */
-data class Card(
+
+data class Card @JvmOverloads constructor(
 
     /**
      * The card number
