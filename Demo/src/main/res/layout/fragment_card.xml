@@ -53,8 +53,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/card_field_expiration"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/card_security_code"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/card_number">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -81,5 +81,16 @@
             android:maxLines="1" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/submit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        android:text="@string/card_field_submit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_expiration" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
