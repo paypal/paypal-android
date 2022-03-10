@@ -13,4 +13,6 @@ class DataCollectorHandler @Inject constructor(@ApplicationContext val context: 
 
     fun getClientMetadataId(clientMetadataId: String? = null, additionalData: HashMap<String, String>? = null): String =
         paypalDataCollector.getClientMetadataId(context, clientMetadataId, additionalData)
+
+    fun setLogging(shouldLog: Boolean) { paypalDataCollector.setLogging(shouldLog) }
 }

@@ -31,7 +31,7 @@ class PayPalDataCollector internal constructor(
     )
 
     /**
-     * Gets a Client Metadata ID at the time of payment activity. Once a user initiates a PayPal payment
+     * Gets a Client Metadata ID at the time of payment activity. Once a user initiates a payment
      * from their device, PayPal uses the Client Metadata ID to verify that the payment is
      * originating from a valid, user-consented device and application. This helps reduce fraud and
      * decrease declines. This method MUST be called prior to initiating a pre-consented payment (a
@@ -39,7 +39,7 @@ class PayPalDataCollector internal constructor(
      * payment request sent to PayPal. Do not otherwise cache or store this value.
      *
      * @param context Android Context
-     * @param clientMetadataId The desired pairing ID, trimmed to 32 characters.
+     * @param clientMetadataId The desired data to pair to the request, trimmed to 32 characters.
      * @param additionalData Additional data that should be associated with the data collection
      *
      * @return clientMetadataId Your server will send this to PayPal
@@ -69,5 +69,9 @@ class PayPalDataCollector internal constructor(
             )
             ""
         }
+    }
+
+    fun setLogging(shouldLog: Boolean)  {
+        System.setProperty("magnes.debug.mode", shouldLog.toString())
     }
 }

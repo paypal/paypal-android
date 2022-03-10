@@ -120,4 +120,13 @@ class PayPalDataCollectorUnitTest {
         val result = sut.getClientMetadataId(mockContext, clientMetadataId, HashMap())
         assertEquals(result, clientMetadataId)
     }
+
+    @Test
+    fun `when setLogging is called, System is called with correct value`() {
+        mockkStatic(System::class)
+        val sut = PayPalDataCollector(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
+        sut.setLogging(true)
+
+        verify { System.setProperty("magnes.debug.mode", true.toString()) }
+    }
 }

@@ -78,7 +78,7 @@ class CardViewModel @Inject constructor(
         val card = Card(number, monthString, yearString)
         card.securityCode = _securityCode.value ?: ""
 
-        System.setProperty("magnes.debug.mode", true.toString()) // check this
+        dataCollectorHandler.setLogging(true)
 
         viewModelScope.launch {
             val order = fetchOrder()
