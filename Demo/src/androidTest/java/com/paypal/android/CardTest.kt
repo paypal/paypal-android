@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.*
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -15,14 +16,14 @@ import org.junit.runner.RunWith
 class CardTest {
 
     companion object {
-        const val LAUNCH_TIMEOUT = 5000L
+        const val LAUNCH_TIMEOUT = 10000L
         const val APP_PACKAGE = "com.paypal.android"
     }
 
     private lateinit var device: UiDevice
 
     @Test
-    fun useAppContext() {
+    fun approveOrder() {
         // Ref: https://github.com/android/testing-samples
         device = UiDevice.getInstance(getInstrumentation())
         device.pressHome()
@@ -38,12 +39,17 @@ class CardTest {
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
 
-        waitForText("CARD")
         findText("CARD").click()
+        waitForText("Card Number")
 
         findText("Card Number").text = "4111111111111111"
-        findText("Expiration").text = "0223"
+        findText("Expiration").text = "02/2023"
         findText("Security Code").text = "123"
+
+        findText("SUBMIT").click()
+
+        waitForText("CAPTURE success: CONFIRMED")
+        assertTrue(findText("CAPTURE success: CONFIRMED").exists())
     }
 
     private fun findText(buttonText: String): UiObject {

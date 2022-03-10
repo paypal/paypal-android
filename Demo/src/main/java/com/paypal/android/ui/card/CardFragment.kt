@@ -160,16 +160,16 @@ class CardFragment : Fragment() {
         card.securityCode = securityCode
 
         lifecycleScope.launch {
+            updateStatusText("Creating order...")
             val order = fetchOrder()
             val request = CardRequest(order.id!!, card)
 
+            updateStatusText("Authorizing order...")
             try {
                 val result = cardClient.approveOrder(request)
-                Log.d(TAG, "SUCCESS")
-                Log.d(TAG, "${result.status}")
+                updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
-                Log.e(TAG, "ERROR")
-                Log.e(TAG, error.errorDescription.orEmpty())
+                updateStatusText("CAPTURE fail: ${error.errorDescription}")
             }
         }
     }
@@ -192,5 +192,9 @@ class CardFragment : Fragment() {
                 )
             )
         )
+    }
+
+    private fun updateStatusText(text: String) {
+        binding.statusText.text = text
     }
 }
