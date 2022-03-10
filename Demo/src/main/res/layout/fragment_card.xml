@@ -41,6 +41,7 @@
         app:layout_constraintTop_toBottomOf="@id/dropdown_menu">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/card_number_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
@@ -60,6 +61,7 @@
         app:layout_constraintTop_toBottomOf="@id/card_number">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/card_expiration_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
@@ -79,6 +81,7 @@
         app:layout_constraintTop_toBottomOf="@id/card_number">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/card_security_code_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
@@ -87,7 +90,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/submit"
+        android:id="@+id/submit_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
