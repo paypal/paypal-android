@@ -1,8 +1,6 @@
 package com.paypal.android.ui.card
 
 import android.os.Bundle
-import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +18,6 @@ import com.paypal.android.card.CardRequest
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentCardBinding
-import com.paypal.android.text.ValueChangeWatcher
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
@@ -50,11 +47,6 @@ class CardFragment : Fragment() {
 
     private val cardViewModel: CardViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        cardViewModel.environment = preferenceUtil.getEnvironment()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,9 +57,9 @@ class CardFragment : Fragment() {
         binding.run {
             autoCompleteTextView.setAdapter(createPrefillCardsAdapter())
 
-            autoCompleteTextView.onValueChange = ::onPrefillCardValueChange
-            cardNumberInput.onValueChange = ::onCardNumberValueChange
-            cardExpirationInput.onValueChange = ::onCardExpirationValueChange
+            autoCompleteTextView.onValueChange = ::onPrefillCardChange
+            cardNumberInput.onValueChange = ::onCardNumberChange
+            cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
@@ -99,16 +91,26 @@ class CardFragment : Fragment() {
 //        }
     }
 
-    private fun onPrefillCardValueChange(oldValue: String, newValue: String) {
+    private fun onPrefillCardChange(oldValue: String, newValue: String) {
+        cardViewModel.run {
+            autoFillCards.find { it.first == newValue }?.second?.apply {
+                val previousCardNumber = binding.cardNumberInput.text.toString()
+                binding.cardNumberInput.setText(CardFormatter.formatCardNumber(number, previousCardNumber))
+
+                val expirationDate = "$expirationMonth/$expirationYear"
+                binding.cardExpirationInput.setText(expirationDate)
+                binding.cardSecurityCodeInput.setText(securityCode)
+            }
+        }
     }
 
-    private fun onCardNumberValueChange(oldValue: String, newValue: String) {
+    private fun onCardNumberChange(oldValue: String, newValue: String) {
         val formattedCardNumber = CardFormatter.formatCardNumber(newValue, oldValue)
         binding.cardNumberInput.setText(formattedCardNumber)
         binding.cardNumberInput.setSelection(formattedCardNumber.length)
     }
 
-    private fun onCardExpirationValueChange(oldValue: String, newValue: String) {
+    private fun onCardExpirationDateChange(oldValue: String, newValue: String) {
         val formattedExpirationDate = DateFormatter.formatExpirationDate(newValue, oldValue)
         binding.cardExpirationInput.setText(formattedExpirationDate)
         binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
@@ -119,39 +121,10 @@ class CardFragment : Fragment() {
         return ArrayAdapter(requireActivity(), R.layout.dropdown_item, autoFillCardNames)
     }
 
-    private fun initializeDropDown() {
-        // set drop down menu items
-        val autoFillCardNames = cardViewModel.autoFillCards.map { it.first }
-        val adapter = ArrayAdapter(requireActivity(), R.layout.dropdown_item, autoFillCardNames)
-
-        binding.run {
-            autoCompleteTextView.setAdapter(adapter)
-//            autoCompleteTextView.onValueChange = {
-//                cardViewModel.selectedPrefillCard.value = autoCompleteTextView.text.toString()
-//            }
-        }
-
-        cardViewModel.selectedPrefillCard.observe(viewLifecycleOwner) { cardName ->
-            cardViewModel.run {
-                autoFillCards.find { it.first == cardName }?.second?.apply {
-
-//                    _cardNumber.value = CardFormatter.formatCardNumber(number)
-//                    _expirationDate.value = "$expirationMonth/$expirationYear"
-//                    _securityCode.value = securityCode
-                }
-            }
-        }
-    }
-
     private fun onCardFieldSubmit() {
         val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
-
-        Log.d(TAG, "$cardNumber")
-        Log.d(TAG, "$expirationDate")
-        Log.d(TAG, "$securityCode")
-        Log.d(TAG, "Environment = ${cardViewModel.environment}")
 
         val (monthString, yearString) =
             expirationDate.split("/") ?: listOf("", "")
@@ -166,7 +139,7 @@ class CardFragment : Fragment() {
 
             updateStatusText("Authorizing order...")
             try {
-                val result = cardClient.approveOrder(request)
+                cardClient.approveOrder(request)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
                 updateStatusText("CAPTURE fail: ${error.errorDescription}")
