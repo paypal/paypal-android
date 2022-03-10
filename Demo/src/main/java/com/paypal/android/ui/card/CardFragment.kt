@@ -23,6 +23,7 @@ import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.ValueChangeWatcher
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
+import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -99,7 +100,6 @@ class CardFragment : Fragment() {
     }
 
     private fun onPrefillCardValueChange(oldValue: String, newValue: String) {
-
     }
 
     private fun onCardNumberValueChange(oldValue: String, newValue: String) {
@@ -109,7 +109,9 @@ class CardFragment : Fragment() {
     }
 
     private fun onCardExpirationValueChange(oldValue: String, newValue: String) {
-
+        val formattedExpirationDate = DateFormatter.formatExpirationDate(newValue, oldValue)
+        binding.cardExpirationInput.setText(formattedExpirationDate)
+        binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
     }
 
     private fun createPrefillCardsAdapter(): ArrayAdapter<String> {
@@ -142,7 +144,7 @@ class CardFragment : Fragment() {
     }
 
     private fun onCardFieldSubmit() {
-        val cardNumber = CardFormatter.formatCardNumber(binding.cardNumberInput.text.toString())
+        val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
 
