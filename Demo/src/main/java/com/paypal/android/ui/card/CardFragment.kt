@@ -29,10 +29,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CardFragment : Fragment() {
 
-    companion object {
-        private val TAG = CardFragment::class.qualifiedName
-    }
-
     @Inject
     lateinit var preferenceUtil: SharedPreferenceUtil
 
@@ -41,8 +37,7 @@ class CardFragment : Fragment() {
 
     private lateinit var binding: FragmentCardBinding
 
-    private val configuration =
-        CoreConfig(BuildConfig.CLIENT_ID, clientSecret = BuildConfig.CLIENT_SECRET)
+    private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
     private val cardClient = CardClient(configuration)
 
     private val cardViewModel: CardViewModel by viewModels()
@@ -63,32 +58,7 @@ class CardFragment : Fragment() {
 
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
-
         return binding.root
-//        return ComposeView(requireContext()).apply {
-//            setContent {
-//                DemoTheme {
-//                    Column {
-//                        DropDown(
-//                            cardViewModel.autoFillCards.map { it.first },
-//                            stringResource(R.string.card_field_prefill_card_fields),
-//                            { selectedCard -> cardViewModel.onPrefillCardSelected(selectedCard) },
-//                            Modifier.padding(16.dp)
-//                        )
-//                        CardFields(
-//                            cardViewModel,
-//                            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-//                        )
-//                        Button(
-//                            onClick = { cardViewModel.onCardFieldSubmit() },
-//                            modifier = Modifier
-//                                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-//                                .fillMaxWidth()
-//                        ) { Text(stringResource(R.string.card_field_submit)) }
-//                    }
-//                }
-//            }
-//        }
     }
 
     private fun onPrefillCardChange(oldValue: String, newValue: String) {
