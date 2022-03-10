@@ -62,14 +62,20 @@ class CardFragment : Fragment() {
     }
 
     private fun onPrefillCardChange(oldValue: String, newValue: String) {
-        cardViewModel.run {
-            autoFillCards.find { it.first == newValue }?.second?.apply {
-                val previousCardNumber = binding.cardNumberInput.text.toString()
-                binding.cardNumberInput.setText(CardFormatter.formatCardNumber(number, previousCardNumber))
+        val autoFillCards = cardViewModel.autoFillCards
+        autoFillCards[newValue]?.let { autoFillCard(it) }
+    }
+
+    private fun autoFillCard(card: Card) {
+        binding.run {
+            card.run {
+                val previousCardNumber = cardNumberInput.text.toString()
+                val formattedCardNumber = CardFormatter.formatCardNumber(number, previousCardNumber)
+                cardNumberInput.setText(formattedCardNumber)
 
                 val expirationDate = "$expirationMonth/$expirationYear"
-                binding.cardExpirationInput.setText(expirationDate)
-                binding.cardSecurityCodeInput.setText(securityCode)
+                cardExpirationInput.setText(expirationDate)
+                cardSecurityCodeInput.setText(securityCode)
             }
         }
     }
@@ -87,7 +93,7 @@ class CardFragment : Fragment() {
     }
 
     private fun createPrefillCardsAdapter(): ArrayAdapter<String> {
-        val autoFillCardNames = cardViewModel.autoFillCards.map { it.first }
+        val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
         return ArrayAdapter(requireActivity(), R.layout.dropdown_item, autoFillCardNames)
     }
 
