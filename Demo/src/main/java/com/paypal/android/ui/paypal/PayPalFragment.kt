@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -40,7 +39,6 @@ class PayPalFragment : Fragment(), PayPalListener {
     @Inject
     lateinit var payPalDemoApi: PayPalDemoApi
 
-    private val payPalViewModel: PayPalViewModel by viewModels()
     private lateinit var paypalClient: PayPalClient
 
     override fun onCreateView(
