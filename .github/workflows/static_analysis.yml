@@ -54,6 +54,7 @@ jobs:
           path: |
             Core/build/outputs/aar/Core-release.aar
             Card/build/outputs/aar/Card-release.aar
+            PayPalCheckout/build/outputs/aar/PayPalCheckout-release.aar
 
       # Assemble artifacts from current branch
       - name: Checkout Current Branch
@@ -67,6 +68,7 @@ jobs:
           path: |
             Core/build/outputs/aar/Core-release.aar
             Card/build/outputs/aar/Card-release.aar
+            PayPalCheckout/build/outputs/aar/PayPalCheckout-release.aar
 
       # Set up Diffuse
       - name: Install Diffuse
@@ -84,3 +86,5 @@ jobs:
         run: diffuse diff --aar main-aar/Card/build/outputs/aar/Card-release.aar current-aar/Card/build/outputs/aar/Card-release.aar
       - name: Run Diffuse Analysis - Core
         run: diffuse diff --aar main-aar/Core/build/outputs/aar/Core-release.aar current-aar/Core/build/outputs/aar/Core-release.aar
+      - name: Run Diffuse Analysis - PayPal
+        run: diffuse diff --aar main-aar/PayPalCheckout/build/outputs/aar/PayPalCheckout-release.aar current-aar/PayPalCheckout/build/outputs/aar/PayPalCheckout-release.aar
