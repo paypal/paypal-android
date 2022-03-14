@@ -2,6 +2,7 @@ package com.paypal.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.*
+import com.paypal.android.testutils.AppDriver
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith

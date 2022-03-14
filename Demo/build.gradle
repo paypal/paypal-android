@@ -53,6 +53,12 @@ android {
         abortOnError true
         warningsAsErrors true
     }
+
+    sourceSets {
+        androidTest {
+            java.srcDirs += "src/androidTestShared/java"
+        }
+    }
 }
 
 dependencies {

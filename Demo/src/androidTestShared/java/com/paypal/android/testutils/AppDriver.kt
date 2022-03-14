@@ -1,4 +1,4 @@
-package com.paypal.android
+package com.paypal.android.testutils
 
 import android.content.Context
 import android.content.Intent
@@ -46,7 +46,9 @@ class AppDriver(private val appPackage: String) {
         intent.addCategory(Intent.CATEGORY_HOME)
 
         val context: Context = ApplicationProvider.getApplicationContext()
-        val resolveInfo = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        val resolveInfo = context.packageManager.resolveActivity(intent,
+            PackageManager.MATCH_DEFAULT_ONLY
+        )
         return resolveInfo!!.activityInfo.packageName
     }
 }
