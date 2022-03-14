@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../../../layout/custom_preview.xml" value="0.4505208333333333" />
         <entry key="../../../../../layout/compose-model-1631723355678.xml" value="0.67" />
         <entry key="../../../../../layout/compose-model-1631731131942.xml" value="0.5638888888888889" />
         <entry key="../../../../../layout/compose-model-1631886742866.xml" value="0.1" />
@@ -19,7 +20,7 @@
         <entry key="Demo/src/main/res/layout/dropdown_item.xml" value="0.29969727547931385" />
         <entry key="Demo/src/main/res/layout/fragment_card.xml" value="0.29969727547931385" />
         <entry key="Demo/src/main/res/layout/fragment_pay_pal.xml" value="0.3671875" />
-        <entry key="Demo/src/main/res/layout/fragment_payment_button.xml" value="0.29969727547931385" />
+        <entry key="Demo/src/main/res/layout/fragment_payment_button.xml" value="0.1" />
         <entry key="Demo/src/main/res/layout/fragment_payment_methods.xml" value="0.1" />
         <entry key="Demo/src/main/res/xml/preferences.xml" value="0.3188405797101449" />
         <entry key="Demo/src/main/res/xml/root_preferences.xml" value="0.32382246376811596" />

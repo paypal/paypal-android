@@ -41,6 +41,7 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.ui.theme.DemoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -55,6 +56,8 @@ class PayPalFragment : Fragment(), PayPalListener {
         private val TAG = PayPalFragment::class.qualifiedName
     }
 
+    private lateinit var binding: FragmentPaymentButtonBinding
+
     @Inject
     lateinit var payPalDemoApi: PayPalDemoApi
 
@@ -66,7 +69,7 @@ class PayPalFragment : Fragment(), PayPalListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_payment_button, container, false)
+        binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
 
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
         val application = requireActivity().application
@@ -74,14 +77,9 @@ class PayPalFragment : Fragment(), PayPalListener {
         paypalClient = PayPalClient(application, coreConfig, returnUrl)
         paypalClient.listener = this
 
-        view.findViewById<ComposeView>(R.id.compose_view).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                PayPalFragmentView()
-            }
-        }
+        binding.submitButton.setOnClickListener { launchNativeCheckout() }
 
-        return view
+        return binding.root
     }
 
     @Preview
