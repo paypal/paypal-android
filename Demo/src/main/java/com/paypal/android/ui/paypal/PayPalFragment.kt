@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypal
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -60,6 +61,7 @@ class PayPalFragment : Fragment(), PayPalListener {
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onPayPalSuccess(result: PayPalCheckoutResult) {
         Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
 
@@ -69,30 +71,29 @@ class PayPalFragment : Fragment(), PayPalListener {
         val orderId = getString(R.string.order_id, result.orderId)
         val statusText = "$payerId\n$orderId"
 
-        payPalViewModel.statusTitle.value = title
-        payPalViewModel.statusText.value = statusText
+        binding.statusText.text = "$title\n$statusText"
         hideLoader()
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onPayPalFailure(error: PayPalSDKError) {
         Log.i(TAG, "Checkout Error: ${error.errorDescription}")
 
         val title = getString(R.string.order_failed)
         val statusText = getString(R.string.reason, error.errorDescription)
 
-        payPalViewModel.statusTitle.value = title
-        payPalViewModel.statusText.value = statusText
+        binding.statusText.text = "$title\n$statusText"
         hideLoader()
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onPayPalCanceled() {
         Log.i(TAG, "User cancelled")
 
         val title = getString(R.string.checkout_cancelled)
         val statusText = getString(R.string.user_cancelled)
 
-        payPalViewModel.statusTitle.value = title
-        payPalViewModel.statusText.value = statusText
+        binding.statusText.text = "$title\n$statusText"
         hideLoader()
     }
 
@@ -101,6 +102,7 @@ class PayPalFragment : Fragment(), PayPalListener {
 
         lifecycleScope.launch {
             try {
+                binding.statusText.setText(R.string.creating_order)
                 val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
@@ -119,10 +121,11 @@ class PayPalFragment : Fragment(), PayPalListener {
     }
 
     private fun showLoader() {
-        payPalViewModel.isLoading.value = true
+        binding.progressIndicator.visibility = View.VISIBLE
+        binding.progressIndicator.animate()
     }
 
     private fun hideLoader() {
-        payPalViewModel.isLoading.value = false
+        binding.progressIndicator.visibility = View.INVISIBLE
     }
 }

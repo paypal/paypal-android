@@ -45,18 +45,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin_16x"
+            android:visibility="invisible"
+            android:indeterminate="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/submit_button" />
+            app:layout_constraintTop_toBottomOf="@id/submit_button"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/creating_order"
+            android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/progress_indicator" />
+            app:layout_constraintTop_toBottomOf="@id/progress_indicator"
+            tools:text="@string/creating_order" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
