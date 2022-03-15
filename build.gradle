@@ -139,3 +139,11 @@ subprojects {
 subprojects {
     group = "com.paypal.android"
 }
+
+task hello {
+    doLast {
+        def script = file('./build.gradle').getText('UTF-8')
+        def updatedScript = script.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"newVersion",')
+        println updatedScript
+    }
+}
