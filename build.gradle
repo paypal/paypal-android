@@ -1,7 +1,7 @@
 buildscript {
 
     ext.modules = [
-            "sdkVersionName"      : "0.0.0-SNAPSHOT",
+            "sdkVersionName"      : "0.0.0",
             "sdkVersionCode"      : 1,
             "androidMinSdkVersion": 21,
             "androidTargetVersion": 30
@@ -142,8 +142,9 @@ subprojects {
 
 task incrementSnapshotVersion {
     doLast {
-        def topLevelGradleFile = file('./build.gradle').getText('UTF-8')
-        def matcher = topLevelGradleFile =~ /"sdkVersionName"\s*: "(.*)",/
+        def topLevelGradleFile = file('./build.gradle')
+        def topLevelGradleFileText = topLevelGradleFile.getText('UTF-8')
+        def matcher = topLevelGradleFileText =~ /"sdkVersionName"\s*: "(.*)",/
         def versionString = matcher[0][1]
 
         def (major, minor, patch) = versionString.tokenize('.')
@@ -151,7 +152,21 @@ task incrementSnapshotVersion {
 
         def newVersion = "$major.$minor.${patchInteger + 1}-SNAPSHOT"
         def updatedScript =
-            topLevelGradleFile.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
-        println updatedScript
+                topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
+        topLevelGradleFile.write(updatedScript, 'UTF-8')
+    }
+}
+
+//./gradlew -PversionParam=0.0.1 changeReleaseVersion
+task changeReleaseVersion {
+    doLast {
+        def topLevelGradleFile = file('./build.gradle')
+        def topLevelGradleFileText = topLevelGradleFile.getText('UTF-8')
+        def updatedScript =
+                topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + versionParam + '",')
+        def matcher = updatedScript =~ /"sdkVersionCode"\s*: ([0-9]*),/
+        def versionCode = matcher[0][1].toInteger() + 1
+        def finalScript = updatedScript.replaceFirst(/("sdkVersionCode"\s*: )[0-9]*,/, '$1' + versionCode + ',')
+        topLevelGradleFile.write(finalScript, 'UTF-8')
     }
 }
