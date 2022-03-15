@@ -140,10 +140,18 @@ subprojects {
     group = "com.paypal.android"
 }
 
-task hello {
+task incrementSnapshotVersion {
     doLast {
-        def script = file('./build.gradle').getText('UTF-8')
-        def updatedScript = script.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"newVersion",')
+        def topLevelGradleFile = file('./build.gradle').getText('UTF-8')
+        def matcher = topLevelGradleFile =~ /"sdkVersionName"\s*: "(.*)",/
+        def versionString = matcher[0][1]
+
+        def (major, minor, patch) = versionString.tokenize('.')
+        def patchInteger = (patch.endsWith('-SNAPSHOT') ? patch - '-SNAPSHOT' : patch).toInteger()
+
+        def newVersion = "$major.$minor.${patchInteger + 1}-SNAPSHOT"
+        def updatedScript =
+            topLevelGradleFile.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
         println updatedScript
     }
 }
