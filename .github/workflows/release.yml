@@ -5,9 +5,6 @@ on:
       version:
         description: 'Version to release'
         required: true
-  push:
-    branches:
-      - snapshot_workflow
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
