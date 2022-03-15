@@ -1,4 +1,4 @@
-name: Publish Snapshot
+name: Release Snapshot
 on:
   push:
     branches:
@@ -6,9 +6,8 @@ on:
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
-  publish_core:
-    needs: [ change_version ]
-    name: Publish Core Snapshot
+  release_core:
+    name: Release Core Snapshot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -28,7 +27,7 @@ jobs:
       - name: Pull updated files
         run: |
           git pull
-      - name: Publish Core
+      - name: Release Core Snapshot
         uses: ./.github/actions/publish_module
         with:
           module: Core
@@ -37,9 +36,8 @@ jobs:
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_card:
-    needs: [ change_version ]
-    name: Publish Card
+  release_card:
+    name: Release Card Snapshot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -59,7 +57,7 @@ jobs:
       - name: Pull updated files
         run: |
           git pull
-      - name: Publish Card
+      - name: Release Card Snapshot
         uses: ./.github/actions/publish_module
         with:
           module: Card
@@ -68,9 +66,8 @@ jobs:
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_checkout:
-    needs: [ change_version ]
-    name: Publish PayPal Checkout Snapshshot
+  release_checkout:
+    name: Release PayPal Checkout Snapshshot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -90,7 +87,7 @@ jobs:
       - name: Pull updated files
         run: |
           git pull
-      - name: Publish Checkout
+      - name: Release Checkout Snapshot
         uses: ./.github/actions/publish_module
         with:
           module: PayPalCheckout
