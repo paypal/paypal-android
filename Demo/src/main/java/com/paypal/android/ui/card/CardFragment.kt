@@ -1,6 +1,7 @@
 package com.paypal.android.ui.card
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,6 +39,9 @@ class CardFragment : Fragment() {
 
     @Inject
     lateinit var payPalDemoApi: PayPalDemoApi
+
+    @Inject
+    lateinit var dataCollectorHandler: DataCollectorHandler
 
     private lateinit var binding: FragmentCardBinding
 
@@ -113,11 +117,13 @@ class CardFragment : Fragment() {
         val card = Card(cardNumber, monthString, yearString)
         card.securityCode = securityCode
 
+        dataCollectorHandler.setLogging(true)
         lifecycleScope.launch {
             updateStatusText("Creating order...")
             val order = fetchOrder()
             val request = CardRequest(order.id!!, card)
-
+            val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
+            Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
                 cardClient.approveOrder(request)
