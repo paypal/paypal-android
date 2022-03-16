@@ -2,7 +2,7 @@ name: Release Snapshot
 on:
   push:
     branches:
-      - snapshot_workflow
+      - main
   workflow_run:
     workflows: ["Release"]
     types:
