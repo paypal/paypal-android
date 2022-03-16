@@ -214,7 +214,7 @@ jobs:
     name: Releases Finished
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Unit test finished"
+      - run: echo "Release finished"
 
   #Once all releases are done, we bump version, tag it and prepare next
   bump_version:
