@@ -27,7 +27,7 @@ android {
     }
 
     buildFeatures {
-        compose = true
+        viewBinding = true
     }
 
     buildTypes {
@@ -52,6 +52,12 @@ android {
         lintConfig file('../lint.xml')
         abortOnError true
         warningsAsErrors true
+    }
+
+    sourceSets {
+        androidTest {
+            java.srcDirs += "src/androidTestShared/java"
+        }
     }
 }
 
@@ -84,11 +90,15 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
+
     testImplementation deps.junit
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation deps.androidxTestRunner
+    androidTestImplementation deps.androidxTestRules
+    androidTestImplementation deps.androidxTestUiAutomator
 }
-
 
 /**
  * Loads properties at the specified file path. If the file does not exist,
