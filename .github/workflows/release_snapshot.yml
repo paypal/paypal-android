@@ -4,7 +4,7 @@ on:
     branches:
       - snapshot_workflow
   workflow_run:
-    workflows: ["Publish Release"]
+    workflows: ["Release"]
     types:
       - completed
 env:
