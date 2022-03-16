@@ -26,11 +26,6 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Pull updated files
-        run: |
-          git pull
       - name: Release Core Snapshot
         uses: ./.github/actions/publish_module
         with:
@@ -56,11 +51,6 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Pull updated files
-        run: |
-          git pull
       - name: Release Card Snapshot
         uses: ./.github/actions/publish_module
         with:
@@ -86,11 +76,6 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Pull updated files
-        run: |
-          git pull
       - name: Release Checkout Snapshot
         uses: ./.github/actions/publish_module
         with:
