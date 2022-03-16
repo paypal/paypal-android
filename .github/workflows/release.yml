@@ -211,7 +211,7 @@ jobs:
 
   releasing_finished:
     needs: [ publish_checkout, publish_card, publish_core, publish_data_collector ]
-    name: All Unit Test finished
+    name: Releases Finished
     runs-on: ubuntu-latest
     steps:
       - run: echo "Unit test finished"
