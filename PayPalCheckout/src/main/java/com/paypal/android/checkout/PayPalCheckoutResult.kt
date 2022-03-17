@@ -1,9 +1,6 @@
 package com.paypal.android.checkout
 
-import com.paypal.android.core.CoreSDKError
-
-sealed class PayPalCheckoutResult {
-    class Success(val orderId: String?, val payerId: String?) : PayPalCheckoutResult()
-    class Failure(val error: CoreSDKError) : PayPalCheckoutResult()
-    object Cancellation : PayPalCheckoutResult()
-}
+/**
+ * A result passed to a [PayPalListener] when the PayPal flow completes successfully.
+ */
+data class PayPalCheckoutResult(val orderId: String?, val payerId: String?)

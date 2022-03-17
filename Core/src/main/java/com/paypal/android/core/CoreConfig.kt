@@ -8,7 +8,7 @@ package com.paypal.android.core
  * @property environment the [Environment] for the payment requests
  */
 // TODO - Spike to investigate if clientSecret is still needed
-data class CoreConfig(
+data class CoreConfig @JvmOverloads constructor(
     val clientId: String,
     val clientSecret: String = "",
     val environment: Environment = Environment.SANDBOX,

@@ -1,5 +1,10 @@
 name: Publish Release
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
@@ -62,17 +67,55 @@ jobs:
         uses: ./.github/actions/unit_test_module
         with:
           module: Card
+  unit_test_paypal:
+    needs: build_aar
+    name: PayPal Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: PayPalCheckout
 
   unit_test_finished:
-    needs: [unit_test_card, unit_test_core]
+    needs: [unit_test_card, unit_test_core, unit_test_paypal]
     name: All Unit Test finished
     runs-on: ubuntu-latest
     steps:
       - run: echo "Unit test finished"
 
-  #Once all the tests have finished, we publish every module in parallel
+  #Once all the tests have finished, we update version and tag it
+  change_version:
+    needs: [ unit_test_finished ]
+    name: Change Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Update Version
+        run: |
+          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
+          code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
+          code=$(expr $code + 1)
+          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
+
+          git add .
+          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
+          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
+          git push origin HEAD ${{ github.event.inputs.version }}
+
+  #Once the version is updated, we publish all modules in parallel
   publish_core:
-    needs: [unit_test_finished]
+    needs: [ change_version ]
     name: Publish Core
     runs-on: ubuntu-latest
     steps:
@@ -88,6 +131,11 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Pull updated files
+        run: |
+          git pull
       - name: Publish Core
         uses: ./.github/actions/publish_module
         with:
@@ -98,7 +146,7 @@ jobs:
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
   publish_card:
-    needs: [ unit_test_finished ]
+    needs: [ change_version ]
     name: Publish Card
     runs-on: ubuntu-latest
     steps:
@@ -114,10 +162,77 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Pull updated files
+        run: |
+          git pull
       - name: Publish Card
         uses: ./.github/actions/publish_module
         with:
           module: Card
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+  publish_checkout:
+    needs: [ change_version ]
+    name: Publish PayPal Checkout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Pull updated files
+        run: |
+          git pull
+      - name: Publish Checkout
+        uses: ./.github/actions/publish_module
+        with:
+          module: PayPalCheckout
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+  publish_data_collector:
+    needs: [ change_version ]
+    name: Publish PayPal DataCollector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Pull updated files
+        run: |
+          git pull
+      - name: Publish PayPal DataCollector
+        uses: ./.github/actions/publish_module
+        with:
+          module: PayPalDataCollector
           sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}

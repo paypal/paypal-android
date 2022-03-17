@@ -32,6 +32,9 @@ class PayPalClient internal constructor(
 
     private var browserSwitchResult: BrowserSwitchResult? = null
 
+    /**
+     * Sets a listener to receive notifications when a PayPal event occurs.
+     */
     var listener: PayPalCheckoutListener? = null
         /**
          * @param value a [PayPalCheckoutListener] to receive results from the PayPal flow

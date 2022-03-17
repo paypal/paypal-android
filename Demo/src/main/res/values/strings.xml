@@ -17,6 +17,7 @@
     <string name="environment_title">Environment</string>
 
     <!-- PayPal Native-->
+    <string name="start_checkout">Start Checkout</string>
     <string name="minimum_sdk_needed">Checkout SDK only available for API 23+</string>
     <string name="order_approved">Order Approved</string>
     <string name="order_id">Order Id: %s</string>
