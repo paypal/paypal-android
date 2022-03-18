@@ -4,3 +4,4 @@ include ':Demo'
 rootProject.name = "AndroidSDK"
 include ':PayPalCheckout'
 include ':PayPalDataCollector'
+include ':PayPalCheckoutWeb'

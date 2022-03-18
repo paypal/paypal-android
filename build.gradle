@@ -51,6 +51,9 @@ buildscript {
             "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
             "hiltKapt"                   : "com.google.dagger:hilt-compiler:${versions.hilt}",
 
+            // Browser Switch
+            "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.1.1",
+
             // Testing
             "junit"                       : "junit:junit:4.13.2",
             "androidxJUnit"               : "androidx.test.ext:junit:1.1.3",
