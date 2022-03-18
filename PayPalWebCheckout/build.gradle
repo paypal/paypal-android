@@ -47,7 +47,6 @@ dependencies {
     testImplementation deps.kotlinxAndroidCoroutinesTest
     testImplementation deps.striktCore
     testImplementation deps.striktMockk
-//    testImplementation deps.jsonMock
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
