@@ -5,22 +5,22 @@ import com.paypal.android.core.PayPalSDKError
 /**
  * Implement this callback to receive results from [PayPalWebClient].
  */
-interface PayPalCheckoutListener {
+interface PayPalCheckoutWebListener {
 
     /**
      * Called when the PayPal flow completes successfully.
-     * @param result [PayPalCheckoutResult] with order information.
+     * @param result [PayPalCheckoutWebResult] with order information.
      */
-    fun onPayPalSuccess(result: PayPalCheckoutResult)
+    fun onPayPalWebSuccess(result: PayPalCheckoutWebResult)
 
     /**
      * Called when the PayPal flow completes with an error.
      * @param error [PayPalSDKError] explaining the reason for failure.
      */
-    fun onPayPalFailure(error: PayPalSDKError)
+    fun onPayPalWebFailure(error: PayPalSDKError)
 
     /**
      * Called when the PayPal flow was canceled by the user.
      */
-    fun onPayPalCanceled()
+    fun onPayPalWebCanceled()
 }

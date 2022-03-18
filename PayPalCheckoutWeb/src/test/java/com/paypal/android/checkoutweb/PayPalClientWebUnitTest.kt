@@ -34,7 +34,7 @@ class PayPalClientWebUnitTest {
     fun `approveOrder starts browserSwitchClient with correct parameters`() {
         val payPalClient =
             PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
-        val payPalRequest = PayPalRequest("mock_order_id")
+        val payPalRequest = PayPalWebRequest("mock_order_id")
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
         every {
@@ -55,7 +55,7 @@ class PayPalClientWebUnitTest {
             PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
-        val slot = slot<PayPalCheckoutResult>()
+        val slot = slot<PayPalCheckoutWebResult>()
 
         val payerId = "fake_payer_id"
         val orderId = "fake_order_id"
@@ -72,7 +72,7 @@ class PayPalClientWebUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalSuccess(capture(slot)) }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalWebSuccess(capture(slot)) }
         assertEquals(slot.captured.orderId, orderId)
         assertEquals(slot.captured.payerId, payerId)
 
@@ -102,7 +102,7 @@ class PayPalClientWebUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalFailure(capture(slot)) }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
         assertEquals(slot.captured.errorDescription,
             "Result did not contain the expected data. Payer ID or Order ID is null.")
 
@@ -132,7 +132,7 @@ class PayPalClientWebUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalFailure(capture(slot)) }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
         assertEquals(slot.captured.errorDescription,
             "Result did not contain the expected data. Payer ID or Order ID is null.")
 
@@ -157,7 +157,7 @@ class PayPalClientWebUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalFailure(capture(slot)) }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
         assertEquals(slot.captured.errorDescription,
             "An unknown error occurred. Contact developer.paypal.com/support.")
 
@@ -182,7 +182,7 @@ class PayPalClientWebUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalFailure(capture(slot)) }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
         assertEquals(slot.captured.errorDescription,
             "An unknown error occurred. Contact developer.paypal.com/support.")
 
@@ -203,7 +203,7 @@ class PayPalClientWebUnitTest {
 
         payPalClient.handleBrowserSwitchResult()
 
-        verify(exactly = 1) { payPalClient.listener?.onPayPalCanceled() }
+        verify(exactly = 1) { payPalClient.listener?.onPayPalWebCanceled() }
 
         assertNullBrowserSwitchResult(payPalClient)
     }

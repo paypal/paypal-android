@@ -5,4 +5,4 @@ package com.paypal.android.checkoutweb
  *
  * @param orderID The ID of the order to be approved.
  */
-data class PayPalRequest(val orderID: String)
+data class PayPalWebRequest(val orderID: String)

@@ -8,7 +8,7 @@ import com.paypal.android.checkoutweb.errors.PayPalError
 import com.paypal.android.core.CoreConfig
 
 /**
- * Use this client to approve an order with a [PayPalRequest].
+ * Use this client to approve an order with a [PayPalWebRequest].
  */
 class PayPalWebClient internal constructor(
     private val activity: FragmentActivity,
@@ -35,9 +35,9 @@ class PayPalWebClient internal constructor(
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
-    var listener: PayPalCheckoutListener? = null
+    var listener: PayPalCheckoutWebListener? = null
         /**
-         * @param value a [PayPalCheckoutListener] to receive results from the PayPal flow
+         * @param value a [PayPalCheckoutWebListener] to receive results from the PayPal flow
          */
         set(value) {
             field = value
@@ -51,11 +51,11 @@ class PayPalWebClient internal constructor(
     }
 
     /**
-     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalCheckoutListener].
+     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalCheckoutWebListener].
      *
-     * @param request [PayPalRequest] for requesting an order approval
+     * @param request [PayPalWebRequest] for requesting an order approval
      */
-    fun approveOrder(request: PayPalRequest) {
+    fun approveOrder(request: PayPalWebRequest) {
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
             request.orderID,
             coreConfig
@@ -82,23 +82,23 @@ class PayPalWebClient internal constructor(
                 browserSwitchResult?.requestMetadata!!
             )
             if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
-                listener?.onPayPalSuccess(
-                    PayPalCheckoutResult(
+                listener?.onPayPalWebSuccess(
+                    PayPalCheckoutWebResult(
                         webResult.orderId,
                         webResult.payerId
                     )
                 )
             } else {
-                listener?.onPayPalFailure(PayPalError.malformedResultError)
+                listener?.onPayPalWebFailure(PayPalError.malformedResultError)
             }
         } else {
-            listener?.onPayPalFailure(PayPalError.unknownError)
+            listener?.onPayPalWebFailure(PayPalError.unknownError)
         }
         browserSwitchResult = null
     }
 
     private fun deliverCancellation() {
         browserSwitchResult = null
-        listener?.onPayPalCanceled()
+        listener?.onPayPalWebCanceled()
     }
 }

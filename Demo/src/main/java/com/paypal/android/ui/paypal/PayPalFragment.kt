@@ -13,9 +13,9 @@ import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.services.PayPalDemoApi
-import com.paypal.android.checkoutweb.PayPalCheckoutListener
-import com.paypal.android.checkoutweb.PayPalCheckoutResult
-import com.paypal.android.checkoutweb.PayPalRequest
+import com.paypal.android.checkoutweb.PayPalCheckoutWebListener
+import com.paypal.android.checkoutweb.PayPalCheckoutWebResult
+import com.paypal.android.checkoutweb.PayPalWebRequest
 import com.paypal.android.checkoutweb.PayPalWebClient
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
@@ -29,7 +29,7 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PayPalFragment : Fragment(), PayPalCheckoutListener {
+class PayPalFragment : Fragment(), PayPalCheckoutWebListener {
 
     companion object {
         private val TAG = PayPalFragment::class.qualifiedName
@@ -59,7 +59,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutListener {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onPayPalSuccess(result: PayPalCheckoutResult) {
+    override fun onPayPalWebSuccess(result: PayPalCheckoutWebResult) {
         Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
 
         val title = getString(R.string.order_approved)
@@ -73,7 +73,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutListener {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onPayPalFailure(error: PayPalSDKError) {
+    override fun onPayPalWebFailure(error: PayPalSDKError) {
         Log.i(TAG, "Checkout Error: ${error.errorDescription}")
 
         val title = getString(R.string.order_failed)
@@ -84,7 +84,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutListener {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onPayPalCanceled() {
+    override fun onPayPalWebCanceled() {
         Log.i(TAG, "User cancelled")
 
         val title = getString(R.string.checkout_cancelled)
@@ -104,16 +104,16 @@ class PayPalFragment : Fragment(), PayPalCheckoutListener {
                 val orderJson = parser.parse(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
-                    paypalClient.approveOrder(PayPalRequest(orderId))
+                    paypalClient.approveOrder(PayPalWebRequest(orderId))
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
                 val error = APIClientError.payPalCheckoutError(e.message!!)
-                onPayPalFailure(error)
+                onPayPalWebFailure(error)
             } catch (e: HttpException) {
                 Log.e(TAG, e.message!!)
                 val error = APIClientError.payPalCheckoutError(e.message!!)
-                onPayPalFailure(error)
+                onPayPalWebFailure(error)
             }
         }
     }
