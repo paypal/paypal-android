@@ -3,7 +3,7 @@ package com.paypal.android.checkoutweb
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class PayPalRequestUnitTest {
+class PayPalWebCheckoutRequestUnitTest {
 
     @Test
     fun `given an order id, PayPalRequest should return the same orderId`() {

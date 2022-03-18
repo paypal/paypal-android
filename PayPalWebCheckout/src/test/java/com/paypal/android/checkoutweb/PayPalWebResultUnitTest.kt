@@ -28,7 +28,7 @@ class PayPalWebResultUnitTest {
         val metadata = JSONObject()
         metadata.put("order_id", mockOrderId)
 
-        val webResult = PayPalWebResult(Uri.parse(url), metadata)
+        val webResult = PayPalDeepLinkUrlResult(Uri.parse(url), metadata)
         expectThat(webResult) {
             get { payerId }.isEqualTo(mockPayerId)
             get { intent }.isEqualTo(mockIntent)

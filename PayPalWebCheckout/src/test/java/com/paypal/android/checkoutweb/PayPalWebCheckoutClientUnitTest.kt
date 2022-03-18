@@ -23,7 +23,7 @@ import org.robolectric.RobolectricTestRunner
 import java.lang.reflect.Field
 
 @RunWith(RobolectricTestRunner::class)
-class PayPalClientWebUnitTest {
+class PayPalWebCheckoutClientUnitTest {
 
     private val browserSwitchClient: BrowserSwitchClient = mockk(relaxed = true)
     private val browserSwitchHelper: BrowserSwitchHelper = mockk(relaxed = true)
@@ -268,7 +268,7 @@ class PayPalClientWebUnitTest {
 
         PayPalWebCheckoutClient(activity, coreConfig, "")
 
-        verify { lifeCycle.addObserver(ofType(PayPalWebLifeCycleObserver::class)) }
+        verify { lifeCycle.addObserver(ofType(PayPalWebCheckoutLifeCycleObserver::class)) }
     }
 
     private fun assertNullBrowserSwitchResult(payPalClient: PayPalWebCheckoutClient) {

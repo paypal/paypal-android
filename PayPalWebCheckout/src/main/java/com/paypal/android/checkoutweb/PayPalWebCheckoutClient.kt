@@ -47,7 +47,7 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
     init {
-        activity.lifecycle.addObserver(PayPalWebLifeCycleObserver(this))
+        activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
     }
 
     /**
@@ -77,7 +77,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     private fun deliverSuccess() {
         if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
-            val webResult = PayPalWebResult(
+            val webResult = PayPalDeepLinkUrlResult(
                 browserSwitchResult?.deepLinkUrl!!,
                 browserSwitchResult?.requestMetadata!!
             )
