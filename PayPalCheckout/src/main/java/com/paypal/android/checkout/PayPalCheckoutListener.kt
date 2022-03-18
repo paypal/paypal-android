@@ -5,7 +5,7 @@ import com.paypal.android.core.PayPalSDKError
 /**
  * Implement this callback to receive results from [PayPalClient].
  */
-interface PayPalListener {
+interface PayPalCheckoutListener {
 
     /**
      * Called when the PayPal flow completes successfully.

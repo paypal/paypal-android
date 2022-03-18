@@ -23,7 +23,7 @@ class PayPalClient internal constructor(
      * @param activity a [FragmentActivity]
      * @param configuration a [CoreConfig] object
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
-    */
+     */
     constructor(
         activity: FragmentActivity,
         configuration: CoreConfig,
@@ -76,27 +76,29 @@ class PayPalClient internal constructor(
     }
 
     private fun deliverSuccess() {
-        val payPalCheckoutResult =
-            if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
-                val webResult = PayPalWebResult(
-                    browserSwitchResult?.deepLinkUrl!!,
-                    browserSwitchResult?.requestMetadata!!
+        if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
+            val webResult = PayPalWebResult(
+                browserSwitchResult?.deepLinkUrl!!,
+                browserSwitchResult?.requestMetadata!!
+            )
+            if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
+                listener?.onPayPalSuccess(
+                    PayPalCheckoutResult(
+                        webResult.orderId,
+                        webResult.payerId
+                    )
                 )
-                if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
-                    PayPalCheckoutResult.Success(webResult.orderId, webResult.payerId)
-                } else {
-                    PayPalCheckoutResult.Failure(PayPalError.malformedResultError)
-                }
             } else {
-                PayPalCheckoutResult.Failure(PayPalError.unknownError)
+                listener?.onPayPalFailure(PayPalError.malformedResultError)
             }
+        } else {
+            listener?.onPayPalFailure(PayPalError.unknownError)
+        }
         browserSwitchResult = null
-        listener?.onPayPalCheckoutResult(payPalCheckoutResult)
     }
 
     private fun deliverCancellation() {
         browserSwitchResult = null
-        val payPalCheckoutResult = PayPalCheckoutResult.Cancellation
-        listener?.onPayPalCheckoutResult(payPalCheckoutResult)
+        listener?.onPayPalCanceled()
     }
 }

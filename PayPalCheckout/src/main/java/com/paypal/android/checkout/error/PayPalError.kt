@@ -1,17 +1,18 @@
 package com.paypal.android.checkout.error
 
 import com.paypal.android.core.CoreSDKError
+import com.paypal.android.core.PayPalSDKError
 
 internal object PayPalError {
 
     // 0. An unknown error occurred.
-    val unknownError = CoreSDKError(
+    val unknownError = PayPalSDKError(
         code = Code.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support."
     )
 
     // 1. Result did not contain the expected data.
-    val malformedResultError = CoreSDKError(
+    val malformedResultError = PayPalSDKError(
         code = Code.MALFORMED_RESULT.ordinal,
         errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
     )

@@ -15,7 +15,7 @@ import com.paypal.android.R
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
-import com.paypal.android.checkout.PayPalListener
+import com.paypal.android.checkout.PayPalCheckoutListener
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
@@ -28,7 +28,7 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PayPalFragment : Fragment(), PayPalListener {
+class PayPalFragment : Fragment(), PayPalCheckoutListener {
 
     companion object {
         private val TAG = PayPalFragment::class.qualifiedName
@@ -51,7 +51,7 @@ class PayPalFragment : Fragment(), PayPalListener {
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
         val application = requireActivity().application
         val returnUrl = BuildConfig.APPLICATION_ID + "://paypalpay"
-        paypalClient = PayPalClient(application, coreConfig, returnUrl)
+        paypalClient = PayPalClient(requireActivity(), coreConfig, returnUrl)
         paypalClient.listener = this
 
         binding.submitButton.setOnClickListener { launchNativeCheckout() }
@@ -101,10 +101,10 @@ class PayPalFragment : Fragment(), PayPalListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.creating_order)
-                val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
+                val orderJson = JsonParser().parse(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
-                    paypalClient.checkout(orderId)
+                    //paypalClient.checkout(orderId)
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
