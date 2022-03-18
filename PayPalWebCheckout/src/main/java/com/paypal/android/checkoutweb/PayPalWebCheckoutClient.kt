@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.checkoutweb.errors.PayPalError
+import com.paypal.android.checkoutweb.errors.PayPalWebCheckoutError
 import com.paypal.android.core.CoreConfig
 
 /**
@@ -89,10 +89,10 @@ class PayPalWebCheckoutClient internal constructor(
                     )
                 )
             } else {
-                listener?.onPayPalWebFailure(PayPalError.malformedResultError)
+                listener?.onPayPalWebFailure(PayPalWebCheckoutError.malformedResultError)
             }
         } else {
-            listener?.onPayPalWebFailure(PayPalError.unknownError)
+            listener?.onPayPalWebFailure(PayPalWebCheckoutError.unknownError)
         }
         browserSwitchResult = null
     }

@@ -2,7 +2,7 @@ package com.paypal.android.checkoutweb.errors
 
 import com.paypal.android.core.PayPalSDKError
 
-internal object PayPalError {
+internal object PayPalWebCheckoutError {
 
     // 0. An unknown error occurred.
     val unknownError = PayPalSDKError(
