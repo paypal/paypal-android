@@ -216,7 +216,7 @@ jobs:
     steps:
       - run: echo "Release finished"
 
-  #Once all releases are done, we bump version, tag it and prepare next
+  # Once all releases are done, we bump version, tag it and prepare next
   bump_version:
     needs: [ releasing_finished ]
     name: Bump Version
