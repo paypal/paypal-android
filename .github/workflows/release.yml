@@ -199,7 +199,7 @@ jobs:
       - name: Change Version
         run: |
           ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: PPublish PayPal DataCollector
+      - name: Publish PayPal DataCollector
         uses: ./.github/actions/publish_module
         with:
           module: PayPalDataCollector
