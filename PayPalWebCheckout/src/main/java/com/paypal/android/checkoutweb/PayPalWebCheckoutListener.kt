@@ -3,15 +3,15 @@ package com.paypal.android.checkoutweb
 import com.paypal.android.core.PayPalSDKError
 
 /**
- * Implement this callback to receive results from [PayPalWebClient].
+ * Implement this callback to receive results from [PayPalWebCheckoutClient].
  */
-interface PayPalCheckoutWebListener {
+interface PayPalWebCheckoutListener {
 
     /**
      * Called when the PayPal flow completes successfully.
-     * @param result [PayPalCheckoutWebResult] with order information.
+     * @param result [PayPalWebCheckoutResult] with order information.
      */
-    fun onPayPalWebSuccess(result: PayPalCheckoutWebResult)
+    fun onPayPalWebSuccess(result: PayPalWebCheckoutResult)
 
     /**
      * Called when the PayPal flow completes with an error.

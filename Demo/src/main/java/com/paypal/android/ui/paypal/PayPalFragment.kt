@@ -13,10 +13,10 @@ import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.services.PayPalDemoApi
-import com.paypal.android.checkoutweb.PayPalCheckoutWebListener
-import com.paypal.android.checkoutweb.PayPalCheckoutWebResult
-import com.paypal.android.checkoutweb.PayPalWebRequest
-import com.paypal.android.checkoutweb.PayPalWebClient
+import com.paypal.android.checkoutweb.PayPalWebCheckoutListener
+import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
+import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
+import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
@@ -29,7 +29,7 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PayPalFragment : Fragment(), PayPalCheckoutWebListener {
+class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     companion object {
         private val TAG = PayPalFragment::class.qualifiedName
@@ -40,7 +40,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutWebListener {
     @Inject
     lateinit var payPalDemoApi: PayPalDemoApi
 
-    private lateinit var paypalClient: PayPalWebClient
+    private lateinit var paypalClient: PayPalWebCheckoutClient
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,7 +50,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutWebListener {
         binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
 
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
-        paypalClient = PayPalWebClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+        paypalClient = PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
         paypalClient.listener = this
 
         binding.submitButton.setOnClickListener { launchNativeCheckout() }
@@ -59,7 +59,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutWebListener {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onPayPalWebSuccess(result: PayPalCheckoutWebResult) {
+    override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
         Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
 
         val title = getString(R.string.order_approved)
@@ -104,7 +104,7 @@ class PayPalFragment : Fragment(), PayPalCheckoutWebListener {
                 val orderJson = parser.parse(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
-                    paypalClient.approveOrder(PayPalWebRequest(orderId))
+                    paypalClient.approveOrder(PayPalWebCheckoutRequest(orderId))
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)

@@ -61,7 +61,7 @@ jobs:
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
   release_checkout_web:
-    name: Release PayPal Checkout Web Snapshshot
+    name: Release PayPal Web Checkout Snapshshot
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -79,7 +79,7 @@ jobs:
       - name: Release Checkout Snapshot
         uses: ./.github/actions/publish_module
         with:
-          module: PayPalCheckoutWeb
+          module: PayPalWebCheckout
           sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}

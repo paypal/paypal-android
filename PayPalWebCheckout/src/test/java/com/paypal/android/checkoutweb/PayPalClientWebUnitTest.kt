@@ -33,8 +33,8 @@ class PayPalClientWebUnitTest {
     @Test
     fun `approveOrder starts browserSwitchClient with correct parameters`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
-        val payPalRequest = PayPalWebRequest("mock_order_id")
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalRequest = PayPalWebCheckoutRequest("mock_order_id")
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
         every {
@@ -52,10 +52,10 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult delivers SUCCESS when PayerId and order id are not null`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
-        val slot = slot<PayPalCheckoutWebResult>()
+        val slot = slot<PayPalWebCheckoutResult>()
 
         val payerId = "fake_payer_id"
         val orderId = "fake_order_id"
@@ -82,7 +82,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult delivers Failure when PayerId is null or blank`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -112,7 +112,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult delivers Failure when order id is null or blank`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -142,7 +142,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult delivers Failure when deeplink is null`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -167,7 +167,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult delivers Failure when metadata is null`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -192,7 +192,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult delivers Cancelled when browserSwitchStatus is CANCELLED`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
         val browserSwitchResult = mockk<BrowserSwitchResult>()
@@ -211,7 +211,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult doesn't deliver result when browserSwitchResult is null`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk(relaxed = true)
 
         every { browserSwitchClient.deliverResult(activity) } returns null
@@ -224,7 +224,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `handleBrowserSwitchResult doesn't deliver result when listener is null`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = null
 
         val browserSwitchResult = mockk<BrowserSwitchResult>()
@@ -239,7 +239,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `when listener is set and result is null, no result is delivered`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
         payPalClient.listener = mockk()
 
         verify { payPalClient.listener?.wasNot(Called) }
@@ -248,7 +248,7 @@ class PayPalClientWebUnitTest {
     @Test
     fun `when listener is set and result is not null, a result is delivered`() {
         val payPalClient =
-            PayPalWebClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
 
         val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
 
@@ -266,13 +266,13 @@ class PayPalClientWebUnitTest {
         val lifeCycle = mockk<Lifecycle>(relaxed = true)
         every { activity.lifecycle } returns lifeCycle
 
-        PayPalWebClient(activity, coreConfig, "")
+        PayPalWebCheckoutClient(activity, coreConfig, "")
 
-        verify { lifeCycle.addObserver(ofType(PayPalLifeCycleObserver::class)) }
+        verify { lifeCycle.addObserver(ofType(PayPalWebLifeCycleObserver::class)) }
     }
 
-    private fun assertNullBrowserSwitchResult(payPalClient: PayPalWebClient) {
-        val privateResult: Field = PayPalWebClient::class.java.getDeclaredField("browserSwitchResult")
+    private fun assertNullBrowserSwitchResult(payPalClient: PayPalWebCheckoutClient) {
+        val privateResult: Field = PayPalWebCheckoutClient::class.java.getDeclaredField("browserSwitchResult")
         privateResult.isAccessible = true
         val result = privateResult.get(payPalClient)
         assertNull(result)

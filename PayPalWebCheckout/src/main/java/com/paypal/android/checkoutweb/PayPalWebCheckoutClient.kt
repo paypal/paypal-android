@@ -8,9 +8,9 @@ import com.paypal.android.checkoutweb.errors.PayPalError
 import com.paypal.android.core.CoreConfig
 
 /**
- * Use this client to approve an order with a [PayPalWebRequest].
+ * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
-class PayPalWebClient internal constructor(
+class PayPalWebCheckoutClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient,
@@ -18,7 +18,7 @@ class PayPalWebClient internal constructor(
 ) {
 
     /**
-     * Create a new instance of [PayPalWebClient].
+     * Create a new instance of [PayPalWebCheckoutClient].
      *
      * @param activity a [FragmentActivity]
      * @param configuration a [CoreConfig] object
@@ -35,9 +35,9 @@ class PayPalWebClient internal constructor(
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
-    var listener: PayPalCheckoutWebListener? = null
+    var listener: PayPalWebCheckoutListener? = null
         /**
-         * @param value a [PayPalCheckoutWebListener] to receive results from the PayPal flow
+         * @param value a [PayPalWebCheckoutListener] to receive results from the PayPal flow
          */
         set(value) {
             field = value
@@ -47,15 +47,15 @@ class PayPalWebClient internal constructor(
         }
 
     init {
-        activity.lifecycle.addObserver(PayPalLifeCycleObserver(this))
+        activity.lifecycle.addObserver(PayPalWebLifeCycleObserver(this))
     }
 
     /**
-     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalCheckoutWebListener].
+     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
      *
-     * @param request [PayPalWebRequest] for requesting an order approval
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun approveOrder(request: PayPalWebRequest) {
+    fun approveOrder(request: PayPalWebCheckoutRequest) {
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
             request.orderID,
             coreConfig
@@ -83,7 +83,7 @@ class PayPalWebClient internal constructor(
             )
             if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
                 listener?.onPayPalWebSuccess(
-                    PayPalCheckoutWebResult(
+                    PayPalWebCheckoutResult(
                         webResult.orderId,
                         webResult.payerId
                     )

@@ -8,9 +8,9 @@ class PayPalLifeCycleObserverUnitTest {
 
     @Test
     fun `when resume is called, payPalClient handles browser switch result`() {
-        val payPalClient = mockk<PayPalWebClient>(relaxed = true)
+        val payPalClient = mockk<PayPalWebCheckoutClient>(relaxed = true)
 
-        val lifeCycleObserver = PayPalLifeCycleObserver(payPalClient)
+        val lifeCycleObserver = PayPalWebLifeCycleObserver(payPalClient)
         lifeCycleObserver.resume()
 
         verify { payPalClient.handleBrowserSwitchResult() }
