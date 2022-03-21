@@ -9,7 +9,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
 @RunWith(RobolectricTestRunner::class)
-class PayPalWebResultUnitTest {
+class PayPalWebCheckoutDeepLinkResultUnitTest {
 
     @Test
     fun `given an Uri and metadata, checkoutWebResult should contain the same fields`() {
