@@ -63,8 +63,9 @@ android {
 
 dependencies {
     implementation project(':Card')
-    implementation project(':PayPalCheckout')
     implementation project(':PayPalDataCollector')
+    implementation project(':PayPalNativeCheckout')
+    implementation project(':PayPalWebCheckout')
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
