@@ -29,37 +29,15 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-
-    testOptions {
-        unitTests.returnDefaultValues = true
-    }
 }
 
 dependencies {
-    api project(':Core')
-
-    dependencies {
-        implementation files('libs/android-magnessdk-5.3.0.jar')
-    }
-
-
-    implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
-    implementation deps.androidxAppcompat
-    implementation deps.preference
-
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.jsonAssert
-    testImplementation deps.robolectric
-
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
+    implementation deps.material
 }
 
-
-project.ext.name = "paypal-data-collector"
-project.ext.pom_name = "PayPal SDK - Data Collector"
-project.ext.pom_desc = "Library for PayPal's data collector"
+project.ext.name = "paypal-ui"
+project.ext.pom_name = "PayPal SDK - UI"
+project.ext.pom_desc = "Library for PayPal's UI components"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")

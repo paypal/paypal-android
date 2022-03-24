@@ -1,4 +1,4 @@
-package com.paypal.android.checkout.paymentbutton
+package com.paypal.android.ui.paymentbutton
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -19,7 +19,7 @@ import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.paypal.android.checkout.R
+import com.paypal.android.ui.R
 
 @Suppress("TooManyFunctions")
 @RequiresApi(Build.VERSION_CODES.M)

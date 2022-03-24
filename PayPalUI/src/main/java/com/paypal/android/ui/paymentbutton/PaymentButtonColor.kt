@@ -1,4 +1,4 @@
-package com.paypal.android.checkout.paymentbutton
+package com.paypal.android.ui.paymentbutton
 
 import android.content.Context
 import android.content.res.ColorStateList
