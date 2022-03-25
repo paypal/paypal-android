@@ -16,6 +16,7 @@
         <entry key="../../../../layout/compose-model-1635341082643.xml" value="0.1" />
         <entry key="../../../../layout/compose-model-1636026003097.xml" value="0.3296296296296296" />
         <entry key="../../../../layout/custom_preview.xml" value="0.14629629629629629" />
+        <entry key="../../.gradle/caches/transforms-3/c82c4269f282094e50134c68922a278f/transformed/android-sdk-0.5.2/res/drawable/wordmark_paypal_color.xml" value="0.11574074074074074" />
         <entry key="Demo/src/main/res/layout/activity_demo.xml" value="0.325" />
         <entry key="Demo/src/main/res/layout/dropdown_item.xml" value="0.29969727547931385" />
         <entry key="Demo/src/main/res/layout/fragment_card.xml" value="0.29969727547931385" />
@@ -24,6 +25,10 @@
         <entry key="Demo/src/main/res/layout/fragment_payment_methods.xml" value="0.1" />
         <entry key="Demo/src/main/res/xml/preferences.xml" value="0.3188405797101449" />
         <entry key="Demo/src/main/res/xml/root_preferences.xml" value="0.32382246376811596" />
+        <entry key="PayPalNativeCheckout/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.11574074074074074" />
+        <entry key="PayPalUI/src/main/res/drawable/wordmark_paypal_color.xml" value="0.11574074074074074" />
+        <entry key="PayPalUI/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.11574074074074074" />
+        <entry key="PayPalUI/src/main/res/layout/paypal_payment_button_view.xml" value="0.37604166666666666" />
       </map>
     </option>
   </component>
