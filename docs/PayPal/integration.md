@@ -100,7 +100,6 @@ payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
     override fun onPayPalWebCanceled() {
         // the user canceled the flow
     }
-
 }
 ```
 
