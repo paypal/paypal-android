@@ -31,7 +31,7 @@ Add a `PayPalButton` to your layout XML:
 Reference the button in your code:
 
 ```kotlin
-val paymentButton = findViewById<PaymentButton>(R.id.payment_button)
+val payPalButton = findViewById<PayPalButton>(R.id.paypal_button)
 
 payPalButton.setOnClickListener {
     //insert your code here
