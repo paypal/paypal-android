@@ -36,8 +36,6 @@ android {
 }
 
 dependencies {
-    api project(':Core')
-
     dependencies {
         implementation files('libs/android-magnessdk-5.3.0.jar')
     }
