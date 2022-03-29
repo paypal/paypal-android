@@ -104,7 +104,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 val orderJson = parser.parse(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
-                    paypalClient.approveOrder(PayPalWebCheckoutRequest(orderId))
+                    paypalClient.start(PayPalWebCheckoutRequest(orderId))
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)

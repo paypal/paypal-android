@@ -138,7 +138,7 @@ val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 
 When a user initiates the PayPal payment flow through your UI, approve the order using your `PayPalWebCheckoutClient`
 
-Call `payPalClient.approveOrder(payPalWebCheckoutRequest)` to approve the order.
+Call `payPalClient.start(payPalWebCheckoutRequest)` to start the checkout web flow.
 
 When the user completes the PayPal payment flow, the result will be returned to the listener set in [step 4](#4-initiate-the-payments-sdk).
 
