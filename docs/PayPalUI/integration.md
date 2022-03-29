@@ -33,7 +33,7 @@ Reference the button in your code:
 ```kotlin
 val paymentButton = findViewById<PaymentButton>(R.id.payment_button)
 
-paymentButton.setOnClickListener {
+payPalButton.setOnClickListener {
     //insert your code here
 }
 ```
