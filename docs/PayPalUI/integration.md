@@ -34,6 +34,6 @@ Reference the button in your code:
 val payPalButton = findViewById<PayPalButton>(R.id.paypal_button)
 
 payPalButton.setOnClickListener {
-    //insert your code here, like starting the paypal flow
+    //start the paypal flow
 }
 ```
