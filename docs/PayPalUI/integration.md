@@ -22,7 +22,7 @@ Add a `PayPalButton` to your layout XML:
 
 ```xml
 <com.paypal.android.ui.paymentbutton.PayPalButton
-    android:id="@+id/payPalButton"
+    android:id="@+id/paypal_button"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />
 ```
@@ -31,9 +31,9 @@ Add a `PayPalButton` to your layout XML:
 Reference the button in your code:
 
 ```kotlin
-val paymentButton = findViewById<PaymentButton>(R.id.payment_button)
+val payPalButton = findViewById<PayPalButton>(R.id.paypal_button)
 
-paymentButton.setOnClickListener {
+payPalButton.setOnClickListener {
     //insert your code here, like starting the paypal flow
 }
 ```
