@@ -22,7 +22,7 @@ Add a `PayPalButton` to your layout XML:
 
 ```xml
 <com.paypal.android.ui.paymentbutton.PayPalButton
-    android:id="@+id/payPalButton"
+    android:id="@+id/paypal_button"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />
 ```
