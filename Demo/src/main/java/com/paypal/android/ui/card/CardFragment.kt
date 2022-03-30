@@ -20,6 +20,7 @@ import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
+import com.paypal.android.core.Address
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentCardBinding
@@ -114,8 +115,19 @@ class CardFragment : Fragment() {
         val (monthString, yearString) =
             expirationDate.split("/") ?: listOf("", "")
 
-        val card = Card(cardNumber, monthString, yearString)
-        card.securityCode = securityCode
+//        val card = Card(cardNumber, monthString, yearString)
+//        card.securityCode = securityCode
+
+        val card = Card("4208455603499482", "02", "2020")
+        card.cardholderName = "John Doe"
+        card.billingAddress = Address(
+            "2211 N First Street",
+            "17.3.160",
+            "CA",
+            "San Jose",
+            "95131",
+            "US"
+        )
 
         dataCollectorHandler.setLogging(true)
         lifecycleScope.launch {
@@ -126,7 +138,8 @@ class CardFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
-                cardClient.approveOrder(request)
+                cardClient.vaultCard(card)
+//                cardClient.approveOrder(request)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
                 updateStatusText("CAPTURE fail: ${error.errorDescription}")

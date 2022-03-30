@@ -39,4 +39,6 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
             }
         }
     }
+
+    suspend fun vaultCard(card: Card) = cardAPI.vaultCard(card)
 }

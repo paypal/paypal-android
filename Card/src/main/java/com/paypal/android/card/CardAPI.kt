@@ -15,6 +15,7 @@ internal class CardAPI(
     private val api: API,
     private val requestFactory: CardAPIRequestFactory = CardAPIRequestFactory()
 ) {
+
     @Throws(PayPalSDKError::class)
     suspend fun confirmPaymentSource(orderID: String, card: Card): CardResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
@@ -32,6 +33,13 @@ internal class CardAPI(
         } else {
             throw parseCardError(status, bodyResponse, correlationID)
         }
+    }
+
+    suspend fun vaultCard(card: Card) {
+        val apiRequest = requestFactory.createVaultPaymentTokenMethod(card)
+        val httpResponse = api.send(apiRequest)
+
+        val bodyResponse = httpResponse.body
     }
 
     private fun parseCardResult(bodyResponse: String, correlationID: String?): CardResult =
