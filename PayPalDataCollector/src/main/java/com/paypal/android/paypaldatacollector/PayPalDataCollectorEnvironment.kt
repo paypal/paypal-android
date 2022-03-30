@@ -1,5 +1,8 @@
 package com.paypal.android.paypaldatacollector
 
+/**
+ * Enum to set the data collector environment
+ */
 enum class PayPalDataCollectorEnvironment {
     LIVE,
     SANDBOX,
