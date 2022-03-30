@@ -2,8 +2,6 @@ package com.paypal.android.paypaldatacollector
 
 import android.content.Context
 import android.util.Log
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.Environment
 import lib.android.paypal.com.magnessdk.InvalidInputException
 import lib.android.paypal.com.magnessdk.MagnesSDK
 import lib.android.paypal.com.magnessdk.MagnesSettings
@@ -13,19 +11,15 @@ import lib.android.paypal.com.magnessdk.MagnesSource
  * Enables you to collect data about a customer's device and correlate it with a session identifier on your server.
  */
 class PayPalDataCollector internal constructor(
-    coreConfig: CoreConfig,
+    environment: PayPalDataCollectorEnvironment,
     private val magnesSDK: MagnesSDK,
     private val uuidHelper: UUIDHelper
 ) {
 
-    private val environment = when(coreConfig.environment) {
-        Environment.LIVE -> lib.android.paypal.com.magnessdk.Environment.LIVE
-        Environment.STAGING -> lib.android.paypal.com.magnessdk.Environment.STAGE
-        Environment.SANDBOX -> lib.android.paypal.com.magnessdk.Environment.SANDBOX
-    }
+    private val environment = getMagnesEnvironment(environment)
 
-    constructor(coreConfig: CoreConfig) : this(
-        coreConfig,
+    constructor(environment: PayPalDataCollectorEnvironment) : this(
+        environment,
         MagnesSDK.getInstance(),
         UUIDHelper()
     )
