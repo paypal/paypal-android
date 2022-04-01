@@ -36,7 +36,7 @@ internal class CardAPIRequestFactory {
         return APIRequest(path, HttpMethod.POST, body)
     }
 
-    fun createVaultPaymentTokenMethod(card: Card): APIRequest {
+    fun createAuthorizeWith3DSVerificationRequest(orderID: String, card: Card): APIRequest {
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
 
@@ -58,21 +58,25 @@ internal class CardAPIRequestFactory {
             cardJSON.put("billing_address", billingAddressJSON)
         }
 
-        cardJSON.put("verification_method", "SCA_WHEN_REQUIRED")
+        val attributesJSON = JSONObject()
+            .put("verification", JSONObject().put("method", "SCA_ALWAYS"))
+        cardJSON.put("attributes", attributesJSON)
+
+//        cardJSON.put("verification_method", "SCA_WHEN_REQUIRED")
 
         val sourceJSON = JSONObject().put("card", cardJSON)
-        val applicationContextJSON = JSONObject()
-            .put("brand_name", "YourBrandName")
-            .put("locale", "en-US")
-            .put("return_url", "https://example.com/returnUrl")
-            .put("cancel_url", "https://example.com/cancelUrl")
+//        val applicationContextJSON = JSONObject()
+//            .put("brand_name", "YourBrandName")
+//            .put("locale", "en-US")
+//            .put("return_url", "https://example.com/returnUrl")
+//            .put("cancel_url", "https://example.com/cancelUrl")
 
         val bodyJSON = JSONObject()
-            .put("source", sourceJSON)
-            .put("application_context", applicationContextJSON)
+            .put("payment_source", sourceJSON)
+//            .put("application_context", applicationContextJSON)
         val body = bodyJSON.toString()
 
-        val path = "v2/vault/payment-tokens"
+        val path = "v2/checkout/orders/$orderID/authorize"
         return APIRequest(path, HttpMethod.POST, body)
     }
 }

@@ -9,6 +9,7 @@ import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
+import org.json.JSONObject
 import java.net.HttpURLConnection.HTTP_OK
 
 internal class CardAPI(
@@ -35,11 +36,17 @@ internal class CardAPI(
         }
     }
 
-    suspend fun vaultCard(card: Card) {
-        val apiRequest = requestFactory.createVaultPaymentTokenMethod(card)
+    suspend fun verifyCard(orderID: String, card: Card): String {
+        val apiRequest = requestFactory.createAuthorizeWith3DSVerificationRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
 
-        val bodyResponse = httpResponse.body
+        val responseJSON = JSONObject(httpResponse.body)
+
+        val linksArray = responseJSON.getJSONArray("links")
+        val links = (0 until linksArray.length()).map { linksArray.getJSONObject(it) }
+
+        val payerActionLink = links.first { it.getString("rel") == "payer-action" }
+        return payerActionLink.getString("href")
     }
 
     private fun parseCardResult(bodyResponse: String, correlationID: String?): CardResult =

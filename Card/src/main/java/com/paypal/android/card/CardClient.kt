@@ -1,16 +1,23 @@
 package com.paypal.android.card
 
+import android.net.Uri
+import androidx.fragment.app.FragmentActivity
+import com.braintreepayments.api.BrowserSwitchClient
+import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 /**
  * Use this client to approve an order with a [Card].
  */
 class CardClient internal constructor(private val cardAPI: CardAPI) {
+
+    private val browserSwitchClient = BrowserSwitchClient()
 
     constructor(configuration: CoreConfig) :
             this(CardAPI(API(configuration)))
@@ -40,5 +47,11 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
         }
     }
 
-    suspend fun vaultCard(card: Card) = cardAPI.vaultCard(card)
+    suspend fun verifyCard(activity: FragmentActivity, orderID: String, card: Card) {
+        val threedsHref = cardAPI.verifyCard(orderID, card)
+        val options = BrowserSwitchOptions()
+            .url(Uri.parse(threedsHref))
+            .returnUrlScheme("com.paypal.android.demo")
+        browserSwitchClient.start(activity, options)
+    }
 }

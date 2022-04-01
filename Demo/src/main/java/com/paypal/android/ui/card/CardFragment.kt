@@ -118,7 +118,7 @@ class CardFragment : Fragment() {
 //        val card = Card(cardNumber, monthString, yearString)
 //        card.securityCode = securityCode
 
-        val card = Card("4208455603499482", "02", "2020")
+        val card = Card("4208455603499482", "02", "2023")
         card.cardholderName = "John Doe"
         card.billingAddress = Address(
             "2211 N First Street",
@@ -138,7 +138,7 @@ class CardFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
-                cardClient.vaultCard(card)
+                val threedsHref = cardClient.verifyCard(requireActivity(), order.id, card)
 //                cardClient.approveOrder(request)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {

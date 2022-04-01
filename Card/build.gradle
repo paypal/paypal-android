@@ -47,6 +47,8 @@ dependencies {
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
 
+    implementation deps.browserSwitch
+
     testImplementation deps.junit
     testImplementation deps.mockk
     testImplementation deps.jsonAssert
