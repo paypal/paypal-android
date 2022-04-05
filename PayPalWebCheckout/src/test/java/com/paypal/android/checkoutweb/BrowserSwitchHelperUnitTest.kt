@@ -23,13 +23,14 @@ class BrowserSwitchHelperUnitTest {
         val finalUrl = "https://www.sandbox.paypal.com/checkoutnow?" +
                 "token=$mockOrderId" +
                 "&redirect_uri=$urlScheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
+                "&fundingSource="
         val uri = Uri.parse(finalUrl)
 
         every { mockCoreConfig.environment } returns Environment.SANDBOX
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, PayPalWebCheckoutFunding.DEFAULT)
 
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo(mockOrderId)
@@ -47,13 +48,14 @@ class BrowserSwitchHelperUnitTest {
         val finalUrl = "https://www.msmaster.qa.paypal.com/checkoutnow?" +
                 "token=$mockOrderId" +
                 "&redirect_uri=$urlScheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
+                "&fundingSource="
         val uri = Uri.parse(finalUrl)
 
         every { mockCoreConfig.environment } returns Environment.STAGING
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, PayPalWebCheckoutFunding.DEFAULT)
 
         expectThat(browserSwitchOptions) {
             get { url?.host }.isEqualTo(uri.host)
@@ -69,16 +71,63 @@ class BrowserSwitchHelperUnitTest {
         val finalUrl = "https://www.paypal.com/checkoutnow?" +
                 "token=$mockOrderId" +
                 "&redirect_uri=$urlScheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1"
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
+                "&fundingSource="
         val uri = Uri.parse(finalUrl)
 
         every { mockCoreConfig.environment } returns Environment.LIVE
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, PayPalWebCheckoutFunding.DEFAULT)
 
         expectThat(browserSwitchOptions) {
             get { url?.host }.isEqualTo(uri.host)
+        }
+    }
+
+    @Test
+    fun `when configurePayPalBrowserSwitchOptions is CREDIT funding, the correct url is returned`() {
+        val mockOrderId = "fake_order_id"
+        val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
+
+        val urlScheme = "com.android.test.scheme"
+        val finalUrl = "https://www.paypal.com/checkoutnow?" +
+                "token=$mockOrderId" +
+                "&redirect_uri=$urlScheme" +
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
+                "&fundingSource=credit"
+        val uri = Uri.parse(finalUrl)
+
+        every { mockCoreConfig.environment } returns Environment.LIVE
+
+        val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, PayPalWebCheckoutFunding.CREDIT)
+
+        expectThat(browserSwitchOptions) {
+            get { url }.isEqualTo(uri)
+        }
+    }
+
+    @Test
+    fun `when configurePayPalBrowserSwitchOptions is PAY_LATER funding, the correct url is returned`() {
+        val mockOrderId = "fake_order_id"
+        val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
+
+        val urlScheme = "com.android.test.scheme"
+        val finalUrl = "https://www.paypal.com/checkoutnow?" +
+                "token=$mockOrderId" +
+                "&redirect_uri=$urlScheme" +
+                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
+                "&fundingSource=paylater"
+        val uri = Uri.parse(finalUrl)
+
+        every { mockCoreConfig.environment } returns Environment.LIVE
+
+        val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, PayPalWebCheckoutFunding.PAY_LATER)
+
+        expectThat(browserSwitchOptions) {
+            get { url }.isEqualTo(uri)
         }
     }
 }
