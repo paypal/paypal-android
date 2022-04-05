@@ -17,7 +17,7 @@ import com.paypal.android.checkoutweb.PayPalWebCheckoutListener
 import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
 import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
 import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
-import com.paypal.android.checkoutweb.PayPalWebCheckoutFunding
+import com.paypal.android.checkoutweb.PayPalWebCheckoutFundingSource
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
@@ -55,8 +55,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         paypalClient.listener = this
 
         binding.submitButton.setOnClickListener { launchWebCheckout() }
-        binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFunding.PAY_LATER) }
-        binding.payPalCreditButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFunding.CREDIT) }
+        binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
+        binding.payPalCreditButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.CREDIT) }
 
         return binding.root
     }
@@ -97,7 +97,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         hideLoader()
     }
 
-    private fun launchWebCheckout(funding: PayPalWebCheckoutFunding = PayPalWebCheckoutFunding.DEFAULT) {
+    private fun launchWebCheckout(funding: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL) {
         showLoader()
 
         lifecycleScope.launch {
