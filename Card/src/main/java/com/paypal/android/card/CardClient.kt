@@ -10,7 +10,6 @@ import com.paypal.android.core.PayPalSDKError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 /**
  * Use this client to approve an order with a [Card].
@@ -47,8 +46,8 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
         }
     }
 
-    suspend fun verifyCard(activity: FragmentActivity, orderID: String, card: Card) {
-        val threedsHref = cardAPI.verifyCard(orderID, card)
+    suspend fun verifyCard(activity: FragmentActivity, request: CardRequest) {
+        val threedsHref = request.run { cardAPI.verifyCard(orderID, card) }
         val options = BrowserSwitchOptions()
             .url(Uri.parse(threedsHref))
             .returnUrlScheme("com.paypal.android.demo")

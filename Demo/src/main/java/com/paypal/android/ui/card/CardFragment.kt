@@ -16,7 +16,6 @@ import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
-import com.paypal.android.core.Address
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentCardBinding
@@ -123,7 +122,7 @@ class CardFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
-                cardClient.verifyCard(requireActivity(), order.id, card)
+                cardClient.verifyCard(requireActivity(), request)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
                 updateStatusText("CAPTURE fail: ${error.errorDescription}")
