@@ -2,7 +2,6 @@ package com.paypal.android.paypaldatacollector
 
 import android.content.Context
 import android.util.Log
-import com.paypal.android.core.CoreConfig
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -26,12 +25,11 @@ class PayPalDataCollectorUnitTest {
     fun `when getClientMetadataId is called, magnes settings has default values`() {
         val appGUID = UUID.randomUUID().toString();
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
-        val mockCoreConfig = CoreConfig(clientId = "")
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
-        val sut = PayPalDataCollector(mockCoreConfig, mockMagnesSDK, mockUUIDHelper)
+        val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.SANDBOX, mockMagnesSDK, mockUUIDHelper)
         sut.getClientMetadataId(mockk(relaxed = true))
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
@@ -46,13 +44,12 @@ class PayPalDataCollectorUnitTest {
     fun `when environment is STAGING, magnes settings environment is STAGE`() {
         val appGUID = UUID.randomUUID().toString();
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
-        val mockCoreConfig = CoreConfig(clientId = "", environment = com.paypal.android.core.Environment.STAGING)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
-        val sut = PayPalDataCollector(mockCoreConfig, mockMagnesSDK, mockUUIDHelper)
+        val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.STAGING, mockMagnesSDK, mockUUIDHelper)
         sut.getClientMetadataId(mockk(relaxed = true))
 
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
@@ -65,13 +62,12 @@ class PayPalDataCollectorUnitTest {
     fun `when environment is LIVE, magnes settings environment is LIVE`() {
         val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
-        val mockCoreConfig = CoreConfig(clientId = "", environment = com.paypal.android.core.Environment.LIVE)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
-        val sut = PayPalDataCollector(mockCoreConfig, mockMagnesSDK, mockUUIDHelper)
+        val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.LIVE, mockMagnesSDK, mockUUIDHelper)
         sut.getClientMetadataId(mockk(relaxed = true))
 
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
@@ -86,13 +82,12 @@ class PayPalDataCollectorUnitTest {
         val errorMessage = "Application’s Globally Unique Identifier (AppGUID) does not match the criteria, This is a string that identifies the merchant application that sets up Magnes on the mobile device. If the merchant app does not pass an AppGuid, Magnes creates one to identify the app. An AppGuid is an application identifier per-installation; that is, if a new instance of the app is installed on the mobile device, or the app is reinstalled, it will have a new AppGuid.\n ***AppGuid Criteria*** \n   Max length: 36 characters \n   Min Length: 30 characters \n   Regex: Letters, numbers and dashes only \n"
         val appGUID = "invalid_uuid"
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
-        val mockCoreConfig = CoreConfig(clientId = "")
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val exceptionSlot = slot<InvalidInputException>()
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
-        val sut = PayPalDataCollector(mockCoreConfig, mockMagnesSDK, mockUUIDHelper)
+        val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.SANDBOX, mockMagnesSDK, mockUUIDHelper)
         val result = sut.getClientMetadataId(mockk(relaxed = true))
 
         verify {  Log.e(any(), any(), capture(exceptionSlot)) }
@@ -107,7 +102,6 @@ class PayPalDataCollectorUnitTest {
         val appGUID = UUID.randomUUID().toString()
         val clientMetadataId = "client_metadata_id"
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
-        val mockCoreConfig = CoreConfig(clientId = "")
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val mockContext = mockk<Context>(relaxed = true)
         val magnesResult = mockk<MagnesResult>(relaxed = true)
@@ -116,7 +110,7 @@ class PayPalDataCollectorUnitTest {
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
         every { mockMagnesSDK.collectAndSubmit(any(), any(), any()) } returns magnesResult
 
-        val sut = PayPalDataCollector(mockCoreConfig, mockMagnesSDK, mockUUIDHelper)
+        val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.SANDBOX, mockMagnesSDK, mockUUIDHelper)
         val result = sut.getClientMetadataId(mockContext, clientMetadataId, HashMap())
         assertEquals(result, clientMetadataId)
     }
