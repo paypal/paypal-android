@@ -92,7 +92,7 @@ class BrowserSwitchHelperUnitTest {
     fun `when configurePayPalBrowserSwitchOptions is CREDIT funding, the correct url is returned`() {
         val mockOrderId = "fake_order_id"
         val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
-        val mockFundingSource = PayPalWebCheckoutFundingSource.CREDIT
+        val mockFundingSource = PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
 
         val urlScheme = "com.android.test.scheme"
         val finalUrl = "https://www.paypal.com/checkoutnow?" +
