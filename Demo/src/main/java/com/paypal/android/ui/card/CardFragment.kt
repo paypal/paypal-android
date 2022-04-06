@@ -111,19 +111,8 @@ class CardFragment : Fragment() {
         val (monthString, yearString) =
             expirationDate.split("/") ?: listOf("", "")
 
-//        val card = Card(cardNumber, monthString, yearString)
-//        card.securityCode = securityCode
-
-        val card = Card("4000000000000002", "01", "2023", "123")
-        card.cardholderName = "John Doe"
-        card.billingAddress = Address(
-            "2211 N First Street",
-            "17.3.160",
-            "CA",
-            "San Jose",
-            "95131",
-            "US"
-        )
+        val card = Card(cardNumber, monthString, yearString)
+        card.securityCode = securityCode
 
         dataCollectorHandler.setLogging(true)
         lifecycleScope.launch {
@@ -134,8 +123,7 @@ class CardFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
-//                cardClient.approveOrder(request)
-                val threedsHref = cardClient.verifyCard(requireActivity(), order.id, card)
+                cardClient.verifyCard(requireActivity(), order.id, card)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
                 updateStatusText("CAPTURE fail: ${error.errorDescription}")
