@@ -41,7 +41,7 @@ class PayPalWebCheckoutClientUnitTest {
             browserSwitchHelper.configurePayPalBrowserSwitchOptions(
                 any(),
                 coreConfig,
-                payPalRequest.funding
+                payPalRequest.fundingSource
             )
         } returns browserSwitchOptions
 

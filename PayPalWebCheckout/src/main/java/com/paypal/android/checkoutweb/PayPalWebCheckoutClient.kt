@@ -59,7 +59,7 @@ class PayPalWebCheckoutClient internal constructor(
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
             request.orderID,
             coreConfig,
-            request.funding
+            request.fundingSource
         )
         browserSwitchClient.start(activity, browserSwitchOptions)
     }
