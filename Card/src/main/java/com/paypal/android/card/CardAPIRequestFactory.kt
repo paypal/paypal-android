@@ -91,7 +91,7 @@ internal class CardAPIRequestFactory {
 
         val bodyJSON = JSONObject()
             .put("payment_source", paymentSourceJSON)
-            .put("application_context", applicationContextJSON)
+//            .put("application_context", applicationContextJSON)
         val body = bodyJSON.toString()
 
         val path = "v2/checkout/orders/$orderID/confirm-payment-source"

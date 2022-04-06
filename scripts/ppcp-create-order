@@ -1,0 +1,38 @@
+function display_insufficent_params {
+  echo "usage: ./create-order <CLIENT_ID> <CLIENT_SECRET>"
+  echo "insufficient params"
+}
+
+CLIENT_ID="$1"
+CLIENT_SECRET="$2"
+ACCESS_TOKEN="$3"
+
+if [ -z "${CLIENT_ID}" ] || [ -z "${CLIENT_SECRET}" ]; then
+  display_insufficent_params
+  exit 1
+fi
+
+#ACCESS_TOKEN=$(./get-auth-token "${CLIENT_ID}" "${CLIENT_SECRET}" | jq -r '.access_token')
+
+ORDER_URL="http://localhost:8080/order?countryCode=US"
+CREDENTIALS=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64)
+
+curl -v -s --location -g --request POST "${ORDER_URL}" \
+--header 'Content-Type: application/json' \
+--header "Authorization: Bearer ${ACCESS_TOKEN}" \
+--data-raw '{
+    "intent": "CAPTURE",
+    "purchase_units": [
+        {
+            "amount": {
+                "currency_code": "USD",
+                "value": "56.00"
+            }
+        }
+    ],
+    "application_context": {
+        "cancel_url": "com.paypal.android.demo://cancel",
+        "return_url": "com.paypal.android.demo://success"
+    }
+}'
+

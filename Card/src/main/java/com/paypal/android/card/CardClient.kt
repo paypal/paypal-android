@@ -48,8 +48,8 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
     }
 
     suspend fun verifyCard(activity: FragmentActivity, orderID: String, card: Card) {
-        val threedsHref = "https://www.sandbox.paypal.com/webapps/helios?action=verify&flow=3ds&cart_id=4EF77104WD360373D"
-//        val threedsHref = cardAPI.verifyCard(orderID, card)
+//        val threedsHref = "https://www.sandbox.paypal.com/webapps/helios?action=verify&flow=3ds&cart_id=4EF77104WD360373D"
+        val threedsHref = cardAPI.verifyCard(orderID, card)
         val options = BrowserSwitchOptions()
             .url(Uri.parse(threedsHref))
             .returnUrlScheme("com.paypal.android.demo")

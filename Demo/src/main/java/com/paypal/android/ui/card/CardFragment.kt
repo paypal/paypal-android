@@ -11,11 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
-import com.paypal.android.api.model.Amount
-import com.paypal.android.api.model.CreateOrderRequest
-import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.Payee
-import com.paypal.android.api.model.PurchaseUnit
+import com.paypal.android.api.model.*
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
@@ -132,7 +128,7 @@ class CardFragment : Fragment() {
         dataCollectorHandler.setLogging(true)
         lifecycleScope.launch {
             updateStatusText("Creating order...")
-            val order = fetchOrder()
+            val order = fetchOrder(true)
             val request = CardRequest(order.id!!, card)
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
@@ -147,24 +143,29 @@ class CardFragment : Fragment() {
         }
     }
 
-    private suspend fun fetchOrder(): Order {
-        return payPalDemoApi.fetchOrderId(
-            countryCode = "CO",
-            orderRequest = CreateOrderRequest(
-                intent = "CAPTURE",
-                purchaseUnit = listOf(
-                    PurchaseUnit(
-                        amount = Amount(
-                            currencyCode = "USD",
-                            value = "10.99"
-                        )
+    private suspend fun fetchOrder(verifyUsing3DS: Boolean = false): Order {
+        val orderRequest = CreateOrderRequest(
+            intent = "CAPTURE",
+            purchaseUnit = listOf(
+                PurchaseUnit(
+                    amount = Amount(
+                        currencyCode = "USD",
+                        value = "10.99"
                     )
-                ),
-                payee = Payee(
-                    emailAddress = "anpelaez@paypal.com"
                 )
+            ),
+            payee = Payee(
+                emailAddress = "anpelaez@paypal.com"
             )
         )
+
+        if (verifyUsing3DS) {
+            orderRequest.applicationContext = ApplicationContext(
+                returnURL = "com.paypal.android.demo://example.com/returnUrl",
+                cancelURL = "com.paypal.android.demo://example.com/cancelUrl"
+            )
+        }
+        return payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = orderRequest)
     }
 
     private fun updateStatusText(text: String) {
