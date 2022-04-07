@@ -26,11 +26,11 @@ For initial setup, the `curl` commands below can be used as a reference for maki
 
 ### 1. Add the Payments SDK  to your app
 
-In your `build.gradle` file, add the following dependency:
+In your `build.gradle` file, add the following dependency [see step 8](#8-Capture-authorize-the-order):
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-web-checkout:1.0.0"[see step 8](#8-Capture-authorize-the-order)
+   implementation "com.paypal.android:paypal-web-checkout:1.0.0"
 }
 ```
 
