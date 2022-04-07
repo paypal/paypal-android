@@ -56,7 +56,9 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
         binding.submitButton.setOnClickListener { launchWebCheckout() }
         binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
-        binding.payPalCreditButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAYPAL_CREDIT) }
+        binding.payPalCreditButton.setOnClickListener {
+            launchWebCheckout(PayPalWebCheckoutFundingSource.PAYPAL_CREDIT)
+        }
 
         return binding.root
     }
