@@ -134,6 +134,9 @@ Configure your `PayPalWebCheckoutRequest` and include the order ID generated [st
 val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 ```
 
+You can also specify the funding source for your order which are `PayPal` (default), `PayLater` and `PayPalCredit`.
+For more information go to: https://developer.paypal.com/docs/checkout/pay-later/us/
+
 ### 7. Approve the order through the Payments SDK
 
 When a user initiates the PayPal payment flow through your UI, approve the order using your `PayPalWebCheckoutClient`
