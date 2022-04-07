@@ -44,7 +44,7 @@ class PayPalWebCheckoutClientUnitTest {
             )
         } returns browserSwitchOptions
 
-        payPalClient.approveOrder(payPalRequest)
+        payPalClient.start(payPalRequest)
 
         verify(exactly = 1) { browserSwitchClient.start(activity, browserSwitchOptions) }
     }

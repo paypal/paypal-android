@@ -55,7 +55,7 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun approveOrder(request: PayPalWebCheckoutRequest) {
+    fun start(request: PayPalWebCheckoutRequest) {
         val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
             request.orderID,
             coreConfig
