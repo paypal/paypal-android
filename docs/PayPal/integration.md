@@ -26,11 +26,11 @@ For initial setup, the `curl` commands below can be used as a reference for maki
 
 ### 1. Add the Payments SDK  to your app
 
-In your `build.gradle` file, add the following dependency:
+In your `build.gradle` file, add the following dependency [see step 8](#8-Capture-authorize-the-order):
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-web-checkout:1.0.0"[see step 8](#8-Capture-authorize-the-order)
+   implementation "com.paypal.android:paypal-web-checkout:1.0.0"
 }
 ```
 
@@ -133,6 +133,9 @@ Configure your `PayPalWebCheckoutRequest` and include the order ID generated [st
 ```kotlin
 val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 ```
+
+You can also specify the funding source for your order which are `PayPal` (default), `PayLater` and `PayPalCredit`.
+For more information go to: https://developer.paypal.com/docs/checkout/pay-later/us/
 
 ### 7. Approve the order through the Payments SDK
 

@@ -17,6 +17,7 @@ import com.paypal.android.checkoutweb.PayPalWebCheckoutListener
 import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
 import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
 import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
+import com.paypal.android.checkoutweb.PayPalWebCheckoutFundingSource
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
@@ -53,7 +54,11 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         paypalClient = PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
         paypalClient.listener = this
 
-        binding.submitButton.setOnClickListener { launchNativeCheckout() }
+        binding.submitButton.setOnClickListener { launchWebCheckout() }
+        binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
+        binding.payPalCreditButton.setOnClickListener {
+            launchWebCheckout(PayPalWebCheckoutFundingSource.PAYPAL_CREDIT)
+        }
 
         return binding.root
     }
@@ -94,7 +99,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         hideLoader()
     }
 
-    private fun launchNativeCheckout() {
+    private fun launchWebCheckout(funding: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL) {
         showLoader()
 
         lifecycleScope.launch {
@@ -104,7 +109,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 val orderJson = parser.parse(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
-                    paypalClient.start(PayPalWebCheckoutRequest(orderId))
+                    paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
