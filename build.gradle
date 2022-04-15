@@ -86,6 +86,7 @@ buildscript {
 
 plugins {
     id "io.gitlab.arturbosch.detekt" version "${detektVersion}"
+    id 'org.jetbrains.kotlin.android' version '1.5.30' apply false
 }
 
 allprojects {
