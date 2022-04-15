@@ -4,6 +4,7 @@
     <!-- Payment Methods -->
     <string name="payment_methods_card">Card</string>
     <string name="payment_methods_paypal">PayPal</string>
+    <string name="payment_methods_threeDSecure">3D Secure</string>
     <string name="payment_methods_menu_settings">Settings</string>
 
     <!-- Card Fields -->
@@ -30,7 +31,5 @@
 
     <string name="auth_credentials_missing_title">Auth Credentials Required</string>
     <string name="auth_credentials_missing_message">You can set authentication credentials in the <b><i>paypal.properties</i></b> file in the root of the project directory.</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
