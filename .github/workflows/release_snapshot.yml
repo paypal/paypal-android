@@ -17,10 +17,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -42,10 +42,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -67,10 +67,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -92,10 +92,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -118,10 +118,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:

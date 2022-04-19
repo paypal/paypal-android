@@ -67,6 +67,7 @@ dependencies {
     implementation project(':PayPalNativeCheckout')
     implementation project(':PayPalWebCheckout')
     implementation project(':PayPalUI')
+    implementation project(':ThreeDSecure')
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx

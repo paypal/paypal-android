@@ -29,7 +29,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = '1.8'
     }
 
     lintOptions {
@@ -40,25 +40,17 @@ android {
 }
 
 dependencies {
-    api project(':Core')
-
-    implementation deps.kotlinStdLib
-    implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
-    implementation deps.kotlinxAndroidCoroutines
+    implementation deps.androidxCoreKtx
 
     testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.jsonAssert
-    testImplementation deps.robolectric
-    testImplementation deps.kotlinxAndroidCoroutinesTest
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }
 
-project.ext.name = "card"
-project.ext.pom_name = "PayPal SDK - Card"
-project.ext.pom_desc = "Library for PayPal card payment method"
+project.ext.name = "three-d-secure"
+project.ext.pom_name = "PayPal SDK - 3D Secure"
+project.ext.pom_desc = "Library for PayPal Strong Consumer Authentication using 3D Secure"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
