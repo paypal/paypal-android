@@ -91,7 +91,7 @@ open class PayPalButton @JvmOverloads constructor(
         label = PayPalButtonLabel(paypalLabelAttribute)
     }
 
-    private fun updateLabel(updatedLabel: PayPalButtonLabel) {
+    protected fun updateLabel(updatedLabel: PayPalButtonLabel) {
         when (updatedLabel.position) {
             PayPalButtonLabel.Position.START -> {
                 suffixTextVisibility = View.GONE

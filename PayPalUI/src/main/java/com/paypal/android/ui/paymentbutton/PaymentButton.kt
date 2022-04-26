@@ -277,5 +277,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
 internal enum class PaymentButtonFundingType {
     PAYPAL,
+    PAY_LATER,
     PAYPAL_CREDIT;
 }
