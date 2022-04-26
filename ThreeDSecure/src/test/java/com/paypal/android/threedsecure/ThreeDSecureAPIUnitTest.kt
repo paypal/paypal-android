@@ -48,6 +48,21 @@ class ThreeDSecureAPIUnitTest {
         }
     """.trimIndent()
 
+    // language=JSON
+    private val errorBody = """
+        {
+          "name": "RESOURCE_NOT_FOUND",
+          "details": [
+            {
+              "issue": "SAMPLE_ORDER_ISSUE",
+              "description": "Sample Error Description."
+            }
+          ],
+          "message": "Sample Error Message.",
+          "debug_id": "81db5c4ddfa35"
+        }
+    """.trimIndent()
+
     private val api = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<ThreeDSecureAPIRequestFactory>()
 
@@ -95,5 +110,24 @@ class ThreeDSecureAPIUnitTest {
         assertEquals("payer-action-order-id", result.orderID)
         assertEquals(OrderStatus.PAYER_ACTION_REQUIRED, result.status)
         assertEquals("https://www.example.com/order/payer-action/link", result.payerActionHref)
+    }
+
+    @Test
+    fun `it returns an error when the order is not found`() = runBlockingTest {
+        val httpResponse = HttpResponse(404, headers, errorBody)
+        coEvery { api.send(apiRequest) } returns httpResponse
+
+        lateinit var capturedError: PayPalSDKError
+        try {
+            sut.verifyCard(orderID, card)
+        } catch (e: PayPalSDKError) {
+            capturedError = e
+        }
+
+        assertEquals(
+            "Sample Error Message. -> [Issue: SAMPLE_ORDER_ISSUE.\n" +
+                    "Error description: Sample Error Description.]",
+            capturedError.errorDescription
+        )
     }
 }

@@ -52,7 +52,7 @@ class ThreeDSecureClient internal constructor(private val api: API) {
             .put("payment_source", paymentSourceJSON)
         val body = bodyJSON.toString()
 
-        val path = "v2/checkout/orders/$orderID/confirm-payment-source"
+        val path = "v2/checkout/orders/${orderID}hello/confirm-payment-source"
         val apiRequest = APIRequest(path, HttpMethod.POST, body)
 
         val httpResponse = api.send(apiRequest)

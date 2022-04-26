@@ -3,6 +3,8 @@ package com.paypal.android.threedsecure
 import com.paypal.android.card.Card
 import com.paypal.android.core.API
 import com.paypal.android.core.APIClientError
+import com.paypal.android.core.HttpResponse
+import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
@@ -23,9 +25,9 @@ internal class ThreeDSecureAPI(
         val status = httpResponse.status
         if (status == HTTP_OK) {
             return parseThreeDSecureResult(bodyResponse!!, null)
+        } else {
+            throw parseThreeDSecureError(status, bodyResponse!!, null)
         }
-
-        throw APIClientError.noResponseData("what")
     }
 
     private fun parseThreeDSecureResult(bodyResponse: String, correlationID: String?): ThreeDSecureResult =
@@ -45,4 +47,40 @@ internal class ThreeDSecureAPI(
             throw APIClientError.noResponseData("what")
 //            throw APIClientError.dataParsingError(correlationID)
         }.getOrNull()!!
+
+    private fun parseThreeDSecureError(
+        status: Int,
+        bodyResponse: String,
+        correlationID: String?
+    ) = when (status) {
+//        HttpResponse.STATUS_UNKNOWN_HOST -> {
+//            APIClientError.unknownHost(correlationID)
+//        }
+//        HttpResponse.STATUS_UNDETERMINED -> {
+//            APIClientError.unknownError(correlationID)
+//        }
+//        HttpResponse.SERVER_ERROR -> {
+//            APIClientError.serverResponseError(correlationID)
+//        }
+        else -> {
+            val json = PaymentsJSON(bodyResponse)
+            val message = json.getString("message")
+
+            val errorDetails = mutableListOf<OrderErrorDetail>()
+            val errorDetailsJson = json.getJSONArray("details")
+            for (i in 0 until errorDetailsJson.length()) {
+                val errorJson = errorDetailsJson.getJSONObject(i)
+                val issue = errorJson.getString("issue")
+                val description = errorJson.getString("description")
+                errorDetails += OrderErrorDetail(issue, description)
+            }
+
+            val description = "$message -> $errorDetails"
+            APIClientError.httpURLConnectionError(
+                status,
+                description,
+                correlationID
+            )
+        }
+    }
 }
