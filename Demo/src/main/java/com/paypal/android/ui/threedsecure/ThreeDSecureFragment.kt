@@ -124,7 +124,7 @@ class ThreeDSecureFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
-                threeDSecureClient.verify(requireActivity(), order.id, card)
+                threeDSecureClient.verify(requireActivity(), request)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
                 updateStatusText("CAPTURE fail: ${error.errorDescription}")

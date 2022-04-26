@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
-import com.paypal.android.card.Card
+import com.paypal.android.card.CardRequest
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
 
@@ -14,8 +14,8 @@ class ThreeDSecureClient internal constructor(private val threeDSecureAPI: Three
 
     constructor(configuration: CoreConfig) : this(ThreeDSecureAPI(API(configuration)))
 
-    suspend fun verify(activity: FragmentActivity, orderID: String, card: Card) {
-        val result = threeDSecureAPI.verifyCard(orderID, card)
+    suspend fun verify(activity: FragmentActivity, cardRequest: CardRequest) {
+        val result = cardRequest.run { threeDSecureAPI.verifyCard(orderID, card) }
 
         // FUTURE: inspect URL for 3DS verification success / failure
         val options = BrowserSwitchOptions()

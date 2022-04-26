@@ -21,7 +21,7 @@ class CardClient internal constructor(private val cardAPI: CardAPI) {
      * @param request [CardRequest] for requesting an order approval
      */
     suspend fun approveOrder(request: CardRequest): CardResult =
-        cardAPI.confirmPaymentSource(request.orderID, request.card)
+        request.run { cardAPI.confirmPaymentSource(orderID, card) }
 
     /**
      * Confirm [Card] payment source for an order. Use this method for Java integrations
