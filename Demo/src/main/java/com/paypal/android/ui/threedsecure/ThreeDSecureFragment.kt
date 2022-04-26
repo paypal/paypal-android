@@ -11,7 +11,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
-import com.paypal.android.api.model.*
+import com.paypal.android.api.model.Amount
+import com.paypal.android.api.model.ApplicationContext
+import com.paypal.android.api.model.CreateOrderRequest
+import com.paypal.android.api.model.Order
+import com.paypal.android.api.model.Payee
+import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardRequest
@@ -24,7 +29,6 @@ import com.paypal.android.ui.card.CardViewModel
 import com.paypal.android.ui.card.DataCollectorHandler
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
-import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
