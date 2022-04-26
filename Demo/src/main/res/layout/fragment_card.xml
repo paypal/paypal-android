@@ -84,8 +84,8 @@
             android:id="@+id/card_security_code_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number"
             android:imeOptions="actionDone"
+            android:inputType="number"
             android:maxLines="1" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -107,9 +107,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:textAlignment="center"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/submit_button"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/submit_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

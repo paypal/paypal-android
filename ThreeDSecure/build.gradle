@@ -40,8 +40,11 @@ android {
 }
 
 dependencies {
+    implementation project(':Card')
+
     implementation deps.androidxAppcompat
     implementation deps.androidxCoreKtx
+    implementation deps.browserSwitch
 
     testImplementation deps.junit
 
