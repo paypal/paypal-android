@@ -47,6 +47,10 @@ dependencies {
     implementation deps.browserSwitch
 
     testImplementation deps.junit
+    testImplementation deps.mockk
+    testImplementation deps.jsonAssert
+    testImplementation deps.robolectric
+    testImplementation deps.kotlinxAndroidCoroutinesTest
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
