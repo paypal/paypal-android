@@ -231,7 +231,7 @@ class CardAPIUnitTest {
         }
 
         assertEquals(
-            "A server occurred. Contact developer.paypal.com/support.",
+            "A server error occurred. Contact developer.paypal.com/support.",
             capturedError.errorDescription
         )
     }

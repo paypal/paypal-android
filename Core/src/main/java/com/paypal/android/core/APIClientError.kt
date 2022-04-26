@@ -39,7 +39,7 @@ object APIClientError {
     // 5. The server's response body returned an error message.
     fun serverResponseError(correlationID: String?) = PayPalSDKError(
         code = Code.SERVER_RESPONSE_ERROR.ordinal,
-        errorDescription = "A server occurred. Contact developer.paypal.com/support.",
+        errorDescription = "A server error occurred. Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
 

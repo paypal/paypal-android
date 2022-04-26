@@ -63,6 +63,13 @@ class ThreeDSecureAPIUnitTest {
         }
     """.trimIndent()
 
+    // language=JSON
+    private val unexpectedBody = """
+        {
+          "some_unexpected_response": "something"
+        }
+    """.trimIndent()
+
     private val api = mockk<API>(relaxed = true)
     private val requestBuilder = mockk<ThreeDSecureAPIRequestFactory>()
 
@@ -129,5 +136,110 @@ class ThreeDSecureAPIUnitTest {
                     "Error description: Sample Error Description.]",
             capturedError.errorDescription
         )
+    }
+
+    @Test
+    fun `it returns noResponseData when the order api call returns an empty body`() =
+        runBlockingTest {
+            val httpResponse = HttpResponse(123, headers, "")
+            coEvery { api.send(apiRequest) } returns httpResponse
+
+            lateinit var capturedError: PayPalSDKError
+            try {
+                sut.verifyCard(orderID, card)
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+
+            assertEquals(
+                "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support.",
+                capturedError.errorDescription
+            )
+        }
+
+    @Test
+    fun `it returns an error when the http response contains an undetermined error`() =
+        runBlockingTest {
+            val httpResponse =
+                HttpResponse(HttpResponse.STATUS_UNDETERMINED, headers, errorBody)
+            coEvery { api.send(apiRequest) } returns httpResponse
+
+            lateinit var capturedError: PayPalSDKError
+            try {
+                sut.verifyCard(orderID, card)
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+
+            assertEquals(
+                "An unknown error occurred. Contact developer.paypal.com/support.",
+                capturedError.errorDescription
+            )
+        }
+
+    @Test
+    fun `it returns an error when the http response contains an unknown host error`() =
+        runBlockingTest {
+            val httpResponse =
+                HttpResponse(HttpResponse.STATUS_UNKNOWN_HOST, headers, errorBody)
+            coEvery { api.send(apiRequest) } returns httpResponse
+
+            lateinit var capturedError: PayPalSDKError
+            try {
+                sut.verifyCard(orderID, card)
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+
+            assertEquals(
+                "An error occurred due to an invalid HTTP response. Contact developer.paypal.com/support.",
+                capturedError.errorDescription
+            )
+        }
+
+    @Test
+    fun `it returns an error when the http response contains a server error`() = runBlockingTest {
+        val httpResponse = HttpResponse(HttpResponse.SERVER_ERROR, headers, errorBody)
+        coEvery { api.send(apiRequest) } returns httpResponse
+
+        lateinit var capturedError: PayPalSDKError
+        try {
+            sut.verifyCard(orderID, card)
+        } catch (e: PayPalSDKError) {
+            capturedError = e
+        }
+
+        assertEquals(
+            "A server error occurred. Contact developer.paypal.com/support.",
+            capturedError.errorDescription
+        )
+    }
+
+    @Test
+    fun `when verify card fails to parse response, correlation ID is set in Error`() =
+        runBlockingTest {
+            coEvery { api.send(apiRequest) } returns HttpResponse(200, headers, unexpectedBody)
+
+            lateinit var capturedError: PayPalSDKError
+            try {
+                sut.verifyCard(orderID, card)
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+            assertEquals(correlationId, capturedError.correlationID)
+        }
+
+    @Test
+    fun `when verify card is errors, correlation ID is set in Error`() = runBlockingTest {
+        coEvery { api.send(apiRequest) } returns HttpResponse(400, headers, errorBody)
+
+        lateinit var capturedError: PayPalSDKError
+        try {
+            sut.verifyCard(orderID, card)
+        } catch (e: PayPalSDKError) {
+            capturedError = e
+        }
+
+        assertEquals(correlationId, capturedError.correlationID)
     }
 }

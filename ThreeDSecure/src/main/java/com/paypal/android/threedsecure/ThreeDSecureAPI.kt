@@ -19,14 +19,18 @@ internal class ThreeDSecureAPI(
     suspend fun verifyCard(orderID: String, card: Card): ThreeDSecureResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
         val httpResponse = api.send(apiRequest)
+        val correlationID = httpResponse.headers["Paypal-Debug-Id"]
 
         val bodyResponse = httpResponse.body
+        if (bodyResponse.isNullOrBlank()) {
+            throw APIClientError.noResponseData(correlationID)
+        }
 
         val status = httpResponse.status
-        if (status == HTTP_OK) {
-            return parseThreeDSecureResult(bodyResponse!!, null)
+        return if (status == HTTP_OK) {
+            parseThreeDSecureResult(bodyResponse, correlationID)
         } else {
-            throw parseThreeDSecureError(status, bodyResponse!!, null)
+            throw parseThreeDSecureError(status, bodyResponse, correlationID)
         }
     }
 
@@ -44,8 +48,7 @@ internal class ThreeDSecureAPI(
 
             ThreeDSecureResult(id, OrderStatus.valueOf(status), payerActionHref)
         }.recover {
-            throw APIClientError.noResponseData("what")
-//            throw APIClientError.dataParsingError(correlationID)
+            throw APIClientError.dataParsingError(correlationID)
         }.getOrNull()!!
 
     private fun parseThreeDSecureError(
@@ -53,15 +56,15 @@ internal class ThreeDSecureAPI(
         bodyResponse: String,
         correlationID: String?
     ) = when (status) {
-//        HttpResponse.STATUS_UNKNOWN_HOST -> {
-//            APIClientError.unknownHost(correlationID)
-//        }
-//        HttpResponse.STATUS_UNDETERMINED -> {
-//            APIClientError.unknownError(correlationID)
-//        }
-//        HttpResponse.SERVER_ERROR -> {
-//            APIClientError.serverResponseError(correlationID)
-//        }
+        HttpResponse.STATUS_UNKNOWN_HOST -> {
+            APIClientError.unknownHost(correlationID)
+        }
+        HttpResponse.STATUS_UNDETERMINED -> {
+            APIClientError.unknownError(correlationID)
+        }
+        HttpResponse.SERVER_ERROR -> {
+            APIClientError.serverResponseError(correlationID)
+        }
         else -> {
             val json = PaymentsJSON(bodyResponse)
             val message = json.getString("message")
