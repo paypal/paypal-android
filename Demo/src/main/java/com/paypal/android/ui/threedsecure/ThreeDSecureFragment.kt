@@ -45,7 +45,7 @@ class ThreeDSecureFragment : Fragment() {
     private lateinit var binding: FragmentThreeDSecureBinding
 
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
-    private val threeDSecureClient = ThreeDSecureClient(configuration)
+    private val threeDSecureClient = ThreeDSecureClient(requireActivity(), configuration)
 
     private val cardViewModel: CardViewModel by viewModels()
 
@@ -124,7 +124,7 @@ class ThreeDSecureFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             try {
-                threeDSecureClient.verify(requireActivity(), request)
+                threeDSecureClient.verify(request)
                 updateStatusText("CAPTURE success: CONFIRMED")
             } catch (error: PayPalSDKError) {
                 updateStatusText("CAPTURE fail: ${error.errorDescription}")
