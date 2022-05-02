@@ -1,4 +1,4 @@
-name: Publish Release
+name: Release
 on:
   workflow_dispatch:
     inputs:
@@ -16,10 +16,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
           #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
@@ -42,10 +42,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
         with:
@@ -59,10 +59,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
         with:
@@ -75,10 +75,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
         with:
@@ -91,51 +91,27 @@ jobs:
     steps:
       - run: echo "Unit test finished"
 
-  #Once all the tests have finished, we update version and tag it
-  change_version:
-    needs: [ unit_test_finished ]
-    name: Change Version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Update Version
-        run: |
-          sed -ri -e 's/(\"sdkVersionName\"[ \t]*: )\"[-.0-9a-zA-Z-]*\"/\1\"${{ github.event.inputs.version }}\"/' ./build.gradle
-          code=$(grep "sdkVersionCode" build.gradle | tr -s ' ' | cut -d ':' -f2 | tr -d ',' | tr -d ' ')
-          code=$(expr $code + 1)
-          sed -ri -e "s/(\"sdkVersionCode\"[ \t]*: )[0-9]*/\1$code/" ./build.gradle
-
-          git add .
-          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
-          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
-          git push origin HEAD ${{ github.event.inputs.version }}
-
   #Once the version is updated, we publish all modules in parallel
   publish_core:
-    needs: [ change_version ]
+    needs: [ unit_test_finished ]
     name: Publish Core
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Pull updated files
+      - name: Change Version
         run: |
-          git pull
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
       - name: Publish Core
         uses: ./.github/actions/publish_module
         with:
@@ -146,27 +122,25 @@ jobs:
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
   publish_card:
-    needs: [ change_version ]
+    needs: [ unit_test_finished ]
     name: Publish Card
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Pull updated files
+      - name: Change Version
         run: |
-          git pull
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
       - name: Publish Card
         uses: ./.github/actions/publish_module
         with:
@@ -176,34 +150,119 @@ jobs:
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_checkout:
-    needs: [ change_version ]
-    name: Publish PayPal Checkout
+  publish_web_checkout:
+    needs: [ unit_test_finished ]
+    name: Publish PayPal Checkout Web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
       - name: Set up Java 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Set github user
-        uses: ./.github/actions/set_github_user
-      - name: Pull updated files
+      - name: Change Version
         run: |
-          git pull
-      - name: Publish Checkout
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+      - name: Publish Checkout Web
         uses: ./.github/actions/publish_module
         with:
-          module: PayPalCheckout
+          module: PayPalWebCheckout
           sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+  publish_data_collector:
+    needs: [ unit_test_finished ]
+    name: Publish PayPal DataCollector
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'microsoft'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Change Version
+        run: |
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+      - name: Publish PayPal DataCollector
+        uses: ./.github/actions/publish_module
+        with:
+          module: PayPalDataCollector
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+  publish_ui:
+    needs: [ unit_test_finished ]
+    name: Publish PayPal UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'microsoft'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Change Version
+        run: |
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+      - name: Publish PayPal UI
+        uses: ./.github/actions/publish_module
+        with:
+          module: PayPalUI
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+
+  releasing_finished:
+    needs: [ publish_web_checkout, publish_card, publish_core, publish_data_collector, publish_ui ]
+    name: Releases Finished
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Release finished"
+
+  # Once all releases are done, we bump version, tag it and prepare next
+  bump_version:
+    needs: [ releasing_finished ]
+    name: Bump Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Update Version
+        run: |
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+          git add .
+          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
+          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
+
+          ./gradlew incrementSnapshotVersion
+          git add .
+          git commit -m 'Next version ready'
+          git push origin HEAD ${{ github.event.inputs.version }}

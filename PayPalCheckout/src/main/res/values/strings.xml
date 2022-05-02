@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <!-- Payment Methods Description -->
-    <string name="paypal_payment_button_description">PayPal Button</string>
-    <string name="paypal_payment_credit_button_description">PayPal Credit Button</string>
-</resources>

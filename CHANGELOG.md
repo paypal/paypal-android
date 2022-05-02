@@ -12,4 +12,6 @@
   * Add `OrderError`
   * Add `OrderErrorDetail`
   * Add `OrderStatus`
+* ThreeDSecure
+  * Add `ThreeDSecureClient`
 
