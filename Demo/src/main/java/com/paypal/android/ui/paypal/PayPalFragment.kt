@@ -8,16 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.services.PayPalDemoApi
-import com.paypal.android.checkoutweb.PayPalWebCheckoutListener
-import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
-import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
-import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
-import com.paypal.android.checkoutweb.PayPalWebCheckoutFundingSource
+import com.paypal.android.checkoutweb.*
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
@@ -51,7 +48,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
 
         val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
-        paypalClient = PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+        paypalClient =
+            PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
         paypalClient.listener = this
 
         binding.submitButton.setOnClickListener { launchWebCheckout() }
@@ -60,6 +58,9 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             launchWebCheckout(PayPalWebCheckoutFundingSource.PAYPAL_CREDIT)
         }
         binding.payPalPayLater.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
+        binding.customizeButton.setOnClickListener {
+            findNavController().navigate(PayPalFragmentDirections.actionPayPalFragmentToPayPalButtonsFragment())
+        }
 
         return binding.root
     }
@@ -106,8 +107,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.creating_order)
-                val parser = JsonParser()
-                val orderJson = parser.parse(OrderUtils.orderWithShipping) as JsonObject
+
+                val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
