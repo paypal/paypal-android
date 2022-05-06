@@ -22,7 +22,6 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.ui.R
 
 @Suppress("TooManyFunctions")
-@RequiresApi(Build.VERSION_CODES.M)
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,

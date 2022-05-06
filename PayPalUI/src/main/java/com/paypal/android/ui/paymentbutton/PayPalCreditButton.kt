@@ -25,7 +25,6 @@ import com.paypal.android.ui.R
  * `payment_button_shape`, and `payment_button_size`.
  *
  */
-@RequiresApi(Build.VERSION_CODES.M)
 class PayPalCreditButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
@@ -43,11 +42,9 @@ class PayPalCreditButton @JvmOverloads constructor(
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
-    override val wordmarkLightLuminanceResId: Int
-        get() = throw UnsupportedOperationException(LUMINANCE_ERROR)
+    override val wordmarkLightLuminanceResId: Int = throw UnsupportedOperationException(LUMINANCE_ERROR)
 
-    override val fundingType: PaymentButtonFundingType
-        get() = PaymentButtonFundingType.PAYPAL_CREDIT
+    override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
     init {
         context.obtainStyledAttributes(attributeSet, R.styleable.PayPalCreditButton).use { typedArray ->
