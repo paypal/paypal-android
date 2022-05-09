@@ -23,17 +23,17 @@
         <entry key="Demo/src/main/res/layout/fragment_pay_pal.xml" value="0.3671875" />
         <entry key="Demo/src/main/res/layout/fragment_payment_button.xml" value="0.30759277343750013" />
         <entry key="Demo/src/main/res/layout/fragment_payment_methods.xml" value="0.1" />
-        <entry key="Demo/src/main/res/layout/fragment_three_d_secure.xml" value="0.3802083333333333" />
         <entry key="Demo/src/main/res/xml/preferences.xml" value="0.3188405797101449" />
         <entry key="Demo/src/main/res/xml/root_preferences.xml" value="0.32382246376811596" />
         <entry key="PayPalNativeCheckout/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.11574074074074074" />
+        <entry key="PayPalUI/src/main/res/drawable/logo_paypal_monochrome.xml" value="0.2630208333333333" />
         <entry key="PayPalUI/src/main/res/drawable/wordmark_paypal_color.xml" value="0.11574074074074074" />
         <entry key="PayPalUI/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.11574074074074074" />
         <entry key="PayPalUI/src/main/res/layout/paypal_payment_button_view.xml" value="0.37604166666666666" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
