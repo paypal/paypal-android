@@ -11,15 +11,21 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
-import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
-import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.PayPalDemoApi
+import com.paypal.android.card.Amount
+import com.paypal.android.card.ApproveOrderCallback
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
+import com.paypal.android.card.CardResult
+import com.paypal.android.card.OrderIntent
+import com.paypal.android.card.OrderRequest
+import com.paypal.android.card.PurchaseUnit
+import com.paypal.android.card.threedsecure.SCA
+import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentCardBinding
@@ -29,6 +35,7 @@ import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -46,15 +53,35 @@ class CardFragment : Fragment() {
     private lateinit var binding: FragmentCardBinding
 
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
-    private val cardClient = CardClient(configuration)
+    private lateinit var cardClient: CardClient
 
     private val cardViewModel: CardViewModel by viewModels()
+
+    private val orderRequest = OrderRequest(
+        OrderIntent.CAPTURE, listOf(
+            PurchaseUnit(
+                referenceId = UUID.randomUUID().toString(),
+                amount = Amount(
+                    currencyCode = "USD",
+                    value = "10.99"
+                )
+            ),
+            PurchaseUnit(
+                referenceId = UUID.randomUUID().toString(),
+                amount = Amount(
+                    currencyCode = "USD",
+                    value = "15.00"
+                )
+            )
+        )
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        cardClient = CardClient(requireActivity(), configuration)
         binding = FragmentCardBinding.inflate(inflater, container, false)
 
         binding.run {
@@ -65,6 +92,11 @@ class CardFragment : Fragment() {
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
             submitButton.setOnClickListener { onCardFieldSubmit() }
+
+            serverSideIntegrationChkbox.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) integrationText.text = getText(R.string.server_integration)
+                else integrationText.text = getText(R.string.client_integration)
+            }
         }
         return binding.root
     }
@@ -110,6 +142,8 @@ class CardFragment : Fragment() {
         val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
+        val isServerSideIntegration = binding.serverSideIntegrationChkbox.isChecked
+        val isThreeDSecure = binding.threedsChkbox.isChecked
 
         val (monthString, yearString) =
             expirationDate.split("/") ?: listOf("", "")
@@ -117,21 +151,67 @@ class CardFragment : Fragment() {
         val card = Card(cardNumber, monthString, yearString)
         card.securityCode = securityCode
 
+        val threeDSecureRequest = if (isThreeDSecure) ThreeDSecureRequest(
+            sca = SCA.SCA_ALWAYS,
+            returnUrl = "com.paypal.android.demo://example.com/returnUrl",
+            cancelUrl = "com.paypal.android.demo://example.com/cancelUrl"
+        ) else
+            null
+
+        if (isServerSideIntegration)
+            serverSideIntegration(card, threeDSecureRequest)
+        else
+            clientSideIntegration(card, threeDSecureRequest)
+    }
+
+    private fun serverSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {
         dataCollectorHandler.setLogging(true)
         lifecycleScope.launch {
             updateStatusText("Creating order...")
             val order = fetchOrder()
-            val request = CardRequest(order.id!!, card)
+            val cardRequest = CardRequest(card)
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
-            try {
-                cardClient.approveOrder(request)
-                updateStatusText("CAPTURE success: CONFIRMED")
-            } catch (error: PayPalSDKError) {
-                updateStatusText("CAPTURE fail: ${error.errorDescription}")
-            }
+            cardClient.approveOrder(
+                orderId = order.id!!,
+                cardRequest = cardRequest,
+                callback = object : ApproveOrderCallback {
+                    override fun success(result: CardResult) {
+                        updateStatusText("Confirmed Order: ${result.orderID}, status: ${result.status.name}")
+                    }
+
+                    override fun failure(error: PayPalSDKError) {
+                        updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                    }
+
+                },
+                threeDSecureRequest = threeDSecureRequest
+            )
         }
+    }
+
+    private fun clientSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {
+        updateStatusText("Creating order and approving order...")
+        val cardRequest = CardRequest(card)
+        // Should we add a callback for when the order is created?
+        //val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
+        //Log.i("Magnes", "MetadataId: $clientMetadataId")
+        cardClient.createAndApproveOrder(
+            orderRequest = orderRequest,
+            cardRequest = cardRequest,
+            callback = object : ApproveOrderCallback {
+                override fun success(result: CardResult) {
+                    updateStatusText("Confirmed Order: ${result.orderID}, status: ${result.status.name}")
+                }
+
+                override fun failure(error: PayPalSDKError) {
+                    updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                }
+
+            },
+            threeDSecureRequest = threeDSecureRequest
+        )
     }
 
     private suspend fun fetchOrder(): Order {
@@ -140,8 +220,8 @@ class CardFragment : Fragment() {
             orderRequest = CreateOrderRequest(
                 intent = "CAPTURE",
                 purchaseUnit = listOf(
-                    PurchaseUnit(
-                        amount = Amount(
+                    com.paypal.android.api.model.PurchaseUnit(
+                        amount = com.paypal.android.api.model.Amount(
                             currencyCode = "USD",
                             value = "10.99"
                         )

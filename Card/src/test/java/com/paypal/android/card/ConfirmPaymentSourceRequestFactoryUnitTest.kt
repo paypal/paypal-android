@@ -10,15 +10,15 @@ import org.robolectric.RobolectricTestRunner
 import org.skyscreamer.jsonassert.JSONAssert
 
 @RunWith(RobolectricTestRunner::class)
-class CardAPIRequestFactoryUnitTest {
+class ConfirmPaymentSourceRequestFactoryUnitTest {
 
     private val orderID = "sample-order-id"
 
-    private lateinit var sut: CardAPIRequestFactory
+    private lateinit var sut: ConfirmPaymentSourceRequestFactory
 
     @Before
     fun beforeEach() {
-        sut = CardAPIRequestFactory()
+        sut = ConfirmPaymentSourceRequestFactory()
     }
 
     @Test

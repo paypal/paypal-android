@@ -1,5 +1,6 @@
 package com.paypal.android.card
 
+import com.paypal.android.card.api.CardAPI
 import com.paypal.android.core.API
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
@@ -45,7 +46,7 @@ class CardAPIUnitTest {
         """
 
     private val api = mockk<API>(relaxed = true)
-    private val requestBuilder = mockk<CardAPIRequestFactory>()
+    private val requestBuilder = mockk<ConfirmPaymentSourceRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24")

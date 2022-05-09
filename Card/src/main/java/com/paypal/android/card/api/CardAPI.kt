@@ -1,24 +1,42 @@
-package com.paypal.android.card
+package com.paypal.android.card.api
 
+import com.paypal.android.card.Card
+import com.paypal.android.card.ConfirmPaymentSourceRequestFactory
+import com.paypal.android.card.CreateOrderRequestFactory
+import com.paypal.android.card.OrderRequest
+import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
 import com.paypal.android.core.APIClientError
+import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpResponse.Companion.SERVER_ERROR
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNDETERMINED
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
 import com.paypal.android.core.OrderErrorDetail
-import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
 import java.net.HttpURLConnection.HTTP_OK
 
 internal class CardAPI(
     private val api: API,
-    private val requestFactory: CardAPIRequestFactory = CardAPIRequestFactory()
 ) {
 
     @Throws(PayPalSDKError::class)
-    suspend fun confirmPaymentSource(orderID: String, card: Card): CardResult {
-        val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card)
+    suspend fun confirmPaymentSource(orderID: String, card: Card, threeDSecureRequest: ThreeDSecureRequest? = null): ConfirmPaymentSourceResponse {
+        return performRequest(
+            ConfirmPaymentSourceRequestFactory.createRequest(orderID, card, threeDSecureRequest),
+            ConfirmPaymentSourceRequestFactory::parseResponse
+        )
+    }
+
+    @Throws(PayPalSDKError::class)
+    suspend fun createOrder(orderRequest: OrderRequest, threeDSecureRequest: ThreeDSecureRequest? = null): CreateOrderResponse {
+        return performRequest(
+            CreateOrderRequestFactory.createRequest(orderRequest, threeDSecureRequest),
+            CreateOrderRequestFactory::parseResponse
+        )
+    }
+
+    private suspend fun <R> performRequest(apiRequest: APIRequest, parseResult: (body: String, correlationId: String?) -> R): R {
         val httpResponse = api.send(apiRequest)
         val correlationID = httpResponse.headers["Paypal-Debug-Id"]
 
@@ -28,25 +46,14 @@ internal class CardAPI(
         }
 
         val status = httpResponse.status
-        if (status == HTTP_OK) {
-            return parseCardResult(bodyResponse, correlationID)
+        if (status in HTTP_OK.. 299) {
+            return parseResult(bodyResponse, correlationID)
         } else {
-            throw parseCardError(status, bodyResponse, correlationID)
+            throw parseError(status, bodyResponse, correlationID)
         }
     }
 
-    private fun parseCardResult(bodyResponse: String, correlationID: String?): CardResult =
-        runCatching {
-            val json = PaymentsJSON(bodyResponse)
-            val status = json.getString("status")
-            val id = json.getString("id")
-
-            CardResult(id, OrderStatus.valueOf(status))
-        }.recover {
-            throw APIClientError.dataParsingError(correlationID)
-        }.getOrNull()!!
-
-    private fun parseCardError(
+    private fun parseError(
         status: Int,
         bodyResponse: String,
         correlationID: String?

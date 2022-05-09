@@ -22,13 +22,13 @@ class ThreeDSecureClient internal constructor(private val activity: FragmentActi
     }
 
     suspend fun verify(cardRequest: CardRequest) {
-        val result = cardRequest.run { threeDSecureAPI.verifyCard(orderID, card) }
+        //val result = cardRequest.run { threeDSecureAPI.verifyCard(orderID, card) }
 
         // FUTURE: inspect URL for 3DS verification success / failure
-        val options = BrowserSwitchOptions()
-            .url(Uri.parse(result.payerActionHref))
-            .returnUrlScheme("com.paypal.android.demo")
-        browserSwitchClient.start(activity, options)
+//        val options = BrowserSwitchOptions()
+//            .url(Uri.parse(result.payerActionHref))
+//            .returnUrlScheme("com.paypal.android.demo")
+//        browserSwitchClient.start(activity, options)
     }
 
     internal fun handleBrowserSwitchResult() {

@@ -45,7 +45,7 @@ class ThreeDSecureFragment : Fragment() {
     private lateinit var binding: FragmentThreeDSecureBinding
 
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
-    private val threeDSecureClient = ThreeDSecureClient(requireActivity(), configuration)
+    private lateinit var threeDSecureClient : ThreeDSecureClient
 
     private val cardViewModel: CardViewModel by viewModels()
 
@@ -54,6 +54,7 @@ class ThreeDSecureFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        threeDSecureClient = ThreeDSecureClient(requireActivity(), configuration)
         binding = FragmentThreeDSecureBinding.inflate(inflater, container, false)
         binding.run {
             autoCompleteTextView.setAdapter(createPrefillCardsAdapter())
@@ -119,7 +120,7 @@ class ThreeDSecureFragment : Fragment() {
         lifecycleScope.launch {
             updateStatusText("Creating order...")
             val order = fetchOrder(true)
-            val request = CardRequest(order.id!!, card)
+            val request = CardRequest(card)
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")

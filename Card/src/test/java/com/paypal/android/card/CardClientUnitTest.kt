@@ -1,5 +1,6 @@
 package com.paypal.android.card
 
+import com.paypal.android.card.api.CardAPI
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import io.mockk.coEvery
