@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.paypal.android">
 
+    <!-- We add this so that we can test on API 21, because NXO doesn't support below 23 (for now)  -->
+    <uses-sdk tools:overrideLibrary="com.paypal.android.checkout"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
