@@ -8,9 +8,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        // TODO: revert once Native XO supports minSdk 21
-        //minSdkVersion 21
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion modules.androidTargetVersion
         versionCode modules.sdkVersionCode
         versionName modules.sdkVersionName
