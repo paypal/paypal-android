@@ -6,7 +6,7 @@ import com.paypal.android.ui.R
 
 
 /**
- * PayLaterButton provides a PayPal PayLater button with the ability to modify the [color], [label], [shape],
+ * PayLaterButton provides a PayPal PayLater button with the ability to modify the [color], [shape],
  * and [size].
  *
  * Setting up PayLaterButton within an XML layout:
@@ -45,8 +45,7 @@ class PayLaterButton @JvmOverloads constructor(
     override val wordmarkLightLuminanceResId: Int
         get() = R.drawable.logo_paypal_color
 
-    override val fundingType: PaymentButtonFundingType
-        get() = PaymentButtonFundingType.PAY_LATER
+    override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAY_LATER
 
     init {
         updateLabel(PayPalButtonLabel.PAY_LATER)
