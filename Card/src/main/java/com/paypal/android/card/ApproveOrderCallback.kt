@@ -19,4 +19,14 @@ interface ApproveOrderCallback {
      * @param error [PayPalSDKError] explaining the reason for failure.
      */
     fun failure(error: PayPalSDKError)
+
+    /**
+     * Called when user cancels the flow.
+     */
+    fun cancelled()
+
+    /**
+     * Called when the 3DS challenge will launch
+     */
+    fun threeDSecureLaunched()
 }

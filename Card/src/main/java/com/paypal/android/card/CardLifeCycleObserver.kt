@@ -1,13 +1,20 @@
 package com.paypal.android.card
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 
 internal class CardLifeCycleObserver(private val cardClient: CardClient) :
-    LifecycleObserver {
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun resume() {
-        cardClient.handleBrowserSwitchResult()
+    DefaultLifecycleObserver {
+
+    private var isFirstEventHandled = false
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+        // We want to ignore any previous onResume events before this class was instantiated
+        if (isFirstEventHandled) {
+            cardClient.handleBrowserSwitchResult()
+        } else {
+            isFirstEventHandled = true
+        }
     }
 }

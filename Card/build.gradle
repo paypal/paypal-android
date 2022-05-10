@@ -57,6 +57,9 @@ dependencies {
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+
+    implementation deps.androidxLifecycleCommonJava
+
 }
 
 project.ext.name = "card"

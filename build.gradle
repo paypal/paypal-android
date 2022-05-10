@@ -25,6 +25,7 @@ buildscript {
             "constraintLayout"            : "androidx.constraintlayout:constraintlayout:2.1.0",
             "kotlinxAndroidCoroutines"    : "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0",
             "androidxLifecycleRuntimeKtx" : "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1",
+            "androidxLifecycleCommonJava" : "androidx.lifecycle:lifecycle-common-java8:2.4.1",
             "fragmentKtx"                 : "androidx.fragment:fragment-ktx:1.1.0",
 
             // Jetpack Compose

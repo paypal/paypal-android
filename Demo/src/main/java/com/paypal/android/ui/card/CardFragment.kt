@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
+import com.paypal.android.api.model.ApplicationContext
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
@@ -168,7 +169,7 @@ class CardFragment : Fragment() {
         dataCollectorHandler.setLogging(true)
         lifecycleScope.launch {
             updateStatusText("Creating order...")
-            val order = fetchOrder()
+            val order = fetchOrder(threeDSecureRequest)
             val cardRequest = CardRequest(card)
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
@@ -178,11 +179,23 @@ class CardFragment : Fragment() {
                 cardRequest = cardRequest,
                 callback = object : ApproveOrderCallback {
                     override fun success(result: CardResult) {
+                        var statusText = "Confirmed Order: ${result.orderID}, status: ${result.status.name}"
+                        result.threeDSecureResult?.let {
+                            statusText+= ", liability shift: ${it.liabilityShift}"
+                        }
                         updateStatusText("Confirmed Order: ${result.orderID}, status: ${result.status.name}")
                     }
 
                     override fun failure(error: PayPalSDKError) {
                         updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                    }
+
+                    override fun cancelled() {
+                        updateStatusText("USER CANCELLED")
+                    }
+
+                    override fun threeDSecureLaunched() {
+                        updateStatusText("3DS launched")
                     }
 
                 },
@@ -202,6 +215,10 @@ class CardFragment : Fragment() {
             cardRequest = cardRequest,
             callback = object : ApproveOrderCallback {
                 override fun success(result: CardResult) {
+                    var statusText = "Confirmed Order: ${result.orderID}, status: ${result.status.name}"
+                    result.threeDSecureResult?.let {
+                        statusText+= "\nLiability shift: ${it.liabilityShift}"
+                    }
                     updateStatusText("Confirmed Order: ${result.orderID}, status: ${result.status.name}")
                 }
 
@@ -209,28 +226,43 @@ class CardFragment : Fragment() {
                     updateStatusText("CAPTURE fail: ${error.errorDescription}")
                 }
 
+                override fun cancelled() {
+                    updateStatusText("USER CANCELLED")
+                }
+
+                override fun threeDSecureLaunched() {
+                    updateStatusText("3DS launched")
+                }
+
             },
             threeDSecureRequest = threeDSecureRequest
         )
     }
 
-    private suspend fun fetchOrder(): Order {
+    private suspend fun fetchOrder(threeDSecureRequest: ThreeDSecureRequest?): Order {
+        val createOrderRequest =  CreateOrderRequest(
+            intent = "CAPTURE",
+            purchaseUnit = listOf(
+                com.paypal.android.api.model.PurchaseUnit(
+                    amount = com.paypal.android.api.model.Amount(
+                        currencyCode = "USD",
+                        value = "10.99"
+                    )
+                )
+            ),
+            payee = Payee(
+                emailAddress = "anpelaez@paypal.com"
+            )
+        )
+        threeDSecureRequest?.let {
+            createOrderRequest.applicationContext = ApplicationContext(
+                returnURL = "com.paypal.android.demo://example.com/returnUrl",
+                cancelURL = "com.paypal.android.demo://example.com/cancelUrl"
+            )
+        }
         return payPalDemoApi.fetchOrderId(
             countryCode = "CO",
-            orderRequest = CreateOrderRequest(
-                intent = "CAPTURE",
-                purchaseUnit = listOf(
-                    com.paypal.android.api.model.PurchaseUnit(
-                        amount = com.paypal.android.api.model.Amount(
-                            currencyCode = "USD",
-                            value = "10.99"
-                        )
-                    )
-                ),
-                payee = Payee(
-                    emailAddress = "anpelaez@paypal.com"
-                )
-            )
+            orderRequest = createOrderRequest
         )
     }
 
