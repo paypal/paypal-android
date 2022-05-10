@@ -1,9 +1,7 @@
 package com.paypal.android.ui.paymentbutton
 
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
-import androidx.annotation.RequiresApi
 import com.paypal.android.ui.R
 
 
@@ -22,7 +20,6 @@ import com.paypal.android.ui.R
  * Optionally you can provide the following attributes: `paypal_color`, `paypal_label`,
  * `payment_button_shape`, and `payment_button_size`.
  */
-@RequiresApi(Build.VERSION_CODES.M)
 class PayLaterButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
@@ -30,7 +27,8 @@ class PayLaterButton @JvmOverloads constructor(
 ) : PayPalButton(context, attributeSet, defStyleAttr) {
 
     /**
-     * Provides the label of the [PayLaterButton]. This value will always be [PAY_LATER], attempting
+     * Provides the label of the [PayLaterButton]. This value will always be
+     * [PaymentButtonFundingType.PAY_LATER], attempting
      * to set the value to anything else will result in that value being ignored.
      */
     override var label: PayPalButtonLabel = PayPalButtonLabel.PAY_LATER
