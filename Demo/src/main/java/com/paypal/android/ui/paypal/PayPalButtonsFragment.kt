@@ -10,7 +10,15 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.fragment.app.Fragment
 import com.paypal.android.databinding.FragmentPaypalButtonsStylingBinding
-import com.paypal.android.ui.paymentbutton.*
+import com.paypal.android.ui.paymentbutton.PayLaterButton
+import com.paypal.android.ui.paymentbutton.PayPalButton
+import com.paypal.android.ui.paymentbutton.PayPalButtonColor
+import com.paypal.android.ui.paymentbutton.PayPalButtonLabel
+import com.paypal.android.ui.paymentbutton.PayPalCreditButton
+import com.paypal.android.ui.paymentbutton.PayPalCreditButtonColor
+import com.paypal.android.ui.paymentbutton.PaymentButtonColor
+import com.paypal.android.ui.paymentbutton.PaymentButtonShape
+import com.paypal.android.ui.paymentbutton.PaymentButtonSize
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -62,10 +70,7 @@ class PayPalButtonsFragment : Fragment() {
             showStyledButton()
         }
 
-        override fun onNothingSelected(p0: AdapterView<*>?) {
-            //Do Nothing
-        }
-
+        override fun onNothingSelected(p0: AdapterView<*>?) = Unit
     }
 
     override fun onCreateView(
@@ -180,5 +185,4 @@ class PayPalButtonsFragment : Fragment() {
                 size = selectedSize
             }
         }
-
 }
