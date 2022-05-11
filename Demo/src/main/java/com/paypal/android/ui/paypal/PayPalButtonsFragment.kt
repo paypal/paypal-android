@@ -91,60 +91,40 @@ class PayPalButtonsFragment : Fragment() {
     }
 
     private fun initPaymentButtonSizeSpinner() {
-        binding.paymentButtonSizeSpinner.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_list_item_1,
-            PaymentButtonSize.values()
-        )
+        binding.paymentButtonSizeSpinner.adapter = simpleArrayAdapter(PaymentButtonSize.values())
         binding.paymentButtonSizeSpinner.onItemSelectedListener = itemSelectionListener
     }
 
+    private fun <T> simpleArrayAdapter(items: Array<T>) = ArrayAdapter(
+        requireContext(),
+        android.R.layout.simple_list_item_1,
+        items
+    )
+
     private fun initPaymentButtonShapeSpinner() {
-        binding.paymentButtonShapeSpinner.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_list_item_1,
-            PaymentButtonShape.values()
-        )
+        binding.paymentButtonShapeSpinner.adapter = simpleArrayAdapter(PaymentButtonShape.values())
         binding.paymentButtonShapeSpinner.onItemSelectedListener = itemSelectionListener
     }
 
     private fun initPaymentButtonLabelSpinner() {
         binding.paymentButtonLabelSpinner.adapter = when (selectedButtonFundingType) {
-            ButtonFundingType.PAYPAL -> ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_list_item_1,
-                PayPalButtonLabel.values()
-            )
-            else -> ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_list_item_1,
-                listOf("N/A")
-            )
+            ButtonFundingType.PAYPAL -> simpleArrayAdapter(PayPalButtonLabel.values())
+            else -> simpleArrayAdapter(arrayOf("N/A"))
         }
         binding.paymentButtonLabelSpinner.onItemSelectedListener = itemSelectionListener
     }
 
     private fun initFundingTypesSpinner() {
-        binding.paymentButtonFundingSpinner.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_list_item_1,
-            ButtonFundingType.values()
-        )
+        binding.paymentButtonFundingSpinner.adapter = simpleArrayAdapter(ButtonFundingType.values())
         binding.paymentButtonFundingSpinner.onItemSelectedListener = itemSelectionListener
     }
 
     private fun initPaymentButtonColorSpinner() {
         binding.paymentButtonColorSpinner.adapter = when (selectedButtonFundingType) {
-            ButtonFundingType.PAYPAL, ButtonFundingType.PAY_LATER -> ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_list_item_1,
+            ButtonFundingType.PAYPAL, ButtonFundingType.PAY_LATER -> simpleArrayAdapter(
                 PayPalButtonColor.values()
             )
-            ButtonFundingType.PAYPAL_CREDIT -> ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_list_item_1,
-                PayPalCreditButtonColor.values()
-            )
+            ButtonFundingType.PAYPAL_CREDIT -> simpleArrayAdapter(PayPalCreditButtonColor.values())
         }
         binding.paymentButtonColorSpinner.onItemSelectedListener = itemSelectionListener
     }

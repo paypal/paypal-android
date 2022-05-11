@@ -2,9 +2,7 @@ package com.paypal.android.ui.paymentbutton
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.os.Build
 import android.util.AttributeSet
-import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
 import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
@@ -44,14 +42,16 @@ class PayPalCreditButton @JvmOverloads constructor(
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
-    override val wordmarkLightLuminanceResId: Int = throw UnsupportedOperationException(LUMINANCE_ERROR)
+    override val wordmarkLightLuminanceResId: Int
+        get() = throw UnsupportedOperationException(LUMINANCE_ERROR)
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
     init {
-        context.obtainStyledAttributes(attributeSet, R.styleable.PayPalCreditButton).use { typedArray ->
-            updateColorFrom(typedArray)
-        }
+        context.obtainStyledAttributes(attributeSet, R.styleable.PayPalCreditButton)
+            .use { typedArray ->
+                updateColorFrom(typedArray)
+            }
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
     }
 
