@@ -24,7 +24,7 @@ import kotlin.coroutines.CoroutineContext
 class CardClient internal constructor(
     private val activity: FragmentActivity,
     private val cardAPI: CardAPI,
-    private val coroutineContext: CoroutineContext //this could be moved to each approve function
+    private val coroutineContext: CoroutineContext // this could be moved to each approve function
 ) {
 
     private val browserSwitchClient = BrowserSwitchClient()
@@ -127,19 +127,15 @@ class CardClient internal constructor(
     }
 
     internal fun handleBrowserSwitchResult() {
-        val result = browserSwitchClient.deliverResult(activity)
-        result?.let { browserSwitchResult ->
-            approveOrderCallback?.let {
-                confirmPaymentSourceResponse?.let { response ->
-                    when (result.status) {
-                        BrowserSwitchStatus.SUCCESS -> deliverSuccess(browserSwitchResult, response)
-                        BrowserSwitchStatus.CANCELED -> deliverCancellation()
-                    }
-                    confirmPaymentSourceResponse = null
-                    approveOrderCallback = null
-                    lifeCycleObserver?.let { activity.lifecycle.removeObserver(it) }
-                }
+        val browserSwitchResult = browserSwitchClient.deliverResult(activity)
+        if (browserSwitchResult != null && approveOrderCallback != null && confirmPaymentSourceResponse != null) {
+            when (browserSwitchResult.status) {
+                BrowserSwitchStatus.SUCCESS -> deliverSuccess(browserSwitchResult, confirmPaymentSourceResponse!!)
+                BrowserSwitchStatus.CANCELED -> deliverCancellation()
             }
+            confirmPaymentSourceResponse = null
+            approveOrderCallback = null
+            lifeCycleObserver?.let { activity.lifecycle.removeObserver(it) }
         }
     }
 

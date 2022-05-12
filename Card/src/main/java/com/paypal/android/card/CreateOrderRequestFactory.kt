@@ -1,5 +1,4 @@
 package com.paypal.android.card
-
 import com.paypal.android.card.api.CreateOrderResponse
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.APIClientError
@@ -12,11 +11,11 @@ import org.json.JSONException
 
 internal object CreateOrderRequestFactory {
 
-    // TODO: remove threeDSecure once confirm_payment_source supports it
     fun createRequest(
         orderRequest: OrderRequest,
         threeDSecureRequest: ThreeDSecureRequest? = null
     ): APIRequest {
+        // remove threeDSecure once confirm_payment_source supports it
         val path = "v2/checkout/orders"
         val body = """
             {
@@ -61,6 +60,6 @@ internal object CreateOrderRequestFactory {
             val id = json.getString("id")
             CreateOrderResponse(id, OrderStatus.valueOf(status))
         } catch (e: JSONException) {
-            throw APIClientError.dataParsingError(correlationId)
+            throw APIClientError.dataParsingError(correlationId, e)
         }
 }

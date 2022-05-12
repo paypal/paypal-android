@@ -6,6 +6,7 @@ import com.paypal.android.card.CreateOrderRequestFactory
 import com.paypal.android.card.OrderRequest
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
+import com.paypal.android.core.API.Companion.SUCCESSFUL_STATUS_CODES
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpResponse.Companion.SERVER_ERROR
@@ -14,14 +15,17 @@ import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
 import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
-import java.net.HttpURLConnection.HTTP_OK
 
 internal class CardAPI(
     private val api: API,
 ) {
 
     @Throws(PayPalSDKError::class)
-    suspend fun confirmPaymentSource(orderID: String, card: Card, threeDSecureRequest: ThreeDSecureRequest? = null): ConfirmPaymentSourceResponse {
+    suspend fun confirmPaymentSource(
+        orderID: String,
+        card: Card,
+        threeDSecureRequest: ThreeDSecureRequest? = null
+    ): ConfirmPaymentSourceResponse {
         return performRequest(
             ConfirmPaymentSourceRequestFactory.createRequest(orderID, card, threeDSecureRequest),
             ConfirmPaymentSourceRequestFactory::parseResponse
@@ -29,14 +33,20 @@ internal class CardAPI(
     }
 
     @Throws(PayPalSDKError::class)
-    suspend fun createOrder(orderRequest: OrderRequest, threeDSecureRequest: ThreeDSecureRequest? = null): CreateOrderResponse {
+    suspend fun createOrder(
+        orderRequest: OrderRequest,
+        threeDSecureRequest: ThreeDSecureRequest? = null
+    ): CreateOrderResponse {
         return performRequest(
             CreateOrderRequestFactory.createRequest(orderRequest, threeDSecureRequest),
             CreateOrderRequestFactory::parseResponse
         )
     }
 
-    private suspend fun <R> performRequest(apiRequest: APIRequest, parseResult: (body: String, correlationId: String?) -> R): R {
+    private suspend fun <R> performRequest(
+        apiRequest: APIRequest,
+        parseResult: (body: String, correlationId: String?) -> R
+    ): R {
         val httpResponse = api.send(apiRequest)
         val correlationID = httpResponse.headers["Paypal-Debug-Id"]
 
@@ -46,7 +56,7 @@ internal class CardAPI(
         }
 
         val status = httpResponse.status
-        if (status in HTTP_OK.. 299) {
+        if (status in SUCCESSFUL_STATUS_CODES) {
             return parseResult(bodyResponse, correlationID)
         } else {
             throw parseError(status, bodyResponse, correlationID)

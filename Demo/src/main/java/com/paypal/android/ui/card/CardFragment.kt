@@ -36,7 +36,7 @@ import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -86,7 +86,14 @@ class CardFragment : Fragment() {
         binding = FragmentCardBinding.inflate(inflater, container, false)
 
         binding.run {
-            autoCompleteTextView.setAdapter(createPrefillCardsAdapter())
+            val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
+            autoCompleteTextView.setAdapter(
+                ArrayAdapter(
+                    requireActivity(),
+                    R.layout.dropdown_item,
+                    autoFillCardNames
+                )
+            )
 
             autoCompleteTextView.onValueChange = ::onPrefillCardChange
             cardNumberInput.onValueChange = ::onCardNumberChange
@@ -134,11 +141,6 @@ class CardFragment : Fragment() {
         binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
     }
 
-    private fun createPrefillCardsAdapter(): ArrayAdapter<String> {
-        val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
-        return ArrayAdapter(requireActivity(), R.layout.dropdown_item, autoFillCardNames)
-    }
-
     private fun onCardFieldSubmit() {
         val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
@@ -152,17 +154,21 @@ class CardFragment : Fragment() {
         val card = Card(cardNumber, monthString, yearString)
         card.securityCode = securityCode
 
-        val threeDSecureRequest = if (isThreeDSecure) ThreeDSecureRequest(
-            sca = SCA.SCA_ALWAYS,
-            returnUrl = "com.paypal.android.demo://example.com/returnUrl",
-            cancelUrl = "com.paypal.android.demo://example.com/cancelUrl"
-        ) else
+        val threeDSecureRequest = if (isThreeDSecure) {
+            ThreeDSecureRequest(
+                sca = SCA.SCA_ALWAYS,
+                returnUrl = "com.paypal.android.demo://example.com/returnUrl",
+                cancelUrl = "com.paypal.android.demo://example.com/cancelUrl"
+            )
+        } else {
             null
+        }
 
-        if (isServerSideIntegration)
+        if (isServerSideIntegration) {
             serverSideIntegration(card, threeDSecureRequest)
-        else
+        } else {
             clientSideIntegration(card, threeDSecureRequest)
+        }
     }
 
     private fun serverSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {
@@ -179,15 +185,15 @@ class CardFragment : Fragment() {
                 cardRequest = cardRequest,
                 callback = object : ApproveOrderCallback {
                     override fun success(result: CardResult) {
-                        var statusText = "Confirmed Order: ${result.orderID}, status: ${result.status.name}"
+                        var statusText = "Confirmed Order: ${ result.orderID }, status: ${ result.status.name }"
                         result.threeDSecureResult?.let {
-                            statusText+= ", liability shift: ${it.liabilityShift}"
+                            statusText += ", liability shift: ${ it.liabilityShift }"
                         }
-                        updateStatusText("Confirmed Order: ${result.orderID}, status: ${result.status.name}")
+                        updateStatusText("Confirmed Order: ${ result.orderID }, status: ${ result.status.name }")
                     }
 
                     override fun failure(error: PayPalSDKError) {
-                        updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                        updateStatusText("CAPTURE fail: ${ error.errorDescription }")
                     }
 
                     override fun cancelled() {
@@ -197,7 +203,6 @@ class CardFragment : Fragment() {
                     override fun threeDSecureLaunched() {
                         updateStatusText("3DS launched")
                     }
-
                 },
                 threeDSecureRequest = threeDSecureRequest
             )
@@ -208,22 +213,22 @@ class CardFragment : Fragment() {
         updateStatusText("Creating order and approving order...")
         val cardRequest = CardRequest(card)
         // Should we add a callback for when the order is created?
-        //val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-        //Log.i("Magnes", "MetadataId: $clientMetadataId")
+        // val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
+        // Log.i("Magnes", "MetadataId: $clientMetadataId")
         cardClient.createAndApproveOrder(
             orderRequest = orderRequest,
             cardRequest = cardRequest,
             callback = object : ApproveOrderCallback {
                 override fun success(result: CardResult) {
-                    var statusText = "Confirmed Order: ${result.orderID}, status: ${result.status.name}"
+                    var statusText = "Confirmed Order: ${ result.orderID }, status: ${ result.status.name }"
                     result.threeDSecureResult?.let {
-                        statusText+= "\nLiability shift: ${it.liabilityShift}"
+                        statusText += "\nLiability shift: ${ it.liabilityShift }"
                     }
-                    updateStatusText("Confirmed Order: ${result.orderID}, status: ${result.status.name}")
+                    updateStatusText("Confirmed Order: ${ result.orderID }, status: ${ result.status.name }")
                 }
 
                 override fun failure(error: PayPalSDKError) {
-                    updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                    updateStatusText("CAPTURE fail: ${ error.errorDescription }")
                 }
 
                 override fun cancelled() {
@@ -233,14 +238,13 @@ class CardFragment : Fragment() {
                 override fun threeDSecureLaunched() {
                     updateStatusText("3DS launched")
                 }
-
             },
             threeDSecureRequest = threeDSecureRequest
         )
     }
 
     private suspend fun fetchOrder(threeDSecureRequest: ThreeDSecureRequest?): Order {
-        val createOrderRequest =  CreateOrderRequest(
+        val createOrderRequest = CreateOrderRequest(
             intent = "CAPTURE",
             purchaseUnit = listOf(
                 com.paypal.android.api.model.PurchaseUnit(

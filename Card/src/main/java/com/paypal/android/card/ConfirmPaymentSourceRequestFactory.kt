@@ -1,7 +1,6 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.api.ConfirmPaymentSourceResponse
-import com.paypal.android.card.api.CreateOrderResponse
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.APIRequest
@@ -9,7 +8,6 @@ import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -43,7 +41,7 @@ internal object ConfirmPaymentSourceRequestFactory {
             val attributesJSON = JSONObject()
                 .put("verification", verificationJSON)
             cardJSON.put("attributes", attributesJSON)
-            //TODO: add return and cancel url when its supported
+            // add return and cancel url when its supported
         }
 
         val paymentSourceJSON = JSONObject().put("card", cardJSON)
@@ -68,6 +66,6 @@ internal object ConfirmPaymentSourceRequestFactory {
             val payerActionHref = payerActionLink?.getString("href")
             ConfirmPaymentSourceResponse(id, OrderStatus.valueOf(status), payerActionHref)
         } catch (e: JSONException) {
-            throw APIClientError.dataParsingError(correlationId)
+            throw APIClientError.dataParsingError(correlationId, e)
         }
 }

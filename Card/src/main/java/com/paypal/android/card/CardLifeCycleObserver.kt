@@ -3,8 +3,7 @@ package com.paypal.android.card
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
-internal class CardLifeCycleObserver(private val cardClient: CardClient) :
-    DefaultLifecycleObserver {
+internal class CardLifeCycleObserver(private val cardClient: CardClient) : DefaultLifecycleObserver {
 
     private var isFirstEventHandled = false
 
