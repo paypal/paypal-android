@@ -67,15 +67,14 @@ class CardClient internal constructor(
     }
 
     /**
-     * Creates order and confirms [Card] payment source for said order.
+     * Creates order and confirms [Card] payment source for said order. Its private until phase 2
      *
      * @param orderRequest [String] order to create
      * @param cardRequest [CardRequest] for requesting an order approval
      * @param threeDSecureRequest [threeDSecureRequest] to run transaction with 3DS
      * @param callback [ApproveOrderCallback] callback for responses
      */
-    @JvmOverloads
-    fun createAndApproveOrder(
+    private fun createAndApproveOrder(
         orderRequest: OrderRequest,
         cardRequest: CardRequest,
         threeDSecureRequest: ThreeDSecureRequest? = null,
