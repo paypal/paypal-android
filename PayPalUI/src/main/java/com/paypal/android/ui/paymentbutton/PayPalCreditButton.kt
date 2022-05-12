@@ -2,12 +2,12 @@ package com.paypal.android.ui.paymentbutton
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.os.Build
 import android.util.AttributeSet
-import androidx.annotation.RequiresApi
 import androidx.core.content.res.use
 import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
+import com.paypal.android.ui.paymentbutton.PayPalCreditButtonColor.BLACK
+import com.paypal.android.ui.paymentbutton.PayPalCreditButtonColor.DARK_BLUE
 
 /**
  * PayPalCreditButton provides a PayPal Credit button with the ability to modify the [color], [shape],
@@ -29,12 +29,12 @@ class PayPalCreditButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : PaymentButton<PayPalButtonColor>(context, attributeSet, defStyleAttr) {
+) : PaymentButton<PayPalCreditButtonColor>(context, attributeSet, defStyleAttr) {
 
     /**
      * Updates the color of the Payment Button with the provided [PayPalCreditButtonColor].
      */
-    override var color: PaymentButtonColor = PayPalCreditButtonColor.DARK_BLUE
+    override var color: PaymentButtonColor = DARK_BLUE
         set(value) {
             field = value
             updateShapeDrawableFillColor(field)
@@ -42,21 +42,23 @@ class PayPalCreditButton @JvmOverloads constructor(
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
-    override val wordmarkLightLuminanceResId: Int = throw UnsupportedOperationException(LUMINANCE_ERROR)
+    override val wordmarkLightLuminanceResId: Int
+        get() = throw UnsupportedOperationException(LUMINANCE_ERROR)
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
     init {
-        context.obtainStyledAttributes(attributeSet, R.styleable.PayPalCreditButton).use { typedArray ->
-            updateColorFrom(typedArray)
-        }
+        context.obtainStyledAttributes(attributeSet, R.styleable.PayPalCreditButton)
+            .use { typedArray ->
+                updateColorFrom(typedArray)
+            }
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {
         val attribute = typedArray.getInt(
             R.styleable.PayPalCreditButton_paypal_credit_color,
-            PayPalCreditButtonColor.DARK_BLUE.value
+            DARK_BLUE.value
         )
         color = PayPalCreditButtonColor(attribute)
     }
