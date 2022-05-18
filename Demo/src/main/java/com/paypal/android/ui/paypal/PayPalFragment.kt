@@ -23,8 +23,15 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.graphql.common.GraphQlClientImpl
+import com.paypal.android.core.graphql.fundingEligibility.FundingEligibilityQuery
+import com.paypal.android.core.graphql.fundingEligibility.Intent
+import com.paypal.android.core.graphql.fundingEligibility.SupportedCountryCurrencyType
+import com.paypal.android.core.graphql.fundingEligibility.SupportedPaymentMethodsType
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
@@ -65,6 +72,19 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         binding.customizeButton.setOnClickListener {
             findNavController().navigate(PayPalFragmentDirections.actionPayPalFragmentToPayPalButtonsFragment())
         }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val graphQlClient = GraphQlClientImpl()
+            val fundingEligibilityQuery = FundingEligibilityQuery(
+                clientId = coreConfig.clientId,
+                intent = Intent.CAPTURE,
+                currencyCode = SupportedCountryCurrencyType.USD,
+                enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
+            )
+            val response = graphQlClient.executeQuery(fundingEligibilityQuery)
+            Log.d(TAG, response.toString())
+        }
+
 
         return binding.root
     }
