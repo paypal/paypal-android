@@ -73,7 +73,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             findNavController().navigate(PayPalFragmentDirections.actionPayPalFragmentToPayPalButtonsFragment())
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch {
             val graphQlClient = GraphQlClientImpl()
             val fundingEligibilityQuery = FundingEligibilityQuery(
                 clientId = coreConfig.clientId,
