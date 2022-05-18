@@ -1,15 +1,6 @@
-package com.paypal.android.core.graphql.fundingEligibility
+package com.paypal.android.core.graphql.fundingEligibility.models
 
-import com.paypal.android.core.graphql.common.getJSONArrayOrNull
-import com.paypal.android.core.graphql.common.toStringsList
 import org.json.JSONObject
-
-data class FundingEligibilityResponse(
-    private val jsonObject: JSONObject,
-    val fundingEligibility: FundingEligibility = FundingEligibility(
-        jsonObject.getJSONObject("fundingEligibility")
-    )
-)
 
 data class FundingEligibility(
     private val jsonObject: JSONObject,
@@ -28,10 +19,4 @@ data class FundingEligibility(
     val credit: SupportedPaymentMethodsTypeEligibility = SupportedPaymentMethodsTypeEligibility(
         jsonObject.getJSONObject("credit")
     ),
-)
-
-data class SupportedPaymentMethodsTypeEligibility(
-    private val jsonObject: JSONObject,
-    val eligible: Boolean = jsonObject.getBoolean("eligible"),
-    val reasons: List<String>? = jsonObject.getJSONArrayOrNull("reasons").toStringsList()
 )

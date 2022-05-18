@@ -3,7 +3,7 @@ package com.paypal.android.core
 import org.json.JSONObject
 import java.net.URL
 
-class GraphQlRequestFactory {
+internal class GraphQLRequestFactory {
 
     fun createHttpRequestFromQuery(requestBody: JSONObject): HttpRequest {
         return HttpRequest(

@@ -1,11 +1,15 @@
 package com.paypal.android.core.graphql.fundingEligibility
 
 import com.paypal.android.core.graphql.common.Query
+import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibilityIntent
+import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibilityResponse
+import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountryCurrencyType
+import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 import org.json.JSONObject
 
 class FundingEligibilityQuery(
     private val clientId: String,
-    private val intent: Intent,
+    private val fundingEligibilityIntent: FundingEligibilityIntent,
     private val currencyCode: SupportedCountryCurrencyType,
     private val enableFunding: List<SupportedPaymentMethodsType>
 ) : Query<FundingEligibilityResponse>() {
@@ -14,7 +18,7 @@ class FundingEligibilityQuery(
         get() = mapOf(
             PARAM_CLIENT_ID to clientId,
             PARAM_CURRENCY to currencyCode,
-            PARAM_INTENT to intent,
+            PARAM_INTENT to fundingEligibilityIntent,
             PARAM_ENABLE_FUNDING to enableFunding
         )
 
@@ -54,5 +58,4 @@ class FundingEligibilityQuery(
     override fun parse(jsonObject: JSONObject): FundingEligibilityResponse {
         return FundingEligibilityResponse(jsonObject)
     }
-
 }

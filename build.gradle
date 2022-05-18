@@ -8,7 +8,7 @@ buildscript {
     ]
 
     ext.versions = [
-            "kotlin"    : "1.5.21",
+            "kotlin"    : "1.6.21",
             "compose"   : "1.0.2",
             "navigation": "2.3.5",
             "hilt"      : "2.38.1"
@@ -78,7 +78,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.4"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.navigation}"
         classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"

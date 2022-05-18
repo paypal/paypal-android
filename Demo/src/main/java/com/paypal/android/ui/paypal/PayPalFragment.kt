@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.gson.JsonObject
@@ -23,15 +24,9 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.core.graphql.common.GraphQlClientImpl
-import com.paypal.android.core.graphql.fundingEligibility.FundingEligibilityQuery
-import com.paypal.android.core.graphql.fundingEligibility.Intent
-import com.paypal.android.core.graphql.fundingEligibility.SupportedCountryCurrencyType
-import com.paypal.android.core.graphql.fundingEligibility.SupportedPaymentMethodsType
+import com.paypal.android.core.api.models.APIResult
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
@@ -50,6 +45,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     lateinit var payPalDemoApi: PayPalDemoApi
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
+
+    private val viewModel: PayPalViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,20 +70,20 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             findNavController().navigate(PayPalFragmentDirections.actionPayPalFragmentToPayPalButtonsFragment())
         }
 
-        lifecycleScope.launch {
-            val graphQlClient = GraphQlClientImpl()
-            val fundingEligibilityQuery = FundingEligibilityQuery(
-                clientId = coreConfig.clientId,
-                intent = Intent.CAPTURE,
-                currencyCode = SupportedCountryCurrencyType.USD,
-                enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
-            )
-            val response = graphQlClient.executeQuery(fundingEligibilityQuery)
-            Log.d(TAG, response.toString())
-        }
-
-
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        viewModel.getEligibility().observe(viewLifecycleOwner) {
+            when (it) {
+                is APIResult.Success -> {
+                    Log.d(TAG, "isVenmoEligible: ${it.data.isVenmoEligible}")
+                }
+                is APIResult.Failure -> {
+                    Log.d(TAG, "Error: ${it.message}")
+                }
+            }
+        }
     }
 
     @SuppressLint("SetTextI18n")
