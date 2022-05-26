@@ -26,7 +26,6 @@ import com.paypal.android.ui.R
  * `payment_button_shape`, and `payment_button_size`.
  *
  */
-@RequiresApi(Build.VERSION_CODES.M)
 open class PayPalButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
@@ -65,8 +64,7 @@ open class PayPalButton @JvmOverloads constructor(
 
     override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_color
 
-    override val fundingType: PaymentButtonFundingType
-        get() = PaymentButtonFundingType.PAYPAL
+    override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL
 
     init {
         context.obtainStyledAttributes(attributeSet, R.styleable.PayPalButton).use { typedArray ->
@@ -91,7 +89,7 @@ open class PayPalButton @JvmOverloads constructor(
         label = PayPalButtonLabel(paypalLabelAttribute)
     }
 
-    private fun updateLabel(updatedLabel: PayPalButtonLabel) {
+    protected fun updateLabel(updatedLabel: PayPalButtonLabel) {
         when (updatedLabel.position) {
             PayPalButtonLabel.Position.START -> {
                 suffixTextVisibility = View.GONE

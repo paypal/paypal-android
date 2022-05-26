@@ -4,6 +4,7 @@
     <!-- Payment Methods -->
     <string name="payment_methods_card">Card</string>
     <string name="payment_methods_paypal">PayPal</string>
+    <string name="payment_methods_three_d_secure">3D Secure</string>
     <string name="payment_methods_menu_settings">Settings</string>
 
     <!-- Card Fields -->
@@ -26,6 +27,7 @@
     <string name="order_failed">Order Failed</string>
     <string name="reason">Reason: %s</string>
     <string name="creating_order">Creating order…</string>
+    <string name="custom_styling">Style Buttons</string>
 
 
     <string name="auth_credentials_missing_title">Auth Credentials Required</string>
@@ -34,4 +36,11 @@
     <string name="server_side_integration">Server side integration</string>
     <string name="server_integration">Server Integration</string>
     <string name="client_integration">Client Integration</string>
+    <string name="payment_button">Payment Button</string>
+    <string name="select_color">Select Color</string>
+    <string name="select_funding">Select Funding</string>
+    <string name="select_label">Select Label</string>
+    <string name="select_shape">Select Shape</string>
+    <string name="select_size">Select Size</string>
+
 </resources>
