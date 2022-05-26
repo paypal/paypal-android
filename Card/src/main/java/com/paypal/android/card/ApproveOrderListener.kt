@@ -1,12 +1,13 @@
 package com.paypal.android.card
 
+import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.PayPalSDKError
 
 /**
  * Implement this callback to receive results from [CardClient].
  * Recommended for Java Integrations
  */
-interface ApproveOrderCallback {
+interface ApproveOrderListener {
 
     /**
      * Called when the order is approved.
@@ -29,4 +30,9 @@ interface ApproveOrderCallback {
      * Called when the 3DS challenge will launch
      */
     fun threeDSecureLaunched()
+
+    /**
+     * Called when the 3DS challenge has ended
+     */
+    fun threeDSecureFinished()
 }

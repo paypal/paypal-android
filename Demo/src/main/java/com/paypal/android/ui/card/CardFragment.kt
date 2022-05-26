@@ -16,15 +16,15 @@ import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.services.PayPalDemoApi
-import com.paypal.android.card.Amount
-import com.paypal.android.card.ApproveOrderCallback
+import com.paypal.android.card.model.Amount
+import com.paypal.android.card.ApproveOrderListener
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
-import com.paypal.android.card.CardResult
+import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.OrderIntent
 import com.paypal.android.card.OrderRequest
-import com.paypal.android.card.PurchaseUnit
+import com.paypal.android.card.model.PurchaseUnit
 import com.paypal.android.card.threedsecure.SCA
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.CoreConfig
@@ -35,6 +35,8 @@ import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -57,6 +59,8 @@ class CardFragment : Fragment() {
     private lateinit var cardClient: CardClient
 
     private val cardViewModel: CardViewModel by viewModels()
+
+    private var job = Job()
 
     private val orderRequest = OrderRequest(
         OrderIntent.CAPTURE, listOf(
@@ -167,12 +171,14 @@ class CardFragment : Fragment() {
         if (isServerSideIntegration) {
             serverSideIntegration(card, threeDSecureRequest)
         } else {
+            //this doesnt do anything until the feature is available
             clientSideIntegration(card, threeDSecureRequest)
         }
     }
 
     private fun serverSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {
         dataCollectorHandler.setLogging(true)
+        job = Job()
         lifecycleScope.launch {
             updateStatusText("Creating order...")
             val order = fetchOrder(threeDSecureRequest)
@@ -180,31 +186,44 @@ class CardFragment : Fragment() {
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
+            cardClient.approveOrderListener = object : ApproveOrderListener {
+                override fun success(result: CardResult) {
+                    val statusText =
+                        "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
+                    val paymentSourceText = result.paymentSource?.let {
+                        val text = "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
+                        val authText = it.authenticationResult?.let { auth ->
+                            val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
+                                    "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
+                                    "Authentication: ${auth.threeDSecure?.authenticationStatus}"
+                            threeDtext
+                        }
+                        text + authText
+                    }
+                    updateStatusText(statusText + paymentSourceText)
+                }
+
+                override fun failure(error: PayPalSDKError) {
+                    updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                }
+
+                override fun cancelled() {
+                    updateStatusText("USER CANCELLED")
+                }
+
+                override fun threeDSecureLaunched() {
+                    updateStatusText("3DS launched")
+                }
+
+                override fun threeDSecureFinished() {
+                    updateStatusText("3DS finished")
+                }
+            }
             cardClient.approveOrder(
                 orderId = order.id!!,
                 cardRequest = cardRequest,
-                callback = object : ApproveOrderCallback {
-                    override fun success(result: CardResult) {
-                        var statusText = "Confirmed Order: ${ result.orderID }, status: ${ result.status.name }"
-                        result.threeDSecureResult?.let {
-                            statusText += ", liability shift: ${ it.liabilityShift }"
-                        }
-                        updateStatusText("Confirmed Order: ${ result.orderID }, status: ${ result.status.name }")
-                    }
-
-                    override fun failure(error: PayPalSDKError) {
-                        updateStatusText("CAPTURE fail: ${ error.errorDescription }")
-                    }
-
-                    override fun cancelled() {
-                        updateStatusText("USER CANCELLED")
-                    }
-
-                    override fun threeDSecureLaunched() {
-                        updateStatusText("3DS launched")
-                    }
-                },
-                threeDSecureRequest = threeDSecureRequest
+                threeDSecureRequest = threeDSecureRequest,
+                coroutineContext = job + Dispatchers.IO
             )
         }
     }
@@ -215,37 +234,37 @@ class CardFragment : Fragment() {
         // Should we add a callback for when the order is created?
         // val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
         // Log.i("Magnes", "MetadataId: $clientMetadataId")
-        cardClient.createAndApproveOrder(
-            orderRequest = orderRequest,
-            cardRequest = cardRequest,
-            callback = object : ApproveOrderCallback {
-                override fun success(result: CardResult) {
-                    var statusText = "Confirmed Order: ${ result.orderID }, status: ${ result.status.name }"
-                    result.threeDSecureResult?.let {
-                        statusText += "\nLiability shift: ${ it.liabilityShift }"
-                    }
-                    updateStatusText("Confirmed Order: ${ result.orderID }, status: ${ result.status.name }")
-                }
-
-                override fun failure(error: PayPalSDKError) {
-                    updateStatusText("CAPTURE fail: ${ error.errorDescription }")
-                }
-
-                override fun cancelled() {
-                    updateStatusText("USER CANCELLED")
-                }
-
-                override fun threeDSecureLaunched() {
-                    updateStatusText("3DS launched")
-                }
-            },
-            threeDSecureRequest = threeDSecureRequest
-        )
+//        cardClient.createAndApproveOrder(
+//            orderRequest = orderRequest,
+//            cardRequest = cardRequest,
+//            callback = object : ApproveOrderCallback {
+//                override fun success(result: CardResult) {
+//                    var statusText = "Confirmed Order: ${ result.orderID }, status: ${ result.status.name }"
+//                    result.threeDSecureResult?.let {
+//                        statusText += "\nLiability shift: ${ it.liabilityShift }"
+//                    }
+//                    updateStatusText("Confirmed Order: ${ result.orderID }, status: ${ result.status.name }")
+//                }
+//
+//                override fun failure(error: PayPalSDKError) {
+//                    updateStatusText("CAPTURE fail: ${ error.errorDescription }")
+//                }
+//
+//                override fun cancelled() {
+//                    updateStatusText("USER CANCELLED")
+//                }
+//
+//                override fun threeDSecureLaunched() {
+//                    updateStatusText("3DS launched")
+//                }
+//            },
+//            threeDSecureRequest = threeDSecureRequest
+//        )
     }
 
     private suspend fun fetchOrder(threeDSecureRequest: ThreeDSecureRequest?): Order {
         val createOrderRequest = CreateOrderRequest(
-            intent = "CAPTURE",
+            intent = "AUTHORIZE",
             purchaseUnit = listOf(
                 com.paypal.android.api.model.PurchaseUnit(
                     amount = com.paypal.android.api.model.Amount(
@@ -271,6 +290,16 @@ class CardFragment : Fragment() {
     }
 
     private fun updateStatusText(text: String) {
-        binding.statusText.text = text
+        if (!isDetached) {
+            requireActivity().runOnUiThread {
+                binding.statusText.text = text
+            }
+        }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        if (job.isActive) job.cancel()
+    }
+
 }

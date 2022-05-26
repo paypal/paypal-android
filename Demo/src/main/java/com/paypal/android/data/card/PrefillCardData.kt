@@ -23,6 +23,12 @@ object PrefillCardData {
                 expirationMonth = "01",
                 expirationYear = "2026",
                 securityCode = "123"
+            ),
+            "New Visa" to Card(
+                number = "4032035809742661",
+                expirationMonth = "09",
+                expirationYear = "2026",
+                securityCode = "655"
             )
         )
     }

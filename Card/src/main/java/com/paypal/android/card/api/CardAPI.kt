@@ -3,6 +3,7 @@ package com.paypal.android.card.api
 import com.paypal.android.card.Card
 import com.paypal.android.card.ConfirmPaymentSourceRequestFactory
 import com.paypal.android.card.CreateOrderRequestFactory
+import com.paypal.android.card.GetOrderInfoRequestFactory
 import com.paypal.android.card.OrderRequest
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
@@ -13,14 +14,12 @@ import com.paypal.android.core.HttpResponse.Companion.SERVER_ERROR
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNDETERMINED
 import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
 import com.paypal.android.core.OrderErrorDetail
-import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
 
 internal class CardAPI(
     private val api: API,
 ) {
 
-    @Throws(PayPalSDKError::class)
     suspend fun confirmPaymentSource(
         orderID: String,
         card: Card,
@@ -32,7 +31,6 @@ internal class CardAPI(
         )
     }
 
-    @Throws(PayPalSDKError::class)
     suspend fun createOrder(
         orderRequest: OrderRequest,
         threeDSecureRequest: ThreeDSecureRequest? = null
@@ -42,6 +40,16 @@ internal class CardAPI(
             CreateOrderRequestFactory::parseResponse
         )
     }
+
+    suspend fun getOrderInfo(
+        getOrderRequest: GetOrderRequest,
+    ): GetOrderInfoResponse {
+        return performRequest(
+            GetOrderInfoRequestFactory.createRequest(getOrderRequest),
+            GetOrderInfoRequestFactory::parseResponse
+        )
+    }
+
 
     private suspend fun <R> performRequest(
         apiRequest: APIRequest,

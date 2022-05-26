@@ -59,6 +59,7 @@ dependencies {
     androidTestImplementation deps.androidxEspressoCore
 
     implementation deps.androidxLifecycleCommonJava
+    implementation deps.androidxLifecycleRuntimeKtx
 
 }
 

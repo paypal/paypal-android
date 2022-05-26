@@ -1,6 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.api.CardAPI
+import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import io.mockk.coEvery
@@ -53,7 +54,7 @@ class CardClientUnitTest {
     @Test
     fun `approve order with callback confirms payment source using card api`() {
         val request = CardRequest(orderID, card)
-        val approveOrderCallbackMock = mockk<ApproveOrderCallback>(relaxed = true)
+        val approveOrderCallbackMock = mockk<ApproveOrderListener>(relaxed = true)
         val resultSlot = slot<CardResult>()
 
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns cardResult
@@ -68,7 +69,7 @@ class CardClientUnitTest {
     fun `approve order with callback confirms throws error`() {
         val errorMessage = "mock_error_message"
         val request = CardRequest(orderID, card)
-        val approveOrderCallbackMock = mockk<ApproveOrderCallback>(relaxed = true)
+        val approveOrderCallbackMock = mockk<ApproveOrderListener>(relaxed = true)
         val exceptionSlot = slot<PayPalSDKError>()
 
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } throws(PayPalSDKError(0, errorMessage))

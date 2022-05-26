@@ -8,6 +8,8 @@ import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.ConfirmPaymentSourceResponse
+import com.paypal.android.card.api.GetOrderRequest
+import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.card.threedsecure.ThreeDSecureResult
 import com.paypal.android.core.API
@@ -24,27 +26,24 @@ import kotlin.coroutines.CoroutineContext
 class CardClient internal constructor(
     private val activity: FragmentActivity,
     private val cardAPI: CardAPI,
-    private val coroutineContext: CoroutineContext // this could be moved to each approve function
 ) {
 
     private val browserSwitchClient = BrowserSwitchClient()
-    private var approveOrderCallback: ApproveOrderCallback? = null
+    var approveOrderListener: ApproveOrderListener? = null
     private var confirmPaymentSourceResponse: ConfirmPaymentSourceResponse? = null
     private var lifeCycleObserver: CardLifeCycleObserver? = null
+    private var currentCoroutineContext: CoroutineContext? = null
 
     /**
      *  CardClient constructor
      *
      *  @param [activity] Activity that launches the card client
      *  @param [configuration] Configuration parameters for client
-     *  @param [coroutineContext] CoroutineContext to execute
      */
-    @JvmOverloads
     constructor(
         activity: FragmentActivity,
         configuration: CoreConfig,
-        coroutineContext: CoroutineContext = Dispatchers.Main
-    ) : this(activity, CardAPI(API(configuration)), coroutineContext)
+    ) : this(activity, CardAPI(API(configuration)))
 
     /**
      * Confirm [Card] payment source for an order.
@@ -52,17 +51,27 @@ class CardClient internal constructor(
      * @param orderId [String] order id to confirm
      * @param cardRequest [CardRequest] for requesting an order approval
      * @param threeDSecureRequest [threeDSecureRequest] to run transaction with 3DS
-     * @param callback [ApproveOrderCallback] callback for responses
+     * @param coroutineContext [CoroutineContext] to specify in which context to run api calls
      */
     @JvmOverloads
     fun approveOrder(
         orderId: String,
         cardRequest: CardRequest,
         threeDSecureRequest: ThreeDSecureRequest? = null,
-        callback: ApproveOrderCallback
+        coroutineContext: CoroutineContext? = Dispatchers.Default
     ) {
-        CoroutineScope(coroutineContext).launch {
-            confirmPaymentSource(orderId, cardRequest, threeDSecureRequest, callback)
+        coroutineContext?.also { context ->
+            lifeCycleObserver = CardLifeCycleObserver(this)
+            lifeCycleObserver?.let { activity.lifecycle.addObserver(it) }
+            currentCoroutineContext = context
+            CoroutineScope(context).launch {
+                try {
+                    confirmPaymentSource(orderId, cardRequest, threeDSecureRequest)
+                } catch (e: PayPalSDKError) {
+                    approveOrderListener?.failure(e)
+                    clearClient()
+                }
+            }
         }
     }
 
@@ -72,17 +81,27 @@ class CardClient internal constructor(
      * @param orderRequest [String] order to create
      * @param cardRequest [CardRequest] for requesting an order approval
      * @param threeDSecureRequest [threeDSecureRequest] to run transaction with 3DS
-     * @param callback [ApproveOrderCallback] callback for responses
+     * @param coroutineContext [CoroutineContext] to specify in which context to run api calls
      */
     private fun createAndApproveOrder(
         orderRequest: OrderRequest,
         cardRequest: CardRequest,
         threeDSecureRequest: ThreeDSecureRequest? = null,
-        callback: ApproveOrderCallback
+        coroutineContext: CoroutineContext? = Dispatchers.Default
     ) {
-        CoroutineScope(coroutineContext).launch {
-            val orderId = createOrder(orderRequest, threeDSecureRequest)
-            confirmPaymentSource(orderId, cardRequest, threeDSecureRequest, callback)
+        coroutineContext?.also { context ->
+            lifeCycleObserver = CardLifeCycleObserver(this)
+            lifeCycleObserver?.let { activity.lifecycle.addObserver(it) }
+            currentCoroutineContext = context
+            CoroutineScope(context).launch {
+                try {
+                    val orderId = createOrder(orderRequest, threeDSecureRequest)
+                    confirmPaymentSource(orderId, cardRequest, threeDSecureRequest)
+                } catch (e: PayPalSDKError) {
+                    approveOrderListener?.failure(e)
+                    clearClient()
+                }
+            }
         }
     }
 
@@ -97,59 +116,87 @@ class CardClient internal constructor(
     private suspend fun confirmPaymentSource(
         orderId: String,
         cardRequest: CardRequest,
-        threeDSecureRequest: ThreeDSecureRequest? = null,
-        callback: ApproveOrderCallback
+        threeDSecureRequest: ThreeDSecureRequest? = null
     ) {
-        try {
-            val confirmPaymentSourceResponse =
-                cardAPI.confirmPaymentSource(orderId, cardRequest.card, threeDSecureRequest)
-            if (confirmPaymentSourceResponse.payerActionHref == null) {
-                val result = confirmPaymentSourceResponse.let {
-                    CardResult(it.orderId, it.status)
-                }
-                callback.success(result)
-            } else {
-                // we launch the 3DS flow
-                val options = BrowserSwitchOptions()
-                    .url(Uri.parse(confirmPaymentSourceResponse.payerActionHref))
-                    .returnUrlScheme(threeDSecureRequest?.returnUrl)
-                this.confirmPaymentSourceResponse = confirmPaymentSourceResponse
-                approveOrderCallback = callback
-                callback.threeDSecureLaunched()
-                lifeCycleObserver = CardLifeCycleObserver(this)
-                lifeCycleObserver?.let { activity.lifecycle.addObserver(it) }
-                browserSwitchClient.start(activity, options)
+        val confirmPaymentSourceResponse =
+            cardAPI.confirmPaymentSource(orderId, cardRequest.card, threeDSecureRequest)
+        if (confirmPaymentSourceResponse.payerActionHref == null) {
+            val result = confirmPaymentSourceResponse.let {
+                CardResult(it.orderId, it.status, it.paymentSource)
             }
-        } catch (e: PayPalSDKError) {
-            callback.failure(e)
+            approveOrderListener?.success(result)
+            clearClient()
+        } else {
+            // we launch the 3DS flow
+            val options = BrowserSwitchOptions()
+                .url(Uri.parse(confirmPaymentSourceResponse.payerActionHref))
+                .returnUrlScheme("com.paypal.android.demo")
+            this.confirmPaymentSourceResponse = confirmPaymentSourceResponse
+            approveOrderListener?.threeDSecureLaunched()
+            browserSwitchClient.start(activity, options)
         }
     }
 
     internal fun handleBrowserSwitchResult() {
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        if (browserSwitchResult != null && approveOrderCallback != null && confirmPaymentSourceResponse != null) {
+        if (browserSwitchResult != null && approveOrderListener != null && confirmPaymentSourceResponse != null) {
+            approveOrderListener?.threeDSecureFinished()
             when (browserSwitchResult.status) {
-                BrowserSwitchStatus.SUCCESS -> deliverSuccess(browserSwitchResult, confirmPaymentSourceResponse!!)
+                BrowserSwitchStatus.SUCCESS -> getOrderInfo(
+                    browserSwitchResult,
+                    confirmPaymentSourceResponse
+                )
                 BrowserSwitchStatus.CANCELED -> deliverCancellation()
             }
-            confirmPaymentSourceResponse = null
-            approveOrderCallback = null
-            lifeCycleObserver?.let { activity.lifecycle.removeObserver(it) }
+        }
+    }
+
+    private fun getOrderInfo(
+        browserSwitchResult: BrowserSwitchResult,
+        confirmPaymentSourceResponse: ConfirmPaymentSourceResponse?
+    ) {
+        confirmPaymentSourceResponse?.also { response ->
+            currentCoroutineContext?.also { context ->
+                CoroutineScope(context).launch {
+                    try {
+                        val getOrderResponse =
+                            cardAPI.getOrderInfo(GetOrderRequest(response.orderId))
+                        val liabilityShift =
+                            browserSwitchResult.deepLinkUrl?.getQueryParameter("liability_shift")
+//                        approveOrderListener?.success(
+//                            CardResult(
+//                                getOrderResponse.orderId,
+//                                getOrderResponse.orderStatus,
+//                                liabilityShift?.let { ThreeDSecureResult(it) }
+//                            )
+//                        )
+                    } catch (e: PayPalSDKError) {
+                        approveOrderListener?.failure(e)
+                    }
+                    clearClient()
+                }
+            }
         }
     }
 
     private fun deliverCancellation() {
-        approveOrderCallback?.cancelled()
+        approveOrderListener?.cancelled()
+        clearClient()
     }
 
-    private fun deliverSuccess(browserSwitchResult: BrowserSwitchResult, response: ConfirmPaymentSourceResponse) {
-        val liabilityShift = browserSwitchResult.deepLinkUrl?.getQueryParameter("liability_shift")
-        approveOrderCallback?.success(
-            CardResult(
-                response.orderId,
-                response.status,
-                liabilityShift?.let { ThreeDSecureResult(it) }
-            )
-        )
+    private fun clearClient() {
+        currentCoroutineContext = null
+        confirmPaymentSourceResponse = null
+        approveOrderListener = null
+        clearLifeCycleObserver()
+    }
+
+    private fun clearLifeCycleObserver() {
+        lifeCycleObserver?.let {
+            CoroutineScope(Dispatchers.Main).launch {
+                //removeObserver() has to be called on main thread
+                activity.lifecycle.removeObserver(it)
+            }
+        }
     }
 }

@@ -124,21 +124,22 @@
         android:id="@+id/integration_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:textAlignment="center"
+        android:layout_marginTop="16dp"
         android:text="@string/client_integration"
+        android:textAlignment="center"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/status_text" />
+        app:layout_constraintTop_toBottomOf="@+id/threeds_chkbox" />
+
     <TextView
         android:id="@+id/status_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/submit_button" />
+        app:layout_constraintTop_toBottomOf="@+id/integration_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
