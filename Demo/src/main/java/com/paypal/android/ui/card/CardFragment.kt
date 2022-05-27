@@ -228,40 +228,6 @@ class CardFragment : Fragment() {
         }
     }
 
-    private fun clientSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {
-        updateStatusText("Creating order and approving order...")
-        val cardRequest = CardRequest(card)
-        // Should we add a callback for when the order is created?
-        // val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-        // Log.i("Magnes", "MetadataId: $clientMetadataId")
-//        cardClient.createAndApproveOrder(
-//            orderRequest = orderRequest,
-//            cardRequest = cardRequest,
-//            callback = object : ApproveOrderCallback {
-//                override fun success(result: CardResult) {
-//                    var statusText = "Confirmed Order: ${ result.orderID }, status: ${ result.status.name }"
-//                    result.threeDSecureResult?.let {
-//                        statusText += "\nLiability shift: ${ it.liabilityShift }"
-//                    }
-//                    updateStatusText("Confirmed Order: ${ result.orderID }, status: ${ result.status.name }")
-//                }
-//
-//                override fun failure(error: PayPalSDKError) {
-//                    updateStatusText("CAPTURE fail: ${ error.errorDescription }")
-//                }
-//
-//                override fun cancelled() {
-//                    updateStatusText("USER CANCELLED")
-//                }
-//
-//                override fun threeDSecureLaunched() {
-//                    updateStatusText("3DS launched")
-//                }
-//            },
-//            threeDSecureRequest = threeDSecureRequest
-//        )
-    }
-
     private suspend fun fetchOrder(threeDSecureRequest: ThreeDSecureRequest?): Order {
         val createOrderRequest = CreateOrderRequest(
             intent = "AUTHORIZE",
