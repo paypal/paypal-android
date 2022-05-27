@@ -42,7 +42,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CardFragment : Fragment() {
+class CardFragment : Fragment(), ApproveOrderListener {
 
     @Inject
     lateinit var preferenceUtil: SharedPreferenceUtil
@@ -53,12 +53,16 @@ class CardFragment : Fragment() {
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
 
-    private lateinit var binding: FragmentCardBinding
-
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
-    private lateinit var cardClient: CardClient
-
     private val cardViewModel: CardViewModel by viewModels()
+
+    private val binding by lazy {
+        FragmentCardBinding.inflate(layoutInflater)
+    }
+
+    private val cardClient by lazy {
+        CardClient(requireActivity(), configuration)
+    }
 
     private var job = Job()
 
@@ -85,9 +89,11 @@ class CardFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        cardClient = CardClient(requireActivity(), configuration)
-        binding = FragmentCardBinding.inflate(inflater, container, false)
+    ): View = binding.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        cardClient.approveOrderListener = this
 
         binding.run {
             val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
@@ -105,7 +111,6 @@ class CardFragment : Fragment() {
 
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
-        return binding.root
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -175,39 +180,6 @@ class CardFragment : Fragment() {
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
-            cardClient.approveOrderListener = object : ApproveOrderListener {
-                override fun onApproveOrderSuccess(result: CardResult) {
-                    val statusText =
-                        "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
-                    val paymentSourceText = result.paymentSource?.let {
-                        val text = "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
-                        val authText = it.authenticationResult?.let { auth ->
-                            val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
-                                    "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
-                                    "Authentication: ${auth.threeDSecure?.authenticationStatus}"
-                            threeDtext
-                        }
-                        text + authText
-                    }
-                    updateStatusText(statusText + paymentSourceText)
-                }
-
-                override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    updateStatusText("CAPTURE fail: ${error.errorDescription}")
-                }
-
-                override fun onApproveOrderCanceled() {
-                    updateStatusText("USER CANCELLED")
-                }
-
-                override fun onApproveOrderThreeDSecureWillLaunch() {
-                    updateStatusText("3DS launched")
-                }
-
-                override fun onApproveOrderThreeDSecureDidFinish() {
-                    updateStatusText("3DS finished")
-                }
-            }
             cardClient.approveOrder(
                 orderId = order.id!!,
                 cardRequest = cardRequest,
@@ -257,4 +229,36 @@ class CardFragment : Fragment() {
         if (job.isActive) job.cancel()
     }
 
+    override fun onApproveOrderSuccess(result: CardResult) {
+        val statusText =
+            "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
+        val paymentSourceText = result.paymentSource?.let {
+            val text =
+                "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
+            val authText = it.authenticationResult?.let { auth ->
+                val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
+                        "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
+                        "Authentication: ${auth.threeDSecure?.authenticationStatus}"
+                threeDtext
+            }
+            text + authText
+        }
+        updateStatusText(statusText + paymentSourceText)
+    }
+
+    override fun onApproveOrderFailure(error: PayPalSDKError) {
+        updateStatusText("CAPTURE fail: ${error.errorDescription}")
+    }
+
+    override fun onApproveOrderCanceled() {
+        updateStatusText("USER CANCELLED")
+    }
+
+    override fun onApproveOrderThreeDSecureWillLaunch() {
+        updateStatusText("3DS launched")
+    }
+
+    override fun onApproveOrderThreeDSecureDidFinish() {
+        updateStatusText("3DS finished")
+    }
 }
