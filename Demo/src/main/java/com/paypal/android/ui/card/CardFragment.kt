@@ -68,25 +68,6 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
     private var job = Job()
 
-    private val orderRequest = OrderRequest(
-        OrderIntent.CAPTURE, listOf(
-            PurchaseUnit(
-                referenceId = UUID.randomUUID().toString(),
-                amount = Amount(
-                    currencyCode = "USD",
-                    value = "10.99"
-                )
-            ),
-            PurchaseUnit(
-                referenceId = UUID.randomUUID().toString(),
-                amount = Amount(
-                    currencyCode = "USD",
-                    value = "15.00"
-                )
-            )
-        )
-    )
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
