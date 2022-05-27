@@ -75,7 +75,7 @@ internal object ConfirmPaymentSourceRequestFactory {
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
-                PaymentSource(json.getJSONObject("payment_source.card")),
+                json.optGetJSONObject("payment_source.card")?.let { PaymentSource(it) },
                 if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(
                     json.json.getJSONArray(
                         "purchase_units"

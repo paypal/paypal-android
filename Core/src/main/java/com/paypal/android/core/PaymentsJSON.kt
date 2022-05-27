@@ -28,6 +28,18 @@ class PaymentsJSON(val json: JSONObject) {
         return nodeResult.node.getJSONObject(keys[0])
     }
 
+    // TODO: consolidate json keypath logic
+    fun optGetJSONObject(keyPath: String): JSONObject? {
+        val keys = keyPath.split(".").toMutableList()
+
+        var node: JSONObject? = json
+        while (keys.size > 0) {
+            node = node?.optJSONObject(keys[0])
+            keys.removeFirst()
+        }
+        return node
+    }
+
     private fun searchNode(keyPath: String): NodeResult {
         var node: JSONObject = json
 
@@ -40,7 +52,6 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     private class NodeResult(val node: JSONObject, val keys : List<String>)
-
 }
 
 fun JSONObject.optNullableString(name: String, fallback: String? = null): String? {

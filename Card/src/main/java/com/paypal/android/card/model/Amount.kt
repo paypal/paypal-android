@@ -7,7 +7,7 @@ data class Amount(
     val value: String?
 ) {
     internal constructor(json: JSONObject) : this(
-        json.getString("currency_code"),
-        json.getString("value")
+        json.optString("currency_code"),
+        json.optString("value")
     )
 }
