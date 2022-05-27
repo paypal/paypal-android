@@ -142,7 +142,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
         updateStatusText("Authorizing order...")
         val cardRequest = buildCardRequest()
-        cardClient.approveOrder(orderId = order.id!!, cardRequest = cardRequest)
+        cardClient.approveOrder(requireActivity(), order.id!!, cardRequest)
     }
 
     private fun buildCardRequest(): CardRequest {

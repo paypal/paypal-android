@@ -1,5 +1,6 @@
 package com.paypal.android.card
 
+import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
@@ -22,15 +23,16 @@ import kotlin.coroutines.CoroutineContext
  * Use this client to approve an order with a [Card].
  */
 class CardClient internal constructor(
-    private val activity: FragmentActivity,
+    activity: FragmentActivity,
     private val cardAPI: CardAPI,
 ) {
 
-    private val browserSwitchClient = BrowserSwitchClient()
     var approveOrderListener: ApproveOrderListener? = null
+
+    private val browserSwitchClient = BrowserSwitchClient()
+    private val lifeCycleObserver = CardLifeCycleObserver(this)
+
     private var confirmPaymentSourceResponse: ConfirmPaymentSourceResponse? = null
-    private var lifeCycleObserver: CardLifeCycleObserver? = null
-    private var currentCoroutineContext: CoroutineContext? = null
 
     /**
      *  CardClient constructor
@@ -43,35 +45,38 @@ class CardClient internal constructor(
         configuration: CoreConfig,
     ) : this(activity, CardAPI(API(configuration)))
 
+    init {
+        activity.lifecycle.addObserver(lifeCycleObserver)
+    }
+
     /**
      * Confirm [Card] payment source for an order.
      *
      * @param orderId [String] order id to confirm
      * @param cardRequest [CardRequest] for requesting an order approval
-     * @param coroutineContext [CoroutineContext] to specify in which context to run api calls
      */
     @JvmOverloads
     fun approveOrder(
+        activity: FragmentActivity,
         orderId: String,
         cardRequest: CardRequest,
-        coroutineContext: CoroutineContext? = Dispatchers.Default
+        context: CoroutineContext = Dispatchers.IO
     ) {
-        coroutineContext?.also { context ->
-            lifeCycleObserver = CardLifeCycleObserver(this)
-            lifeCycleObserver?.let { activity.lifecycle.addObserver(it) }
-            currentCoroutineContext = context
-            CoroutineScope(context).launch {
-                try {
-                    confirmPaymentSource(orderId, cardRequest)
-                } catch (e: PayPalSDKError) {
-                    approveOrderListener?.onApproveOrderFailure(e)
-                    clearClient()
-                }
+        CoroutineScope(context).launch {
+            try {
+                confirmPaymentSource(activity, orderId, cardRequest)
+            } catch (e: PayPalSDKError) {
+                approveOrderListener?.onApproveOrderFailure(e)
+                clearClient()
             }
         }
     }
 
-    private suspend fun confirmPaymentSource(orderId: String, cardRequest: CardRequest) {
+    private suspend fun confirmPaymentSource(
+        activity: FragmentActivity,
+        orderId: String,
+        cardRequest: CardRequest
+    ) {
         val confirmPaymentSourceResponse =
             cardAPI.confirmPaymentSource(orderId, cardRequest.card, cardRequest.threeDSecureRequest)
         if (confirmPaymentSourceResponse.payerActionHref == null) {
@@ -91,7 +96,7 @@ class CardClient internal constructor(
         }
     }
 
-    internal fun handleBrowserSwitchResult() {
+    internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
         if (browserSwitchResult != null && approveOrderListener != null && confirmPaymentSourceResponse != null) {
             approveOrderListener?.onApproveOrderThreeDSecureDidFinish()
@@ -110,24 +115,22 @@ class CardClient internal constructor(
         confirmPaymentSourceResponse: ConfirmPaymentSourceResponse?
     ) {
         confirmPaymentSourceResponse?.also { response ->
-            currentCoroutineContext?.also { context ->
-                CoroutineScope(context).launch {
-                    try {
-                        val getOrderResponse =
-                            cardAPI.getOrderInfo(GetOrderRequest(response.orderId))
-                        approveOrderListener?.onApproveOrderSuccess(
-                            CardResult(
-                                getOrderResponse.orderId,
-                                getOrderResponse.orderStatus,
-                                confirmPaymentSourceResponse.paymentSource,
-                                browserSwitchResult.deepLinkUrl
-                            )
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val getOrderResponse =
+                        cardAPI.getOrderInfo(GetOrderRequest(response.orderId))
+                    approveOrderListener?.onApproveOrderSuccess(
+                        CardResult(
+                            getOrderResponse.orderId,
+                            getOrderResponse.orderStatus,
+                            confirmPaymentSourceResponse.paymentSource,
+                            browserSwitchResult.deepLinkUrl
                         )
-                    } catch (e: PayPalSDKError) {
-                        approveOrderListener?.onApproveOrderFailure(e)
-                    }
-                    clearClient()
+                    )
+                } catch (e: PayPalSDKError) {
+                    approveOrderListener?.onApproveOrderFailure(e)
                 }
+                clearClient()
             }
         }
     }
@@ -138,18 +141,7 @@ class CardClient internal constructor(
     }
 
     private fun clearClient() {
-        currentCoroutineContext = null
         confirmPaymentSourceResponse = null
         approveOrderListener = null
-        clearLifeCycleObserver()
-    }
-
-    private fun clearLifeCycleObserver() {
-        lifeCycleObserver?.let {
-            CoroutineScope(Dispatchers.Main).launch {
-                //removeObserver() has to be called on main thread
-                activity.lifecycle.removeObserver(it)
-            }
-        }
     }
 }
