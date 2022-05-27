@@ -2,9 +2,7 @@ package com.paypal.android.card.api
 
 import com.paypal.android.card.Card
 import com.paypal.android.card.ConfirmPaymentSourceRequestFactory
-import com.paypal.android.card.CreateOrderRequestFactory
 import com.paypal.android.card.GetOrderInfoRequestFactory
-import com.paypal.android.card.OrderRequest
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
 import com.paypal.android.core.API.Companion.SUCCESSFUL_STATUS_CODES
@@ -31,16 +29,6 @@ internal class CardAPI(
         )
     }
 
-    suspend fun createOrder(
-        orderRequest: OrderRequest,
-        threeDSecureRequest: ThreeDSecureRequest? = null
-    ): CreateOrderResponse {
-        return performRequest(
-            CreateOrderRequestFactory.createRequest(orderRequest, threeDSecureRequest),
-            CreateOrderRequestFactory::parseResponse
-        )
-    }
-
     suspend fun getOrderInfo(
         getOrderRequest: GetOrderRequest,
     ): GetOrderInfoResponse {
@@ -49,7 +37,6 @@ internal class CardAPI(
             GetOrderInfoRequestFactory::parseResponse
         )
     }
-
 
     private suspend fun <R> performRequest(
         apiRequest: APIRequest,

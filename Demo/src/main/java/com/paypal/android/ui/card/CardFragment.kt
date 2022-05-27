@@ -104,11 +104,6 @@ class CardFragment : Fragment() {
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
             submitButton.setOnClickListener { onCardFieldSubmit() }
-
-            serverSideIntegrationChkbox.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) integrationText.text = getText(R.string.server_integration)
-                else integrationText.text = getText(R.string.client_integration)
-            }
         }
         return binding.root
     }
@@ -149,7 +144,6 @@ class CardFragment : Fragment() {
         val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
-        val isServerSideIntegration = binding.serverSideIntegrationChkbox.isChecked
         val isThreeDSecure = binding.threedsChkbox.isChecked
 
         val (monthString, yearString) =
@@ -168,12 +162,7 @@ class CardFragment : Fragment() {
             null
         }
 
-        if (isServerSideIntegration) {
-            serverSideIntegration(card, threeDSecureRequest)
-        } else {
-            //this doesnt do anything until the feature is available
-            clientSideIntegration(card, threeDSecureRequest)
-        }
+        serverSideIntegration(card, threeDSecureRequest)
     }
 
     private fun serverSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {

@@ -75,44 +75,6 @@ class CardClient internal constructor(
         }
     }
 
-    /**
-     * Creates order and confirms [Card] payment source for said order. Its private until phase 2
-     *
-     * @param orderRequest [String] order to create
-     * @param cardRequest [CardRequest] for requesting an order approval
-     * @param threeDSecureRequest [threeDSecureRequest] to run transaction with 3DS
-     * @param coroutineContext [CoroutineContext] to specify in which context to run api calls
-     */
-    private fun createAndApproveOrder(
-        orderRequest: OrderRequest,
-        cardRequest: CardRequest,
-        threeDSecureRequest: ThreeDSecureRequest? = null,
-        coroutineContext: CoroutineContext? = Dispatchers.Default
-    ) {
-        coroutineContext?.also { context ->
-            lifeCycleObserver = CardLifeCycleObserver(this)
-            lifeCycleObserver?.let { activity.lifecycle.addObserver(it) }
-            currentCoroutineContext = context
-            CoroutineScope(context).launch {
-                try {
-                    val orderId = createOrder(orderRequest, threeDSecureRequest)
-                    confirmPaymentSource(orderId, cardRequest, threeDSecureRequest)
-                } catch (e: PayPalSDKError) {
-                    approveOrderListener?.failure(e)
-                    clearClient()
-                }
-            }
-        }
-    }
-
-    private suspend fun createOrder(
-        orderRequest: OrderRequest,
-        threeDSecureRequest: ThreeDSecureRequest? = null
-    ): String {
-        val createOrderResponse = cardAPI.createOrder(orderRequest, threeDSecureRequest)
-        return createOrderResponse.orderID
-    }
-
     private suspend fun confirmPaymentSource(
         orderId: String,
         cardRequest: CardRequest,
