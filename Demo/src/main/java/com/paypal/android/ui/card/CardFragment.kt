@@ -64,6 +64,9 @@ class CardFragment : Fragment(), ApproveOrderListener {
         CardClient(requireActivity(), configuration)
     }
 
+    private val shouldRequestThreeDSecure: Boolean
+        get() = binding.threedsChkbox.isChecked
+
     private var job = Job()
 
     private val orderRequest = OrderRequest(
@@ -149,7 +152,6 @@ class CardFragment : Fragment(), ApproveOrderListener {
         val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
-        val isThreeDSecure = binding.threedsChkbox.isChecked
 
         val (monthString, yearString) =
             expirationDate.split("/") ?: listOf("", "")
@@ -157,7 +159,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
         val card = Card(cardNumber, monthString, yearString)
         card.securityCode = securityCode
 
-        val threeDSecureRequest = if (isThreeDSecure) {
+        val threeDSecureRequest = if (shouldRequestThreeDSecure) {
             ThreeDSecureRequest(
                 sca = SCA.SCA_ALWAYS,
                 returnUrl = "com.paypal.android.demo://example.com/returnUrl",
@@ -175,7 +177,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
         job = Job()
         lifecycleScope.launch {
             updateStatusText("Creating order...")
-            val order = fetchOrder(threeDSecureRequest)
+            val order = fetchOrder()
             val cardRequest = CardRequest(card)
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
@@ -189,7 +191,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
         }
     }
 
-    private suspend fun fetchOrder(threeDSecureRequest: ThreeDSecureRequest?): Order {
+    private suspend fun fetchOrder(): Order {
         val createOrderRequest = CreateOrderRequest(
             intent = "AUTHORIZE",
             purchaseUnit = listOf(
@@ -200,20 +202,17 @@ class CardFragment : Fragment(), ApproveOrderListener {
                     )
                 )
             ),
-            payee = Payee(
-                emailAddress = "anpelaez@paypal.com"
-            )
+            payee = Payee(emailAddress = "anpelaez@paypal.com")
         )
-        threeDSecureRequest?.let {
+
+        if (shouldRequestThreeDSecure) {
             createOrderRequest.applicationContext = ApplicationContext(
                 returnURL = "com.paypal.android.demo://example.com/returnUrl",
                 cancelURL = "com.paypal.android.demo://example.com/cancelUrl"
             )
         }
-        return payPalDemoApi.fetchOrderId(
-            countryCode = "CO",
-            orderRequest = createOrderRequest
-        )
+
+        return payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = createOrderRequest)
     }
 
     private fun updateStatusText(text: String) {
