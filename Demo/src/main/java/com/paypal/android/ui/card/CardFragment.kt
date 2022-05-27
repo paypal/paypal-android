@@ -38,6 +38,8 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
     companion object {
         const val TAG = "CardFragment"
+        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+        const val APP_CANCEL_URL = "com.paypal.android.demo://example.com/cancelUrl"
     }
 
     @Inject
@@ -160,8 +162,8 @@ class CardFragment : Fragment(), ApproveOrderListener {
         if (shouldRequestThreeDSecure) {
             cardRequest.threeDSecureRequest = ThreeDSecureRequest(
                 sca = SCA.SCA_ALWAYS,
-                returnUrl = "com.paypal.android.demo://example.com/returnUrl",
-                cancelUrl = "com.paypal.android.demo://example.com/cancelUrl"
+                returnUrl = APP_RETURN_URL,
+                cancelUrl = APP_CANCEL_URL
             )
         }
         return cardRequest
@@ -183,8 +185,8 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
         if (shouldRequestThreeDSecure) {
             createOrderRequest.applicationContext = ApplicationContext(
-                returnURL = "com.paypal.android.demo://example.com/returnUrl",
-                cancelURL = "com.paypal.android.demo://example.com/cancelUrl"
+                returnURL = APP_RETURN_URL,
+                cancelURL = APP_CANCEL_URL
             )
         }
         return createOrderRequest
