@@ -11,7 +11,6 @@ import com.paypal.android.card.api.ConfirmPaymentSourceResponse
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
-import com.paypal.android.card.threedsecure.ThreeDSecureResult
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
@@ -68,7 +67,7 @@ class CardClient internal constructor(
                 try {
                     confirmPaymentSource(orderId, cardRequest, threeDSecureRequest)
                 } catch (e: PayPalSDKError) {
-                    approveOrderListener?.failure(e)
+                    approveOrderListener?.onApproveOrderFailure(e)
                     clearClient()
                 }
             }
@@ -86,7 +85,7 @@ class CardClient internal constructor(
             val result = confirmPaymentSourceResponse.let {
                 CardResult(it.orderId, it.status, it.paymentSource)
             }
-            approveOrderListener?.success(result)
+            approveOrderListener?.onApproveOrderSuccess(result)
             clearClient()
         } else {
             // we launch the 3DS flow
@@ -94,7 +93,7 @@ class CardClient internal constructor(
                 .url(Uri.parse(confirmPaymentSourceResponse.payerActionHref))
                 .returnUrlScheme("com.paypal.android.demo")
             this.confirmPaymentSourceResponse = confirmPaymentSourceResponse
-            approveOrderListener?.threeDSecureLaunched()
+            approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
             browserSwitchClient.start(activity, options)
         }
     }
@@ -102,7 +101,7 @@ class CardClient internal constructor(
     internal fun handleBrowserSwitchResult() {
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
         if (browserSwitchResult != null && approveOrderListener != null && confirmPaymentSourceResponse != null) {
-            approveOrderListener?.threeDSecureFinished()
+            approveOrderListener?.onApproveOrderThreeDSecureDidFinish()
             when (browserSwitchResult.status) {
                 BrowserSwitchStatus.SUCCESS -> getOrderInfo(
                     browserSwitchResult,
@@ -133,7 +132,7 @@ class CardClient internal constructor(
 //                            )
 //                        )
                     } catch (e: PayPalSDKError) {
-                        approveOrderListener?.failure(e)
+                        approveOrderListener?.onApproveOrderFailure(e)
                     }
                     clearClient()
                 }
@@ -142,7 +141,7 @@ class CardClient internal constructor(
     }
 
     private fun deliverCancellation() {
-        approveOrderListener?.cancelled()
+        approveOrderListener?.onApproveOrderCanceled()
         clearClient()
     }
 

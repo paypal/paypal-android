@@ -176,7 +176,7 @@ class CardFragment : Fragment() {
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             cardClient.approveOrderListener = object : ApproveOrderListener {
-                override fun success(result: CardResult) {
+                override fun onApproveOrderSuccess(result: CardResult) {
                     val statusText =
                         "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
                     val paymentSourceText = result.paymentSource?.let {
@@ -192,19 +192,19 @@ class CardFragment : Fragment() {
                     updateStatusText(statusText + paymentSourceText)
                 }
 
-                override fun failure(error: PayPalSDKError) {
+                override fun onApproveOrderFailure(error: PayPalSDKError) {
                     updateStatusText("CAPTURE fail: ${error.errorDescription}")
                 }
 
-                override fun cancelled() {
+                override fun onApproveOrderCanceled() {
                     updateStatusText("USER CANCELLED")
                 }
 
-                override fun threeDSecureLaunched() {
+                override fun onApproveOrderThreeDSecureWillLaunch() {
                     updateStatusText("3DS launched")
                 }
 
-                override fun threeDSecureFinished() {
+                override fun onApproveOrderThreeDSecureDidFinish() {
                     updateStatusText("3DS finished")
                 }
             }

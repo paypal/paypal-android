@@ -61,7 +61,7 @@ class CardClientUnitTest {
 
         sut.approveOrder(request, approveOrderCallbackMock)
 
-        verify(exactly = 1) { approveOrderCallbackMock.success(capture(resultSlot)) }
+        verify(exactly = 1) { approveOrderCallbackMock.onApproveOrderSuccess(capture(resultSlot)) }
         assertSame(resultSlot.captured, cardResult)
     }
 
@@ -76,7 +76,7 @@ class CardClientUnitTest {
 
         sut.approveOrder(request, approveOrderCallbackMock)
 
-        verify(exactly = 1) { approveOrderCallbackMock.failure(capture(exceptionSlot)) }
+        verify(exactly = 1) { approveOrderCallbackMock.onApproveOrderFailure(capture(exceptionSlot)) }
         assert(exceptionSlot.captured.errorDescription == errorMessage)
     }
 }

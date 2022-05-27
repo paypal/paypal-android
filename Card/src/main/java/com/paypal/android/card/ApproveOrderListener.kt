@@ -5,7 +5,6 @@ import com.paypal.android.core.PayPalSDKError
 
 /**
  * Implement this callback to receive results from [CardClient].
- * Recommended for Java Integrations
  */
 interface ApproveOrderListener {
 
@@ -13,26 +12,26 @@ interface ApproveOrderListener {
      * Called when the order is approved.
      * @param result [CardResult] with order information.
      */
-    fun success(result: CardResult)
+    fun onApproveOrderSuccess(result: CardResult)
 
     /**
      * Called when the approval fails.
      * @param error [PayPalSDKError] explaining the reason for failure.
      */
-    fun failure(error: PayPalSDKError)
+    fun onApproveOrderFailure(error: PayPalSDKError)
 
     /**
      * Called when user cancels the flow.
      */
-    fun cancelled()
+    fun onApproveOrderCanceled()
 
     /**
-     * Called when the 3DS challenge will launch
+     * Called when the 3DS challenge will launch.
      */
-    fun threeDSecureLaunched()
+    fun onApproveOrderThreeDSecureWillLaunch()
 
     /**
-     * Called when the 3DS challenge has ended
+     * Called when the 3DS challenge has finished.
      */
-    fun threeDSecureFinished()
+    fun onApproveOrderThreeDSecureDidFinish()
 }
