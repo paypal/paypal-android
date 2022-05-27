@@ -13,7 +13,6 @@ import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.model.ApplicationContext
 import com.paypal.android.api.model.CreateOrderRequest
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.card.ApproveOrderListener
@@ -149,6 +148,32 @@ class CardFragment : Fragment(), ApproveOrderListener {
     }
 
     private fun onCardFieldSubmit() {
+        job = Job()
+        lifecycleScope.launch {
+            createOrder()
+        }
+    }
+
+    private suspend fun createOrder() {
+        dataCollectorHandler.setLogging(true)
+        updateStatusText("Creating order...")
+
+        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
+        Log.i("Magnes", "MetadataId: $clientMetadataId")
+
+        val orderRequest = buildOrderRequest()
+        val order = payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = orderRequest)
+
+        updateStatusText("Authorizing order...")
+        val cardRequest = buildCardRequest()
+        cardClient.approveOrder(
+            orderId = order.id!!,
+            cardRequest = cardRequest,
+            coroutineContext = job + Dispatchers.IO
+        )
+    }
+
+    private fun buildCardRequest(): CardRequest {
         val cardNumber = binding.cardNumberInput.text.toString()
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
@@ -159,38 +184,19 @@ class CardFragment : Fragment(), ApproveOrderListener {
         val card = Card(cardNumber, monthString, yearString)
         card.securityCode = securityCode
 
-        val threeDSecureRequest = if (shouldRequestThreeDSecure) {
-            ThreeDSecureRequest(
+        val cardRequest = CardRequest(card)
+
+        if (shouldRequestThreeDSecure) {
+            cardRequest.threeDSecureRequest = ThreeDSecureRequest(
                 sca = SCA.SCA_ALWAYS,
                 returnUrl = "com.paypal.android.demo://example.com/returnUrl",
                 cancelUrl = "com.paypal.android.demo://example.com/cancelUrl"
             )
-        } else {
-            null
         }
-
-        serverSideIntegration(card, threeDSecureRequest)
+        return cardRequest
     }
 
-    private fun serverSideIntegration(card: Card, threeDSecureRequest: ThreeDSecureRequest?) {
-        dataCollectorHandler.setLogging(true)
-        job = Job()
-        lifecycleScope.launch {
-            updateStatusText("Creating order...")
-            val order = fetchOrder()
-            val cardRequest = CardRequest(card, threeDSecureRequest)
-            val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-            Log.i("Magnes", "MetadataId: $clientMetadataId")
-            updateStatusText("Authorizing order...")
-            cardClient.approveOrder(
-                orderId = order.id!!,
-                cardRequest = cardRequest,
-                coroutineContext = job + Dispatchers.IO
-            )
-        }
-    }
-
-    private suspend fun fetchOrder(): Order {
+    private fun buildOrderRequest(): CreateOrderRequest {
         val createOrderRequest = CreateOrderRequest(
             intent = "AUTHORIZE",
             purchaseUnit = listOf(
@@ -210,8 +216,6 @@ class CardFragment : Fragment(), ApproveOrderListener {
                 cancelURL = "com.paypal.android.demo://example.com/cancelUrl"
             )
         }
-
-        return payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = createOrderRequest)
     }
 
     private fun updateStatusText(text: String) {
