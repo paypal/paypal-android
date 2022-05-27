@@ -16,14 +16,14 @@ import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.services.PayPalDemoApi
-import com.paypal.android.card.model.Amount
 import com.paypal.android.card.ApproveOrderListener
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
-import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.OrderIntent
 import com.paypal.android.card.OrderRequest
+import com.paypal.android.card.model.Amount
+import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.model.PurchaseUnit
 import com.paypal.android.card.threedsecure.SCA
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
@@ -38,7 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -178,14 +178,13 @@ class CardFragment : Fragment(), ApproveOrderListener {
         lifecycleScope.launch {
             updateStatusText("Creating order...")
             val order = fetchOrder()
-            val cardRequest = CardRequest(card)
+            val cardRequest = CardRequest(card, threeDSecureRequest)
             val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
             Log.i("Magnes", "MetadataId: $clientMetadataId")
             updateStatusText("Authorizing order...")
             cardClient.approveOrder(
                 orderId = order.id!!,
                 cardRequest = cardRequest,
-                threeDSecureRequest = threeDSecureRequest,
                 coroutineContext = job + Dispatchers.IO
             )
         }

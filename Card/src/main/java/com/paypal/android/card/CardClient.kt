@@ -49,14 +49,12 @@ class CardClient internal constructor(
      *
      * @param orderId [String] order id to confirm
      * @param cardRequest [CardRequest] for requesting an order approval
-     * @param threeDSecureRequest [threeDSecureRequest] to run transaction with 3DS
      * @param coroutineContext [CoroutineContext] to specify in which context to run api calls
      */
     @JvmOverloads
     fun approveOrder(
         orderId: String,
         cardRequest: CardRequest,
-        threeDSecureRequest: ThreeDSecureRequest? = null,
         coroutineContext: CoroutineContext? = Dispatchers.Default
     ) {
         coroutineContext?.also { context ->
@@ -65,7 +63,7 @@ class CardClient internal constructor(
             currentCoroutineContext = context
             CoroutineScope(context).launch {
                 try {
-                    confirmPaymentSource(orderId, cardRequest, threeDSecureRequest)
+                    confirmPaymentSource(orderId, cardRequest)
                 } catch (e: PayPalSDKError) {
                     approveOrderListener?.onApproveOrderFailure(e)
                     clearClient()
@@ -74,13 +72,9 @@ class CardClient internal constructor(
         }
     }
 
-    private suspend fun confirmPaymentSource(
-        orderId: String,
-        cardRequest: CardRequest,
-        threeDSecureRequest: ThreeDSecureRequest? = null
-    ) {
+    private suspend fun confirmPaymentSource(orderId: String, cardRequest: CardRequest) {
         val confirmPaymentSourceResponse =
-            cardAPI.confirmPaymentSource(orderId, cardRequest.card, threeDSecureRequest)
+            cardAPI.confirmPaymentSource(orderId, cardRequest.card, cardRequest.threeDSecureRequest)
         if (confirmPaymentSourceResponse.payerActionHref == null) {
             val result = confirmPaymentSourceResponse.let {
                 CardResult(it.orderId, it.status, it.paymentSource)
