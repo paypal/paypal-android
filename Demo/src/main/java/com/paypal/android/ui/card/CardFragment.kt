@@ -36,6 +36,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CardFragment : Fragment(), ApproveOrderListener {
 
+    companion object {
+        const val TAG = "CardFragment"
+    }
+
     @Inject
     lateinit var preferenceUtil: SharedPreferenceUtil
 
@@ -134,7 +138,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
         val order = payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-        Log.i("Magnes", "MetadataId: $clientMetadataId")
+        Log.i(TAG, "MetadataId: $clientMetadataId")
 
         updateStatusText("Authorizing order...")
         val cardRequest = buildCardRequest()
@@ -146,8 +150,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
         val expirationDate = binding.cardExpirationInput.text.toString()
         val securityCode = binding.cardSecurityCodeInput.text.toString()
 
-        val (monthString, yearString) =
-            expirationDate.split("/") ?: listOf("", "")
+        val (monthString, yearString) = expirationDate.split("/")
 
         val card = Card(cardNumber, monthString, yearString)
         card.securityCode = securityCode
