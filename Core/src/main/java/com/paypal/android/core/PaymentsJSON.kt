@@ -10,36 +10,36 @@ class PaymentsJSON(val json: JSONObject) {
     constructor(input: String) : this(JSONObject(input))
 
     @Throws(JSONException::class)
-    fun getString(keyPath: String): String {
+    fun getString(keyPath: String): String? {
         val nodeResult = searchNode(keyPath)
         val keys = nodeResult.keys
-        return nodeResult.node.getString(keys[0])
+        return nodeResult.node?.getString(keys[0])
     }
 
-    fun getJSONArray(keyPath: String): JSONArray {
+    fun getJSONArray(keyPath: String): JSONArray? {
         val nodeResult = searchNode(keyPath)
         val keys = nodeResult.keys
-        return nodeResult.node.getJSONArray(keys[0])
+        return nodeResult.node?.getJSONArray(keys[0])
     }
 
-    fun getJSONObject(keyPath: String): JSONObject {
+    fun getJSONObject(keyPath: String): JSONObject? {
         val nodeResult = searchNode(keyPath)
         val keys = nodeResult.keys
-        return nodeResult.node.getJSONObject(keys[0])
+        return nodeResult.node?.optJSONObject(keys[0])
     }
 
     private fun searchNode(keyPath: String): NodeResult {
-        var node: JSONObject = json
+        var node: JSONObject? = json
 
         val keys = keyPath.split(".").toMutableList()
         while (keys.size > 1) {
-            node = node.getJSONObject(keys[0])
+            node = node?.optJSONObject(keys[0])
             keys.removeFirst()
         }
         return NodeResult(node, keys)
     }
 
-    private class NodeResult(val node: JSONObject, val keys : List<String>)
+    private class NodeResult(val node: JSONObject?, val keys : List<String>)
 
 }
 

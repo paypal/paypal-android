@@ -16,10 +16,10 @@ internal data class GetOrderInfoResponse(
     val purchaseUnits: List<PurchaseUnit>? = null
 ) {
     constructor(json: PaymentsJSON) : this(
-        json.getString("id"),
-        OrderStatus.valueOf(json.getString("status")),
-        OrderIntent.valueOf(json.getString("intent")),
-        PaymentSource(json.getJSONObject("payment_source.card")),
-        if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(json.getJSONArray("purchase_units")) else null
+        json.getString("id")!!,
+        OrderStatus.valueOf(json.getString("status")!!),
+        OrderIntent.valueOf(json.getString("intent")!!),
+        json.getJSONObject("payment_source.card")?.let { PaymentSource(it) },
+        if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(json.getJSONArray("purchase_units")!!) else null
     )
 }

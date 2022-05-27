@@ -161,15 +161,14 @@ class CardClient internal constructor(
                     try {
                         val getOrderResponse =
                             cardAPI.getOrderInfo(GetOrderRequest(response.orderId))
-                        val liabilityShift =
-                            browserSwitchResult.deepLinkUrl?.getQueryParameter("liability_shift")
-//                        approveOrderListener?.success(
-//                            CardResult(
-//                                getOrderResponse.orderId,
-//                                getOrderResponse.orderStatus,
-//                                liabilityShift?.let { ThreeDSecureResult(it) }
-//                            )
-//                        )
+                        approveOrderListener?.success(
+                            CardResult(
+                                getOrderResponse.orderId,
+                                getOrderResponse.orderStatus,
+                                getOrderResponse.paymentSource,
+                                browserSwitchResult.deepLinkUrl.toString()
+                            )
+                        )
                     } catch (e: PayPalSDKError) {
                         approveOrderListener?.failure(e)
                     }

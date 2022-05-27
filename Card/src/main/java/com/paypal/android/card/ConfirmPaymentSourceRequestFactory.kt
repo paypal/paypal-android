@@ -11,6 +11,7 @@ import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
 import com.paypal.android.core.containsKey
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -63,11 +64,11 @@ internal object ConfirmPaymentSourceRequestFactory {
     fun parseResponse(response: String, correlationId: String?): ConfirmPaymentSourceResponse =
         try {
             val json = PaymentsJSON(response)
-            val status = json.getString("status")
-            val id = json.getString("id")
+            val status = json.getString("status")!!
+            val id = json.getString("id")!!
 
             // this section is for 3DS
-            val linksArray = json.getJSONArray("links")
+            val linksArray = json.getJSONArray("links") ?: JSONArray()
             val links = (0 until linksArray.length()).map { linksArray.getJSONObject(it) }
             val payerActionLink = links.firstOrNull { it.getString("rel") == "payer-action" }
             val payerActionHref = payerActionLink?.getString("href")
@@ -75,7 +76,7 @@ internal object ConfirmPaymentSourceRequestFactory {
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
-                PaymentSource(json.getJSONObject("payment_source.card")),
+                json.getJSONObject("payment_source.card")?.let { PaymentSource(it) },
                 if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(
                     json.json.getJSONArray(
                         "purchase_units"

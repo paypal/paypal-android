@@ -188,6 +188,7 @@ class CardFragment : Fragment() {
             updateStatusText("Authorizing order...")
             cardClient.approveOrderListener = object : ApproveOrderListener {
                 override fun success(result: CardResult) {
+                    val deepLinkText = result.deeplink + "\n"
                     val statusText =
                         "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
                     val paymentSourceText = result.paymentSource?.let {
@@ -200,7 +201,7 @@ class CardFragment : Fragment() {
                         }
                         text + authText
                     }
-                    updateStatusText(statusText + paymentSourceText)
+                    updateStatusText(deepLinkText + statusText + paymentSourceText)
                 }
 
                 override fun failure(error: PayPalSDKError) {

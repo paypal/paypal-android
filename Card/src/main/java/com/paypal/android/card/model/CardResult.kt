@@ -8,5 +8,6 @@ import com.paypal.android.core.OrderStatus
 data class CardResult(
     val orderID: String,
     val status: OrderStatus? = null,
-    val paymentSource: PaymentSource? = null
+    val paymentSource: PaymentSource? = null,
+    val deeplink: String? = null //TODO: remove this, this is only for testing
 )

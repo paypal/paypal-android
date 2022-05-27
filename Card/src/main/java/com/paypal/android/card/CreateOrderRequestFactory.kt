@@ -56,8 +56,8 @@ internal object CreateOrderRequestFactory {
     fun parseResponse(response: String, correlationId: String?): CreateOrderResponse =
         try {
             val json = PaymentsJSON(response)
-            val status = json.getString("status")
-            val id = json.getString("id")
+            val status = json.getString("status")!!
+            val id = json.getString("id")!!
             CreateOrderResponse(id, OrderStatus.valueOf(status))
         } catch (e: JSONException) {
             throw APIClientError.dataParsingError(correlationId, e)
