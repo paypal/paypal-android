@@ -19,11 +19,7 @@ import com.paypal.android.card.ApproveOrderListener
 import com.paypal.android.card.Card
 import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
-import com.paypal.android.card.OrderIntent
-import com.paypal.android.card.OrderRequest
-import com.paypal.android.card.model.Amount
 import com.paypal.android.card.model.CardResult
-import com.paypal.android.card.model.PurchaseUnit
 import com.paypal.android.card.threedsecure.SCA
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.CoreConfig
@@ -34,10 +30,7 @@ import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -63,8 +56,6 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
     private val shouldRequestThreeDSecure: Boolean
         get() = binding.threedsChkbox.isChecked
-
-    private var job = Job()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -130,8 +121,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
     }
 
     private fun onCardFieldSubmit() {
-        job = Job()
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             createOrder()
         }
     }
@@ -148,11 +138,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
         updateStatusText("Authorizing order...")
         val cardRequest = buildCardRequest()
-        cardClient.approveOrder(
-            orderId = order.id!!,
-            cardRequest = cardRequest,
-            coroutineContext = job + Dispatchers.IO
-        )
+        cardClient.approveOrder(orderId = order.id!!, cardRequest = cardRequest)
     }
 
     private fun buildCardRequest(): CardRequest {
@@ -207,11 +193,6 @@ class CardFragment : Fragment(), ApproveOrderListener {
                 binding.statusText.text = text
             }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        if (job.isActive) job.cancel()
     }
 
     override fun onApproveOrderSuccess(result: CardResult) {
