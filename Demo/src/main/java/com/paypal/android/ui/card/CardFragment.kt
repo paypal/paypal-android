@@ -55,9 +55,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
     private val cardViewModel: CardViewModel by viewModels()
 
-    private val binding by lazy {
-        FragmentCardBinding.inflate(layoutInflater)
-    }
+    private lateinit var binding: FragmentCardBinding
 
     private val cardClient by lazy {
         CardClient(requireActivity(), configuration)
@@ -72,7 +70,10 @@ class CardFragment : Fragment(), ApproveOrderListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = binding.root
+    ): View {
+        binding = FragmentCardBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -226,8 +227,11 @@ class CardFragment : Fragment(), ApproveOrderListener {
                 threeDtext
             }
             text + authText
-        }
-        updateStatusText(statusText + paymentSourceText)
+        } ?: ""
+
+        val deepLink = result.deepLinkUrl?.toString() ?: ""
+        val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
+        updateStatusText(joinedText)
     }
 
     override fun onApproveOrderFailure(error: PayPalSDKError) {

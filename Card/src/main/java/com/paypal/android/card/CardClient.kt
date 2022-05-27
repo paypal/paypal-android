@@ -10,7 +10,6 @@ import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.ConfirmPaymentSourceResponse
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
@@ -116,15 +115,14 @@ class CardClient internal constructor(
                     try {
                         val getOrderResponse =
                             cardAPI.getOrderInfo(GetOrderRequest(response.orderId))
-                        val liabilityShift =
-                            browserSwitchResult.deepLinkUrl?.getQueryParameter("liability_shift")
-//                        approveOrderListener?.success(
-//                            CardResult(
-//                                getOrderResponse.orderId,
-//                                getOrderResponse.orderStatus,
-//                                liabilityShift?.let { ThreeDSecureResult(it) }
-//                            )
-//                        )
+                        approveOrderListener?.onApproveOrderSuccess(
+                            CardResult(
+                                getOrderResponse.orderId,
+                                getOrderResponse.orderStatus,
+                                confirmPaymentSourceResponse.paymentSource,
+                                browserSwitchResult.deepLinkUrl
+                            )
+                        )
                     } catch (e: PayPalSDKError) {
                         approveOrderListener?.onApproveOrderFailure(e)
                     }

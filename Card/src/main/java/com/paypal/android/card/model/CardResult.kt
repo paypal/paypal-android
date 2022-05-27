@@ -1,5 +1,6 @@
 package com.paypal.android.card.model
 
+import android.net.Uri
 import com.paypal.android.core.OrderStatus
 
 /**
@@ -8,5 +9,6 @@ import com.paypal.android.core.OrderStatus
 data class CardResult(
     val orderID: String,
     val status: OrderStatus? = null,
-    val paymentSource: PaymentSource? = null
+    val paymentSource: PaymentSource? = null,
+    val deepLinkUrl: Uri? = null
 )
