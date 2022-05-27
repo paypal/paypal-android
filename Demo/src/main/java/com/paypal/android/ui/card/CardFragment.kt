@@ -158,11 +158,11 @@ class CardFragment : Fragment(), ApproveOrderListener {
         dataCollectorHandler.setLogging(true)
         updateStatusText("Creating order...")
 
-        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-        Log.i("Magnes", "MetadataId: $clientMetadataId")
-
         val orderRequest = buildOrderRequest()
         val order = payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = orderRequest)
+
+        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
+        Log.i("Magnes", "MetadataId: $clientMetadataId")
 
         updateStatusText("Authorizing order...")
         val cardRequest = buildCardRequest()
@@ -216,6 +216,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
                 cancelURL = "com.paypal.android.demo://example.com/cancelUrl"
             )
         }
+        return createOrderRequest
     }
 
     private fun updateStatusText(text: String) {
