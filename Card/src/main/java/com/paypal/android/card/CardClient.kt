@@ -32,6 +32,7 @@ class CardClient internal constructor(
     private val browserSwitchClient = BrowserSwitchClient()
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
+    // TODO: determine if we can store this in browser switch metadata to support process kill
     private var confirmPaymentSourceResponse: ConfirmPaymentSourceResponse? = null
 
     /**

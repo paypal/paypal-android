@@ -148,16 +148,16 @@ class CardFragment : Fragment(), ApproveOrderListener {
     }
 
     private fun buildCardRequest(): CardRequest {
-        val cardNumber = binding.cardNumberInput.text.toString()
-        val expirationDate = binding.cardExpirationInput.text.toString()
-        val securityCode = binding.cardSecurityCodeInput.text.toString()
+        val cardRequest = binding.run {
+            val cardNumber = cardNumberInput.text.toString()
+            val expirationDate = cardExpirationInput.text.toString()
+            val securityCode = cardSecurityCodeInput.text.toString()
 
-        val (monthString, yearString) = expirationDate.split("/")
+            val (monthString, yearString) = expirationDate.split("/")
 
-        val card = Card(cardNumber, monthString, yearString)
-        card.securityCode = securityCode
-
-        val cardRequest = CardRequest(card)
+            val card = Card(cardNumber, monthString, yearString, securityCode)
+            CardRequest(card)
+        }
 
         if (shouldRequestThreeDSecure) {
             cardRequest.threeDSecureRequest = ThreeDSecureRequest(
