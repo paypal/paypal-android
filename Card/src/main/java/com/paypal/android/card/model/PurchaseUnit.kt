@@ -13,14 +13,6 @@ data class PurchaseUnit(
     val amount: Amount,
     val payee: Payee? = null
 ) {
-
-    companion object {
-        internal fun fromJSONArray(jsonArray: JSONArray) : List<PurchaseUnit> {
-            return List(jsonArray.length()) { index ->
-                PurchaseUnit(jsonArray.getJSONObject(index))
-            }
-        }
-    }
     internal constructor(json: JSONObject) : this(
         json.optNullableString("reference_id"),
         Amount(json),

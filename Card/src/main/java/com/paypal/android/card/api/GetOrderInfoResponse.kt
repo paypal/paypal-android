@@ -19,7 +19,7 @@ internal data class GetOrderInfoResponse(
         json.getString("id"),
         OrderStatus.valueOf(json.getString("status")),
         OrderIntent.valueOf(json.getString("intent")),
-        json.optGetJSONObject("payment_source.card")?.let { PaymentSource(it) },
-        if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(json.getJSONArray("purchase_units")) else null
+        json.optMapJSONObject("payment_source.card") { PaymentSource(it) },
+        json.optMapJSONArray("purchase_units") { PurchaseUnit(it) }
     )
 }

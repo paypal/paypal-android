@@ -72,7 +72,13 @@ class PaymentsJSON(val json: JSONObject) {
         return node?.optJSONArray(keys[0])
     }
 
-    private class NodeResult(val node: JSONObject, val keys : List<String>)
+    fun <T> optMapJSONArray(keyPath: String, transform: (JSONObject) -> T): List<T>? =
+        optGetJSONArray(keyPath)?.map(transform)
+
+    fun <T> optMapJSONObject(keyPath: String, transform: (JSONObject) -> T): T? =
+        optGetJSONObject(keyPath)?.map(transform)
+
+    private class NodeResult(val node: JSONObject, val keys: List<String>)
 }
 
 fun JSONObject.optNullableString(name: String, fallback: String? = null): String? {

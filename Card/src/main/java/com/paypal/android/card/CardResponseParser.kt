@@ -31,8 +31,8 @@ internal class CardResponseParser {
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
-                json.optGetJSONObject("payment_source.card")?.let { PaymentSource(it) },
-                json.optGetJSONArray("purchase_units")?.let { PurchaseUnit.fromJSONArray(it) }
+                json.optMapJSONObject("payment_source.card") { PaymentSource(it) },
+                json.optMapJSONArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (e: JSONException) {
             throw APIClientError.dataParsingError(correlationId, e)
