@@ -28,6 +28,19 @@ class PaymentsJSON(val json: JSONObject) {
         return nodeResult.node.getJSONObject(keys[0])
     }
 
+    // TODO: consolidate json keyPath logic
+    fun optString(keyPath: String): String? {
+        val keys = keyPath.split(".").toMutableList()
+
+        var node: JSONObject? = json
+        while (keys.size > 1) {
+            node = node?.optJSONObject(keys[0])
+            keys.removeFirst()
+        }
+
+        return node?.getString(keys[0])
+    }
+
     // TODO: consolidate json keypath logic
     fun optGetJSONObject(keyPath: String): JSONObject? {
         val keys = keyPath.split(".").toMutableList()
@@ -72,11 +85,11 @@ class PaymentsJSON(val json: JSONObject) {
         return node?.optJSONArray(keys[0])
     }
 
-    fun <T> optMapJSONArray(keyPath: String, transform: (JSONObject) -> T): List<T>? =
-        optGetJSONArray(keyPath)?.map(transform)
-
-    fun <T> optMapJSONObject(keyPath: String, transform: (JSONObject) -> T): T? =
+    fun <T> optMapObject(keyPath: String, transform: (JSONObject) -> T): T? =
         optGetJSONObject(keyPath)?.map(transform)
+
+    fun <T> optMapObjectArray(keyPath: String, transform: (JSONObject) -> T): List<T>? =
+        optGetJSONArray(keyPath)?.map(transform)
 
     private class NodeResult(val node: JSONObject, val keys: List<String>)
 }

@@ -1,8 +1,6 @@
 package com.paypal.android.card.model
 
-import com.paypal.android.core.containsKey
-import com.paypal.android.core.optNullableString
-import org.json.JSONObject
+import com.paypal.android.core.PaymentsJSON
 
 data class PaymentSource(
     val lastDigits: String,
@@ -10,10 +8,10 @@ data class PaymentSource(
     val type: String? = null,
     val authenticationResult: AuthenticationResult? = null
 ) {
-    internal constructor(json: JSONObject) : this(
+    internal constructor(json: PaymentsJSON) : this(
         json.getString("last_digits"),
         json.getString("brand"),
-        json.optNullableString("type"),
-        if (json.containsKey("authentication_result")) AuthenticationResult(json.getJSONObject("authentication_result")) else null
+        json.optString("type"),
+        json.optMapObject("authentication_result") { AuthenticationResult(it) }
     )
 }

@@ -5,8 +5,6 @@ import com.paypal.android.card.model.PaymentSource
 import com.paypal.android.card.model.PurchaseUnit
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PaymentsJSON
-import com.paypal.android.core.containsKey
-import org.json.JSONObject
 
 internal data class GetOrderInfoResponse(
     val orderId: String,
@@ -19,7 +17,8 @@ internal data class GetOrderInfoResponse(
         json.getString("id"),
         OrderStatus.valueOf(json.getString("status")),
         OrderIntent.valueOf(json.getString("intent")),
-        json.optMapJSONObject("payment_source.card") { PaymentSource(it) },
-        json.optMapJSONArray("purchase_units") { PurchaseUnit(it) }
+        // TODO: make PaymentsJSON return payments JSON objects to fully wrap JSONObject API
+        json.optMapObject("payment_source.card") { PaymentSource(PaymentsJSON(it)) },
+        json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
     )
 }

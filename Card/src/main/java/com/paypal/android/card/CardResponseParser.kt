@@ -10,7 +10,6 @@ import com.paypal.android.core.OrderErrorDetail
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.PaymentsJSON
-import com.paypal.android.core.containsKey
 import org.json.JSONException
 
 internal class CardResponseParser {
@@ -31,8 +30,8 @@ internal class CardResponseParser {
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
-                json.optMapJSONObject("payment_source.card") { PaymentSource(it) },
-                json.optMapJSONArray("purchase_units") { PurchaseUnit(it) }
+                json.optMapObject("payment_source.card") { PaymentSource(it) },
+                json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (e: JSONException) {
             throw APIClientError.dataParsingError(correlationId, e)
