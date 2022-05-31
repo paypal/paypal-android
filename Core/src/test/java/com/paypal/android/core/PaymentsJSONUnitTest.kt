@@ -2,6 +2,7 @@ package com.paypal.android.core
 
 import org.json.JSONException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +22,13 @@ class PaymentsJSONUnitTest {
                 "b": {
                   "c": "c-value"
                 }
-              }
+              },
+              "links": [
+                {
+                  "rel": "sample-rel",
+                  "href": "/sample/href"
+                }
+              ]
             }
         """.trimIndent()
         sut = PaymentsJSON(json)
@@ -35,5 +42,17 @@ class PaymentsJSONUnitTest {
     @Test(expected = JSONException::class)
     fun `it should throw when a string property does not exist at a given keypath`() {
         sut.getString("a.b.c.d")
+    }
+
+    @Test
+    fun `it should return a link href for existing links`() {
+        val href = sut.getLinkHref("sample-rel")
+        assertEquals("/sample/href", href)
+    }
+
+    @Test
+    fun `it should return null if the link does not exist`() {
+        val href = sut.getLinkHref("another-rel")
+        assertNull(href)
     }
 }

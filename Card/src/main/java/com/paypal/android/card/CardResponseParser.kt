@@ -26,10 +26,7 @@ internal class CardResponseParser {
             val id = json.getString("id")
 
             // this section is for 3DS
-            val linksArray = json.getJSONArray("links")
-            val links = (0 until linksArray.length()).map { linksArray.getJSONObject(it) }
-            val payerActionLink = links.firstOrNull { it.getString("rel") == "payer-action" }
-            val payerActionHref = payerActionLink?.getString("href")
+            val payerActionHref = json.getLinkHref("payer-action")
             ConfirmPaymentSourceResponse(
                 id,
                 OrderStatus.valueOf(status),

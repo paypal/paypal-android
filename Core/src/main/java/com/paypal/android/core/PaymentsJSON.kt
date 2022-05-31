@@ -51,6 +51,14 @@ class PaymentsJSON(val json: JSONObject) {
         return NodeResult(node, keys)
     }
 
+    fun getLinkHref(rel: String): String? {
+        val linksArray = json.optJSONArray("links") ?: JSONArray()
+        val links = (0 until linksArray.length()).map { linksArray.getJSONObject(it) }
+
+        val targetLink = links.firstOrNull { rel == it.getString("rel") }
+        return targetLink?.optString("href")
+    }
+
     private class NodeResult(val node: JSONObject, val keys : List<String>)
 }
 

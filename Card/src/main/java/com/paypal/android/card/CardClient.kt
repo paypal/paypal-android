@@ -75,11 +75,11 @@ class CardClient internal constructor(
         orderId: String,
         cardRequest: CardRequest
     ) {
-        val confirmPaymentSourceResponse =
+        val response =
             cardAPI.confirmPaymentSource(orderId, cardRequest.card, cardRequest.threeDSecureRequest)
-        if (confirmPaymentSourceResponse.payerActionHref == null) {
-            val result = confirmPaymentSourceResponse.let {
-                CardResult(it.orderID, it.status, it.paymentSource)
+        if (response.payerActionHref == null) {
+            val result = response.run {
+                CardResult(orderID, status, paymentSource)
             }
             withContext(Dispatchers.Main) {
                 approveOrderListener?.onApproveOrderSuccess(result)
@@ -90,11 +90,9 @@ class CardClient internal constructor(
             }
 
             // launch the 3DS flow
-            val approveOrderMetadata = confirmPaymentSourceResponse.run {
-                ApproveOrderMetadata(orderId, paymentSource)
-            }
+            val approveOrderMetadata = ApproveOrderMetadata(orderId, response.paymentSource)
             val options = BrowserSwitchOptions()
-                .url(Uri.parse(confirmPaymentSourceResponse.payerActionHref))
+                .url(Uri.parse(response.payerActionHref))
                 .returnUrlScheme("com.paypal.android.demo")
                 .metadata(approveOrderMetadata.toJSON())
 
