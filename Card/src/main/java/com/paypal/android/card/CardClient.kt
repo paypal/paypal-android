@@ -1,15 +1,12 @@
 package com.paypal.android.card
 
-import android.content.Context
 import android.net.Uri
-import android.view.Display
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.card.api.CardAPI
-import com.paypal.android.card.api.ConfirmPaymentSourceResponse
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.API
@@ -33,9 +30,6 @@ class CardClient internal constructor(
 
     private val browserSwitchClient = BrowserSwitchClient()
     private val lifeCycleObserver = CardLifeCycleObserver(this)
-
-    // TODO: determine if we can store this in browser switch metadata to support process kill
-    private var confirmPaymentSourceResponse: ConfirmPaymentSourceResponse? = null
 
     /**
      *  CardClient constructor
@@ -69,8 +63,9 @@ class CardClient internal constructor(
             try {
                 confirmPaymentSource(activity, orderId, cardRequest)
             } catch (e: PayPalSDKError) {
-                approveOrderListener?.onApproveOrderFailure(e)
-                clearClient()
+                withContext(Dispatchers.Main) {
+                    approveOrderListener?.onApproveOrderFailure(e)
+                }
             }
         }
     }
@@ -89,67 +84,57 @@ class CardClient internal constructor(
             withContext(Dispatchers.Main) {
                 approveOrderListener?.onApproveOrderSuccess(result)
             }
-            clearClient()
         } else {
             withContext(Dispatchers.Main) {
                 approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
             }
 
             // launch the 3DS flow
+            val approveOrderMetadata = confirmPaymentSourceResponse.run {
+                ApproveOrderMetadata(orderId, paymentSource)
+            }
             val options = BrowserSwitchOptions()
                 .url(Uri.parse(confirmPaymentSourceResponse.payerActionHref))
                 .returnUrlScheme("com.paypal.android.demo")
-            this.confirmPaymentSourceResponse = confirmPaymentSourceResponse
+                .metadata(approveOrderMetadata.toJSON())
+
             browserSwitchClient.start(activity, options)
         }
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        if (browserSwitchResult != null && approveOrderListener != null && confirmPaymentSourceResponse != null) {
+        if (browserSwitchResult != null && approveOrderListener != null) {
             approveOrderListener?.onApproveOrderThreeDSecureDidFinish()
             when (browserSwitchResult.status) {
-                BrowserSwitchStatus.SUCCESS -> getOrderInfo(
-                    browserSwitchResult,
-                    confirmPaymentSourceResponse
-                )
-                BrowserSwitchStatus.CANCELED -> deliverCancellation()
+                BrowserSwitchStatus.SUCCESS -> getOrderInfo(browserSwitchResult)
+                BrowserSwitchStatus.CANCELED -> notifyApproveOrderCanceled()
             }
         }
     }
 
-    private fun getOrderInfo(
-        browserSwitchResult: BrowserSwitchResult,
-        confirmPaymentSourceResponse: ConfirmPaymentSourceResponse?
-    ) {
-        confirmPaymentSourceResponse?.also { response ->
+    private fun getOrderInfo(browserSwitchResult: BrowserSwitchResult) {
+        ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val getOrderResponse =
-                        cardAPI.getOrderInfo(GetOrderRequest(response.orderId))
+                        cardAPI.getOrderInfo(GetOrderRequest(metadata.orderId))
                     approveOrderListener?.onApproveOrderSuccess(
                         CardResult(
                             getOrderResponse.orderId,
                             getOrderResponse.orderStatus,
-                            confirmPaymentSourceResponse.paymentSource,
+                            metadata.paymentSource,
                             browserSwitchResult.deepLinkUrl
                         )
                     )
                 } catch (e: PayPalSDKError) {
                     approveOrderListener?.onApproveOrderFailure(e)
                 }
-                clearClient()
             }
         }
     }
 
-    private fun deliverCancellation() {
+    private fun notifyApproveOrderCanceled() {
         approveOrderListener?.onApproveOrderCanceled()
-        clearClient()
-    }
-
-    private fun clearClient() {
-        confirmPaymentSourceResponse = null
-        approveOrderListener = null
     }
 }
