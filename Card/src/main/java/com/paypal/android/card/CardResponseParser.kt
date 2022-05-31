@@ -30,7 +30,7 @@ internal class CardResponseParser {
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
-                json.optMapObject("payment_source.card") { PaymentSource(PaymentsJSON(it)) },
+                json.optMapObject("payment_source.card") { PaymentSource(it) },
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (e: JSONException) {

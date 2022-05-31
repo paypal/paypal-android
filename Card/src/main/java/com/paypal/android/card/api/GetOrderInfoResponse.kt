@@ -17,8 +17,7 @@ internal data class GetOrderInfoResponse(
         json.getString("id"),
         OrderStatus.valueOf(json.getString("status")),
         OrderIntent.valueOf(json.getString("intent")),
-        // TODO: make PaymentsJSON return payments JSON objects to fully wrap JSONObject API
-        json.optMapObject("payment_source.card") { PaymentSource(PaymentsJSON(it)) },
+        json.optMapObject("payment_source.card") { PaymentSource(it) },
         json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
     )
 }

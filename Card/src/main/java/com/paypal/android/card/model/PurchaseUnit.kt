@@ -1,5 +1,6 @@
 package com.paypal.android.card.model
 
+import com.paypal.android.core.PaymentsJSON
 import com.paypal.android.core.optNullableString
 import org.json.JSONArray
 import org.json.JSONObject
@@ -13,8 +14,8 @@ data class PurchaseUnit(
     val amount: Amount,
     val payee: Payee? = null
 ) {
-    internal constructor(json: JSONObject) : this(
-        json.optNullableString("reference_id"),
+    internal constructor(json: PaymentsJSON) : this(
+        json.optString("reference_id"),
         Amount(json),
         Payee(json)
     )

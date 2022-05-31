@@ -54,7 +54,7 @@ class PaymentsJSONUnitTest {
 
     @Test
     fun `it should return an optional JSONObject if one exists at a given keypath`() {
-        val json = sut.optGetJSONObject("a.b")
+        val json = sut.optGetObject("a.b")
 
         val expected = JSONObject()
             .put("c", "c-value")
@@ -63,7 +63,7 @@ class PaymentsJSONUnitTest {
 
     @Test
     fun `it should return null when an optional JSONObject does not exist at a given keypath`() {
-        val json = sut.optGetJSONObject("a.b.c.d")
+        val json = sut.optGetObject("a.b.c.d")
         assertNull(json)
     }
 

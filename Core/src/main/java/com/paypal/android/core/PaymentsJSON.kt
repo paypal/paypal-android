@@ -16,18 +16,6 @@ class PaymentsJSON(val json: JSONObject) {
         return nodeResult.node.getString(keys[0])
     }
 
-    fun getJSONArray(keyPath: String): JSONArray {
-        val nodeResult = searchNode(keyPath)
-        val keys = nodeResult.keys
-        return nodeResult.node.getJSONArray(keys[0])
-    }
-
-    fun getJSONObject(keyPath: String): JSONObject {
-        val nodeResult = searchNode(keyPath)
-        val keys = nodeResult.keys
-        return nodeResult.node.getJSONObject(keys[0])
-    }
-
     // TODO: consolidate json keyPath logic
     fun optString(keyPath: String): String? {
         val keys = keyPath.split(".").toMutableList()
@@ -42,7 +30,7 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     // TODO: consolidate json keypath logic
-    fun optGetJSONObject(keyPath: String): JSONObject? {
+    fun optGetObject(keyPath: String): PaymentsJSON? {
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -50,7 +38,7 @@ class PaymentsJSON(val json: JSONObject) {
             node = node?.optJSONObject(keys[0])
             keys.removeFirst()
         }
-        return node
+        return node?.let { PaymentsJSON(it) }
     }
 
     private fun searchNode(keyPath: String): NodeResult {
@@ -73,7 +61,7 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     // TODO: consolidate json keypath logic
-    fun optGetJSONArray(keyPath: String): JSONArray? {
+    private fun optGetJSONArray(keyPath: String): JSONArray? {
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -85,11 +73,17 @@ class PaymentsJSON(val json: JSONObject) {
         return node?.optJSONArray(keys[0])
     }
 
-    fun <T> optMapObject(keyPath: String, transform: (JSONObject) -> T): T? =
-        optGetJSONObject(keyPath)?.map(transform)
+    fun <T> optMapObject(keyPath: String, transform: (PaymentsJSON) -> T): T? =
+        optGetObject(keyPath)?.let { transform(it) }
 
-    fun <T> optMapObjectArray(keyPath: String, transform: (JSONObject) -> T): List<T>? =
-        optGetJSONArray(keyPath)?.map(transform)
+    fun <T> optMapObjectArray(keyPath: String, transform: (PaymentsJSON) -> T): List<T>? {
+        return optGetJSONArray(keyPath)?.let { jsonArray ->
+            (0 until jsonArray.length()).map { index ->
+                val json = jsonArray.getJSONObject(index)
+                transform(PaymentsJSON(json))
+            }
+        }
+    }
 
     private class NodeResult(val node: JSONObject, val keys: List<String>)
 }
