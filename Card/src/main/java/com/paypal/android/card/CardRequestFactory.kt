@@ -1,22 +1,14 @@
 package com.paypal.android.card
 
-import com.paypal.android.card.api.ConfirmPaymentSourceResponse
-import com.paypal.android.card.model.PaymentSource
-import com.paypal.android.card.model.PurchaseUnit
+import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
-import com.paypal.android.core.APIClientError
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
-import com.paypal.android.core.OrderStatus
-import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.core.PaymentsJSON
-import com.paypal.android.core.containsKey
-import org.json.JSONException
 import org.json.JSONObject
 
-internal object ConfirmPaymentSourceRequestFactory {
+internal class CardRequestFactory {
 
-    fun createRequest(
+    fun createConfirmPaymentSourceRequest(
         orderID: String,
         card: Card,
         threeDSecureRequest: ThreeDSecureRequest? = null
@@ -59,30 +51,8 @@ internal object ConfirmPaymentSourceRequestFactory {
         return APIRequest(path, HttpMethod.POST, body)
     }
 
-    @Throws(PayPalSDKError::class)
-    fun parseResponse(response: String, correlationId: String?): ConfirmPaymentSourceResponse =
-        try {
-            val json = PaymentsJSON(response)
-            val status = json.getString("status")
-            val id = json.getString("id")
-
-            // this section is for 3DS
-            val linksArray = json.getJSONArray("links")
-            val links = (0 until linksArray.length()).map { linksArray.getJSONObject(it) }
-            val payerActionLink = links.firstOrNull { it.getString("rel") == "payer-action" }
-            val payerActionHref = payerActionLink?.getString("href")
-            ConfirmPaymentSourceResponse(
-                id,
-                OrderStatus.valueOf(status),
-                payerActionHref,
-                json.optGetJSONObject("payment_source.card")?.let { PaymentSource(it) },
-                if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(
-                    json.json.getJSONArray(
-                        "purchase_units"
-                    )
-                ) else null
-            )
-        } catch (e: JSONException) {
-            throw APIClientError.dataParsingError(correlationId, e)
-        }
+    fun createGetOrderInfoRequest(getOrderRequest: GetOrderRequest): APIRequest {
+        val path = "v2/checkout/orders/${getOrderRequest.orderId}"
+        return APIRequest(path, HttpMethod.GET, "")
+    }
 }

@@ -1,21 +1,16 @@
 package com.paypal.android.card.api
 
 import com.paypal.android.card.Card
-import com.paypal.android.card.ConfirmPaymentSourceRequestFactory
-import com.paypal.android.card.GetOrderInfoRequestFactory
+import com.paypal.android.card.CardRequestFactory
+import com.paypal.android.card.CardResponseParser
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
-import com.paypal.android.core.API.Companion.SUCCESSFUL_STATUS_CODES
 import com.paypal.android.core.APIClientError
-import com.paypal.android.core.APIRequest
-import com.paypal.android.core.HttpResponse.Companion.SERVER_ERROR
-import com.paypal.android.core.HttpResponse.Companion.STATUS_UNDETERMINED
-import com.paypal.android.core.HttpResponse.Companion.STATUS_UNKNOWN_HOST
-import com.paypal.android.core.OrderErrorDetail
-import com.paypal.android.core.PaymentsJSON
 
 internal class CardAPI(
     private val api: API,
+    private val requestFactory: CardRequestFactory = CardRequestFactory(),
+    private val responseParser: CardResponseParser = CardResponseParser()
 ) {
 
     suspend fun confirmPaymentSource(
@@ -23,25 +18,8 @@ internal class CardAPI(
         card: Card,
         threeDSecureRequest: ThreeDSecureRequest? = null
     ): ConfirmPaymentSourceResponse {
-        return performRequest(
-            ConfirmPaymentSourceRequestFactory.createRequest(orderID, card, threeDSecureRequest),
-            ConfirmPaymentSourceRequestFactory::parseResponse
-        )
-    }
+        val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card, threeDSecureRequest)
 
-    suspend fun getOrderInfo(
-        getOrderRequest: GetOrderRequest,
-    ): GetOrderInfoResponse {
-        return performRequest(
-            GetOrderInfoRequestFactory.createRequest(getOrderRequest),
-            GetOrderInfoRequestFactory::parseResponse
-        )
-    }
-
-    private suspend fun <R> performRequest(
-        apiRequest: APIRequest,
-        parseResult: (body: String, correlationId: String?) -> R
-    ): R {
         val httpResponse = api.send(apiRequest)
         val correlationID = httpResponse.headers["Paypal-Debug-Id"]
 
@@ -50,47 +28,30 @@ internal class CardAPI(
             throw APIClientError.noResponseData(correlationID)
         }
 
-        val status = httpResponse.status
-        if (status in SUCCESSFUL_STATUS_CODES) {
-            return parseResult(bodyResponse, correlationID)
+        if (httpResponse.isSuccessful) {
+            return responseParser.parseConfirmPaymentSourceResponse(bodyResponse, correlationID)
         } else {
-            throw parseError(status, bodyResponse, correlationID)
+            throw responseParser.parseError(httpResponse.status, bodyResponse, correlationID)
         }
     }
 
-    private fun parseError(
-        status: Int,
-        bodyResponse: String,
-        correlationID: String?
-    ) = when (status) {
-        STATUS_UNKNOWN_HOST -> {
-            APIClientError.unknownHost(correlationID)
-        }
-        STATUS_UNDETERMINED -> {
-            APIClientError.unknownError(correlationID)
-        }
-        SERVER_ERROR -> {
-            APIClientError.serverResponseError(correlationID)
-        }
-        else -> {
-            val json = PaymentsJSON(bodyResponse)
-            val message = json.getString("message")
+    suspend fun getOrderInfo(
+        getOrderRequest: GetOrderRequest,
+    ): GetOrderInfoResponse {
+        val apiRequest = requestFactory.createGetOrderInfoRequest(getOrderRequest)
 
-            val errorDetails = mutableListOf<OrderErrorDetail>()
-            val errorDetailsJson = json.getJSONArray("details")
-            for (i in 0 until errorDetailsJson.length()) {
-                val errorJson = errorDetailsJson.getJSONObject(i)
-                val issue = errorJson.getString("issue")
-                val description = errorJson.getString("description")
-                errorDetails += OrderErrorDetail(issue, description)
-            }
+        val httpResponse = api.send(apiRequest)
+        val correlationID = httpResponse.headers["Paypal-Debug-Id"]
 
-            val description = "$message -> $errorDetails"
-            APIClientError.httpURLConnectionError(
-                status,
-                description,
-                correlationID
-            )
+        val bodyResponse = httpResponse.body
+        if (bodyResponse.isNullOrBlank()) {
+            throw APIClientError.noResponseData(correlationID)
+        }
+
+        if (httpResponse.isSuccessful) {
+            return responseParser.parseGetOrderInfoResponse(bodyResponse, correlationID)
+        } else {
+            throw responseParser.parseError(httpResponse.status, bodyResponse, correlationID)
         }
     }
 }

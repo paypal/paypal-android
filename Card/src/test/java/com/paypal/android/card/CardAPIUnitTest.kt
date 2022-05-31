@@ -46,7 +46,7 @@ class CardAPIUnitTest {
         """
 
     private val api = mockk<API>(relaxed = true)
-    private val requestBuilder = mockk<ConfirmPaymentSourceRequestFactory>()
+    private val requestFactory = mockk<CardRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24")
@@ -86,8 +86,8 @@ class CardAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = CardAPI(api, requestBuilder)
-        every { requestBuilder.createConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
+        sut = CardAPI(api, requestFactory)
+        every { requestFactory.createConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
