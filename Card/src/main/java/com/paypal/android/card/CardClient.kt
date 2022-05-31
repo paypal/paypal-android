@@ -2,6 +2,7 @@ package com.paypal.android.card
 
 import android.content.Context
 import android.net.Uri
+import android.view.Display
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -17,6 +18,7 @@ import com.paypal.android.core.PayPalSDKError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -84,15 +86,20 @@ class CardClient internal constructor(
             val result = confirmPaymentSourceResponse.let {
                 CardResult(it.orderId, it.status, it.paymentSource)
             }
-            approveOrderListener?.onApproveOrderSuccess(result)
+            withContext(Dispatchers.Main) {
+                approveOrderListener?.onApproveOrderSuccess(result)
+            }
             clearClient()
         } else {
-            // we launch the 3DS flow
+            withContext(Dispatchers.Main) {
+                approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
+            }
+
+            // launch the 3DS flow
             val options = BrowserSwitchOptions()
                 .url(Uri.parse(confirmPaymentSourceResponse.payerActionHref))
                 .returnUrlScheme("com.paypal.android.demo")
             this.confirmPaymentSourceResponse = confirmPaymentSourceResponse
-            approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
             browserSwitchClient.start(activity, options)
         }
     }
