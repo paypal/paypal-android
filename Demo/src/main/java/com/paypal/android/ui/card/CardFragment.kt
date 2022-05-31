@@ -215,7 +215,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
             text + authText
         } ?: ""
 
-        val deepLink = result.deepLinkUrl?.toString() ?: ""
+        val deepLink = result.deepLinkUrl?.toString().orEmpty()
         val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
         updateStatusText(joinedText)
     }
