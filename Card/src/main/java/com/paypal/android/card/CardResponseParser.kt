@@ -30,7 +30,7 @@ internal class CardResponseParser {
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
-                json.optMapObject("payment_source.card") { PaymentSource(it) },
+                json.optMapObject("payment_source.card") { PaymentSource(PaymentsJSON(it)) },
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (e: JSONException) {
@@ -64,21 +64,14 @@ internal class CardResponseParser {
             val json = PaymentsJSON(bodyResponse)
             val message = json.getString("message")
 
-            val errorDetails = mutableListOf<OrderErrorDetail>()
-            val errorDetailsJson = json.getJSONArray("details")
-            for (i in 0 until errorDetailsJson.length()) {
-                val errorJson = errorDetailsJson.getJSONObject(i)
-                val issue = errorJson.getString("issue")
-                val description = errorJson.getString("description")
-                errorDetails += OrderErrorDetail(issue, description)
+            val errorDetails = json.optMapObjectArray("details") {
+                val issue = it.getString("issue")
+                val description = it.getString("description")
+                OrderErrorDetail(issue, description)
             }
 
             val description = "$message -> $errorDetails"
-            APIClientError.httpURLConnectionError(
-                status,
-                description,
-                correlationID
-            )
+            APIClientError.httpURLConnectionError(status, description, correlationID)
         }
     }
 }
