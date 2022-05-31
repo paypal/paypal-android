@@ -1,12 +1,15 @@
 package com.paypal.android.core
 
+import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.skyscreamer.jsonassert.JSONAssert
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentsJSONUnitTest {
@@ -23,6 +26,11 @@ class PaymentsJSONUnitTest {
                   "c": "c-value"
                 }
               },
+              "jsonArray": [
+                {
+                  "arrayElement0": "array-element-0-value"
+                }
+              ],
               "links": [
                 {
                   "rel": "sample-rel",
@@ -45,7 +53,40 @@ class PaymentsJSONUnitTest {
     }
 
     @Test
-    fun `it should return a link href for existing links`() {
+    fun `it should return an optional JSONObject if one exists at a given keypath`() {
+        val json = sut.optGetJSONObject("a.b")
+
+        val expected = JSONObject()
+            .put("c", "c-value")
+        JSONAssert.assertEquals(expected, json, true)
+    }
+
+    @Test
+    fun `it should return null when an optional JSONObject does not exist at a given keypath`() {
+        val json = sut.optGetJSONObject("a.b.c.d")
+        assertNull(json)
+    }
+
+    @Test
+    fun `it should return an optional JSONArray if one exists at a given keypath`() {
+        val json = sut.optGetJSONArray("jsonArray")
+
+        val expected = JSONArray()
+            .put(
+                0, JSONObject()
+                    .put("arrayElement0", "array-element-0-value")
+            )
+        JSONAssert.assertEquals(expected, json, true)
+    }
+
+    @Test
+    fun `it should return null when an optional JSONArray does not exist at a given keypath`() {
+        val json = sut.optGetJSONArray("anotherArray")
+        assertNull(json)
+    }
+
+    @Test
+    fun `it should return a link href for a given rel if one exists`() {
         val href = sut.getLinkHref("sample-rel")
         assertEquals("/sample/href", href)
     }

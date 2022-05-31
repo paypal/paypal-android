@@ -32,11 +32,7 @@ internal class CardResponseParser {
                 OrderStatus.valueOf(status),
                 payerActionHref,
                 json.optGetJSONObject("payment_source.card")?.let { PaymentSource(it) },
-                if (json.json.containsKey("purchase_units")) PurchaseUnit.fromJSONArray(
-                    json.json.getJSONArray(
-                        "purchase_units"
-                    )
-                ) else null
+                json.optGetJSONArray("purchase_units")?.let { PurchaseUnit.fromJSONArray(it) }
             )
         } catch (e: JSONException) {
             throw APIClientError.dataParsingError(correlationId, e)

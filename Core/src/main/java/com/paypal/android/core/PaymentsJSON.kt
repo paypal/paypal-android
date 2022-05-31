@@ -59,6 +59,19 @@ class PaymentsJSON(val json: JSONObject) {
         return targetLink?.optString("href")
     }
 
+    // TODO: consolidate json keypath logic
+    fun optGetJSONArray(keyPath: String): JSONArray? {
+        val keys = keyPath.split(".").toMutableList()
+
+        var node: JSONObject? = json
+        while (keys.size > 1) {
+            node = node?.optJSONObject(keys[0])
+            keys.removeFirst()
+        }
+
+        return node?.optJSONArray(keys[0])
+    }
+
     private class NodeResult(val node: JSONObject, val keys : List<String>)
 }
 
