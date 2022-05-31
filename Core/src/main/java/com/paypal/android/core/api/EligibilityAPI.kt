@@ -5,15 +5,16 @@ import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.api.models.APIResult
 import com.paypal.android.core.api.models.Eligibility
 import com.paypal.android.core.graphql.common.GraphQlClient
+import com.paypal.android.core.graphql.common.GraphQlClientImpl
 import com.paypal.android.core.graphql.fundingEligibility.FundingEligibilityQuery
 import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibilityIntent
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 
 class EligibilityAPI(
-    private val graphQlClient: GraphQlClient,
     private val coreConfig: CoreConfig
 ) {
+    private val graphQlClient: GraphQlClient = GraphQlClientImpl()
 
     suspend fun checkEligibility(): APIResult<Eligibility> {
         val fundingEligibilityQuery = FundingEligibilityQuery(

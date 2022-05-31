@@ -4,7 +4,7 @@ import com.paypal.android.core.graphql.common.getJSONArrayOrNull
 import com.paypal.android.core.graphql.common.toStringsList
 import org.json.JSONObject
 
-data class SupportedPaymentMethodsTypeEligibility(
+internal data class SupportedPaymentMethodsTypeEligibility(
     private val jsonObject: JSONObject,
     val eligible: Boolean = jsonObject.getBoolean("eligible"),
     val reasons: List<String>? = jsonObject.getJSONArrayOrNull("reasons").toStringsList()

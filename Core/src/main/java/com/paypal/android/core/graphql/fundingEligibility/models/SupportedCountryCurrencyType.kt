@@ -1,5 +1,5 @@
 package com.paypal.android.core.graphql.fundingEligibility.models
 
-enum class SupportedCountryCurrencyType {
+internal enum class SupportedCountryCurrencyType {
     USD
 }

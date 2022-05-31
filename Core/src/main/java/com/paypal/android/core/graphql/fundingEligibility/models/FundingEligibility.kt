@@ -2,7 +2,7 @@ package com.paypal.android.core.graphql.fundingEligibility.models
 
 import org.json.JSONObject
 
-data class FundingEligibility(
+internal data class FundingEligibility(
     private val jsonObject: JSONObject,
     val venmo: SupportedPaymentMethodsTypeEligibility = SupportedPaymentMethodsTypeEligibility(
         jsonObject.getJSONObject("venmo")

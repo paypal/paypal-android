@@ -7,7 +7,7 @@ import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountr
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 import org.json.JSONObject
 
-class FundingEligibilityQuery(
+internal class FundingEligibilityQuery(
     private val clientId: String,
     private val fundingEligibilityIntent: FundingEligibilityIntent,
     private val currencyCode: SupportedCountryCurrencyType,

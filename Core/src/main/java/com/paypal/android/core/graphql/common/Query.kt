@@ -2,7 +2,7 @@ package com.paypal.android.core.graphql.common
 
 import org.json.JSONObject
 
-abstract class Query<T> {
+internal abstract class Query<T> {
     fun requestBody(): JSONObject {
         val query = """query { $queryName(${queryParameters()})
             $dataFieldsForResponse }
