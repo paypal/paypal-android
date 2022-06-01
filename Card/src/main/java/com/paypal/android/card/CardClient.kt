@@ -25,7 +25,7 @@ class CardClient internal constructor(
     activity: FragmentActivity,
     private val cardAPI: CardAPI,
     private val browserSwitchClient: BrowserSwitchClient,
-    private val ioDispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
@@ -39,7 +39,7 @@ class CardClient internal constructor(
      *  @param [configuration] Configuration parameters for client
      */
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
-            this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.IO)
+            this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.Main)
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)
@@ -52,13 +52,11 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
-        CoroutineScope(ioDispatcher).launch {
+        CoroutineScope(dispatcher).launch {
             try {
                 confirmPaymentSource(activity, cardRequest)
             } catch (e: PayPalSDKError) {
-                withContext(Dispatchers.Main) {
-                    approveOrderListener?.onApproveOrderFailure(e)
-                }
+                approveOrderListener?.onApproveOrderFailure(e)
             }
         }
     }
@@ -69,13 +67,9 @@ class CardClient internal constructor(
             val result = response.run {
                 CardResult(orderID, status, paymentSource)
             }
-            withContext(Dispatchers.Main) {
-                approveOrderListener?.onApproveOrderSuccess(result)
-            }
+            approveOrderListener?.onApproveOrderSuccess(result)
         } else {
-            withContext(Dispatchers.Main) {
-                approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
-            }
+            approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
             // launch the 3DS flow
             val approveOrderMetadata =
@@ -102,7 +96,7 @@ class CardClient internal constructor(
 
     private fun getOrderInfo(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(dispatcher).launch {
                 try {
                     val getOrderResponse =
                         cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))

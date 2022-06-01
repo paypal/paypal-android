@@ -1,7 +1,9 @@
 package com.paypal.android.card
 
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
+import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.ConfirmPaymentSourceResponse
 import com.paypal.android.card.model.CardResult
@@ -16,6 +18,8 @@ import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -24,12 +28,17 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class CardClientUnitTest {
 
     private val card = Card("4111111111111111", "01", "24")
     private val orderID = "sample-order-id"
+
+    private val cardRequest = CardRequest(orderID, card)
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
     private val confirmPaymentSourceResponse =
@@ -59,14 +68,11 @@ class CardClientUnitTest {
 
     @Test
     fun `approve order notifies listener of confirm payment source success`() = runTest {
-        val dispatcher = StandardTestDispatcher(testScheduler)
-        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
-        sut.approveOrderListener = approveOrderListener
+        val sut = createCardClient(testScheduler)
 
-        val request = CardRequest(orderID, card)
-        coEvery { cardAPI.confirmPaymentSource(request) } returns confirmPaymentSourceResponse
+        coEvery { cardAPI.confirmPaymentSource(cardRequest) } returns confirmPaymentSourceResponse
 
-        sut.approveOrder(activity, request)
+        sut.approveOrder(activity, cardRequest)
         advanceUntilIdle()
 
         val resultSlot = slot<CardResult>()
@@ -78,16 +84,12 @@ class CardClientUnitTest {
 
     @Test
     fun `approve order notifies listener of confirm payment source failure`() = runTest {
-        val dispatcher = StandardTestDispatcher(testScheduler)
-        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
-        sut.approveOrderListener = approveOrderListener
+        val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(0, "mock_error_message")
-        val request = CardRequest(orderID, card)
+        coEvery { cardAPI.confirmPaymentSource(cardRequest) } throws error
 
-        coEvery { cardAPI.confirmPaymentSource(request) } throws error
-
-        sut.approveOrder(activity, request)
+        sut.approveOrder(activity, cardRequest)
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()
@@ -95,5 +97,36 @@ class CardClientUnitTest {
 
         val capturedError = errorSlot.captured
         assertEquals("mock_error_message", capturedError.errorDescription)
+    }
+
+    @Test
+    fun `approve order performs browser switch when payer action is required`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        val threeDSecureAuthChallengeResponse =
+            ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED, "/payer/action/href")
+
+        coEvery { cardAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
+
+        sut.approveOrder(activity, cardRequest)
+        advanceUntilIdle()
+
+        val browserSwitchOptionsSlot = slot<BrowserSwitchOptions>()
+        verify(exactly = 1) {
+            browserSwitchClient.start(
+                activity,
+                capture(browserSwitchOptionsSlot)
+            )
+        }
+
+        val browserSwitchOptions = browserSwitchOptionsSlot.captured
+        assertEquals(Uri.parse("/payer/action/href"), browserSwitchOptions.url)
+    }
+
+    private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        sut.approveOrderListener = approveOrderListener
+        return sut
     }
 }
