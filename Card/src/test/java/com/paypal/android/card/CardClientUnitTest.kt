@@ -4,12 +4,15 @@ import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
+import com.braintreepayments.api.BrowserSwitchResult
+import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.ConfirmPaymentSourceResponse
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -121,6 +124,19 @@ class CardClientUnitTest {
 
         val browserSwitchOptions = browserSwitchOptionsSlot.captured
         assertEquals(Uri.parse("/payer/action/href"), browserSwitchOptions.url)
+    }
+
+    @Test
+    fun `handle browser switch result notifies listener of cancelation`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
+        every { browserSwitchResult.status } returns BrowserSwitchStatus.CANCELED
+
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        sut.handleBrowserSwitchResult(activity)
+        verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
     }
 
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {

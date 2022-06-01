@@ -16,7 +16,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Use this client to approve an order with a [Card].
@@ -98,8 +97,7 @@ class CardClient internal constructor(
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
             CoroutineScope(dispatcher).launch {
                 try {
-                    val getOrderResponse =
-                        cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
+                    val getOrderResponse = cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
                     approveOrderListener?.onApproveOrderSuccess(
                         CardResult(
                             getOrderResponse.orderId,
