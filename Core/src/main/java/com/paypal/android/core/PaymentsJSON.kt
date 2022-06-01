@@ -17,7 +17,6 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     fun optString(keyPath: String): String? {
-        // TODO: consolidate json keyPath logic
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -30,7 +29,6 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     fun optGetObject(keyPath: String): PaymentsJSON? {
-        // TODO: consolidate json keypath logic
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -61,7 +59,6 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     private fun optGetJSONArray(keyPath: String): JSONArray? {
-        // TODO: consolidate json keypath logic
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
