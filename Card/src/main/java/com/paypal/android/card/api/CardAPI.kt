@@ -4,7 +4,6 @@ import com.paypal.android.card.CardRequest
 import com.paypal.android.card.CardRequestFactory
 import com.paypal.android.card.CardResponseParser
 import com.paypal.android.core.API
-import com.paypal.android.core.APIClientError
 
 internal class CardAPI(
     private val api: API,

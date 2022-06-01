@@ -49,37 +49,43 @@ internal class CardResponseParser {
         }
 
     fun parseError(httpResponse: HttpResponse): PayPalSDKError? {
-        if (httpResponse.isSuccessful) return null
+        val result: PayPalSDKError?
+        if (httpResponse.isSuccessful) {
+            result = null
+        } else {
 
-        val correlationID = httpResponse.headers["Paypal-Debug-Id"]
-        val bodyResponse = httpResponse.body
-        if (bodyResponse.isNullOrBlank()) {
-            return APIClientError.noResponseData(correlationID)
-        }
+            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
+            val bodyResponse = httpResponse.body
+            if (bodyResponse.isNullOrBlank()) {
+                result = APIClientError.noResponseData(correlationID)
+            } else {
+                result = when (val status = httpResponse.status) {
+                    HttpResponse.STATUS_UNKNOWN_HOST -> {
+                        APIClientError.unknownHost(correlationID)
+                    }
+                    HttpResponse.STATUS_UNDETERMINED -> {
+                        APIClientError.unknownError(correlationID)
+                    }
+                    HttpResponse.SERVER_ERROR -> {
+                        APIClientError.serverResponseError(correlationID)
+                    }
+                    else -> {
+                        val json = PaymentsJSON(bodyResponse)
+                        val message = json.getString("message")
 
-        return when (val status = httpResponse.status) {
-            HttpResponse.STATUS_UNKNOWN_HOST -> {
-                APIClientError.unknownHost(correlationID)
-            }
-            HttpResponse.STATUS_UNDETERMINED -> {
-                APIClientError.unknownError(correlationID)
-            }
-            HttpResponse.SERVER_ERROR -> {
-                APIClientError.serverResponseError(correlationID)
-            }
-            else -> {
-                val json = PaymentsJSON(bodyResponse)
-                val message = json.getString("message")
+                        val errorDetails = json.optMapObjectArray("details") {
+                            val issue = it.getString("issue")
+                            val description = it.getString("description")
+                            OrderErrorDetail(issue, description)
+                        }
 
-                val errorDetails = json.optMapObjectArray("details") {
-                    val issue = it.getString("issue")
-                    val description = it.getString("description")
-                    OrderErrorDetail(issue, description)
+                        val description = "$message -> $errorDetails"
+                        APIClientError.httpURLConnectionError(status, description, correlationID)
+                    }
                 }
-
-                val description = "$message -> $errorDetails"
-                APIClientError.httpURLConnectionError(status, description, correlationID)
             }
         }
+
+        return result
     }
 }

@@ -1,7 +1,6 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.api.GetOrderRequest
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
 import org.json.JSONObject
@@ -47,7 +46,6 @@ internal class CardRequestFactory {
             val path = "v2/checkout/orders/$orderID/confirm-payment-source"
             APIRequest(path, HttpMethod.POST, body)
         }
-
 
     fun createGetOrderInfoRequest(getOrderRequest: GetOrderRequest): APIRequest {
         val path = "v2/checkout/orders/${getOrderRequest.orderId}"
