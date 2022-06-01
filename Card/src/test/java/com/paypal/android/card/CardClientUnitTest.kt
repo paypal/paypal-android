@@ -75,23 +75,26 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `approve order notifies listener of confirm payment source failure`() = runTest {
-        val dispatcher = StandardTestDispatcher(testScheduler)
-        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
-        sut.approveOrderListener = approveOrderListener
-
+    fun `approve order notifies listener of confirm payment source failure`() {
         val error = PayPalSDKError(0, "mock_error_message")
         val request = CardRequest(orderID, card)
 
         coEvery { cardAPI.confirmPaymentSource(request) } throws error
 
-        sut.approveOrder(activity, request)
-        advanceUntilIdle()
+        return runTest {
 
-        val errorSlot = slot<PayPalSDKError>()
-        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+            sut.approveOrderListener = approveOrderListener
 
-        val capturedError = errorSlot.captured
-        assertEquals("mock_error_message", capturedError.errorDescription)
+            sut.approveOrder(activity, request)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
+
+            val capturedError = errorSlot.captured
+            assertEquals("mock_error_message", capturedError.errorDescription)
+        }
     }
 }
