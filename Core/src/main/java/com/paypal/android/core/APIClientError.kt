@@ -10,10 +10,10 @@ object APIClientError {
     )
 
     // 1. Error parsing HTTP response data.
-    fun dataParsingError(correlationID: String?, e: Exception) = PayPalSDKError(
+    fun dataParsingError(correlationID: String?) = PayPalSDKError(
         code = Code.DATA_PARSING_ERROR.ordinal,
         errorDescription = "An error occurred parsing HTTP response data." +
-                " Contact developer.paypal.com/support. ${e.message}",
+                " Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
 
