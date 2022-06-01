@@ -11,6 +11,6 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Run Unit Tests
         run: ./gradlew --stacktrace testRelease

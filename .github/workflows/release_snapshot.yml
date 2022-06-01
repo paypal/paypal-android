@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -95,7 +95,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
@@ -121,7 +121,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'zulu'
+          distribution: 'microsoft'
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
         with:
