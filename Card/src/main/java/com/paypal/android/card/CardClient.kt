@@ -38,10 +38,8 @@ class CardClient internal constructor(
      *  @param [activity] Activity that launches the card client
      *  @param [configuration] Configuration parameters for client
      */
-    constructor(
-        activity: FragmentActivity,
-        configuration: CoreConfig,
-    ) : this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.IO)
+    constructor(activity: FragmentActivity, configuration: CoreConfig) :
+            this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.IO)
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)
@@ -65,10 +63,7 @@ class CardClient internal constructor(
         }
     }
 
-    private suspend fun confirmPaymentSource(
-        activity: FragmentActivity,
-        cardRequest: CardRequest
-    ) {
+    private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         val response = cardAPI.confirmPaymentSource(cardRequest)
         if (response.payerActionHref == null) {
             val result = response.run {

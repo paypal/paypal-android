@@ -12,6 +12,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -40,12 +41,13 @@ class CardClientUnitTest {
     private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
 
     // Ref: https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test#dispatchersmain-delegation
-    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
+    private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
 
     private lateinit var sut: CardClient
 
     @Before
     fun beforeEach() {
+        mainThreadSurrogate = newSingleThreadContext("UI thread")
         Dispatchers.setMain(mainThreadSurrogate)
     }
 
@@ -75,26 +77,23 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `approve order notifies listener of confirm payment source failure`() {
+    fun `approve order notifies listener of confirm payment source failure`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        sut.approveOrderListener = approveOrderListener
+
         val error = PayPalSDKError(0, "mock_error_message")
         val request = CardRequest(orderID, card)
 
         coEvery { cardAPI.confirmPaymentSource(request) } throws error
 
-        return runTest {
+        sut.approveOrder(activity, request)
+        advanceUntilIdle()
 
-            val dispatcher = StandardTestDispatcher(testScheduler)
-            sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
-            sut.approveOrderListener = approveOrderListener
+        val errorSlot = slot<PayPalSDKError>()
+        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
 
-            sut.approveOrder(activity, request)
-            advanceUntilIdle()
-
-            val errorSlot = slot<PayPalSDKError>()
-            verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
-
-            val capturedError = errorSlot.captured
-            assertEquals("mock_error_message", capturedError.errorDescription)
-        }
+        val capturedError = errorSlot.captured
+        assertEquals("mock_error_message", capturedError.errorDescription)
     }
 }
