@@ -84,21 +84,3 @@ class PaymentsJSON(val json: JSONObject) {
 
     private class NodeResult(val node: JSONObject, val keys: List<String>)
 }
-
-fun JSONObject.optNullableString(name: String, fallback: String? = null): String? {
-    return if (this.has(name) && !this.isNull(name)) {
-        this.getString(name)
-    } else {
-        fallback
-    }
-}
-
-fun JSONObject.containsKey(key: String) = this.has(key) && !this.isNull(key)
-
-fun JSONObject.optNullableJSONObject(name: String): JSONObject? {
-    return if (this.containsKey(name)) {
-        this.getJSONObject(name)
-    } else {
-        null
-    }
-}
