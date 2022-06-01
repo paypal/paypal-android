@@ -11,12 +11,12 @@ import org.json.JSONObject
  */
 data class PurchaseUnit(
     val referenceId: String?,
-    val amount: Amount,
+    val amount: Amount? = null,
     val payee: Payee? = null
 ) {
     internal constructor(json: PaymentsJSON) : this(
         json.optString("reference_id"),
-        Amount(json),
-        Payee(json)
+        json.optMapObject("amount") { Amount(it) },
+        json.optMapObject("payee") { Payee(json) }
     )
 }

@@ -17,7 +17,7 @@ class PaymentsJSON(val json: JSONObject) {
     }
 
     // TODO: consolidate json keyPath logic
-    fun optString(keyPath: String): String? {
+    fun optString(keyPath: String, fallback: String? = null): String? {
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -26,7 +26,7 @@ class PaymentsJSON(val json: JSONObject) {
             keys.removeFirst()
         }
 
-        return node?.getString(keys[0])
+        return node?.optNullableString(keys[0])
     }
 
     // TODO: consolidate json keypath logic

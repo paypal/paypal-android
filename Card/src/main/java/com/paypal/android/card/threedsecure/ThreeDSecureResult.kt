@@ -1,13 +1,26 @@
 package com.paypal.android.card.threedsecure
 
 import com.paypal.android.core.PaymentsJSON
+import org.json.JSONObject
 
 data class ThreeDSecureResult(
     val enrollmentStatus: String? = null,
     val authenticationStatus: String? = null
 ) {
+
+    companion object {
+        const val KEY_ENROLLMENT_STATUS = "enrollment_status"
+        const val KEY_AUTHENTICATION_STATUS = "authentication_status"
+    }
+
     internal constructor(json: PaymentsJSON) : this(
-        json.optString("enrollment_status"),
-        json.optString("authentication_status")
+        json.optString(KEY_ENROLLMENT_STATUS),
+        json.optString(KEY_AUTHENTICATION_STATUS)
     )
+
+    fun toJSON(): JSONObject {
+        return JSONObject()
+            .putOpt(KEY_ENROLLMENT_STATUS, enrollmentStatus)
+            .putOpt(KEY_AUTHENTICATION_STATUS, authenticationStatus)
+    }
 }

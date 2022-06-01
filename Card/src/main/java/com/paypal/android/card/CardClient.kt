@@ -116,7 +116,7 @@ class CardClient internal constructor(
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val getOrderResponse =
-                        cardAPI.getOrderInfo(GetOrderRequest(metadata.orderId))
+                        cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
                     approveOrderListener?.onApproveOrderSuccess(
                         CardResult(
                             getOrderResponse.orderId,
