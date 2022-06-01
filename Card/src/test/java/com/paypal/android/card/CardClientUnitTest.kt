@@ -2,6 +2,7 @@ package com.paypal.android.card
 
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
@@ -54,6 +55,8 @@ class CardClientUnitTest {
     private val approveOrderMetadata = ApproveOrderMetadata("sample-order-id", paymentSource)
 
     private val activity = mockk<FragmentActivity>(relaxed = true)
+    private val activityLifecycle = mockk<Lifecycle>(relaxed = true)
+
     private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
 
     private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
@@ -61,18 +64,24 @@ class CardClientUnitTest {
     // Ref: https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test#dispatchersmain-delegation
     private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
 
-    private lateinit var sut: CardClient
-
     @Before
     fun beforeEach() {
         mainThreadSurrogate = newSingleThreadContext("UI thread")
         Dispatchers.setMain(mainThreadSurrogate)
+
+        every { activity.lifecycle } returns activityLifecycle
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
         mainThreadSurrogate.close()
+    }
+
+    @Test
+    fun `register lifecycle observer on init`() = runTest {
+        createCardClient(testScheduler)
+        verify(exactly = 1) { activityLifecycle.addObserver(any<CardLifeCycleObserver>()) }
     }
 
     @Test
