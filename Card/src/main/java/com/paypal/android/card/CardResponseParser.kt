@@ -15,12 +15,11 @@ import org.json.JSONException
 internal class CardResponseParser {
 
     @Throws(PayPalSDKError::class)
-    fun parseConfirmPaymentSourceResponse(
-        response: String,
-        correlationId: String?
-    ): ConfirmPaymentSourceResponse =
+    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResponse =
         try {
-            val json = PaymentsJSON(response)
+            val bodyResponse = httpResponse.body!!
+
+            val json = PaymentsJSON(bodyResponse)
             val status = json.getString("status")
             val id = json.getString("id")
 
@@ -34,44 +33,53 @@ internal class CardResponseParser {
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (ignored: JSONException) {
-            throw APIClientError.dataParsingError(correlationId)
+            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
+            throw APIClientError.dataParsingError(correlationID)
         }
 
     @Throws(PayPalSDKError::class)
-    fun parseGetOrderInfoResponse(response: String, correlationId: String?): GetOrderInfoResponse =
+    fun parseGetOrderInfoResponse(httpResponse: HttpResponse): GetOrderInfoResponse =
         try {
-            val json = PaymentsJSON(response)
+            val bodyResponse = httpResponse.body!!
+            val json = PaymentsJSON(bodyResponse)
             GetOrderInfoResponse(json)
         } catch (ignored: JSONException) {
-            throw APIClientError.dataParsingError(correlationId)
+            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
+            throw APIClientError.dataParsingError(correlationID)
         }
 
-    fun parseError(
-        status: Int,
-        bodyResponse: String,
-        correlationID: String?
-    ) = when (status) {
-        HttpResponse.STATUS_UNKNOWN_HOST -> {
-            APIClientError.unknownHost(correlationID)
-        }
-        HttpResponse.STATUS_UNDETERMINED -> {
-            APIClientError.unknownError(correlationID)
-        }
-        HttpResponse.SERVER_ERROR -> {
-            APIClientError.serverResponseError(correlationID)
-        }
-        else -> {
-            val json = PaymentsJSON(bodyResponse)
-            val message = json.getString("message")
+    fun parseError(httpResponse: HttpResponse): PayPalSDKError? {
+        if (httpResponse.isSuccessful) return null
 
-            val errorDetails = json.optMapObjectArray("details") {
-                val issue = it.getString("issue")
-                val description = it.getString("description")
-                OrderErrorDetail(issue, description)
+        val correlationID = httpResponse.headers["Paypal-Debug-Id"]
+        val bodyResponse = httpResponse.body
+        if (bodyResponse.isNullOrBlank()) {
+            return APIClientError.noResponseData(correlationID)
+        }
+
+        return when (val status = httpResponse.status) {
+            HttpResponse.STATUS_UNKNOWN_HOST -> {
+                APIClientError.unknownHost(correlationID)
             }
+            HttpResponse.STATUS_UNDETERMINED -> {
+                APIClientError.unknownError(correlationID)
+            }
+            HttpResponse.SERVER_ERROR -> {
+                APIClientError.serverResponseError(correlationID)
+            }
+            else -> {
+                val json = PaymentsJSON(bodyResponse)
+                val message = json.getString("message")
 
-            val description = "$message -> $errorDetails"
-            APIClientError.httpURLConnectionError(status, description, correlationID)
+                val errorDetails = json.optMapObjectArray("details") {
+                    val issue = it.getString("issue")
+                    val description = it.getString("description")
+                    OrderErrorDetail(issue, description)
+                }
+
+                val description = "$message -> $errorDetails"
+                APIClientError.httpURLConnectionError(status, description, correlationID)
+            }
         }
     }
 }

@@ -39,7 +39,8 @@ class CardRequestFactoryUnitTest {
             )
         )
 
-        val apiRequest = sut.createConfirmPaymentSourceRequest(orderID, card)
+        val cardRequest = CardRequest(orderID, card)
+        val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
         // language=JSON
@@ -70,7 +71,8 @@ class CardRequestFactoryUnitTest {
     fun `it omits optional params when they are not set`() {
         val card = Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
 
-        val apiRequest = sut.createConfirmPaymentSourceRequest(orderID, card)
+        val cardRequest = CardRequest(orderID, card)
+        val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
         // language=JSON
