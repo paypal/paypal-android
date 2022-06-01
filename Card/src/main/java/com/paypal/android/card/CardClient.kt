@@ -55,13 +55,12 @@ class CardClient internal constructor(
     @JvmOverloads
     fun approveOrder(
         activity: FragmentActivity,
-        orderId: String,
         cardRequest: CardRequest,
         context: CoroutineContext = Dispatchers.IO
     ) {
         CoroutineScope(context).launch {
             try {
-                confirmPaymentSource(activity, orderId, cardRequest)
+                confirmPaymentSource(activity, cardRequest)
             } catch (e: PayPalSDKError) {
                 withContext(Dispatchers.Main) {
                     approveOrderListener?.onApproveOrderFailure(e)
@@ -72,11 +71,9 @@ class CardClient internal constructor(
 
     private suspend fun confirmPaymentSource(
         activity: FragmentActivity,
-        orderId: String,
         cardRequest: CardRequest
     ) {
-        val response =
-            cardAPI.confirmPaymentSource(orderId, cardRequest.card, cardRequest.threeDSecureRequest)
+        val response = cardAPI.confirmPaymentSource(cardRequest)
         if (response.payerActionHref == null) {
             val result = response.run {
                 CardResult(orderID, status, paymentSource)
@@ -90,7 +87,8 @@ class CardClient internal constructor(
             }
 
             // launch the 3DS flow
-            val approveOrderMetadata = ApproveOrderMetadata(orderId, response.paymentSource)
+            val approveOrderMetadata =
+                ApproveOrderMetadata(cardRequest.orderID, response.paymentSource)
             val options = BrowserSwitchOptions()
                 .url(Uri.parse(response.payerActionHref))
                 .returnUrlScheme("com.paypal.android.demo")

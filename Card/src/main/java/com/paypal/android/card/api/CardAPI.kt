@@ -1,6 +1,7 @@
 package com.paypal.android.card.api
 
 import com.paypal.android.card.Card
+import com.paypal.android.card.CardRequest
 import com.paypal.android.card.CardRequestFactory
 import com.paypal.android.card.CardResponseParser
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
@@ -14,11 +15,11 @@ internal class CardAPI(
 ) {
 
     suspend fun confirmPaymentSource(
-        orderID: String,
-        card: Card,
-        threeDSecureRequest: ThreeDSecureRequest? = null
+        cardRequest: CardRequest
     ): ConfirmPaymentSourceResponse {
-        val apiRequest = requestFactory.createConfirmPaymentSourceRequest(orderID, card, threeDSecureRequest)
+        val apiRequest = cardRequest.run {
+            requestFactory.createConfirmPaymentSourceRequest(orderID, card, threeDSecureRequest)
+        }
 
         val httpResponse = api.send(apiRequest)
         val correlationID = httpResponse.headers["Paypal-Debug-Id"]

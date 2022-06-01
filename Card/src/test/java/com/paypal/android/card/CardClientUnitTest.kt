@@ -11,11 +11,17 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Assert.assertSame
-import org.junit.Assert.assertThrows
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -32,55 +38,78 @@ class CardClientUnitTest {
     private val activity = mockk<FragmentActivity>(relaxed = true)
     private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
 
+    private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
+
+    // Ref: https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test#dispatchersmain-delegation
+    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
+
     private lateinit var sut: CardClient
 
     @Before
     fun beforeEach() {
         sut = CardClient(activity, cardAPI, browserSwitchClient)
+        Dispatchers.setMain(mainThreadSurrogate)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
+        mainThreadSurrogate.close()
     }
 
     @Test
-    fun `approve order confirms payment source using card api`() = runBlockingTest {
-        val request = CardRequest(card)
+    fun `approve order confirms payment source using card api`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+
+        val request = CardRequest(orderID, card)
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns confirmPaymentSourceResponse
 
-        val actualResult = sut.approveOrder(activity, orderID, request)
-        assertSame(actualResult, confirmPaymentSourceResponse)
+        sut.approveOrderListener = approveOrderListener
+        sut.approveOrder(activity, request, dispatcher)
+        advanceUntilIdle()
+
+        val resultSlot = slot<CardResult>()
+        verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(resultSlot)) }
+
+        val actual = resultSlot.captured
+        assertEquals("sample-order-id", actual.orderID)
     }
 
     @Test
     fun `approve order throws paypal error`() {
         val errorMessage = "mock_error_message"
-        val request = CardRequest(card)
+        val request = CardRequest(orderID, card)
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } throws (PayPalSDKError(
             0,
             errorMessage
         ))
 
         val exception =
-            assertThrows(PayPalSDKError::class.java) { runBlocking { sut.approveOrder(activity, orderID, request) } }
+            assertThrows(PayPalSDKError::class.java) { runBlocking { sut.approveOrder(
+                activity,
+                request
+            ) } }
         assert(exception.errorDescription == errorMessage)
     }
 
     @Test
     fun `approve order with callback confirms payment source using card api`() {
-        val request = CardRequest(card)
-        val approveOrderCallbackMock = mockk<ApproveOrderListener>(relaxed = true)
+        val request = CardRequest(orderID, card)
         val resultSlot = slot<CardResult>()
 
         coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns confirmPaymentSourceResponse
 
-        sut.approveOrderListener = approveOrderCallbackMock
-        sut.approveOrder(activity, orderID, request)
+        sut.approveOrderListener = approveOrderListener
+        sut.approveOrder(activity, request)
 
-        verify(exactly = 1) { approveOrderCallbackMock.onApproveOrderSuccess(capture(resultSlot)) }
+        verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(resultSlot)) }
         assertSame(resultSlot.captured, confirmPaymentSourceResponse)
     }
 
     @Test
     fun `approve order with callback confirms throws error`() {
         val errorMessage = "mock_error_message"
-        val request = CardRequest(card)
+        val request = CardRequest(orderID, card)
         val approveOrderCallbackMock = mockk<ApproveOrderListener>(relaxed = true)
         val exceptionSlot = slot<PayPalSDKError>()
 
@@ -90,7 +119,7 @@ class CardClientUnitTest {
         ))
 
         sut.approveOrderListener = approveOrderCallbackMock
-        sut.approveOrder(activity, orderID, request)
+        sut.approveOrder(activity, request)
 
         verify(exactly = 1) { approveOrderCallbackMock.onApproveOrderFailure(capture(exceptionSlot)) }
         assert(exceptionSlot.captured.errorDescription == errorMessage)

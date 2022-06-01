@@ -189,7 +189,7 @@ class CardFragment : Fragment() {
             val (monthString, yearString) = expirationDate.split("/")
 
             val card = Card(cardNumber, monthString, yearString, securityCode)
-            CardRequest(card)
+            CardRequest(order.id!!, card)
         }
 
         if (shouldRequestThreeDSecure) {
@@ -199,7 +199,7 @@ class CardFragment : Fragment() {
                 cancelUrl = APP_CANCEL_URL
             )
         }
-        cardClient.approveOrder(requireActivity(), order.id!!, cardRequest)
+        cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
     private fun buildOrderRequest(): CreateOrderRequest {
