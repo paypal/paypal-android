@@ -24,11 +24,11 @@ import kotlin.coroutines.CoroutineContext
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val cardAPI: CardAPI,
+    private val browserSwitchClient: BrowserSwitchClient
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
 
-    private val browserSwitchClient = BrowserSwitchClient()
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
     /**
@@ -40,7 +40,7 @@ class CardClient internal constructor(
     constructor(
         activity: FragmentActivity,
         configuration: CoreConfig,
-    ) : this(activity, CardAPI(API(configuration)))
+    ) : this(activity, CardAPI(API(configuration)), BrowserSwitchClient())
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)
