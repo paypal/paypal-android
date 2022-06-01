@@ -14,7 +14,7 @@ data class ApproveOrderMetadata(val orderID: String, val paymentSource: PaymentS
         fun fromJSON(data: JSONObject?): ApproveOrderMetadata? =
             data?.let { fromJSON(PaymentsJSON(it)) }
 
-        private fun fromJSON(json: PaymentsJSON): ApproveOrderMetadata? {
+        private fun fromJSON(json: PaymentsJSON): ApproveOrderMetadata {
             val orderId = json.getString(KEY_ORDER_ID)
             val paymentSource = json.optMapObject(KEY_PAYMENT_SOURCE) { PaymentSource(it) }
             return ApproveOrderMetadata(orderId, paymentSource)

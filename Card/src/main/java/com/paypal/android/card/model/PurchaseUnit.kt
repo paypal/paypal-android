@@ -1,9 +1,6 @@
 package com.paypal.android.card.model
 
 import com.paypal.android.core.PaymentsJSON
-import com.paypal.android.core.optNullableString
-import org.json.JSONArray
-import org.json.JSONObject
 
 /**
  * A purchase unit for an order. If an order takes multiple purchase units,

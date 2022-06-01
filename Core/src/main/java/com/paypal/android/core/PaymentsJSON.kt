@@ -16,8 +16,8 @@ class PaymentsJSON(val json: JSONObject) {
         return nodeResult.node.getString(keys[0])
     }
 
-    // TODO: consolidate json keyPath logic
-    fun optString(keyPath: String, fallback: String? = null): String? {
+    fun optString(keyPath: String): String? {
+        // TODO: consolidate json keyPath logic
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -29,8 +29,8 @@ class PaymentsJSON(val json: JSONObject) {
         return node?.optNullableString(keys[0])
     }
 
-    // TODO: consolidate json keypath logic
     fun optGetObject(keyPath: String): PaymentsJSON? {
+        // TODO: consolidate json keypath logic
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json
@@ -60,8 +60,8 @@ class PaymentsJSON(val json: JSONObject) {
         return targetLink?.optString("href")
     }
 
-    // TODO: consolidate json keypath logic
     private fun optGetJSONArray(keyPath: String): JSONArray? {
+        // TODO: consolidate json keypath logic
         val keys = keyPath.split(".").toMutableList()
 
         var node: JSONObject? = json

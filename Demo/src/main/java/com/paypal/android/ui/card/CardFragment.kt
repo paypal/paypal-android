@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CardFragment : Fragment(), ApproveOrderListener {
+class CardFragment : Fragment() {
 
     companion object {
         const val TAG = "CardFragment"
@@ -74,8 +74,6 @@ class CardFragment : Fragment(), ApproveOrderListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        cardClient.approveOrderListener = this
-
         binding.run {
             val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
             autoCompleteTextView.setAdapter(
@@ -91,6 +89,44 @@ class CardFragment : Fragment(), ApproveOrderListener {
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
             submitButton.setOnClickListener { onCardFieldSubmit() }
+        }
+
+        cardClient.approveOrderListener = object : ApproveOrderListener {
+            override fun onApproveOrderSuccess(result: CardResult) {
+                val statusText =
+                    "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
+                val paymentSourceText = result.paymentSource?.let {
+                    val text =
+                        "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
+                    val authText = it.authenticationResult?.let { auth ->
+                        val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
+                                "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
+                                "Authentication: ${auth.threeDSecure?.authenticationStatus}"
+                        threeDtext
+                    }
+                    text + authText
+                } ?: ""
+
+                val deepLink = result.deepLinkUrl?.toString().orEmpty()
+                val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
+                updateStatusText(joinedText)
+            }
+
+            override fun onApproveOrderFailure(error: PayPalSDKError) {
+                updateStatusText("CAPTURE fail: ${error.errorDescription}")
+            }
+
+            override fun onApproveOrderCanceled() {
+                updateStatusText("USER CANCELLED")
+            }
+
+            override fun onApproveOrderThreeDSecureWillLaunch() {
+                updateStatusText("3DS launched")
+            }
+
+            override fun onApproveOrderThreeDSecureDidFinish() {
+                updateStatusText("3DS finished")
+            }
         }
     }
 
@@ -143,11 +179,8 @@ class CardFragment : Fragment(), ApproveOrderListener {
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
         updateStatusText("Authorizing order...")
-        val cardRequest = buildCardRequest()
-        cardClient.approveOrder(requireActivity(), order.id!!, cardRequest)
-    }
 
-    private fun buildCardRequest(): CardRequest {
+        // build card request
         val cardRequest = binding.run {
             val cardNumber = cardNumberInput.text.toString()
             val expirationDate = cardExpirationInput.text.toString()
@@ -166,7 +199,7 @@ class CardFragment : Fragment(), ApproveOrderListener {
                 cancelUrl = APP_CANCEL_URL
             )
         }
-        return cardRequest
+        cardClient.approveOrder(requireActivity(), order.id!!, cardRequest)
     }
 
     private fun buildOrderRequest(): CreateOrderRequest {
@@ -198,41 +231,5 @@ class CardFragment : Fragment(), ApproveOrderListener {
                 binding.statusText.text = text
             }
         }
-    }
-
-    override fun onApproveOrderSuccess(result: CardResult) {
-        val statusText =
-            "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
-        val paymentSourceText = result.paymentSource?.let {
-            val text =
-                "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
-            val authText = it.authenticationResult?.let { auth ->
-                val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
-                        "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
-                        "Authentication: ${auth.threeDSecure?.authenticationStatus}"
-                threeDtext
-            }
-            text + authText
-        } ?: ""
-
-        val deepLink = result.deepLinkUrl?.toString().orEmpty()
-        val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
-        updateStatusText(joinedText)
-    }
-
-    override fun onApproveOrderFailure(error: PayPalSDKError) {
-        updateStatusText("CAPTURE fail: ${error.errorDescription}")
-    }
-
-    override fun onApproveOrderCanceled() {
-        updateStatusText("USER CANCELLED")
-    }
-
-    override fun onApproveOrderThreeDSecureWillLaunch() {
-        updateStatusText("3DS launched")
-    }
-
-    override fun onApproveOrderThreeDSecureDidFinish() {
-        updateStatusText("3DS finished")
     }
 }
