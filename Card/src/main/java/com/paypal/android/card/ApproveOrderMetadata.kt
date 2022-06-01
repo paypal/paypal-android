@@ -8,8 +8,8 @@ data class ApproveOrderMetadata(val orderID: String, val paymentSource: PaymentS
 
     companion object {
 
-        const val KEY_ORDER_ID = "orderID"
-        const val KEY_PAYMENT_SOURCE = "paymentSource"
+        const val KEY_ORDER_ID = "order_id"
+        const val KEY_PAYMENT_SOURCE = "payment_source"
 
         fun fromJSON(data: JSONObject?): ApproveOrderMetadata? =
             data?.let { fromJSON(PaymentsJSON(it)) }
