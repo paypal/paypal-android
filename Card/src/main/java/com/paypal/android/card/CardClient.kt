@@ -12,6 +12,7 @@ import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +25,8 @@ import kotlin.coroutines.CoroutineContext
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val cardAPI: CardAPI,
-    private val browserSwitchClient: BrowserSwitchClient
+    private val browserSwitchClient: BrowserSwitchClient,
+    private val ioDispatcher: CoroutineDispatcher
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
@@ -40,7 +42,7 @@ class CardClient internal constructor(
     constructor(
         activity: FragmentActivity,
         configuration: CoreConfig,
-    ) : this(activity, CardAPI(API(configuration)), BrowserSwitchClient())
+    ) : this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.IO)
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)
@@ -49,16 +51,11 @@ class CardClient internal constructor(
     /**
      * Confirm [Card] payment source for an order.
      *
-     * @param orderId [String] order id to confirm
+     * @param activity [FragmentActivity] activity used to start 3DS flow (if requested)
      * @param cardRequest [CardRequest] for requesting an order approval
      */
-    @JvmOverloads
-    fun approveOrder(
-        activity: FragmentActivity,
-        cardRequest: CardRequest,
-        context: CoroutineContext = Dispatchers.IO
-    ) {
-        CoroutineScope(context).launch {
+    fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
+        CoroutineScope(ioDispatcher).launch {
             try {
                 confirmPaymentSource(activity, cardRequest)
             } catch (e: PayPalSDKError) {

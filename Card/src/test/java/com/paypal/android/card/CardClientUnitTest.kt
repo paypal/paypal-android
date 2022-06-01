@@ -33,7 +33,7 @@ class CardClientUnitTest {
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
     private val confirmPaymentSourceResponse =
-        ConfirmPaymentSourceResponse("orderId", OrderStatus.APPROVED)
+        ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
 
     private val activity = mockk<FragmentActivity>(relaxed = true)
     private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
@@ -47,7 +47,6 @@ class CardClientUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = CardClient(activity, cardAPI, browserSwitchClient)
         Dispatchers.setMain(mainThreadSurrogate)
     }
 
@@ -60,12 +59,13 @@ class CardClientUnitTest {
     @Test
     fun `approve order confirms payment source using card api`() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
+        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        sut.approveOrderListener = approveOrderListener
 
         val request = CardRequest(orderID, card)
         coEvery { cardAPI.confirmPaymentSource(request) } returns confirmPaymentSourceResponse
 
-        sut.approveOrderListener = approveOrderListener
-        sut.approveOrder(activity, request, dispatcher)
+        sut.approveOrder(activity, request)
         advanceUntilIdle()
 
         val resultSlot = slot<CardResult>()
@@ -76,24 +76,32 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `approve order throws paypal error`() {
-        val errorMessage = "mock_error_message"
-        val request = CardRequest(orderID, card)
-        coEvery { cardAPI.confirmPaymentSource(request) } throws (PayPalSDKError(
-            0,
-            errorMessage
-        ))
+    fun `approve order throws paypal error`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        sut.approveOrderListener = approveOrderListener
 
-        val exception =
-            assertThrows(PayPalSDKError::class.java) { runBlocking { sut.approveOrder(
-                activity,
-                request
-            ) } }
-        assert(exception.errorDescription == errorMessage)
+        val error = PayPalSDKError(0, "mock_error_message")
+        val request = CardRequest(orderID, card)
+
+        coEvery { cardAPI.confirmPaymentSource(request) } throws error
+
+        sut.approveOrder(activity, request)
+        advanceUntilIdle()
+
+        val errorSlot = slot<PayPalSDKError>()
+        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
+
+        val capturedError = errorSlot.captured
+        assertEquals("mock_error_message", capturedError.errorDescription)
     }
 
     @Test
-    fun `approve order with callback confirms payment source using card api`() {
+    fun `approve order with callback confirms payment source using card api`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        sut.approveOrderListener = approveOrderListener
+
         val request = CardRequest(orderID, card)
         val resultSlot = slot<CardResult>()
 
@@ -107,7 +115,11 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `approve order with callback confirms throws error`() {
+    fun `approve order with callback confirms throws error`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        sut.approveOrderListener = approveOrderListener
+
         val errorMessage = "mock_error_message"
         val request = CardRequest(orderID, card)
         val approveOrderCallbackMock = mockk<ApproveOrderListener>(relaxed = true)
@@ -118,7 +130,6 @@ class CardClientUnitTest {
             errorMessage
         ))
 
-        sut.approveOrderListener = approveOrderCallbackMock
         sut.approveOrder(activity, request)
 
         verify(exactly = 1) { approveOrderCallbackMock.onApproveOrderFailure(capture(exceptionSlot)) }
