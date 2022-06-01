@@ -25,7 +25,7 @@ class PaymentsJSON(val json: JSONObject) {
             keys.removeFirst()
         }
 
-        return node?.optNullableString(keys[0])
+        return node?.optString(keys[0])
     }
 
     fun optGetObject(keyPath: String): PaymentsJSON? {

@@ -58,30 +58,12 @@ class PaymentsJSONUnitTest {
 
         val expected = JSONObject()
             .put("c", "c-value")
-        JSONAssert.assertEquals(expected, json, true)
+        JSONAssert.assertEquals(expected, json?.json, true)
     }
 
     @Test
     fun `it should return null when an optional JSONObject does not exist at a given keypath`() {
         val json = sut.optGetObject("a.b.c.d")
-        assertNull(json)
-    }
-
-    @Test
-    fun `it should return an optional JSONArray if one exists at a given keypath`() {
-        val json = sut.optGetJSONArray("jsonArray")
-
-        val expected = JSONArray()
-            .put(
-                0, JSONObject()
-                    .put("arrayElement0", "array-element-0-value")
-            )
-        JSONAssert.assertEquals(expected, json, true)
-    }
-
-    @Test
-    fun `it should return null when an optional JSONArray does not exist at a given keypath`() {
-        val json = sut.optGetJSONArray("anotherArray")
         assertNull(json)
     }
 
