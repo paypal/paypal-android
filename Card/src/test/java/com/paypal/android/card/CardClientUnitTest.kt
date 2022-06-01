@@ -8,10 +8,14 @@ import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.ConfirmPaymentSourceResponse
+import com.paypal.android.card.api.GetOrderInfoResponse
+import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
+import com.paypal.android.card.model.PaymentSource
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -125,6 +129,64 @@ class CardClientUnitTest {
         val browserSwitchOptions = browserSwitchOptionsSlot.captured
         assertEquals(Uri.parse("/payer/action/href"), browserSwitchOptions.url)
     }
+
+    @Test
+    fun `handle browser switch result fetches updated order using browser switch metadata`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+
+            val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
+            every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
+
+            val paymentSource = PaymentSource("1111", "Visa")
+            val metadata = ApproveOrderMetadata("sample-order-id", paymentSource)
+            every { browserSwitchResult.requestMetadata } returns metadata.toJSON()
+
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val orderRequestSlot = slot<GetOrderRequest>()
+            coVerify(exactly = 1) { cardAPI.getOrderInfo(capture(orderRequestSlot)) }
+
+            val orderRequest = orderRequestSlot.captured
+            assertEquals("sample-order-id", orderRequest.orderId)
+        }
+
+    @Test
+    fun `handle browser switch result notifies user of success with updated order info`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+
+            val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
+            every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
+
+            val paymentSource = PaymentSource("1111", "Visa")
+            val metadata = ApproveOrderMetadata("sample-order-id", paymentSource)
+            every { browserSwitchResult.requestMetadata } returns metadata.toJSON()
+
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            val response =
+                GetOrderInfoResponse("sample-order-id", OrderStatus.APPROVED, OrderIntent.CAPTURE)
+            coEvery { cardAPI.getOrderInfo(any()) } returns response
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val cardResultSlot = slot<CardResult>()
+            coVerify(exactly = 1) {
+                approveOrderListener.onApproveOrderSuccess(
+                    capture(
+                        cardResultSlot
+                    )
+                )
+            }
+
+            val cardResult = cardResultSlot.captured
+            assertEquals("sample-order-id", cardResult.orderID)
+        }
 
     @Test
     fun `handle browser switch result notifies listener of cancelation`() = runTest {
