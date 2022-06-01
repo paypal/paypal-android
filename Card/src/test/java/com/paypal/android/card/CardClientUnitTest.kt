@@ -50,6 +50,9 @@ class CardClientUnitTest {
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
 
+    private val paymentSource = PaymentSource("1111", "Visa")
+    private val approveOrderMetadata = ApproveOrderMetadata("sample-order-id", paymentSource)
+
     private val activity = mockk<FragmentActivity>(relaxed = true)
     private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
 
@@ -134,13 +137,8 @@ class CardClientUnitTest {
         runTest {
             val sut = createCardClient(testScheduler)
 
-            val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
-            every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-
-            val paymentSource = PaymentSource("1111", "Visa")
-            val metadata = ApproveOrderMetadata("sample-order-id", paymentSource)
-            every { browserSwitchResult.requestMetadata } returns metadata.toJSON()
-
+            val browserSwitchResult =
+                createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, approveOrderMetadata)
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
             sut.handleBrowserSwitchResult(activity)
@@ -158,13 +156,8 @@ class CardClientUnitTest {
         runTest {
             val sut = createCardClient(testScheduler)
 
-            val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
-            every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-
-            val paymentSource = PaymentSource("1111", "Visa")
-            val metadata = ApproveOrderMetadata("sample-order-id", paymentSource)
-            every { browserSwitchResult.requestMetadata } returns metadata.toJSON()
-
+            val browserSwitchResult =
+                createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, approveOrderMetadata)
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
             val response =
@@ -176,11 +169,7 @@ class CardClientUnitTest {
 
             val cardResultSlot = slot<CardResult>()
             coVerify(exactly = 1) {
-                approveOrderListener.onApproveOrderSuccess(
-                    capture(
-                        cardResultSlot
-                    )
-                )
+                approveOrderListener.onApproveOrderSuccess(capture(cardResultSlot))
             }
 
             val cardResult = cardResultSlot.captured
@@ -191,9 +180,7 @@ class CardClientUnitTest {
     fun `handle browser switch result notifies listener of cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.CANCELED
-
+        val browserSwitchResult = createBrowserSwitchResult(BrowserSwitchStatus.CANCELED)
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
         sut.handleBrowserSwitchResult(activity)
@@ -205,5 +192,17 @@ class CardClientUnitTest {
         val sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
         sut.approveOrderListener = approveOrderListener
         return sut
+    }
+
+    private fun createBrowserSwitchResult(
+        @BrowserSwitchStatus status: Int,
+        metadata: ApproveOrderMetadata? = null
+    ): BrowserSwitchResult {
+
+        val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
+        every { browserSwitchResult.status } returns status
+
+        every { browserSwitchResult.requestMetadata } returns metadata?.toJSON()
+        return browserSwitchResult
     }
 }
