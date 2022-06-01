@@ -1,6 +1,5 @@
 package com.paypal.android.core
 
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.Assert.assertEquals

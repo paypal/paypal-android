@@ -1,10 +1,8 @@
 package com.paypal.android.card.api
 
-import com.paypal.android.card.Card
 import com.paypal.android.card.CardRequest
 import com.paypal.android.card.CardRequestFactory
 import com.paypal.android.card.CardResponseParser
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
 import com.paypal.android.core.APIClientError
 

@@ -33,7 +33,7 @@ internal class CardResponseParser {
                 json.optMapObject("payment_source.card") { PaymentSource(it) },
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
-        } catch (e: JSONException) {
+        } catch (ignored: JSONException) {
             throw APIClientError.dataParsingError(correlationId)
         }
 
@@ -42,7 +42,7 @@ internal class CardResponseParser {
         try {
             val json = PaymentsJSON(response)
             GetOrderInfoResponse(json)
-        } catch (e: JSONException) {
+        } catch (ignored: JSONException) {
             throw APIClientError.dataParsingError(correlationId)
         }
 
