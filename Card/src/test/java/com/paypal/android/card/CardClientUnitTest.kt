@@ -62,7 +62,7 @@ class CardClientUnitTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
 
         val request = CardRequest(orderID, card)
-        coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns confirmPaymentSourceResponse
+        coEvery { cardAPI.confirmPaymentSource(request) } returns confirmPaymentSourceResponse
 
         sut.approveOrderListener = approveOrderListener
         sut.approveOrder(activity, request, dispatcher)
@@ -79,7 +79,7 @@ class CardClientUnitTest {
     fun `approve order throws paypal error`() {
         val errorMessage = "mock_error_message"
         val request = CardRequest(orderID, card)
-        coEvery { cardAPI.confirmPaymentSource(orderID, card) } throws (PayPalSDKError(
+        coEvery { cardAPI.confirmPaymentSource(request) } throws (PayPalSDKError(
             0,
             errorMessage
         ))
@@ -97,7 +97,7 @@ class CardClientUnitTest {
         val request = CardRequest(orderID, card)
         val resultSlot = slot<CardResult>()
 
-        coEvery { cardAPI.confirmPaymentSource(orderID, card) } returns confirmPaymentSourceResponse
+        coEvery { cardAPI.confirmPaymentSource(request) } returns confirmPaymentSourceResponse
 
         sut.approveOrderListener = approveOrderListener
         sut.approveOrder(activity, request)
@@ -113,7 +113,7 @@ class CardClientUnitTest {
         val approveOrderCallbackMock = mockk<ApproveOrderListener>(relaxed = true)
         val exceptionSlot = slot<PayPalSDKError>()
 
-        coEvery { cardAPI.confirmPaymentSource(orderID, card) } throws (PayPalSDKError(
+        coEvery { cardAPI.confirmPaymentSource(request) } throws (PayPalSDKError(
             0,
             errorMessage
         ))
