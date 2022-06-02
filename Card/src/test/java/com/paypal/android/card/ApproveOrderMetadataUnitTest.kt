@@ -12,7 +12,7 @@ class ApproveOrderMetadataUnitTest {
         // language=JSON
         val jsonString = """
             {
-                "order_iD": "sample-order-id",
+                "order_id": "sample-order-id",
                 "payment_source": {
                   "last_digits": "4111",
                   "brand": "Visa",
