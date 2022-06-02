@@ -1,5 +1,7 @@
 package com.paypal.android.card
 
+import com.paypal.android.card.threedsecure.SCA
+import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.Address
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -64,12 +66,13 @@ class CardRequestFactoryUnitTest {
               }
             }
         """.trimIndent()
-        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
     }
 
     @Test
     fun `it omits optional params when they are not set`() {
-        val card = Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
+        val card =
+            Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
 
         val cardRequest = CardRequest(orderID, card)
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
@@ -86,6 +89,40 @@ class CardRequestFactoryUnitTest {
               }
             }
         """.trimIndent()
-        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
+    }
+
+    @Test
+    fun `it optionally request 3DS strong consumer authentication`() {
+        val card =
+            Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
+
+        val cardRequest = CardRequest(orderID, card)
+        cardRequest.threeDSecureRequest = ThreeDSecureRequest(
+            SCA.SCA_ALWAYS,
+            "https://sample.com/return/url",
+            "https://sample.com/return/url"
+        )
+
+        val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
+        assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
+
+        // language=JSON
+        val expectedJSON = """
+            {
+              "payment_source": {
+                "card": {
+                  "number": "4111111111111111",
+                  "expiry": "2022-01",
+                  "attributes": {
+                    "verification": {
+                      "method": "SCA_ALWAYS"
+                    }
+                  }
+                }
+              }
+            }
+        """.trimIndent()
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
     }
 }
