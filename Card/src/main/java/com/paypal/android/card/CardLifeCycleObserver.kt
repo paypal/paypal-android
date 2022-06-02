@@ -17,7 +17,6 @@ internal class CardLifeCycleObserver(private val cardClient: CardClient) : Defau
             else -> null
         }
 
-        Log.e("LIFECYCLE OBSERVER", "ON RESUME")
         activity?.let { cardClient.handleBrowserSwitchResult(it) }
     }
 }
