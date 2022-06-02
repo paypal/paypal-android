@@ -117,7 +117,7 @@ class CardFragment : Fragment() {
             }
 
             override fun onApproveOrderCanceled() {
-                updateStatusText("USER CANCELLED")
+                updateStatusText("USER CANCELED")
             }
 
             override fun onApproveOrderThreeDSecureWillLaunch() {
