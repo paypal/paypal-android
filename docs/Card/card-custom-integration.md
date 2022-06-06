@@ -36,10 +36,11 @@ Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
 ```
 
-Create a `CardClient` to approve an order with a Card payment method:
+Create a `CardClient` to approve an order with a Card payment method. Also, set a listener to receive callbacks from the client.
 
 ```kotlin
 val cardClient = CardClient(config)
+cardClient.approveOrderListener = this
 ```
 
 ### 3. Create an order
@@ -100,13 +101,16 @@ Approve the order using your `CardClient`.
 Call `CardClient#approveOrder` to approve the order, and then handle results:
 
 ```kotlin
-viewLifecycleOwner.lifecycleScope.launch {
-  try {
-    val result = cardClient.approveOrder(cardRequest)
-    // order was successfully approved and is ready to be captured/authorized (see step 6)
-  } catch (error: PayPalSDKError) {
-    // inspect `error` for more information
-  }
+private fun approveMyOrder(cardRequest: CardRequest)
+  val result = cardClient.approveOrder(cardRequest)
+}
+
+fun onApproveOrderSuccess(result: CardResult) {
+  // order was successfully approved and is ready to be captured/authorized (see step 6)
+}
+
+fun onApproveOrderFailure(error: PayPalSDKError) {
+  // inspect `error` for more information
 }
 ```
 
