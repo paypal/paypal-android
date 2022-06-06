@@ -4,7 +4,6 @@
     <!-- Payment Methods -->
     <string name="payment_methods_card">Card</string>
     <string name="payment_methods_paypal">PayPal</string>
-    <string name="payment_methods_three_d_secure">3D Secure</string>
     <string name="payment_methods_menu_settings">Settings</string>
 
     <!-- Card Fields -->
@@ -32,6 +31,8 @@
 
     <string name="auth_credentials_missing_title">Auth Credentials Required</string>
     <string name="auth_credentials_missing_message">You can set authentication credentials in the <b><i>paypal.properties</i></b> file in the root of the project directory.</string>
+    <string name="with_three_d_secure">with 3DS</string>
+    <string name="server_integration">Server Integration</string>
     <string name="payment_button">Payment Button</string>
     <string name="select_color">Select Color</string>
     <string name="select_funding">Select Funding</string>

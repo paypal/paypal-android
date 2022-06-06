@@ -23,8 +23,9 @@ buildscript {
             "androidxAppcompat"           : "androidx.appcompat:appcompat:1.3.1",
             "material"                    : "com.google.android.material:material:1.4.0",
             "constraintLayout"            : "androidx.constraintlayout:constraintlayout:2.1.0",
-            "kotlinxAndroidCoroutines"    : "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0",
-            "androidxLifecycleRuntimeKtx" : "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1",
+            "kotlinxAndroidCoroutines"    : "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1",
+            "androidxLifecycleRuntimeKtx" : "androidx.lifecycle:lifecycle-runtime-ktx:2.4.1",
+            "androidxLifecycleCommonJava" : "androidx.lifecycle:lifecycle-common-java8:2.4.1",
             "fragmentKtx"                 : "androidx.fragment:fragment-ktx:1.1.0",
 
             // Jetpack Compose
@@ -62,7 +63,7 @@ buildscript {
             "androidxTestRules"           : "androidx.test:rules:1.4.0",
             "androidxTestUiAutomator"     : "androidx.test.uiautomator:uiautomator:2.2.0",
             "mockk"                       : "io.mockk:mockk:1.12.0",
-            "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0",
+            "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1",
             "robolectric"                 : "org.robolectric:robolectric:4.6.1",
             "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",
             "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
