@@ -1,4 +1,4 @@
-# [:up_arrow:](.)&nbsp;Card: Custom Integration
+# [:arrow_up:](.)&nbsp;Card: Custom Integration
 
 Follow these steps to add Card payments:
 
