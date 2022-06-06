@@ -1,5 +1,5 @@
 # Card
 
-- [Get Started](get-started.md)
-- [Integration](integration.md)
+- [Getting Started](getting-started.md)
+- [Custom Integration](card-custom-integration.md)
 

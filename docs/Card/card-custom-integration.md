@@ -1,13 +1,4 @@
----
-title: Pay with Card Custom Integration
-keywords: 
-contentType: docs
-productStatus: current
-apiVersion: TODO
-sdkVersion: TODO
----
-
-# Pay with Card Custom Integration
+# Card: Custom Integration
 
 Follow these steps to add Card payments:
 

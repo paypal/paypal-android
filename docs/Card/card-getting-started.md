@@ -1,13 +1,4 @@
----
-title: Pay with Card
-keywords: 
-contentType: docs
-productStatus: current
-apiVersion: TODO
-sdkVersion: TODO
----
-
-# Pay with Card
+# Card: Getting Started
 
 Accept Card payments in your Android app using the PayPal Payments SDK.
 
@@ -26,5 +17,4 @@ Android apps can be written in Kotlin or Java 8 and higher.
 
 ## Integration methods
 
-- [Custom Integration](integration.md)
-
+- [Custom Integration](card-custom-integration.md)
