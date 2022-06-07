@@ -21,7 +21,7 @@ class PrefillCardsAdapter(private val items: MutableList<PrefillCardsItem>) :
 
     override fun getItemViewType(position: Int) =
         when (items[position]) {
-            is PrefillCardsHeader -> ViewType.HEADER.value
+            is PrefillCardsItem.Header -> ViewType.HEADER.value
             else -> ViewType.DATA.value
         }
 
@@ -31,23 +31,23 @@ class PrefillCardsAdapter(private val items: MutableList<PrefillCardsItem>) :
             ViewType.HEADER -> {
                 val binding =
                     ItemPrefillCardsHeaderBinding.inflate(layoutInflater, parent, false)
-                HeaderViewHolder(binding)
+                PrefillCardsHeaderViewHolder(binding)
             }
             else -> {
                 val binding =
                     ItemPrefillCardDataBinding.inflate(layoutInflater, parent, false)
-                PrefillCardDataViewHolder(binding)
+                PrefillCardsDataViewHolder(binding)
             }
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is HeaderViewHolder -> {
-                (items[position] as? PrefillCardsHeader)?.let { holder.bind(it) }
+            is PrefillCardsHeaderViewHolder -> {
+                (items[position] as? PrefillCardsItem.Header)?.let { holder.bind(it) }
             }
-            is PrefillCardDataViewHolder -> {
-                (items[position] as? PrefillCardsData)?.let { holder.bind(it) }
+            is PrefillCardsDataViewHolder -> {
+                (items[position] as? PrefillCardsItem.Data)?.let { holder.bind(it) }
             }
         }
     }

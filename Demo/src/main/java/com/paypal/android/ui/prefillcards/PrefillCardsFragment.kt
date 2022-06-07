@@ -25,13 +25,12 @@ class PrefillCardsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val items = mutableListOf<PrefillCardsItem>()
-
         for (i in 0 until TestCards.numGroups) {
             val group = TestCards.Group.values()[i]
-            items += PrefillCardsHeader(group.name)
+            items += PrefillCardsItem.Header(group.name)
 
             val prefillCards = TestCards.cardsInGroup(group)
-            items += prefillCards.map { PrefillCardsData(it) }
+            items += prefillCards.map { PrefillCardsItem.Data(it) }
         }
 
         binding.run {
