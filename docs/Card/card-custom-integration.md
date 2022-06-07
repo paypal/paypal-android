@@ -106,7 +106,7 @@ cardRequest.threeDSecureRequest = ThreeDSecureRequest(
 )
 ```
 
-Notice the "myapp://" portion of the `returnUrl` and `cancelUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
+Notice the `myapp://` portion of the `returnUrl` and `cancelUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
 
 Create an intent filter to specify a deep link target for the SDK to return control back to your application:
 
