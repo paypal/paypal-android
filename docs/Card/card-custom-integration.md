@@ -94,7 +94,7 @@ Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardReq
 val cardRequest  = CardRequest("<ORDER_ID>", card)
 ```
 
-Optionally, a merchant app can request Strong Consumer Authentication (SCA) for a `CardRequest` that will require an additional authorization via 3D Secure.
+Optionally, a merchant app can request Strong Consumer Authentication (SCA) for a `CardRequest` that will require users to provide additional authentication information via 3D Secure.
 
 To request SCA, add the following to `CardRequest`:
 
