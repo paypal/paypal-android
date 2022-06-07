@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/paymentMethodsFragment">
 
@@ -21,7 +22,11 @@
     <fragment
         android:id="@+id/cardFragment"
         android:name="com.paypal.android.ui.card.CardFragment"
-        android:label="CardFragment" />
+        android:label="CardFragment" >
+        <action
+            android:id="@+id/action_cardFragment_to_prefillCardFragment"
+            app:destination="@id/prefillCardFragment" />
+    </fragment>
     <fragment
         android:id="@+id/payPalFragment"
         android:name="com.paypal.android.ui.paypal.PayPalFragment"
@@ -38,4 +43,9 @@
         android:id="@+id/payPalButtonsFragment"
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
+    <fragment
+        android:id="@+id/prefillCardFragment"
+        android:name="com.paypal.android.ui.prefillcard.PrefillCardFragment"
+        android:label="fragment_prefill_card"
+        tools:layout="@layout/fragment_prefill_card" />
 </navigation>

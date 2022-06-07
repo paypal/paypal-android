@@ -32,6 +32,18 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/prefill_card_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/prefill_card_data"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dropdown_menu"
+        />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/card_number"
         android:layout_width="0dp"
@@ -40,7 +52,7 @@
         android:hint="@string/card_field_card_number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dropdown_menu">
+        app:layout_constraintTop_toBottomOf="@id/prefill_card_button">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/card_number_input"
