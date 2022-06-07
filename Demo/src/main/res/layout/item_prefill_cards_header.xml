@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/standard_margin"
+    android:padding="@dimen/item_standard_padding"
+    android:background="?attr/colorPrimary"
     >
 
     <TextView
         android:id="@+id/title"
         style="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textColor="?attr/colorOnPrimary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
