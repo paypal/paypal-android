@@ -94,6 +94,36 @@ Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardReq
 val cardRequest  = CardRequest("<ORDER_ID>", card)
 ```
 
+Optionally, a merchant app can request Strong Consumer Authentication (SCA) for a `CardRequest` that will require an additional authorization via 3D Secure.
+
+To request SCA, add the following to `CardRequest`:
+
+```kotlin
+cardRequest.threeDSecureRequest = ThreeDSecureRequest(
+  sca = SCA.SCA_ALWAYS,
+  returnUrl = "myapp://return_url"
+  cancelUrl = "myapp://cancel_url"
+)
+```
+
+Notice the "myapp://" portion of the `returnUrl` and `cancelUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
+
+Create an intent filter to specify a deep link target for the SDK to return control back to your application:
+
+```xml
+<activity
+    android:name=".MyDeepLinkTargetActivity"
+    ...
+    >
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <data android:scheme="myapp"/>
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+    </intent-filter>
+</activity>
+```
+
 ### 5. Approve the order through the Payments SDK
 
 Approve the order using your `CardClient`.
@@ -111,6 +141,19 @@ fun onApproveOrderSuccess(result: CardResult) {
 
 fun onApproveOrderFailure(error: PayPalSDKError) {
   // inspect `error` for more information
+}
+
+// optional
+fun onApproveOrderCanceled() {
+  // 3DS flow was canceled
+}
+
+fun onApproveOrderThreeDSecureWillLaunch() {
+  // 3DS flow will launch
+}
+
+fun onApproveOrderThreeDSecureDidFinish() {
+  // user successfully completed 3DS authentication
 }
 ```
 
@@ -145,4 +188,3 @@ TODO - Do we have test card numbers merchants can test this with?
 ### 2. Go live with your integration
 
 Follow [these instructions](https://developer.paypal.com/api/rest/production/) to prepare your integration to go live.
-
