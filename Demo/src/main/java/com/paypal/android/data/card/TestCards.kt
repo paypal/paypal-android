@@ -22,24 +22,6 @@ object TestCards {
                 )
             ),
             PrefillCard(
-                name = "3DS2",
-                card = Card(
-                    number = "4000000000001091",
-                    expirationMonth = "01",
-                    expirationYear = "2026",
-                    securityCode = "123"
-                ),
-            ),
-            PrefillCard(
-                name = "3DS1",
-                card = Card(
-                    number = "4000000000000002",
-                    expirationMonth = "01",
-                    expirationYear = "2026",
-                    securityCode = "123"
-                ),
-            ),
-            PrefillCard(
                 name = "New Visa",
                 card = Card(
                     number = "4032035809742661",
@@ -50,7 +32,24 @@ object TestCards {
             )
         ),
         Group.CARD_3DS to listOf(
-
+            PrefillCard(
+                name = "3DS1",
+                card = Card(
+                    number = "4000000000000002",
+                    expirationMonth = "01",
+                    expirationYear = "2026",
+                    securityCode = "123"
+                ),
+            ),
+            PrefillCard(
+                name = "3DS2",
+                card = Card(
+                    number = "4000000000001091",
+                    expirationMonth = "01",
+                    expirationYear = "2026",
+                    securityCode = "123"
+                ),
+            ),
         )
     )
 
