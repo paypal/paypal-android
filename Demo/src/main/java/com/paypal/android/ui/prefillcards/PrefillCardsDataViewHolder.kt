@@ -9,6 +9,10 @@ class PrefillCardsDataViewHolder(private val binding: ItemPrefillCardDataBinding
     fun bind(item: PrefillCardsItem.Data) {
         binding.run {
             name.text = item.prefillCard.name
+
+            root.setOnClickListener {
+
+            }
         }
     }
 }
