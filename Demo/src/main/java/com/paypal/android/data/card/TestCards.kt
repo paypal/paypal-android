@@ -59,4 +59,8 @@ object TestCards {
             "3DS2",
         )
     )
+
+    fun cardsInGroup(group: Group): List<PrefillCard> {
+        return cardGroups[group]?.mapNotNull { cards[it] } ?: emptyList()
+    }
 }
