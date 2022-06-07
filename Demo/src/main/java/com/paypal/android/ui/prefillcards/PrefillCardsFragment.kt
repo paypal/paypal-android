@@ -5,11 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.paypal.android.data.card.PrefillCard
 import com.paypal.android.data.card.TestCards
 import com.paypal.android.databinding.FragmentPrefillCardsBinding
 
-class PrefillCardsFragment : Fragment() {
+class PrefillCardsFragment : Fragment(), PrefillCardsListener {
 
     private lateinit var binding: FragmentPrefillCardsBinding
 
@@ -33,9 +36,14 @@ class PrefillCardsFragment : Fragment() {
             items += prefillCards.map { PrefillCardsItem.Data(it) }
         }
 
-        binding.run {
-            recyclerView.layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.adapter = PrefillCardsAdapter(items)
-        }
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = PrefillCardsAdapter(items, this)
+    }
+
+    override fun prefillCardSelected(prefillCard: PrefillCard) {
+        val bundle = Bundle()
+//        bundle.putParcelable("PREFILL_CARD", prefillCard)
+
+        setFragmentResult("PREFILL_CARD", bundle)
     }
 }

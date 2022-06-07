@@ -7,7 +7,10 @@ import com.paypal.android.databinding.ItemPrefillCardDataBinding
 import com.paypal.android.databinding.ItemPrefillCardsHeaderBinding
 
 
-class PrefillCardsAdapter(private val items: MutableList<PrefillCardsItem>) :
+class PrefillCardsAdapter(
+    private val items: MutableList<PrefillCardsItem>,
+    private val listener: PrefillCardsListener
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private enum class ViewType(val value: Int) {
@@ -36,7 +39,7 @@ class PrefillCardsAdapter(private val items: MutableList<PrefillCardsItem>) :
             else -> {
                 val binding =
                     ItemPrefillCardDataBinding.inflate(layoutInflater, parent, false)
-                PrefillCardsDataViewHolder(binding)
+                PrefillCardsDataViewHolder(binding, listener)
             }
         }
     }
