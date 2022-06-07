@@ -1,4 +1,4 @@
-# PayPal SDK: Card
+# Accepting Card Payments
 
 The Card module in the PayPal SDK enables Credit and Debit card payments in your app.
 
