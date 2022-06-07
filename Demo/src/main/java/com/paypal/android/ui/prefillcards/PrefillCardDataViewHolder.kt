@@ -8,7 +8,7 @@ class PrefillCardDataViewHolder(private val binding: ItemPrefillCardDataBinding)
 
     fun bind(item: PrefillCardsData) {
         binding.run {
-
+            name.text = item.prefillCard.name
         }
     }
 }

@@ -15,14 +15,14 @@ class PrefillCardsAdapter(private val items: MutableList<PrefillCardsItem>) :
         DATA(1);
 
         companion object {
-            fun fromInt(value: Int) = ViewType.values().first { it.value == value }
+            fun fromInt(value: Int) = values().first { it.value == value }
         }
     }
 
     override fun getItemViewType(position: Int) =
         when (items[position]) {
             is PrefillCardsHeader -> ViewType.HEADER.value
-            else -> ViewType.HEADER.value
+            else -> ViewType.DATA.value
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -30,12 +30,12 @@ class PrefillCardsAdapter(private val items: MutableList<PrefillCardsItem>) :
         return when (ViewType.fromInt(viewType)) {
             ViewType.HEADER -> {
                 val binding =
-                    ItemPrefillCardsHeaderBinding.inflate(layoutInflater, null, false)
+                    ItemPrefillCardsHeaderBinding.inflate(layoutInflater, parent, false)
                 HeaderViewHolder(binding)
             }
             else -> {
                 val binding =
-                    ItemPrefillCardDataBinding.inflate(layoutInflater, null, false)
+                    ItemPrefillCardDataBinding.inflate(layoutInflater, parent, false)
                 PrefillCardDataViewHolder(binding)
             }
         }

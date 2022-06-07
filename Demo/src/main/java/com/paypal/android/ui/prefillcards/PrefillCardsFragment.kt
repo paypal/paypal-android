@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.paypal.android.data.card.TestCards
 import com.paypal.android.databinding.FragmentPrefillCardsBinding
 
@@ -34,6 +35,7 @@ class PrefillCardsFragment : Fragment() {
         }
 
         binding.run {
+            recyclerView.layoutManager = LinearLayoutManager(requireContext())
             recyclerView.adapter = PrefillCardsAdapter(items)
         }
     }
