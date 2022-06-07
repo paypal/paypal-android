@@ -24,6 +24,7 @@ import com.paypal.android.card.threedsecure.SCA
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.data.card.TestCards
 import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
