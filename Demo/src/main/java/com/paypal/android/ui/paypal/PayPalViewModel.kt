@@ -1,11 +1,12 @@
 package com.paypal.android.ui.paypal
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.api.EligibilityAPI
-import com.paypal.android.core.api.models.APIResult
 import com.paypal.android.core.api.models.Eligibility
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,11 +18,19 @@ class PayPalViewModel
     private val eligibilityAPI: EligibilityAPI
 ) : ViewModel() {
 
-    fun getEligibility(): LiveData<APIResult<Eligibility>> {
-        val liveData = MutableLiveData<APIResult<Eligibility>>()
+    fun getEligibility(): LiveData<Eligibility> {
+        val liveData = MutableLiveData<Eligibility>()
         viewModelScope.launch {
-            liveData.postValue(eligibilityAPI.checkEligibility())
+            try {
+                liveData.postValue(eligibilityAPI.checkEligibility())
+            } catch (error: PayPalSDKError) {
+                Log.d(TAG, "Error: ${error.message}")
+            }
         }
         return liveData
+    }
+
+    companion object {
+        const val TAG = "PayPalViewModelTag"
     }
 }

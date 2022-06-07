@@ -9,11 +9,11 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
 
-internal interface GraphQlClient {
+internal interface GraphQLClient {
     suspend fun <T> executeQuery(query: Query<T>): GraphQlQueryResponse<T>
 }
 
-internal class GraphQlClientImpl : GraphQlClient {
+internal class GraphQLClientImpl : GraphQLClient {
     private val http = Http()
     private val graphQlRequestFactory = GraphQLRequestFactory()
 

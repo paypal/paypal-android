@@ -24,7 +24,6 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.core.api.models.APIResult
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -75,14 +74,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.getEligibility().observe(viewLifecycleOwner) {
-            when (it) {
-                is APIResult.Success -> {
-                    Log.d(TAG, "isVenmoEligible: ${it.data.isVenmoEligible}")
-                }
-                is APIResult.Failure -> {
-                    Log.d(TAG, "Error: ${it.message}")
-                }
-            }
+            Log.d(TAG, "isVenmoEligible: ${it.isVenmoEligible}")
         }
     }
 
