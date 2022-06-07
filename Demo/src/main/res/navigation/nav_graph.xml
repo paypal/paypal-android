@@ -46,6 +46,6 @@
     <fragment
         android:id="@+id/prefillCardFragment"
         android:name="com.paypal.android.ui.prefillcard.PrefillCardFragment"
-        android:label="fragment_prefill_card"
+        android:label="Prefill Card"
         tools:layout="@layout/fragment_prefill_card" />
 </navigation>

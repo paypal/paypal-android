@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.model.ApplicationContext
@@ -89,6 +90,7 @@ class CardFragment : Fragment() {
             cardNumberInput.onValueChange = ::onCardNumberChange
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
+            prefillCardButton.setOnClickListener { onPrefillCardData() }
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
 
@@ -167,6 +169,10 @@ class CardFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             createOrder()
         }
+    }
+
+    private fun onPrefillCardData() {
+        findNavController().navigate(R.id.action_cardFragment_to_prefillCardFragment)
     }
 
     private suspend fun createOrder() {
