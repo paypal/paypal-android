@@ -181,9 +181,9 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 ## Testing and Go Live
 
-### 1. Test the Card integratoin
+### 1. Test the Card integration
 
-TODO - Do we have test card numbers merchants can test this with?
+- [PayPal Developer: 3D Secure test scenarios](https://developer.paypal.com/docs/checkout/advanced/customize/3d-secure/test/)
 
 ### 2. Go live with your integration
 
