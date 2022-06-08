@@ -68,10 +68,11 @@ Create a `PayPalWebCheckoutClient` to approve an order with a PayPal payment met
 val payPalWebCheckoutClient = PayPalWebCheckoutClient(requireActivity(), config, returnUrl)
 ```
 
-Set a listener on your `PayPalWebCheckoutClient` to handle results:
+Set a listener on the client to receive payment flow callbacks:
 
 ```kotlin
 payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
+
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
         // order was successfully approved and is ready to be captured/authorized (see step 8)
     }
@@ -88,7 +89,7 @@ payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
 
 ### 4. Create an order
 
-When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
+When a user initiates a payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
 ```bash
 curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
