@@ -62,7 +62,7 @@ Set a return URL using the custom scheme you configured in the `ActivityManifest
 val returnUrl = "custom-url-scheme"
 ```
 
-Create a `PayPalClient` to approve an order with a PayPal payment method:
+Create a `PayPalWebCheckoutClient` to approve an order with a PayPal payment method:
 
 ```kotlin
 val payPalWebCheckoutClient = PayPalWebCheckoutClient(requireActivity(), config, returnUrl)
