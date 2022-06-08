@@ -79,16 +79,6 @@ class CardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.run {
-            val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
-            autoCompleteTextView.setAdapter(
-                ArrayAdapter(
-                    requireActivity(),
-                    R.layout.dropdown_item,
-                    autoFillCardNames
-                )
-            )
-
-            autoCompleteTextView.onValueChange = ::onPrefillCardChange
             cardNumberInput.onValueChange = ::onCardNumberChange
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
@@ -149,7 +139,6 @@ class CardFragment : Fragment() {
             bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_YEAR)
 
         binding.run {
-            val previousCardNumber = cardNumberInput.text.toString()
             cardNumberInput.setText("")
             val formattedCardNumber =
                 CardFormatter.formatCardNumber(cardNumber ?: "")
