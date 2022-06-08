@@ -6,8 +6,7 @@ import com.paypal.android.databinding.ItemTestCardsDataBinding
 class TestCardsDataViewHolder(
     private val binding: ItemTestCardsDataBinding,
     private val listener: TestCardsListener
-) :
-    RecyclerView.ViewHolder(binding.root) {
+) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(item: TestCardsItem.Data) {
         binding.run {
