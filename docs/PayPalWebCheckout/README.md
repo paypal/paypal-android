@@ -1,11 +1,11 @@
-# Accepting PayPal Payments
+# Accepting PayPal Web Checkout Payments
 
-The PayPal module in the PayPal SDK enables PayPal payments in your app.
+The PayPal Web Checkout module in the PayPal SDK enables PayPal payments in your app.
 
-Follow these steps to add PayPal payments:
+Follow these steps to add PayPal Web Checkout payments:
 
 1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
-1. [Add PayPal Module](#add-paypal-module)
+1. [Add PayPal Web Checkout Module](#add-paypal-web-checkout-module)
 1. [Test and go live](#test-and-go-live)
 
 ## Setup a PayPal Developer Account
@@ -16,9 +16,9 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 You will need a server integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
 For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
-## Add PayPal Module
+## Add PayPal Web Checkout Module
 
-### 1. Add the Payments SDK  to your app
+### 1. Add the Payments SDK to your app
 
 In your `build.gradle` file, add the following dependency:
 
@@ -30,7 +30,7 @@ dependencies {
 
 ### 2. Configure your app to handle browser switching
 
-The PayPal SDK redirects users to a web interface to complete the PayPal payment flow. After a user has completed the flow, a custom URL scheme is used to return control back to your app.
+The PayPal SDK redirects users to a web interface to complete the PayPal Web Checkout flow. After a user has completed the flow, a custom URL scheme is used to return control back to your app.
 
 Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app:
 
