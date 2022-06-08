@@ -24,8 +24,8 @@
         android:name="com.paypal.android.ui.card.CardFragment"
         android:label="CardFragment" >
         <action
-            android:id="@+id/action_cardFragment_to_prefillCardFragment"
-            app:destination="@id/prefillCardFragment" />
+            android:id="@+id/action_cardFragment_to_testCardFragment"
+            app:destination="@id/testCardFragment" />
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
@@ -44,8 +44,8 @@
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
     <fragment
-        android:id="@+id/prefillCardFragment"
+        android:id="@+id/testCardFragment"
         android:name="com.paypal.android.ui.testcards.TestCardsFragment"
-        android:label="Prefill Card"
+        android:label="Test Cards"
         tools:layout="@layout/fragment_test_cards" />
 </navigation>

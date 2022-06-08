@@ -78,12 +78,12 @@ class CardFragment : Fragment() {
             cardNumberInput.onValueChange = ::onCardNumberChange
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
-            prefillCardButton.setOnClickListener { onPrefillCardData() }
+            useTestCardButton.setOnClickListener { showTestCards() }
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
 
         setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
-            handlePrefillCardResult(bundle)
+            handleTestCardSelected(bundle)
         }
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
@@ -125,7 +125,7 @@ class CardFragment : Fragment() {
         }
     }
 
-    private fun handlePrefillCardResult(bundle: Bundle) {
+    private fun handleTestCardSelected(bundle: Bundle) {
         val cardNumber = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_NUMBER)
         val securityCode = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_SECURITY_CODE)
 
@@ -164,8 +164,8 @@ class CardFragment : Fragment() {
         }
     }
 
-    private fun onPrefillCardData() {
-        findNavController().navigate(R.id.action_cardFragment_to_prefillCardFragment)
+    private fun showTestCards() {
+        findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
     }
 
     private suspend fun createOrder() {

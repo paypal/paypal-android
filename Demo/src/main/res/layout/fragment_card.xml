@@ -7,13 +7,13 @@
     android:layout_marginEnd="@dimen/standard_margin">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/prefill_card_button"
+        android:id="@+id/use_test_card_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/standard_margin"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
-        android:text="@string/prefill_card_data"
+        android:text="@string/use_test_card"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,7 +26,7 @@
         android:hint="@string/card_field_card_number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/prefill_card_button">
+        app:layout_constraintTop_toBottomOf="@id/use_test_card_button">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/card_number_input"

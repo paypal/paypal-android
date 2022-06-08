@@ -15,12 +15,12 @@ import com.paypal.android.databinding.FragmentTestCardsBinding
 class TestCardsFragment : Fragment(), TestCardsListener {
 
     companion object {
-        const val REQUEST_KEY = "PREFILL_CARD"
+        const val REQUEST_KEY = "TEST_CARD"
 
-        const val RESULT_EXTRA_CARD_NUMBER = "PREFILL_CARD_NUMBER"
-        const val RESULT_EXTRA_CARD_EXPIRATION_MONTH = "PREFILL_CARD_EXPIRATION_MONTH"
-        const val RESULT_EXTRA_CARD_EXPIRATION_YEAR = "PREFILL_CARD_EXPIRATION_YEAR"
-        const val RESULT_EXTRA_CARD_SECURITY_CODE = "PREFILL_CARD_SECURITY_CODE"
+        const val RESULT_EXTRA_CARD_NUMBER = "TEST_CARD_NUMBER"
+        const val RESULT_EXTRA_CARD_EXPIRATION_MONTH = "TEST_CARD_EXPIRATION_MONTH"
+        const val RESULT_EXTRA_CARD_EXPIRATION_YEAR = "TEST_CARD_EXPIRATION_YEAR"
+        const val RESULT_EXTRA_CARD_SECURITY_CODE = "TEST_CARD_SECURITY_CODE"
     }
 
     private val viewModel: TestCardsViewModel by viewModels()
