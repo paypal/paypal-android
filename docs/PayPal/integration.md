@@ -148,7 +148,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --data-raw ''
 ```
 
-## Testing and go live
+## Test and go live
 
 ### 1. Test the PayPal integration
 
