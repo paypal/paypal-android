@@ -7,7 +7,7 @@ enum class Environment(val url: String, val grqphQlUrl: String) {
     ),
     SANDBOX(
         "https://api.sandbox.paypal.com",
-        "https:///www.sandbox.paypal.com/graphql"
+        "https://www.sandbox.paypal.com/graphql"
     ),
     STAGING(
         "https://api.msmaster.qa.paypal.com",
