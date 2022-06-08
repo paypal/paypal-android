@@ -74,7 +74,7 @@ Set a listener on the client to receive payment flow callbacks:
 payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
 
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-        // order was successfully approved and is ready to be captured/authorized (see step 8)
+        // order was successfully approved and is ready to be captured/authorized (see step 7)
     }
 
     override fun onPayPalWebFailure(error: PayPalSDKError) {
@@ -112,7 +112,7 @@ The `id` field of the response contains the order ID to pass to your client.
 
 ### 5. Create a request object for launching the PayPal flow
 
-Configure your `PayPalWebCheckoutRequest` and include the order ID generated in [step 5](#5-create-an-order):
+Configure your `PayPalWebCheckoutRequest` and include the order ID generated in [step 4](#4-create-an-order):
 
 ```kotlin
 val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
