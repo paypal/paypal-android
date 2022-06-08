@@ -206,7 +206,7 @@ class CardFragment : Fragment() {
 
         // build card request
         val cardRequest = binding.run {
-            val cardNumber = cardNumberInput.text.toString()
+            val cardNumber = cardNumberInput.text.toString().replace(" ", "")
             val expirationDate = cardExpirationInput.text.toString()
             val securityCode = cardSecurityCodeInput.text.toString()
 
