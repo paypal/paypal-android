@@ -28,7 +28,8 @@ class TestCardsFragment : Fragment(), TestCardsListener {
     private lateinit var binding: FragmentTestCardsBinding
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentTestCardsBinding.inflate(inflater, null, false)

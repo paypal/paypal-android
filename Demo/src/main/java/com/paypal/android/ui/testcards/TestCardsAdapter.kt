@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.paypal.android.databinding.ItemTestCardsDataBinding
 import com.paypal.android.databinding.ItemTestCardsHeaderBinding
 
-
 class TestCardsAdapter(
     private val items: MutableList<TestCardsItem>,
     private val listener: TestCardsListener
