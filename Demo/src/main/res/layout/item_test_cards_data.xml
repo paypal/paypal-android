@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
     android:padding="@dimen/item_standard_padding"
-    android:background="?attr/selectableItemBackground">
+    tools:ignore="Overdraw">
 
     <TextView
         android:id="@+id/name"
@@ -22,10 +23,10 @@
         style="@style/TextAppearance.Material3.BodyLarge"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/name"
         tools:text="Card Number" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
