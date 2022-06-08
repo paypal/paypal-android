@@ -1,20 +1,14 @@
----
-title: Pay with PayPal Web Custom Integration
-keywords: 
-contentType: docs
-productStatus: current
-apiVersion: TODO
-sdkVersion: TODO
----
-# Pay with PayPal Custom Integration
+# Accepting PayPal Payments
 
-Follow these steps to add Card payments:
+The PayPal module in the PayPal SDK enables PayPal payments in your app.
 
-1. [Know before you code](#know-before-you-code)
-1. [Add PayPal Payments](#add-paypal-payments)
+Follow these steps to add PayPal payments:
+
+1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
+1. [Add PayPal Module](#add-paypal-module)
 1. [Test and go live](#test-and-go-live)
 
-## Know before you code
+## Setup a PayPal Developer Account
 
 You will need to set up authorization to use the PayPal Payments SDK. 
 Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and generate an access token. 
@@ -22,7 +16,7 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 You will need a server integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
 For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
-## Add PayPal Payments
+## Add PayPal Module
 
 ### 1. Add the Payments SDK  to your app
 
