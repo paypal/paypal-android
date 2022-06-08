@@ -30,9 +30,9 @@ dependencies {
 
 ### 2. Configure your app to handle browser switching
 
-The PayPal payment flow utilizes a browser switch. A URL scheme must be defined to return to your app from the browser.
+The PayPal SDK re-directs the user to a Chrome Custom Tab to complete the PayPal payment flow. After the user has completed the flow, a custom URL scheme is used to return control back to your app.
 
-Edit your `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on your Activity that will be responsible for handling the deep link back into the app:
+Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on your Activity that will be responsible for handling the deep link back into the app:
 
 ```xml
 <activity android:name="com.company.app.MyPaymentsActivity"
