@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -26,7 +25,6 @@ import com.paypal.android.card.threedsecure.SCA
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.data.card.TestCards
 import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
@@ -147,26 +145,6 @@ class CardFragment : Fragment() {
             val expirationDate = "$expirationMonth/$expirationYear"
             cardExpirationInput.setText(expirationDate)
             cardSecurityCodeInput.setText(securityCode)
-        }
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun onPrefillCardChange(oldValue: String, newValue: String) {
-        val autoFillCards = cardViewModel.autoFillCards
-        autoFillCards[newValue]?.let { autoFillCard(it) }
-    }
-
-    private fun autoFillCard(card: Card) {
-        binding.run {
-            card.run {
-                val previousCardNumber = cardNumberInput.text.toString()
-                val formattedCardNumber = CardFormatter.formatCardNumber(number, previousCardNumber)
-                cardNumberInput.setText(formattedCardNumber)
-
-                val expirationDate = "$expirationMonth/$expirationYear"
-                cardExpirationInput.setText(expirationDate)
-                cardSecurityCodeInput.setText(securityCode)
-            }
         }
     }
 
