@@ -1,8 +1,8 @@
 package com.paypal.android.ui.prefillcards
 
-import com.paypal.android.data.card.PrefillCard
+import com.paypal.android.data.card.TestCard
 
 interface PrefillCardsListener {
 
-    fun onPrefillCardSelected(prefillCard: PrefillCard)
+    fun onPrefillCardSelected(testCard: TestCard)
 }

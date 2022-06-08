@@ -29,6 +29,7 @@ import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
+import com.paypal.android.ui.prefillcards.PrefillCardsViewModel
 import com.paypal.android.ui.prefillcards.PrefillCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,7 +55,6 @@ class CardFragment : Fragment() {
     lateinit var dataCollectorHandler: DataCollectorHandler
 
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
-    private val cardViewModel: CardViewModel by viewModels()
 
     private lateinit var binding: FragmentCardBinding
 

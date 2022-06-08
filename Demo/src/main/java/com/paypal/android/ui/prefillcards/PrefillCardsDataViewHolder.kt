@@ -11,11 +11,11 @@ class PrefillCardsDataViewHolder(
 
     fun bind(item: PrefillCardsItem.Data) {
         binding.run {
-            name.text = item.prefillCard.name
-            cardNumber.text = item.prefillCard.card.number
+            name.text = item.testCard.name
+            cardNumber.text = item.testCard.card.number
 
             root.setOnClickListener {
-                listener.onPrefillCardSelected(item.prefillCard)
+                listener.onPrefillCardSelected(item.testCard)
             }
         }
     }
