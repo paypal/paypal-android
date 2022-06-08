@@ -20,7 +20,7 @@ For initial setup, the `curl` commands below can be used as a reference for maki
 
 ### 1. Add the Payments SDK  to your app
 
-In your `build.gradle` file, add the following dependency [see step 8](#8-Capture-authorize-the-order):
+In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
