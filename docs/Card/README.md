@@ -179,7 +179,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --data-raw ''
 ```
 
-## Testing and Go Live
+## Test and Go Live
 
 ### 1. Test the Card integration
 
