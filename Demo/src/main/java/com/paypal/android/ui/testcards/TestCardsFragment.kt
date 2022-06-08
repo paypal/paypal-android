@@ -10,9 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.paypal.android.data.card.TestCard
-import com.paypal.android.databinding.FragmentPrefillCardsBinding
+import com.paypal.android.databinding.FragmentTestCardsBinding
 
-class PrefillCardsFragment : Fragment(), PrefillCardsListener {
+class TestCardsFragment : Fragment(), TestCardsListener {
 
     companion object {
         const val REQUEST_KEY = "PREFILL_CARD"
@@ -23,32 +23,32 @@ class PrefillCardsFragment : Fragment(), PrefillCardsListener {
         const val RESULT_EXTRA_CARD_SECURITY_CODE = "PREFILL_CARD_SECURITY_CODE"
     }
 
-    private val viewModel: PrefillCardsViewModel by viewModels()
+    private val viewModel: TestCardsViewModel by viewModels()
 
-    private lateinit var binding: FragmentPrefillCardsBinding
+    private lateinit var binding: FragmentTestCardsBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPrefillCardsBinding.inflate(inflater, null, false)
+        binding = FragmentTestCardsBinding.inflate(inflater, null, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val items = mutableListOf<PrefillCardsItem>()
+        val items = mutableListOf<TestCardsItem>()
         for (group in viewModel.testCardGroups) {
-            items += PrefillCardsItem.Header(group.name)
-            items += group.cards.map { PrefillCardsItem.Data(it) }
+            items += TestCardsItem.Header(group.name)
+            items += group.cards.map { TestCardsItem.Data(it) }
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = PrefillCardsAdapter(items, this)
+        binding.recyclerView.adapter = TestCardsAdapter(items, this)
     }
 
-    override fun onPrefillCardSelected(testCard: TestCard) {
+    override fun onTestCardSelected(testCard: TestCard) {
         val bundle = testCard.card.run {
             Bundle().apply {
                 putString(RESULT_EXTRA_CARD_NUMBER, number)

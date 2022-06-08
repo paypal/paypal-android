@@ -1,12 +1,12 @@
 package com.paypal.android.ui.testcards
 
 import androidx.recyclerview.widget.RecyclerView
-import com.paypal.android.databinding.ItemPrefillCardsHeaderBinding
+import com.paypal.android.databinding.ItemTestCardsHeaderBinding
 
-class PrefillCardsHeaderViewHolder(private val binding: ItemPrefillCardsHeaderBinding) :
+class TestCardsHeaderViewHolder(private val binding: ItemTestCardsHeaderBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(item: PrefillCardsItem.Header) {
+    fun bind(item: TestCardsItem.Header) {
         binding.run {
             title.text = item.title
         }

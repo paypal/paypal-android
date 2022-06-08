@@ -3,13 +3,13 @@ package com.paypal.android.ui.testcards
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.paypal.android.databinding.ItemPrefillCardDataBinding
-import com.paypal.android.databinding.ItemPrefillCardsHeaderBinding
+import com.paypal.android.databinding.ItemTestCardsDataBinding
+import com.paypal.android.databinding.ItemTestCardsHeaderBinding
 
 
-class PrefillCardsAdapter(
-    private val items: MutableList<PrefillCardsItem>,
-    private val listener: PrefillCardsListener
+class TestCardsAdapter(
+    private val items: MutableList<TestCardsItem>,
+    private val listener: TestCardsListener
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -24,7 +24,7 @@ class PrefillCardsAdapter(
 
     override fun getItemViewType(position: Int) =
         when (items[position]) {
-            is PrefillCardsItem.Header -> ViewType.HEADER.value
+            is TestCardsItem.Header -> ViewType.HEADER.value
             else -> ViewType.DATA.value
         }
 
@@ -33,24 +33,24 @@ class PrefillCardsAdapter(
         return when (ViewType.fromInt(viewType)) {
             ViewType.HEADER -> {
                 val binding =
-                    ItemPrefillCardsHeaderBinding.inflate(layoutInflater, parent, false)
-                PrefillCardsHeaderViewHolder(binding)
+                    ItemTestCardsHeaderBinding.inflate(layoutInflater, parent, false)
+                TestCardsHeaderViewHolder(binding)
             }
             else -> {
                 val binding =
-                    ItemPrefillCardDataBinding.inflate(layoutInflater, parent, false)
-                PrefillCardsDataViewHolder(binding, listener)
+                    ItemTestCardsDataBinding.inflate(layoutInflater, parent, false)
+                TestCardsDataViewHolder(binding, listener)
             }
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is PrefillCardsHeaderViewHolder -> {
-                (items[position] as? PrefillCardsItem.Header)?.let { holder.bind(it) }
+            is TestCardsHeaderViewHolder -> {
+                (items[position] as? TestCardsItem.Header)?.let { holder.bind(it) }
             }
-            is PrefillCardsDataViewHolder -> {
-                (items[position] as? PrefillCardsItem.Data)?.let { holder.bind(it) }
+            is TestCardsDataViewHolder -> {
+                (items[position] as? TestCardsItem.Data)?.let { holder.bind(it) }
             }
         }
     }

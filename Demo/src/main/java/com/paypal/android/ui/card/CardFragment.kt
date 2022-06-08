@@ -28,7 +28,7 @@ import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
-import com.paypal.android.ui.testcards.PrefillCardsFragment
+import com.paypal.android.ui.testcards.TestCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -82,7 +82,7 @@ class CardFragment : Fragment() {
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
 
-        setFragmentResultListener(PrefillCardsFragment.REQUEST_KEY) { _, bundle ->
+        setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
             handlePrefillCardResult(bundle)
         }
 
@@ -126,13 +126,13 @@ class CardFragment : Fragment() {
     }
 
     private fun handlePrefillCardResult(bundle: Bundle) {
-        val cardNumber = bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_NUMBER)
-        val securityCode = bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_SECURITY_CODE)
+        val cardNumber = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_NUMBER)
+        val securityCode = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_SECURITY_CODE)
 
         val expirationMonth =
-            bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_MONTH)
+            bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_MONTH)
         val expirationYear =
-            bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_YEAR)
+            bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_YEAR)
 
         binding.run {
             cardNumberInput.setText("")

@@ -1,21 +1,21 @@
 package com.paypal.android.ui.testcards
 
 import androidx.recyclerview.widget.RecyclerView
-import com.paypal.android.databinding.ItemPrefillCardDataBinding
+import com.paypal.android.databinding.ItemTestCardsDataBinding
 
-class PrefillCardsDataViewHolder(
-    private val binding: ItemPrefillCardDataBinding,
-    private val listener: PrefillCardsListener
+class TestCardsDataViewHolder(
+    private val binding: ItemTestCardsDataBinding,
+    private val listener: TestCardsListener
 ) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(item: PrefillCardsItem.Data) {
+    fun bind(item: TestCardsItem.Data) {
         binding.run {
             name.text = item.testCard.name
             cardNumber.text = item.testCard.card.number
 
             root.setOnClickListener {
-                listener.onPrefillCardSelected(item.testCard)
+                listener.onTestCardSelected(item.testCard)
             }
         }
     }

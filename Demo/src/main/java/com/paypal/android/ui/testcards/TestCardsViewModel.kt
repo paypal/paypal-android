@@ -5,7 +5,7 @@ import com.paypal.android.card.Card
 import com.paypal.android.data.card.TestCard
 import com.paypal.android.data.card.TestCardGroup
 
-class PrefillCardsViewModel : ViewModel() {
+class TestCardsViewModel : ViewModel() {
 
     val testCardGroups = listOf(
         TestCardGroup(
