@@ -56,7 +56,7 @@ Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
 ```
 
-Set the return URL from the URL scheme you configured in the `ActivityManifest.xml` [step 2](#2-configure-your-app-to-handle-browser-switching):
+Set a return URL using the custom scheme you configured in the `ActivityManifest.xml` [step 2](#2-configure-your-app-to-handle-browser-switching):
 
 ```kotlin
 val returnUrl = "custom-url-scheme"
@@ -111,40 +111,38 @@ The `id` field of the response contains the order ID to pass to your client.
 
 ### 5. Create a request object for launching the PayPal flow
 
-Configure your `PayPalWebCheckoutRequest` and include the order ID generated [step 5](#5-create-an-order):
+Configure your `PayPalWebCheckoutRequest` and include the order ID generated in [step 5](#5-create-an-order):
 
 ```kotlin
 val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 ```
 
-You can also specify the funding source for your order which are `PayPal` (default), `PayLater` and `PayPalCredit`.
-For more information go to: https://developer.paypal.com/docs/checkout/pay-later/us/
+You can also specify one of the follwing funding sources for your order: `PayPal` (default), `PayLater` or `PayPalCredit`.
+> For more information on PayPal Pay Later go to: https://developer.paypal.com/docs/checkout/pay-later/us/
 
-### 6. Approve the order through the Payments SDK
+### 6. Approve the order using the PayPal SDK
 
-When a user initiates the PayPal payment flow through your UI, approve the order using your `PayPalWebCheckoutClient`
+To start the PayPal Web Checkokut flow, call `payPalWebCheckoutClient.start(payPalWebCheckoutRequest)`.
 
-Call `payPalClient.start(payPalWebCheckoutRequest)` to start the checkout web flow.
+When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 4](#4-initiate-the-payments-sdk).
 
-When the user completes the PayPal payment flow, the result will be returned to the listener set in [step 4](#4-initiate-the-payments-sdk).
+### 7. Capture/Authorize the order
 
-### 7. Capture/authorize the order
-
-If you receive a successful result in the client-side flow, you can then capture or authorize the order. 
-
-Call `authorize` to place funds on hold:
-
-```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer <ACCESS_TOKEN>' \
---data-raw ''
-```
+After receiving a successful result from the `onPayPalWebSuccess` callback, you can now capture or authorize the order. 
 
 Call `capture` to capture funds immediately:
 
 ```bash
 curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data-raw ''
+```
+
+Call `authorize` to place funds on hold:
+
+```bash
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw ''
