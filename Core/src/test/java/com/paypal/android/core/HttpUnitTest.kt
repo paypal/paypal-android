@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -48,7 +48,7 @@ class HttpUnitTest {
     }
 
     @Test
-    fun `send sets request method on url connection`() = runBlockingTest {
+    fun `send sets request method on url connection`() = runTest {
         val httpRequest = HttpRequest(url, HttpMethod.GET)
 
         sut.send(httpRequest)
@@ -56,7 +56,7 @@ class HttpUnitTest {
     }
 
     @Test
-    fun `send sets request headers on url connection`() = runBlockingTest {
+    fun `send sets request headers on url connection`() = runTest {
         val httpRequest = HttpRequest(url, HttpMethod.GET)
         httpRequest.headers["Sample-Header"] = "sample-value"
 
@@ -65,7 +65,7 @@ class HttpUnitTest {
     }
 
     @Test
-    fun `send calls connect on http url connection to initiate request`() = runBlockingTest {
+    fun `send calls connect on http url connection to initiate request`() = runTest {
         val httpRequest = HttpRequest(url, HttpMethod.GET)
 
         sut.send(httpRequest)
@@ -73,7 +73,7 @@ class HttpUnitTest {
     }
 
     @Test
-    fun `send forwards http response from http parser`() = runBlockingTest {
+    fun `send forwards http response from http parser`() = runTest {
         val httpRequest = HttpRequest(url, HttpMethod.GET)
         val result = sut.send(httpRequest)
 
@@ -81,7 +81,7 @@ class HttpUnitTest {
     }
 
     @Test
-    fun `it returns unknown host http status when UnknownHostException thrown`() = runBlockingTest {
+    fun `it returns unknown host http status when UnknownHostException thrown`() = runTest {
         val error = UnknownHostException()
         every { urlConnection.connect() } throws error
 
@@ -93,7 +93,7 @@ class HttpUnitTest {
     }
 
     @Test
-    fun `it returns status undetermined when the status cannot be determined`() = runBlockingTest {
+    fun `it returns status undetermined when the status cannot be determined`() = runTest {
         val error = Exception()
         every { urlConnection.connect() } throws error
 

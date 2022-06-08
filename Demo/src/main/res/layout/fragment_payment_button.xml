@@ -14,7 +14,7 @@
             android:id="@+id/payPalButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_16x"
+            android:layout_margin="@dimen/standard_margin"
             android:tag="PayPal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -24,27 +24,46 @@
             android:id="@+id/payPalCreditButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_16x"
+            android:layout_margin="@dimen/standard_margin"
             android:tag="PayPal Credit"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/payPalButton" />
+        <com.paypal.android.ui.paymentbutton.PayLaterButton
+            android:id="@+id/payPalPayLater"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/standard_margin"
+            android:tag="PayPal Pay Later"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/payPalCreditButton" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/submit_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_16x"
+            android:layout_margin="@dimen/standard_margin"
             android:text="@string/start_checkout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/payPalCreditButton" />
+            app:layout_constraintTop_toBottomOf="@id/payPalPayLater" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/customize_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/standard_margin"
+            android:text="@string/custom_styling"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/submit_button" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progress_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_16x"
+            android:layout_margin="@dimen/standard_margin"
             android:visibility="invisible"
             android:indeterminate="true"
             app:layout_constraintEnd_toEndOf="parent"

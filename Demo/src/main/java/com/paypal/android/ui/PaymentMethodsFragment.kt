@@ -32,7 +32,6 @@ class PaymentMethodsFragment : Fragment() {
         binding.run {
             cardButton.setOnClickListener { launchCardFragment() }
             payPalButton.setOnClickListener { launchPayPalFragment() }
-            threeDSecureButton.setOnClickListener { launchThreeDSecure() }
         }
         return binding.root
     }
@@ -57,10 +56,6 @@ class PaymentMethodsFragment : Fragment() {
 
     private fun launchCardFragment() {
         navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToCardFragment())
-    }
-
-    private fun launchThreeDSecure() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToThreeDSecureFragment())
     }
 
     private fun launchSettingsFragment() {

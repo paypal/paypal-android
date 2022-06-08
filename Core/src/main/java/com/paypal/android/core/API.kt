@@ -5,6 +5,7 @@ class API internal constructor(
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory
 ) {
+
     constructor(configuration: CoreConfig) :
             this(configuration, Http(), HttpRequestFactory())
 

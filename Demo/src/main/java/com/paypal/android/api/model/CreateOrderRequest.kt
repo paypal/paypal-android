@@ -6,5 +6,8 @@ data class CreateOrderRequest(
     val intent: String?,
     @SerializedName("purchase_units")
     val purchaseUnit: List<PurchaseUnit>?,
-    val payee: Payee?
-)
+    val payee: Payee?,
+) {
+    @SerializedName("application_context")
+    var applicationContext: ApplicationContext? = null
+}

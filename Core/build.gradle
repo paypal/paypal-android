@@ -50,6 +50,7 @@ dependencies {
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
 
+    testImplementation deps.jsonAssert
     testImplementation deps.junit
     testImplementation deps.mockk
     testImplementation deps.robolectric

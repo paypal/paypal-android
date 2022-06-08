@@ -12,7 +12,8 @@ object APIClientError {
     // 1. Error parsing HTTP response data.
     fun dataParsingError(correlationID: String?) = PayPalSDKError(
         code = Code.DATA_PARSING_ERROR.ordinal,
-        errorDescription = "An error occurred parsing HTTP response data. Contact developer.paypal.com/support.",
+        errorDescription = "An error occurred parsing HTTP response data." +
+                " Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
 
@@ -39,7 +40,7 @@ object APIClientError {
     // 5. The server's response body returned an error message.
     fun serverResponseError(correlationID: String?) = PayPalSDKError(
         code = Code.SERVER_RESPONSE_ERROR.ordinal,
-        errorDescription = "A server occurred. Contact developer.paypal.com/support.",
+        errorDescription = "A server error occurred. Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
 

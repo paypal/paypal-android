@@ -14,9 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.paypal.android"
-        // TODO: revert once Native XO supports minSdk 21
-        //minSdkVersion 21
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -67,7 +65,6 @@ dependencies {
     implementation project(':PayPalNativeCheckout')
     implementation project(':PayPalWebCheckout')
     implementation project(':PayPalUI')
-    implementation project(':ThreeDSecure')
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx

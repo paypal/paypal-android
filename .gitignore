@@ -36,23 +36,8 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# IntelliJ
-*.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/assetWizardSettings.xml
-.idea/dictionaries
-.idea/libraries
-.idea/jarRepositories.xml
 # Android Studio 3 in .gitignore file.
-.idea/caches
-.idea/modules.xml
-# Comment next line if keeping position of elements in Navigation Editor is relevant for you
-.idea/navEditor.xml
-.idea/misc.xml
-.idea/compiler.xml
-.idea/*
+.idea/
 
 
 # Keystore files
@@ -97,4 +82,3 @@ lint/tmp/
 
 # PayPal
 paypal.properties
-

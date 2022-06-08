@@ -18,5 +18,10 @@ enum class OrderStatus {
     /**
      * The order is completed and paid
      */
-    COMPLETED
+    COMPLETED,
+
+    /**
+     * The payer is required to take additional action before the order can be approved
+     */
+    PAYER_ACTION_REQUIRED
 }

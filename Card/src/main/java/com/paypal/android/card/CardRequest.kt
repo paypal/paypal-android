@@ -1,3 +1,9 @@
 package com.paypal.android.card
 
-data class CardRequest(val orderID: String, val card: Card)
+import com.paypal.android.card.threedsecure.ThreeDSecureRequest
+
+data class CardRequest(
+    val orderID: String,
+    val card: Card,
+    var threeDSecureRequest: ThreeDSecureRequest? = null
+)
