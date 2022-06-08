@@ -119,17 +119,17 @@ val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 ```
 
 You can also specify one of the follwing funding sources for your order: `PayPal` (default), `PayLater` or `PayPalCredit`.
-> For more information on PayPal Pay Later go to: https://developer.paypal.com/docs/checkout/pay-later/us/
+> For more information on PayPal Pay Later visit [developer.paypal.com](https://developer.paypal.com/docs/checkout/pay-later/us/)
 
 ### 6. Approve the order using the PayPal SDK
 
 To start the PayPal Web Checkokut flow, call `payPalWebCheckoutClient.start(payPalWebCheckoutRequest)`.
 
-When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 4](#4-initiate-the-payments-sdk).
+When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-the-payments-sdk).
 
 ### 7. Capture/Authorize the order
 
-After receiving a successful result from the `onPayPalWebSuccess` callback, you can now capture or authorize the order. 
+After receiving a successful result from the `onPayPalWebSuccess()` callback, you can now capture or authorize the order. 
 
 Call `capture` to capture funds immediately:
 
