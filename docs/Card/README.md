@@ -108,7 +108,7 @@ cardRequest.threeDSecureRequest = ThreeDSecureRequest(
 
 Notice the `myapp://` portion of the `returnUrl` and `cancelUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
 
-Create an intent filter to specify a deep link target for the SDK to return control back to your application:
+Create an intent filter to specify a deep link target for the SDK to use when returning control back to your application:
 
 ```xml
 <activity
@@ -143,7 +143,6 @@ fun onApproveOrderFailure(error: PayPalSDKError) {
   // inspect `error` for more information
 }
 
-// optional
 fun onApproveOrderCanceled() {
   // 3DS flow was canceled
 }
@@ -157,7 +156,7 @@ fun onApproveOrderThreeDSecureDidFinish() {
 }
 ```
 
-### 6. Capture/authorize the order
+### 6. Capture/Authorize the order
 
 If you receive a successful result in the client-side flow, you can then capture or authorize the order. 
 
