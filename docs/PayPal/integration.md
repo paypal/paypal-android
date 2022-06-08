@@ -48,18 +48,7 @@ Edit your `AndroidManifest.xml` to include an `intent-filter` and set the `andro
 </activity>
 ```
 
-### 3. Create a PayPal button 
-
-Add a `PayPalButton` to your layout XML:
-
-```xml
-<com.paypal.android.checkout.paymentbutton.PayPalButton
-    android:id="@+id/payPalButton"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
-```
-
-### 4. Initiate the Payments SDK
+### 3. Initiate the Payments SDK
 
 Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 
@@ -97,7 +86,7 @@ payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
 }
 ```
 
-### 5. Create an order
+### 4. Create an order
 
 When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
@@ -120,7 +109,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 The `id` field of the response contains the order ID to pass to your client.
 
-### 6. Create a request object for launching the PayPal flow
+### 5. Create a request object for launching the PayPal flow
 
 Configure your `PayPalWebCheckoutRequest` and include the order ID generated [step 5](#5-create-an-order):
 
@@ -131,7 +120,7 @@ val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 You can also specify the funding source for your order which are `PayPal` (default), `PayLater` and `PayPalCredit`.
 For more information go to: https://developer.paypal.com/docs/checkout/pay-later/us/
 
-### 7. Approve the order through the Payments SDK
+### 6. Approve the order through the Payments SDK
 
 When a user initiates the PayPal payment flow through your UI, approve the order using your `PayPalWebCheckoutClient`
 
@@ -139,7 +128,7 @@ Call `payPalClient.start(payPalWebCheckoutRequest)` to start the checkout web fl
 
 When the user completes the PayPal payment flow, the result will be returned to the listener set in [step 4](#4-initiate-the-payments-sdk).
 
-### 8. Capture/authorize the order
+### 7. Capture/authorize the order
 
 If you receive a successful result in the client-side flow, you can then capture or authorize the order. 
 
