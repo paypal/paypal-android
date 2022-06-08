@@ -45,7 +45,7 @@ card.cvv = "123"
 // STEP 4: Call checkout method
 lifecycleScope.launch {
   try {
-    let result = cardClient.checkoutWithCard(ORDER_ID, card)
+    val result = cardClient.checkoutWithCard(ORDER_ID, card)
   
     // send orderID to your server to process the payment
     val orderID = result.orderID 
