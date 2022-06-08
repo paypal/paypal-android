@@ -1,4 +1,4 @@
-package com.paypal.android.ui.prefillcards
+package com.paypal.android.ui.testcards
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

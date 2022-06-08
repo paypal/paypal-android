@@ -1,4 +1,4 @@
-package com.paypal.android.ui.prefillcards
+package com.paypal.android.ui.testcards
 
 import androidx.recyclerview.widget.RecyclerView
 import com.paypal.android.databinding.ItemPrefillCardDataBinding

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.BuildConfig
@@ -29,8 +28,7 @@ import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
-import com.paypal.android.ui.prefillcards.PrefillCardsViewModel
-import com.paypal.android.ui.prefillcards.PrefillCardsFragment
+import com.paypal.android.ui.testcards.PrefillCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch

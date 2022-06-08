@@ -1,4 +1,4 @@
-package com.paypal.android.ui.prefillcards
+package com.paypal.android.ui.testcards
 
 import com.paypal.android.data.card.TestCard
 
