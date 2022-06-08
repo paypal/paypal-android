@@ -4,5 +4,5 @@ import com.paypal.android.data.card.PrefillCard
 
 interface PrefillCardsListener {
 
-    fun prefillCardSelected(prefillCard: PrefillCard)
+    fun onPrefillCardSelected(prefillCard: PrefillCard)
 }

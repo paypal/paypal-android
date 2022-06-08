@@ -15,7 +15,7 @@ class PrefillCardsDataViewHolder(
             cardNumber.text = item.prefillCard.card.number
 
             root.setOnClickListener {
-                listener.prefillCardSelected(item.prefillCard)
+                listener.onPrefillCardSelected(item.prefillCard)
             }
         }
     }

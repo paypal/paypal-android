@@ -16,6 +16,15 @@ class PrefillCardsFragment : Fragment(), PrefillCardsListener {
 
     private lateinit var binding: FragmentPrefillCardsBinding
 
+    companion object {
+        const val REQUEST_KEY = "PREFILL_CARD"
+
+        const val RESULT_EXTRA_CARD_NUMBER = "PREFILL_CARD_NUMBER"
+        const val RESULT_EXTRA_CARD_EXPIRATION_MONTH = "PREFILL_CARD_EXPIRATION_MONTH"
+        const val RESULT_EXTRA_CARD_EXPIRATION_YEAR = "PREFILL_CARD_EXPIRATION_YEAR"
+        const val RESULT_EXTRA_CARD_SECURITY_CODE = "PREFILL_CARD_SECURITY_CODE"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,10 +49,17 @@ class PrefillCardsFragment : Fragment(), PrefillCardsListener {
         binding.recyclerView.adapter = PrefillCardsAdapter(items, this)
     }
 
-    override fun prefillCardSelected(prefillCard: PrefillCard) {
-        val bundle = Bundle()
-//        bundle.putParcelable("PREFILL_CARD", prefillCard)
+    override fun onPrefillCardSelected(prefillCard: PrefillCard) {
+        val bundle = prefillCard.card.run {
+            Bundle().apply {
+                putString(RESULT_EXTRA_CARD_NUMBER, number)
+                putString(RESULT_EXTRA_CARD_EXPIRATION_MONTH, expirationMonth)
+                putString(RESULT_EXTRA_CARD_EXPIRATION_YEAR, expirationYear)
+                putString(RESULT_EXTRA_CARD_SECURITY_CODE, securityCode)
+            }
+        }
 
-        setFragmentResult("PREFILL_CARD", bundle)
+        setFragmentResult(REQUEST_KEY, bundle)
+        findNavController().popBackStack()
     }
 }

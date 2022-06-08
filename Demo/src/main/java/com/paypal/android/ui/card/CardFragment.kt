@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -30,6 +31,7 @@ import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
+import com.paypal.android.ui.prefillcards.PrefillCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -94,6 +96,10 @@ class CardFragment : Fragment() {
             submitButton.setOnClickListener { onCardFieldSubmit() }
         }
 
+        setFragmentResultListener(PrefillCardsFragment.REQUEST_KEY) { _, bundle ->
+            handlePrefillCardResult(bundle)
+        }
+
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 val statusText =
@@ -130,6 +136,28 @@ class CardFragment : Fragment() {
             override fun onApproveOrderThreeDSecureDidFinish() {
                 updateStatusText("3DS finished")
             }
+        }
+    }
+
+    private fun handlePrefillCardResult(bundle: Bundle) {
+        val cardNumber = bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_NUMBER)
+        val securityCode = bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_SECURITY_CODE)
+
+        val expirationMonth =
+            bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_MONTH)
+        val expirationYear =
+            bundle.getString(PrefillCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_YEAR)
+
+        binding.run {
+            val previousCardNumber = cardNumberInput.text.toString()
+            cardNumberInput.setText("")
+            val formattedCardNumber =
+                CardFormatter.formatCardNumber(cardNumber ?: "")
+            cardNumberInput.setText(formattedCardNumber)
+
+            val expirationDate = "$expirationMonth/$expirationYear"
+            cardExpirationInput.setText(expirationDate)
+            cardSecurityCodeInput.setText(securityCode)
         }
     }
 
