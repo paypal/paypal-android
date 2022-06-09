@@ -50,5 +50,4 @@ class EligibilityAPITest : TestCase() {
                 GraphQlQueryResponse(correlationId = "correlationId")
         assertThrows<PayPalSDKError> { api.checkEligibility() }
     }
-
 }

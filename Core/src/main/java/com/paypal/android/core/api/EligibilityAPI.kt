@@ -33,7 +33,7 @@ class EligibilityAPI {
             enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
         )
         val response = graphQLClient.executeQuery(fundingEligibilityQuery)
-        return if (response.data != null)
+        return if (response.data != null) {
             Eligibility(
                 isCreditCardEligible = response.data.fundingEligibility.card.eligible,
                 isPayLaterEligible = response.data.fundingEligibility.payLater.eligible,
@@ -41,11 +41,13 @@ class EligibilityAPI {
                 isPaypalEligible = response.data.fundingEligibility.paypal.eligible,
                 isVenmoEligible = response.data.fundingEligibility.venmo.eligible,
             )
-        else throw PayPalSDKError(
-            0,
-            "Error in checking eligibility: ${response.errors}",
-            response.correlationId
-        )
+        } else {
+            throw PayPalSDKError(
+                0,
+                "Error in checking eligibility: ${response.errors}",
+                response.correlationId
+            )
+        }
     }
 
     companion object {

@@ -13,6 +13,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
+import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -61,28 +62,11 @@ internal class GraphQLClientImplTest {
         verify {
             mockQuery.parse(any())
         }
-        assertNull(response.data)
+        assertNotNull(response.data)
     }
 
     @Test
-    fun `verify empty response`() = runBlocking {
-        val mockQuery: Query<Any> = mockk(relaxed = true)
-        every { mockQuery.requestBody() } returns mockk()
-        val mockHttpRequest: HttpRequest = mockk(relaxed = true)
-        every { mockGraphQLRequestFactory.createHttpRequestFromQuery(any()) } returns mockHttpRequest
-        coEvery { mockHttp.send(mockHttpRequest) } returns HttpResponse(
-            status = HttpURLConnection.HTTP_OK,
-            headers = mapOf(
-                PAYPAL_DEBUG_ID to "454532"
-            ),
-            body = graphQlQueryResponseWithoutData
-        )
-        val response = client.executeQuery(mockQuery)
-        assertNull(response.data)
-    }
-
-    @Test
-    fun `verify non success response`() = runBlocking {
+    fun `verify non success response`(): Unit = runBlocking {
         val mockQuery: Query<Any> = mockk(relaxed = true)
         every { mockQuery.requestBody() } returns mockk()
         val mockHttpRequest: HttpRequest = mockk(relaxed = true)
@@ -94,8 +78,8 @@ internal class GraphQLClientImplTest {
             ),
             body = graphQlQueryResponseWithoutData
         )
-        val response = client.executeQuery(mockQuery)
-        assertNull(response.data)
+        val result = client.executeQuery(mockQuery)
+        assertNull(result.data)
     }
 
     companion object {
@@ -110,5 +94,4 @@ internal class GraphQLClientImplTest {
           }
         """
     }
-
 }

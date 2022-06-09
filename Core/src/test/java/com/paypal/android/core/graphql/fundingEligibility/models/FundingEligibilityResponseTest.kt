@@ -85,5 +85,4 @@ class FundingEligibilityResponseTest : TestCase() {
 }
         """
     }
-
 }

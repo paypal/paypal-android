@@ -4,7 +4,6 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.GraphQLRequestFactory
 import com.paypal.android.core.Http
-import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
 
@@ -19,7 +18,6 @@ internal class GraphQLClientImpl(
 ) : GraphQLClient {
 
     override suspend fun <T> executeQuery(query: Query<T>): GraphQlQueryResponse<T> {
-        return try {
             val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
                 query.requestBody()
             )
@@ -39,9 +37,6 @@ internal class GraphQLClientImpl(
             } else {
                 GraphQlQueryResponse()
             }
-        } catch (e: JSONException) {
-            GraphQlQueryResponse()
-        }
     }
 
     companion object {
