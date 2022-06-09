@@ -3,18 +3,20 @@ package com.paypal.android.core
 import org.json.JSONObject
 import java.net.URL
 
-internal class GraphQLRequestFactory {
+internal class GraphQLRequestFactory(
+    private val coreConfig: CoreConfig
+) {
 
     fun createHttpRequestFromQuery(requestBody: JSONObject): HttpRequest {
         return HttpRequest(
-            url = URL(Environment.SANDBOX.grqphQlUrl),
+            url = URL(coreConfig.environment.grqphQlUrl),
             method = HttpMethod.POST,
             body = requestBody.toString().trimIndent(),
             headers = headers()
         )
     }
 
-    fun headers() = mutableMapOf(
+    private fun headers() = mutableMapOf(
         "Content-type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",

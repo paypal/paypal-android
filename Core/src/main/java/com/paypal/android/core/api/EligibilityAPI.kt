@@ -1,6 +1,5 @@
 package com.paypal.android.core.api
 
-import android.util.Log
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.api.models.Eligibility
@@ -11,11 +10,20 @@ import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibil
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 
-class EligibilityAPI(
-    private val coreConfig: CoreConfig
-) {
-    private val graphQLClient: GraphQLClient = GraphQLClientImpl()
+class EligibilityAPI {
 
+    constructor(coreConfig: CoreConfig) : this(coreConfig, GraphQLClientImpl(coreConfig))
+
+    private val coreConfig: CoreConfig
+    private val graphQLClient: GraphQLClient
+
+    internal constructor(
+        coreConfig: CoreConfig,
+        graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
+    ) {
+        this.coreConfig = coreConfig
+        this.graphQLClient = graphQLClient
+    }
 
     suspend fun checkEligibility(): Eligibility {
         val fundingEligibilityQuery = FundingEligibilityQuery(
@@ -25,7 +33,6 @@ class EligibilityAPI(
             enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
         )
         val response = graphQLClient.executeQuery(fundingEligibilityQuery)
-        Log.d(TAG, response.toString())
         return if (response.data != null)
             Eligibility(
                 isCreditCardEligible = response.data.fundingEligibility.card.eligible,
@@ -34,7 +41,11 @@ class EligibilityAPI(
                 isPaypalEligible = response.data.fundingEligibility.paypal.eligible,
                 isVenmoEligible = response.data.fundingEligibility.venmo.eligible,
             )
-        else throw PayPalSDKError(0, "description", null)
+        else throw PayPalSDKError(
+            0,
+            "Error in checking eligibility: ${response.errors}",
+            response.correlationId
+        )
     }
 
     companion object {

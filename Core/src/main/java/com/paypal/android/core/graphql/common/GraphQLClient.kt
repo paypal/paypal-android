@@ -1,10 +1,9 @@
 package com.paypal.android.core.graphql.common
 
-import android.util.Log
 import com.paypal.android.core.APIClientError
+import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.GraphQLRequestFactory
 import com.paypal.android.core.Http
-import com.paypal.android.core.PayPalSDKError
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -13,9 +12,11 @@ internal interface GraphQLClient {
     suspend fun <T> executeQuery(query: Query<T>): GraphQlQueryResponse<T>
 }
 
-internal class GraphQLClientImpl : GraphQLClient {
-    private val http = Http()
-    private val graphQlRequestFactory = GraphQLRequestFactory()
+internal class GraphQLClientImpl(
+    private val coreConfig: CoreConfig,
+    private val http: Http = Http(),
+    private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
+) : GraphQLClient {
 
     override suspend fun <T> executeQuery(query: Query<T>): GraphQlQueryResponse<T> {
         return try {
@@ -24,27 +25,26 @@ internal class GraphQLClientImpl : GraphQLClient {
             )
             val httpResponse = http.send(httpRequest)
             val bodyResponse = httpResponse.body
-            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
+            val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
             if (bodyResponse.isNullOrBlank()) {
                 throw APIClientError.noResponseData(correlationID)
             }
             val status = httpResponse.status
-            return if (status == HttpURLConnection.HTTP_OK) {
+            return if (status == HttpURLConnection.HTTP_OK && !bodyResponse.isNullOrBlank()) {
                 val data = query.parse(JSONObject(bodyResponse).getJSONObject("data"))
-                GraphQlQueryResponse(data)
+                GraphQlQueryResponse(
+                    data = data,
+                    correlationId = correlationID
+                )
             } else {
-                throw JSONException("error in getting graphQL response")
+                GraphQlQueryResponse()
             }
         } catch (e: JSONException) {
-            Log.d(TAG, "error in parsing data: ${e.message}")
-            GraphQlQueryResponse()
-        } catch (e: PayPalSDKError) {
-            Log.d(TAG, "payPal SDK Error: ${e.message}")
             GraphQlQueryResponse()
         }
     }
 
     companion object {
-        const val TAG = "GraphQl Client"
+        const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 }
