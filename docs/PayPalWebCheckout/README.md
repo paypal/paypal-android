@@ -123,7 +123,7 @@ You can also specify one of the follwing funding sources for your order: `PayPal
 
 ### 6. Approve the order using the PayPal SDK
 
-To start the PayPal Web Checkokut flow, call `payPalWebCheckoutClient.start(payPalWebCheckoutRequest)`
+To start the PayPal Web Checkout flow, call `payPalWebCheckoutClient.start(payPalWebCheckoutRequest)`
 
 When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-the-payments-sdk).
 
