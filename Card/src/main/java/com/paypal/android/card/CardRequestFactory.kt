@@ -30,18 +30,25 @@ internal class CardRequestFactory {
                 cardJSON.put("billing_address", billingAddressJSON)
             }
 
+            val bodyJSON = JSONObject()
             threeDSecureRequest?.also {
                 val verificationJSON = JSONObject()
                     .put("method", it.sca.name)
                 val attributesJSON = JSONObject()
                     .put("verification", verificationJSON)
                 cardJSON.put("attributes", attributesJSON)
+
                 // add return and cancel url when its supported
+                val applicationContextJSON = JSONObject()
+                    .put("return_url", it.returnUrl)
+                    .put("cancel_url", it.cancelUrl)
+                bodyJSON.put("application_context", applicationContextJSON)
             }
 
             val paymentSourceJSON = JSONObject().put("card", cardJSON)
-            val bodyJSON = JSONObject().put("payment_source", paymentSourceJSON)
-            val body = bodyJSON.toString()
+            bodyJSON.put("payment_source", paymentSourceJSON)
+
+            val body = bodyJSON.toString().replace("\\/", "/")
 
             val path = "v2/checkout/orders/$orderID/confirm-payment-source"
             APIRequest(path, HttpMethod.POST, body)
