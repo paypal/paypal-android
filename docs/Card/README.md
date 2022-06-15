@@ -45,8 +45,9 @@ cardClient.approveOrderListener = this
 
 ### 3. Create an order
 
-When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
+When a user initiates a payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
+**Request**
 ```bash
 curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
 --header 'Content-Type: application/json' \
@@ -62,6 +63,14 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
         }
     ]
 }'
+```
+
+**Response**
+```json
+{
+   "id":"<ORDER_ID>",
+   "status":"CREATED"
+}
 ```
 
 The `id` field of the response contains the order ID to pass to your client.
