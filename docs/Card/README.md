@@ -138,7 +138,7 @@ Create an intent filter to specify a deep link target for the SDK to use when re
 
 Approve the order using your `CardClient`.
 
-Call `CardClient#approveOrder` to approve the order, and then handle results:
+Call `cardClient.approveOrder()` to approve the order, and then handle results:
 
 ```kotlin
 private fun approveMyOrder(cardRequest: CardRequest)
