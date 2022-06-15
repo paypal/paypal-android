@@ -110,6 +110,7 @@ To request SCA, add the following to `CardRequest`:
 ```kotlin
 cardRequest.threeDSecureRequest = ThreeDSecureRequest(
   sca = SCA.SCA_ALWAYS,
+  // custom url scheme needs to be configured in AndroidManifest.xml (see below)
   returnUrl = "myapp://return_url"
   cancelUrl = "myapp://cancel_url"
 )
