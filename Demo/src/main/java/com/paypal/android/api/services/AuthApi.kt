@@ -4,7 +4,6 @@ import android.util.Base64
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.AuthToken
 import com.paypal.android.api.model.AuthTokenResponse
-import okhttp3.Credentials
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
