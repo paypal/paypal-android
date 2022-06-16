@@ -31,9 +31,7 @@ class DemoActivity : AppCompatActivity() {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
 
-        val authCredentialsMissing =
-            BuildConfig.CLIENT_ID.isEmpty() || BuildConfig.CLIENT_SECRET.isEmpty()
-        if (authCredentialsMissing) {
+        if (BuildConfig.CLIENT_ID.isEmpty()) {
             showAuthCredentialsMissingDialog()
         }
     }

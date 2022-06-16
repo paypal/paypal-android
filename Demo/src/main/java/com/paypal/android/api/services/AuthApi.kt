@@ -1,5 +1,6 @@
 package com.paypal.android.api.services
 
+import android.util.Base64
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.AuthToken
 import com.paypal.android.api.model.AuthTokenResponse
@@ -29,14 +30,20 @@ interface AuthApi {
 
         /**
          * Valid credentials for creating a server <-> server auth token require a valid client id
-         * as the user and a corresponding secret for the password. This should be encoded in Base64.
+         * as the user. This should be encoded in Base64.
          *
          * The proper format prior to encoding is as follows: clientId:secret
          *
          * OkHttp provides a convenient "Basic" function which handles the heavy lifting for us.
          */
-        val payPalAuthorization: String = Credentials.basic(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
+        val payPalAuthorization: String
 
         var authToken: AuthToken? = null
+
+        init {
+            val basicAuth = "${BuildConfig.CLIENT_ID}:"
+            val bytes = basicAuth.toByteArray(Charsets.UTF_8)
+            payPalAuthorization = Base64.encodeToString(bytes, Base64.NO_WRAP)
+        }
     }
 }

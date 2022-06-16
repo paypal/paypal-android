@@ -51,7 +51,7 @@ class CardFragment : Fragment() {
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
 
-    private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
+    private val configuration = CoreConfig(BuildConfig.CLIENT_ID)
     private val cardViewModel: CardViewModel by viewModels()
 
     private lateinit var binding: FragmentCardBinding

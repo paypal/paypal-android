@@ -18,14 +18,10 @@ class HttpRequestFactoryUnitTest {
 
         companion object {
             private const val CLIENT_ID = "sample-client-id"
-            private const val CLIENT_SECRET = "sample-client-secret"
 
-            private val SANDBOX_CONFIGURATION =
-                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.SANDBOX)
-            private val STAGING_CONFIGURATION =
-                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.STAGING)
-            private val LIVE_CONFIGURATION =
-                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.LIVE)
+            private val SANDBOX_CONFIGURATION = CoreConfig(CLIENT_ID, Environment.SANDBOX)
+            private val STAGING_CONFIGURATION = CoreConfig(CLIENT_ID, Environment.STAGING)
+            private val LIVE_CONFIGURATION = CoreConfig(CLIENT_ID, Environment.LIVE)
 
             @JvmStatic
             @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
@@ -61,8 +57,7 @@ class HttpRequestFactoryUnitTest {
     @RunWith(RobolectricTestRunner::class)
     class NonParameterizedTests {
 
-        private val configuration =
-            CoreConfig("sample-client-id", "sample-client-secret")
+        private val configuration = CoreConfig("sample-client-id")
 
         private val requestBody = """{ "sample": "json" }"""
 
@@ -110,7 +105,7 @@ class HttpRequestFactoryUnitTest {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
             val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
-            val expected = "Basic c2FtcGxlLWNsaWVudC1pZDpzYW1wbGUtY2xpZW50LXNlY3JldA=="
+            val expected = "Basic c2FtcGxlLWNsaWVudC1pZDo="
             assertEquals(expected, result.headers["Authorization"])
         }
 

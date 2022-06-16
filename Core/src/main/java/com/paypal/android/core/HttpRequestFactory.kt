@@ -22,7 +22,7 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
             "Accept-Language" to language
         )
 
-        val credentials = configuration.run { "$clientId:$clientSecret" }
+        val credentials = configuration.run { "$clientId:" }
         headers["Authorization"] = "Basic ${credentials.base64encoded()}"
 
         if (method == HttpMethod.POST) {
