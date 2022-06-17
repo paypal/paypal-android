@@ -22,8 +22,14 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
             "Accept-Language" to language
         )
 
-        val credentials = configuration.run { "$clientId:" }
-        headers["Authorization"] = "Basic ${credentials.base64encoded()}"
+        headers["Authorization"] = configuration.run {
+            if (accessToken != null) {
+                "Bearer $accessToken"
+            } else {
+                val credentials = "$clientId:".base64encoded()
+                "Basic $credentials"
+            }
+        }
 
         if (method == HttpMethod.POST) {
             headers["Content-Type"] = "application/json"
