@@ -173,7 +173,7 @@ class CardFragment : Fragment() {
         updateStatusText("Creating order...")
 
         val orderRequest = buildOrderRequest()
-        val order = payPalDemoApi.fetchOrderId(countryCode = "CO", orderRequest = orderRequest)
+        val order = payPalDemoApi.fetchOrderId(orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
         Log.i(TAG, "MetadataId: $clientMetadataId")

@@ -9,15 +9,9 @@ import retrofit2.http.Query
 
 interface PayPalDemoApi {
 
-    @POST("/order")
-    suspend fun fetchOrderId(
-        @Query("countryCode") countryCode: String,
-        @Body orderRequest: CreateOrderRequest?
-    ): Order
+    @POST("/orders")
+    suspend fun fetchOrderId(@Body orderRequest: CreateOrderRequest?): Order
 
-    @POST("/order")
-    suspend fun fetchOrderId(
-        @Query("countryCode") countryCode: String,
-        @Body jsonObject: JsonObject
-    ): Order
+    @POST("/orders")
+    suspend fun fetchOrderId(@Body jsonObject: JsonObject): Order
 }

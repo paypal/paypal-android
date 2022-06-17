@@ -23,7 +23,7 @@ private const val WRITE_TIMEOUT_IN_SEC = 30L
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val SAMPLE_SERVER_BASE_URL = "https://ppcp-sample-merchant-sand.herokuapp.com"
+    private const val SAMPLE_SERVER_BASE_URL = "https://sdk-sample-merchant-server.herokuapp.com/"
     private const val SANDBOX_BASE_URL = "https://api.sandbox.paypal.com"
 
     private fun provideRetrofitService(

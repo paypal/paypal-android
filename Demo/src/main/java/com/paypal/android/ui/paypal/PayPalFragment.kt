@@ -113,7 +113,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
-                val order = payPalDemoApi.fetchOrderId(countryCode = "US", orderJson)
+                val order = payPalDemoApi.fetchOrderId(orderJson)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
                 }
