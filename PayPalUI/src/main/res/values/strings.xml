@@ -1,0 +1,10 @@
+<resources>
+
+    <!-- Payment Methods Description -->
+    <string name="paypal_payment_button_description">PayPal Button</string>
+    <string name="paypal_payment_credit_button_description">PayPal Credit Button</string>
+    <string name="paypal_checkout_smart_payment_button_label_buy_now">Buy Now</string>
+    <string name="paypal_checkout_smart_payment_button_label_checkout">Checkout</string>
+    <string name="paypal_checkout_smart_payment_button_label_pay">Pay with</string>
+    <string name="paypal_checkout_smart_payment_button_label_pay_later">Pay Later</string>
+</resources>

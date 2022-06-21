@@ -14,9 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.paypal.android"
-        // TODO: revert once Native XO supports minSdk 21
-        //minSdkVersion 21
-        minSdkVersion 23
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -27,7 +25,7 @@ android {
     }
 
     buildFeatures {
-        compose = true
+        viewBinding = true
     }
 
     buildTypes {
@@ -53,11 +51,20 @@ android {
         abortOnError true
         warningsAsErrors true
     }
+
+    sourceSets {
+        androidTest {
+            java.srcDirs += "src/androidTestShared/java"
+        }
+    }
 }
 
 dependencies {
     implementation project(':Card')
-    implementation project(':PayPalCheckout')
+    implementation project(':PayPalDataCollector')
+    implementation project(':PayPalNativeCheckout')
+    implementation project(':PayPalWebCheckout')
+    implementation project(':PayPalUI')
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
@@ -83,11 +90,15 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
+
     testImplementation deps.junit
+
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation deps.androidxTestRunner
+    androidTestImplementation deps.androidxTestRules
+    androidTestImplementation deps.androidxTestUiAutomator
 }
-
 
 /**
  * Loads properties at the specified file path. If the file does not exist,

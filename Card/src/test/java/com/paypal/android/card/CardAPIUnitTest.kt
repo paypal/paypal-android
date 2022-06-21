@@ -1,5 +1,6 @@
 package com.paypal.android.card
 
+import com.paypal.android.card.api.CardAPI
 import com.paypal.android.core.API
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
@@ -45,7 +46,7 @@ class CardAPIUnitTest {
         """
 
     private val api = mockk<API>(relaxed = true)
-    private val requestBuilder = mockk<CardAPIRequestFactory>()
+    private val requestFactory = mockk<CardRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24")
@@ -81,12 +82,14 @@ class CardAPIUnitTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
+    private val cardRequest = CardRequest(orderID, card)
+
     private lateinit var sut: CardAPI
 
     @Before
     fun beforeEach() {
-        sut = CardAPI(api, requestBuilder)
-        every { requestBuilder.createConfirmPaymentSourceRequest(orderID, card) } returns apiRequest
+        sut = CardAPI(api, requestFactory)
+        every { requestFactory.createConfirmPaymentSourceRequest(cardRequest) } returns apiRequest
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
@@ -102,7 +105,7 @@ class CardAPIUnitTest {
         val httpResponse = HttpResponse(200, emptyMap(), successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
-        sut.confirmPaymentSource(orderID, card)
+        sut.confirmPaymentSource(cardRequest)
         coVerify { api.send(apiRequest) }
     }
 
@@ -111,7 +114,7 @@ class CardAPIUnitTest {
         val httpResponse = HttpResponse(200, headers, successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
-        val result = sut.confirmPaymentSource(orderID, card)
+        val result = sut.confirmPaymentSource(cardRequest)
 
         assertEquals("testOrderID", result.orderID)
         assertEquals(OrderStatus.APPROVED, result.status)
@@ -124,7 +127,7 @@ class CardAPIUnitTest {
 
         lateinit var capturedError: PayPalSDKError
         try {
-            sut.confirmPaymentSource(orderID, card)
+            sut.confirmPaymentSource(cardRequest)
         } catch (e: PayPalSDKError) {
             capturedError = e
         }
@@ -145,7 +148,7 @@ class CardAPIUnitTest {
 
             lateinit var capturedError: PayPalSDKError
             try {
-                sut.confirmPaymentSource(orderID, card)
+                sut.confirmPaymentSource(cardRequest)
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -165,7 +168,7 @@ class CardAPIUnitTest {
 
             lateinit var capturedError: PayPalSDKError
             try {
-                sut.confirmPaymentSource(orderID, card)
+                sut.confirmPaymentSource(cardRequest)
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -187,7 +190,7 @@ class CardAPIUnitTest {
 
             lateinit var capturedError: PayPalSDKError
             try {
-                sut.confirmPaymentSource(orderID, card)
+                sut.confirmPaymentSource(cardRequest)
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -206,7 +209,7 @@ class CardAPIUnitTest {
 
         lateinit var capturedError: PayPalSDKError
         try {
-            sut.confirmPaymentSource(orderID, card)
+            sut.confirmPaymentSource(cardRequest)
         } catch (e: PayPalSDKError) {
             capturedError = e
         }
@@ -225,13 +228,13 @@ class CardAPIUnitTest {
 
         lateinit var capturedError: PayPalSDKError
         try {
-            sut.confirmPaymentSource(orderID, card)
+            sut.confirmPaymentSource(cardRequest)
         } catch (e: PayPalSDKError) {
             capturedError = e
         }
 
         assertEquals(
-            "A server occurred. Contact developer.paypal.com/support.",
+            "A server error occurred. Contact developer.paypal.com/support.",
             capturedError.errorDescription
         )
     }
@@ -243,7 +246,7 @@ class CardAPIUnitTest {
 
             lateinit var capturedError: PayPalSDKError
             try {
-                sut.confirmPaymentSource(orderID, card)
+                sut.confirmPaymentSource(cardRequest)
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -256,7 +259,7 @@ class CardAPIUnitTest {
 
         lateinit var capturedError: PayPalSDKError
         try {
-            sut.confirmPaymentSource(orderID, card)
+            sut.confirmPaymentSource(cardRequest)
         } catch (e: PayPalSDKError) {
             capturedError = e
         }

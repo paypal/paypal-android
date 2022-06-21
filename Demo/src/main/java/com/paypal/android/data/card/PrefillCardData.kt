@@ -5,7 +5,7 @@ import com.paypal.android.card.Card
 object PrefillCardData {
 
     val cards by lazy {
-        listOf(
+        mapOf(
             "Visa" to Card(
                 number = "4111111111111111",
                 expirationMonth = "01",
@@ -23,6 +23,12 @@ object PrefillCardData {
                 expirationMonth = "01",
                 expirationYear = "2026",
                 securityCode = "123"
+            ),
+            "New Visa" to Card(
+                number = "4032035809742661",
+                expirationMonth = "09",
+                expirationYear = "2026",
+                securityCode = "655"
             )
         )
     }

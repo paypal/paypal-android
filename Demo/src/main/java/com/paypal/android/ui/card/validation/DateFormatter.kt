@@ -15,6 +15,7 @@ object DateFormatter {
         newDateString: String,
         previousDateString: String?
     ): String {
+        if (newDateString.endsWith("/")) return newDateString
         return if (newDateString.length > (previousDateString ?: "").length) {
             when (newDateString.length) {
                 2 -> "$newDateString/"

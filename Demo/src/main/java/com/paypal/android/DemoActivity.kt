@@ -1,6 +1,8 @@
 package com.paypal.android
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
@@ -47,5 +49,16 @@ class DemoActivity : AppCompatActivity() {
             .setPositiveButton("OK", null)
             .create()
             .show()
+    }
+
+    override fun onNewIntent(newIntent: Intent?) {
+        super.onNewIntent(intent)
+        intent = newIntent
+        Log.e("DEMO ACTIVITY", "ON NEW INTENT")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.e("DEMO ACTIVITY", "ON RESUME")
     }
 }
