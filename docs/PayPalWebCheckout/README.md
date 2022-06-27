@@ -1,20 +1,14 @@
----
-title: Pay with PayPal Web Custom Integration
-keywords: 
-contentType: docs
-productStatus: current
-apiVersion: TODO
-sdkVersion: TODO
----
-# Pay with PayPal Custom Integration
+# Accepting PayPal Web Checkout Payments
 
-Follow these steps to add Card payments:
+The PayPal Web Checkout module in the PayPal SDK enables PayPal payments in your app.
 
-1. [Know before you code](#know-before-you-code)
-1. [Add PayPal Payments](#add-paypal-payments)
+Follow these steps to add PayPal Web Checkout payments:
+
+1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
+1. [Add PayPal Web Checkout Module](#add-paypal-web-checkout-module)
 1. [Test and go live](#test-and-go-live)
 
-## Know before you code
+## Setup a PayPal Developer Account
 
 You will need to set up authorization to use the PayPal Payments SDK. 
 Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and generate an access token. 
@@ -22,11 +16,11 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 You will need a server integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
 For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
-## Add PayPal Payments
+## Add PayPal Web Checkout Module
 
-### 1. Add the Payments SDK  to your app
+### 1. Add the Payments SDK to your app
 
-In your `build.gradle` file, add the following dependency [see step 8](#8-Capture-authorize-the-order):
+In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
@@ -36,9 +30,9 @@ dependencies {
 
 ### 2. Configure your app to handle browser switching
 
-The PayPal payment flow utilizes a browser switch. A URL scheme must be defined to return to your app from the browser.
+The PayPal SDK redirects users to a web interface to complete the PayPal Web Checkout flow. After a user has completed the flow, a custom URL scheme is used to return control back to your app.
 
-Edit your `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on your Activity that will be responsible for handling the deep link back into the app:
+Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app:
 
 ```xml
 <activity android:name="com.company.app.MyPaymentsActivity"
@@ -54,18 +48,7 @@ Edit your `AndroidManifest.xml` to include an `intent-filter` and set the `andro
 </activity>
 ```
 
-### 3. Create a PayPal button 
-
-Add a `PayPalButton` to your layout XML:
-
-```xml
-<com.paypal.android.checkout.paymentbutton.PayPalButton
-    android:id="@+id/payPalButton"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
-```
-
-### 4. Initiate the Payments SDK
+### 3. Initiate the Payments SDK
 
 Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 
@@ -73,24 +56,25 @@ Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
 ```
 
-Set the return URL from the URL scheme you configured in the `ActivityManifest.xml` [step 2](#2-configure-your-app-to-handle-browser-switching):
+Set a return URL using the custom scheme you configured in the `ActivityManifest.xml` [step 2](#2-configure-your-app-to-handle-browser-switching):
 
 ```kotlin
 val returnUrl = "custom-url-scheme"
 ```
 
-Create a `PayPalClient` to approve an order with a PayPal payment method:
+Create a `PayPalWebCheckoutClient` to approve an order with a PayPal payment method:
 
 ```kotlin
 val payPalWebCheckoutClient = PayPalWebCheckoutClient(requireActivity(), config, returnUrl)
 ```
 
-Set a listener on your `PayPalWebCheckoutClient` to handle results:
+Set a listener on the client to receive payment flow callbacks:
 
 ```kotlin
 payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
+
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-        // order was successfully approved and is ready to be captured/authorized (see step 8)
+        // order was successfully approved and is ready to be captured/authorized (see step 7)
     }
 
     override fun onPayPalWebFailure(error: PayPalSDKError) {
@@ -103,10 +87,11 @@ payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
 }
 ```
 
-### 5. Create an order
+### 4. Create an order
 
-When a user enters the payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
+When a user initiates a payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
+**Request**
 ```bash
 curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
 --header 'Content-Type: application/json' \
@@ -124,39 +109,36 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 }'
 ```
 
+**Response**
+```json
+{
+   "id":"<ORDER_ID>",
+   "status":"CREATED"
+}
+```
+
 The `id` field of the response contains the order ID to pass to your client.
 
-### 6. Create a request object for launching the PayPal flow
+### 5. Create a request object for launching the PayPal flow
 
-Configure your `PayPalWebCheckoutRequest` and include the order ID generated [step 5](#5-create-an-order):
+Configure your `PayPalWebCheckoutRequest` and include the order ID generated in [step 4](#4-create-an-order):
 
 ```kotlin
 val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
 ```
 
-You can also specify the funding source for your order which are `PayPal` (default), `PayLater` and `PayPalCredit`.
-For more information go to: https://developer.paypal.com/docs/checkout/pay-later/us/
+You can also specify one of the follwing funding sources for your order: `PayPal (default)`, `PayLater` or `PayPalCredit`.
+> Click [here](https://developer.paypal.com/docs/checkout/pay-later/us/) for more information on PayPal Pay Later
 
-### 7. Approve the order through the Payments SDK
+### 6. Approve the order using the PayPal SDK
 
-When a user initiates the PayPal payment flow through your UI, approve the order using your `PayPalWebCheckoutClient`
+To start the PayPal Web Checkout flow, call `payPalWebCheckoutClient.start(payPalWebCheckoutRequest)`
 
-Call `payPalClient.start(payPalWebCheckoutRequest)` to start the checkout web flow.
+When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-the-payments-sdk).
 
-When the user completes the PayPal payment flow, the result will be returned to the listener set in [step 4](#4-initiate-the-payments-sdk).
+### 7. Capture/Authorize the order
 
-### 8. Capture/authorize the order
-
-If you receive a successful result in the client-side flow, you can then capture or authorize the order. 
-
-Call `authorize` to place funds on hold:
-
-```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer <ACCESS_TOKEN>' \
---data-raw ''
-```
+After receiving a successful result from the `onPayPalWebSuccess()` callback, you can now capture or authorize the order. 
 
 Call `capture` to capture funds immediately:
 
@@ -167,7 +149,16 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --data-raw ''
 ```
 
-## Testing and go live
+Call `authorize` to place funds on hold:
+
+```bash
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data-raw ''
+```
+
+## Test and go live
 
 ### 1. Test the PayPal integration
 
@@ -177,3 +168,4 @@ When prompted to login with PayPal during the payment flow on your mobile app, y
 ### 2. Go live with your integration
 
 Follow [these instructions](https://developer.paypal.com/api/rest/production/) to prepare your integration to go live.
+
