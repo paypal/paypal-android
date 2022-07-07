@@ -1,4 +1,0 @@
-
-# TODO: insert your PayPal client id and client secret and save this file as "paypal.properties"
-# NOTE: the surrounding quotes are required
-CLIENT_ID="<YOUR_CLIENT_ID>"
