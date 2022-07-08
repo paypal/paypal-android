@@ -12,7 +12,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
@@ -22,7 +21,6 @@ import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
 import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import dagger.hilt.android.AndroidEntryPoint

@@ -18,10 +18,6 @@ import java.net.URL
 @ExperimentalCoroutinesApi
 class APIUnitTest {
 
-    companion object {
-        private const val CLIENT_ID = "sample-client-id"
-    }
-
     private val http = mockk<Http>()
     private val httpRequestFactory = mockk<HttpRequestFactory>()
     private val authHandler = mockk<AuthHandler>()

@@ -110,7 +110,11 @@ class HttpRequestFactoryUnitTest {
         fun `it should add basic auth authorization header`() {
             val mockClientId = "mock_client_id"
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, AuthHandler.fromClientId(mockClientId))
+            val result = sut.createHttpRequestFromAPIRequest(
+                apiRequest,
+                configuration,
+                AuthHandler.fromClientId(mockClientId)
+            )
 
             val expected = "Basic ${"$mockClientId:".base64encoded()}"
             assertEquals(expected, result.headers["Authorization"])
@@ -120,7 +124,11 @@ class HttpRequestFactoryUnitTest {
         fun `it should add bearer token authorization header`() {
             val mockAccessToken = "mock_access_token"
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, AuthHandler.fromToken(mockAccessToken))
+            val result = sut.createHttpRequestFromAPIRequest(
+                apiRequest,
+                configuration,
+                AuthHandler.fromToken(mockAccessToken)
+            )
 
             val expected = "Bearer $mockAccessToken"
             assertEquals(expected, result.headers["Authorization"])

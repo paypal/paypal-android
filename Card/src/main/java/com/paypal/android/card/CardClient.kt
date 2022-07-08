@@ -39,7 +39,12 @@ class CardClient internal constructor(
      *  @param [configuration] Configuration parameters for client
      */
     constructor(activity: FragmentActivity, configuration: CoreConfig, accessToken: String) :
-            this(activity, CardAPI(API(configuration, AuthHandler.fromToken(accessToken))), BrowserSwitchClient(), Dispatchers.Main)
+            this(
+                activity,
+                CardAPI(API(configuration, AuthHandler.fromToken(accessToken))),
+                BrowserSwitchClient(),
+                Dispatchers.Main
+            )
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)

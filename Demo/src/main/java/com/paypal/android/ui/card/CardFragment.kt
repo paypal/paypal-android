@@ -9,7 +9,6 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.model.ApplicationContext
 import com.paypal.android.api.model.CreateOrderRequest
