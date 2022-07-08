@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/paymentMethodsFragment">
 
@@ -15,16 +16,17 @@
             android:id="@+id/action_paymentMethodsFragment_to_payPalFragment"
             app:destination="@id/payPalFragment" />
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_threeDSecureFragment"
-            app:destination="@id/threeDSecureFragment" />
-        <action
             android:id="@+id/action_paymentMethodsFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
         android:name="com.paypal.android.ui.card.CardFragment"
-        android:label="CardFragment" />
+        android:label="CardFragment" >
+        <action
+            android:id="@+id/action_cardFragment_to_testCardFragment"
+            app:destination="@id/testCardFragment" />
+    </fragment>
     <fragment
         android:id="@+id/payPalFragment"
         android:name="com.paypal.android.ui.paypal.PayPalFragment"
@@ -34,10 +36,6 @@
             app:destination="@id/payPalButtonsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/threeDSecureFragment"
-        android:name="com.paypal.android.ui.threedsecure.ThreeDSecureFragment"
-        android:label="ThreeDSecureFragment" />
-    <fragment
         android:id="@+id/settingsFragment"
         android:name="com.paypal.android.ui.SettingsFragment"
         android:label="SettingsFragment" />
@@ -45,4 +43,9 @@
         android:id="@+id/payPalButtonsFragment"
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
+    <fragment
+        android:id="@+id/testCardFragment"
+        android:name="com.paypal.android.ui.testcards.TestCardsFragment"
+        android:label="Test Cards"
+        tools:layout="@layout/fragment_test_cards" />
 </navigation>
