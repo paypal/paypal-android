@@ -5,10 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.api.model.ApplicationContext
 import com.paypal.android.api.model.CreateOrderRequest
@@ -51,8 +51,6 @@ class CardFragment : Fragment() {
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
 
-    private val cardViewModel: CardViewModel by viewModels()
-
     private lateinit var cardClient: CardClient
     private lateinit var binding: FragmentCardBinding
 
@@ -80,44 +78,6 @@ class CardFragment : Fragment() {
 
         setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
             handleTestCardSelected(bundle)
-        }
-
-        cardClient.approveOrderListener = object : ApproveOrderListener {
-            override fun onApproveOrderSuccess(result: CardResult) {
-                val statusText =
-                    "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
-                val paymentSourceText = result.paymentSource?.let {
-                    val text =
-                        "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
-                    val authText = it.authenticationResult?.let { auth ->
-                        val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
-                                "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
-                                "Authentication: ${auth.threeDSecure?.authenticationStatus}"
-                        threeDtext
-                    }
-                    text + authText
-                } ?: ""
-
-                val deepLink = result.deepLinkUrl?.toString().orEmpty()
-                val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
-                updateStatusText(joinedText)
-            }
-
-            override fun onApproveOrderFailure(error: PayPalSDKError) {
-                updateStatusText("CAPTURE fail: ${error.errorDescription}")
-            }
-
-            override fun onApproveOrderCanceled() {
-                updateStatusText("USER CANCELED")
-            }
-
-            override fun onApproveOrderThreeDSecureWillLaunch() {
-                updateStatusText("3DS launched")
-            }
-
-            override fun onApproveOrderThreeDSecureDidFinish() {
-                updateStatusText("3DS finished")
-            }
         }
     }
 
