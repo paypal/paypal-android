@@ -1,7 +1,5 @@
 package com.paypal.android.di
 
-import com.paypal.android.api.interceptors.TokenRefreshInterceptor
-import com.paypal.android.api.services.AuthApi
 import com.paypal.android.api.services.OrdersV2Api
 import com.paypal.android.api.services.PayPalDemoApi
 import dagger.Module
@@ -46,17 +44,9 @@ object NetworkModule {
     fun provideOrdersV2Api(): OrdersV2Api {
         return provideApi(
             provideRetrofitService(
-                SANDBOX_BASE_URL,
-                TokenRefreshInterceptor(
-                    provideAuthApi()
-                )
+                SANDBOX_BASE_URL
             )
         )
-    }
-
-    @Provides
-    fun provideAuthApi(): AuthApi {
-        return provideApi(provideRetrofitService(SANDBOX_BASE_URL))
     }
 
     private fun initHttpClientAndInterceptor(vararg interceptors: Interceptor): OkHttpClient {

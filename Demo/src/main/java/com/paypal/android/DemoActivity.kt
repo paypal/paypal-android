@@ -30,10 +30,6 @@ class DemoActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
-
-        if (BuildConfig.CLIENT_ID.isEmpty()) {
-            showAuthCredentialsMissingDialog()
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
