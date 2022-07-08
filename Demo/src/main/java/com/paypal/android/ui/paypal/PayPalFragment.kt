@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.gson.JsonObject
@@ -44,6 +45,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
 
+    private val viewModel: PayPalViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,6 +70,12 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         }
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        viewModel.getEligibility().observe(viewLifecycleOwner) {
+            Log.d(TAG, "isVenmoEligible: ${it.isVenmoEligible}")
+        }
     }
 
     @SuppressLint("SetTextI18n")

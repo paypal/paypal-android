@@ -5,10 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.BuildConfig
 import com.paypal.android.R
 import com.paypal.android.api.model.ApplicationContext
@@ -28,6 +28,7 @@ import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
+import com.paypal.android.ui.testcards.TestCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -52,7 +53,6 @@ class CardFragment : Fragment() {
     lateinit var dataCollectorHandler: DataCollectorHandler
 
     private val configuration = CoreConfig(BuildConfig.CLIENT_ID, BuildConfig.CLIENT_SECRET)
-    private val cardViewModel: CardViewModel by viewModels()
 
     private lateinit var binding: FragmentCardBinding
 
@@ -75,20 +75,15 @@ class CardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.run {
-            val autoFillCardNames = cardViewModel.autoFillCards.keys.toList()
-            autoCompleteTextView.setAdapter(
-                ArrayAdapter(
-                    requireActivity(),
-                    R.layout.dropdown_item,
-                    autoFillCardNames
-                )
-            )
-
-            autoCompleteTextView.onValueChange = ::onPrefillCardChange
             cardNumberInput.onValueChange = ::onCardNumberChange
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
+            useTestCardButton.setOnClickListener { showTestCards() }
             submitButton.setOnClickListener { onCardFieldSubmit() }
+        }
+
+        setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
+            handleTestCardSelected(bundle)
         }
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
@@ -130,23 +125,24 @@ class CardFragment : Fragment() {
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun onPrefillCardChange(oldValue: String, newValue: String) {
-        val autoFillCards = cardViewModel.autoFillCards
-        autoFillCards[newValue]?.let { autoFillCard(it) }
-    }
+    private fun handleTestCardSelected(bundle: Bundle) {
+        val cardNumber = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_NUMBER)
+        val securityCode = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_SECURITY_CODE)
 
-    private fun autoFillCard(card: Card) {
+        val expirationMonth =
+            bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_MONTH)
+        val expirationYear =
+            bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_YEAR)
+
         binding.run {
-            card.run {
-                val previousCardNumber = cardNumberInput.text.toString()
-                val formattedCardNumber = CardFormatter.formatCardNumber(number, previousCardNumber)
-                cardNumberInput.setText(formattedCardNumber)
+            cardNumberInput.setText("")
+            val formattedCardNumber =
+                CardFormatter.formatCardNumber(cardNumber ?: "")
+            cardNumberInput.setText(formattedCardNumber)
 
-                val expirationDate = "$expirationMonth/$expirationYear"
-                cardExpirationInput.setText(expirationDate)
-                cardSecurityCodeInput.setText(securityCode)
-            }
+            val expirationDate = "$expirationMonth/$expirationYear"
+            cardExpirationInput.setText(expirationDate)
+            cardSecurityCodeInput.setText(securityCode)
         }
     }
 
@@ -168,6 +164,10 @@ class CardFragment : Fragment() {
         }
     }
 
+    private fun showTestCards() {
+        findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
+    }
+
     private suspend fun createOrder() {
         dataCollectorHandler.setLogging(true)
         updateStatusText("Creating order...")
@@ -182,7 +182,7 @@ class CardFragment : Fragment() {
 
         // build card request
         val cardRequest = binding.run {
-            val cardNumber = cardNumberInput.text.toString()
+            val cardNumber = cardNumberInput.text.toString().replace(" ", "")
             val expirationDate = cardExpirationInput.text.toString()
             val securityCode = cardSecurityCodeInput.text.toString()
 
