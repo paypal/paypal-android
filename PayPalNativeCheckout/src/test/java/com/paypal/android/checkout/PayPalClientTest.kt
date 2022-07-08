@@ -32,7 +32,7 @@ class PayPalClientTest {
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
     private val mockReturnUrl = "com.example://paypalpay"
-    private val coreConfig = CoreConfig(mockClientId, environment = Environment.SANDBOX)
+    private val coreConfig = CoreConfig(environment = Environment.SANDBOX)
 
     @Before
     fun setUp() {
@@ -51,14 +51,13 @@ class PayPalClientTest {
         val configSlot = slot<CheckoutConfig>()
 
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
-        PayPalClient(mockApplication, coreConfig, mockReturnUrl)
+        PayPalClient(mockApplication, coreConfig, mockReturnUrl, mockClientId)
 
         verify {
             PayPalCheckout.setConfig(any())
         }
         expectThat(configSlot.captured) {
             get { application }.isEqualTo(mockApplication)
-            get { clientId }.isEqualTo(mockClientId)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
         }
     }
@@ -69,8 +68,9 @@ class PayPalClientTest {
 
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
         PayPalClient(mockApplication,
-            CoreConfig(mockClientId, environment = Environment.LIVE),
-            mockReturnUrl
+            CoreConfig(environment = Environment.LIVE),
+            mockReturnUrl,
+            mockClientId
         )
 
         verify {
@@ -78,7 +78,6 @@ class PayPalClientTest {
         }
         expectThat(configSlot.captured) {
             get { application }.isEqualTo(mockApplication)
-            get { clientId }.isEqualTo(mockClientId)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.LIVE)
         }
     }
@@ -90,8 +89,9 @@ class PayPalClientTest {
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
         PayPalClient(
             mockApplication,
-            CoreConfig(mockClientId, environment = Environment.STAGING),
-            mockReturnUrl
+            CoreConfig(environment = Environment.STAGING),
+            mockReturnUrl,
+            mockClientId
         )
 
         verify {
@@ -99,7 +99,6 @@ class PayPalClientTest {
         }
         expectThat(configSlot.captured) {
             get { application }.isEqualTo(mockApplication)
-            get { clientId }.isEqualTo(mockClientId)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.STAGE)
         }
     }
@@ -109,7 +108,7 @@ class PayPalClientTest {
         every { PayPalCheckout.setConfig(any()) } just runs
         every { PayPalCheckout.start(any(), any(), any(), any(), any()) } just runs
 
-        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
+        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl, mockClientId)
 
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
@@ -136,7 +135,7 @@ class PayPalClientTest {
             )
         } answers { createOrderSlot.captured.create(createOrderActions) }
 
-        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
+        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl, mockClientId)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
         paypalClient.checkout(orderId)
@@ -172,7 +171,7 @@ class PayPalClientTest {
             )
         } answers { onApproveSlot.captured.onApprove(approval) }
 
-        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
+        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl, mockClientId)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
         val payPalClientListener = mockk<PayPalListener>(relaxed = true)
@@ -202,7 +201,7 @@ class PayPalClientTest {
             )
         } answers { onCancelSlot.captured.onCancel() }
 
-        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
+        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl, mockClientId)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
         val payPalClientListener = mockk<PayPalListener>(relaxed = true)
@@ -235,7 +234,7 @@ class PayPalClientTest {
             )
         } answers { onError.captured.onError(errorInfo) }
 
-        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl)
+        val paypalClient = PayPalClient(mockApplication, coreConfig, mockReturnUrl, mockClientId)
 
         val payPalClientListener = mockk<PayPalListener>(relaxed = true)
         paypalClient.listener = payPalClientListener
