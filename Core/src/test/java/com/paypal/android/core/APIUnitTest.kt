@@ -24,9 +24,10 @@ class APIUnitTest {
 
     private val http = mockk<Http>()
     private val httpRequestFactory = mockk<HttpRequestFactory>()
+    private val authHandler = mockk<AuthHandler>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
-    private val configuration = CoreConfig(CLIENT_ID)
+    private val configuration = CoreConfig()
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
@@ -34,7 +35,7 @@ class APIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory)
+        sut = API(configuration, authHandler, http, httpRequestFactory)
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
@@ -51,7 +52,7 @@ class APIUnitTest {
 
         val httpRequest = HttpRequest(url, HttpMethod.GET)
         every {
-            httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
+            httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
         } returns httpRequest
 
         val httpResponse = HttpResponse(200)

@@ -54,7 +54,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     ): View {
         binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
 
-        val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
+        val coreConfig = CoreConfig()
         paypalClient =
             PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
         paypalClient.listener = this

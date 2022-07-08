@@ -13,7 +13,7 @@ import com.paypal.checkout.error.OnError
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: String) {
+class PayPalClient(application: Application, coreConfig: CoreConfig, clientId: String, returnUrl: String) {
 
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
@@ -23,7 +23,7 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
     init {
         val config = CheckoutConfig(
             application = application,
-            clientId = coreConfig.clientId,
+            clientId = clientId,
             environment = getPayPalEnvironment(coreConfig.environment),
             returnUrl = returnUrl,
         )

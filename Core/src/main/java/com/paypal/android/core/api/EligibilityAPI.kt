@@ -10,24 +10,17 @@ import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibil
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 
-class EligibilityAPI {
+class EligibilityAPI internal constructor(
+    private val coreConfig: CoreConfig,
+    private val clientId: String,
+    private val graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
+) {
 
-    constructor(coreConfig: CoreConfig) : this(coreConfig, GraphQLClientImpl(coreConfig))
-
-    private val coreConfig: CoreConfig
-    private val graphQLClient: GraphQLClient
-
-    internal constructor(
-        coreConfig: CoreConfig,
-        graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
-    ) {
-        this.coreConfig = coreConfig
-        this.graphQLClient = graphQLClient
-    }
+    constructor(coreConfig: CoreConfig, clientId: String) : this(coreConfig, clientId, GraphQLClientImpl(coreConfig))
 
     suspend fun checkEligibility(): Eligibility {
         val fundingEligibilityQuery = FundingEligibilityQuery(
-            clientId = coreConfig.clientId,
+            clientId = clientId,
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,
             currencyCode = SupportedCountryCurrencyType.USD,
             enableFunding = listOf(SupportedPaymentMethodsType.VENMO)

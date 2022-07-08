@@ -31,7 +31,7 @@ class EligibilityAPITest : TestCase() {
     @Before
     public override fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
-        api = EligibilityAPI(mockCoreConfig, mockkGraphQlClient)
+        api = EligibilityAPI(mockCoreConfig, "", mockkGraphQlClient)
     }
 
     @Test

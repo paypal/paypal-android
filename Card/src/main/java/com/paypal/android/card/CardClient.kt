@@ -10,6 +10,7 @@ import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.API
+import com.paypal.android.core.AuthHandler
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import kotlinx.coroutines.CoroutineDispatcher
@@ -37,8 +38,8 @@ class CardClient internal constructor(
      *  @param [activity] Activity that launches the card client
      *  @param [configuration] Configuration parameters for client
      */
-    constructor(activity: FragmentActivity, configuration: CoreConfig) :
-            this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.Main)
+    constructor(activity: FragmentActivity, configuration: CoreConfig, accessToken: String) :
+            this(activity, CardAPI(API(configuration, AuthHandler.fromToken(accessToken))), BrowserSwitchClient(), Dispatchers.Main)
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)

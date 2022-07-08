@@ -5,13 +5,9 @@ import org.junit.Test
 
 class CoreConfigUnitTest {
 
-    companion object {
-        private const val CLIENT_ID = "sample-client-id"
-    }
-
     @Test
     fun `it should default to SANDBOX environment`() {
-        val sut = CoreConfig(CLIENT_ID)
+        val sut = CoreConfig()
         assertEquals(Environment.SANDBOX, sut.environment)
     }
 }
