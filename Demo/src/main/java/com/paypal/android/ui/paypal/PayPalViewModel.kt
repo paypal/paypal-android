@@ -19,7 +19,7 @@ class PayPalViewModel
 ) : ViewModel() {
 
     fun getEligibility(): LiveData<Eligibility> {
-        val liveData = MutableLiveData<Eligibility>()
+        val liveData: MutableLiveData<Eligibility> = MutableLiveData()
         viewModelScope.launch {
             try {
                 liveData.postValue(eligibilityAPI.checkEligibility())
