@@ -10,10 +10,10 @@ import retrofit2.http.POST
 interface PayPalDemoApi {
 
     @POST("/orders")
-    suspend fun fetchOrderId(@Body orderRequest: CreateOrderRequest?): Order
+    suspend fun createOrder(@Body orderRequest: CreateOrderRequest?): Order
 
     @POST("/orders")
-    suspend fun fetchOrderId(@Body jsonObject: JsonObject): Order
+    suspend fun createOrder(@Body jsonObject: JsonObject): Order
 
     @POST("/access_tokens")
     suspend fun fetchAccessToken(): AccessToken
