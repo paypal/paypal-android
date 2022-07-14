@@ -1,7 +1,5 @@
 package com.paypal.android.core
 
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -19,9 +17,9 @@ class HttpRequestFactoryUnitTest {
     class URLTests(private val configuration: CoreConfig, private val expected: URL) {
 
         companion object {
-            private val SANDBOX_CONFIGURATION = CoreConfig(Environment.SANDBOX)
-            private val STAGING_CONFIGURATION = CoreConfig(Environment.STAGING)
-            private val LIVE_CONFIGURATION = CoreConfig(Environment.LIVE)
+            private val SANDBOX_CONFIGURATION = CoreConfig(environment = Environment.SANDBOX)
+            private val STAGING_CONFIGURATION = CoreConfig(environment = Environment.STAGING)
+            private val LIVE_CONFIGURATION = CoreConfig(environment = Environment.LIVE)
 
             @JvmStatic
             @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
@@ -42,17 +40,14 @@ class HttpRequestFactoryUnitTest {
 
         private lateinit var sut: HttpRequestFactory
 
-        private val authHandler = mockk<AuthHandler>(relaxed = true)
-
         @Before
         fun beforeEach() {
             sut = HttpRequestFactory()
-            every { authHandler.getAuthHeader() } returns "mock_header"
         }
 
         @Test
         fun `it should properly format the url for `() {
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
             assertEquals(expected, result.url)
         }
     }
@@ -62,8 +57,6 @@ class HttpRequestFactoryUnitTest {
 
         private val configuration = CoreConfig()
 
-        private val authHandler = mockk<AuthHandler>()
-
         private val requestBody = """{ "sample": "json" }"""
 
         private lateinit var sut: HttpRequestFactory
@@ -71,13 +64,12 @@ class HttpRequestFactoryUnitTest {
         @Before
         fun beforeEach() {
             sut = HttpRequestFactory("sample-language")
-            every { authHandler.getAuthHeader() } returns "mock_header"
         }
 
         @Test
         fun `it should forward the http method`() {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertEquals(HttpMethod.POST, result.method)
         }
@@ -85,7 +77,7 @@ class HttpRequestFactoryUnitTest {
         @Test
         fun `it should forward the http body`() {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertEquals(requestBody, result.body)
         }
@@ -93,7 +85,7 @@ class HttpRequestFactoryUnitTest {
         @Test
         fun `it should set accept encoding default header`() {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertEquals("gzip", result.headers["Accept-Encoding"])
         }
@@ -101,7 +93,7 @@ class HttpRequestFactoryUnitTest {
         @Test
         fun `it should set accept language default header`() {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertEquals("sample-language", result.headers["Accept-Language"])
         }
@@ -112,8 +104,7 @@ class HttpRequestFactoryUnitTest {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
             val result = sut.createHttpRequestFromAPIRequest(
                 apiRequest,
-                configuration,
-                AuthHandler.fromToken(mockAccessToken)
+                CoreConfig(accessToken = mockAccessToken),
             )
 
             val expected = "Bearer $mockAccessToken"
@@ -123,7 +114,7 @@ class HttpRequestFactoryUnitTest {
         @Test
         fun `it should add content type json header for POST requests`() {
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertEquals("application/json", result.headers["Content-Type"])
         }
@@ -131,7 +122,7 @@ class HttpRequestFactoryUnitTest {
         @Test
         fun `it should add content type json header for GET requests`() {
             val apiRequest = APIRequest("sample/path", HttpMethod.GET, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration, authHandler)
+            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertNull(result.headers["Content-Type"])
         }

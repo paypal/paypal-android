@@ -127,8 +127,8 @@ class CardFragment : Fragment() {
     private suspend fun createOrder() {
 
         val accessToken = payPalDemoApi.fetchAccessToken().value
-        val configuration = CoreConfig()
-        cardClient = CardClient(requireActivity(), configuration, accessToken)
+        val configuration = CoreConfig(accessToken = accessToken)
+        cardClient = CardClient(requireActivity(), configuration)
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {

@@ -8,7 +8,6 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
         configuration: CoreConfig,
-        authHandler: AuthHandler
     ): HttpRequest {
         val path = apiRequest.path
         val baseUrl = configuration.environment.url
@@ -23,7 +22,7 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
             "Accept-Language" to language
         )
 
-        headers["Authorization"] = authHandler.getAuthHeader()
+        headers["Authorization"] = "Bearer ${configuration.accessToken}"
 
         if (method == HttpMethod.POST) {
             headers["Content-Type"] = "application/json"
