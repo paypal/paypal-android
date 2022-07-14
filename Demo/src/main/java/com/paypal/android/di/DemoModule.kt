@@ -15,10 +15,11 @@ object DemoModule {
     @Provides
     fun provideEligibilityAPI(
         coreConfig: CoreConfig
-    ): EligibilityAPI = EligibilityAPI(coreConfig, com.paypal.android.BuildConfig.CLIENT_ID)
+    ): EligibilityAPI = EligibilityAPI(coreConfig)
 
     @Provides
     fun provideCoreConfig(): CoreConfig = CoreConfig(
+        clientId = com.paypal.android.BuildConfig.CLIENT_ID,
         environment = Environment.SANDBOX
     )
 }

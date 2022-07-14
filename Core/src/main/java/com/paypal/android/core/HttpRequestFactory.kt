@@ -22,7 +22,9 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
             "Accept-Language" to language
         )
 
-        headers["Authorization"] = "Bearer ${configuration.accessToken}"
+        configuration.accessToken?.also { token ->
+            headers["Authorization"] = "Bearer $token"
+        }
 
         if (method == HttpMethod.POST) {
             headers["Content-Type"] = "application/json"

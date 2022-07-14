@@ -12,15 +12,20 @@ import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymen
 
 class EligibilityAPI internal constructor(
     private val coreConfig: CoreConfig,
-    private val clientId: String,
     private val graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
 ) {
 
-    constructor(coreConfig: CoreConfig, clientId: String) : this(coreConfig, clientId, GraphQLClientImpl(coreConfig))
+    constructor(coreConfig: CoreConfig) : this(coreConfig, GraphQLClientImpl(coreConfig))
 
     suspend fun checkEligibility(): Eligibility {
+        if (coreConfig.clientId.isNullOrEmpty()) {
+            throw PayPalSDKError(
+                0,
+                "Client Id should not be null or empty"
+            )
+        }
         val fundingEligibilityQuery = FundingEligibilityQuery(
-            clientId = clientId,
+            clientId = coreConfig.clientId,
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,
             currencyCode = SupportedCountryCurrencyType.USD,
             enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
