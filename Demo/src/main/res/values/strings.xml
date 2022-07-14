@@ -27,9 +27,6 @@
     <string name="creating_order">Creating order…</string>
     <string name="custom_styling">Style Buttons</string>
 
-
-    <string name="auth_credentials_missing_title">Auth Credentials Required</string>
-    <string name="auth_credentials_missing_message">You can set authentication credentials in the <b><i>paypal.properties</i></b> file in the root of the project directory.</string>
     <string name="request_three_d_secure">Request 3D Secure Authentication</string>
     <string name="server_integration">Server Integration</string>
     <string name="payment_button">Payment Button</string>
