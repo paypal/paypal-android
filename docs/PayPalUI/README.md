@@ -1,11 +1,9 @@
----
-title: Use PayPal UI Components Integration
-keywords:
-contentType: docs
-productStatus: current
-apiVersion: TODO
-sdkVersion: TODO
----
+# Pay using PayPal UI
+
+1. [Add PayPal UI](#add-paypal-ui)
+
+## Add PayPal UI
+
 ### 1. Add PayPalUI to your app
 
 In your `build.gradle` file, add the following dependency:
@@ -17,6 +15,10 @@ dependencies {
 ```
 
 ### 2. Create a PayPal button
+The PayPalUI module allows you to render three buttons that can offer a set of customizations like color, edges, size and labels:
+* `PayPalButton`: generic PayPal button
+* `PayPalPayLater`: a PayPal button with a fixed PayLater label
+* `PayPalCredit`: a PayPal button with the PayPalCredit logo
 
 Add a `PayPalButton` to your layout XML:
 
