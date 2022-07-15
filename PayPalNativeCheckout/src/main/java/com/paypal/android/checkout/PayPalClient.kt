@@ -3,6 +3,7 @@ package com.paypal.android.checkout
 import android.app.Application
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.PayPalSDKError
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -13,7 +14,7 @@ import com.paypal.checkout.error.OnError
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient(application: Application, coreConfig: CoreConfig, clientId: String, returnUrl: String) {
+class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: String) {
 
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
@@ -21,6 +22,13 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, clientId: S
     var listener: PayPalListener? = null
 
     init {
+        val clientId = coreConfig.clientId
+        if (clientId.isNullOrEmpty()) {
+            throw PayPalSDKError(
+                0,
+                "Client Id should not be null or empty"
+            )
+        }
         val config = CheckoutConfig(
             application = application,
             clientId = clientId,
