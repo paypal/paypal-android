@@ -98,6 +98,10 @@ allprojects {
         mavenLocal()
 
         maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+
+        maven {
             url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
             credentials {
                 username cardinalUsername
