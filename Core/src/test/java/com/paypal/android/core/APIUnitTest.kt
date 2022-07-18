@@ -18,16 +18,11 @@ import java.net.URL
 @ExperimentalCoroutinesApi
 class APIUnitTest {
 
-    companion object {
-        private const val CLIENT_ID = "sample-client-id"
-        private const val CLIENT_SECRET = "sample-client-secret"
-    }
-
     private val http = mockk<Http>()
     private val httpRequestFactory = mockk<HttpRequestFactory>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
-    private val configuration = CoreConfig(CLIENT_ID, CLIENT_SECRET)
+    private val configuration = CoreConfig()
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 

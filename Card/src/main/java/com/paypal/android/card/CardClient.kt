@@ -38,7 +38,12 @@ class CardClient internal constructor(
      *  @param [configuration] Configuration parameters for client
      */
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
-            this(activity, CardAPI(API(configuration)), BrowserSwitchClient(), Dispatchers.Main)
+            this(
+                activity,
+                CardAPI(API(configuration)),
+                BrowserSwitchClient(),
+                Dispatchers.Main
+            )
 
     init {
         activity.lifecycle.addObserver(lifeCycleObserver)
@@ -102,7 +107,7 @@ class CardClient internal constructor(
                         CardResult(
                             getOrderResponse.orderId,
                             getOrderResponse.orderStatus,
-                            metadata.paymentSource,
+                            getOrderResponse.paymentSource,
                             browserSwitchResult.deepLinkUrl
                         )
                     )

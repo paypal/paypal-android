@@ -23,6 +23,7 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
@@ -32,7 +33,7 @@ class PayPalClientTest {
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
     private val mockReturnUrl = "com.example://paypalpay"
-    private val coreConfig = CoreConfig(mockClientId, environment = Environment.SANDBOX)
+    private val coreConfig = CoreConfig(clientId = mockClientId, environment = Environment.SANDBOX)
 
     @Before
     fun setUp() {
@@ -57,10 +58,19 @@ class PayPalClientTest {
             PayPalCheckout.setConfig(any())
         }
         expectThat(configSlot.captured) {
-            get { application }.isEqualTo(mockApplication)
             get { clientId }.isEqualTo(mockClientId)
+            get { application }.isEqualTo(mockApplication)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
         }
+    }
+
+    @Test
+    fun `when no clientId is provided, PayPalClient initialization throws error`() {
+        val expectedErrorMessage = "Client Id should not be null or empty"
+        val exception = assertThrows(PayPalSDKError::class.java) {
+            PayPalClient(mockApplication, CoreConfig(), mockReturnUrl)
+        }
+        assert(expectedErrorMessage == exception.errorDescription)
     }
 
     @Test
@@ -69,7 +79,7 @@ class PayPalClientTest {
 
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
         PayPalClient(mockApplication,
-            CoreConfig(mockClientId, environment = Environment.LIVE),
+            CoreConfig(clientId = mockClientId, environment = Environment.LIVE),
             mockReturnUrl
         )
 
@@ -78,7 +88,6 @@ class PayPalClientTest {
         }
         expectThat(configSlot.captured) {
             get { application }.isEqualTo(mockApplication)
-            get { clientId }.isEqualTo(mockClientId)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.LIVE)
         }
     }
@@ -90,7 +99,7 @@ class PayPalClientTest {
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
         PayPalClient(
             mockApplication,
-            CoreConfig(mockClientId, environment = Environment.STAGING),
+            CoreConfig(clientId = mockClientId, environment = Environment.STAGING),
             mockReturnUrl
         )
 
@@ -99,7 +108,6 @@ class PayPalClientTest {
         }
         expectThat(configSlot.captured) {
             get { application }.isEqualTo(mockApplication)
-            get { clientId }.isEqualTo(mockClientId)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.STAGE)
         }
     }

@@ -10,22 +10,20 @@ import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibil
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 
-class EligibilityAPI {
+class EligibilityAPI internal constructor(
+    private val coreConfig: CoreConfig,
+    private val graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
+) {
 
     constructor(coreConfig: CoreConfig) : this(coreConfig, GraphQLClientImpl(coreConfig))
 
-    private val coreConfig: CoreConfig
-    private val graphQLClient: GraphQLClient
-
-    internal constructor(
-        coreConfig: CoreConfig,
-        graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
-    ) {
-        this.coreConfig = coreConfig
-        this.graphQLClient = graphQLClient
-    }
-
     suspend fun checkEligibility(): Eligibility {
+        if (coreConfig.clientId.isNullOrEmpty()) {
+            throw PayPalSDKError(
+                0,
+                "Client Id should not be null or empty"
+            )
+        }
         val fundingEligibilityQuery = FundingEligibilityQuery(
             clientId = coreConfig.clientId,
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,

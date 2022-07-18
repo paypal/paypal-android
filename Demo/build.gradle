@@ -21,7 +21,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
-        buildConfigField("String", "CLIENT_SECRET", paypalProperties["CLIENT_SECRET"] ?: "\"\"")
     }
 
     buildFeatures {

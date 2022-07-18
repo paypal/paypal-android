@@ -17,15 +17,9 @@ class HttpRequestFactoryUnitTest {
     class URLTests(private val configuration: CoreConfig, private val expected: URL) {
 
         companion object {
-            private const val CLIENT_ID = "sample-client-id"
-            private const val CLIENT_SECRET = "sample-client-secret"
-
-            private val SANDBOX_CONFIGURATION =
-                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.SANDBOX)
-            private val STAGING_CONFIGURATION =
-                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.STAGING)
-            private val LIVE_CONFIGURATION =
-                CoreConfig(CLIENT_ID, CLIENT_SECRET, Environment.LIVE)
+            private val SANDBOX_CONFIGURATION = CoreConfig(environment = Environment.SANDBOX)
+            private val STAGING_CONFIGURATION = CoreConfig(environment = Environment.STAGING)
+            private val LIVE_CONFIGURATION = CoreConfig(environment = Environment.LIVE)
 
             @JvmStatic
             @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
@@ -61,8 +55,7 @@ class HttpRequestFactoryUnitTest {
     @RunWith(RobolectricTestRunner::class)
     class NonParameterizedTests {
 
-        private val configuration =
-            CoreConfig("sample-client-id", "sample-client-secret")
+        private val configuration = CoreConfig()
 
         private val requestBody = """{ "sample": "json" }"""
 
@@ -106,11 +99,15 @@ class HttpRequestFactoryUnitTest {
         }
 
         @Test
-        fun `it should add basic auth authorization header`() {
+        fun `it should add bearer token authorization header`() {
+            val mockAccessToken = "mock_access_token"
             val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+            val result = sut.createHttpRequestFromAPIRequest(
+                apiRequest,
+                CoreConfig(accessToken = mockAccessToken),
+            )
 
-            val expected = "Basic c2FtcGxlLWNsaWVudC1pZDpzYW1wbGUtY2xpZW50LXNlY3JldA=="
+            val expected = "Bearer $mockAccessToken"
             assertEquals(expected, result.headers["Authorization"])
         }
 

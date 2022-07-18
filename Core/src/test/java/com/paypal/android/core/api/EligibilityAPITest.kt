@@ -13,12 +13,14 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import junit.framework.TestCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-class EligibilityAPITest : TestCase() {
+@ExperimentalCoroutinesApi
+class EligibilityAPITest {
 
     lateinit var api: EligibilityAPI
 
@@ -29,15 +31,16 @@ class EligibilityAPITest : TestCase() {
     private lateinit var mockkGraphQlClient: GraphQLClient
 
     @Before
-    public override fun setUp() {
+    fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
         api = EligibilityAPI(mockCoreConfig, mockkGraphQlClient)
     }
 
     @Test
-    fun testCheckEligibilitySuccessCase() = runBlocking {
+    fun `a successful eligibility check`() = runBlocking {
         val mockFundingEligibilityResponse: FundingEligibilityResponse = mockk(relaxed = true)
         every { mockFundingEligibilityResponse.fundingEligibility.venmo.eligible } returns true
+        every { mockCoreConfig.clientId } returns "mock_client_id"
         coEvery { mockkGraphQlClient.executeQuery(any<Query<FundingEligibilityResponse>>()) } returns
                 GraphQlQueryResponse(data = mockFundingEligibilityResponse)
         val result = api.checkEligibility()
@@ -45,9 +48,18 @@ class EligibilityAPITest : TestCase() {
     }
 
     @Test
-    fun testCheckEligibilityErrorCase(): Unit = runBlocking {
+    fun `an unsuccessful eligibility check`() = runBlocking {
+        val correlationId = "correlationId"
+        every { mockCoreConfig.clientId } returns "mock_client_id"
         coEvery { mockkGraphQlClient.executeQuery(any<Query<FundingEligibility>>()) } returns
-                GraphQlQueryResponse(correlationId = "correlationId")
-        assertThrows<PayPalSDKError> { api.checkEligibility() }
+                GraphQlQueryResponse(correlationId = correlationId)
+        val exception = assertThrows<PayPalSDKError> { api.checkEligibility() }
+        assertEquals(exception.correlationID, correlationId)
+    }
+
+    @Test
+    fun `when client id is null, it should throw exception`() = runBlocking {
+        val exception = assertThrows<PayPalSDKError> { api.checkEligibility() }
+        assertEquals("Client Id should not be null or empty", exception.errorDescription)
     }
 }
