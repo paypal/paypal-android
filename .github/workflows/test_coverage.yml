@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+concurrency:
+  group: test-coverage-${{ github.event.number }}
+  cancel-in-progress: true
 jobs:
   test_coverage_job:
     name: Test Code Coverage

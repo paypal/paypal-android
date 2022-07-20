@@ -1,5 +1,8 @@
 name: Static Analysis
 on: [pull_request, workflow_dispatch]
+concurrency:
+  group: static-analysis-${{ github.event.number }}
+  cancel-in-progress: true
 jobs:
   detekt:
     name: Detekt
