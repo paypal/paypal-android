@@ -21,9 +21,13 @@ import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
 import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.api.EligibilityAPI
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
+import dagger.Provides
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
@@ -71,9 +75,30 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.getEligibility().observe(viewLifecycleOwner) {
-            Log.d(TAG, "isVenmoEligible: ${it.isVenmoEligible}")
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+
+                val accessToken = payPalDemoApi.fetchAccessToken().value
+
+                val coreConfig = CoreConfig(
+                    accessToken = accessToken,
+                    environment = Environment.SANDBOX
+                )
+
+                val eligibilityAPI = EligibilityAPI(coreConfig)
+                val result = eligibilityAPI.checkEligibility()
+
+                Log.d(TAG, "isVenmoEligible: ${result.isVenmoEligible}")
+                //liveData.postValue(eligibilityAPI.checkEligibility())
+            } catch (error: PayPalSDKError) {
+                Log.d(PayPalViewModel.TAG, "Error: ${error.message}")
+            }
         }
+
+
+//        viewModel.getEligibility().observe(viewLifecycleOwner) {
+//            Log.d(TAG, "isVenmoEligible: ${it.isVenmoEligible}")
+//        }
     }
 
     @SuppressLint("SetTextI18n")

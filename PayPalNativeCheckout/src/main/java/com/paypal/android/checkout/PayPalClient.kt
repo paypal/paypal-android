@@ -22,16 +22,16 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
     var listener: PayPalListener? = null
 
     init {
-        val clientId = coreConfig.clientId
-        if (clientId.isNullOrEmpty()) {
-            throw PayPalSDKError(
-                0,
-                "Client Id should not be null or empty"
-            )
-        }
+//        val clientId = coreConfig.clientId
+//        if (clientId.isNullOrEmpty()) {
+//            throw PayPalSDKError(
+//                0,
+//                "Client Id should not be null or empty"
+//            )
+//        }
         val config = CheckoutConfig(
             application = application,
-            clientId = clientId,
+            clientId = "",
             environment = getPayPalEnvironment(coreConfig.environment),
             returnUrl = returnUrl,
         )

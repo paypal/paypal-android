@@ -14,4 +14,20 @@ class API internal constructor(
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         return http.send(httpRequest)
     }
+
+    suspend fun getClientId(): String {
+        // Make a call to /v1/oauth2/token and get a token
+        // https://ppaas/api/3719176155269356#apiReference
+        val apiRequest = APIRequest(
+            path = "v1/oauth2/token",
+            method = HttpMethod.GET,
+            body = null
+        )
+        val httpRequest =
+            httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
+        val response = http.send(httpRequest)
+        val json = PaymentsJSON(response.body!!)
+        return json.getString("client_id")
+    }
 }
+
