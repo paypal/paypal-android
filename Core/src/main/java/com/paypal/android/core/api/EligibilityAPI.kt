@@ -12,13 +12,14 @@ import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountr
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 
 class EligibilityAPI internal constructor(
-    private val coreConfig: CoreConfig,
-    private val graphQLClient: GraphQLClient = GraphQLClientImpl(coreConfig)
+    private val api: API,
+    private val graphQLClient: GraphQLClient
 ) {
 
-    val api = API(coreConfig)
-
-    constructor(coreConfig: CoreConfig) : this(coreConfig, GraphQLClientImpl(coreConfig))
+    constructor(coreConfig: CoreConfig) : this(
+        API(coreConfig),
+        GraphQLClientImpl(coreConfig)
+    )
 
     suspend fun checkEligibility(): Eligibility {
         val fundingEligibilityQuery = FundingEligibilityQuery(
