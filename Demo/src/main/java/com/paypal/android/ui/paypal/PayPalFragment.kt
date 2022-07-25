@@ -47,8 +47,6 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
 
-    private val viewModel: PayPalViewModel by viewModels()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

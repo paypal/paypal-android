@@ -1,6 +1,7 @@
 package com.paypal.android.checkout
 
 import android.app.Application
+import com.paypal.android.core.API
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
@@ -14,7 +15,13 @@ import com.paypal.checkout.error.OnError
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: String) {
+class PayPalClient(
+    private val application: Application,
+    private val coreConfig: CoreConfig,
+    private val returnUrl: String
+) {
+
+    private val api = API(coreConfig)
 
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
@@ -29,13 +36,6 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
 //                "Client Id should not be null or empty"
 //            )
 //        }
-        val config = CheckoutConfig(
-            application = application,
-            clientId = "",
-            environment = getPayPalEnvironment(coreConfig.environment),
-            returnUrl = returnUrl,
-        )
-        PayPalCheckout.setConfig(config)
     }
 
     /**
@@ -43,7 +43,15 @@ class PayPalClient(application: Application, coreConfig: CoreConfig, returnUrl: 
      *
      * @param orderId the id of the order
      */
-    fun checkout(orderId: String) {
+    suspend fun checkout(orderId: String) {
+        val config = CheckoutConfig(
+            application = application,
+            clientId = api.getClientId(),
+            environment = getPayPalEnvironment(coreConfig.environment),
+            returnUrl = returnUrl,
+        )
+        PayPalCheckout.setConfig(config)
+
         PayPalCheckout.start(CreateOrder { createOrderActions ->
             createOrderActions.set(orderId)
         },
