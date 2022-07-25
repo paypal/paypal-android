@@ -20,11 +20,13 @@ For initial setup, the `curl` commands below can be used in place of a server SD
 
 ### 1. Add the Payments SDK Card module to your app
 
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+
 In your app's `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:card:1.0.0"
+   implementation "com.paypal.android:card:<CURRENT-VERSION>"
 }
 ```
 
