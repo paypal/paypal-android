@@ -76,11 +76,16 @@ class CardClient internal constructor(
             approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
             // launch the 3DS flow
+            val urlScheme = cardRequest.threeDSecureRequest?.let {
+                val returnUrl = it.returnUrl
+                val uri = Uri.parse(returnUrl)
+                uri.scheme
+            }
             val approveOrderMetadata =
                 ApproveOrderMetadata(cardRequest.orderID, response.paymentSource)
             val options = BrowserSwitchOptions()
                 .url(Uri.parse(response.payerActionHref))
-                .returnUrlScheme("com.paypal.android.demo")
+                .returnUrlScheme(urlScheme)
                 .metadata(approveOrderMetadata.toJSON())
 
             browserSwitchClient.start(activity, options)
