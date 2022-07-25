@@ -1,4 +1,5 @@
 Welcome to the PayPal Android SDK. This library will help you accept Card, PayPal, and Venmo payments in your Android app.
+
 ![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
 
 ## FAQ
@@ -45,7 +46,7 @@ dependencies {
 }
 ```
 
-##Usage
+## Usage
 To know how to use each dependency of the SDK, go to any of the following:
 - [Card](docs/Card)
 - [PayPalUI](docs/PayPalUI)
