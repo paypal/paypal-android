@@ -16,8 +16,6 @@ class API internal constructor(
     }
 
     suspend fun getClientId(): String {
-        // Make a call to /v1/oauth2/token and get a token
-        // https://ppaas/api/3719176155269356#apiReference
         val apiRequest = APIRequest(
             path = "v1/oauth2/token",
             method = HttpMethod.GET,

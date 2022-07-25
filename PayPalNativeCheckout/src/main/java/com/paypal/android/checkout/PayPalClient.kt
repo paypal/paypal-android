@@ -28,16 +28,6 @@ class PayPalClient(
      */
     var listener: PayPalListener? = null
 
-    init {
-//        val clientId = coreConfig.clientId
-//        if (clientId.isNullOrEmpty()) {
-//            throw PayPalSDKError(
-//                0,
-//                "Client Id should not be null or empty"
-//            )
-//        }
-    }
-
     /**
      * Initiate a PayPal checkout for an order.
      *

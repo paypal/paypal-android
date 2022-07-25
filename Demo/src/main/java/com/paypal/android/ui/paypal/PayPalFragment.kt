@@ -75,28 +75,17 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-
                 val accessToken = payPalDemoApi.fetchAccessToken().value
-
-                val coreConfig = CoreConfig(
-                    accessToken = accessToken,
-                    environment = Environment.SANDBOX
-                )
+                val coreConfig = CoreConfig(accessToken, Environment.SANDBOX)
 
                 val eligibilityAPI = EligibilityAPI(coreConfig)
                 val result = eligibilityAPI.checkEligibility()
 
                 Log.d(TAG, "isVenmoEligible: ${result.isVenmoEligible}")
-                //liveData.postValue(eligibilityAPI.checkEligibility())
             } catch (error: PayPalSDKError) {
-                Log.d(PayPalViewModel.TAG, "Error: ${error.message}")
+                Log.d(TAG, "Error: ${error.message}")
             }
         }
-
-
-//        viewModel.getEligibility().observe(viewLifecycleOwner) {
-//            Log.d(TAG, "isVenmoEligible: ${it.isVenmoEligible}")
-//        }
     }
 
     @SuppressLint("SetTextI18n")

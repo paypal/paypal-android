@@ -21,13 +21,6 @@ class EligibilityAPI internal constructor(
     constructor(coreConfig: CoreConfig) : this(coreConfig, GraphQLClientImpl(coreConfig))
 
     suspend fun checkEligibility(): Eligibility {
-//        if (coreConfig.clientId.isNullOrEmpty()) {
-//            throw PayPalSDKError(
-//                0,
-//                "Client Id should not be null or empty"
-//            )
-//        }
-
         val fundingEligibilityQuery = FundingEligibilityQuery(
             clientId = api.getClientId(),
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,
