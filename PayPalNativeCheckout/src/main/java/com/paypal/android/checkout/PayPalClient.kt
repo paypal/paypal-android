@@ -4,7 +4,6 @@ import android.app.Application
 import com.paypal.android.core.API
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -15,13 +14,15 @@ import com.paypal.checkout.error.OnError
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient(
+class PayPalClient internal constructor(
     private val application: Application,
     private val coreConfig: CoreConfig,
-    private val returnUrl: String
+    private val returnUrl: String,
+    private val api: API
 ) {
 
-    private val api = API(coreConfig)
+    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
+            this(application, coreConfig, returnUrl, API(coreConfig))
 
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
