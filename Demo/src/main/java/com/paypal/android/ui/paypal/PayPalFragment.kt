@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.gson.JsonObject
@@ -25,9 +24,7 @@ import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.api.EligibilityAPI
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
-import dagger.Provides
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException

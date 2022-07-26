@@ -3,7 +3,6 @@ package com.paypal.android.core
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
