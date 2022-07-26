@@ -21,23 +21,24 @@ class API internal constructor(
         val httpRequest =
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         val response = http.send(httpRequest)
-        return response.run {
-            val correlationID = headers["Paypal-Debug-Id"]
-            if (isSuccessful) {
-                if (body.isNullOrBlank()) {
-                    throw APIClientError.noResponseData(correlationID)
-                } else {
-                    val json = PaymentsJSON(body)
-                    val clientID = json.optString("client_id")
-                    if (clientID.isNullOrBlank()) {
-                        throw APIClientError.dataParsingError(correlationID)
-                    } else {
-                        clientID
-                    }
-                }
-            } else {
-                throw APIClientError.serverResponseError(correlationID)
-            }
+        val correlationID = response.headers["Paypal-Debug-Id"]
+        if (response.isSuccessful) {
+            return parseClientId(response.body, correlationID)
         }
+
+        throw APIClientError.serverResponseError(correlationID)
+    }
+
+    @Throws(PayPalSDKError::class)
+    private fun parseClientId(responseBody: String?, correlationID: String?): String {
+        if (responseBody.isNullOrBlank()) {
+            throw APIClientError.noResponseData(correlationID)
+        }
+        val json = PaymentsJSON(responseBody)
+        val clientID = json.optString("client_id")
+        if (clientID.isNullOrBlank()) {
+            throw APIClientError.dataParsingError(correlationID)
+        }
+        return clientID
     }
 }
