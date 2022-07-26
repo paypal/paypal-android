@@ -6,11 +6,13 @@
 
 ### 1. Add PayPalUI to your app
 
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/paypal-ui?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/paypal-ui?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+
 In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-ui:1.0.0"
+   implementation "com.paypal.android:paypal-ui:<CURRENT-VERSION>"
 }
 ```
 
