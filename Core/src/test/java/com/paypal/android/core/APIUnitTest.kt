@@ -27,13 +27,17 @@ class APIUnitTest {
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
 
+    private val httpResponseHeaders = mapOf(
+        "Paypal-Debug-Id" to "sample-correlation-id"
+    )
+
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
     private val clientIdSuccessResponse by lazy {
         val clientIdBody = JSONObject()
             .put("client_id", "sample-client-id")
             .toString()
-        HttpResponse(200, emptyMap(), clientIdBody)
+        HttpResponse(200, httpResponseHeaders, clientIdBody)
     }
 
     private lateinit var sut: API
@@ -103,4 +107,74 @@ class APIUnitTest {
         val result = sut.getClientId()
         assertEquals("sample-client-id", result)
     }
+
+    @Test
+    fun `get client id throws no response data error when http response has no body`() =
+        runBlocking {
+            val url = URL("https://example.com/resolved/path")
+            val httpRequest = HttpRequest(url, HttpMethod.GET)
+
+            every {
+                httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
+            } returns httpRequest
+
+            val noBodyHttpResponse = HttpResponse(200, httpResponseHeaders)
+            coEvery { http.send(httpRequest) } returns noBodyHttpResponse
+
+            var capturedError: PayPalSDKError? = null
+            try {
+                sut.getClientId()
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+            assertEquals(Code.NO_RESPONSE_DATA.ordinal, capturedError?.code)
+            assertEquals("sample-correlation-id", capturedError?.correlationID)
+        }
+
+    @Test
+    fun `get client id throws data parsing error when http response is missing client id`() =
+        runBlocking {
+            val url = URL("https://example.com/resolved/path")
+            val httpRequest = HttpRequest(url, HttpMethod.GET)
+
+            every {
+                httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
+            } returns httpRequest
+
+            val httpResponseWithoutClientId =
+                HttpResponse(200, httpResponseHeaders, "{}")
+            coEvery { http.send(httpRequest) } returns httpResponseWithoutClientId
+
+            var capturedError: PayPalSDKError? = null
+            try {
+                sut.getClientId()
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+            assertEquals(Code.DATA_PARSING_ERROR.ordinal, capturedError?.code)
+            assertEquals("sample-correlation-id", capturedError?.correlationID)
+        }
+
+    @Test
+    fun `get client id throws server response error when http response is unsuccessful`() =
+        runBlocking {
+            val url = URL("https://example.com/resolved/path")
+            val httpRequest = HttpRequest(url, HttpMethod.GET)
+
+            every {
+                httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
+            } returns httpRequest
+
+            val httpResponseWithoutClientId = HttpResponse(500, httpResponseHeaders)
+            coEvery { http.send(httpRequest) } returns httpResponseWithoutClientId
+
+            var capturedError: PayPalSDKError? = null
+            try {
+                sut.getClientId()
+            } catch (e: PayPalSDKError) {
+                capturedError = e
+            }
+            assertEquals(Code.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
+            assertEquals("sample-correlation-id", capturedError?.correlationID)
+        }
 }
