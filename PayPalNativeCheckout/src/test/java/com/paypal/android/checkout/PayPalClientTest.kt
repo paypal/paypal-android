@@ -33,7 +33,7 @@ class PayPalClientTest {
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
     private val mockReturnUrl = "com.example://paypalpay"
-    private val coreConfig = CoreConfig(clientId = mockClientId, environment = Environment.SANDBOX)
+    private val coreConfig = CoreConfig(environment = Environment.SANDBOX)
 
     @Before
     fun setUp() {
@@ -79,7 +79,7 @@ class PayPalClientTest {
 
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
         PayPalClient(mockApplication,
-            CoreConfig(clientId = mockClientId, environment = Environment.LIVE),
+            CoreConfig(environment = Environment.LIVE),
             mockReturnUrl
         )
 
@@ -99,7 +99,7 @@ class PayPalClientTest {
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
         PayPalClient(
             mockApplication,
-            CoreConfig(clientId = mockClientId, environment = Environment.STAGING),
+            CoreConfig(environment = Environment.STAGING),
             mockReturnUrl
         )
 

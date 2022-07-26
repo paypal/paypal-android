@@ -1,6 +1,6 @@
 package com.paypal.android.core.api
 
-import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.API
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.assertThrows
 import com.paypal.android.core.graphql.common.GraphQLClient
@@ -16,50 +16,59 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
 class EligibilityAPITest {
 
-    lateinit var api: EligibilityAPI
+    @MockK
+    private lateinit var api: API
 
     @MockK
-    private lateinit var mockCoreConfig: CoreConfig
+    private lateinit var graphQLClient: GraphQLClient
 
-    @MockK
-    private lateinit var mockkGraphQlClient: GraphQLClient
+    lateinit var sut: EligibilityAPI
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxed = true)
-        api = EligibilityAPI(mockCoreConfig, mockkGraphQlClient)
+        sut = EligibilityAPI(api, graphQLClient)
     }
 
     @Test
     fun `a successful eligibility check`() = runBlocking {
         val mockFundingEligibilityResponse: FundingEligibilityResponse = mockk(relaxed = true)
         every { mockFundingEligibilityResponse.fundingEligibility.venmo.eligible } returns true
-        every { mockCoreConfig.clientId } returns "mock_client_id"
-        coEvery { mockkGraphQlClient.executeQuery(any<Query<FundingEligibilityResponse>>()) } returns
+        coEvery { api.getClientId() } returns "mock_client_id"
+        coEvery { graphQLClient.executeQuery(any<Query<FundingEligibilityResponse>>()) } returns
                 GraphQlQueryResponse(data = mockFundingEligibilityResponse)
-        val result = api.checkEligibility()
+        val result = sut.checkEligibility()
         assertEquals(result.isVenmoEligible, true)
     }
 
     @Test
     fun `an unsuccessful eligibility check`() = runBlocking {
         val correlationId = "correlationId"
-        every { mockCoreConfig.clientId } returns "mock_client_id"
-        coEvery { mockkGraphQlClient.executeQuery(any<Query<FundingEligibility>>()) } returns
+        coEvery { api.getClientId() } returns "mock_client_id"
+        coEvery { graphQLClient.executeQuery(any<Query<FundingEligibility>>()) } returns
                 GraphQlQueryResponse(correlationId = correlationId)
-        val exception = assertThrows<PayPalSDKError> { api.checkEligibility() }
+        val exception = assertThrows<PayPalSDKError> { sut.checkEligibility() }
         assertEquals(exception.correlationID, correlationId)
     }
 
     @Test
-    fun `when client id is null, it should throw exception`() = runBlocking {
-        val exception = assertThrows<PayPalSDKError> { api.checkEligibility() }
-        assertEquals("Client Id should not be null or empty", exception.errorDescription)
+    fun `propagates errors from core api`() = runBlocking {
+        val error = Exception("client id error")
+        coEvery { api.getClientId() } throws error
+
+        var capturedError: Exception? = null
+        try {
+            sut.checkEligibility()
+        } catch (e: Exception) {
+            capturedError = e
+        }
+        assertSame(error, capturedError)
     }
 }

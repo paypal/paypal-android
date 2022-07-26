@@ -19,7 +19,6 @@ object DemoModule {
 
     @Provides
     fun provideCoreConfig(): CoreConfig = CoreConfig(
-        clientId = com.paypal.android.BuildConfig.CLIENT_ID,
         environment = Environment.SANDBOX
     )
 }
