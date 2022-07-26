@@ -16,11 +16,7 @@ class API internal constructor(
     }
 
     suspend fun getClientId(): String {
-        val apiRequest = APIRequest(
-            path = "v1/oauth2/token",
-            method = HttpMethod.GET,
-            body = null
-        )
+        val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
         val httpRequest =
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         val response = http.send(httpRequest)
