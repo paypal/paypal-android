@@ -28,7 +28,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PayPalNativeFragment : Fragment(), PayPalListener {
 
-
     companion object {
         private val TAG = PayPalNativeFragment::class.qualifiedName
     }
@@ -39,7 +38,8 @@ class PayPalNativeFragment : Fragment(), PayPalListener {
     lateinit var payPalDemoApi: PayPalDemoApi
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
@@ -57,15 +57,16 @@ class PayPalNativeFragment : Fragment(), PayPalListener {
                     JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
                 val order = payPalDemoApi.createOrder(orderJson)
 
-
                 val coreConfig = CoreConfig(accessToken = accessToken)
-                val paypalNativeClient = PayPalClient(activity?.application!!, coreConfig, "${BuildConfig.APPLICATION_ID}://paypalpay")
+                val paypalNativeClient = PayPalClient(
+                    activity?.application!!,
+                    coreConfig,
+                    "${BuildConfig.APPLICATION_ID}://paypalpay"
+                )
                 paypalNativeClient.listener = this@PayPalNativeFragment
-
                 order.id?.let { orderId ->
                     paypalNativeClient.startCheckout(orderId)
                 }
-
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
                 val error = APIClientError.payPalCheckoutError(e.message!!)
@@ -89,5 +90,4 @@ class PayPalNativeFragment : Fragment(), PayPalListener {
     override fun onPayPalCanceled() {
         Toast.makeText(requireContext(), "PayPal CANCELED", Toast.LENGTH_LONG).show()
     }
-
 }

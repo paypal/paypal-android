@@ -28,4 +28,3 @@ class API internal constructor(
         return json.getString("client_id")
     }
 }
-
