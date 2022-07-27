@@ -2,6 +2,7 @@ package com.paypal.android.checkout
 
 import android.app.Application
 import com.paypal.android.core.API
+import com.paypal.android.checkout.model.buyer.Buyer
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
@@ -27,6 +28,11 @@ class PayPalClient(
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
     var listener: PayPalListener? = null
+        set(value) {
+            if (value != null) {
+                registerCallbacks(value)
+            }
+        }
 
     /**
      * Initiate a PayPal checkout for an order.
@@ -46,7 +52,15 @@ class PayPalClient(
             createOrderActions.set(orderId)
         },
             onApprove = OnApprove { approval ->
-                val result = approval.run { PayPalCheckoutResult(data.orderId, data.payerId) }
+
+                //TODO: add Cart and VaultData objects
+                val result = approval.run {
+                    PayPalCheckoutResult(
+                        orderId = data.orderId,
+                        payerId = data.payerId,
+                        payer = Buyer(data.payer),
+                        billingToken = approval.data.billingToken)
+                }
                 listener?.onPayPalSuccess(result)
             },
             onCancel = OnCancel {
@@ -55,6 +69,44 @@ class PayPalClient(
             onError = OnError { errorInfo ->
                 val error = APIClientError.payPalCheckoutError(errorInfo.reason)
                 listener?.onPayPalFailure(error)
+            })
+    }
+
+    //TODO: add start checkout with Create Order actions
+    suspend fun startCheckout(orderId: String) {
+        val config = CheckoutConfig(
+            application = application,
+            clientId = api.getClientId(),
+            environment = getPayPalEnvironment(coreConfig.environment),
+            returnUrl = returnUrl,
+        )
+        PayPalCheckout.setConfig(config)
+        PayPalCheckout.startCheckout(CreateOrder { createOrderActions ->
+            createOrderActions.set(orderId)
+        })
+    }
+
+    private fun registerCallbacks(listener: PayPalListener) {
+        //TODO: add onShippingChange callback
+        PayPalCheckout.registerCallbacks(
+            onApprove = OnApprove { approval ->
+
+                //TODO: add Cart and VaultData objects
+                val result = approval.run {
+                    PayPalCheckoutResult(
+                        orderId = data.orderId,
+                        payerId = data.payerId,
+                        payer = Buyer(data.payer),
+                        billingToken = approval.data.billingToken)
+                }
+                listener.onPayPalSuccess(result)
+            },
+            onCancel = OnCancel {
+                listener.onPayPalCanceled()
+            },
+            onError = OnError { errorInfo ->
+                val error = APIClientError.payPalCheckoutError(errorInfo.reason)
+                listener.onPayPalFailure(error)
             })
     }
 }

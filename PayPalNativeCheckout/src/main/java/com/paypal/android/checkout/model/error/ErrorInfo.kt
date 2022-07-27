@@ -1,7 +1,5 @@
 package com.paypal.android.checkout.model.error
 
-import com.paypal.android.checkout.model.CorrelationIds
-
 data class ErrorInfo(
 
     /**
