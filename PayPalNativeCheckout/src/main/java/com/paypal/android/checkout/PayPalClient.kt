@@ -5,7 +5,6 @@ import com.paypal.android.core.API
 import com.paypal.android.checkout.model.buyer.Buyer
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
