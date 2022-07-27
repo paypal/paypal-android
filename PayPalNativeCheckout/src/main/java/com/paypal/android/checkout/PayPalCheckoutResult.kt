@@ -10,5 +10,4 @@ data class PayPalCheckoutResult(
     val orderId: String?,
     val payerId: String?,
     val payer: Buyer? = null,
-    val billingToken: String? = null
 )

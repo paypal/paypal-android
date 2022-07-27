@@ -16,13 +16,15 @@ import com.paypal.checkout.error.OnError
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient(
+class PayPalClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
-    private val returnUrl: String
+    private val returnUrl: String,
+    private val api: API
 ) {
 
-    private val api = API(coreConfig)
+    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(application, coreConfig, returnUrl, API(coreConfig))
+
 
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
@@ -34,45 +36,12 @@ class PayPalClient(
             }
         }
 
+    //TODO: add start checkout with Create Order actions
     /**
      * Initiate a PayPal checkout for an order.
      *
      * @param orderId the id of the order
      */
-    suspend fun checkout(orderId: String) {
-        val config = CheckoutConfig(
-            application = application,
-            clientId = api.getClientId(),
-            environment = getPayPalEnvironment(coreConfig.environment),
-            returnUrl = returnUrl,
-        )
-        PayPalCheckout.setConfig(config)
-
-        PayPalCheckout.start(CreateOrder { createOrderActions ->
-            createOrderActions.set(orderId)
-        },
-            onApprove = OnApprove { approval ->
-
-                //TODO: add Cart and VaultData objects
-                val result = approval.run {
-                    PayPalCheckoutResult(
-                        orderId = data.orderId,
-                        payerId = data.payerId,
-                        payer = Buyer(data.payer),
-                        billingToken = approval.data.billingToken)
-                }
-                listener?.onPayPalSuccess(result)
-            },
-            onCancel = OnCancel {
-                listener?.onPayPalCanceled()
-            },
-            onError = OnError { errorInfo ->
-                val error = APIClientError.payPalCheckoutError(errorInfo.reason)
-                listener?.onPayPalFailure(error)
-            })
-    }
-
-    //TODO: add start checkout with Create Order actions
     suspend fun startCheckout(orderId: String) {
         val config = CheckoutConfig(
             application = application,
@@ -96,8 +65,8 @@ class PayPalClient(
                     PayPalCheckoutResult(
                         orderId = data.orderId,
                         payerId = data.payerId,
-                        payer = Buyer(data.payer),
-                        billingToken = approval.data.billingToken)
+                        payer = Buyer(data.payer)
+                    )
                 }
                 listener.onPayPalSuccess(result)
             },
