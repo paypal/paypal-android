@@ -32,6 +32,7 @@ class PaymentMethodsFragment : Fragment() {
         binding.run {
             cardButton.setOnClickListener { launchCardFragment() }
             payPalButton.setOnClickListener { launchPayPalFragment() }
+            payPalNativeButton.setOnClickListener { launchPayPalNativeFragment() }
         }
         return binding.root
     }
@@ -56,6 +57,10 @@ class PaymentMethodsFragment : Fragment() {
 
     private fun launchCardFragment() {
         navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToCardFragment())
+    }
+
+    private fun launchPayPalNativeFragment() {
+        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToPayPalNativeFragment())
     }
 
     private fun launchSettingsFragment() {

@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalNativeFragment"
+            app:destination="@id/payPalNativeFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -48,4 +51,8 @@
         android:name="com.paypal.android.ui.testcards.TestCardsFragment"
         android:label="Test Cards"
         tools:layout="@layout/fragment_test_cards" />
+    <fragment
+        android:id="@+id/payPalNativeFragment"
+        android:name="com.paypal.android.ui.paypal.PayPalNativeFragment"
+        android:label="PayPalNativeFragment" />
 </navigation>
