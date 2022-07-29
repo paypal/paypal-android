@@ -36,10 +36,8 @@ In order to integrate PayPalNative checkout, you will need:
    customers to place orders.
 2. Setting a return URL.
 
-Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/)
-overview to learn about how to create a new PayPal application as well as how to find those details.
-
-A return URL is required for redirecting users back to the app after authenticating. For more details on setting a return URL please see our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/#know-before-you-code),
+A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/)
+to create said url and also to learn about how to create a new PayPal application as well.
 
 ### 3. Initiate PayPal Native Checkout
 
@@ -64,7 +62,7 @@ Set a listener on the client to receive payment flow callbacks:
 payPalClient.listener = object : PayPalNativeCheckoutListener {
 
     override fun onPayPalSuccess(result: PayPalCheckoutResult) {
-       // order was successfully approved and is ready to be captured/authorized (see step 7)
+       // order was successfully approved and is ready to be captured/authorized (see step 6)
     }
 
     override fun onPayPalFailure(error: PayPalSDKError) {
@@ -118,7 +116,7 @@ payPalWebCheckoutClient.start(payPalWebCheckoutRequest)
 ```
 When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-paypal-native-checkout).
 
-### 7. Capture/Authorize the order
+### 6. Capture/Authorize the order
 
 After receiving a successful result from the `onPayPalSuccess()` callback, you can now capture or authorize the order.
 
