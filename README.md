@@ -48,7 +48,7 @@ dependencies {
 
 ## Usage
 The SDK uses AccessToken integration, meaning that an access token is needed to use every module of the SDK. To create an access token, a client ID and secret are needed.
-Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and secret. In order to create an access token, run the following request with
+Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a `CLIENT_ID` and `SECRET`. In order to create an access token, run the following request with
 `CLIENT_ID:SECRET` encoded in base64, on the `Authorization` header:
 
 **Request**

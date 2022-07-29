@@ -1,6 +1,6 @@
 # Accepting PayPal Web Checkout Payments
 
-The PayPal Web Checkout module in the PayPal SDK enables PayPal payments in your app.
+The PayPal Web Checkout module in the PayPal SDK enables PayPal payments in your browser launched from your app.
 
 Follow these steps to add PayPal Web Checkout payments:
 
