@@ -47,10 +47,35 @@ dependencies {
 ```
 
 ## Usage
+The SDK uses AccessToken integration, meaning that an access token is needed to use every module of the SDK. To create an access token, a client ID and secret are needed.
+Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and secret. In order to create an access token, run the following request with
+`CLIENT_ID:SECRET` encoded in base64, on the `Authorization` header:
+
+**Request**
+```bash
+curl --location --request POST 'https://api.sandbox.paypal.com/v1/oauth2/token' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Basic <CLIENT_ID:SECRET>'
+```
+
+**Response**
+```json
+{
+  "scope": "...",
+  "access_token": "<ACCESS_TOKEN>",
+  "token_type": "Bearer",
+  "app_id": "...",
+  "expires_in": 32400,
+  "nonce": "..."
+}
+```
+Insert `ACCESS_TOKEN` in the `CoreConfig` object to use in any of the modules.
+
 To know how to use each dependency of the SDK, go to any of the following:
 - [Card](docs/Card)
 - [PayPalUI](docs/PayPalUI)
 - [PayPal Web Checkout](docs/PayPalWebCheckout)
+- [PayPal Native Checkout](docs/PayPalNativeCheckout)
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.
