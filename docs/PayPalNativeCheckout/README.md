@@ -112,7 +112,7 @@ The `id` field of the response contains the order ID to pass to your client.
 Start the PayPal Native checkout flow with the order ID generated in [step 4](#4-create-an-order):
 
 ```kotlin
-payPalWebCheckoutClient.start(payPalWebCheckoutRequest)
+paypalNativeClient.startCheckout(orderId)
 ```
 When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-paypal-native-checkout).
 
