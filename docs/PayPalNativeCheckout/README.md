@@ -36,8 +36,7 @@ In order to integrate PayPalNative checkout, you will need:
    customers to place orders.
 2. Setting a return URL.
 
-A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/)
-to create said url and also to learn about how to create a new PayPal application as well.
+A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/) to create said url and also to learn about how to create a new PayPal application as well.
 
 ### 3. Initiate PayPal Native Checkout
 
