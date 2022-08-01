@@ -1,6 +1,10 @@
 package com.paypal.android.core
 
 data class Address(
+    /**
+     * The [two-character ISO 3166-1 code], that identifies the country or region.
+     */
+    val countryCode: String,
 
     /**
      * Optional. Line 1 of the Address (eg. number, street, etc)
@@ -27,10 +31,5 @@ data class Address(
      * Optional. Zip code or equivalent is usually required for countries that have them.
      * For a list of countries that do not have postal codes please refer to http://en.wikipedia.org/wiki/Postal_code
      */
-    val postalCode: String? = null,
-
-    /**
-     * Optional. 2 letter country code
-     */
-    val countryCode: String? = null,
+    val postalCode: String? = null
 )
