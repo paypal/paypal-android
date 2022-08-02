@@ -188,14 +188,14 @@ class CardFragment : Fragment() {
 
             val (monthString, yearString) = expirationDate.split("/")
 
-            val billing = Address(
+            val billingAddress = Address(
                 countryCode = "US",
                 streetAddress = "3272 Gateway Road",
                 locality = "Aloha",
                 postalCode = "97007"
             )
 
-            val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billing)
+            val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
             CardRequest(order.id!!, card)
         }
 
