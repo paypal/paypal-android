@@ -59,7 +59,7 @@ class PayPalNativeFragment : Fragment(), PayPalListener {
 
                 val coreConfig = CoreConfig(accessToken = accessToken)
                 val paypalNativeClient = PayPalClient(
-                    activity?.application!!,
+                    requireActivity().application,
                     coreConfig,
                     "${BuildConfig.APPLICATION_ID}://paypalpay"
                 )
