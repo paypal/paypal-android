@@ -53,10 +53,10 @@ Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the 
 
 ### 3. Initiate the Payments SDK
 
-Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
+Create a `CoreConfig` using an [access token](../../README.md#access-token):
 
 ```kotlin
-val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
+val config = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 ```
 
 Set a return URL using the custom scheme you configured in the `ActivityManifest.xml` [step 2](#2-configure-your-app-to-handle-browser-switching):

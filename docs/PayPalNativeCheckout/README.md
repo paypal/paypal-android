@@ -39,10 +39,10 @@ A return URL is required for redirecting users back to the app after authenticat
 
 ### 3. Initiate PayPal Native Checkout
 
-Create a `CoreConfig` using with an `ACCESS_TOKEN` created with the `CLIENT_ID` and `SECRET`:
+Create a `CoreConfig` using an [access token](../../README.md#access-token):
 
 ```kotlin
- val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment= Environment.SANDBOX)
+val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 ```
 
 Create a `PayPalClient` with your `RETURN_URL` created above:
