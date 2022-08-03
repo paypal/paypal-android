@@ -61,9 +61,9 @@ curl --location --request POST 'https://api.paypal.com/v1/oauth2/token' \
 -d '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"'
 ```
 
-Make sure to set environment variables for `CLIENT_ID` and `CLIENT_SECRET` when fetching an access token from the command line. We use curl to demonstrate the composition of the HTTP request.
+Make sure to set environment variables for `CLIENT_ID` and `CLIENT_SECRET` when fetching an access token from the command line.
 
-This example can be adapted to any server-side language to receive the following JSON result:
+We use curl to demonstrate the composition of the HTTP request. This example can be adapted to any server-side language to receive the following JSON result:
 
 ```json
 {
