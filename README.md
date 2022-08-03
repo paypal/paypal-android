@@ -52,7 +52,7 @@ The PayPal SDK uses access tokens for authentication.
 
 To create an access token, follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a client id and client secret from the PayPal Developer portal.
 
-Then, make the following http request from your server using Basic authentication:
+Then, make the following HTTP request from your server using Basic authentication:
 
 ```bash
 curl --location --request POST 'https://api.paypal.com/v1/oauth2/token' \
@@ -63,7 +63,7 @@ curl --location --request POST 'https://api.paypal.com/v1/oauth2/token' \
 
 Make sure to set environment variables for `CLIENT_ID` and `CLIENT_SECRET` when fetching an access token from the command line.
 
-We use curl to demonstrate the composition of the HTTP request. This example can be adapted to any server-side language to receive the following JSON result:
+We use curl to demonstrate the composition of the access token HTTP request. This example can be adapted to any server-side language to receive the following JSON result:
 
 ```json
 {
@@ -76,7 +76,7 @@ We use curl to demonstrate the composition of the HTTP request. This example can
 }
 ```
 
-Use the `ACCESS_TOKEN` to create a `CoreConfig` object to use in any of the SDK modules.
+Use the `ACCESS_TOKEN` to create an instance of `CoreConfig` to use with any of the SDK's feature clients.
 
 ## Modules
 
