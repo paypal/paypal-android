@@ -4,4 +4,3 @@
 - [PayPalUI](PayPalUI)
 - [PayPal Web Checkout](PayPalWebCheckout)
 - [PayPal Native Checkout](PayPalNativeCheckout)
-

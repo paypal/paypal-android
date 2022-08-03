@@ -46,19 +46,25 @@ dependencies {
 }
 ```
 
-## Usage
-The SDK uses AccessToken integration, meaning that an access token is needed to use every module of the SDK. To create an access token, a client ID and secret are needed.
-Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a `CLIENT_ID` and `SECRET`. In order to create an access token, run the following request with
-`CLIENT_ID:SECRET` encoded in base64, on the `Authorization` header:
+## Access Token
 
-**Request**
+The PayPal SDK uses access tokens for authentication.
+
+To create an access token, you will first need to follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a client id and client secret.
+
+Then, make the following http request from your server using Basic authentication:
+
 ```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v1/oauth2/token' \
---header 'Content-Type: application/json' \
---header 'Authorization: Basic <CLIENT_ID:SECRET>'
+curl --location --request POST 'https://api.paypal.com/v1/oauth2/token' \
+-H "Authorization: Basic $(echo $CLIENT_ID:$CLIENT_SECRET | base64)" \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-d '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"'
 ```
 
-**Response**
+We use curl to demonstrate the composition of the HTTP request. Make sure to set environment variables for `CLIENT_ID` and `CLIENT_SECRET` when fetching an access token from the command line.
+
+This example can be adapted to any server-side language to receive the following JSON result:
+
 ```json
 {
   "scope": "...",
@@ -69,9 +75,13 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v1/oauth2/token' 
   "nonce": "..."
 }
 ```
-Insert `ACCESS_TOKEN` in the `CoreConfig` object to use in any of the modules.
 
-To know how to use each dependency of the SDK, go to any of the following:
+Use the `ACCESS_TOKEN` to create a `CoreConfig` object to use in any of the SDK modules.
+
+## Modules
+
+Each feature module has its own onboarding guide:
+
 - [Card](docs/Card)
 - [PayPalUI](docs/PayPalUI)
 - [PayPal Web Checkout](docs/PayPalWebCheckout)
