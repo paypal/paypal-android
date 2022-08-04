@@ -2,7 +2,6 @@ package com.paypal.android.checkout
 
 import android.app.Application
 import com.paypal.android.core.API
-import com.paypal.android.checkout.model.buyer.Buyer
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.checkout.PayPalCheckout
@@ -15,7 +14,7 @@ import com.paypal.checkout.error.OnError
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient internal constructor (
+class PayPalCheckoutClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
@@ -28,20 +27,18 @@ class PayPalClient internal constructor (
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
-    var listener: PayPalListener? = null
+    var listener: PayPalCheckoutListener? = null
         set(value) {
             if (value != null) {
                 registerCallbacks(value)
             }
         }
-
-    //TODO: add start checkout with Create Order actions
     /**
      * Initiate a PayPal checkout for an order.
      *
-     * @param orderId the id of the order
+     * @param createOrder the id of the order
      */
-    suspend fun startCheckout(orderId: String) {
+    suspend fun startCheckout(createOrder: CreateOrder) {
         val config = CheckoutConfig(
             application = application,
             clientId = api.getClientId(),
@@ -49,32 +46,24 @@ class PayPalClient internal constructor (
             returnUrl = returnUrl,
         )
         PayPalCheckout.setConfig(config)
-        PayPalCheckout.startCheckout(CreateOrder { createOrderActions ->
-            createOrderActions.set(orderId)
-        })
+        listener?.onPayPalCheckoutStart()
+        PayPalCheckout.startCheckout(createOrder)
     }
 
-    private fun registerCallbacks(listener: PayPalListener) {
-        //TODO: add onShippingChange callback
+    private fun registerCallbacks(listener: PayPalCheckoutListener) {
         PayPalCheckout.registerCallbacks(
             onApprove = OnApprove { approval ->
-
-                //TODO: add Cart and VaultData objects
                 val result = approval.run {
-                    PayPalCheckoutResult(
-                        orderId = data.orderId,
-                        payerId = data.payerId,
-                        payer = Buyer(data.payer)
-                    )
+                    PayPalCheckoutResult(this)
                 }
-                listener.onPayPalSuccess(result)
+                listener.onPayPalCheckoutSuccess(result)
             },
             onCancel = OnCancel {
-                listener.onPayPalCanceled()
+                listener.onPayPalCheckoutCanceled()
             },
             onError = OnError { errorInfo ->
                 val error = APIClientError.payPalCheckoutError(errorInfo.reason)
-                listener.onPayPalFailure(error)
+                listener.onPayPalCheckoutFailure(error)
             })
     }
 }

@@ -42,7 +42,7 @@ android {
 dependencies {
     api project(':Core')
 
-    implementation (deps.paypalNativeCheckout) {
+    api (deps.paypalNativeCheckout) {
         exclude module: 'data-collector'
     }
 
