@@ -48,9 +48,10 @@ dependencies {
 
 ## Access Token
 
-The PayPal SDK uses access tokens for authentication.
+The PayPal SDK uses access tokens for authentication. You can create an access token in two steps:
 
-To create an access token, follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a client id and client secret from the PayPal Developer portal. Then, make the following HTTP request from your server using Basic authentication:
+1. Follw the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a `CLIENT_ID` and `CLIENT_SECRET` from the PayPal Developer site.
+1. Use the credentials obtained in step 1 to make the following HTTP request using Basic Authentication:
 
 ```bash
 # for LIVE environment
@@ -66,9 +67,11 @@ curl -X POST https://api.sandbox.paypal.com/v1/oauth2/token \
 -d 'grant_type=client_credentials&response_type=token&return_authn_schemes=true'
 ```
 
-Make sure to set environment variables for `CLIENT_ID` and `CLIENT_SECRET` when fetching an access token from the command line.
+Make sure that the environment variables for `CLIENT_ID` and `CLIENT_SECRET` are set to the values obtained in step 1.
 
-We use curl to demonstrate the composition of the access token HTTP request. This example can be adapted to any server-side language to receive the following JSON result:
+> NOTE: We use curl to demonstrate the overall composition of the Access Token HTTP request. This example can be adapted to any server-side language/framework of your choice.
+
+On success, we receive the following JSON result:
 
 ```json
 {
@@ -81,7 +84,7 @@ We use curl to demonstrate the composition of the access token HTTP request. Thi
 }
 ```
 
-Use the `ACCESS_TOKEN` to create an instance of `CoreConfig` to use with any of the SDK's feature clients.
+Use the value from the `access_token` property to create an instance of `CoreConfig` to use with any of the SDK's feature clients.
 
 ## Modules
 
