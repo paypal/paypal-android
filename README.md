@@ -46,19 +46,36 @@ dependencies {
 }
 ```
 
-## Usage
-The SDK uses AccessToken integration, meaning that an access token is needed to use every module of the SDK. To create an access token, a client ID and secret are needed.
-Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a `CLIENT_ID` and `SECRET`. In order to create an access token, run the following request with
-`CLIENT_ID:SECRET` encoded in base64, on the `Authorization` header:
+## Access Token
+
+The PayPal SDK uses access tokens for authentication.
+
+> The follwing example can be adapted to any server-side language/framework of your choice. We use command-line curl to demonstrate the overall composition of the Access Token HTTP request.
+
+To create an access token:
+
+1. Follw the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a client ID and secret from the PayPal Developer site.
+1. Make an HTTP request with Basic Authentication using client ID and secret to fetch an access token:
 
 **Request**
 ```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v1/oauth2/token' \
---header 'Content-Type: application/json' \
---header 'Authorization: Basic <CLIENT_ID:SECRET>'
+# for LIVE environment
+curl -X POST https://api.paypal.com/v1/oauth2/token \
+-u $CLIENT_ID:$CLIENT_SECRET \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-d 'grant_type=client_credentials&response_type=token&return_authn_schemes=true'
+
+# for SANDBOX environment
+curl -X POST https://api.sandbox.paypal.com/v1/oauth2/token \
+-u $CLIENT_ID:$CLIENT_SECRET \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-d 'grant_type=client_credentials&response_type=token&return_authn_schemes=true'
 ```
 
+:warning:&nbsp;Make sure the environment variables for `CLIENT_ID` and `CLIENT_SECRET` are set.
+
 **Response**
+
 ```json
 {
   "scope": "...",
@@ -69,9 +86,13 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v1/oauth2/token' 
   "nonce": "..."
 }
 ```
-Insert `ACCESS_TOKEN` in the `CoreConfig` object to use in any of the modules.
 
-To know how to use each dependency of the SDK, go to any of the following:
+Use the value for `access_token` in the response to create an instance of `CoreConfig` to use with any of the SDK's feature clients.
+
+## Modules
+
+Each feature module has its own onboarding guide:
+
 - [Card](docs/Card)
 - [PayPalUI](docs/PayPalUI)
 - [PayPal Web Checkout](docs/PayPalWebCheckout)

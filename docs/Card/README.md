@@ -32,10 +32,10 @@ dependencies {
 
 ### 2. Initiate the Payments SDK
 
-Create a `CoreConfig` using your client ID from the PayPal Developer Portal:
+Create a `CoreConfig` using an [access token](../../README.md#access-token):
 
 ```kotlin
-val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
+val config = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 ```
 
 Create a `CardClient` to approve an order with a Card payment method. Also, set a listener to receive callbacks from the client.
