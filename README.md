@@ -54,7 +54,7 @@ To create an access token, follow the steps in [Get Started](https://developer.p
 
 ```bash
 curl --location --request POST 'https://api.paypal.com/v1/oauth2/token' \
--H "Authorization: Basic $(echo $CLIENT_ID:$CLIENT_SECRET | base64)" \
+-u $CLIENT_ID:$CLIENT_SECRET
 -H 'Content-Type: application/x-www-form-urlencoded' \
 -d '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"'
 ```
