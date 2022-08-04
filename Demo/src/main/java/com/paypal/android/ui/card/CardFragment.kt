@@ -21,6 +21,7 @@ import com.paypal.android.card.CardRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.threedsecure.SCA
 import com.paypal.android.card.threedsecure.ThreeDSecureRequest
+import com.paypal.android.core.Address
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentCardBinding
@@ -187,7 +188,14 @@ class CardFragment : Fragment() {
 
             val (monthString, yearString) = expirationDate.split("/")
 
-            val card = Card(cardNumber, monthString, yearString, securityCode)
+            val billingAddress = Address(
+                countryCode = "US",
+                streetAddress = "3272 Gateway Road",
+                locality = "Aloha",
+                postalCode = "97007"
+            )
+
+            val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
             CardRequest(order.id!!, card)
         }
 
