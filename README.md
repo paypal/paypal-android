@@ -53,8 +53,8 @@ The PayPal SDK uses access tokens for authentication.
 To create an access token, follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a client id and client secret from the PayPal Developer portal. Then, make the following HTTP request from your server using Basic authentication:
 
 ```bash
-curl --location --request POST 'https://api.paypal.com/v1/oauth2/token' \
--u $CLIENT_ID:$CLIENT_SECRET
+curl -X POST 'https://api.paypal.com/v1/oauth2/token' \
+-u $CLIENT_ID:$CLIENT_SECRET \
 -H 'Content-Type: application/x-www-form-urlencoded' \
 -d '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"'
 ```
