@@ -67,7 +67,7 @@ curl -X POST https://api.sandbox.paypal.com/v1/oauth2/token \
 -d 'grant_type=client_credentials&response_type=token&return_authn_schemes=true'
 ```
 
-:warning:&nbsp;Make sure that the environment variables for `CLIENT_ID` and `CLIENT_SECRET` are set.
+:warning:&nbsp;Make sure the environment variables for `CLIENT_ID` and `CLIENT_SECRET` are set.
 
 > NOTE: We use curl to demonstrate the overall composition of the Access Token HTTP request. This example can be adapted to any server-side language/framework of your choice.
 
