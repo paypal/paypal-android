@@ -48,8 +48,6 @@ dependencies {
 
 ## Access Token
 
-> NOTE: We use curl to demonstrate the overall composition of the Access Token HTTP request. This example can be adapted to any server-side language/framework of your choice.
-
 The PayPal SDK uses access tokens for authentication. You can create an access token in two steps:
 
 1. Follw the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to obtain a `CLIENT_ID` and `CLIENT_SECRET` from the PayPal Developer site.
@@ -70,6 +68,8 @@ curl -X POST https://api.sandbox.paypal.com/v1/oauth2/token \
 ```
 
 :warning:&nbsp;Make sure the environment variables for `CLIENT_ID` and `CLIENT_SECRET` are set.
+
+> We use command-line curl to demonstrate the overall composition of the Access Token HTTP request. This example can be adapted to any server-side language/framework of your choice.
 
 On success, we receive the following JSON result:
 
