@@ -6,11 +6,11 @@ import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.checkout.PayPalCheckout
+import com.paypal.checkout.approve.Approval
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.createorder.CreateOrder
-import com.paypal.checkout.createorder.CreateOrderActions
 import com.paypal.checkout.error.ErrorInfo
 import com.paypal.checkout.error.OnError
 import io.mockk.coEvery
@@ -67,7 +67,7 @@ class PayPalClientTest {
         } just runs
 
         sut = PayPalCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
-        sut.startCheckout(generateRandomString())
+        sut.startCheckout(mockk(relaxed = true))
 
         verify {
             PayPalCheckout.setConfig(any())
@@ -80,6 +80,22 @@ class PayPalClientTest {
     }
 
     @Test
+    fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runBlocking {
+        val payPalCheckoutListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        every { PayPalCheckout.setConfig(any()) } just runs
+        every { PayPalCheckout.startCheckout(any()) } just runs
+
+        sut = PayPalCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
+        sut.listener = payPalCheckoutListener
+        resetField(PayPalCheckout::class.java, "isConfigSet", true)
+        sut.startCheckout(mockk(relaxed = true))
+
+        verify {
+            payPalCheckoutListener.onPayPalCheckoutStart()
+        }
+    }
+
+    @Test
     fun `when checkout is invoked, propagates core api client id fetch errors`() = runBlocking {
         val error = Exception("client id error")
         coEvery { api.getClientId() } throws error
@@ -88,7 +104,7 @@ class PayPalClientTest {
 
         var capturedError: Exception? = null
         try {
-            sut.startCheckout(generateRandomString())
+            sut.startCheckout(mockk(relaxed = true))
         } catch (e: Exception) {
             capturedError = e
         }
@@ -104,10 +120,9 @@ class PayPalClientTest {
             every {
                 PayPalCheckout.startCheckout(any())
             } just runs
-
             val liveConfig = CoreConfig(environment = Environment.LIVE)
             sut = PayPalCheckoutClient(mockApplication, liveConfig, mockReturnUrl, api)
-            sut.startCheckout(generateRandomString())
+            sut.startCheckout(mockk())
 
             verify {
                 PayPalCheckout.setConfig(any())
@@ -130,7 +145,7 @@ class PayPalClientTest {
 
             val stagingConfig = CoreConfig(environment = Environment.STAGING)
             sut = PayPalCheckoutClient(mockApplication, stagingConfig, mockReturnUrl, api)
-            sut.startCheckout(generateRandomString())
+            sut.startCheckout(mockk(relaxed = true))
 
             verify {
                 PayPalCheckout.setConfig(any())
@@ -149,7 +164,7 @@ class PayPalClientTest {
         sut = PayPalCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        sut.startCheckout(generateRandomString())
+        sut.startCheckout(mockk(relaxed = true))
 
         verify {
             PayPalCheckout.startCheckout(any())
@@ -157,24 +172,20 @@ class PayPalClientTest {
     }
 
     @Test
-    fun `when checkout is invoked with an orderId, createOrderAction is called`() = runBlocking {
-        val orderId = generateRandomString()
-        val createOrderSlot = slot<CreateOrder>()
-        val createOrderActions = mockk<CreateOrderActions>(relaxed = true)
+    fun `when startCheckout is invoked, NXO startCheckout is called`() = runBlocking {
+        val createOrder = mockk<CreateOrder>(relaxed = true)
 
         every {
-            PayPalCheckout.startCheckout(
-                capture(createOrderSlot)
-            )
-        } answers { createOrderSlot.captured.create(createOrderActions) }
+            PayPalCheckout.startCheckout(any())
+        } just runs
 
         sut = PayPalCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
-        sut.startCheckout(orderId)
-
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
+        sut.startCheckout(createOrder)
+
 
         verify {
-            createOrderActions.set(orderId)
+            PayPalCheckout.startCheckout(createOrder)
         }
     }
 
@@ -196,22 +207,9 @@ class PayPalClientTest {
 
     @Test
     fun `when OnApprove is invoked, onPayPalSuccess is called`() {
-        val userId = generateRandomString()
-        val orderId = generateRandomString()
-        val payerId = generateRandomString()
-        val paymentId = generateRandomString()
-        val buyer = mockk<com.paypal.pyplcheckout.pojo.Buyer>()
-        every { buyer.userId } returns userId
-        val approval = mockk<com.paypal.checkout.approve.Approval>()
+        val approval = mockk<Approval>()
         val onApproveSlot = slot<OnApprove>()
         val paypalCheckoutResultSlot = slot<PayPalCheckoutResult>()
-
-        val approvalDataMock = mockk<com.paypal.checkout.approve.ApprovalData>(relaxed = true)
-        every { approvalDataMock.payerId } returns payerId
-        every { approvalDataMock.orderId } returns orderId
-        every { approvalDataMock.paymentId } returns paymentId
-
-        every { approval.data } returns approvalDataMock
 
         every {
             PayPalCheckout.registerCallbacks(
@@ -230,9 +228,7 @@ class PayPalClientTest {
         every {
             payPalClientListener.onPayPalCheckoutSuccess(capture(paypalCheckoutResultSlot))
         } answers {
-            assert(paypalCheckoutResultSlot.captured.payerId == payerId)
-            assert(paypalCheckoutResultSlot.captured.orderId == orderId)
-            assert(paypalCheckoutResultSlot.captured.payer?.userId == userId)
+            assert(paypalCheckoutResultSlot.captured.approval == approval)
         }
 
         verify { payPalClientListener.onPayPalCheckoutSuccess(any()) }

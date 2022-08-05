@@ -29,6 +29,7 @@ class PayPalCheckoutClient internal constructor (
      */
     var listener: PayPalCheckoutListener? = null
         set(value) {
+            field = value
             if (value != null) {
                 registerCallbacks(value)
             }
