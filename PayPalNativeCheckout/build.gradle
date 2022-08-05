@@ -49,6 +49,7 @@ dependencies {
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+    implementation deps.kotlinxAndroidCoroutines
     implementation deps.material
 
     testImplementation deps.junit

@@ -4,12 +4,16 @@ import android.app.Application
 import com.paypal.android.core.API
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
+import com.paypal.android.core.PayPalSDKError
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Use this client to checkout with PayPal.
@@ -39,16 +43,22 @@ class PayPalCheckoutClient internal constructor (
      *
      * @param createOrder the id of the order
      */
-    suspend fun startCheckout(createOrder: CreateOrder) {
-        val config = CheckoutConfig(
-            application = application,
-            clientId = api.getClientId(),
-            environment = getPayPalEnvironment(coreConfig.environment),
-            returnUrl = returnUrl,
-        )
-        PayPalCheckout.setConfig(config)
-        listener?.onPayPalCheckoutStart()
-        PayPalCheckout.startCheckout(createOrder)
+    fun startCheckout(createOrder: CreateOrder) {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val config = CheckoutConfig(
+                    application = application,
+                    clientId = api.getClientId(),
+                    environment = getPayPalEnvironment(coreConfig.environment),
+                    returnUrl = returnUrl,
+                )
+                PayPalCheckout.setConfig(config)
+                listener?.onPayPalCheckoutStart()
+                PayPalCheckout.startCheckout(createOrder)
+            } catch (e: PayPalSDKError) {
+                listener?.onPayPalCheckoutFailure(e)
+            }
+        }
     }
 
     private fun registerCallbacks(listener: PayPalCheckoutListener) {
@@ -63,8 +73,7 @@ class PayPalCheckoutClient internal constructor (
                 listener.onPayPalCheckoutCanceled()
             },
             onError = OnError { errorInfo ->
-                val error = APIClientError.payPalCheckoutError(errorInfo.reason)
-                listener.onPayPalCheckoutFailure(error)
+                listener.onPayPalCheckoutFailure(PayPalCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
             })
     }
 }
