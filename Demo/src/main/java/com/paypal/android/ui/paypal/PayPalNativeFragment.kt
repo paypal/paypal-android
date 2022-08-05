@@ -66,7 +66,9 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
                 )
                 paypalNativeClient.listener = this@PayPalNativeFragment
                 order.id?.let { orderId ->
-                    paypalNativeClient.startCheckout(CreateOrder { createOrderActions -> createOrderActions.set(orderId) })
+                    paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
+                        createOrderActions.set(orderId)
+                    })
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
