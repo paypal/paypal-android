@@ -11,6 +11,7 @@ import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
+import com.paypal.checkout.shipping.OnShippingChange
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +77,10 @@ class PayPalClient internal constructor (
             },
             onError = OnError { errorInfo ->
                 listener.onPayPalCheckoutFailure(PayPalCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
-            })
+            },
+            onShippingChange = OnShippingChange { shippingChangeData, shippingChangeActions ->
+                listener.onPayPalCheckoutShippingChange(shippingChangeData, shippingChangeActions)
+            }
+        )
     }
 }
