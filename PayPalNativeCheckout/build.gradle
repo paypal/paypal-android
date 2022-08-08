@@ -42,13 +42,14 @@ android {
 dependencies {
     api project(':Core')
 
-    implementation (deps.paypalNativeCheckout) {
+    api (deps.paypalNativeCheckout) {
         exclude module: 'data-collector'
     }
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
+    implementation deps.kotlinxAndroidCoroutines
     implementation deps.material
 
     testImplementation deps.junit
