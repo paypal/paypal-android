@@ -112,7 +112,7 @@ class PayPalClientTest {
     }
 
     @Test
-    fun `when getting client id fails is invoked, it calls onPayPalFailure`() = runBlocking {
+    fun `when getting client id fails is invoked, it calls onPayPalFailure`() = runTest {
         val mockCode = 0
         val mockErrorDescription = "mock_error_description"
         val error = PayPalSDKError(mockCode, mockErrorDescription)
@@ -124,10 +124,11 @@ class PayPalClientTest {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }
 
-        sut = getPayPalCheckoutClient()
+        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
 
         sut.startCheckout(mockk(relaxed = true))
+        advanceUntilIdle()
 
         verify {
             payPalCheckoutListener.onPayPalCheckoutFailure(any())
@@ -188,6 +189,7 @@ class PayPalClientTest {
 
     @Test
     fun `when startCheckout is invoked, PayPalCheckout startCheckout is called`() = runTest {
+        val createOrder = mockk<CreateOrder>(relaxed = true)
         every { PayPalCheckout.startCheckout(any()) } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
@@ -195,24 +197,6 @@ class PayPalClientTest {
 
         sut.startCheckout(mockk(relaxed = true))
         advanceUntilIdle()
-
-        verify {
-            PayPalCheckout.startCheckout(any())
-        }
-    }
-
-    @Test
-    fun `when startCheckout is invoked, NXO startCheckout is called`() = runBlocking {
-        val createOrder = mockk<CreateOrder>(relaxed = true)
-
-        every {
-            PayPalCheckout.startCheckout(any())
-        } just runs
-
-        sut = getPayPalCheckoutClient()
-        resetField(PayPalCheckout::class.java, "isConfigSet", true)
-        sut.startCheckout(createOrder)
-
 
         verify {
             PayPalCheckout.startCheckout(createOrder)
