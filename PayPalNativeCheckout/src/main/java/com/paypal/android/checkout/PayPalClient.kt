@@ -11,6 +11,7 @@ import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,11 +19,12 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalCheckoutClient internal constructor (
+class PayPalClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
-    private val api: API
+    private val api: API,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(application, coreConfig, returnUrl, API(coreConfig))
@@ -44,7 +46,7 @@ class PayPalCheckoutClient internal constructor (
      * @param createOrder the id of the order
      */
     fun startCheckout(createOrder: CreateOrder) {
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(dispatcher).launch {
             try {
                 val config = CheckoutConfig(
                     application = application,

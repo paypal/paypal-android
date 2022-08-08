@@ -13,7 +13,7 @@ import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.services.PayPalDemoApi
 import com.paypal.android.checkout.PayPalCheckoutResult
-import com.paypal.android.checkout.PayPalCheckoutClient
+import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalCheckoutListener
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
@@ -59,7 +59,7 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
                 val order = payPalDemoApi.createOrder(orderJson)
 
                 val coreConfig = CoreConfig(accessToken = accessToken)
-                val paypalNativeClient = PayPalCheckoutClient(
+                val paypalNativeClient = PayPalClient(
                     requireActivity().application,
                     coreConfig,
                     "${BuildConfig.APPLICATION_ID}://paypalpay"

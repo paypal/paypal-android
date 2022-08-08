@@ -3,7 +3,7 @@ package com.paypal.android.checkout
 import com.paypal.android.core.PayPalSDKError
 
 /**
- * Implement this callback to receive results from [PayPalCheckoutClient].
+ * Implement this callback to receive results from [PayPalClient].
  */
 interface PayPalCheckoutListener {
 
