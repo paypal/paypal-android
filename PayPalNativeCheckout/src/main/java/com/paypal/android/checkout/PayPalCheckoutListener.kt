@@ -1,6 +1,8 @@
 package com.paypal.android.checkout
 
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.checkout.shipping.ShippingChangeActions
+import com.paypal.checkout.shipping.ShippingChangeData
 
 /**
  * Implement this callback to receive results from [PayPalClient].
@@ -28,4 +30,12 @@ interface PayPalCheckoutListener {
      * Called when the PayPal flow was canceled by the user.
      */
     fun onPayPalCheckoutCanceled()
+
+    /**
+     * Called when a shipping address changes
+     */
+    fun onPayPalCheckoutShippingChange(
+        shippingChangeData: ShippingChangeData,
+        shippingChangeActions: ShippingChangeActions
+    )
 }

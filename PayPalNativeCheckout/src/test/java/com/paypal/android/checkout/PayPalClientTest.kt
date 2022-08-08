@@ -13,6 +13,9 @@ import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.ErrorInfo
 import com.paypal.checkout.error.OnError
+import com.paypal.checkout.shipping.OnShippingChange
+import com.paypal.checkout.shipping.ShippingChangeActions
+import com.paypal.checkout.shipping.ShippingChangeData
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -300,6 +303,38 @@ class PayPalClientTest {
         }
 
         verify { payPalClientListener.onPayPalCheckoutFailure(any()) }
+    }
+
+    @Test
+    fun `when OnShippingChange is invoked, onPayPalShippingChange is called`() {
+        val onShippingChangeSlot = slot<OnShippingChange>()
+        val shippingActionsSlot = slot<ShippingChangeActions>()
+        val shippingDataSlot = slot<ShippingChangeData>()
+        val shippingActions = mockk<ShippingChangeActions>()
+        val shippingData = mockk<ShippingChangeData>()
+
+        every {
+            PayPalCheckout.registerCallbacks(
+                any(),
+                capture(onShippingChangeSlot),
+                any(),
+                any()
+            )
+        } answers { onShippingChangeSlot.captured.onShippingChanged(shippingData, shippingActions) }
+
+        sut = getPayPalCheckoutClient()
+
+        val payPalClientListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        sut.listener = payPalClientListener
+
+        every {
+            payPalClientListener.onPayPalCheckoutShippingChange(capture(shippingDataSlot), capture(shippingActionsSlot))
+        } answers {
+            assert(shippingDataSlot.captured == shippingData)
+            assert(shippingActionsSlot.captured == shippingActions)
+        }
+
+        verify { payPalClientListener.onPayPalCheckoutShippingChange(any(), any()) }
     }
 
     /**

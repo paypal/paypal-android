@@ -20,6 +20,8 @@ import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
 import com.paypal.checkout.createorder.CreateOrder
+import com.paypal.checkout.shipping.ShippingChangeActions
+import com.paypal.checkout.shipping.ShippingChangeData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -96,5 +98,12 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
 
     override fun onPayPalCheckoutCanceled() {
         Toast.makeText(requireContext(), "PayPal CANCELED", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPayPalCheckoutShippingChange(
+        shippingChangeData: ShippingChangeData,
+        shippingChangeActions: ShippingChangeActions
+    ) {
+        Toast.makeText(requireContext(), "PayPal SHIPPING CHANGE", Toast.LENGTH_LONG).show()
     }
 }
