@@ -97,14 +97,15 @@ class PayPalClientTest {
     }
 
     @Test
-    fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runBlocking {
+    fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runTest {
         val payPalCheckoutListener = mockk<PayPalCheckoutListener>(relaxed = true)
         every { PayPalCheckout.startCheckout(any()) } just runs
 
-        sut = getPayPalCheckoutClient()
+        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
         sut.startCheckout(mockk(relaxed = true))
+        advanceUntilIdle()
 
         verify {
             payPalCheckoutListener.onPayPalCheckoutStart()
@@ -195,7 +196,7 @@ class PayPalClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        sut.startCheckout(mockk(relaxed = true))
+        sut.startCheckout(createOrder)
         advanceUntilIdle()
 
         verify {
