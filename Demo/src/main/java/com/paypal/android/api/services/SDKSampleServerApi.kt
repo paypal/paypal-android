@@ -7,7 +7,7 @@ import com.paypal.android.api.model.Order
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface PayPalDemoApi {
+interface SDKSampleServerApi {
 
     @POST("/orders")
     suspend fun createOrder(@Body orderRequest: CreateOrderRequest?): Order

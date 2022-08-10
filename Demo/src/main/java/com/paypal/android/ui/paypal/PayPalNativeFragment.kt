@@ -7,11 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.BuildConfig
-import com.paypal.android.api.services.PayPalDemoApi
+import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.checkout.PayPalCheckoutListener
@@ -19,6 +20,7 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
+import com.paypal.android.viewmodels.PayPalNativeViewModel
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
@@ -38,7 +40,9 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
     private lateinit var binding: FragmentPayPalNativeBinding
 
     @Inject
-    lateinit var payPalDemoApi: PayPalDemoApi
+    lateinit var sdkSampleServerApi: SDKSampleServerApi
+
+    private val viewModel: PayPalNativeViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,17 +52,17 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
 
         binding = FragmentPayPalNativeBinding.inflate(inflater, container, false)
 
-        binding.startNativeCheckout.setOnClickListener { launchNativeCheckout() }
+        binding.startNativeCheckout.setOnClickListener { viewModel.billingAgreementCheckout() }
         return binding.root
     }
 
     private fun launchNativeCheckout() {
         lifecycleScope.launch {
             try {
-                val accessToken = payPalDemoApi.fetchAccessToken().value
+                val accessToken = sdkSampleServerApi.fetchAccessToken().value
                 val orderJson =
                     JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
-                val order = payPalDemoApi.createOrder(orderJson)
+                val order = sdkSampleServerApi.createOrder(orderJson)
 
                 val coreConfig = CoreConfig(accessToken = accessToken)
                 val paypalNativeClient = PayPalClient(
