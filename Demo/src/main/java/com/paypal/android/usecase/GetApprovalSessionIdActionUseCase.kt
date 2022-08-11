@@ -1,4 +1,4 @@
-package com.paypal.android
+package com.paypal.android.usecase
 
 import androidx.core.net.toUri
 import com.google.gson.JsonObject

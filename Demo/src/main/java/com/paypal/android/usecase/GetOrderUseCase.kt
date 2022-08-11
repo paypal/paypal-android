@@ -1,4 +1,4 @@
-package com.paypal.android
+package com.paypal.android.usecase
 
 import com.paypal.checkout.createorder.CurrencyCode
 import com.paypal.checkout.createorder.OrderIntent

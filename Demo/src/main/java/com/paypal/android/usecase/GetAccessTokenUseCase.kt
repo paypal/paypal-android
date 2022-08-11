@@ -1,4 +1,4 @@
-package com.paypal.android
+package com.paypal.android.usecase
 
 import com.paypal.android.api.services.SDKSampleServerApi
 import kotlinx.coroutines.Dispatchers

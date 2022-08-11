@@ -1,4 +1,4 @@
-package com.paypal.android
+package com.paypal.android.usecase
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
