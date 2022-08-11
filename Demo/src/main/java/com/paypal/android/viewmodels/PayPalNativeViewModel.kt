@@ -22,6 +22,7 @@ import com.paypal.checkout.error.ErrorInfo
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,12 +30,12 @@ import javax.inject.Inject
 class PayPalNativeViewModel @Inject constructor(
     private val getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase,
     private val getAccessTokenUseCase: GetAccessTokenUseCase,
-    private val getOrderUseCase: GetOrderUseCase = GetOrderUseCase(),
     private val getOrderIdUseCase: GetOrderIdUseCase,
     private val getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase,
     application: Application
 ): AndroidViewModel(application), PayPalCheckoutListener {
 
+    private val getOrderUseCase = GetOrderUseCase()
     private val payPalConstants = PayPalConfigConstants()
 
     private val internalState = MutableLiveData<ViewState>(ViewState.Initial)
@@ -42,8 +43,24 @@ class PayPalNativeViewModel @Inject constructor(
 
     lateinit var payPalClient: PayPalClient
 
+    private var accessToken = ""
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, e ->
+        internalState.postValue(ViewState.CheckoutError(message = e.message))
+    }
+
+    fun fetchAccessToken() {
+        internalState.postValue(ViewState.GeneratingToken)
+        viewModelScope.launch(exceptionHandler) {
+            accessToken = getAccessTokenUseCase()
+            initPayPalClient(accessToken)
+            internalState.postValue(ViewState.TokenGenerated(accessToken))
+        }
+    }
+
     fun billingAgreementCheckout() {
-        viewModelScope.launch {
+        internalState.postValue(ViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
             val order = getBillingAgreementTokenUseCase()
             order.id?.also { orderId ->
                 startCheckoutFlow(CreateOrder { createOrderActions ->
@@ -53,20 +70,8 @@ class PayPalNativeViewModel @Inject constructor(
         }
     }
 
-    fun fetchAccessToken() {
-        internalState.postValue(ViewState.GeneratingToken)
-        viewModelScope.launch {
-            try {
-                val accessToken = getAccessTokenUseCase()
-                initPayPalClient(accessToken)
-                internalState.postValue(ViewState.TokenGenerated(accessToken))
-            } catch (e: Exception) {
-                internalState.postValue(ViewState.CheckoutError(message = e.message))
-            }
-        }
-    }
-
     fun orderCheckout() {
+        internalState.postValue(ViewState.CheckoutInit)
         val order = getOrderUseCase()
         startCheckoutFlow(CreateOrder { createOrderActions ->
             createOrderActions.create(order) {
@@ -76,7 +81,8 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun orderIdCheckout() {
-        viewModelScope.launch {
+        internalState.postValue(ViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
             val orderId = getOrderIdUseCase()
             orderId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
@@ -88,7 +94,8 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun vaultCheckout() {
-        viewModelScope.launch {
+        internalState.postValue(ViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
             val sessionId = getApprovalSessionIdActionUseCase()
             sessionId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
@@ -96,6 +103,11 @@ class PayPalNativeViewModel @Inject constructor(
                 })
             }
         }
+    }
+
+    fun reset() {
+        accessToken = ""
+        internalState.postValue(ViewState.Initial)
     }
 
     private fun startCheckoutFlow(createOrder: CreateOrder) {
@@ -146,12 +158,10 @@ class PayPalNativeViewModel @Inject constructor(
 
     sealed class ViewState {
         object Initial : ViewState()
-        object BillingAgreementState : ViewState()
-        object VaultV2State : ViewState()
         object GeneratingToken : ViewState()
-        object ErrorGeneratingToken : ViewState()
         class TokenGenerated(val token: String) : ViewState()
         class OrderCreated(val orderId: String) : ViewState()
+        object CheckoutInit: ViewState()
         object CheckoutStart : ViewState()
         object CheckoutCancelled : ViewState()
         class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) : ViewState()

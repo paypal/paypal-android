@@ -1,37 +1,22 @@
 package com.paypal.android.ui.paypal
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.paypal.android.BuildConfig
+import com.google.android.material.radiobutton.MaterialRadioButton
+import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
-import com.paypal.android.checkout.PayPalCheckoutResult
-import com.paypal.android.checkout.PayPalClient
-import com.paypal.android.checkout.PayPalCheckoutListener
-import com.paypal.android.core.APIClientError
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
 import com.paypal.android.viewmodels.PayPalNativeViewModel
-import com.paypal.checkout.createorder.CreateOrder
-import com.paypal.checkout.shipping.ShippingChangeActions
-import com.paypal.checkout.shipping.ShippingChangeData
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
+class PayPalNativeFragment : Fragment() {
 
     companion object {
         private val TAG = PayPalNativeFragment::class.qualifiedName
@@ -44,6 +29,8 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
 
     private val viewModel: PayPalNativeViewModel by viewModels()
 
+    private var selectedOptionId = R.id.order_checkout
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -51,63 +38,124 @@ class PayPalNativeFragment : Fragment(), PayPalCheckoutListener {
     ): View {
 
         binding = FragmentPayPalNativeBinding.inflate(inflater, container, false)
-
-        binding.startNativeCheckout.setOnClickListener { viewModel.billingAgreementCheckout() }
+        viewModel.state.observe(viewLifecycleOwner) { viewState ->
+            checkViewState(viewState)
+        }
+        with(binding) {
+            fetchAccessTokenButton.setOnClickListener { viewModel.fetchAccessToken() }
+            startNativeCheckout.setOnClickListener { onStartNativeCheckoutClicked() }
+            orderCheckout.setOnClickListener { onRadioButtonClicked(it) }
+            orderIdCheckout.setOnClickListener { onRadioButtonClicked(it) }
+            billingAgreementCheckout.setOnClickListener { onRadioButtonClicked(it) }
+            vaultCheckout.setOnClickListener { onRadioButtonClicked(it) }
+            errorButton.setOnClickListener { viewModel.reset() }
+        }
         return binding.root
     }
 
-    private fun launchNativeCheckout() {
-        lifecycleScope.launch {
-            try {
-                val accessToken = sdkSampleServerApi.fetchAccessToken().value
-                val orderJson =
-                    JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
-                val order = sdkSampleServerApi.createOrder(orderJson)
-
-                val coreConfig = CoreConfig(accessToken = accessToken)
-                val paypalNativeClient = PayPalClient(
-                    requireActivity().application,
-                    coreConfig,
-                    "${BuildConfig.APPLICATION_ID}://paypalpay"
-                )
-                paypalNativeClient.listener = this@PayPalNativeFragment
-                order.id?.let { orderId ->
-                    paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
-                        createOrderActions.set(orderId)
-                    })
-                }
-            } catch (e: UnknownHostException) {
-                Log.e(TAG, e.message!!)
-                val error = APIClientError.payPalCheckoutError(e.message!!)
-                onPayPalCheckoutFailure(error)
-            } catch (e: HttpException) {
-                Log.e(TAG, e.message!!)
-                val error = APIClientError.payPalCheckoutError(e.message!!)
-                onPayPalCheckoutFailure(error)
-            }
+    private fun onRadioButtonClicked(view: View) {
+        if (view is MaterialRadioButton && view.isChecked) {
+            selectedOptionId = view.id
         }
     }
 
-    override fun onPayPalCheckoutStart() {
-        Toast.makeText(requireContext(), "PayPal START", Toast.LENGTH_LONG).show()
+    private fun onStartNativeCheckoutClicked() {
+        when(selectedOptionId) {
+            R.id.order_checkout -> { viewModel.orderCheckout() }
+            R.id.order_id_checkout -> { viewModel.orderIdCheckout() }
+            R.id.billing_agreement_checkout -> { viewModel.billingAgreementCheckout() }
+            R.id.vault_checkout -> { viewModel.vaultCheckout() }
+            else -> {}
+        }
     }
 
-    override fun onPayPalCheckoutSuccess(result: PayPalCheckoutResult) {
-        Toast.makeText(requireContext(), "PayPal SUCCESS", Toast.LENGTH_LONG).show()
+    private fun checkViewState(viewState: PayPalNativeViewModel.ViewState) {
+        when (viewState) {
+            PayPalNativeViewModel.ViewState.CheckoutCancelled -> checkoutCancelled()
+            is PayPalNativeViewModel.ViewState.CheckoutComplete -> checkoutComplete(viewState)
+            is PayPalNativeViewModel.ViewState.CheckoutError -> checkoutError(viewState)
+            PayPalNativeViewModel.ViewState.CheckoutStart -> checkoutStart()
+            PayPalNativeViewModel.ViewState.GeneratingToken -> generatingToken()
+            PayPalNativeViewModel.ViewState.Initial -> setInitialState()
+            is PayPalNativeViewModel.ViewState.OrderCreated -> orderCreated(viewState)
+            is PayPalNativeViewModel.ViewState.TokenGenerated -> tokenGenerated(viewState)
+            PayPalNativeViewModel.ViewState.CheckoutInit -> checkoutInit()
+        }
     }
 
-    override fun onPayPalCheckoutFailure(error: PayPalSDKError) {
-        Toast.makeText(requireContext(), "PayPal FAILURE", Toast.LENGTH_LONG).show()
+    private fun setInitialState() {
+        with(binding) {
+            fetchAccessTokenButton.visibility = View.VISIBLE
+            fetchAccessTokenButton.isEnabled = true
+            startNativeCheckout.visibility = View.GONE
+            checkoutOptionsRadioGroup.visibility = View.GONE
+            errorGroup.visibility = View.GONE
+            hideProgress()
+        }
     }
 
-    override fun onPayPalCheckoutCanceled() {
-        Toast.makeText(requireContext(), "PayPal CANCELED", Toast.LENGTH_LONG).show()
+    private fun generatingToken() {
+        showProgress("Fetching access token...")
+        with(binding) {
+            fetchAccessTokenButton.isEnabled = false
+            startNativeCheckout.visibility = View.GONE
+        }
     }
 
-    override fun onPayPalCheckoutShippingChange(
-        shippingChangeData: ShippingChangeData,
-        shippingChangeActions: ShippingChangeActions
-    ) {
-        Toast.makeText(requireContext(), "PayPal SHIPPING CHANGE", Toast.LENGTH_LONG).show()
+    private fun tokenGenerated(viewState: PayPalNativeViewModel.ViewState.TokenGenerated) {
+        hideProgress()
+        with(binding) {
+            startNativeCheckout.visibility = View.VISIBLE
+            startNativeCheckout.isEnabled = true
+            checkoutOptionsRadioGroup.visibility = View.VISIBLE
+            selectedOptionId = R.id.order_checkout
+            orderCheckout.isChecked = true
+            fetchAccessTokenButton.visibility = View.GONE
+        }
     }
+
+    private fun checkoutInit() {
+        showProgress("Initializing Checkout...")
+        with(binding) {
+            startNativeCheckout.isEnabled = false
+            checkoutOptionsRadioGroup.visibility = View.GONE
+        }
+    }
+
+    private fun checkoutStart() {
+        showProgress("Starting Paypal...")
+    }
+
+    private fun checkoutError(viewState: PayPalNativeViewModel.ViewState.CheckoutError) {
+        val message = viewState.message?: viewState.error?.reason?: "Oops! Something went wrong"
+        hideProgress()
+        with(binding) {
+            errorGroup.visibility = View.VISIBLE
+            errorMessage.text = message
+        }
+    }
+
+    private fun orderCreated(viewState: PayPalNativeViewModel.ViewState.OrderCreated) {
+
+    }
+
+    private fun checkoutCancelled() {
+
+    }
+
+    private fun checkoutComplete(viewState: PayPalNativeViewModel.ViewState.CheckoutComplete) {
+
+    }
+
+    private fun showProgress(text: String) {
+        with(binding) {
+            progressGroup.visibility = View.VISIBLE
+            progressText.text = text
+        }
+    }
+
+    private fun hideProgress() {
+        binding.progressGroup.visibility = View.GONE
+    }
+
 }
