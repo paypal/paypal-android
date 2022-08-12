@@ -23,6 +23,7 @@ import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,11 +33,47 @@ class PayPalNativeViewModel @Inject constructor(
     private val getOrderIdUseCase: GetOrderIdUseCase,
     private val getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase,
     application: Application
-): AndroidViewModel(application), PayPalCheckoutListener {
+) : AndroidViewModel(application) {
 
     private val getOrderUseCase: GetOrderUseCase = GetOrderUseCase()
 
     private val payPalConstants = PayPalConfigConstants()
+
+    private val payPalListener = object : PayPalCheckoutListener {
+        override fun onPayPalCheckoutStart() {
+            internalState.postValue(ViewState.CheckoutStart)
+        }
+
+        override fun onPayPalCheckoutSuccess(result: PayPalCheckoutResult) {
+            result.approval.data.apply {
+                internalState.postValue(ViewState.CheckoutComplete(
+                    payerId,
+                    orderId,
+                    paymentId,
+                    billingToken
+                ))
+            }
+        }
+
+        override fun onPayPalCheckoutFailure(error: PayPalSDKError) {
+            val errorState = when (error) {
+                is PayPalCheckoutError -> ViewState.CheckoutError(error = error.errorInfo)
+                else -> ViewState.CheckoutError(message = error.errorDescription)
+            }
+            internalState.postValue(errorState)
+        }
+
+        override fun onPayPalCheckoutCanceled() {
+            internalState.postValue(ViewState.CheckoutCancelled)
+        }
+
+        override fun onPayPalCheckoutShippingChange(
+            shippingChangeData: ShippingChangeData,
+            shippingChangeActions: ShippingChangeActions
+        ) {
+            // implement
+        }
+    }
 
     private val internalState = MutableLiveData<ViewState>(ViewState.Initial)
     val state: LiveData<ViewState> = internalState
@@ -61,7 +98,7 @@ class PayPalNativeViewModel @Inject constructor(
                 val accessToken = getAccessTokenUseCase()
                 initPayPalClient(accessToken)
                 internalState.postValue(ViewState.TokenGenerated(accessToken))
-            } catch (e: Exception) {
+            } catch (e: HttpException) {
                 internalState.postValue(ViewState.CheckoutError(message = e.message))
             }
         }
@@ -109,40 +146,7 @@ class PayPalNativeViewModel @Inject constructor(
             CoreConfig(accessToken),
             payPalConstants.returnUrl
         )
-        payPalClient.listener = this
-    }
-
-    override fun onPayPalCheckoutStart() {
-        internalState.postValue(ViewState.CheckoutStart)
-    }
-
-    override fun onPayPalCheckoutSuccess(result: PayPalCheckoutResult) {
-        result.approval.data.apply {
-            internalState.postValue(ViewState.CheckoutComplete(
-                payerId,
-                orderId,
-                paymentId,
-                billingToken
-            ))
-        }
-    }
-
-    override fun onPayPalCheckoutFailure(error: PayPalSDKError) {
-        val errorState = when (error) {
-            is PayPalCheckoutError -> ViewState.CheckoutError(error = error.errorInfo)
-            else -> ViewState.CheckoutError(message = error.errorDescription)
-        }
-        internalState.postValue(errorState)
-    }
-
-    override fun onPayPalCheckoutCanceled() {
-        internalState.postValue(ViewState.CheckoutCancelled)
-    }
-
-    override fun onPayPalCheckoutShippingChange(
-        shippingChangeData: ShippingChangeData,
-        shippingChangeActions: ShippingChangeActions
-    ) {
+        payPalClient.listener = payPalListener
     }
 
     sealed class ViewState {

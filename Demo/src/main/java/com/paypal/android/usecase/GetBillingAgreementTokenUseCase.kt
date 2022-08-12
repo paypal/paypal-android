@@ -8,10 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class GetBillingAgreementTokenUseCase @Inject constructor(
-    private val sdkSampleServerApi: SDKSampleServerApi) {
+class GetBillingAgreementTokenUseCase
+    @Inject constructor(private val sdkSampleServerApi: SDKSampleServerApi) {
 
-    suspend operator fun invoke() : Order = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(): Order = withContext(Dispatchers.IO) {
         val jsonOrder = JsonParser.parseString(BA_TOKEN_BODY) as JsonObject
         sdkSampleServerApi.createOrder(jsonOrder)
     }

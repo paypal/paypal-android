@@ -14,5 +14,4 @@ class GetOrderUseCase {
         AppContext(),
         listOf(PurchaseUnit(amount = Amount(CurrencyCode.USD, "60")))
     )
-
 }
