@@ -29,11 +29,12 @@ import javax.inject.Inject
 class PayPalNativeViewModel @Inject constructor(
     private val getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase,
     private val getAccessTokenUseCase: GetAccessTokenUseCase,
-    private val getOrderUseCase: GetOrderUseCase = GetOrderUseCase(),
     private val getOrderIdUseCase: GetOrderIdUseCase,
     private val getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase,
     application: Application
 ): AndroidViewModel(application), PayPalCheckoutListener {
+
+    private val getOrderUseCase: GetOrderUseCase = GetOrderUseCase()
 
     private val payPalConstants = PayPalConfigConstants()
 
