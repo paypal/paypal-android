@@ -21,5 +21,4 @@ object DemoModule {
     fun provideCoreConfig(): CoreConfig = CoreConfig(
         environment = Environment.SANDBOX
     )
-
 }

@@ -18,10 +18,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class PayPalNativeFragment : Fragment() {
 
-    companion object {
-        private val TAG = PayPalNativeFragment::class.qualifiedName
-    }
-
     private lateinit var binding: FragmentPayPalNativeBinding
 
     @Inject

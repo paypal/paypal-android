@@ -2,7 +2,6 @@ package com.paypal.android.usecase
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.ui.paypal.OrderUtils
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +12,7 @@ class GetOrderIdUseCase@Inject constructor(
     private val sdkSampleServerApi: SDKSampleServerApi
 ) {
 
-    suspend operator fun invoke() : String? = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(): String? = withContext(Dispatchers.IO) {
         val jsonOrder = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
         val result = sdkSampleServerApi.createOrder(jsonOrder)
         result.id
