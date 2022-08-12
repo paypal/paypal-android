@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.radiobutton.MaterialRadioButton
@@ -56,7 +55,7 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun onStartNativeCheckoutClicked() {
-        when(selectedOptionId) {
+        when (selectedOptionId) {
             R.id.order_checkout -> { viewModel.orderCheckout() }
             R.id.order_id_checkout -> { viewModel.orderIdCheckout() }
             R.id.billing_agreement_checkout -> { viewModel.billingAgreementCheckout() }
@@ -123,7 +122,7 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun checkoutError(viewState: PayPalNativeViewModel.ViewState.CheckoutError) {
-        val message = viewState.message?: viewState.error?.reason?: "Oops! Something went wrong"
+        val message = viewState.message ?: viewState.error?.reason ?: "Oops! Something went wrong"
         hideProgress()
         with(binding) {
             errorGroup.visibility = View.VISIBLE
@@ -132,7 +131,6 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun orderCreated(viewState: PayPalNativeViewModel.ViewState.OrderCreated) {
-
     }
 
     private fun checkoutCancelled() {
@@ -145,7 +143,6 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun checkoutComplete(viewState: PayPalNativeViewModel.ViewState.CheckoutComplete) {
-
     }
 
     private fun showProgress(text: String) {
@@ -158,5 +155,4 @@ class PayPalNativeFragment : Fragment() {
     private fun hideProgress() {
         binding.progressGroup.visibility = View.GONE
     }
-
 }

@@ -164,7 +164,7 @@ class PayPalNativeViewModel @Inject constructor(
         object GeneratingToken : ViewState()
         class TokenGenerated(val token: String) : ViewState()
         class OrderCreated(val orderId: String) : ViewState()
-        object CheckoutInit: ViewState()
+        object CheckoutInit : ViewState()
         object CheckoutStart : ViewState()
         object CheckoutCancelled : ViewState()
         class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) : ViewState()
