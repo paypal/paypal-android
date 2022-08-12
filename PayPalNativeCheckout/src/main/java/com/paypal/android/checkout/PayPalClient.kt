@@ -13,6 +13,7 @@ import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +32,16 @@ class PayPalClient internal constructor (
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(application, coreConfig, returnUrl, API(coreConfig))
 
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        val error = when(exception) {
+            is PayPalSDKError -> exception
+            else -> {
+                val message = exception.localizedMessage?: "Something went wrong"
+                PayPalSDKError(0, message)
+            }
+        }
+        listener?.onPayPalCheckoutFailure(error)
+    }
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
@@ -47,20 +58,16 @@ class PayPalClient internal constructor (
      * @param createOrder the id of the order
      */
     fun startCheckout(createOrder: CreateOrder) {
-        CoroutineScope(dispatcher).launch {
-            try {
-                val config = CheckoutConfig(
-                    application = application,
-                    clientId = api.getClientId(),
-                    environment = getPayPalEnvironment(coreConfig.environment),
-                    returnUrl = returnUrl,
-                )
-                PayPalCheckout.setConfig(config)
-                listener?.onPayPalCheckoutStart()
-                PayPalCheckout.startCheckout(createOrder)
-            } catch (e: PayPalSDKError) {
-                listener?.onPayPalCheckoutFailure(e)
-            }
+        CoroutineScope(dispatcher).launch(exceptionHandler) {
+            val config = CheckoutConfig(
+                application = application,
+                clientId = api.getClientId(),
+                environment = getPayPalEnvironment(coreConfig.environment),
+                returnUrl = returnUrl,
+            )
+            PayPalCheckout.setConfig(config)
+            listener?.onPayPalCheckoutStart()
+            PayPalCheckout.startCheckout(createOrder)
         }
     }
 

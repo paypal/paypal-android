@@ -140,7 +140,12 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun checkoutCancelled() {
-
+        val message = "Checkout cancelled by user"
+        hideProgress()
+        with(binding) {
+            errorGroup.visibility = View.VISIBLE
+            errorMessage.text = message
+        }
     }
 
     private fun checkoutComplete(viewState: PayPalNativeViewModel.ViewState.CheckoutComplete) {

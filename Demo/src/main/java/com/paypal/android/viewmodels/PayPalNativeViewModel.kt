@@ -96,7 +96,7 @@ class PayPalNativeViewModel @Inject constructor(
     fun vaultCheckout() {
         internalState.postValue(ViewState.CheckoutInit)
         viewModelScope.launch(exceptionHandler) {
-            val sessionId = getApprovalSessionIdActionUseCase()
+            val sessionId = getApprovalSessionIdActionUseCase(accessToken)
             sessionId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.setVaultApprovalSessionId(it)
