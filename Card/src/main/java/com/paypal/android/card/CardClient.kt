@@ -11,9 +11,8 @@ import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.CoreCoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,17 +31,9 @@ class CardClient internal constructor(
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        val error = when(exception) {
-            is PayPalSDKError -> exception
-            else -> {
-                val message = exception.localizedMessage?: "Something went wrong"
-                PayPalSDKError(0, message)
-            }
-        }
-        approveOrderListener?.onApproveOrderFailure(error)
+    private val exceptionHandler = CoreCoroutineExceptionHandler {
+        approveOrderListener?.onApproveOrderFailure(it)
     }
-
     /**
      *  CardClient constructor
      *

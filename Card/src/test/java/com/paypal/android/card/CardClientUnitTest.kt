@@ -206,7 +206,7 @@ class CardClientUnitTest {
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
             val error = PayPalSDKError(0, "mock_error_message")
-            coEvery { cardAPI.getOrderInfo(any()) } throws  error
+            coEvery { cardAPI.getOrderInfo(any()) } throws error
 
             sut.handleBrowserSwitchResult(activity)
             advanceUntilIdle()
