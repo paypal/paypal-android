@@ -17,8 +17,7 @@ class GetApprovalSessionIdActionUseCase @Inject constructor(
         val vaultSessionId = payPalApi.postApprovalSessionId(jsonRequest)
 
         val approvalSessionIdLink = vaultSessionId
-            .links
-            ?.find { vaultLink -> vaultLink?.rel == "approve" }
+            .links?.find { vaultLink -> vaultLink?.rel == "approve" }
         approvalSessionIdLink?.href?.toUri()?.getQueryParameter("approval_session_id")
     }
 
