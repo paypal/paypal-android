@@ -38,6 +38,18 @@
     <string name="select_size">Select Size</string>
 
     <string name="use_test_card">Use a Test Card</string>
+
+    <!-- NXO -->
     <string name="get_token">Get Access Token</string>
     <string name="try_again">Try Again</string>
+    <string name="fetching_access_token">Fetching access token…</string>
+    <string name="approved">Approved</string>
+    <string name="error">Error</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="token_generated">Token Generated</string>
+    <string name="init_checkout">Initializing Checkout…</string>
+    <string name="starting_paypal">Starting PayPal…</string>
+    <string name="something_went_wrong">Oops! Something went wrong</string>
+    <string name="order_created">Order Created</string>
+    <string name="checkout_cancelled_by_user">Checkout cancelled by user</string>
 </resources>
