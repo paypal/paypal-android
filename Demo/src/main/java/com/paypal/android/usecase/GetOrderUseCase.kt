@@ -8,7 +8,7 @@ import com.paypal.checkout.order.Order
 import com.paypal.checkout.order.PurchaseUnit
 import javax.inject.Inject
 
-class GetOrderUseCase @Inject constructor(){
+class GetOrderUseCase @Inject constructor() {
 
     operator fun invoke() = Order(
         OrderIntent.CAPTURE,

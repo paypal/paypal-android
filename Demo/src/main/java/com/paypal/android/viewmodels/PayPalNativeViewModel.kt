@@ -27,14 +27,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalNativeViewModel @Inject constructor(
-    private val getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase,
-    private val getAccessTokenUseCase: GetAccessTokenUseCase,
-    private val getOrderIdUseCase: GetOrderIdUseCase,
-    private val getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase,
-    private val getOrderUseCase: GetOrderUseCase,
-    private val payPalConstants: PayPalConfigConstants,
     application: Application
 ) : AndroidViewModel(application) {
+
+    @Inject
+    lateinit var getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase
+    @Inject
+    lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
+    @Inject
+    lateinit var getOrderIdUseCase: GetOrderIdUseCase
+    @Inject
+    lateinit var getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase
+    @Inject
+    lateinit var getOrderUseCase: GetOrderUseCase
+    @Inject
+    lateinit var payPalConstants: PayPalConfigConstants
 
     private val payPalListener = object : PayPalCheckoutListener {
         override fun onPayPalCheckoutStart() {
