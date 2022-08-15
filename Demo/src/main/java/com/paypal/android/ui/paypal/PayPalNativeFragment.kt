@@ -15,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
+@Suppress("TooManyFunctions")
 class PayPalNativeFragment : Fragment() {
 
     private lateinit var binding: FragmentPayPalNativeBinding
