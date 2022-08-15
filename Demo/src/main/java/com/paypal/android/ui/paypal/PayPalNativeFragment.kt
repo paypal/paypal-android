@@ -10,6 +10,7 @@ import com.google.android.material.radiobutton.MaterialRadioButton
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
+import com.paypal.android.viewmodels.NativeCheckoutViewState
 import com.paypal.android.viewmodels.PayPalNativeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -65,17 +66,17 @@ class PayPalNativeFragment : Fragment() {
         }
     }
 
-    private fun checkViewState(viewState: PayPalNativeViewModel.ViewState) {
+    private fun checkViewState(viewState: NativeCheckoutViewState) {
         when (viewState) {
-            PayPalNativeViewModel.ViewState.CheckoutCancelled -> checkoutCancelled()
-            is PayPalNativeViewModel.ViewState.CheckoutComplete -> checkoutComplete(viewState)
-            is PayPalNativeViewModel.ViewState.CheckoutError -> checkoutError(viewState)
-            PayPalNativeViewModel.ViewState.CheckoutStart -> checkoutStart()
-            PayPalNativeViewModel.ViewState.GeneratingToken -> generatingToken()
-            PayPalNativeViewModel.ViewState.Initial -> setInitialState()
-            is PayPalNativeViewModel.ViewState.OrderCreated -> orderCreated(viewState)
-            is PayPalNativeViewModel.ViewState.TokenGenerated -> tokenGenerated(viewState)
-            PayPalNativeViewModel.ViewState.CheckoutInit -> checkoutInit()
+            NativeCheckoutViewState.CheckoutCancelled -> checkoutCancelled()
+            is NativeCheckoutViewState.CheckoutComplete -> checkoutComplete(viewState)
+            is NativeCheckoutViewState.CheckoutError -> checkoutError(viewState)
+            NativeCheckoutViewState.CheckoutStart -> checkoutStart()
+            NativeCheckoutViewState.GeneratingToken -> generatingToken()
+            NativeCheckoutViewState.Initial -> setInitialState()
+            is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
+            is NativeCheckoutViewState.TokenGenerated -> tokenGenerated(viewState)
+            NativeCheckoutViewState.CheckoutInit -> checkoutInit()
         }
     }
 
@@ -99,7 +100,7 @@ class PayPalNativeFragment : Fragment() {
         }
     }
 
-    private fun tokenGenerated(viewState: PayPalNativeViewModel.ViewState.TokenGenerated) {
+    private fun tokenGenerated(viewState: NativeCheckoutViewState.TokenGenerated) {
         hideProgress()
         setContent(getString(R.string.token_generated), viewState.token)
         with(binding) {
@@ -132,7 +133,7 @@ class PayPalNativeFragment : Fragment() {
         showProgress(getString(R.string.starting_paypal))
     }
 
-    private fun checkoutError(viewState: PayPalNativeViewModel.ViewState.CheckoutError) {
+    private fun checkoutError(viewState: NativeCheckoutViewState.CheckoutError) {
         val message = viewState.message ?: viewState.error?.reason ?: getString(R.string.something_went_wrong)
         setContent(getString(R.string.error), message)
         hideProgress()
@@ -142,7 +143,7 @@ class PayPalNativeFragment : Fragment() {
         }
     }
 
-    private fun orderCreated(viewState: PayPalNativeViewModel.ViewState.OrderCreated) {
+    private fun orderCreated(viewState: NativeCheckoutViewState.OrderCreated) {
         setContent(getString(R.string.order_created), "OrderId: ${viewState.orderId}")
         hideProgress()
     }
@@ -156,7 +157,7 @@ class PayPalNativeFragment : Fragment() {
         }
     }
 
-    private fun checkoutComplete(viewState: PayPalNativeViewModel.ViewState.CheckoutComplete) {
+    private fun checkoutComplete(viewState: NativeCheckoutViewState.CheckoutComplete) {
         val content = "Order Id: ${viewState.orderId} \n" +
                 "Payer Id: ${viewState.payerId} \n" +
                 "Payment Id: ${viewState.paymentId} \n" +
