@@ -32,12 +32,10 @@ class PayPalNativeViewModel @Inject constructor(
     private val getAccessTokenUseCase: GetAccessTokenUseCase,
     private val getOrderIdUseCase: GetOrderIdUseCase,
     private val getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase,
+    private val getOrderUseCase: GetOrderUseCase,
+    private val payPalConstants: PayPalConfigConstants,
     application: Application
 ) : AndroidViewModel(application) {
-
-    private val getOrderUseCase: GetOrderUseCase = GetOrderUseCase()
-
-    private val payPalConstants = PayPalConfigConstants()
 
     private val payPalListener = object : PayPalCheckoutListener {
         override fun onPayPalCheckoutStart() {
