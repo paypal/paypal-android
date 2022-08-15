@@ -128,7 +128,7 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun checkoutStart() {
-        showProgress(getString(R.string.start_checkout))
+        showProgress(getString(R.string.starting_paypal))
     }
 
     private fun checkoutError(viewState: PayPalNativeViewModel.ViewState.CheckoutError) {
