@@ -2,9 +2,8 @@ package com.paypal.android.checkout
 
 import android.app.Application
 import com.paypal.android.core.API
-import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.CoreCoroutineExceptionHandler
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -13,7 +12,6 @@ import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,15 +30,8 @@ class PayPalClient internal constructor (
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(application, coreConfig, returnUrl, API(coreConfig))
 
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        val error = when(exception) {
-            is PayPalSDKError -> exception
-            else -> {
-                val message = exception.localizedMessage?: "Something went wrong"
-                PayPalSDKError(0, message)
-            }
-        }
-        listener?.onPayPalCheckoutFailure(error)
+    private val exceptionHandler = CoreCoroutineExceptionHandler {
+        listener?.onPayPalCheckoutFailure(it)
     }
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
