@@ -101,6 +101,7 @@ class PayPalNativeViewModel @Inject constructor(
             order.id?.also { orderId ->
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.setBillingAgreementId(orderId)
+                    internalState.postValue(ViewState.OrderCreated(orderId))
                 })
             }
         }
@@ -136,6 +137,7 @@ class PayPalNativeViewModel @Inject constructor(
             sessionId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.setVaultApprovalSessionId(it)
+                    internalState.postValue(ViewState.OrderCreated(sessionId))
                 })
             }
         }

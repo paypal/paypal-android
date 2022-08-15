@@ -43,7 +43,7 @@ class PayPalNativeFragment : Fragment() {
             orderIdCheckout.setOnClickListener { onRadioButtonClicked(it) }
             billingAgreementCheckout.setOnClickListener { onRadioButtonClicked(it) }
             vaultCheckout.setOnClickListener { onRadioButtonClicked(it) }
-            errorButton.setOnClickListener { viewModel.reset() }
+            tryAgainButton.setOnClickListener { viewModel.reset() }
         }
         return binding.root
     }
@@ -84,7 +84,8 @@ class PayPalNativeFragment : Fragment() {
             fetchAccessTokenButton.isEnabled = true
             startNativeCheckout.visibility = View.GONE
             checkoutOptionsRadioGroup.visibility = View.GONE
-            errorGroup.visibility = View.GONE
+            contentGroup.visibility = View.GONE
+            tryAgainButton.visibility = View.GONE
             hideProgress()
         }
     }
@@ -99,6 +100,7 @@ class PayPalNativeFragment : Fragment() {
 
     private fun tokenGenerated(viewState: PayPalNativeViewModel.ViewState.TokenGenerated) {
         hideProgress()
+        setContent("Token Generated", viewState.token)
         with(binding) {
             startNativeCheckout.visibility = View.VISIBLE
             startNativeCheckout.isEnabled = true
@@ -106,6 +108,14 @@ class PayPalNativeFragment : Fragment() {
             selectedOptionId = R.id.order_checkout
             orderCheckout.isChecked = true
             fetchAccessTokenButton.visibility = View.GONE
+        }
+    }
+
+    private fun setContent(titleText: String, contentText: String) {
+        with(binding) {
+            contentGroup.visibility = View.VISIBLE
+            title.text = titleText
+            content.text = contentText
         }
     }
 
@@ -123,32 +133,47 @@ class PayPalNativeFragment : Fragment() {
 
     private fun checkoutError(viewState: PayPalNativeViewModel.ViewState.CheckoutError) {
         val message = viewState.message ?: viewState.error?.reason ?: "Oops! Something went wrong"
+        setContent("Error", message)
         hideProgress()
         with(binding) {
-            errorGroup.visibility = View.VISIBLE
-            errorMessage.text = message
+            startNativeCheckout.visibility = View.GONE
+            tryAgainButton.visibility = View.VISIBLE
         }
     }
 
     private fun orderCreated(viewState: PayPalNativeViewModel.ViewState.OrderCreated) {
+        setContent("Order Created", "OrderId: ${viewState.orderId}")
+        hideProgress()
     }
 
     private fun checkoutCancelled() {
-        val message = "Checkout cancelled by user"
+        val content = "Checkout cancelled by user"
+        setContent("Cancelled", content)
         hideProgress()
         with(binding) {
-            errorGroup.visibility = View.VISIBLE
-            errorMessage.text = message
+            startNativeCheckout.visibility = View.GONE
+            tryAgainButton.visibility = View.VISIBLE
         }
     }
 
     private fun checkoutComplete(viewState: PayPalNativeViewModel.ViewState.CheckoutComplete) {
+        val content = "Order Id: ${viewState.orderId} \n" +
+                "Payer Id: ${viewState.payerId} \n" +
+                "Payment Id: ${viewState.paymentId} \n" +
+                "Billing Token: ${viewState.billingToken}"
+        setContent("Approved", content)
+        hideProgress()
+        with(binding) {
+            tryAgainButton.visibility = View.VISIBLE
+            startNativeCheckout.visibility = View.GONE
+        }
     }
 
     private fun showProgress(text: String) {
         with(binding) {
             progressGroup.visibility = View.VISIBLE
             progressText.text = text
+            contentGroup.visibility = View.GONE
         }
     }
 

@@ -36,6 +36,37 @@
             app:layout_constraintEnd_toEndOf="@id/progress_circular"
             app:layout_constraintStart_toStartOf="@id/progress_circular"
             tools:text="Fetching access token..."/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="0.35"
+            android:layout_marginStart="@dimen/padding_16dp"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            tools:text="Approve"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="@dimen/padding_16dp"
+            android:layout_marginEnd="@dimen/padding_16dp"
+            android:layout_marginStart="@dimen/padding_16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="This is the content of the flow"/>
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/content_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="content,title"/>
+
         <androidx.constraintlayout.widget.Group
             android:id="@+id/progress_group"
             android:layout_width="wrap_content"
@@ -67,7 +98,7 @@
             tools:text="This is an Error message"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/error_button"
+            android:id="@+id/try_again_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/standard_margin"
@@ -75,12 +106,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/error_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:constraint_referenced_ids="error_button, error_message"/>
 
         <RadioGroup
             android:id="@+id/checkout_options_radio_group"
