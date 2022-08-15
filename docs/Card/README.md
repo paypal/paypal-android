@@ -41,7 +41,7 @@ val config = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 Create a `CardClient` to approve an order with a Card payment method. Also, set a listener to receive callbacks from the client.
 
 ```kotlin
-val cardClient = CardClient(config)
+val cardClient = CardClient(activity, config)
 cardClient.approveOrderListener = this
 ```
 
