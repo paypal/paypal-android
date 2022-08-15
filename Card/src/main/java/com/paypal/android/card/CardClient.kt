@@ -11,7 +11,7 @@ import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.core.API
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.CoreCoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +31,9 @@ class CardClient internal constructor(
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
+    private val exceptionHandler = CoreCoroutineExceptionHandler {
+        approveOrderListener?.onApproveOrderFailure(it)
+    }
     /**
      *  CardClient constructor
      *
@@ -56,12 +59,8 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
-        CoroutineScope(dispatcher).launch {
-            try {
-                confirmPaymentSource(activity, cardRequest)
-            } catch (e: PayPalSDKError) {
-                approveOrderListener?.onApproveOrderFailure(e)
-            }
+        CoroutineScope(dispatcher).launch(exceptionHandler) {
+            confirmPaymentSource(activity, cardRequest)
         }
     }
 
@@ -105,20 +104,16 @@ class CardClient internal constructor(
 
     private fun getOrderInfo(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
-            CoroutineScope(dispatcher).launch {
-                try {
-                    val getOrderResponse = cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
-                    approveOrderListener?.onApproveOrderSuccess(
-                        CardResult(
-                            getOrderResponse.orderId,
-                            getOrderResponse.orderStatus,
-                            getOrderResponse.paymentSource,
-                            browserSwitchResult.deepLinkUrl
-                        )
+            CoroutineScope(dispatcher).launch(exceptionHandler) {
+                val getOrderResponse = cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
+                approveOrderListener?.onApproveOrderSuccess(
+                    CardResult(
+                        getOrderResponse.orderId,
+                        getOrderResponse.orderStatus,
+                        getOrderResponse.paymentSource,
+                        browserSwitchResult.deepLinkUrl
                     )
-                } catch (e: PayPalSDKError) {
-                    approveOrderListener?.onApproveOrderFailure(e)
-                }
+                )
             }
         }
     }
