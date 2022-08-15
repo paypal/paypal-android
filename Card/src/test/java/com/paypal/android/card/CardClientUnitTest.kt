@@ -196,6 +196,28 @@ class CardClientUnitTest {
         verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
     }
 
+    @Test
+    fun `handle browser switch result notifies listener of get order failure`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+
+            val browserSwitchResult =
+                createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, approveOrderMetadata)
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            val error = PayPalSDKError(0, "mock_error_message")
+            coEvery { cardAPI.getOrderInfo(any()) } throws error
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
+
+            val capturedError = errorSlot.captured
+            assertEquals("mock_error_message", capturedError.errorDescription)
+        }
+
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
