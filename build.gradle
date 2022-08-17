@@ -51,6 +51,8 @@ buildscript {
             // Dependency Injection
             "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
             "hiltKapt"                   : "com.google.dagger:hilt-compiler:${versions.hilt}",
+            "androidHiltViewModel"                 : "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03",
+            "androidHiltKapt"             : "androidx.hilt:hilt-compiler:1.0.0-alpha03",
 
             // Browser Switch
             "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.1.1",

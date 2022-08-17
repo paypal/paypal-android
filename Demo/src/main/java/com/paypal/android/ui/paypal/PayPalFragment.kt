@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.R
-import com.paypal.android.api.services.PayPalDemoApi
+import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
 import com.paypal.android.checkoutweb.PayPalWebCheckoutFundingSource
 import com.paypal.android.checkoutweb.PayPalWebCheckoutListener
@@ -40,7 +40,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     private lateinit var binding: FragmentPaymentButtonBinding
 
     @Inject
-    lateinit var payPalDemoApi: PayPalDemoApi
+    lateinit var sdkSampleServerApi: SDKSampleServerApi
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
 
@@ -72,7 +72,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val accessToken = payPalDemoApi.fetchAccessToken().value
+                val accessToken = sdkSampleServerApi.fetchAccessToken().value
                 val coreConfig = CoreConfig(accessToken, Environment.SANDBOX)
 
                 val eligibilityAPI = EligibilityAPI(coreConfig)
@@ -129,7 +129,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
-                val order = payPalDemoApi.createOrder(orderJson)
+                val order = sdkSampleServerApi.createOrder(orderJson)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
                 }

@@ -90,6 +90,8 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
+    implementation deps.androidHiltViewModel
+    kapt deps.androidHiltKapt
 
     testImplementation deps.junit
 
