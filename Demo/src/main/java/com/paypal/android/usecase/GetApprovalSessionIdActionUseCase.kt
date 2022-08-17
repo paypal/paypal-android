@@ -12,9 +12,9 @@ class GetApprovalSessionIdActionUseCase @Inject constructor(
     private val payPalApi: PayPalApi
 ) {
 
-    suspend operator fun invoke(): String? = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(accessToken: String): String? = withContext(Dispatchers.IO) {
         val jsonRequest = JsonParser.parseString(APPROVAL_SESSION_ID_REQUEST) as JsonObject
-        val vaultSessionId = payPalApi.postApprovalSessionId(jsonRequest)
+        val vaultSessionId = payPalApi.postApprovalSessionId("Bearer $accessToken", jsonRequest)
 
         val approvalSessionIdLink = vaultSessionId
             .links?.find { vaultLink -> vaultLink?.rel == "approve" }

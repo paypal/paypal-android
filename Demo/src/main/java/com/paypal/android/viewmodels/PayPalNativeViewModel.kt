@@ -21,8 +21,8 @@ import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -84,31 +84,36 @@ class PayPalNativeViewModel @Inject constructor(
 
     lateinit var payPalClient: PayPalClient
 
+    private var accessToken = ""
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, e ->
+        internalState.postValue(NativeCheckoutViewState.CheckoutError(message = e.message))
+    }
+
+    fun fetchAccessToken() {
+        internalState.postValue(NativeCheckoutViewState.GeneratingToken)
+        viewModelScope.launch(exceptionHandler) {
+            accessToken = getAccessTokenUseCase()
+            initPayPalClient(accessToken)
+            internalState.postValue(NativeCheckoutViewState.TokenGenerated(accessToken))
+        }
+    }
+
     fun billingAgreementCheckout() {
-        viewModelScope.launch {
+        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
             val order = getBillingAgreementTokenUseCase()
             order.id?.also { orderId ->
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.setBillingAgreementId(orderId)
+                    internalState.postValue(NativeCheckoutViewState.OrderCreated(orderId))
                 })
             }
         }
     }
 
-    fun fetchAccessToken() {
-        internalState.postValue(NativeCheckoutViewState.GeneratingToken)
-        viewModelScope.launch {
-            try {
-                val accessToken = getAccessTokenUseCase()
-                initPayPalClient(accessToken)
-                internalState.postValue(NativeCheckoutViewState.TokenGenerated(accessToken))
-            } catch (e: HttpException) {
-                internalState.postValue(NativeCheckoutViewState.CheckoutError(message = e.message))
-            }
-        }
-    }
-
     fun orderCheckout() {
+        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
         val order = getOrderUseCase()
         startCheckoutFlow(CreateOrder { createOrderActions ->
             createOrderActions.create(order) {
@@ -118,7 +123,8 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun orderIdCheckout() {
-        viewModelScope.launch {
+        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
             val orderId = getOrderIdUseCase()
             orderId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
@@ -130,14 +136,21 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun vaultCheckout() {
-        viewModelScope.launch {
-            val sessionId = getApprovalSessionIdActionUseCase()
+        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
+            val sessionId = getApprovalSessionIdActionUseCase(accessToken)
             sessionId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.setVaultApprovalSessionId(it)
+                    internalState.postValue(NativeCheckoutViewState.OrderCreated(sessionId))
                 })
             }
         }
+    }
+
+    fun reset() {
+        accessToken = ""
+        internalState.postValue(NativeCheckoutViewState.Initial)
     }
 
     private fun startCheckoutFlow(createOrder: CreateOrder) {

@@ -2,9 +2,8 @@ package com.paypal.android.checkout
 
 import android.app.Application
 import com.paypal.android.core.API
-import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.core.CoreCoroutineExceptionHandler
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -31,6 +30,9 @@ class PayPalClient internal constructor (
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(application, coreConfig, returnUrl, API(coreConfig))
 
 
+    private val exceptionHandler = CoreCoroutineExceptionHandler {
+        listener?.onPayPalCheckoutFailure(it)
+    }
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
@@ -47,20 +49,16 @@ class PayPalClient internal constructor (
      * @param createOrder the id of the order
      */
     fun startCheckout(createOrder: CreateOrder) {
-        CoroutineScope(dispatcher).launch {
-            try {
-                val config = CheckoutConfig(
-                    application = application,
-                    clientId = api.getClientId(),
-                    environment = getPayPalEnvironment(coreConfig.environment),
-                    returnUrl = returnUrl,
-                )
-                PayPalCheckout.setConfig(config)
-                listener?.onPayPalCheckoutStart()
-                PayPalCheckout.startCheckout(createOrder)
-            } catch (e: PayPalSDKError) {
-                listener?.onPayPalCheckoutFailure(e)
-            }
+        CoroutineScope(dispatcher).launch(exceptionHandler) {
+            val config = CheckoutConfig(
+                application = application,
+                clientId = api.getClientId(),
+                environment = getPayPalEnvironment(coreConfig.environment),
+                returnUrl = returnUrl,
+            )
+            PayPalCheckout.setConfig(config)
+            listener?.onPayPalCheckoutStart()
+            PayPalCheckout.startCheckout(createOrder)
         }
     }
 
