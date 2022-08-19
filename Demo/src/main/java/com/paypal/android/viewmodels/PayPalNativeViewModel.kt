@@ -17,9 +17,18 @@ import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.ui.paypal.OrderUtils.asValueString
+import com.paypal.android.ui.paypal.OrderUtils.getAmount
 import com.paypal.checkout.createorder.CreateOrder
+import com.paypal.checkout.order.Options
+import com.paypal.checkout.order.Order
+import com.paypal.checkout.order.patch.PatchOrderRequest
+import com.paypal.checkout.order.patch.fields.PatchAmount
+import com.paypal.checkout.order.patch.fields.PatchShippingOptions
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
+import com.paypal.checkout.shipping.ShippingChangeType
+import com.paypal.pyplcheckout.common.instrumentation.PLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -42,6 +51,8 @@ class PayPalNativeViewModel @Inject constructor(
     lateinit var getOrderUseCase: GetOrderUseCase
     @Inject
     lateinit var payPalConstants: PayPalConfigConstants
+
+    private lateinit var order: Order
 
     private val payPalListener = object : PayPalCheckoutListener {
         override fun onPayPalCheckoutStart() {
@@ -75,7 +86,43 @@ class PayPalNativeViewModel @Inject constructor(
             shippingChangeData: ShippingChangeData,
             shippingChangeActions: ShippingChangeActions
         ) {
-            // implement
+            val options: List<Options>
+            val updatedShippingAmount: String?
+
+            when (shippingChangeData.shippingChangeType) {
+                ShippingChangeType.OPTION_CHANGE -> {
+
+                    options = shippingChangeData.shippingOptions
+                    updatedShippingAmount = shippingChangeData.selectedShippingOption?.amount?.value
+                }
+                ShippingChangeType.ADDRESS_CHANGE -> {
+                    options = shippingChangeData.shippingOptions.map {
+                        it.copy(
+                            amount = it.amount?.copy(
+                                value = ((it.amount?.value?.toFloat() ?: 0f) + 10f).asValueString()
+                            )
+                        )
+                    }
+                    updatedShippingAmount = options.find { it.selected }?.amount?.value
+                }
+            }
+
+            val patchRequest = PatchOrderRequest(
+                PatchShippingOptions.Replace(
+                    purchaseUnitReferenceId = "PUHF",
+                    options = options
+                ),
+                PatchAmount.Replace(
+                    purchaseUnitReferenceId = "PUHF",
+                    amount = getAmount(
+                        value = order.purchaseUnitList.first().amount.value,
+                        shippingValue = updatedShippingAmount ?: "0.00"
+                    )
+                )
+            )
+            shippingChangeActions.patchOrder(patchRequest) {
+                //PLog.d(TAG, "Patch Order after shipping change was successful")
+            }
         }
     }
 
@@ -114,7 +161,7 @@ class PayPalNativeViewModel @Inject constructor(
 
     fun orderCheckout() {
         internalState.postValue(NativeCheckoutViewState.CheckoutInit)
-        val order = getOrderUseCase()
+        order = getOrderUseCase()
         startCheckoutFlow(CreateOrder { createOrderActions ->
             createOrderActions.create(order) {
                 internalState.postValue(NativeCheckoutViewState.OrderCreated(it))
