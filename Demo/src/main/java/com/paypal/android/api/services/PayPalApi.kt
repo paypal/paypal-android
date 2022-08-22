@@ -2,6 +2,7 @@ package com.paypal.android.api.services
 
 import com.google.gson.JsonObject
 import com.paypal.android.api.model.Order
+import com.paypal.android.data.ba.BAToken
 import com.paypal.android.data.vault.VaultSessionId
 import retrofit2.http.Body
 import retrofit2.http.Header
@@ -22,4 +23,11 @@ interface PayPalApi {
         @Header("Authorization") accessToken: String,
         @Body jsonObject: JsonObject
     ): VaultSessionId
+
+    @Headers("Accept: application/json")
+    @POST("/v1/billing-agreements/agreement-tokens")
+    suspend fun postBillingAgreementToken(
+        @Header("Authorization") accessToken: String,
+        @Body jsonObject: JsonObject
+    ): BAToken
 }
