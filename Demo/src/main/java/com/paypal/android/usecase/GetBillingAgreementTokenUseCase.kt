@@ -41,7 +41,8 @@ class GetBillingAgreementTokenUseCase
               },
               "application_context": {
                 "return_url": "https://example.com/returnUrl",
-                "cancel_url": "https://example.com/cancelUrl"
+                "cancel_url": "https://example.com/cancelUrl",
+                "shipping_preference": "NO_SHIPPING"
               }
             }
         """
