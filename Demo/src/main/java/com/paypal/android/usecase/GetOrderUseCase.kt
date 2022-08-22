@@ -1,6 +1,6 @@
 package com.paypal.android.usecase
 
-import com.paypal.android.ui.paypal.OrderUtils
+import com.paypal.android.utils.OrderUtils
 import javax.inject.Inject
 
 class GetOrderUseCase @Inject constructor() {

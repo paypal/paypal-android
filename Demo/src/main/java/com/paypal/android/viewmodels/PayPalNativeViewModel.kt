@@ -17,8 +17,8 @@ import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.ui.paypal.OrderUtils.asValueString
-import com.paypal.android.ui.paypal.OrderUtils.getAmount
+import com.paypal.android.utils.OrderUtils.asValueString
+import com.paypal.android.utils.OrderUtils.getAmount
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.order.Options
 import com.paypal.checkout.order.Order
@@ -28,7 +28,6 @@ import com.paypal.checkout.order.patch.fields.PatchShippingOptions
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 import com.paypal.checkout.shipping.ShippingChangeType
-import com.paypal.pyplcheckout.common.instrumentation.PLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch

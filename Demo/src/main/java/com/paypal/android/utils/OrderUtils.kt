@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.utils
 
 import com.paypal.checkout.createorder.CurrencyCode
 import com.paypal.checkout.createorder.ItemCategory
@@ -20,7 +20,7 @@ import com.paypal.checkout.order.UnitAmount
 
 object OrderUtils {
 
-    val orderWithShipping = """
+    val orderWithFixedShipping = """
         {
         	"application_context": {
         		"brand_name": "EXAMPLE INC",
@@ -28,7 +28,7 @@ object OrderUtils {
         		"landing_page": "BILLING",
         		"locale": "de-DE",
         		"return_url": "https://example.com/return",
-        		"shipping_preference": "GET_FROM_FILE",
+        		"shipping_preference": "SET_PROVIDED_ADDRESS",
         		"user_action": "PAY_NOW"
         	},
         	"intent": "AUTHORIZE",
@@ -108,99 +108,7 @@ object OrderUtils {
         					"admin_area_2": "San Francisco",
         					"country_code": "US",
         					"postal_code": "94107"
-        				},
-        				"options": [{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "10.00"
-        						},
-        						"id": "1",
-        						"label": "Standard Shipping",
-        						"selected": false,
-        						"type": "SHIPPING"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "9.00"
-        						},
-        						"id": "2",
-        						"label": "2 days Shipping",
-        						"selected": false,
-        						"type": "SHIPPING"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "8.00"
-        						},
-        						"id": "3",
-        						"label": "5 days Shipping",
-        						"selected": false,
-        						"type": "SHIPPING"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "7.00"
-        						},
-        						"id": "4",
-        						"label": "Express Shipping",
-        						"selected": false,
-        						"type": "SHIPPING"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "00.00"
-        						},
-        						"id": "5",
-        						"label": "1 day Shipping",
-        						"selected": true,
-        						"type": "SHIPPING"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "5.00"
-        						},
-        						"id": "6",
-        						"label": "Pick up from 1122 N 1st st, San Jose CA, 95129",
-        						"selected": false,
-        						"type": "PICKUP"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "4.00"
-        						},
-        						"id": "8",
-        						"label": "Pick up from 999 N 1st st, San Fransisco CA, 95009",
-        						"selected": false,
-        						"type": "PICKUP"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "3.00"
-        						},
-        						"id": "9",
-        						"label": "In store pickup",
-        						"selected": false,
-        						"type": "PICKUP"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "2.00"
-        						},
-        						"id": "10",
-        						"label": "Pick up from Amazon",
-        						"selected": false,
-        						"type": "PICKUP"
-        					},{
-        						"amount": {
-        							"currency_code": "USD",
-        							"value": "1.00"
-        						},
-        						"id": "11",
-        						"label": "Pick up from Tesla warehouse",
-        						"selected": false,
-        						"type": "PICKUP"
-        					}
-        				]
+        				}
         			},
         			"soft_descriptor": "HighFashions"
         		}

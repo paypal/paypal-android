@@ -24,6 +24,7 @@ import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.core.api.EligibilityAPI
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
+import com.paypal.android.utils.OrderUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -128,7 +129,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             try {
                 binding.statusText.setText(R.string.creating_order)
 
-                val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
+                val orderJson = JsonParser.parseString(OrderUtils.orderWithFixedShipping) as JsonObject
                 val order = sdkSampleServerApi.createOrder(orderJson)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
