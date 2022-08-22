@@ -120,7 +120,7 @@ class PayPalNativeViewModel @Inject constructor(
                 )
             )
             shippingChangeActions.patchOrder(patchRequest) {
-                //PLog.d(TAG, "Patch Order after shipping change was successful")
+                internalState.postValue(NativeCheckoutViewState.OrderPatched)
             }
         }
     }

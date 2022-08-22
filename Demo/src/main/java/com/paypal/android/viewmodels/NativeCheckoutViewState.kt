@@ -7,6 +7,7 @@ sealed class NativeCheckoutViewState {
     object GeneratingToken : NativeCheckoutViewState()
     class TokenGenerated(val token: String) : NativeCheckoutViewState()
     class OrderCreated(val orderId: String) : NativeCheckoutViewState()
+    object OrderPatched : NativeCheckoutViewState()
     object CheckoutInit : NativeCheckoutViewState()
     object CheckoutStart : NativeCheckoutViewState()
     object CheckoutCancelled : NativeCheckoutViewState()

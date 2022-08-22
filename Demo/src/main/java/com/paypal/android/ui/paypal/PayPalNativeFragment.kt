@@ -1,9 +1,11 @@
 package com.paypal.android.ui.paypal
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.radiobutton.MaterialRadioButton
@@ -75,6 +77,7 @@ class PayPalNativeFragment : Fragment() {
             NativeCheckoutViewState.GeneratingToken -> generatingToken()
             NativeCheckoutViewState.Initial -> setInitialState()
             is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
+            is NativeCheckoutViewState.OrderPatched -> orderPatched()
             is NativeCheckoutViewState.TokenGenerated -> tokenGenerated(viewState)
             NativeCheckoutViewState.CheckoutInit -> checkoutInit()
         }
@@ -148,6 +151,11 @@ class PayPalNativeFragment : Fragment() {
         hideProgress()
     }
 
+    private fun orderPatched() {
+        Toast.makeText(requireContext(), "Order Patched", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "Patch Order after shipping change was successful")
+    }
+
     private fun checkoutCancelled() {
         setContent(getString(R.string.cancelled), getString(R.string.checkout_cancelled_by_user))
         hideProgress()
@@ -180,5 +188,9 @@ class PayPalNativeFragment : Fragment() {
 
     private fun hideProgress() {
         binding.progressGroup.visibility = View.GONE
+    }
+
+    companion object {
+        private val TAG = PayPalNativeFragment::class.java.simpleName
     }
 }
