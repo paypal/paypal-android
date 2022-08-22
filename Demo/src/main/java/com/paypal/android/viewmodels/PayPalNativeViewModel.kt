@@ -39,6 +39,10 @@ class PayPalNativeViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
 
+    private companion object {
+        private const val SHIPPING_METHOD_INCREASE = 10f
+    }
+
     @Inject
     lateinit var getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase
     @Inject
@@ -101,7 +105,7 @@ class PayPalNativeViewModel @Inject constructor(
                     options = shippingChangeData.shippingOptions.map {
                         it.copy(
                             amount = it.amount?.copy(
-                                value = ((it.amount?.value?.toFloat() ?: 0f) + 10f).asValueString()
+                                value = ((it.amount?.value?.toFloat() ?: 0f) + SHIPPING_METHOD_INCREASE).asValueString()
                             )
                         )
                     }
