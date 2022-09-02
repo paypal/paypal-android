@@ -46,6 +46,7 @@ class PayPalNativeFragment : Fragment() {
             orderCheckout.setOnClickListener { onRadioButtonClicked(it) }
             orderIdCheckout.setOnClickListener { onRadioButtonClicked(it) }
             billingAgreementCheckout.setOnClickListener { onRadioButtonClicked(it) }
+            billingAgreementWithoutPurchaseCheckout.setOnClickListener { onRadioButtonClicked(it) }
             vaultCheckout.setOnClickListener { onRadioButtonClicked(it) }
             tryAgainButton.setOnClickListener { viewModel.reset() }
         }
@@ -63,6 +64,7 @@ class PayPalNativeFragment : Fragment() {
             R.id.order_checkout -> { viewModel.orderCheckout() }
             R.id.order_id_checkout -> { viewModel.orderIdCheckout() }
             R.id.billing_agreement_checkout -> { viewModel.billingAgreementCheckout() }
+            R.id.billing_agreement_without_purchase_checkout -> { viewModel.billingAgreementWithoutPurchase() }
             R.id.vault_checkout -> { viewModel.vaultCheckout() }
             else -> {}
         }

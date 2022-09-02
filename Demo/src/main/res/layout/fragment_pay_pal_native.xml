@@ -41,11 +41,12 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/checkout_options_radio_group"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.35"
+            app:layout_constraintVertical_bias="0.0"
             android:layout_marginStart="@dimen/padding_16dp"
+            android:layout_marginTop="@dimen/padding_16dp"
             android:textSize="24sp"
             android:textStyle="bold"
             tools:text="Approve"/>
@@ -128,6 +129,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Billing Agreement Checkout"/>
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/billing_agreement_without_purchase_checkout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Billing Agreement without purchase Checkout"/>
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/vault_checkout"
                     android:layout_width="wrap_content"

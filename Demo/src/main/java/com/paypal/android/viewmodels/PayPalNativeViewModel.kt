@@ -17,6 +17,7 @@ import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.usecase.GetBillingAgreementTokenWithoutPurchaseUseCase
 import com.paypal.android.utils.OrderUtils.asValueString
 import com.paypal.android.utils.OrderUtils.getAmount
 import com.paypal.checkout.createorder.CreateOrder
@@ -44,6 +45,8 @@ class PayPalNativeViewModel @Inject constructor(
 
     @Inject
     lateinit var getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase
+    @Inject
+    lateinit var getBillingAgreementTokenWithoutPurchaseUseCase: GetBillingAgreementTokenWithoutPurchaseUseCase
     @Inject
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
     @Inject
@@ -159,6 +162,17 @@ class PayPalNativeViewModel @Inject constructor(
                     internalState.postValue(NativeCheckoutViewState.OrderCreated(orderId))
                 })
             }
+        }
+    }
+
+    fun billingAgreementWithoutPurchase() {
+        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
+        viewModelScope.launch(exceptionHandler) {
+            val token = getBillingAgreementTokenWithoutPurchaseUseCase(accessToken)
+            startCheckoutFlow(CreateOrder { createOrderActions ->
+                createOrderActions.setBillingAgreementId(token)
+                internalState.postValue(NativeCheckoutViewState.OrderCreated(token))
+            })
         }
     }
 

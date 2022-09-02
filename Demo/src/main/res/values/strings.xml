@@ -3,8 +3,8 @@
 
     <!-- Payment Methods -->
     <string name="payment_methods_card">Card</string>
-    <string name="payment_methods_paypal">PayPal</string>
-    <string name="payment_methods_paypal_native">PayPal Native</string>
+    <string name="payment_methods_paypal_web">PayPal Web</string>
+    <string name="payment_methods_paypal_native">PayPal</string>
     <string name="payment_methods_menu_settings">Settings</string>
 
     <!-- Card Fields -->
