@@ -5,11 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.usecase.GetAccessTokenUseCase
-import com.paypal.android.usecase.GetApprovalSessionIdActionUseCase
-import com.paypal.android.usecase.GetBillingAgreementTokenUseCase
-import com.paypal.android.usecase.GetOrderIdUseCase
-import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.PayPalConfigConstants
 import com.paypal.android.checkout.PayPalCheckoutError
 import com.paypal.android.checkout.PayPalCheckoutListener
@@ -17,6 +12,8 @@ import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.usecase.GetAccessTokenUseCase
+import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
@@ -31,15 +28,10 @@ class PayPalNativeViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     @Inject
-    lateinit var getBillingAgreementTokenUseCase: GetBillingAgreementTokenUseCase
-    @Inject
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
-    @Inject
-    lateinit var getApprovalSessionIdActionUseCase: GetApprovalSessionIdActionUseCase
-    @Inject
-    lateinit var getOrderUseCase: GetOrderUseCase
+
     @Inject
     lateinit var payPalConstants: PayPalConfigConstants
 
@@ -99,29 +91,6 @@ class PayPalNativeViewModel @Inject constructor(
         }
     }
 
-    fun billingAgreementCheckout() {
-        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
-        viewModelScope.launch(exceptionHandler) {
-            val order = getBillingAgreementTokenUseCase()
-            order.id?.also { orderId ->
-                startCheckoutFlow(CreateOrder { createOrderActions ->
-                    createOrderActions.setBillingAgreementId(orderId)
-                    internalState.postValue(NativeCheckoutViewState.OrderCreated(orderId))
-                })
-            }
-        }
-    }
-
-    fun orderCheckout() {
-        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
-        val order = getOrderUseCase()
-        startCheckoutFlow(CreateOrder { createOrderActions ->
-            createOrderActions.create(order) {
-                internalState.postValue(NativeCheckoutViewState.OrderCreated(it))
-            }
-        })
-    }
-
     fun orderIdCheckout() {
         internalState.postValue(NativeCheckoutViewState.CheckoutInit)
         viewModelScope.launch(exceptionHandler) {
@@ -130,19 +99,6 @@ class PayPalNativeViewModel @Inject constructor(
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.set(it)
                     internalState.postValue(NativeCheckoutViewState.OrderCreated(it))
-                })
-            }
-        }
-    }
-
-    fun vaultCheckout() {
-        internalState.postValue(NativeCheckoutViewState.CheckoutInit)
-        viewModelScope.launch(exceptionHandler) {
-            val sessionId = getApprovalSessionIdActionUseCase(accessToken)
-            sessionId?.also {
-                startCheckoutFlow(CreateOrder { createOrderActions ->
-                    createOrderActions.setVaultApprovalSessionId(it)
-                    internalState.postValue(NativeCheckoutViewState.OrderCreated(sessionId))
                 })
             }
         }

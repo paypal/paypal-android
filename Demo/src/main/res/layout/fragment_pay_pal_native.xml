@@ -107,34 +107,4 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
-        <RadioGroup
-            android:id="@+id/checkout_options_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/padding_16dp"
-            app:layout_constraintTop_toTopOf="parent">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/order_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Order Checkout"/>
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/order_id_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Order Id Checkout"/>
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/billing_agreement_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Billing Agreement Checkout"/>
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/vault_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Vault Checkout"
-                    />
-
-        </RadioGroup>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
