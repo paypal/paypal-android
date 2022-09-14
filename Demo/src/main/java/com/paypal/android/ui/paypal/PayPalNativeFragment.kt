@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.paypal.android.R
@@ -23,6 +24,8 @@ class PayPalNativeFragment : Fragment() {
     @Inject
     lateinit var sdkSampleServerApi: SDKSampleServerApi
 
+    private var selectedShippingPreference: ShippingPreferenceType? = null
+
     private val viewModel: PayPalNativeViewModel by viewModels()
 
     override fun onCreateView(
@@ -30,17 +33,36 @@ class PayPalNativeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentPayPalNativeBinding.inflate(inflater, container, false)
         viewModel.state.observe(viewLifecycleOwner) { viewState ->
             checkViewState(viewState)
         }
         with(binding) {
-            startNativeCheckout.setOnClickListener { viewModel.orderIdCheckout() }
+            startNativeCheckout.setOnClickListener { startCheckout() }
             fetchAccessTokenButton.setOnClickListener { viewModel.fetchAccessToken() }
             tryAgainButton.setOnClickListener { viewModel.reset() }
         }
+        initShippingOptions()
         return binding.root
+    }
+
+    private fun startCheckout() {
+        selectedShippingPreference?.let {
+            viewModel.orderIdCheckout(it)
+        }
+        binding.checkoutOptionsRadioGroup.isVisible = false
+    }
+
+    private fun initShippingOptions() {
+        ShippingPreferenceType.values().forEach { shippingPreferenceType ->
+            val radioButton = android.widget.RadioButton(requireContext())
+            radioButton.text = shippingPreferenceType.description
+            radioButton.setOnClickListener {
+                selectedShippingPreference = shippingPreferenceType
+                binding.startNativeCheckout.isEnabled = true
+            }
+            binding.checkoutOptionsRadioGroup.addView(radioButton)
+        }
     }
 
     private fun checkViewState(viewState: NativeCheckoutViewState) {
@@ -81,8 +103,9 @@ class PayPalNativeFragment : Fragment() {
         setContent(getString(R.string.token_generated), viewState.token)
         with(binding) {
             startNativeCheckout.visibility = View.VISIBLE
-            startNativeCheckout.isEnabled = true
             fetchAccessTokenButton.visibility = View.GONE
+            checkoutOptionsRadioGroup.clearCheck()
+            checkoutOptionsRadioGroup.isVisible = true
         }
     }
 

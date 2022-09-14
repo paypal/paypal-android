@@ -12,6 +12,7 @@ import com.paypal.android.checkout.PayPalCheckoutResult
 import com.paypal.android.checkout.PayPalClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.checkout.createorder.CreateOrder
@@ -91,10 +92,10 @@ class PayPalNativeViewModel @Inject constructor(
         }
     }
 
-    fun orderIdCheckout() {
+    fun orderIdCheckout(shippingPreferenceType: ShippingPreferenceType) {
         internalState.postValue(NativeCheckoutViewState.CheckoutInit)
         viewModelScope.launch(exceptionHandler) {
-            val orderId = getOrderIdUseCase()
+            val orderId = getOrderIdUseCase(shippingPreferenceType)
             orderId?.also {
                 startCheckoutFlow(CreateOrder { createOrderActions ->
                     createOrderActions.set(it)
