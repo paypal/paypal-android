@@ -1,9 +1,11 @@
 package com.paypal.android.ui.paypal
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -175,5 +177,14 @@ class PayPalNativeFragment : Fragment() {
 
     private fun hideProgress() {
         binding.progressGroup.visibility = View.GONE
+    }
+
+    private fun orderPatched() {
+        Toast.makeText(requireContext(), "Order Patched", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "Patch Order after shipping change was successful")
+    }
+
+    companion object {
+        private val TAG = PayPalNativeFragment::class.java.simpleName
     }
 }

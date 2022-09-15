@@ -1,6 +1,7 @@
 package com.paypal.android.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,8 +17,15 @@ import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.checkout.createorder.CreateOrder
+import com.paypal.checkout.createorder.CurrencyCode
+import com.paypal.checkout.order.Amount
+import com.paypal.checkout.order.patch.PatchOrderRequest
+import com.paypal.checkout.order.patch.fields.PatchAmount
+import com.paypal.checkout.order.patch.fields.PatchShippingAddress
+import com.paypal.checkout.order.patch.fields.PatchShippingOptions
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
+import com.paypal.checkout.shipping.ShippingChangeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -68,7 +76,33 @@ class PayPalNativeViewModel @Inject constructor(
             shippingChangeData: ShippingChangeData,
             shippingChangeActions: ShippingChangeActions
         ) {
-            // implement
+            val patchRequest = when (shippingChangeData.shippingChangeType) {
+                ShippingChangeType.OPTION_CHANGE -> {
+                    PatchOrderRequest(
+                        PatchShippingOptions.Replace(
+                            options = shippingChangeData.shippingOptions
+                        ),
+                        PatchAmount.Replace(
+                            amount = Amount(currencyCode = CurrencyCode.USD, "10.00")
+                        )
+                    )
+                }
+                ShippingChangeType.ADDRESS_CHANGE -> {
+                    PatchOrderRequest(
+                        PatchShippingAddress.Replace(shippingChangeData.shippingAddress),
+                        PatchAmount.Replace(
+                            amount = Amount(currencyCode = CurrencyCode.USD, "10.00")
+                        )
+                    )
+                }
+            }
+            try {
+                shippingChangeActions.patchOrder(patchRequest) {
+                    internalState.postValue(NativeCheckoutViewState.OrderPatched)
+                }
+            } catch (ex: Exception) {
+                Log.d("LSAT", ex.message.orEmpty())
+            }
         }
     }
 

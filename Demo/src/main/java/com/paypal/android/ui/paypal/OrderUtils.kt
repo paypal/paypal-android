@@ -16,32 +16,6 @@ object OrderUtils {
         	"intent": "AUTHORIZE",
         	"purchase_units": [{
         			"amount": {
-        				"breakdown": {
-        					"discount": {
-        						"currency_code": "USD",
-        						"value": "00.00"
-        					},
-        					"handling": {
-        						"currency_code": "USD",
-        						"value": "00.00"
-        					},
-        					"item_total": {
-        						"currency_code": "USD",
-        						"value": "00.00"
-        					},
-        					"shipping": {
-        						"currency_code": "USD",
-        						"value": "0.00"
-        					},
-        					"shipping_discount": {
-        						"currency_code": "USD",
-        						"value": "00.00"
-        					},
-        					"tax_total": {
-        						"currency_code": "USD",
-        						"value": "100"
-        					}
-        				},
         				"currency_code": "USD",
         				"value": "100.00"
         			},
@@ -81,7 +55,6 @@ object OrderUtils {
         				"email_address": "merchant@email.com",
         				"merchant_id": "X5XAHHCG636FA"
         			},
-        			"reference_id": "PUHF",
         			"shipping": {
         				"address": {
         					"address_line_1": "123 Townsend St",
@@ -269,7 +242,6 @@ object OrderUtils {
         				"email_address": "merchant@email.com",
         				"merchant_id": "X5XAHHCG636FA"
         			},
-        			"reference_id": "PUHF",
         			"soft_descriptor": "HighFashions"
         		}
         	]
@@ -355,7 +327,6 @@ object OrderUtils {
         				"email_address": "merchant@email.com",
         				"merchant_id": "X5XAHHCG636FA"
         			},
-        			"reference_id": "PUHF",
         			"shipping": {
         				"address": {
         					"address_line_1": "123 Townsend St",
@@ -371,4 +342,5 @@ object OrderUtils {
         	]
         }
     """.trimIndent()
+
 }
