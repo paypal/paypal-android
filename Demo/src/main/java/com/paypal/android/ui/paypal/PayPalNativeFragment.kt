@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -78,6 +79,9 @@ class PayPalNativeFragment : Fragment() {
             is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
             is NativeCheckoutViewState.TokenGenerated -> tokenGenerated(viewState)
             NativeCheckoutViewState.CheckoutInit -> checkoutInit()
+            NativeCheckoutViewState.OrderPatched -> {
+                Toast.makeText(context, "Order Patched", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
