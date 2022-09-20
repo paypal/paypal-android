@@ -55,7 +55,7 @@ class PayPalNativeFragment : Fragment() {
 
     private fun initShippingOptions() {
         ShippingPreferenceType.values().forEach { shippingPreferenceType ->
-            val radioButton = android.widget.RadioButton(requireContext())
+            val radioButton = RadioButton(requireContext())
             radioButton.text = shippingPreferenceType.description
             radioButton.setOnClickListener {
                 selectedShippingPreference = shippingPreferenceType
