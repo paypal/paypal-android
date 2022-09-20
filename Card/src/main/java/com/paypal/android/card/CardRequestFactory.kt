@@ -31,7 +31,7 @@ internal class CardRequestFactory {
             }
 
             val bodyJSON = JSONObject()
-            threeDSecureRequest?.also {
+            threeDSecureRequest?.let {
                 val verificationJSON = JSONObject()
                     .put("method", it.sca.name)
                 val attributesJSON = JSONObject()
