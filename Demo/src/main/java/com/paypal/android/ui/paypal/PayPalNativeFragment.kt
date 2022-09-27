@@ -79,9 +79,7 @@ class PayPalNativeFragment : Fragment() {
             is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
             is NativeCheckoutViewState.TokenGenerated -> tokenGenerated(viewState)
             NativeCheckoutViewState.CheckoutInit -> checkoutInit()
-            NativeCheckoutViewState.OrderPatched -> {
-                Toast.makeText(context, "Order Patched", Toast.LENGTH_SHORT).show()
-            }
+            NativeCheckoutViewState.OrderPatched -> orderPatched()
         }
     }
 

@@ -1,7 +1,6 @@
 package com.paypal.android.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -96,12 +95,8 @@ class PayPalNativeViewModel @Inject constructor(
                     )
                 }
             }
-            try {
-                shippingChangeActions.patchOrder(patchRequest) {
-                    internalState.postValue(NativeCheckoutViewState.OrderPatched)
-                }
-            } catch (ex: Exception) {
-                Log.d("LSAT", ex.message.orEmpty())
+            shippingChangeActions.patchOrder(patchRequest) {
+                internalState.postValue(NativeCheckoutViewState.OrderPatched)
             }
         }
     }
