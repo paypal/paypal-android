@@ -11,16 +11,28 @@ import com.paypal.android.core.graphql.fundingEligibility.models.FundingEligibil
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 
-class EligibilityAPI internal constructor(
+/**
+ *  API that checks merchants eligibility for different payment methods.
+ */
+internal class EligibilityAPI internal constructor(
     private val api: API,
     private val graphQLClient: GraphQLClient
 ) {
 
+    /**
+     *  EligibilityAPI constructor
+     *  @param coreConfig configuration parameters for eligibility API
+     */
     constructor(coreConfig: CoreConfig) : this(
         API(coreConfig),
         GraphQLClientImpl(coreConfig)
     )
 
+    /**
+     *  Checks if merchant is eligible for a set of payment methods
+     *  @return [Eligibility] for payment methods
+     *  @throws PayPalSDKError if something went wrong in the API call
+     */
     suspend fun checkEligibility(): Eligibility {
         val fundingEligibilityQuery = FundingEligibilityQuery(
             clientId = api.getClientId(),
