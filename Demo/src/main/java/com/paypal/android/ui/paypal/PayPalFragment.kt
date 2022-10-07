@@ -20,9 +20,7 @@ import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
 import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
 import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.Environment
 import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.core.api.EligibilityAPI
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -67,22 +65,6 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         }
 
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val accessToken = sdkSampleServerApi.fetchAccessToken().value
-                val coreConfig = CoreConfig(accessToken, Environment.SANDBOX)
-
-                val eligibilityAPI = EligibilityAPI(coreConfig)
-                val result = eligibilityAPI.checkEligibility()
-
-                Log.d(TAG, "isVenmoEligible: ${result.isVenmoEligible}")
-            } catch (error: PayPalSDKError) {
-                Log.d(TAG, "Error: ${error.message}")
-            }
-        }
     }
 
     @SuppressLint("SetTextI18n")
