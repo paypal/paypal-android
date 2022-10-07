@@ -14,7 +14,7 @@ import com.paypal.android.core.graphql.fundingEligibility.models.SupportedPaymen
 /**
  *  API that checks merchants eligibility for different payment methods.
  */
-class EligibilityAPI internal constructor(
+internal class EligibilityAPI internal constructor(
     private val api: API,
     private val graphQLClient: GraphQLClient
 ) {

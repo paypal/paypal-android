@@ -89,22 +89,6 @@ curl -X POST https://api.sandbox.paypal.com/v1/oauth2/token \
 
 Use the value for `access_token` in the response to create an instance of `CoreConfig` to use with any of the SDK's feature clients.
 
-## Eligibility
-Before using each payment method provided by the SDK, you can check if you are eligible for each payment method, using the `EligibilityAPI` which is part of `Core`, included in every payment method module.
-Use as follows:
-```kotlin
-viewLifecycleOwner.lifecycleScope.launch {
-    try {
-        val coreConfig = CoreConfig("<ACCESS_TOKEN>")
-        val eligibilityAPI = EligibilityAPI(coreConfig)
-        val result = eligibilityAPI.checkEligibility()
-        // check for eligibility
-    } catch (error: PayPalSDKError) {
-        // handle error
-    }
-}
-```
-
 ## Modules
 
 Each feature module has its own onboarding guide:
