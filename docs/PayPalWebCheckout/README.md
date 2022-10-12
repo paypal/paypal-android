@@ -35,8 +35,8 @@ dependencies {
 
 The PayPal SDK redirects users to a web interface to complete the PayPal Web Checkout flow. After a user has completed the flow, a custom URL scheme is used to return control back to your app.
 
-Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app:
-
+Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app. Also set the activity `launchMode` to `singleTop`:
+> Note: `android:exported` is required if your app compile SDK version is API 31 (Android 12) or later.
 ```xml
 <activity android:name="com.company.app.MyPaymentsActivity"
     android:exported="true"
@@ -49,6 +49,14 @@ Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the 
         <category android:name="android.intent.category.BROWSABLE"/>
     </intent-filter>
 </activity>
+```
+Also, add `onNewIntent` to your activity:
+
+```kotlin
+override fun onNewIntent(newIntent: Intent?) {
+    super.onNewIntent(intent)
+    intent = newIntent
+}
 ```
 
 ### 3. Initiate the Payments SDK
