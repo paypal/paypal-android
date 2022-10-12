@@ -120,11 +120,14 @@ cardRequest.threeDSecureRequest = ThreeDSecureRequest(
 
 Notice the `myapp://` portion of the `returnUrl` and `cancelUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
 
-Create an intent filter to specify a deep link target for the SDK to use when returning control back to your application:
+Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app. Also set the activity `launchMode` to `singleTop`:
+> Note: `android:exported` is required if your app compile SDK version is API 31 (Android 12) or later.
 
 ```xml
 <activity
     android:name=".MyDeepLinkTargetActivity"
+    android:launchMode="singleTop"
+    android:exported="true"
     ...
     >
     <intent-filter>
@@ -135,6 +138,14 @@ Create an intent filter to specify a deep link target for the SDK to use when re
     </intent-filter>
 </activity>
 ```
+Also, add `onNewIntent` to your activity: 
+
+```kotlin
+override fun onNewIntent(newIntent: Intent?) {
+    super.onNewIntent(intent)
+    intent = newIntent
+}
+```
 
 ### 5. Approve the order through the Payments SDK
 
@@ -143,8 +154,8 @@ Approve the order using your `CardClient`.
 Call `cardClient.approveOrder()` to approve the order, and then handle results:
 
 ```kotlin
-private fun approveMyOrder(cardRequest: CardRequest)
-  val result = cardClient.approveOrder(cardRequest)
+private fun approveMyOrder(cardRequest: CardRequest) {
+  val result = cardClient.approveOrder(this, cardRequest)
 }
 
 fun onApproveOrderSuccess(result: CardResult) {
