@@ -19,8 +19,8 @@ dependencies {
 ### 2. Create a PayPal button
 The PayPalUI module allows you to render three buttons that can offer a set of customizations like color, edges, size and labels:
 * `PayPalButton`: generic PayPal button
-* `PayPalPayLater`: a PayPal button with a fixed PayLater label
-* `PayPalCredit`: a PayPal button with the PayPalCredit logo
+* `PayLaterButton`: a PayPal button with a fixed PayLater label
+* `PayPalCreditButton`: a PayPal button with the PayPalCredit logo
 
 Add a `PayPalButton` to your layout XML:
 
