@@ -54,7 +54,6 @@ class PayPalClient internal constructor (
                 application = application,
                 clientId = api.getClientId(),
                 environment = getPayPalEnvironment(coreConfig.environment),
-                returnUrl = returnUrl,
             )
             PayPalCheckout.setConfig(config)
             listener?.onPayPalCheckoutStart()

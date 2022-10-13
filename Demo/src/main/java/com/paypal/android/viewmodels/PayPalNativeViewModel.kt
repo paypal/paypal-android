@@ -15,12 +15,12 @@ import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
+import com.paypal.android.utils.OrderUtils.asValueString
+import com.paypal.android.utils.OrderUtils.getAmount
 import com.paypal.checkout.createorder.CreateOrder
-import com.paypal.checkout.createorder.CurrencyCode
-import com.paypal.checkout.order.Amount
+import com.paypal.checkout.order.Options
 import com.paypal.checkout.order.patch.PatchOrderRequest
 import com.paypal.checkout.order.patch.fields.PatchAmount
-import com.paypal.checkout.order.patch.fields.PatchShippingAddress
 import com.paypal.checkout.order.patch.fields.PatchShippingOptions
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
@@ -34,6 +34,10 @@ import javax.inject.Inject
 class PayPalNativeViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
+
+    private companion object {
+        private const val SHIPPING_METHOD_INCREASE = 10f
+    }
 
     @Inject
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
@@ -75,26 +79,40 @@ class PayPalNativeViewModel @Inject constructor(
             shippingChangeData: ShippingChangeData,
             shippingChangeActions: ShippingChangeActions
         ) {
-            val patchRequest = when (shippingChangeData.shippingChangeType) {
+            val options: List<Options>
+            val updatedShippingAmount: String?
+
+            when (shippingChangeData.shippingChangeType) {
                 ShippingChangeType.OPTION_CHANGE -> {
-                    PatchOrderRequest(
-                        PatchShippingOptions.Replace(
-                            options = shippingChangeData.shippingOptions
-                        ),
-                        PatchAmount.Replace(
-                            amount = Amount(currencyCode = CurrencyCode.USD, "10.00")
-                        )
-                    )
+
+                    options = shippingChangeData.shippingOptions
+                    updatedShippingAmount = shippingChangeData.selectedShippingOption?.amount?.value
                 }
                 ShippingChangeType.ADDRESS_CHANGE -> {
-                    PatchOrderRequest(
-                        PatchShippingAddress.Replace(shippingChangeData.shippingAddress),
-                        PatchAmount.Replace(
-                            amount = Amount(currencyCode = CurrencyCode.USD, "10.00")
+                    options = shippingChangeData.shippingOptions.map {
+                        it.copy(
+                            amount = it.amount?.copy(
+                                value = ((it.amount?.value?.toFloat() ?: 0f) + SHIPPING_METHOD_INCREASE).asValueString()
+                            )
                         )
-                    )
+                    }
+                    updatedShippingAmount = options.find { it.selected }?.amount?.value
                 }
             }
+
+            val patchRequest = PatchOrderRequest(
+                PatchShippingOptions.Replace(
+                    purchaseUnitReferenceId = "PUHF",
+                    options = options
+                ),
+                PatchAmount.Replace(
+                    purchaseUnitReferenceId = "PUHF",
+                    amount = getAmount(
+                        value = "100.0",
+                        shippingValue = updatedShippingAmount ?: "0.00"
+                    )
+                )
+            )
             shippingChangeActions.patchOrder(patchRequest) {
                 internalState.postValue(NativeCheckoutViewState.OrderPatched)
             }
