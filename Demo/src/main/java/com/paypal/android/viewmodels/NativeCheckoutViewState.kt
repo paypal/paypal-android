@@ -10,6 +10,7 @@ sealed class NativeCheckoutViewState {
     object CheckoutInit : NativeCheckoutViewState()
     object CheckoutStart : NativeCheckoutViewState()
     object CheckoutCancelled : NativeCheckoutViewState()
+    object OrderPatched : NativeCheckoutViewState()
     class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) : NativeCheckoutViewState()
     data class CheckoutComplete(
         val payerId: String?,

@@ -11,6 +11,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/standard_margin"
+            android:enabled="false"
             android:text="@string/start_checkout"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +45,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.35"
+            app:layout_constraintVertical_bias="0.20"
             android:layout_marginStart="@dimen/padding_16dp"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -65,13 +66,25 @@
             android:id="@+id/content_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:constraint_referenced_ids="content,title"/>
+            app:constraint_referenced_ids="content,title" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/progress_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:constraint_referenced_ids="progress_text,progress_circular"/>
+            app:constraint_referenced_ids="progress_text,progress_circular" />
+
+        <RadioGroup
+            android:id="@+id/checkout_options_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/padding_16dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/content" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fetch_access_token_button"
@@ -106,35 +119,5 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
-
-        <RadioGroup
-            android:id="@+id/checkout_options_radio_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/padding_16dp"
-            app:layout_constraintTop_toTopOf="parent">
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/order_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Order Checkout"/>
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/order_id_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Order Id Checkout"/>
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/billing_agreement_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Billing Agreement Checkout"/>
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/vault_checkout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Vault Checkout"
-                    />
-
-        </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
