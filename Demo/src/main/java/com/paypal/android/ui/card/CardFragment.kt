@@ -10,7 +10,6 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
-import com.paypal.android.api.model.ApplicationContext
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.services.SDKSampleServerApi
@@ -223,13 +222,6 @@ class CardFragment : Fragment() {
             ),
             payee = Payee(emailAddress = "anpelaez@paypal.com")
         )
-
-        if (shouldRequestThreeDSecure) {
-            createOrderRequest.applicationContext = ApplicationContext(
-                returnURL = APP_RETURN_URL,
-                cancelURL = APP_CANCEL_URL
-            )
-        }
         return createOrderRequest
     }
 

@@ -120,9 +120,13 @@ class CardRequestFactoryUnitTest {
                     }
                   }
                 }
+              },
+              "application_context": {
+                "return_url": "https://sample.com/return/url",
+                "cancel_url": "https://sample.com/return/url"
               }
             }
         """.trimIndent()
-        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
     }
 }
