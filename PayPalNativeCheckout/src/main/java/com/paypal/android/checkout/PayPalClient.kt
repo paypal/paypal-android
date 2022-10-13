@@ -22,12 +22,11 @@ import kotlinx.coroutines.launch
 class PayPalClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
-    private val returnUrl: String,
     private val api: API,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
-    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(application, coreConfig, returnUrl, API(coreConfig))
+    constructor(application: Application, coreConfig: CoreConfig) : this(application, coreConfig, API(coreConfig))
 
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {

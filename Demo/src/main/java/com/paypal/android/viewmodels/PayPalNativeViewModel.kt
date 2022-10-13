@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.PayPalConfigConstants
 import com.paypal.android.checkout.PayPalCheckoutError
 import com.paypal.android.checkout.PayPalCheckoutListener
 import com.paypal.android.checkout.PayPalCheckoutResult
@@ -43,9 +42,6 @@ class PayPalNativeViewModel @Inject constructor(
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
-
-    @Inject
-    lateinit var payPalConstants: PayPalConfigConstants
 
     private val payPalListener = object : PayPalCheckoutListener {
         override fun onPayPalCheckoutStart() {
@@ -164,8 +160,7 @@ class PayPalNativeViewModel @Inject constructor(
     private fun initPayPalClient(accessToken: String) {
         payPalClient = PayPalClient(
             getApplication(),
-            CoreConfig(accessToken),
-            payPalConstants.returnUrl
+            CoreConfig(accessToken)
         )
         payPalClient.listener = payPalListener
     }
