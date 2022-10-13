@@ -8,6 +8,7 @@ import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
+import com.paypal.checkout.config.UIConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
@@ -55,6 +56,9 @@ class PayPalClient internal constructor (
                 clientId = api.getClientId(),
                 environment = getPayPalEnvironment(coreConfig.environment),
                 returnUrl = returnUrl,
+                uiConfig = UIConfig(
+                    showExitSurveyDialog = false
+                )
             )
             PayPalCheckout.setConfig(config)
             listener?.onPayPalCheckoutStart()
