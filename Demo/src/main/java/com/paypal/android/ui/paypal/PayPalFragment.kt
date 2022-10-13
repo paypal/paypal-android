@@ -9,8 +9,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.checkoutweb.PayPalWebCheckoutClient

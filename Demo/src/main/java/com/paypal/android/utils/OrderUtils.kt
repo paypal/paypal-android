@@ -18,6 +18,7 @@ import com.paypal.checkout.order.PurchaseUnit
 import com.paypal.checkout.order.Shipping
 import com.paypal.checkout.order.UnitAmount
 
+@SuppressWarnings("LongParameterList", "LongMethod")
 object OrderUtils {
 
     fun createOrderBuilder(
