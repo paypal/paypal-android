@@ -45,14 +45,14 @@ import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
 
 @ExperimentalCoroutinesApi
-class PayPalClientTest {
+class PayPalNativeCheckoutClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
 
     private val api = mockk<API>(relaxed = true)
 
-    private lateinit var sut: PayPalClient
+    private lateinit var sut: PayPalNativeCheckoutClient
 
     // Ref: https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test#dispatchersmain-delegation
     private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
@@ -100,7 +100,7 @@ class PayPalClientTest {
 
     @Test
     fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runTest {
-        val payPalCheckoutListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        val payPalCheckoutListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         every { PayPalCheckout.startCheckout(any()) } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
@@ -120,7 +120,7 @@ class PayPalClientTest {
         val mockErrorDescription = "mock_error_description"
         val error = PayPalSDKError(mockCode, mockErrorDescription)
         val errorSlot = slot<PayPalSDKError>()
-        val payPalCheckoutListener = spyk<PayPalCheckoutListener>()
+        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
         coEvery { api.getClientId() } throws error
         every {
@@ -208,7 +208,7 @@ class PayPalClientTest {
 
     @Test
     fun `when listener is set, PayPalCheckout registerCallbacks() is called`() = runTest {
-        val listener = mockk<PayPalCheckoutListener>()
+        val listener = mockk<PayPalNativeCheckoutListener>()
         sut = getPayPalCheckoutClient()
         sut.listener = listener
 
@@ -226,7 +226,7 @@ class PayPalClientTest {
     fun `when OnApprove is invoked, onPayPalSuccess is called`() {
         val approval = mockk<Approval>()
         val onApproveSlot = slot<OnApprove>()
-        val paypalCheckoutResultSlot = slot<PayPalCheckoutResult>()
+        val paypalCheckoutResultSlot = slot<PayPalNativeCheckoutResult>()
 
         every {
             PayPalCheckout.registerCallbacks(
@@ -239,7 +239,7 @@ class PayPalClientTest {
 
         sut = getPayPalCheckoutClient()
 
-        val payPalClientListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         sut.listener = payPalClientListener
 
         every {
@@ -266,7 +266,7 @@ class PayPalClientTest {
 
         sut = getPayPalCheckoutClient()
 
-        val payPalClientListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         sut.listener = payPalClientListener
 
         verify { payPalClientListener.onPayPalCheckoutCanceled() }
@@ -292,7 +292,7 @@ class PayPalClientTest {
 
         sut = getPayPalCheckoutClient()
 
-        val payPalClientListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         sut.listener = payPalClientListener
 
         every {
@@ -323,7 +323,7 @@ class PayPalClientTest {
 
         sut = getPayPalCheckoutClient()
 
-        val payPalClientListener = mockk<PayPalCheckoutListener>(relaxed = true)
+        val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         sut.listener = payPalClientListener
 
         every {
@@ -352,10 +352,10 @@ class PayPalClientTest {
     private fun getPayPalCheckoutClient(
         coreConfig: CoreConfig = CoreConfig(),
         testScheduler: TestCoroutineScheduler? = null
-    ): PayPalClient {
+    ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalClient(mockApplication, coreConfig, api, dispatcher)
-        }?: PayPalClient(mockApplication, coreConfig, api)
+            PayPalNativeCheckoutClient(mockApplication, coreConfig, api, dispatcher)
+        }?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
     }
 }
