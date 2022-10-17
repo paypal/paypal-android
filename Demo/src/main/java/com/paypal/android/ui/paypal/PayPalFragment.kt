@@ -9,8 +9,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
@@ -22,6 +20,7 @@ import com.paypal.android.core.APIClientError
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
+import com.paypal.android.utils.OrderUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -110,8 +109,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             try {
                 binding.statusText.setText(R.string.creating_order)
 
-                val orderJson = JsonParser.parseString(OrderUtils.orderWithShipping) as JsonObject
-                val order = sdkSampleServerApi.createOrder(orderJson)
+                val orderRequest = OrderUtils.createOrderBuilder("5.0")
+                val order = sdkSampleServerApi.createOrder(orderRequest)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
                 }

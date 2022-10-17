@@ -302,6 +302,9 @@ jobs:
         uses: ./.github/actions/set_github_user
       - name: Update Version
         run: |
+          today=$(date +'%Y-%m-%d')
+          sed -i '' 's/## unreleased.*/## '"${{ github.event.inputs.version }}"' ('"$today"')/' CHANGELOG.md
+
           ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
           git add .
           git commit -m 'Bump version to ${{ github.event.inputs.version }}'
@@ -311,3 +314,16 @@ jobs:
           git add .
           git commit -m 'Next version ready'
           git push origin HEAD ${{ github.event.inputs.version }}
+      - name: Save changelog entries to a file
+        run: sed -e '1,/##/d' -e '/##/,$d' CHANGELOG.md > changelog_entries.md
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: ${{ github.event.inputs.version }}
+          body_path: changelog_entries.md
+          draft: false
+          prerelease: false

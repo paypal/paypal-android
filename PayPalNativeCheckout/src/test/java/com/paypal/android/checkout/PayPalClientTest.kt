@@ -49,7 +49,6 @@ class PayPalClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
-    private val mockReturnUrl = "com.example://paypalpay"
 
     private val api = mockk<API>(relaxed = true)
 
@@ -356,7 +355,7 @@ class PayPalClientTest {
     ): PayPalClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
-        }?: PayPalClient(mockApplication, coreConfig, mockReturnUrl, api)
+            PayPalClient(mockApplication, coreConfig, api, dispatcher)
+        }?: PayPalClient(mockApplication, coreConfig, api)
     }
 }
