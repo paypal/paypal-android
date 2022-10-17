@@ -45,12 +45,11 @@ Create a `CoreConfig` using an [access token](../../README.md#access-token):
 val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 ```
 
-Create a `PayPalClient` with your `RETURN_URL` created above:
+Create a `PayPalClient`:
 ```kotlin
 val payPalClient = PayPalClient(
    application = requireActvitiy().application,
-   coreConfig = coreConfig,
-   returnUrl = "<RETURN_URL>"
+   coreConfig = coreConfig
 )
 ```
 
@@ -59,6 +58,10 @@ Set a listener on the client to receive payment flow callbacks:
 ```kotlin
 payPalClient.listener = object : PayPalNativeCheckoutListener {
 
+    override fun onPayPalCheckoutStart() {
+        // the paypal paysheet is about to appear
+    }
+    
     override fun onPayPalSuccess(result: PayPalCheckoutResult) {
        // order was successfully approved and is ready to be captured/authorized (see step 6)
     }
@@ -69,6 +72,13 @@ payPalClient.listener = object : PayPalNativeCheckoutListener {
 
     override fun onPayPalCanceled() {
        // the user canceled the flow
+    }
+
+    override fun onPayPalCheckoutShippingChange(
+        shippingChangeData: ShippingChangeData,
+        shippingChangeActions: ShippingChangeActions
+    ) {
+        // there has been a change in shipping address or shipping method. Patch the order accordingly
     }
 }
 ```
@@ -107,10 +117,12 @@ The `id` field of the response contains the order ID to pass to your client.
 
 ### 5. Start the PayPal Native Checkout flow
 
-Start the PayPal Native checkout flow with the order ID generated in [step 4](#4-create-an-order):
+To start the PayPal Native checkout flow, call the `startCheckout` function in `PayPalClient`, with the `CreateOrderCallback` and set the order ID from [step 4](#4-create-an-order) in `createOrderActions`:
 
 ```kotlin
-paypalNativeClient.startCheckout(orderId)
+paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
+    createOrderActions.set(orderId)
+})
 ```
 When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-paypal-native-checkout).
 
