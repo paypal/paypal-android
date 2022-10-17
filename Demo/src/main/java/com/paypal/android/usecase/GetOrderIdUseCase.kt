@@ -14,7 +14,7 @@ class GetOrderIdUseCase@Inject constructor(
     suspend operator fun invoke(shippingPreferenceType: ShippingPreferenceType): String? =
         withContext(Dispatchers.IO) {
             val order = OrderUtils.createOrderBuilder(
-                "100.0",
+                "5.0",
                 shippingPreference = shippingPreferenceType.nxoShippingPreference
             )
             val result = sdkSampleServerApi.createOrder(order)

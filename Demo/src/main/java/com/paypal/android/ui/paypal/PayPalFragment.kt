@@ -109,7 +109,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             try {
                 binding.statusText.setText(R.string.creating_order)
 
-                val orderRequest = OrderUtils.createOrderBuilder("100.0")
+                val orderRequest = OrderUtils.createOrderBuilder("5.0")
                 val order = sdkSampleServerApi.createOrder(orderRequest)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
