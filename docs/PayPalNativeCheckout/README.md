@@ -47,7 +47,7 @@ val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 
 Create a `PayPalClient`:
 ```kotlin
-val payPalClient = PayPalClient(
+val payPalClient = PayPalNativeCheckoutClient(
    application = requireActvitiy().application,
    coreConfig = coreConfig
 )
@@ -62,7 +62,7 @@ payPalClient.listener = object : PayPalNativeCheckoutListener {
         // the paypal paysheet is about to appear
     }
     
-    override fun onPayPalSuccess(result: PayPalCheckoutResult) {
+    override fun onPayPalSuccess(result: PayPalNativeCheckoutResult) {
        // order was successfully approved and is ready to be captured/authorized (see step 6)
     }
 
@@ -117,7 +117,7 @@ The `id` field of the response contains the order ID to pass to your client.
 
 ### 5. Start the PayPal Native Checkout flow
 
-To start the PayPal Native checkout flow, call the `startCheckout` function in `PayPalClient`, with the `CreateOrderCallback` and set the order ID from [step 4](#4-create-an-order) in `createOrderActions`:
+To start the PayPal Native checkout flow, call the `startCheckout` function in `PayPalNativeCheckoutClient`, with the `CreateOrderCallback` and set the order ID from [step 4](#4-create-an-order) in `createOrderActions`:
 
 ```kotlin
 paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
