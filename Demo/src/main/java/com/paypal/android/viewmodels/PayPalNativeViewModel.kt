@@ -109,6 +109,7 @@ class PayPalNativeViewModel @Inject constructor(
                     )
                 )
             )
+            //TODO: patch order will fail because of bug in NXO. See: https://engineering.paypalcorp.com/jira/browse/DTNOR-607
             shippingChangeActions.patchOrder(patchRequest) {
                 internalState.postValue(NativeCheckoutViewState.OrderPatched)
             }
