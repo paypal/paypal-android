@@ -1,7 +1,7 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
-* Add `PayPalNative`:
+* Add `PayPalNativeCheckout`:
   * Use the native Paypal checkout flow in your app 
 
 ## 0.0.4 (2022-07-25)
