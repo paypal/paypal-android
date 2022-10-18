@@ -185,3 +185,14 @@ task changeReleaseVersion {
         topLevelGradleFile.write(finalScript, 'UTF-8')
     }
 }
+
+//./gradlew -PversionParam=0.0.1 changeReleaseVersion
+task updateCHANGELOGVersion {
+    doLast {
+        def date = new Date()
+        def formattedDate = date.format('yyyy-MM-dd')
+        def changelogFile = new File('CHANGELOG.md')
+        def changelogFileText = changelogFile.text.replaceFirst("## unreleased", "## " + versionParam + " ($formattedDate)")
+        changelogFile.write(changelogFileText)
+    }
+}

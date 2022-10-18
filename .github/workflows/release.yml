@@ -302,10 +302,10 @@ jobs:
         uses: ./.github/actions/set_github_user
       - name: Update Version
         run: |
-          today=$(date +'%Y-%m-%d')
-          sed -i '' 's/## unreleased.*/## '"${{ github.event.inputs.version }}"' ('"$today"')/' CHANGELOG.md
 
+          ./gradlew -PversionParam=${{ github.event.inputs.version }} updateCHANGELOGVersion
           ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+
           git add .
           git commit -m 'Bump version to ${{ github.event.inputs.version }}'
           git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
