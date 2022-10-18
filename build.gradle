@@ -73,7 +73,15 @@ buildscript {
             "json" : "org.json:json:20220320",
 
             // PayPal
-            "paypalNativeCheckout"        : "com.paypal.checkout:android-sdk:0.8.2"
+            "nativeCheckout"              : "com.paypal.checkout:android-sdk:0.8.2",
+
+            // Release modules
+            "card"                        : "com.paypal.android:card:${modules.sdkVersionName}",
+            "paypalUI"                    : "com.paypal.android:paypal-ui:${modules.sdkVersionName}",
+            "paypalWebCheckout"           : "com.paypal.android:paypal-web-checkout:${modules.sdkVersionName}",
+            "paypalNativeCheckout"        : "com.paypal.android:paypal-native-checkout:${modules.sdkVersionName}",
+            "paypalDataCollector"         : "com.paypal.android:paypal-data-collector:${modules.sdkVersionName}",
+
     ]
 
     repositories {

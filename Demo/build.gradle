@@ -59,12 +59,18 @@ android {
 }
 
 dependencies {
-    implementation project(':Card')
-    implementation project(':PayPalDataCollector')
-    implementation project(':PayPalNativeCheckout')
-    implementation project(':PayPalWebCheckout')
-    implementation project(':PayPalUI')
-    implementation project(':Venmo')
+    debugImplementation project(':Card')
+    debugImplementation project(':PayPalDataCollector')
+    debugImplementation project(':PayPalNativeCheckout')
+    debugImplementation project(':PayPalWebCheckout')
+    debugImplementation project(':PayPalUI')
+    debugImplementation project(':Venmo')
+
+    releaseImplementation deps.card
+    releaseImplementation deps.paypalUI
+    releaseImplementation deps.paypalWebCheckout
+    releaseImplementation deps.paypalNativeCheckout
+    releaseImplementation deps.paypalDataCollector
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
