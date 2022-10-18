@@ -1,9 +1,6 @@
-description: 'Publishes module'
+name: 'Publish All Modules'
+description: 'Publishes all modules'
 inputs:
-  module:
-    description: 'Module'
-    required: true
-    default: ''
   sonatype_usr:
     description: 'Sonatype user'
     required: true
@@ -27,7 +24,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ./gradlew --stacktrace clean :${{ inputs.module }}:publishReleasePublicationToMavenRepository
+    - run: |
+        ./gradlew --stacktrace clean \
+        :Core:publishReleasePublicationToMavenRepository \
+        :Card:publishReleasePublicationToMavenRepository \
+        :PayPalWebCheckout:publishReleasePublicationToMavenRepository \
+        :PayPalNativeCheckout:publishReleasePublicationToMavenRepository \
+        :PayPalDataCollector:publishReleasePublicationToMavenRepository \
+        :PayPalUI:publishReleasePublicationToMavenRepository
       shell: bash
       env:
         SONATYPE_NEXUS_USERNAME: ${{ inputs.sonatype_usr }}

@@ -35,7 +35,6 @@ jobs:
 
   #Once building is finished, we unit test every module in parallel
   unit_test_core:
-    needs: build_aar
     name: Core Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -52,7 +51,6 @@ jobs:
           module: Card
 
   unit_test_card:
-    needs: build_aar
     name: Card Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +66,6 @@ jobs:
         with:
           module: Card
   unit_test_paypal:
-    needs: build_aar
     name: PayPal Web Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +81,6 @@ jobs:
         with:
           module: PayPalWebCheckout
   unit_test_paypal_native:
-    needs: build_aar
     name: PayPal Native Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -107,10 +103,11 @@ jobs:
     steps:
       - run: echo "Unit test finished"
 
-  #Once the version is updated, we publish all modules in parallel
-  publish_core:
-    needs: [ unit_test_finished ]
-    name: Publish Core
+  # after build and unit tests are finished, publish all modules at once
+  # to help reduce the probability of failure when interacting with sonatype servers
+  publish_all_modules:
+    needs: [ unit_test_finished, build_aar ]
+    name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -125,174 +122,21 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Change Version
+      - name: Update Version
         run: |
           ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: Publish Core
-        uses: ./.github/actions/publish_module
+      - name: Publish All Modules
+        uses: ./.github/actions/publish_all_modules
         with:
-          module: Core
           sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
           signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_card:
-    needs: [ unit_test_finished ]
-    name: Publish Card
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'microsoft'
-      - name: Decode Signing Key
-        uses: ./.github/actions/decode_signing_key_action
-        with:
-          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
-          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Change Version
-        run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: Publish Card
-        uses: ./.github/actions/publish_module
-        with:
-          module: Card
-          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
-          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_web_checkout:
-    needs: [ unit_test_finished ]
-    name: Publish PayPal Checkout Web
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'microsoft'
-      - name: Decode Signing Key
-        uses: ./.github/actions/decode_signing_key_action
-        with:
-          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
-          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Change Version
-        run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: Publish Checkout Web
-        uses: ./.github/actions/publish_module
-        with:
-          module: PayPalWebCheckout
-          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
-          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_native_checkout:
-    needs: [ unit_test_finished ]
-    name: Publish PayPal Native Checkout
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'microsoft'
-      - name: Decode Signing Key
-        uses: ./.github/actions/decode_signing_key_action
-        with:
-          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
-          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Change Version
-        run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: Publish Native Checkout
-        uses: ./.github/actions/publish_module
-        with:
-          module: PayPalNativeCheckout
-          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
-          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_data_collector:
-    needs: [ unit_test_finished ]
-    name: Publish PayPal DataCollector
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'microsoft'
-      - name: Decode Signing Key
-        uses: ./.github/actions/decode_signing_key_action
-        with:
-          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
-          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Change Version
-        run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: Publish PayPal DataCollector
-        uses: ./.github/actions/publish_module
-        with:
-          module: PayPalDataCollector
-          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
-          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-  publish_ui:
-    needs: [ unit_test_finished ]
-    name: Publish PayPal UI
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'microsoft'
-      - name: Decode Signing Key
-        uses: ./.github/actions/decode_signing_key_action
-        with:
-          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
-          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Change Version
-        run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-      - name: Publish PayPal UI
-        uses: ./.github/actions/publish_module
-        with:
-          module: PayPalUI
-          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
-          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
-          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
-          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
-
-  releasing_finished:
-    needs: [ publish_web_checkout, publish_card, publish_core, publish_data_collector, publish_ui, publish_native_checkout ]
-    name: Releases Finished
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Release finished"
 
   # Once all releases are done, we bump version, tag it and prepare next
   bump_version:
-    needs: [ releasing_finished ]
+    needs: [ publish_all_modules ]
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
