@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalClient internal constructor (
+class PayPalNativeCheckoutClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
     private val api: API,
@@ -36,7 +36,7 @@ class PayPalClient internal constructor (
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
-    var listener: PayPalCheckoutListener? = null
+    var listener: PayPalNativeCheckoutListener? = null
         set(value) {
             field = value
             if (value != null) {
@@ -64,11 +64,11 @@ class PayPalClient internal constructor (
         }
     }
 
-    private fun registerCallbacks(listener: PayPalCheckoutListener) {
+    private fun registerCallbacks(listener: PayPalNativeCheckoutListener) {
         PayPalCheckout.registerCallbacks(
             onApprove = OnApprove { approval ->
                 val result = approval.run {
-                    PayPalCheckoutResult(this)
+                    PayPalNativeCheckoutResult(this)
                 }
                 listener.onPayPalCheckoutSuccess(result)
             },
@@ -76,7 +76,7 @@ class PayPalClient internal constructor (
                 listener.onPayPalCheckoutCanceled()
             },
             onError = OnError { errorInfo ->
-                listener.onPayPalCheckoutFailure(PayPalCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
+                listener.onPayPalCheckoutFailure(PayPalNativeCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
             },
             onShippingChange = OnShippingChange { shippingChangeData, shippingChangeActions ->
                 listener.onPayPalCheckoutShippingChange(shippingChangeData, shippingChangeActions)

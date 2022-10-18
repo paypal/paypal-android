@@ -5,9 +5,9 @@ import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 
 /**
- * Implement this callback to receive results from [PayPalClient].
+ * Implement this callback to receive results from [PayPalNativeCheckoutClient].
  */
-interface PayPalCheckoutListener {
+interface PayPalNativeCheckoutListener {
 
     /**
      * Called when the PayPal flow is about to start.
@@ -16,9 +16,9 @@ interface PayPalCheckoutListener {
 
     /**
      * Called when the PayPal flow completes successfully.
-     * @param result [PayPalCheckoutResult] with order information.
+     * @param result [PayPalNativeCheckoutResult] with order information.
      */
-    fun onPayPalCheckoutSuccess(result: PayPalCheckoutResult)
+    fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult)
 
     /**
      * Called when the PayPal flow completes with an error.

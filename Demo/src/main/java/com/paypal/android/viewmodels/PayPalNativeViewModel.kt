@@ -5,10 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.checkout.PayPalCheckoutError
-import com.paypal.android.checkout.PayPalCheckoutListener
-import com.paypal.android.checkout.PayPalCheckoutResult
-import com.paypal.android.checkout.PayPalClient
+import com.paypal.android.checkout.PayPalNativeCheckoutError
+import com.paypal.android.checkout.PayPalNativeCheckoutListener
+import com.paypal.android.checkout.PayPalNativeCheckoutResult
+import com.paypal.android.checkout.PayPalNativeCheckoutClient
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
 import com.paypal.android.ui.paypal.ShippingPreferenceType
@@ -43,12 +43,12 @@ class PayPalNativeViewModel @Inject constructor(
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
 
-    private val payPalListener = object : PayPalCheckoutListener {
+    private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {
             internalState.postValue(NativeCheckoutViewState.CheckoutStart)
         }
 
-        override fun onPayPalCheckoutSuccess(result: PayPalCheckoutResult) {
+        override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
             result.approval.data.apply {
                 internalState.postValue(NativeCheckoutViewState.CheckoutComplete(
                     payerId,
@@ -61,7 +61,7 @@ class PayPalNativeViewModel @Inject constructor(
 
         override fun onPayPalCheckoutFailure(error: PayPalSDKError) {
             val errorState = when (error) {
-                is PayPalCheckoutError -> NativeCheckoutViewState.CheckoutError(error = error.errorInfo)
+                is PayPalNativeCheckoutError -> NativeCheckoutViewState.CheckoutError(error = error.errorInfo)
                 else -> NativeCheckoutViewState.CheckoutError(message = error.errorDescription)
             }
             internalState.postValue(errorState)
@@ -119,7 +119,7 @@ class PayPalNativeViewModel @Inject constructor(
     private val internalState = MutableLiveData<NativeCheckoutViewState>(NativeCheckoutViewState.Initial)
     val state: LiveData<NativeCheckoutViewState> = internalState
 
-    lateinit var payPalClient: PayPalClient
+    lateinit var payPalClient: PayPalNativeCheckoutClient
 
     private var accessToken = ""
 
@@ -159,7 +159,7 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     private fun initPayPalClient(accessToken: String) {
-        payPalClient = PayPalClient(
+        payPalClient = PayPalNativeCheckoutClient(
             getApplication(),
             CoreConfig(accessToken)
         )
