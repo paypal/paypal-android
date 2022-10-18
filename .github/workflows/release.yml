@@ -35,7 +35,6 @@ jobs:
 
   #Once building is finished, we unit test every module in parallel
   unit_test_core:
-    needs: build_aar
     name: Core Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -52,7 +51,6 @@ jobs:
           module: Card
 
   unit_test_card:
-    needs: build_aar
     name: Card Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +66,6 @@ jobs:
         with:
           module: Card
   unit_test_paypal:
-    needs: build_aar
     name: PayPal Web Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +81,6 @@ jobs:
         with:
           module: PayPalWebCheckout
   unit_test_paypal_native:
-    needs: build_aar
     name: PayPal Native Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -110,7 +106,7 @@ jobs:
   # after build and unit tests are finished, publish all modules at once
   # to help reduce the probability of failure when interacting with sonatype servers
   publish_all_modules:
-    needs: [ unit_test_finished ]
+    needs: [ unit_test_finished, build_aar ]
     name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
     steps:
