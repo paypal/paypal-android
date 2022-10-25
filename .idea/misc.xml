@@ -35,6 +35,7 @@
         <entry key="PayPalUI/src/main/res/drawable/wordmark_paypal_color.xml" value="0.11574074074074074" />
         <entry key="PayPalUI/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.11574074074074074" />
         <entry key="PayPalUI/src/main/res/layout/paypal_payment_button_view.xml" value="0.37604166666666666" />
+        <entry key="PayPalUI/src/main/res/layout/paypal_ui_payment_button_view.xml" value="0.2791666666666667" />
       </map>
     </option>
   </component>

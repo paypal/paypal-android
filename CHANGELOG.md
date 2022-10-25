@@ -1,5 +1,9 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* `PayPalUI`:
+  * Fix: remove loading spinner on buttons.
+
 ## 0.0.5 (2022-10-18)
 * Add `PayPalNativeCheckout`:
   * Use the native Paypal checkout flow in your app 
