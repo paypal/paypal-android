@@ -3,7 +3,6 @@ package com.paypal.android.ui.paymentbutton
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Canvas
-import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -12,7 +11,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
 import com.google.android.material.shape.CutCornerTreatment
@@ -159,7 +157,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     init {
         LayoutInflater.from(context)
-            .inflate(R.layout.paypal_payment_button_view, this, true)
+            .inflate(R.layout.paypal_ui_payment_button_view, this, true)
 
         prefixTextView = findViewById(R.id.prefixText)
         suffixTextView = findViewById(R.id.suffixText)
