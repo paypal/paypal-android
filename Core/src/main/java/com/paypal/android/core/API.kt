@@ -1,5 +1,7 @@
 package com.paypal.android.core
 
+import android.util.Log
+
 class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
@@ -40,5 +42,32 @@ class API internal constructor(
             throw APIClientError.dataParsingError(correlationID)
         }
         return clientID
+    }
+
+    suspend fun sendAnalyticsEvent(name: String) {
+//        val requestBody = """
+//            {
+//              "events": {
+//                "event_params": {
+//                  "event_name": "hello_from_team_sdk2"
+//                }
+//              }
+//            }
+//        """.trimIndent()
+
+        val analyticsEventData = AnalyticsEventData("cannillo_app_id", "cannillo_app_id", "hello_from_team_sdk2").toJSON().toString()
+
+
+        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData)
+        val httpRequest =
+            httpRequestFactory.createHttpRequestForFPTI(apiRequest)
+        val response = http.send(httpRequest)
+        if (response.isSuccessful) {
+            Log.d("FPTI", "SENT SUCCESS")
+        }
+
+//        throw APIClientError.serverResponseError(correlationID)
+
+
     }
 }

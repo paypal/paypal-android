@@ -31,4 +31,21 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
         }
         return HttpRequest(url, method, body, headers)
     }
+
+    fun createHttpRequestForFPTI(
+        apiRequest: APIRequest
+    ): HttpRequest {
+        val path = apiRequest.path
+        val baseUrl = Environment.LIVE.url
+
+        val url = URL("$baseUrl/$path")
+        val method = apiRequest.method
+        val body = apiRequest.body
+
+        val headers: MutableMap<String, String> = mutableMapOf(
+            "Content-Type" to "application/json"
+        )
+
+        return HttpRequest(url, method, body, headers)
+    }
 }
