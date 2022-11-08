@@ -55,7 +55,7 @@ class API internal constructor(
 //            }
 //        """.trimIndent()
 
-        val analyticsEventData = AnalyticsEventData("cannillo_app_id", "cannillo_app_id", "hello_from_team_sdk2").toJSON().toString()
+        val analyticsEventData = AnalyticsEventData("cannillo_app_id").toJSON().toString()
 
 
         val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData)

@@ -3,14 +3,40 @@ package com.paypal.android.core
 import org.json.JSONObject
 
 data class AnalyticsEventData(
-    val appID: String,
-    val appName: String,
     val eventName: String
 ) {
+
+    private val appID = "Bedtime"
+    private val appName = ""
+    private val clientSDKVersion = ""
+    private val clientOS = ""
+    private val component = "ppunifiedsdk"
+    private val deviceManufacturer = ""
+    private val eventSource = ""
+    private val isSimulator = ""
+    private val merchantAppVersion = ""
+    private val deviceModel = ""
+    private val platform = "Android"
+    private val sessionID = ""
+    private val timestamp = ""
+    private val tenantName = "PayPal"
+
     companion object {
         const val KEY_APP_ID = "app_id"
         const val KEY_APP_NAME = "app_name"
+        const val KEY_CLIENT_SDK_VERSION = "c_sdk_ver"
+        const val KEY_CLIENT_OS = "client_os"
+        const val KEY_COMPONENT = "comp"
+        const val KEY_DEVICE_MANUFACTURER = "device_manufacturer"
         const val KEY_EVENT_NAME = "event_name"
+        const val KEY_EVENT_SOURCE = "event_source"
+        const val KEY_IS_SIMULATOR = "is_simulator"
+        const val KEY_MERCHANT_APP_VERSION = "mapv"
+        const val KEY_DEVICE_MODEL = "mobile_device_model"
+        const val KEY_PLATFORM = "platform"
+        const val KEY_SESSION_ID = "session_id"
+        const val KEY_TIMESTAMP = "t"
+        const val KEY_TENANT_NAME = "tenant_name"
 
         const val KEY_EVENT_PARAMETERS = "event_params"
         const val KEY_EVENTS = "events"
@@ -20,7 +46,20 @@ data class AnalyticsEventData(
         val eventParams = JSONObject()
             .put(KEY_APP_ID, appID)
             .put(KEY_APP_NAME, appName)
+            .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
+            .put(KEY_CLIENT_OS, clientOS)
+            .put(KEY_COMPONENT, component)
+            .put(KEY_DEVICE_MANUFACTURER, deviceManufacturer)
+            .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_EVENT_NAME, eventName)
+            .put(KEY_EVENT_SOURCE, eventSource)
+            .put(KEY_IS_SIMULATOR, isSimulator)
+            .put(KEY_MERCHANT_APP_VERSION, merchantAppVersion)
+            .put(KEY_DEVICE_MODEL, deviceModel)
+            .put(KEY_PLATFORM, platform)
+            .put(KEY_SESSION_ID, sessionID)
+            .put(KEY_TIMESTAMP, timestamp)
+            .put(KEY_TENANT_NAME, tenantName)
 
         val midLevel = JSONObject()
             .put(KEY_EVENT_PARAMETERS, eventParams)
@@ -29,33 +68,3 @@ data class AnalyticsEventData(
             .put(KEY_EVENTS, midLevel)
     }
 }
-
-//data class PaymentSource2(
-//    val lastDigits: String,
-//    val brand: String,
-//    val type: String? = null,
-//    val authenticationResult: AuthenticationResult? = null
-//) {
-//
-//    companion object {
-//        const val KEY_LAST_DIGITS = "last_digits"
-//        const val KEY_BRAND = "brand"
-//        const val KEY_TYPE = "type"
-//        const val KEY_AUTHENTICATION_RESULT = "authentication_result"
-//    }
-//
-//    internal constructor(json: PaymentsJSON) : this(
-//        json.getString(KEY_LAST_DIGITS),
-//        json.getString(KEY_BRAND),
-//        json.optString(KEY_TYPE),
-//        json.optMapObject(KEY_AUTHENTICATION_RESULT) { AuthenticationResult(it) }
-//    )
-//
-//    fun toJSON(): JSONObject {
-//        return JSONObject()
-//            .put(KEY_LAST_DIGITS, lastDigits)
-//            .put(KEY_BRAND, brand)
-//            .putOpt(KEY_TYPE, type)
-//            .putOpt(KEY_AUTHENTICATION_RESULT, authenticationResult?.toJSON())
-//    }
-//}
