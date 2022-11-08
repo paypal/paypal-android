@@ -14,7 +14,7 @@ You will need to set up authorization to use the PayPal Payments SDK.
 Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and secret, needed to generate an access token.
 
 You will need a server-side integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
-This order will be used to authorize or capture funds. For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
+The order created on your server will be used to authorize or capture funds. For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
 ## Add PayPal Native Checkout Module
 
