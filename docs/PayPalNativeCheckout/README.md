@@ -59,7 +59,7 @@ Set a listener on the client to receive payment flow callbacks:
 payPalClient.listener = object : PayPalNativeCheckoutListener {
 
     override fun onPayPalCheckoutStart() {
-        // the PaPal paysheet is about to appear
+        // the PayPal paysheet is about to appear
     }
     
     override fun onPayPalSuccess(result: PayPalNativeCheckoutResult) {
