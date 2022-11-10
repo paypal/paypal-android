@@ -1,6 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.api.CardAPI
+import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.API
 import com.paypal.android.core.APIRequest
 import com.paypal.android.core.HttpMethod
@@ -82,7 +83,11 @@ class CardAPIUnitTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val cardRequest = CardRequest(orderID, card)
+    private val cardRequest = CardRequest(
+        orderID,
+        card,
+        ThreeDSecureRequest(returnUrl = "return_url", cancelUrl = "cancel_url")
+    )
 
     private lateinit var sut: CardAPI
 
