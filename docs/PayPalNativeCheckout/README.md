@@ -1,12 +1,13 @@
 # Accepting PayPal Native Checkout Payments
-
+ 
 The PayPal Native Checkout module in the PayPal SDK enables PayPal payments in your app
 
 Follow these steps to add PayPal Native Checkout payments:
 
 1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
-1. [Add PayPal Native Checkout Module](#add-paypal-native-checkout-module)
-1. [Test and go live](#test-and-go-live)
+2. [Add PayPal Native Checkout Module](#add-paypal-native-checkout-module)
+3. [Test and go live](#test-and-go-live)
+4. After initial setup, Follow instructions[here](#billing-agreement) for Billing Agreements
 
 ## Setup a PayPal Developer Account
 
