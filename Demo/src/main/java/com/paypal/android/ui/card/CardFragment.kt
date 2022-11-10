@@ -192,7 +192,7 @@ class CardFragment : Fragment() {
             )
 
             val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
-            val sca = when(radioGroup3DS.checkedRadioButtonId) {
+            val sca = when (radioGroup3DS.checkedRadioButtonId) {
                 R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
                 else -> SCA.SCA_ALWAYS
             }
