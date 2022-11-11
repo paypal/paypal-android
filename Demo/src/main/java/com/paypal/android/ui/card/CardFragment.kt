@@ -185,7 +185,7 @@ class CardFragment : Fragment() {
             val (monthString, yearString) = expirationDate.split("/")
 
             val billingAddress = Address(
-                countryCode = "USD",
+                countryCode = "US",
                 streetAddress = "3272 Gateway Road",
                 locality = "Aloha",
                 postalCode = "97007"
