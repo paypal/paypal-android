@@ -104,7 +104,7 @@ Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardReq
 val cardRequest  = CardRequest("<ORDER_ID>", card)
 ```
 
-Strong Consumer Authentication (SCA) is enabled by default, so you need to attach a `ThreeDSecureRequest` to a `CardRequest` that will require users to provide additional authentication information via 3D Secure. Set `sca` with `SCA_ALWAYS` to enable 3DS for every transaction
+Strong Consumer Authentication (SCA) is enabled by default. You need to pass a `ThreeDSecureRequest` when creating a `CardRequest`. This will require users to provide additional authentication information via 3D Secure. You can optionally set `sca` to `SCA_ALWAYS` if you want to require 3D Secure for every transaction.
 
 To request SCA, add the following to `CardRequest`:
 
