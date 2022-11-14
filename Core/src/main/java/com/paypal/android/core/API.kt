@@ -1,15 +1,22 @@
 package com.paypal.android.core
 
+import android.content.Context
 import android.util.Log
+import java.util.*
 
 class API internal constructor(
+    // TODO: - Make context non-optional.
+    // TODO: - Is there another way to get Context w/o passing it down from feature clients?
     private val configuration: CoreConfig,
     private val http: Http,
-    private val httpRequestFactory: HttpRequestFactory
+    private val httpRequestFactory: HttpRequestFactory,
+    private val context: Context?
 ) {
 
-    constructor(configuration: CoreConfig) :
-            this(configuration, Http(), HttpRequestFactory())
+    private val sessionID = UUID.randomUUID().toString().replace("-", "")
+
+    constructor(configuration: CoreConfig, context: Context?= null) :
+            this(configuration, Http(), HttpRequestFactory(), context)
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =
@@ -45,29 +52,17 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-//        val requestBody = """
-//            {
-//              "events": {
-//                "event_params": {
-//                  "event_name": "hello_from_team_sdk2"
-//                }
-//              }
-//            }
-//        """.trimIndent()
-
-        val analyticsEventData = AnalyticsEventData("cannillo_app_id").toJSON().toString()
-
+        val analyticsEventData = AnalyticsEventData(
+            name,
+            context!!,
+            sessionID
+        ).toJSON().toString()
 
         val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData)
-        val httpRequest =
-            httpRequestFactory.createHttpRequestForFPTI(apiRequest)
+        val httpRequest = httpRequestFactory.createHttpRequestForFPTI(apiRequest)
         val response = http.send(httpRequest)
-        if (response.isSuccessful) {
-            Log.d("FPTI", "SENT SUCCESS")
+        if (!response.isSuccessful) {
+            Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
         }
-
-//        throw APIClientError.serverResponseError(correlationID)
-
-
     }
 }
