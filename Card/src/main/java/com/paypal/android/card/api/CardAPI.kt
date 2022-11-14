@@ -12,7 +12,8 @@ internal class CardAPI(
 ) {
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
-        api.sendAnalyticsEvent("hello_its_sammy")
+        // TODO: - Remove after testing
+        api.sendAnalyticsEvent("fake.trigger.event")
 
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
         val httpResponse = api.send(apiRequest)

@@ -43,7 +43,8 @@ class CardClient internal constructor(
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
                 activity,
-                CardAPI(API(configuration)),
+                // TODO: - Remove after testing
+                CardAPI(API(configuration, activity)),
                 BrowserSwitchClient(),
                 Dispatchers.Main
             )
