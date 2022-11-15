@@ -2,7 +2,7 @@
 
 ## unreleased
 * `Card`:
-  * Update `CardRequest` to require `ThreeDSecure`
+  * Update `CardRequest` to require `ThreeDSecureRequest `
 * `PayPalUI`:
   * Fix: remove loading spinner on buttons.
 
