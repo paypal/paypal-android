@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import androidx.test.core.app.ApplicationProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -16,9 +17,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.net.URL
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class APIUnitTest {
 
     private val http = mockk<Http>()
@@ -44,7 +48,7 @@ class APIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory)
+        sut = API(configuration, http, httpRequestFactory, null)
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }

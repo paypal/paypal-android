@@ -12,7 +12,7 @@ class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val context: Context?
+    private val context: Context? = null
 ) {
 
     private val isSimulator: Boolean by lazy {
@@ -66,6 +66,8 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
+        val appMetadata = AppInspector().getAppMetadata(context!!)
+
         val analyticsEventData = AnalyticsEventData(
             eventName = name,
             sessionID = sessionID,
