@@ -1,8 +1,8 @@
 package com.paypal.android.core
 
 import androidx.fragment.app.FragmentActivity
+import com.paypal.android.core.analytics.AnalyticsEventData
 import io.mockk.mockk
-import org.junit.Assert
 import org.junit.Test
 
 class AnalyticsEventDataUnitTest {

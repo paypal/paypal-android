@@ -15,12 +15,12 @@ android {
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        buildConfigField "String", "PAYPAL_SDK_VERSION", "\"$versionName\""
     }
 
     buildTypes {
 
         release {
-            version = android.defaultConfig.versionName //had to add this to get the version in the build
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

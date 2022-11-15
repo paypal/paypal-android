@@ -2,6 +2,8 @@ package com.paypal.android.core
 
 import android.content.Context
 import android.util.Log
+import com.paypal.android.core.analytics.AnalyticsEventData
+import com.paypal.android.core.analytics.models.DeviceData
 import java.util.*
 
 class API internal constructor(
@@ -13,9 +15,21 @@ class API internal constructor(
     private val context: Context?
 ) {
 
+    private val isSimulator: Boolean by lazy {
+        false
+    }
+    private val merchantAppVersion: String by lazy {
+        ""
+    }
+    private val appId: String by lazy {
+        ""
+    }
+    private val appName: String by lazy {
+        ""
+    }
     private val sessionID = UUID.randomUUID().toString().replace("-", "")
 
-    constructor(configuration: CoreConfig, context: Context?= null) :
+    constructor(configuration: CoreConfig, context: Context? = null) :
             this(configuration, Http(), HttpRequestFactory(), context)
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
@@ -53,9 +67,9 @@ class API internal constructor(
 
     suspend fun sendAnalyticsEvent(name: String) {
         val analyticsEventData = AnalyticsEventData(
-            name,
-            context!!,
-            sessionID
+            eventName = name,
+            sessionID = sessionID,
+            deviceData = DeviceData(appName, appId, false, merchantAppVersion)
         ).toJSON().toString()
 
         val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData)

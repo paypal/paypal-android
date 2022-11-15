@@ -1,30 +1,18 @@
-package com.paypal.android.core
+package com.paypal.android.core.analytics
 
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
+import com.paypal.android.core.BuildConfig
+import com.paypal.android.core.analytics.models.DeviceData
 import org.json.JSONObject
 
 data class AnalyticsEventData(
     val eventName: String,
-    val context: Context,
-    val sessionID: String
+    val sessionID: String,
+    val deviceData: DeviceData
 ) {
 
-    private val appID = context.packageName
-
-    private val appName: String
-        get() {
-            val applicationInfo = context.packageManager.getApplicationInfo(context.packageName, 0)
-            return if (applicationInfo != null) {
-                context.packageManager.getApplicationLabel(applicationInfo) as String
-            } else {
-                ""
-            }
-        }
-
     // TODO: - Add VERSION_NAME to BuildConfig
-    private val clientSDKVersion = ""
+    private val clientSDKVersion = BuildConfig.PAYPAL_SDK_VERSION
 
     private val clientOS = "Android API " + Build.VERSION.SDK_INT.toString()
 
@@ -36,29 +24,15 @@ data class AnalyticsEventData(
 
     private val eventSource = "mobile-native"
 
-    private val isSimulator: Boolean
-        get() {
-            return "google_sdk".equals(Build.PRODUCT, ignoreCase = true) ||
-                    "sdk".equals(Build.PRODUCT, ignoreCase = true) ||
-                    "Genymotion".equals(Build.MANUFACTURER, ignoreCase = true) ||
-                    Build.FINGERPRINT.contains("generic")
-        }
 
-    private val merchantAppVersion: String
-        get() {
-            return try {
-                val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-                packageInfo.versionName
-            } catch (ignored: PackageManager.NameNotFoundException) {
-                ""
-            }
-        }
+    private val platform
+        get() = "Android"
 
-    private val platform = "Android"
+    private val timestamp
+        get() = System.currentTimeMillis()
 
-    private val timestamp = System.currentTimeMillis()
-
-    private val tenantName = "PayPal"
+    private val tenantName
+        get() = "PayPal"
 
     companion object {
         const val KEY_APP_ID = "app_id"
@@ -83,8 +57,8 @@ data class AnalyticsEventData(
 
     fun toJSON(): JSONObject {
         val eventParams = JSONObject()
-            .put(KEY_APP_ID, appID)
-            .put(KEY_APP_NAME, appName)
+            .put(KEY_APP_ID, deviceData.appId)
+            .put(KEY_APP_NAME, deviceData.appName)
             .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
             .put(KEY_CLIENT_OS, clientOS)
             .put(KEY_COMPONENT, component)
@@ -92,8 +66,8 @@ data class AnalyticsEventData(
             .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_EVENT_NAME, eventName)
             .put(KEY_EVENT_SOURCE, eventSource)
-            .put(KEY_IS_SIMULATOR, isSimulator)
-            .put(KEY_MERCHANT_APP_VERSION, merchantAppVersion)
+            .put(KEY_IS_SIMULATOR, deviceData.isSimulator)
+            .put(KEY_MERCHANT_APP_VERSION, deviceData.merchantAppVersion)
             .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_PLATFORM, platform)
             .put(KEY_SESSION_ID, sessionID)
