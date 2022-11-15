@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import com.paypal.android.core.analytics.AnalyticsEventData
 import java.net.URL
 import java.util.Locale
 
@@ -32,9 +33,8 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
         return HttpRequest(url, method, body, headers)
     }
 
-    fun createHttpRequestForFPTI(
-        apiRequest: APIRequest
-    ): HttpRequest {
+    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest{
+        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData.toJSON().toString())
         val path = apiRequest.path
         val baseUrl = Environment.LIVE.url
 

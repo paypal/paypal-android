@@ -2,7 +2,10 @@ package com.paypal.android.core
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.core.analytics.AnalyticsEventData
+import com.paypal.android.core.analytics.models.DeviceData
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,32 +17,30 @@ class AnalyticsEventDataUnitTest {
 
     @Test
     fun `it should properly format all analytics metadata`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val sut = AnalyticsEventData("fake-event", context, "fake-session-id")
+        val sut = AnalyticsEventData("fake-event", "fake-session-id", DeviceData(
+            "fake-app-name", "fake-app-id", false, "fake-merchant-app-version", ),
+        timestamp = 10000)
 
         // language=JSON
         val expected = """
         {
             "events": {
                 "event_params": {
-                    "app_id": "com.braintree.uber",
-                    "app_name": "Uber",
-                    "c_sdk_ver": "5.12.0",
-                    "client_id": "172B29EC22C84E9884029448B4B95A71",
-                    "client_os": "iOS 13.7",
-                    "comp": "ppmobilesdk",
-                    "device_manufacturer": "Apple",
+                    "app_id": "fake-app-id",
+                    "app_name": "fake-app-name",
+                    "c_sdk_ver": "${BuildConfig.PAYPAL_SDK_VERSION}",
+                    "client_os": "Android API ${Build.VERSION.SDK_INT}",
+                    "comp": "ppunifiedsdk",
+                    "device_manufacturer": "${Build.MANUFACTURER}",
                     "event_name": "fake-event",
                     "event_source": "mobile-native",
-                    "ios_package_manager": "Swift Package Manager",
-                    "is_simulator": true,
-                    "mapv": "7.11.0",
-                    "merchant_id": "21705010674",
-                    "mobile_device_model": "iPhone11,8",
-                    "platform": "iOS",
+                    "is_simulator": false,
+                    "mapv": "fake-merchant-app-version",
+                    "mobile_device_model": "${Build.MODEL}",
+                    "platform": "Android",
                     "session_id": "fake-session-id",
-                    "t": "1666816838453",
-                    "tenant_name": "paypal"
+                    "t": "10000",
+                    "tenant_name": "PayPal"
                 }
             }
         }       

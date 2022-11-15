@@ -3,7 +3,7 @@ package com.paypal.android.core.analytics
 import android.content.Context
 import com.paypal.android.core.analytics.models.DeviceData
 
-class EnvironmentInspector(
+class DeviceInspector(
     private val context: Context
 ) {
     val appName: String

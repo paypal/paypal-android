@@ -3,7 +3,7 @@ package com.paypal.android.core
 import android.content.Context
 import android.util.Log
 import com.paypal.android.core.analytics.AnalyticsEventData
-import com.paypal.android.core.analytics.models.DeviceData
+import com.paypal.android.core.analytics.DeviceInspector
 import java.util.*
 
 class API internal constructor(
@@ -12,7 +12,7 @@ class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val context: Context? = null
+    private val deviceInspector: DeviceInspector
 ) {
 
     private val isSimulator: Boolean by lazy {
@@ -30,7 +30,7 @@ class API internal constructor(
     private val sessionID = UUID.randomUUID().toString().replace("-", "")
 
     constructor(configuration: CoreConfig, context: Context? = null) :
-            this(configuration, Http(), HttpRequestFactory(), context)
+            this(configuration, Http(), HttpRequestFactory())
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =
@@ -66,14 +66,14 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
+        val deviceData = deviceInspector.inspect()
         val analyticsEventData = AnalyticsEventData(
             eventName = name,
             sessionID = sessionID,
-            deviceData = DeviceData(appName, appId, false, merchantAppVersion)
-        ).toJSON().toString()
-
-        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData)
-        val httpRequest = httpRequestFactory.createHttpRequestForFPTI(apiRequest)
+            deviceData = deviceData,
+            timestamp = System.currentTimeMillis()
+        )
+        val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
         val response = http.send(httpRequest)
         if (!response.isSuccessful) {
             Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
