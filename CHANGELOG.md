@@ -1,6 +1,8 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+* `Card`:
+  * Update `CardRequest` to require `ThreeDSecureRequest `
 * `PayPalUI`:
   * Fix: remove loading spinner on buttons.
 

@@ -28,7 +28,9 @@
     <string name="creating_order">Creating order…</string>
     <string name="custom_styling">Style Buttons</string>
 
-    <string name="request_three_d_secure">Request 3D Secure Authentication</string>
+    <string name="sca_title">SCA:</string>
+    <string name="sca_always">Always</string>
+    <string name="sca_when_required">When required</string>
     <string name="server_integration">Server Integration</string>
     <string name="payment_button">Payment Button</string>
     <string name="select_color">Select Color</string>

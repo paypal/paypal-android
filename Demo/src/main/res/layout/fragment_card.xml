@@ -81,15 +81,30 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <androidx.appcompat.widget.AppCompatCheckBox
-        android:id="@+id/threeds_chkbox"
-        android:layout_width="wrap_content"
+
+    <RadioGroup
+        android:id="@+id/radioGroup3DS"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:checked="true"
-        android:text="@string/request_three_d_secure"
+        android:layout_marginTop="@dimen/padding_16dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_security_code" />
+        app:layout_constraintTop_toBottomOf="@id/card_security_code">
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sca_title"/>
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/sca_always"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/sca_always"/>
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/sca_when_required"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sca_when_required"/>
+    </RadioGroup>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/submit_button"
@@ -112,7 +127,7 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/threeds_chkbox" />
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup3DS" />
 
     <TextView
         android:id="@+id/status_text"

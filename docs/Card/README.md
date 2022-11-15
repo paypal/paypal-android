@@ -100,18 +100,17 @@ val card = Card(
 
 Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardRequest`.
 
-
 ```kotlin
 val cardRequest  = CardRequest("<ORDER_ID>", card)
 ```
 
-Optionally, a merchant app can request Strong Consumer Authentication (SCA) for a `CardRequest` that will require users to provide additional authentication information via 3D Secure.
+Strong Consumer Authentication (SCA) is enabled by default. You need to pass a `ThreeDSecureRequest` when creating a `CardRequest`. This will require users to provide additional authentication information via 3D Secure. You can optionally set `sca` to `SCA_ALWAYS` if you want to require 3D Secure for every transaction.
 
 To request SCA, add the following to `CardRequest`:
 
 ```kotlin
 cardRequest.threeDSecureRequest = ThreeDSecureRequest(
-  sca = SCA.SCA_ALWAYS,
+  sca = SCA.SCA_ALWAYS, // default value is SCA_WHEN_REQUIRED
   // custom url scheme needs to be configured in AndroidManifest.xml (see below)
   returnUrl = "myapp://return_url",
   cancelUrl = "myapp://cancel_url"

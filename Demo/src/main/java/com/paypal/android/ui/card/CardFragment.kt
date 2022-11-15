@@ -54,9 +54,6 @@ class CardFragment : Fragment() {
     private lateinit var cardClient: CardClient
     private lateinit var binding: FragmentCardBinding
 
-    private val shouldRequestThreeDSecure: Boolean
-        get() = binding.threedsChkbox.isChecked
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -195,22 +192,25 @@ class CardFragment : Fragment() {
             )
 
             val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
-            CardRequest(order.id!!, card)
-        }
-
-        if (shouldRequestThreeDSecure) {
-            cardRequest.threeDSecureRequest = ThreeDSecureRequest(
-                sca = SCA.SCA_ALWAYS,
-                returnUrl = APP_RETURN_URL,
-                cancelUrl = APP_CANCEL_URL
+            val sca = when (radioGroup3DS.checkedRadioButtonId) {
+                R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
+                else -> SCA.SCA_ALWAYS
+            }
+            CardRequest(
+                order.id!!,
+                card,
+                ThreeDSecureRequest(
+                    sca = sca,
+                    returnUrl = APP_RETURN_URL,
+                    cancelUrl = APP_CANCEL_URL
+                )
             )
         }
 
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
-    private fun buildOrderRequest(): CreateOrderRequest {
-        val createOrderRequest = CreateOrderRequest(
+    private fun buildOrderRequest(): CreateOrderRequest = CreateOrderRequest(
             intent = "AUTHORIZE",
             purchaseUnit = listOf(
                 com.paypal.android.api.model.PurchaseUnit(
@@ -222,8 +222,6 @@ class CardFragment : Fragment() {
             ),
             payee = Payee(emailAddress = "anpelaez@paypal.com")
         )
-        return createOrderRequest
-    }
 
     private fun updateStatusText(text: String) {
         if (!isDetached) {
