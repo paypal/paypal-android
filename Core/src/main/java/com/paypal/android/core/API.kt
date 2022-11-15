@@ -66,8 +66,6 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-        val appMetadata = AppInspector().getAppMetadata(context!!)
-
         val analyticsEventData = AnalyticsEventData(
             eventName = name,
             sessionID = sessionID,
