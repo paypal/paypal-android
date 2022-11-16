@@ -1,7 +1,6 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.threedsecure.SCA
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.Address
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -15,10 +14,8 @@ import org.skyscreamer.jsonassert.JSONAssert
 class CardRequestFactoryUnitTest {
 
     private val orderID = "sample-order-id"
-    private val threeDSecureRequest = ThreeDSecureRequest(
-        returnUrl = "https://sample.com/return/url",
-        cancelUrl = "https://sample.com/cancel/url"
-    )
+
+    private val returnUrl = "return_url"
 
     private lateinit var sut: CardRequestFactory
 
@@ -45,7 +42,7 @@ class CardRequestFactoryUnitTest {
             )
         )
 
-        val cardRequest = CardRequest(orderID, card, threeDSecureRequest)
+        val cardRequest = CardRequest(orderID, card, returnUrl)
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
@@ -74,8 +71,8 @@ class CardRequestFactoryUnitTest {
                 }
               },
               "application_context": {
-                "return_url": "https://sample.com/return/url",
-                "cancel_url": "https://sample.com/cancel/url"
+                "return_url": "return_url",
+                "cancel_url": "return_url"
               }             
             }
         """.trimIndent()
@@ -87,7 +84,7 @@ class CardRequestFactoryUnitTest {
         val card =
             Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
 
-        val cardRequest = CardRequest(orderID, card, threeDSecureRequest)
+        val cardRequest = CardRequest(orderID, card, returnUrl)
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
@@ -106,8 +103,8 @@ class CardRequestFactoryUnitTest {
                 }
                },
               "application_context": {
-                "return_url": "https://sample.com/return/url",
-                "cancel_url": "https://sample.com/cancel/url"
+                "return_url": "return_url",
+                "cancel_url": "return_url"
               }
             }
         """.trimIndent()
@@ -119,12 +116,8 @@ class CardRequestFactoryUnitTest {
         val card =
             Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
 
-        val alwaysThreeDSecureRequest = ThreeDSecureRequest(
-            sca = SCA.SCA_ALWAYS,
-            returnUrl = "https://sample.com/return/url",
-            cancelUrl = "https://sample.com/cancel/url"
-        )
-        val cardRequest = CardRequest(orderID, card, alwaysThreeDSecureRequest)
+
+        val cardRequest = CardRequest(orderID, card, returnUrl, SCA.SCA_ALWAYS)
 
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
@@ -144,8 +137,8 @@ class CardRequestFactoryUnitTest {
                 }
               },
               "application_context": {
-                "return_url": "https://sample.com/return/url",
-                "cancel_url": "https://sample.com/cancel/url"
+                "return_url": "return_url",
+                "cancel_url": "return_url"
               }
             }
         """.trimIndent()

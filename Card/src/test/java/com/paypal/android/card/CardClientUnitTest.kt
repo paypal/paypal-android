@@ -13,7 +13,6 @@ import com.paypal.android.card.api.GetOrderInfoResponse
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.model.PaymentSource
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.OrderStatus
 import com.paypal.android.core.PayPalSDKError
 import io.mockk.coEvery
@@ -45,9 +44,8 @@ class CardClientUnitTest {
 
     private val card = Card("4111111111111111", "01", "24")
     private val orderID = "sample-order-id"
-    private val threeDSecureRequest = ThreeDSecureRequest(returnUrl = "return_url", cancelUrl = "cancel_url")
 
-    private val cardRequest = CardRequest(orderID, card, threeDSecureRequest)
+    private val cardRequest = CardRequest(orderID, card, "return_url")
 
     private val cardAPI = mockk<CardAPI>(relaxed = true)
     private val confirmPaymentSourceResponse =
