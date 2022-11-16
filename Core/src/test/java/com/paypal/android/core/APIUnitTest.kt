@@ -1,6 +1,7 @@
 package com.paypal.android.core
 
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.core.analytics.DeviceInspector
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -28,6 +29,8 @@ class APIUnitTest {
     private val http = mockk<Http>()
     private val httpRequestFactory = mockk<HttpRequestFactory>()
 
+    private val deviceInspector = mockk<DeviceInspector>()
+
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
 
@@ -48,7 +51,7 @@ class APIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory, null)
+        sut = API(configuration, http, httpRequestFactory, deviceInspector)
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }

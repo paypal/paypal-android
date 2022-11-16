@@ -15,22 +15,10 @@ class API internal constructor(
     private val deviceInspector: DeviceInspector
 ) {
 
-    private val isSimulator: Boolean by lazy {
-        false
-    }
-    private val merchantAppVersion: String by lazy {
-        ""
-    }
-    private val appId: String by lazy {
-        ""
-    }
-    private val appName: String by lazy {
-        ""
-    }
     private val sessionID = UUID.randomUUID().toString().replace("-", "")
 
-    constructor(configuration: CoreConfig, context: Context? = null) :
-            this(configuration, Http(), HttpRequestFactory())
+    constructor(configuration: CoreConfig, context: Context) :
+            this(configuration, Http(), HttpRequestFactory(), DeviceInspector(context))
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =

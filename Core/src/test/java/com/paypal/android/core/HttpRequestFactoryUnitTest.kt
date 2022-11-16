@@ -1,5 +1,9 @@
 package com.paypal.android.core
 
+import android.os.Build
+import com.paypal.android.core.analytics.AnalyticsEventData
+import com.paypal.android.core.analytics.models.DeviceData
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -8,6 +12,7 @@ import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RobolectricTestRunner
+import org.skyscreamer.jsonassert.JSONAssert
 import java.net.URL
 
 @RunWith(Enclosed::class)
@@ -125,6 +130,57 @@ class HttpRequestFactoryUnitTest {
             val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
             assertNull(result.headers["Content-Type"])
+        }
+
+        @Test
+        fun `createHttpRequestForAnalytics properly constructs HTTP request`() {
+            val analyticsEventData = AnalyticsEventData(
+                eventName = "fake-event",
+                sessionID = "fake-session-id",
+                deviceData = DeviceData(
+                    appName = "fake-app-name",
+                    appId = "fake-app-id",
+                    clientSDKVersion = "fake-sdk-version",
+                    clientOS = "fake-client-os",
+                    deviceManufacturer = "fake-manufacturer",
+                    deviceModel = "fake-device-model",
+                    isSimulator = false,
+                    merchantAppVersion = "fake-merchant-app-version"
+                ),
+                timestamp = 10000
+            )
+
+            val result = sut.createHttpRequestForAnalytics(analyticsEventData)
+
+            // language=JSON
+            val expected = """
+            {
+                "events": {
+                    "event_params": {
+                        "app_id": "fake-app-id",
+                        "app_name": "fake-app-name",
+                        "c_sdk_ver": "fake-sdk-version",
+                        "client_os": "fake-client-os",
+                        "comp": "ppunifiedsdk",
+                        "device_manufacturer": "fake-manufacturer",
+                        "event_name": "fake-event",
+                        "event_source": "mobile-native",
+                        "is_simulator": false,
+                        "mapv": "fake-merchant-app-version",
+                        "mobile_device_model": "fake-device-model",
+                        "platform": "Android",
+                        "session_id": "fake-session-id",
+                        "t": "10000",
+                        "tenant_name": "PayPal"
+                    }
+                }
+            }
+            """
+
+            assertEquals(HttpMethod.POST, result.method)
+            assertEquals("application/json", result.headers["Content-Type"])
+            assertEquals(URL("https://api.paypal.com/v1/tracking/events"), result.url)
+            JSONAssert.assertEquals(JSONObject(expected), JSONObject(result.body!!), false)
         }
     }
 }

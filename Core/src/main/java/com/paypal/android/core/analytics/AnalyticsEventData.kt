@@ -1,10 +1,7 @@
 package com.paypal.android.core.analytics
 
-import android.os.Build
-import com.paypal.android.core.BuildConfig
 import com.paypal.android.core.analytics.models.DeviceData
 import org.json.JSONObject
-import java.sql.Timestamp
 import java.util.*
 
 data class AnalyticsEventData(
@@ -13,23 +10,6 @@ data class AnalyticsEventData(
     val deviceData: DeviceData,
     val timestamp: Long,
 ) {
-
-    // TODO: - Add VERSION_NAME to BuildConfig
-    private val clientSDKVersion = BuildConfig.PAYPAL_SDK_VERSION
-
-    private val clientOS = "Android API ${Build.VERSION.SDK_INT}"
-
-    private val component = "ppunifiedsdk"
-
-    private val deviceManufacturer = Build.MANUFACTURER
-
-    private val deviceModel = Build.MODEL
-
-    private val eventSource = "mobile-native"
-
-    private val platform = "Android"
-
-    private val tenantName = "PayPal"
 
     companion object {
         const val KEY_APP_ID = "app_id"
@@ -56,19 +36,19 @@ data class AnalyticsEventData(
         val eventParams = JSONObject()
             .put(KEY_APP_ID, deviceData.appId)
             .put(KEY_APP_NAME, deviceData.appName)
-            .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
-            .put(KEY_CLIENT_OS, clientOS)
-            .put(KEY_COMPONENT, component)
-            .put(KEY_DEVICE_MANUFACTURER, deviceManufacturer.orEmpty())
-            .put(KEY_DEVICE_MODEL, deviceModel.orEmpty())
+            .put(KEY_CLIENT_SDK_VERSION, deviceData.clientSDKVersion)
+            .put(KEY_CLIENT_OS, deviceData.clientOS)
+            .put(KEY_COMPONENT, "ppunifiedsdk")
+            .put(KEY_DEVICE_MANUFACTURER, deviceData.deviceManufacturer.orEmpty())
+            .put(KEY_DEVICE_MODEL, deviceData.deviceModel.orEmpty())
             .put(KEY_EVENT_NAME, eventName)
-            .put(KEY_EVENT_SOURCE, eventSource)
+            .put(KEY_EVENT_SOURCE, "mobile-native")
             .put(KEY_IS_SIMULATOR, deviceData.isSimulator)
             .put(KEY_MERCHANT_APP_VERSION, deviceData.merchantAppVersion)
-            .put(KEY_PLATFORM, platform)
+            .put(KEY_PLATFORM, "Android")
             .put(KEY_SESSION_ID, sessionID)
             .put(KEY_TIMESTAMP, timestamp.toString())
-            .put(KEY_TENANT_NAME, tenantName)
+            .put(KEY_TENANT_NAME, "PayPal")
 
         val midLevel = JSONObject()
             .put(KEY_EVENT_PARAMETERS, eventParams)
