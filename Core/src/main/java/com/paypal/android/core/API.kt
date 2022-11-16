@@ -12,13 +12,14 @@ class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val deviceInspector: DeviceInspector
+    private val deviceInspector: DeviceInspector,
+    private val applicationContext: Context
 ) {
 
     private val sessionID = UUID.randomUUID().toString().replace("-", "")
 
     constructor(configuration: CoreConfig, context: Context) :
-            this(configuration, Http(), HttpRequestFactory(), DeviceInspector(context))
+            this(configuration, Http(), HttpRequestFactory(), DeviceInspector(), context.applicationContext)
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =
@@ -54,7 +55,7 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-        val deviceData = deviceInspector.inspect()
+        val deviceData = deviceInspector.inspect(applicationContext)
         val analyticsEventData = AnalyticsEventData(
             eventName = name,
             sessionID = sessionID,

@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.core.analytics.DeviceInspector
 import io.mockk.coEvery
@@ -51,7 +52,8 @@ class APIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory, deviceInspector)
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        sut = API(configuration, http, httpRequestFactory, deviceInspector, context)
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }
