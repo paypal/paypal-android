@@ -2,13 +2,12 @@ package com.paypal.android.core.analytics
 
 import com.paypal.android.core.analytics.models.DeviceData
 import org.json.JSONObject
-import java.util.*
 
 data class AnalyticsEventData(
     val eventName: String,
+    val timestamp: Long,
     val sessionID: String,
     val deviceData: DeviceData,
-    val timestamp: Long,
 ) {
 
     companion object {

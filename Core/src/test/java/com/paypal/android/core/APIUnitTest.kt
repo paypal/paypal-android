@@ -53,7 +53,7 @@ class APIUnitTest {
     @Before
     fun beforeEach() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        sut = API(configuration, http, httpRequestFactory, deviceInspector, context)
+        sut = API(configuration, context, http, httpRequestFactory, deviceInspector)
 
         Dispatchers.setMain(testCoroutineDispatcher)
     }

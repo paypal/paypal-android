@@ -1,6 +1,5 @@
 package com.paypal.android.core
 
-import android.os.Build
 import com.paypal.android.core.analytics.AnalyticsEventData
 import com.paypal.android.core.analytics.models.DeviceData
 import org.json.JSONObject
@@ -136,6 +135,7 @@ class HttpRequestFactoryUnitTest {
         fun `createHttpRequestForAnalytics properly constructs HTTP request`() {
             val analyticsEventData = AnalyticsEventData(
                 eventName = "fake-event",
+                timestamp = 10000,
                 sessionID = "fake-session-id",
                 deviceData = DeviceData(
                     appName = "fake-app-name",
@@ -146,8 +146,7 @@ class HttpRequestFactoryUnitTest {
                     deviceModel = "fake-device-model",
                     isSimulator = false,
                     merchantAppVersion = "fake-merchant-app-version"
-                ),
-                timestamp = 10000
+                )
             )
 
             val result = sut.createHttpRequestForAnalytics(analyticsEventData)

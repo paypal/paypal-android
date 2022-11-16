@@ -10,16 +10,22 @@ class API internal constructor(
     // TODO: - Make context non-optional.
     // TODO: - Is there another way to get Context w/o passing it down from feature clients?
     private val configuration: CoreConfig,
+    private val applicationContext: Context,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val deviceInspector: DeviceInspector,
-    private val applicationContext: Context
+    private val deviceInspector: DeviceInspector
 ) {
 
     private val sessionID = UUID.randomUUID().toString().replace("-", "")
 
     constructor(configuration: CoreConfig, context: Context) :
-            this(configuration, Http(), HttpRequestFactory(), DeviceInspector(), context.applicationContext)
+            this(
+                configuration,
+                context.applicationContext,
+                Http(),
+                HttpRequestFactory(),
+                DeviceInspector()
+            )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =
@@ -58,9 +64,9 @@ class API internal constructor(
         val deviceData = deviceInspector.inspect(applicationContext)
         val analyticsEventData = AnalyticsEventData(
             eventName = name,
+            timestamp = System.currentTimeMillis(),
             sessionID = sessionID,
-            deviceData = deviceData,
-            timestamp = System.currentTimeMillis()
+            deviceData = deviceData
         )
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
         val response = http.send(httpRequest)
