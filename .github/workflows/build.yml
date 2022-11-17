@@ -24,7 +24,7 @@ jobs:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Assemble
-        run: ./gradlew clean assemble -x :Demo:assemble
+        run: ./gradlew --stacktrace assemble -x :Demo:assemble # we exclude Demo module in assemble
         env:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
