@@ -15,7 +15,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONException
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -75,8 +74,6 @@ class CardAPIUnitTest {
 
     private val correlationId = "expected correlation ID"
     private val headers = mapOf("Paypal-Debug-Id" to correlationId)
-
-    //private val testCoroutineDispatcher = StandardTestDispatcher()
 
     private val cardRequest = CardRequest(
         orderID,
