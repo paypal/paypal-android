@@ -96,6 +96,6 @@ jobs:
       - name: Run Diffuse Analysis - PayPalWebCheckout
         run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar current-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar
       - name: Run Diffuse Analysis - PayPalNativeCheckout
-        run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-debug.aar current-aar/PayPalNativeCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar
+        run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-debug.aar current-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-debug.aar
       - name: Run Diffuse Analysis - PayPalUI
         run: diffuse diff --aar main-aar/PayPalUI/build/outputs/aar/PayPalUI-debug.aar current-aar/PayPalUI/build/outputs/aar/PayPalUI-debug.aar
