@@ -4,14 +4,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Before
@@ -31,8 +26,6 @@ class APIUnitTest {
         "Paypal-Debug-Id" to "sample-correlation-id"
     )
 
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
-
     private val clientIdSuccessResponse by lazy {
         val clientIdBody = JSONObject()
             .put("client_id", "sample-client-id")
@@ -45,18 +38,10 @@ class APIUnitTest {
     @Before
     fun beforeEach() {
         sut = API(configuration, http, httpRequestFactory)
-
-        Dispatchers.setMain(testCoroutineDispatcher)
-    }
-
-    @After
-    fun afterEach() {
-        Dispatchers.resetMain()
-        testCoroutineDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun `converts an api request to an http request and sends it`() = runBlocking {
+    fun `converts an api request to an http request and sends it`() = runTest {
         val url = URL("https://example.com/resolved/path")
 
         val httpRequest = HttpRequest(url, HttpMethod.GET)
@@ -72,7 +57,7 @@ class APIUnitTest {
     }
 
     @Test
-    fun `get client id sends oauth api request`() = runBlocking {
+    fun `get client id sends oauth api request`() = runTest {
         val url = URL("https://example.com/resolved/path")
         val httpRequest = HttpRequest(url, HttpMethod.GET)
 
@@ -94,7 +79,7 @@ class APIUnitTest {
     }
 
     @Test
-    fun `get client id returns client id from JSON`() = runBlocking {
+    fun `get client id returns client id from JSON`() = runTest {
         val url = URL("https://example.com/resolved/path")
         val httpRequest = HttpRequest(url, HttpMethod.GET)
 
@@ -110,7 +95,7 @@ class APIUnitTest {
 
     @Test
     fun `get client id throws no response data error when http response has no body`() =
-        runBlocking {
+        runTest {
             val url = URL("https://example.com/resolved/path")
             val httpRequest = HttpRequest(url, HttpMethod.GET)
 
@@ -133,7 +118,7 @@ class APIUnitTest {
 
     @Test
     fun `get client id throws data parsing error when http response is missing client id`() =
-        runBlocking {
+        runTest {
             val url = URL("https://example.com/resolved/path")
             val httpRequest = HttpRequest(url, HttpMethod.GET)
 
@@ -157,7 +142,7 @@ class APIUnitTest {
 
     @Test
     fun `get client id throws server response error when http response is unsuccessful`() =
-        runBlocking {
+        runTest {
             val url = URL("https://example.com/resolved/path")
             val httpRequest = HttpRequest(url, HttpMethod.GET)
 
