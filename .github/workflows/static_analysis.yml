@@ -48,30 +48,34 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-      - name: Assemble Release AAR on Main Branch
-        run: ./gradlew clean assembleRelease
+      - name: Assemble Debug AAR on Main Branch
+        run: ./gradlew clean assembleDebug
       - name: Upload Main Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: main-aar
           path: |
-            Core/build/outputs/aar/Core-release.aar
-            Card/build/outputs/aar/Card-release.aar
-            PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
+            Core/build/outputs/aar/Core-debug.aar
+            Card/build/outputs/aar/Card-debug.aar
+            PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar
+            PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-debug.aar
+            PayPalUI/build/outputs/aar/PayPalUI-debug.aar
 
       # Assemble artifacts from current branch
       - name: Checkout Current Branch
         uses: actions/checkout@v2
-      - name: Assemble Release AAR on Current Branch
-        run: ./gradlew clean assembleRelease
+      - name: Assemble Debug AAR on Current Branch
+        run: ./gradlew clean assembleDebug
       - name: Upload Current Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: current-aar
           path: |
-            Core/build/outputs/aar/Core-release.aar
-            Card/build/outputs/aar/Card-release.aar
-            PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
+            Core/build/outputs/aar/Core-debug.aar
+            Card/build/outputs/aar/Card-debug.aar
+            PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar
+            PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-debug.aar
+            PayPalUI/build/outputs/aar/PayPalUI-debug.aar
 
       # Set up Diffuse
       - name: Install Diffuse
@@ -86,8 +90,12 @@ jobs:
 
       # Run Diffuse analysis
       - name: Run Diffuse Analysis - Card
-        run: diffuse diff --aar main-aar/Card/build/outputs/aar/Card-release.aar current-aar/Card/build/outputs/aar/Card-release.aar
+        run: diffuse diff --aar main-aar/Card/build/outputs/aar/Card-debug.aar current-aar/Card/build/outputs/aar/Card-debug.aar
       - name: Run Diffuse Analysis - Core
-        run: diffuse diff --aar main-aar/Core/build/outputs/aar/Core-release.aar current-aar/Core/build/outputs/aar/Core-release.aar
-      - name: Run Diffuse Analysis - PayPal
-        run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar current-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
+        run: diffuse diff --aar main-aar/Core/build/outputs/aar/Core-debug.aar current-aar/Core/build/outputs/aar/Core-debug.aar
+      - name: Run Diffuse Analysis - PayPalWebCheckout
+        run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar current-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar
+      - name: Run Diffuse Analysis - PayPalNativeCheckout
+        run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-debug.aar current-aar/PayPalNativeCheckout/build/outputs/aar/PayPalWebCheckout-debug.aar
+      - name: Run Diffuse Analysis - PayPalUI
+        run: diffuse diff --aar main-aar/PayPalUI/build/outputs/aar/PayPalUI-debug.aar current-aar/PayPalUI/build/outputs/aar/PayPalUI-debug.aar
