@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.core.analytics.AnalyticsEventData
 import com.paypal.android.core.analytics.DeviceInspector
-import java.util.*
+import java.util.UUID
 
 class API internal constructor(
     // TODO: - Make context non-optional.

@@ -59,7 +59,6 @@ class DeviceInspectorUnitTest {
         )
         val result = sut.inspect(context)
 
-        // TODO: - Implement these asserts with either regex or appropriate hard coded actual cases. See iOS AnalyticsEventRequest_Tests for reference.
         assertEquals(result.appId, "sample.package.name")
         assertEquals(result.appName, "sample-application-label")
         assertEquals(result.clientOS, "Android API 456")
