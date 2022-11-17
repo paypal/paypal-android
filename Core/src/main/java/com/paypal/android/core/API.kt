@@ -2,6 +2,7 @@ package com.paypal.android.core
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.paypal.android.core.analytics.AnalyticsEventData
 import com.paypal.android.core.analytics.DeviceInspector
 import java.util.*
@@ -11,17 +12,17 @@ class API internal constructor(
     // TODO: - Is there another way to get Context w/o passing it down from feature clients?
     private val configuration: CoreConfig,
     private val applicationContext: Context,
+    private val sessionID: String,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
     private val deviceInspector: DeviceInspector
 ) {
 
-    private val sessionID = UUID.randomUUID().toString().replace("-", "")
-
     constructor(configuration: CoreConfig, context: Context) :
             this(
                 configuration,
                 context.applicationContext,
+                UUID.randomUUID().toString().replace("-", ""),
                 Http(),
                 HttpRequestFactory(),
                 DeviceInspector()
@@ -61,13 +62,13 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
+        sendAnalyticsEvent(name, System.currentTimeMillis())
+    }
+
+    @VisibleForTesting
+    internal suspend fun sendAnalyticsEvent(name: String, timestamp: Long) {
         val deviceData = deviceInspector.inspect(applicationContext)
-        val analyticsEventData = AnalyticsEventData(
-            eventName = name,
-            timestamp = System.currentTimeMillis(),
-            sessionID = sessionID,
-            deviceData = deviceData
-        )
+        val analyticsEventData = AnalyticsEventData(name, timestamp, sessionID, deviceData)
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
         val response = http.send(httpRequest)
         if (!response.isSuccessful) {

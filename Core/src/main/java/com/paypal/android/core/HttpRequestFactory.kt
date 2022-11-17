@@ -33,8 +33,12 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
         return HttpRequest(url, method, body, headers)
     }
 
-    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest{
-        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, analyticsEventData.toJSON().toString())
+    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest {
+        val apiRequest = APIRequest(
+            "v1/tracking/events",
+            HttpMethod.POST,
+            analyticsEventData.toJSON().toString()
+        )
         val path = apiRequest.path
         val baseUrl = Environment.LIVE.url
 
