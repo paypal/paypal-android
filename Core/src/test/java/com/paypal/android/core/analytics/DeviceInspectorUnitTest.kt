@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,12 +48,12 @@ class DeviceInspectorUnitTest {
     }
 
     @Test
-    fun `it properly inspects context and build info to construct DeviceData`() {
+    fun `inspect properly inspects context and build info to construct DeviceData`() {
         val sut = DeviceInspector(
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
-            deviceModel = "sample-device-model",
+            deviceModel = "sample-model",
             deviceProduct = "sample-product",
             deviceFingerprint = "sample-fingerprint"
         )
@@ -64,8 +65,68 @@ class DeviceInspectorUnitTest {
         assertEquals(result.clientOS, "Android API 456")
         assertEquals(result.clientSDKVersion, "1.2.3")
         assertEquals(result.deviceManufacturer, "sample-manufacturer")
-        assertEquals(result.deviceModel, "sample-device-model")
+        assertEquals(result.deviceModel, "sample-model")
         assertEquals(result.isSimulator, false)
         assertEquals(result.merchantAppVersion, "7.8.9")
+    }
+
+    @Test
+    fun `inspect returns true for isSimulator when device product is google_sdk`() {
+        val sut = DeviceInspector(
+            clientSDKVersion = "1.2.3",
+            sdkInt = 456,
+            deviceManufacturer = "sample-manufacturer",
+            deviceModel = "sample-model",
+            deviceProduct = "google_sdk",
+            deviceFingerprint = "sample-fingerprint"
+        )
+
+        val result = sut.inspect(context)
+        assertTrue(result.isSimulator)
+    }
+
+    @Test
+    fun `inspect returns true for isSimulator when device product is sdk`() {
+        val sut = DeviceInspector(
+            clientSDKVersion = "1.2.3",
+            sdkInt = 456,
+            deviceManufacturer = "sample-manufacturer",
+            deviceModel = "sample-model",
+            deviceProduct = "google_sdk",
+            deviceFingerprint = "sample-fingerprint"
+        )
+
+        val result = sut.inspect(context)
+        assertTrue(result.isSimulator)
+    }
+
+    @Test
+    fun `inspect returns true for isSimulator when device manufacturer is Genymotion`() {
+        val sut = DeviceInspector(
+            clientSDKVersion = "1.2.3",
+            sdkInt = 456,
+            deviceManufacturer = "Genymotion",
+            deviceModel = "sample-model",
+            deviceProduct = "sample-product",
+            deviceFingerprint = "sample-fingerprint"
+        )
+
+        val result = sut.inspect(context)
+        assertTrue(result.isSimulator)
+    }
+
+    @Test
+    fun `inspect returns true for isSimulator when device fingerprint contains generic`() {
+        val sut = DeviceInspector(
+            clientSDKVersion = "1.2.3",
+            sdkInt = 456,
+            deviceManufacturer = "sample-manufacturer",
+            deviceModel = "sample-model",
+            deviceProduct = "sample-product",
+            deviceFingerprint = "some-generic-fingerprint"
+        )
+
+        val result = sut.inspect(context)
+        assertTrue(result.isSimulator)
     }
 }
