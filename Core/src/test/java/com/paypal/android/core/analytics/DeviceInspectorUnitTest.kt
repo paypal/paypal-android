@@ -16,11 +16,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class DeviceInspectorUnitTest {
 
-    lateinit var context: Context
-    lateinit var packageManager: PackageManager
+    private lateinit var context: Context
+    private lateinit var packageManager: PackageManager
 
-    lateinit var packageInfo: PackageInfo
-    lateinit var applicationInfo: ApplicationInfo
+    private lateinit var packageInfo: PackageInfo
+    private lateinit var applicationInfo: ApplicationInfo
 
     @Before
     fun beforeEach() {
