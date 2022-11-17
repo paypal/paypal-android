@@ -129,4 +129,44 @@ class DeviceInspectorUnitTest {
         val result = sut.inspect(context)
         assertTrue(result.isSimulator)
     }
+
+    @Test
+    fun `inspect returns an empty string for app name when package manager throws`() {
+        val nameNotFound = PackageManager.NameNotFoundException("get application info error")
+        every {
+            packageManager.getApplicationInfo("sample.package.name", 0)
+        } throws nameNotFound
+
+        val sut = DeviceInspector(
+            clientSDKVersion = "1.2.3",
+            sdkInt = 456,
+            deviceManufacturer = "sample-manufacturer",
+            deviceModel = "sample-model",
+            deviceProduct = "sample-product",
+            deviceFingerprint = "some-generic-fingerprint"
+        )
+
+        val result = sut.inspect(context)
+        assertEquals("", result.appName)
+    }
+
+    @Test
+    fun `inspect returns an empty string for merchant app version when package manager throws`() {
+        val nameNotFound = PackageManager.NameNotFoundException("get package info error")
+        every {
+            packageManager.getPackageInfo("sample.package.name", 0)
+        } throws nameNotFound
+
+        val sut = DeviceInspector(
+            clientSDKVersion = "1.2.3",
+            sdkInt = 456,
+            deviceManufacturer = "sample-manufacturer",
+            deviceModel = "sample-model",
+            deviceProduct = "sample-product",
+            deviceFingerprint = "some-generic-fingerprint"
+        )
+
+        val result = sut.inspect(context)
+        assertEquals("", result.merchantAppVersion)
+    }
 }

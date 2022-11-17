@@ -30,7 +30,7 @@ class DeviceInspector internal constructor(
         val appName = try {
             val applicationInfo = packageManager.getApplicationInfo(context.packageName, 0)
             packageManager.getApplicationLabel(applicationInfo).toString()
-        } catch (ex: Exception) {
+        } catch (ex: PackageManager.NameNotFoundException) {
             ""
         }
 
