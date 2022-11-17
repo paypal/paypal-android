@@ -90,13 +90,6 @@ class CardAPIUnitTest {
     fun beforeEach() {
         sut = CardAPI(api, requestFactory)
         every { requestFactory.createConfirmPaymentSourceRequest(cardRequest) } returns apiRequest
-
-       // Dispatchers.setMain(testCoroutineDispatcher)
-    }
-
-    @After
-    fun afterEach() {
-        //Dispatchers.resetMain()
     }
 
     @Test
