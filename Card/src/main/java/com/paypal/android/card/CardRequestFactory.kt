@@ -39,7 +39,7 @@ internal class CardRequestFactory {
 
             val returnURLJSON = JSONObject()
                 .put("return_url", returnUrl)
-                .put("cancel_url", returnUrl) //we can set the same url
+                .put("cancel_url", returnUrl) // we can set the same url
             bodyJSON.put("application_context", returnURLJSON)
 
             val paymentSourceJSON = JSONObject().put("card", cardJSON)

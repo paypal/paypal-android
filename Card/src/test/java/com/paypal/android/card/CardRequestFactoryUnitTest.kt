@@ -116,7 +116,6 @@ class CardRequestFactoryUnitTest {
         val card =
             Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
 
-
         val cardRequest = CardRequest(orderID, card, returnUrl, SCA.SCA_ALWAYS)
 
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
