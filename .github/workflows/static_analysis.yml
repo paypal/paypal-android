@@ -49,7 +49,7 @@ jobs:
         with:
           ref: main
       - name: Assemble Release AAR on Main Branch
-        run: ./gradlew clean assemble -x :Demo:assemble # we exclude Demo module in assemble
+        run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Main Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -64,8 +64,8 @@ jobs:
       # Assemble artifacts from current branch
       - name: Checkout Current Branch
         uses: actions/checkout@v2
-      - name: Assemble release AAR on Current Branch
-        run: ./gradlew clean assemble -x :Demo:assemble # we exclude Demo module in assemble
+      - name: Assemble Release AAR on Current Branch
+        run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Current Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
