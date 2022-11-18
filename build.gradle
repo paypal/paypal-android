@@ -135,7 +135,9 @@ detekt {
     input = files(
             "Core/src",
             "Card/src",
-            "PayPalCheckout/src",
+            "PayPalWebCheckout/src",
+            "PayPalNativeCheckout/src",
+            "PayPalDataCollector/src",
             "Demo/src"
     )
     autoCorrect = project.hasProperty('detektAutoCorrect')
