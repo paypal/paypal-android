@@ -8,8 +8,6 @@ import com.paypal.android.core.analytics.DeviceInspector
 import java.util.UUID
 
 class API internal constructor(
-    // TODO: - Make context non-optional.
-    // TODO: - Is there another way to get Context w/o passing it down from feature clients?
     private val configuration: CoreConfig,
     private val applicationContext: Context,
     private val sessionID: String,
