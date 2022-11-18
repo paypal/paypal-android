@@ -9,9 +9,22 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
         configuration: CoreConfig,
+    ): HttpRequest =
+        configuration.run { createHttpRequestFromAPIRequest(apiRequest, environment, accessToken) }
+
+    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest {
+        val body = analyticsEventData.toJSON().toString()
+        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, body)
+        return createHttpRequestFromAPIRequest(apiRequest, Environment.LIVE)
+    }
+
+    private fun createHttpRequestFromAPIRequest(
+        apiRequest: APIRequest,
+        environment: Environment,
+        accessToken: String? = null
     ): HttpRequest {
         val path = apiRequest.path
-        val baseUrl = configuration.environment.url
+        val baseUrl = environment.url
 
         val url = URL("$baseUrl/$path")
         val method = apiRequest.method
@@ -23,33 +36,13 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
             "Accept-Language" to language
         )
 
-        configuration.accessToken?.also { token ->
+        accessToken?.let { token ->
             headers["Authorization"] = "Bearer $token"
         }
 
         if (method == HttpMethod.POST) {
             headers["Content-Type"] = "application/json"
         }
-        return HttpRequest(url, method, body, headers)
-    }
-
-    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest {
-        val apiRequest = APIRequest(
-            "v1/tracking/events",
-            HttpMethod.POST,
-            analyticsEventData.toJSON().toString()
-        )
-        val path = apiRequest.path
-        val baseUrl = Environment.LIVE.url
-
-        val url = URL("$baseUrl/$path")
-        val method = apiRequest.method
-        val body = apiRequest.body
-
-        val headers: MutableMap<String, String> = mutableMapOf(
-            "Content-Type" to "application/json"
-        )
-
         return HttpRequest(url, method, body, headers)
     }
 }
