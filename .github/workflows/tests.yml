@@ -16,4 +16,4 @@ jobs:
           java-version: '11'
           distribution: 'microsoft'
       - name: Run Unit Tests
-        run: ./gradlew --stacktrace testRelease
+        run: ./gradlew --stacktrace testDebug

@@ -98,27 +98,17 @@ val card = Card(
 )
 ```
 
-Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardRequest`.
-
-
+Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardRequest`. Strong Consumer Authentication (SCA) is enabled by default, so you need to specify a `return_url` to re direct to your app after the SCA challenge finishes. You can optionally set `sca` to `SCA_ALWAYS` if you want to require 3D Secure for every transaction.
 ```kotlin
-val cardRequest  = CardRequest("<ORDER_ID>", card)
-```
-
-Optionally, a merchant app can request Strong Consumer Authentication (SCA) for a `CardRequest` that will require users to provide additional authentication information via 3D Secure.
-
-To request SCA, add the following to `CardRequest`:
-
-```kotlin
-cardRequest.threeDSecureRequest = ThreeDSecureRequest(
-  sca = SCA.SCA_ALWAYS,
-  // custom url scheme needs to be configured in AndroidManifest.xml (see below)
-  returnUrl = "myapp://return_url",
-  cancelUrl = "myapp://cancel_url"
+val cardRequest  = CardRequest(
+    orderID = "<ORDER_ID>",
+    card = card,
+    returnUrl = "myapp://return_url", // custom url scheme needs to be configured in AndroidManifest.xml (see below)
+    sca = SCA.SCA_ALWAYS // default value is SCA_WHEN_REQUIRED
 )
 ```
 
-Notice the `myapp://` portion of the `returnUrl` and `cancelUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
+Notice the `myapp://` portion of the `returnUrl` in the above code snippet. This `myapp` custom url scheme must also be registered in your app's `AndroidManifest.xml`.
 
 Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app. Also set the activity `launchMode` to `singleTop`:
 > Note: `android:exported` is required if your app compile SDK version is API 31 (Android 12) or later.
