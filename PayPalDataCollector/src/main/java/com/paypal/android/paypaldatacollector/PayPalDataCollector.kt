@@ -39,7 +39,11 @@ class PayPalDataCollector internal constructor(
      * @return clientMetadataId Your server will send this to PayPal
      */
     @JvmOverloads
-    fun getClientMetadataId(context: Context, clientMetadataId: String? = null, additionalData: HashMap<String, String>? = null): String {
+    fun getClientMetadataId(
+        context: Context,
+        clientMetadataId: String? = null,
+        additionalData: HashMap<String, String>? = null
+    ): String {
         val appContext = context.applicationContext
         return try {
             val magnesSettingsBuilder = MagnesSettings.Builder(appContext)
