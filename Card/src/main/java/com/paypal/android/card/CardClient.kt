@@ -75,7 +75,7 @@ class CardClient internal constructor(
             approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
             // launch the 3DS flow
-            val urlScheme = cardRequest.threeDSecureRequest.run { Uri.parse(returnUrl).scheme }
+            val urlScheme = cardRequest.run { Uri.parse(returnUrl).scheme }
             val approveOrderMetadata =
                 ApproveOrderMetadata(cardRequest.orderID, response.paymentSource)
             val options = BrowserSwitchOptions()

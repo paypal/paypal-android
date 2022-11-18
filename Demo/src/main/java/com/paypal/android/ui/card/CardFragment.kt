@@ -19,7 +19,6 @@ import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.threedsecure.SCA
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.Address
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
@@ -39,7 +38,6 @@ class CardFragment : Fragment() {
     companion object {
         const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
-        const val APP_CANCEL_URL = "com.paypal.android.demo://example.com/cancelUrl"
     }
 
     @Inject
@@ -199,11 +197,8 @@ class CardFragment : Fragment() {
             CardRequest(
                 order.id!!,
                 card,
-                ThreeDSecureRequest(
-                    sca = sca,
-                    returnUrl = APP_RETURN_URL,
-                    cancelUrl = APP_CANCEL_URL
-                )
+                APP_RETURN_URL,
+                sca
             )
         }
 
