@@ -9,9 +9,8 @@ import io.mockk.runs
 import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Test
-
-import org.junit.Assert.*
-import java.util.*
+import org.junit.Assert.assertEquals
+import java.util.UUID
 
 class UUIDHelperUnitTest {
     @Test

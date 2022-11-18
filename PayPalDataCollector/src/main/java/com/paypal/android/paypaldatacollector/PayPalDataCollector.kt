@@ -69,7 +69,7 @@ class PayPalDataCollector internal constructor(
         }
     }
 
-    fun setLogging(shouldLog: Boolean)  {
+    fun setLogging(shouldLog: Boolean) {
         System.setProperty("magnes.debug.mode", shouldLog.toString())
     }
 }

@@ -16,14 +16,14 @@ import lib.android.paypal.com.magnessdk.MagnesSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
-import java.util.*
+import java.util.UUID
 import kotlin.collections.HashMap
 
 class PayPalDataCollectorUnitTest {
 
     @Test
     fun `when getClientMetadataId is called, magnes settings has default values`() {
-        val appGUID = UUID.randomUUID().toString();
+        val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
@@ -42,7 +42,7 @@ class PayPalDataCollectorUnitTest {
 
     @Test
     fun `when environment is STAGING, magnes settings environment is STAGE`() {
-        val appGUID = UUID.randomUUID().toString();
+        val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
@@ -97,7 +97,7 @@ class PayPalDataCollectorUnitTest {
         val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.SANDBOX, mockMagnesSDK, mockUUIDHelper)
         val result = sut.getClientMetadataId(mockk(relaxed = true))
 
-        verify {  Log.e(any(), any(), capture(exceptionSlot)) }
+        verify { Log.e(any(), any(), capture(exceptionSlot)) }
 
         assertEquals(exceptionSlot.captured.message, errorMessage)
         assertEquals("", result)

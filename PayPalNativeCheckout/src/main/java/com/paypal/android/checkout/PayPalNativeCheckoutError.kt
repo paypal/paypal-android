@@ -7,4 +7,5 @@ class PayPalNativeCheckoutError(
     code: Int,
     errorDescription: String,
     correlationID: String? = null,
-    val errorInfo: ErrorInfo) : PayPalSDKError(code, errorDescription, correlationID)
+    val errorInfo: ErrorInfo
+) : PayPalSDKError(code, errorDescription, correlationID)
