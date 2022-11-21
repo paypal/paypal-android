@@ -12,13 +12,12 @@ android {
         minSdkVersion modules.androidMinSdkVersion
         targetSdkVersion modules.androidTargetVersion
         versionCode modules.sdkVersionCode
-        versionName modules.sdkVersionName
+        versionName rootProject.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
-
         release {
             version = android.defaultConfig.versionName //had to add this to get the version in the build
             minifyEnabled false
