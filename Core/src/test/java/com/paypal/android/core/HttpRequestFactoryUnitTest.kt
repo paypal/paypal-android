@@ -7,153 +7,135 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
-import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RobolectricTestRunner
 import org.skyscreamer.jsonassert.JSONAssert
 import java.net.URL
 
-@RunWith(Enclosed::class)
+@RunWith(RobolectricTestRunner::class)
 class HttpRequestFactoryUnitTest {
 
-    @RunWith(ParameterizedRobolectricTestRunner::class)
-    class URLTests(private val configuration: CoreConfig, private val expected: URL) {
+    private val configuration = CoreConfig()
+    private val requestBody = """{ "sample": "json" }"""
 
-        companion object {
-            private val SANDBOX_CONFIGURATION = CoreConfig(environment = Environment.SANDBOX)
-            private val STAGING_CONFIGURATION = CoreConfig(environment = Environment.STAGING)
-            private val LIVE_CONFIGURATION = CoreConfig(environment = Environment.LIVE)
+    private lateinit var sut: HttpRequestFactory
 
-            @JvmStatic
-            @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
-            fun configurationScenarios() = listOf(
-                arrayOf(
-                    SANDBOX_CONFIGURATION,
-                    URL("https://api.sandbox.paypal.com/sample/path")
-                ),
-                arrayOf(
-                    STAGING_CONFIGURATION,
-                    URL("https://api.msmaster.qa.paypal.com/sample/path")
-                ),
-                arrayOf(LIVE_CONFIGURATION, URL("https://api.paypal.com/sample/path"))
-            )
-        }
-
-        private val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
-
-        private lateinit var sut: HttpRequestFactory
-
-        @Before
-        fun beforeEach() {
-            sut = HttpRequestFactory()
-        }
-
-        @Test
-        fun `it should properly format the url for `() {
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
-            assertEquals(expected, result.url)
-        }
+    @Before
+    fun beforeEach() {
+        sut = HttpRequestFactory("sample-language")
     }
 
-    @RunWith(RobolectricTestRunner::class)
-    class NonParameterizedTests {
+    @Test
+    fun `it should properly format the url for the sandbox environment`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
+        val sandboxConfig = CoreConfig(environment = Environment.SANDBOX)
 
-        private val configuration = CoreConfig()
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, sandboxConfig)
+        assertEquals(URL("https://api.sandbox.paypal.com/sample/path"), result.url)
+    }
 
-        private val requestBody = """{ "sample": "json" }"""
+    @Test
+    fun `it should properly format the url for the staging environment`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
+        val stagingConfig = CoreConfig(environment = Environment.STAGING)
 
-        private lateinit var sut: HttpRequestFactory
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, stagingConfig)
+        assertEquals(URL("https://api.msmaster.qa.paypal.com/sample/path"), result.url)
+    }
 
-        @Before
-        fun beforeEach() {
-            sut = HttpRequestFactory("sample-language")
-        }
+    @Test
+    fun `it should properly format the url for the live environment`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
+        val prodConfig = CoreConfig(environment = Environment.LIVE)
 
-        @Test
-        fun `it should forward the http method`() {
-            val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, prodConfig)
+        assertEquals(URL("https://api.paypal.com/sample/path"), result.url)
+    }
 
-            assertEquals(HttpMethod.POST, result.method)
-        }
+    @Test
+    fun `it should forward the http method`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
-        @Test
-        fun `it should forward the http body`() {
-            val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+        assertEquals(HttpMethod.POST, result.method)
+    }
 
-            assertEquals(requestBody, result.body)
-        }
+    @Test
+    fun `it should forward the http body`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
-        @Test
-        fun `it should set accept encoding default header`() {
-            val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+        assertEquals(requestBody, result.body)
+    }
 
-            assertEquals("gzip", result.headers["Accept-Encoding"])
-        }
+    @Test
+    fun `it should set accept encoding default header`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
-        @Test
-        fun `it should set accept language default header`() {
-            val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+        assertEquals("gzip", result.headers["Accept-Encoding"])
+    }
 
-            assertEquals("sample-language", result.headers["Accept-Language"])
-        }
+    @Test
+    fun `it should set accept language default header`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
 
-        @Test
-        fun `it should add bearer token authorization header`() {
-            val mockAccessToken = "mock_access_token"
-            val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(
-                apiRequest,
-                CoreConfig(accessToken = mockAccessToken),
+        assertEquals("sample-language", result.headers["Accept-Language"])
+    }
+
+    @Test
+    fun `it should add bearer token authorization header`() {
+        val mockAccessToken = "mock_access_token"
+        val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(
+            apiRequest,
+            CoreConfig(accessToken = mockAccessToken),
+        )
+
+        val expected = "Bearer $mockAccessToken"
+        assertEquals(expected, result.headers["Authorization"])
+    }
+
+    @Test
+    fun `it should add content type json header for POST requests`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+
+        assertEquals("application/json", result.headers["Content-Type"])
+    }
+
+    @Test
+    fun `it should add content type json header for GET requests`() {
+        val apiRequest = APIRequest("sample/path", HttpMethod.GET, requestBody)
+        val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
+
+        assertNull(result.headers["Content-Type"])
+    }
+
+    @Test
+    fun `createHttpRequestForAnalytics properly constructs HTTP request`() {
+        val analyticsEventData = AnalyticsEventData(
+            eventName = "fake-event",
+            timestamp = 10000,
+            sessionID = "fake-session-id",
+            deviceInspector = DeviceInspector(
+                appId = "fake-app-id",
+                appName = "fake-app-name",
+                merchantAppVersion = "fake-merchant-app-version",
+                clientSDKVersion = "fake-sdk-version",
+                sdkInt = 123,
+                deviceManufacturer = "fake-manufacturer",
+                deviceModel = "fake-device-model",
+                deviceProduct = "fake-device-product",
+                deviceFingerprint = "fake-device-fingerprint"
             )
+        )
 
-            val expected = "Bearer $mockAccessToken"
-            assertEquals(expected, result.headers["Authorization"])
-        }
+        val result = sut.createHttpRequestForAnalytics(analyticsEventData)
 
-        @Test
-        fun `it should add content type json header for POST requests`() {
-            val apiRequest = APIRequest("sample/path", HttpMethod.POST, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
-
-            assertEquals("application/json", result.headers["Content-Type"])
-        }
-
-        @Test
-        fun `it should add content type json header for GET requests`() {
-            val apiRequest = APIRequest("sample/path", HttpMethod.GET, requestBody)
-            val result = sut.createHttpRequestFromAPIRequest(apiRequest, configuration)
-
-            assertNull(result.headers["Content-Type"])
-        }
-
-        @Test
-        fun `createHttpRequestForAnalytics properly constructs HTTP request`() {
-            val analyticsEventData = AnalyticsEventData(
-                eventName = "fake-event",
-                timestamp = 10000,
-                sessionID = "fake-session-id",
-                deviceInspector = DeviceInspector(
-                    appId = "fake-app-id",
-                    appName = "fake-app-name",
-                    merchantAppVersion = "fake-merchant-app-version",
-                    clientSDKVersion = "fake-sdk-version",
-                    sdkInt = 123,
-                    deviceManufacturer = "fake-manufacturer",
-                    deviceModel = "fake-device-model",
-                    deviceProduct = "fake-device-product",
-                    deviceFingerprint = "fake-device-fingerprint"
-                )
-            )
-
-            val result = sut.createHttpRequestForAnalytics(analyticsEventData)
-
-            // language=JSON
-            val expected = """
+        // language=JSON
+        val expected = """
             {
                 "events": {
                     "event_params": {
@@ -177,10 +159,9 @@ class HttpRequestFactoryUnitTest {
             }
             """
 
-            assertEquals(HttpMethod.POST, result.method)
-            assertEquals("application/json", result.headers["Content-Type"])
-            assertEquals(URL("https://api.paypal.com/v1/tracking/events"), result.url)
-            JSONAssert.assertEquals(JSONObject(expected), JSONObject(result.body!!), false)
-        }
+        assertEquals(HttpMethod.POST, result.method)
+        assertEquals("application/json", result.headers["Content-Type"])
+        assertEquals(URL("https://api.paypal.com/v1/tracking/events"), result.url)
+        JSONAssert.assertEquals(JSONObject(expected), JSONObject(result.body!!), false)
     }
 }
