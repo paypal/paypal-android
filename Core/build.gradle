@@ -15,7 +15,7 @@ android {
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        buildConfigField "String", "PAYPAL_SDK_VERSION", "\"$versionName\""
+        buildConfigField "String", "CLIENT_SDK_VERSION", "\"$versionName\""
     }
 
     buildTypes {

@@ -9,7 +9,6 @@ import java.util.UUID
 
 class API internal constructor(
     private val configuration: CoreConfig,
-    private val applicationContext: Context,
     private val sessionID: String,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
@@ -19,11 +18,10 @@ class API internal constructor(
     constructor(configuration: CoreConfig, context: Context) :
             this(
                 configuration,
-                context.applicationContext,
                 UUID.randomUUID().toString().replace("-", ""),
                 Http(),
                 HttpRequestFactory(),
-                DeviceInspector()
+                DeviceInspector(context.applicationContext)
             )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
@@ -65,8 +63,7 @@ class API internal constructor(
 
     @VisibleForTesting
     internal suspend fun sendAnalyticsEvent(name: String, timestamp: Long) {
-        val deviceData = deviceInspector.inspect(applicationContext)
-        val analyticsEventData = AnalyticsEventData(name, timestamp, sessionID, deviceData)
+        val analyticsEventData = AnalyticsEventData(name, timestamp, sessionID, deviceInspector)
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
         val response = http.send(httpRequest)
         if (!response.isSuccessful) {

@@ -1,7 +1,7 @@
 package com.paypal.android.core
 
 import com.paypal.android.core.analytics.AnalyticsEventData
-import com.paypal.android.core.analytics.models.DeviceData
+import com.paypal.android.core.analytics.DeviceInspector
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -137,15 +137,16 @@ class HttpRequestFactoryUnitTest {
                 eventName = "fake-event",
                 timestamp = 10000,
                 sessionID = "fake-session-id",
-                deviceData = DeviceData(
-                    appName = "fake-app-name",
+                deviceInspector = DeviceInspector(
                     appId = "fake-app-id",
+                    appName = "fake-app-name",
+                    merchantAppVersion = "fake-merchant-app-version",
                     clientSDKVersion = "fake-sdk-version",
-                    clientOS = "fake-client-os",
+                    sdkInt = 123,
                     deviceManufacturer = "fake-manufacturer",
                     deviceModel = "fake-device-model",
-                    isSimulator = false,
-                    merchantAppVersion = "fake-merchant-app-version"
+                    deviceProduct = "fake-device-product",
+                    deviceFingerprint = "fake-device-fingerprint"
                 )
             )
 
@@ -159,7 +160,7 @@ class HttpRequestFactoryUnitTest {
                         "app_id": "fake-app-id",
                         "app_name": "fake-app-name",
                         "c_sdk_ver": "fake-sdk-version",
-                        "client_os": "fake-client-os",
+                        "client_os": "Android API 123",
                         "comp": "ppunifiedsdk",
                         "device_manufacturer": "fake-manufacturer",
                         "event_name": "fake-event",

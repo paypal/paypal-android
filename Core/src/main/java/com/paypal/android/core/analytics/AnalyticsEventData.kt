@@ -1,13 +1,12 @@
 package com.paypal.android.core.analytics
 
-import com.paypal.android.core.analytics.models.DeviceData
 import org.json.JSONObject
 
 data class AnalyticsEventData(
     val eventName: String,
     val timestamp: Long,
     val sessionID: String,
-    val deviceData: DeviceData,
+    val deviceInspector: DeviceInspector,
 ) {
 
     companion object {
@@ -33,17 +32,17 @@ data class AnalyticsEventData(
 
     fun toJSON(): JSONObject {
         val eventParams = JSONObject()
-            .put(KEY_APP_ID, deviceData.appId)
-            .put(KEY_APP_NAME, deviceData.appName)
-            .put(KEY_CLIENT_SDK_VERSION, deviceData.clientSDKVersion)
-            .put(KEY_CLIENT_OS, deviceData.clientOS)
+            .put(KEY_APP_ID, deviceInspector.appId)
+            .put(KEY_APP_NAME, deviceInspector.appName)
+            .put(KEY_CLIENT_SDK_VERSION, deviceInspector.clientSDKVersion)
+            .put(KEY_CLIENT_OS, deviceInspector.clientOS)
             .put(KEY_COMPONENT, "ppunifiedsdk")
-            .put(KEY_DEVICE_MANUFACTURER, deviceData.deviceManufacturer.orEmpty())
-            .put(KEY_DEVICE_MODEL, deviceData.deviceModel.orEmpty())
+            .put(KEY_DEVICE_MANUFACTURER, deviceInspector.deviceManufacturer)
+            .put(KEY_DEVICE_MODEL, deviceInspector.deviceModel)
             .put(KEY_EVENT_NAME, eventName)
             .put(KEY_EVENT_SOURCE, "mobile-native")
-            .put(KEY_IS_SIMULATOR, deviceData.isSimulator)
-            .put(KEY_MERCHANT_APP_VERSION, deviceData.merchantAppVersion)
+            .put(KEY_IS_SIMULATOR, deviceInspector.isSimulator)
+            .put(KEY_MERCHANT_APP_VERSION, deviceInspector.merchantAppVersion)
             .put(KEY_PLATFORM, "Android")
             .put(KEY_SESSION_ID, sessionID)
             .put(KEY_TIMESTAMP, timestamp.toString())

@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.core.analytics.AnalyticsEventData
 import com.paypal.android.core.analytics.DeviceInspector
-import com.paypal.android.core.analytics.models.DeviceData
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -28,8 +27,6 @@ class APIUnitTest {
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
 
-    private val deviceInspector = mockk<DeviceInspector>()
-
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
 
@@ -47,15 +44,16 @@ class APIUnitTest {
         HttpResponse(200, httpResponseHeaders, clientIdBody)
     }
 
-    private val deviceData = DeviceData(
-        appName = "app name",
+    private val deviceInspector = DeviceInspector(
         appId = "app id",
+        appName = "app name",
+        merchantAppVersion = "4.5.6",
         clientSDKVersion = "1.2.3",
-        clientOS = "123",
+        sdkInt = 123,
         deviceManufacturer = "device manufacturer",
         deviceModel = "device model",
-        isSimulator = false,
-        merchantAppVersion = "4.5.6"
+        deviceProduct = "device product",
+        deviceFingerprint = "device fingerprint"
     )
 
     private lateinit var context: Context
@@ -64,7 +62,7 @@ class APIUnitTest {
     @Before
     fun beforeEach() {
         context = ApplicationProvider.getApplicationContext()
-        sut = API(configuration, context, "session-id", http, httpRequestFactory, deviceInspector)
+        sut = API(configuration, "session-id", http, httpRequestFactory, deviceInspector)
     }
 
     @Test
@@ -177,8 +175,6 @@ class APIUnitTest {
 
     @Test
     fun `send analytics event creates an http request via http request factory`() = runTest {
-        every { deviceInspector.inspect(context) } returns deviceData
-
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
         every {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
@@ -190,12 +186,11 @@ class APIUnitTest {
         assertEquals("sample.event.name", analyticsEventData.eventName)
         assertEquals(789, analyticsEventData.timestamp)
         assertEquals("session-id", analyticsEventData.sessionID)
-        assertSame(deviceData, analyticsEventData.deviceData)
+        assertSame(deviceInspector, analyticsEventData.deviceInspector)
     }
 
     @Test
     fun `send analytics event sends an http request created from an analytics event`() = runTest {
-        every { deviceInspector.inspect(context) } returns deviceData
         every { httpRequestFactory.createHttpRequestForAnalytics(any()) } returns httpRequest
 
         sut.sendAnalyticsEvent("sample.event.name", 789)

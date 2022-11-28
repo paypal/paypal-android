@@ -50,6 +50,7 @@ class DeviceInspectorUnitTest {
     @Test
     fun `inspect properly inspects context and build info to construct DeviceData`() {
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
@@ -57,21 +58,21 @@ class DeviceInspectorUnitTest {
             deviceProduct = "sample-product",
             deviceFingerprint = "sample-fingerprint"
         )
-        val result = sut.inspect(context)
 
-        assertEquals(result.appId, "sample.package.name")
-        assertEquals(result.appName, "sample-application-label")
-        assertEquals(result.clientOS, "Android API 456")
-        assertEquals(result.clientSDKVersion, "1.2.3")
-        assertEquals(result.deviceManufacturer, "sample-manufacturer")
-        assertEquals(result.deviceModel, "sample-model")
-        assertEquals(result.isSimulator, false)
-        assertEquals(result.merchantAppVersion, "7.8.9")
+        assertEquals(sut.appId, "sample.package.name")
+        assertEquals(sut.appName, "sample-application-label")
+        assertEquals(sut.clientOS, "Android API 456")
+        assertEquals(sut.clientSDKVersion, "1.2.3")
+        assertEquals(sut.deviceManufacturer, "sample-manufacturer")
+        assertEquals(sut.deviceModel, "sample-model")
+        assertEquals(sut.isSimulator, false)
+        assertEquals(sut.merchantAppVersion, "7.8.9")
     }
 
     @Test
     fun `inspect returns true for isSimulator when device product is google_sdk`() {
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
@@ -80,13 +81,13 @@ class DeviceInspectorUnitTest {
             deviceFingerprint = "sample-fingerprint"
         )
 
-        val result = sut.inspect(context)
-        assertTrue(result.isSimulator)
+        assertTrue(sut.isSimulator)
     }
 
     @Test
     fun `inspect returns true for isSimulator when device product is sdk`() {
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
@@ -95,13 +96,13 @@ class DeviceInspectorUnitTest {
             deviceFingerprint = "sample-fingerprint"
         )
 
-        val result = sut.inspect(context)
-        assertTrue(result.isSimulator)
+        assertTrue(sut.isSimulator)
     }
 
     @Test
     fun `inspect returns true for isSimulator when device manufacturer is Genymotion`() {
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "Genymotion",
@@ -110,13 +111,13 @@ class DeviceInspectorUnitTest {
             deviceFingerprint = "sample-fingerprint"
         )
 
-        val result = sut.inspect(context)
-        assertTrue(result.isSimulator)
+        assertTrue(sut.isSimulator)
     }
 
     @Test
     fun `inspect returns true for isSimulator when device fingerprint contains generic`() {
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
@@ -125,8 +126,7 @@ class DeviceInspectorUnitTest {
             deviceFingerprint = "some-generic-fingerprint"
         )
 
-        val result = sut.inspect(context)
-        assertTrue(result.isSimulator)
+        assertTrue(sut.isSimulator)
     }
 
     @Test
@@ -137,6 +137,7 @@ class DeviceInspectorUnitTest {
         } throws nameNotFound
 
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
@@ -145,8 +146,7 @@ class DeviceInspectorUnitTest {
             deviceFingerprint = "some-generic-fingerprint"
         )
 
-        val result = sut.inspect(context)
-        assertEquals("N/A", result.appName)
+        assertEquals("N/A", sut.appName)
     }
 
     @Test
@@ -157,6 +157,7 @@ class DeviceInspectorUnitTest {
         } throws nameNotFound
 
         val sut = DeviceInspector(
+            context = context,
             clientSDKVersion = "1.2.3",
             sdkInt = 456,
             deviceManufacturer = "sample-manufacturer",
@@ -165,7 +166,6 @@ class DeviceInspectorUnitTest {
             deviceFingerprint = "some-generic-fingerprint"
         )
 
-        val result = sut.inspect(context)
-        assertEquals("N/A", result.merchantAppVersion)
+        assertEquals("N/A", sut.merchantAppVersion)
     }
 }
