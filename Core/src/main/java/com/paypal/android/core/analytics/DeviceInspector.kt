@@ -31,14 +31,14 @@ class DeviceInspector internal constructor(
             val applicationInfo = packageManager.getApplicationInfo(context.packageName, 0)
             packageManager.getApplicationLabel(applicationInfo).toString()
         } catch (ignored: PackageManager.NameNotFoundException) {
-            ""
+            "N/A"
         }
 
         val merchantAppVersion = try {
             val packageInfo = packageManager.getPackageInfo(context.packageName, 0)
             packageInfo.versionName
         } catch (ignored: PackageManager.NameNotFoundException) {
-            ""
+            "N/A"
         }
 
         val appId = context.packageName

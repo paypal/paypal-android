@@ -130,7 +130,7 @@ class DeviceInspectorUnitTest {
     }
 
     @Test
-    fun `inspect returns an empty string for app name when package manager throws`() {
+    fun `inspect returns Not Applicable for app name when package manager throws`() {
         val nameNotFound = PackageManager.NameNotFoundException("get application info error")
         every {
             packageManager.getApplicationInfo("sample.package.name", 0)
@@ -146,11 +146,11 @@ class DeviceInspectorUnitTest {
         )
 
         val result = sut.inspect(context)
-        assertEquals("", result.appName)
+        assertEquals("N/A", result.appName)
     }
 
     @Test
-    fun `inspect returns an empty string for merchant app version when package manager throws`() {
+    fun `inspect returns Not Applicable for merchant app version when package manager throws`() {
         val nameNotFound = PackageManager.NameNotFoundException("get package info error")
         every {
             packageManager.getPackageInfo("sample.package.name", 0)
@@ -166,6 +166,6 @@ class DeviceInspectorUnitTest {
         )
 
         val result = sut.inspect(context)
-        assertEquals("", result.merchantAppVersion)
+        assertEquals("N/A", result.merchantAppVersion)
     }
 }
