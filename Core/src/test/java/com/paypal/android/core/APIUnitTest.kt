@@ -49,7 +49,7 @@ class APIUnitTest {
         appName = "app name",
         merchantAppVersion = "4.5.6",
         clientSDKVersion = "1.2.3",
-        sdkInt = 123,
+        androidSDKInt = 123,
         deviceManufacturer = "device manufacturer",
         deviceModel = "device model",
         deviceProduct = "device product",

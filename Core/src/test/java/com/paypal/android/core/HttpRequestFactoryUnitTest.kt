@@ -124,7 +124,7 @@ class HttpRequestFactoryUnitTest {
                 appName = "fake-app-name",
                 merchantAppVersion = "fake-merchant-app-version",
                 clientSDKVersion = "fake-sdk-version",
-                sdkInt = 123,
+                androidSDKInt = 123,
                 deviceManufacturer = "fake-manufacturer",
                 deviceModel = "fake-device-model",
                 deviceProduct = "fake-device-product",
