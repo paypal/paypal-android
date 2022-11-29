@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.core.analytics.AnalyticsEventData
 import com.paypal.android.core.analytics.DeviceInspector
-import java.util.*
+import java.util.UUID
 
 /**
  * This class is exposed for internal PayPal use only. Do not use.

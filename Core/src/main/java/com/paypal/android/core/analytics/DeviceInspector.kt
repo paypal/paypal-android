@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.core.BuildConfig
 
+@Suppress("LongParameterList")
 class DeviceInspector @VisibleForTesting internal constructor(
     private val clientSDKVersion: String,
     private val sdkInt: Int,
@@ -16,6 +17,7 @@ class DeviceInspector @VisibleForTesting internal constructor(
     private val context: Context
 ) {
 
+    @Suppress("LongParameterList")
     constructor(context: Context) : this(
         clientSDKVersion = BuildConfig.CLIENT_SDK_VERSION,
         sdkInt = Build.VERSION.SDK_INT,
