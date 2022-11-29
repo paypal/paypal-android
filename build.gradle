@@ -109,7 +109,7 @@ nexusPublishing {
         sonatype {
             username = System.getenv('SONATYPE_NEXUS_USERNAME') ?: ''
             password = System.getenv('SONATYPE_NEXUS_PASSWORD') ?: ''
-            repositoryDescription = "Paypal Android Sdk"
+            repositoryDescription = "Paypal Android SDK"
             packageGroup = "com.paypal"
         }
     }
