@@ -6,8 +6,8 @@ Follow these steps to add PayPal Native Checkout payments:
 
 1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
 2. [Add PayPal Native Checkout Module](#add-paypal-native-checkout-module)
-3. [Test and go live](#test-and-go-live)
-4. After initial setup, follow instructions [here](#billing-agreement) for Billing Agreements
+3. After initial setup, follow instructions [here](#billing-agreement) for Billing Agreements
+4. [Test and go live](#test-and-go-live)
 
 ## Setup a PayPal Developer Account
 
@@ -194,7 +194,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 ```json
 {
-   "token_id": "<TOKEN>"
+   "token_id": "<BILLING_AGREEMENT_TOKEN>"
 }
 ```
 
@@ -202,7 +202,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 ```kotlin
 paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
-   createOrderActions.setBillingAgreementId(billingAgreementId)
+   createOrderActions.setBillingAgreementId(BILLING_AGREEMENT_TOKEN)
 })
 ```
 
