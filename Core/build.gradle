@@ -15,12 +15,12 @@ android {
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        buildConfigField "String", "CLIENT_SDK_VERSION", "\"$versionName\""
     }
 
     buildTypes {
 
         release {
-            version = android.defaultConfig.versionName //had to add this to get the version in the build
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -56,6 +56,7 @@ dependencies {
     testImplementation deps.robolectric
     testImplementation deps.json
     testImplementation deps.kotlinxAndroidCoroutinesTest
+    testImplementation deps.androidxTestCore
 
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore

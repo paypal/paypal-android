@@ -1,6 +1,12 @@
 package com.paypal.android.core
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.core.analytics.AnalyticsEventData
+import com.paypal.android.core.analytics.DeviceData
+import com.paypal.android.core.analytics.DeviceInspector
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -11,13 +17,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.net.URL
 
 @ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 class APIUnitTest {
-
-    private val http = mockk<Http>()
+    private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
+
+    private val deviceInspector = mockk<DeviceInspector>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
@@ -26,6 +36,9 @@ class APIUnitTest {
         "Paypal-Debug-Id" to "sample-correlation-id"
     )
 
+    private val url = URL("https://example.com/resolved/path")
+    private val httpRequest = HttpRequest(url, HttpMethod.GET)
+
     private val clientIdSuccessResponse by lazy {
         val clientIdBody = JSONObject()
             .put("client_id", "sample-client-id")
@@ -33,18 +46,28 @@ class APIUnitTest {
         HttpResponse(200, httpResponseHeaders, clientIdBody)
     }
 
+    private val deviceData = DeviceData(
+        appName = "app name",
+        appId = "app id",
+        clientSDKVersion = "1.2.3",
+        clientOS = "123",
+        deviceManufacturer = "device manufacturer",
+        deviceModel = "device model",
+        isSimulator = false,
+        merchantAppVersion = "4.5.6"
+    )
+
+    private lateinit var context: Context
     private lateinit var sut: API
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory)
+        context = ApplicationProvider.getApplicationContext()
+        sut = API(configuration, "session-id", http, httpRequestFactory, deviceInspector)
     }
 
     @Test
     fun `converts an api request to an http request and sends it`() = runTest {
-        val url = URL("https://example.com/resolved/path")
-
-        val httpRequest = HttpRequest(url, HttpMethod.GET)
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         } returns httpRequest
@@ -58,9 +81,6 @@ class APIUnitTest {
 
     @Test
     fun `get client id sends oauth api request`() = runTest {
-        val url = URL("https://example.com/resolved/path")
-        val httpRequest = HttpRequest(url, HttpMethod.GET)
-
         val apiRequestSlot = slot<APIRequest>()
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(
@@ -80,9 +100,6 @@ class APIUnitTest {
 
     @Test
     fun `get client id returns client id from JSON`() = runTest {
-        val url = URL("https://example.com/resolved/path")
-        val httpRequest = HttpRequest(url, HttpMethod.GET)
-
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
         } returns httpRequest
@@ -96,8 +113,6 @@ class APIUnitTest {
     @Test
     fun `get client id throws no response data error when http response has no body`() =
         runTest {
-            val url = URL("https://example.com/resolved/path")
-            val httpRequest = HttpRequest(url, HttpMethod.GET)
 
             every {
                 httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
@@ -119,8 +134,6 @@ class APIUnitTest {
     @Test
     fun `get client id throws data parsing error when http response is missing client id`() =
         runTest {
-            val url = URL("https://example.com/resolved/path")
-            val httpRequest = HttpRequest(url, HttpMethod.GET)
 
             every {
                 httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
@@ -143,8 +156,6 @@ class APIUnitTest {
     @Test
     fun `get client id throws server response error when http response is unsuccessful`() =
         runTest {
-            val url = URL("https://example.com/resolved/path")
-            val httpRequest = HttpRequest(url, HttpMethod.GET)
 
             every {
                 httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
@@ -162,4 +173,31 @@ class APIUnitTest {
             assertEquals(Code.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
             assertEquals("sample-correlation-id", capturedError?.correlationID)
         }
+
+    @Test
+    fun `send analytics event creates an http request via http request factory`() = runTest {
+        every { deviceInspector.inspect() } returns deviceData
+
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
+        } returns httpRequest
+
+        sut.sendAnalyticsEvent("sample.event.name", 789)
+
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals("sample.event.name", analyticsEventData.eventName)
+        assertEquals(789, analyticsEventData.timestamp)
+        assertEquals("session-id", analyticsEventData.sessionID)
+        assertSame(deviceData, analyticsEventData.deviceData)
+    }
+
+    @Test
+    fun `send analytics event sends an http request created from an analytics event`() = runTest {
+        every { deviceInspector.inspect() } returns deviceData
+        every { httpRequestFactory.createHttpRequestForAnalytics(any()) } returns httpRequest
+
+        sut.sendAnalyticsEvent("sample.event.name", 789)
+        coVerify { http.send(httpRequest) }
+    }
 }

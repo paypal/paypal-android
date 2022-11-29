@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import com.paypal.android.core.analytics.AnalyticsEventData
 import java.net.URL
 import java.util.Locale
 
@@ -8,9 +9,22 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
     fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
         configuration: CoreConfig,
+    ): HttpRequest =
+        configuration.run { createHttpRequestFromAPIRequest(apiRequest, environment, accessToken) }
+
+    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest {
+        val body = analyticsEventData.toJSON().toString()
+        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, body)
+        return createHttpRequestFromAPIRequest(apiRequest, Environment.LIVE)
+    }
+
+    private fun createHttpRequestFromAPIRequest(
+        apiRequest: APIRequest,
+        environment: Environment,
+        accessToken: String? = null
     ): HttpRequest {
         val path = apiRequest.path
-        val baseUrl = configuration.environment.url
+        val baseUrl = environment.url
 
         val url = URL("$baseUrl/$path")
         val method = apiRequest.method
@@ -22,7 +36,7 @@ internal class HttpRequestFactory(private val language: String = Locale.getDefau
             "Accept-Language" to language
         )
 
-        configuration.accessToken?.also { token ->
+        accessToken?.let { token ->
             headers["Authorization"] = "Bearer $token"
         }
 
