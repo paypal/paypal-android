@@ -10,7 +10,7 @@ data class DeviceInspector internal constructor(
     val appName: String,
     val merchantAppVersion: String,
     val clientSDKVersion: String,
-    private val sdkInt: Int,
+    private val androidSDKInt: Int,
     val deviceManufacturer: String,
     val deviceModel: String,
     val deviceProduct: String,
@@ -49,14 +49,14 @@ data class DeviceInspector internal constructor(
         appName = parseAppName(context),
         merchantAppVersion = parseAppVersion(context),
         clientSDKVersion = clientSDKVersion,
-        sdkInt = sdkInt,
+        androidSDKInt = sdkInt,
         deviceManufacturer = deviceManufacturer,
         deviceModel = deviceModel,
         deviceProduct = deviceProduct,
         deviceFingerprint = deviceFingerprint
     )
 
-    val clientOS = "Android API $sdkInt"
+    val clientOS = "Android API $androidSDKInt"
 
     val isSimulator = "google_sdk".equals(deviceProduct, ignoreCase = true) ||
             "sdk".equals(deviceProduct, ignoreCase = true) ||
