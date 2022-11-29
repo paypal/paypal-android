@@ -1,18 +1,15 @@
 package com.paypal.android.core
 
 import com.paypal.android.core.analytics.AnalyticsEventData
-import com.paypal.android.core.analytics.DeviceInspector
+import com.paypal.android.core.analytics.DeviceData
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.skyscreamer.jsonassert.JSONAssert
 import java.net.URL
 
-@RunWith(RobolectricTestRunner::class)
 class HttpRequestFactoryUnitTest {
 
     private val configuration = CoreConfig()
@@ -119,16 +116,15 @@ class HttpRequestFactoryUnitTest {
             eventName = "fake-event",
             timestamp = 10000,
             sessionID = "fake-session-id",
-            deviceInspector = DeviceInspector(
+            deviceData = DeviceData(
                 appId = "fake-app-id",
                 appName = "fake-app-name",
                 merchantAppVersion = "fake-merchant-app-version",
                 clientSDKVersion = "fake-sdk-version",
-                androidSDKInt = 123,
                 deviceManufacturer = "fake-manufacturer",
                 deviceModel = "fake-device-model",
-                deviceProduct = "fake-device-product",
-                deviceFingerprint = "fake-device-fingerprint"
+                isSimulator = false,
+                clientOS = "fake client OS"
             )
         )
 
@@ -142,7 +138,7 @@ class HttpRequestFactoryUnitTest {
                         "app_id": "fake-app-id",
                         "app_name": "fake-app-name",
                         "c_sdk_ver": "fake-sdk-version",
-                        "client_os": "Android API 123",
+                        "client_os": "fake client OS",
                         "comp": "ppunifiedsdk",
                         "device_manufacturer": "fake-manufacturer",
                         "event_name": "fake-event",

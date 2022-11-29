@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.core.analytics.AnalyticsEventData
 import com.paypal.android.core.analytics.DeviceInspector
-import java.util.UUID
+import java.util.*
 
 /**
  * This class is exposed for internal PayPal use only. Do not use.
@@ -25,7 +25,7 @@ class API internal constructor(
                 UUID.randomUUID().toString().replace("-", ""),
                 Http(),
                 HttpRequestFactory(),
-                DeviceInspector(context.applicationContext)
+                DeviceInspector(context)
             )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
@@ -67,7 +67,8 @@ class API internal constructor(
 
     @VisibleForTesting
     internal suspend fun sendAnalyticsEvent(name: String, timestamp: Long) {
-        val analyticsEventData = AnalyticsEventData(name, timestamp, sessionID, deviceInspector)
+        val analyticsEventData =
+            AnalyticsEventData(name, timestamp, sessionID, deviceInspector.inspect())
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
         val response = http.send(httpRequest)
         if (!response.isSuccessful) {

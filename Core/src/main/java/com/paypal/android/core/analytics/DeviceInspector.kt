@@ -3,63 +3,63 @@ package com.paypal.android.core.analytics
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import com.paypal.android.core.BuildConfig
 
-data class DeviceInspector internal constructor(
-    val appId: String,
-    val appName: String,
-    val merchantAppVersion: String,
-    val clientSDKVersion: String,
-    private val androidSDKInt: Int,
-    val deviceManufacturer: String,
-    val deviceModel: String,
-    val deviceProduct: String,
-    val deviceFingerprint: String
+class DeviceInspector @VisibleForTesting internal constructor(
+    private val clientSDKVersion: String,
+    private val sdkInt: Int,
+    private val deviceManufacturer: String,
+    private val deviceModel: String,
+    private val deviceProduct: String,
+    private val deviceFingerprint: String,
+    private val context: Context
 ) {
 
-    companion object {
+    constructor(context: Context) : this(
+        clientSDKVersion = BuildConfig.CLIENT_SDK_VERSION,
+        sdkInt = Build.VERSION.SDK_INT,
+        deviceManufacturer = Build.MANUFACTURER,
+        deviceModel = Build.MODEL,
+        deviceProduct = Build.PRODUCT,
+        deviceFingerprint = Build.FINGERPRINT,
+        context = context
+    )
 
-        fun parseAppName(context: Context): String = try {
-            val packageManager = context.packageManager
+    fun inspect(): DeviceData {
+        val packageManager = context.packageManager
+
+        val appName = try {
             val applicationInfo = packageManager.getApplicationInfo(context.packageName, 0)
             packageManager.getApplicationLabel(applicationInfo).toString()
         } catch (ignored: PackageManager.NameNotFoundException) {
             "N/A"
         }
 
-        fun parseAppVersion(context: Context): String = try {
-            val packageManager = context.packageManager
+        val merchantAppVersion = try {
             val packageInfo = packageManager.getPackageInfo(context.packageName, 0)
             packageInfo.versionName
         } catch (ignored: PackageManager.NameNotFoundException) {
             "N/A"
         }
+
+        val appId = context.packageName
+        val clientOS = "Android API $sdkInt"
+
+        val isSimulator = "google_sdk".equals(deviceProduct, ignoreCase = true) ||
+                "sdk".equals(deviceProduct, ignoreCase = true) ||
+                "Genymotion".equals(deviceManufacturer, ignoreCase = true) ||
+                deviceFingerprint.contains("generic")
+
+        return DeviceData(
+            appName = appName,
+            appId = appId,
+            clientSDKVersion = clientSDKVersion,
+            clientOS = clientOS,
+            deviceManufacturer = deviceManufacturer,
+            deviceModel = deviceModel,
+            isSimulator = isSimulator,
+            merchantAppVersion = merchantAppVersion,
+        )
     }
-
-    constructor(
-        context: Context,
-        clientSDKVersion: String = BuildConfig.CLIENT_SDK_VERSION,
-        sdkInt: Int = Build.VERSION.SDK_INT,
-        deviceManufacturer: String = Build.MANUFACTURER,
-        deviceModel: String = Build.MODEL,
-        deviceProduct: String = Build.PRODUCT,
-        deviceFingerprint: String = Build.FINGERPRINT
-    ) : this(
-        appId = context.packageName,
-        appName = parseAppName(context),
-        merchantAppVersion = parseAppVersion(context),
-        clientSDKVersion = clientSDKVersion,
-        androidSDKInt = sdkInt,
-        deviceManufacturer = deviceManufacturer,
-        deviceModel = deviceModel,
-        deviceProduct = deviceProduct,
-        deviceFingerprint = deviceFingerprint
-    )
-
-    val clientOS = "Android API $androidSDKInt"
-
-    val isSimulator = "google_sdk".equals(deviceProduct, ignoreCase = true) ||
-            "sdk".equals(deviceProduct, ignoreCase = true) ||
-            "Genymotion".equals(deviceManufacturer, ignoreCase = true) ||
-            deviceFingerprint.contains("generic")
 }
