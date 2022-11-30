@@ -1,7 +1,6 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
-* Add [Gradle Nexus Publish Plugin](https://github.com/gradle-nexus/publish-plugin) to release process
 * `Card`:
   * Remove `ThreeDSecureRequest` from `CardRequest`
   * Update `CardRequest` to pass `return_url` and an optional `sca`
