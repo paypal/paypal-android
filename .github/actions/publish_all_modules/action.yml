@@ -25,13 +25,7 @@ runs:
   using: "composite"
   steps:
     - run: |
-        ./gradlew --stacktrace clean \
-        :Core:publishReleasePublicationToMavenRepository \
-        :Card:publishReleasePublicationToMavenRepository \
-        :PayPalWebCheckout:publishReleasePublicationToMavenRepository \
-        :PayPalNativeCheckout:publishReleasePublicationToMavenRepository \
-        :PayPalDataCollector:publishReleasePublicationToMavenRepository \
-        :PayPalUI:publishReleasePublicationToMavenRepository
+        ./gradlew --stacktrace clean publishToSonatype closeAndReleaseSonatypeStagingRepository
       shell: bash
       env:
         SONATYPE_NEXUS_USERNAME: ${{ inputs.sonatype_usr }}
