@@ -1,11 +1,8 @@
 package com.paypal.android.core
 
 import android.content.Context
-import android.util.Log
-import androidx.annotation.VisibleForTesting
-import com.paypal.android.core.analytics.AnalyticsEventData
+import com.paypal.android.core.analytics.AnalyticsClient
 import com.paypal.android.core.analytics.DeviceInspector
-import java.util.UUID
 
 /**
  * This class is exposed for internal PayPal use only. Do not use.
@@ -13,19 +10,17 @@ import java.util.UUID
  */
 class API internal constructor(
     private val configuration: CoreConfig,
-    private val sessionID: String,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val deviceInspector: DeviceInspector
+    private val analyticsClient: AnalyticsClient,
 ) {
 
     constructor(configuration: CoreConfig, context: Context) :
             this(
                 configuration,
-                UUID.randomUUID().toString().replace("-", ""),
                 Http(),
                 HttpRequestFactory(),
-                DeviceInspector(context)
+                AnalyticsClient(DeviceInspector(context), Http(), HttpRequestFactory())
             )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
@@ -62,17 +57,7 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-        sendAnalyticsEvent(name, System.currentTimeMillis())
+        analyticsClient.sendAnalyticsEvent(name, System.currentTimeMillis())
     }
 
-    @VisibleForTesting
-    internal suspend fun sendAnalyticsEvent(name: String, timestamp: Long) {
-        val analyticsEventData =
-            AnalyticsEventData(name, timestamp, sessionID, deviceInspector.inspect())
-        val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
-        val response = http.send(httpRequest)
-        if (!response.isSuccessful) {
-            Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
-        }
-    }
 }
