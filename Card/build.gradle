@@ -12,7 +12,7 @@ android {
         minSdkVersion modules.androidMinSdkVersion
         targetSdkVersion modules.androidTargetVersion
         versionCode modules.sdkVersionCode
-        versionName rootProject.version
+        versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
