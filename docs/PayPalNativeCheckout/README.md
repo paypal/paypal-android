@@ -177,15 +177,6 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
   "plan":
   {
     "type": "MERCHANT_INITIATED_BILLING",
-    "merchant_preferences":
-    {
-      "return_url": "https://example.com/return",
-      "cancel_url": "https://example.com/cancel",
-      "notify_url": "https://example.com/notify",
-      "accepted_pymt_type": "INSTANT",
-      "skip_shipping_address": false,
-      "immutable_shipping_address": true
-    }
   }
 }'
 ```
