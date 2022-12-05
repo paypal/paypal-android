@@ -11,18 +11,17 @@ internal class AnalyticsClient(
     private val httpRequestFactory: HttpRequestFactory
 ) {
 
-    internal suspend fun sendAnalyticsEvent(name: String, timestamp: Long) {
+    internal suspend fun sendAnalyticsEvent(name: String) {
+        val timestamp = System.currentTimeMillis()
+
         val analyticsEventData =
             AnalyticsEventData(name, timestamp, sessionId, deviceInspector.inspect())
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
+
         val response = http.send(httpRequest)
         if (!response.isSuccessful) {
             Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
         }
-    }
-
-    suspend fun sendAnalyticsEvent(name: String) {
-        sendAnalyticsEvent(name, System.currentTimeMillis())
     }
 
     companion object {

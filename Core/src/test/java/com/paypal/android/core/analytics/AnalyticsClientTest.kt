@@ -5,12 +5,7 @@ import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.HttpRequest
 import com.paypal.android.core.HttpRequestFactory
 import com.paypal.android.core.HttpResponse
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.spyk
+import io.mockk.*
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,9 +21,7 @@ import java.net.URL
 class AnalyticsClientTest {
 
     private lateinit var http: Http
-
     private lateinit var httpRequestFactory: HttpRequestFactory
-
     private lateinit var analyticsClient: AnalyticsClient
 
     lateinit var deviceInspector: DeviceInspector
@@ -54,43 +47,73 @@ class AnalyticsClientTest {
         deviceInspector = mockk()
         every { deviceInspector.inspect() } returns deviceData
         analyticsClient = AnalyticsClient(deviceInspector, http, httpRequestFactory)
+
+        coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
 
     @Test
-    fun `sendAnalyticsEvent internal`() = runTest {
+    fun `sendAnalyticsEvent send proper AnalyticsEventData`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
         every {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
-        val httpResponse = HttpResponse(200)
-        coEvery { http.send(httpRequest) } returns httpResponse
 
-        analyticsClient.sendAnalyticsEvent("sample.event.name", 789)
+        analyticsClient.sendAnalyticsEvent("sample.event.name")
 
-        val analyticsEventData1 = analyticsEventDataSlot.captured
-        assertEquals("sample.event.name", analyticsEventData1.eventName)
-        assertEquals(789, analyticsEventData1.timestamp)
-        assertSame(deviceData, analyticsEventData1.deviceData)
-        val firstSessionId = analyticsEventData1.sessionID
-        analyticsClient.sendAnalyticsEvent("second event", 200L)
-        val analyticsEventData2 = analyticsEventDataSlot.captured
-        val secondSessionId = analyticsEventData2.sessionID
-        assertEquals("second event", analyticsEventData2.eventName)
-        assertEquals(firstSessionId, secondSessionId)
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals("sample.event.name", analyticsEventData.eventName)
+        assertSame(deviceData, analyticsEventData.deviceData)
     }
 
     @Test
-    fun `send analytics event verify time stamp `() = runTest {
-        val timeStampSlot = slot<Long>()
-        val currTimeStamp = System.currentTimeMillis()
-        coEvery { http.send(any()) } returns mockk(relaxed = true)
-        coEvery { httpRequestFactory.createHttpRequestForAnalytics(any()) } returns mockk(relaxed = true)
-        val spyAnalyticsClient = spyk(analyticsClient)
-        spyAnalyticsClient.sendAnalyticsEvent("sample.event.name")
+    fun `sendAnalyticsEvent calls HTTP send`() = runTest {
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(any())
+        } returns httpRequest
+
+        analyticsClient.sendAnalyticsEvent("sample.event.name")
+
         coVerify(exactly = 1) {
-            spyAnalyticsClient.sendAnalyticsEvent("sample.event.name", capture(timeStampSlot))
+            http.send(httpRequest)
         }
-        assert(timeStampSlot.captured > currTimeStamp)
-        assert(timeStampSlot.captured < System.currentTimeMillis())
+    }
+
+    fun `sendAnalyticsEvent sends proper timestamp`() = runTest {
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
+        } returns httpRequest
+
+        val timeBeforeEventSent = System.currentTimeMillis()
+        analyticsClient.sendAnalyticsEvent("sample.event.name")
+
+        val actualTimestamp = analyticsEventDataSlot.captured.timestamp
+
+        assert(actualTimestamp > timeBeforeEventSent)
+        assert(actualTimestamp < System.currentTimeMillis())
+    }
+
+    @Test
+    fun `analyticsClient uses singleton for sessionId`() = runTest {
+        val analyticsEventDataSlot1 = slot<AnalyticsEventData>()
+
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot1))
+        } returns httpRequest
+
+        analyticsClient.sendAnalyticsEvent("event1")
+        val analyticsEventData1 = analyticsEventDataSlot1.captured
+
+        val analyticsEventDataSlot2 = slot<AnalyticsEventData>()
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot2))
+        } returns httpRequest
+
+        val analyticsClient2 = AnalyticsClient(deviceInspector, http, httpRequestFactory)
+        analyticsClient2.sendAnalyticsEvent("event2")
+
+        val analyticsEventData2 = analyticsEventDataSlot2.captured
+
+        assertEquals(analyticsEventData1.sessionID, analyticsEventData2.sessionID)
     }
 }

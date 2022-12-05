@@ -1,5 +1,6 @@
 package com.paypal.android.core
 
+import com.paypal.android.core.analytics.AnalyticsClient
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -21,6 +22,7 @@ class APIUnitTest {
 
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
+    private val analyticsClient = mockk<AnalyticsClient>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
@@ -43,7 +45,7 @@ class APIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory)
+        sut = API(configuration, http, httpRequestFactory, analyticsClient)
     }
 
     @Test
