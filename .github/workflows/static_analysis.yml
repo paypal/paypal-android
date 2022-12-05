@@ -49,7 +49,7 @@ jobs:
         with:
           ref: main
       - name: Assemble Release AAR on Main Branch
-        run: ./gradlew clean assembleRelease
+        run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Main Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -58,12 +58,14 @@ jobs:
             Core/build/outputs/aar/Core-release.aar
             Card/build/outputs/aar/Card-release.aar
             PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
+            PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
+            PayPalUI/build/outputs/aar/PayPalUI-release.aar
 
       # Assemble artifacts from current branch
       - name: Checkout Current Branch
         uses: actions/checkout@v2
       - name: Assemble Release AAR on Current Branch
-        run: ./gradlew clean assembleRelease
+        run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Current Branch Artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -72,6 +74,8 @@ jobs:
             Core/build/outputs/aar/Core-release.aar
             Card/build/outputs/aar/Card-release.aar
             PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
+            PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
+            PayPalUI/build/outputs/aar/PayPalUI-release.aar
 
       # Set up Diffuse
       - name: Install Diffuse
@@ -89,5 +93,9 @@ jobs:
         run: diffuse diff --aar main-aar/Card/build/outputs/aar/Card-release.aar current-aar/Card/build/outputs/aar/Card-release.aar
       - name: Run Diffuse Analysis - Core
         run: diffuse diff --aar main-aar/Core/build/outputs/aar/Core-release.aar current-aar/Core/build/outputs/aar/Core-release.aar
-      - name: Run Diffuse Analysis - PayPal
+      - name: Run Diffuse Analysis - PayPalWebCheckout
         run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar current-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
+      - name: Run Diffuse Analysis - PayPalNativeCheckout
+        run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar current-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
+      - name: Run Diffuse Analysis - PayPalUI
+        run: diffuse diff --aar main-aar/PayPalUI/build/outputs/aar/PayPalUI-release.aar current-aar/PayPalUI/build/outputs/aar/PayPalUI-release.aar

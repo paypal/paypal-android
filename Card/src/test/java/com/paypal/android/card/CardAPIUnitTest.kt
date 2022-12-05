@@ -12,14 +12,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.runTest
 import org.json.JSONException
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -80,9 +75,11 @@ class CardAPIUnitTest {
     private val correlationId = "expected correlation ID"
     private val headers = mapOf("Paypal-Debug-Id" to correlationId)
 
-    private val testCoroutineDispatcher = TestCoroutineDispatcher()
-
-    private val cardRequest = CardRequest(orderID, card)
+    private val cardRequest = CardRequest(
+        orderID,
+        card,
+       "return_url"
+    )
 
     private lateinit var sut: CardAPI
 
@@ -90,18 +87,10 @@ class CardAPIUnitTest {
     fun beforeEach() {
         sut = CardAPI(api, requestFactory)
         every { requestFactory.createConfirmPaymentSourceRequest(cardRequest) } returns apiRequest
-
-        Dispatchers.setMain(testCoroutineDispatcher)
-    }
-
-    @After
-    fun afterEach() {
-        Dispatchers.resetMain()
-        testCoroutineDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun `it sends a confirm payment source api request`() = runBlockingTest {
+    fun `it sends a confirm payment source api request`() = runTest {
         val httpResponse = HttpResponse(200, emptyMap(), successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
@@ -110,7 +99,7 @@ class CardAPIUnitTest {
     }
 
     @Test
-    fun `it returns a confirm payment source result`() = runBlockingTest {
+    fun `it returns a confirm payment source result`() = runTest {
         val httpResponse = HttpResponse(200, headers, successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
@@ -121,7 +110,7 @@ class CardAPIUnitTest {
     }
 
     @Test
-    fun `it returns an error when the order is not found`() = runBlockingTest {
+    fun `it returns an error when the order is not found`() = runTest {
         val httpResponse = HttpResponse(404, headers, errorBody)
         coEvery { api.send(apiRequest) } returns httpResponse
 
@@ -141,7 +130,7 @@ class CardAPIUnitTest {
 
     @Test
     fun `it returns unknownError when the order api call returns an error body`() =
-        runBlockingTest {
+        runTest {
             // Status: STATUS_UNDETERMINED
             val httpResponse = HttpResponse(-1, headers, errorBody)
             coEvery { api.send(apiRequest) } returns httpResponse
@@ -161,7 +150,7 @@ class CardAPIUnitTest {
 
     @Test
     fun `it returns noResponseData when the order api call returns an empty body`() =
-        runBlockingTest {
+        runTest {
             // Status: ANY
             val httpResponse = HttpResponse(-10, headers, emptyErrorBody)
             coEvery { api.send(apiRequest) } returns httpResponse
@@ -181,7 +170,7 @@ class CardAPIUnitTest {
 
     @Test
     fun `it returns dataParsingError when the order api call returns an error body`() =
-        runBlockingTest {
+        runTest {
             // Status: OK
             val httpResponse = HttpResponse(200, headers, errorBody)
             val parsingException = JSONException("Parsing Error")
@@ -202,7 +191,7 @@ class CardAPIUnitTest {
         }
 
     @Test
-    fun `it returns unknownHost when the order api call returns an error body`() = runBlockingTest {
+    fun `it returns unknownHost when the order api call returns an error body`() = runTest {
         // Status: STATUS_UNKNOWN_HOST
         val httpResponse = HttpResponse(-2, headers, errorBody)
         coEvery { api.send(apiRequest) } returns httpResponse
@@ -221,7 +210,7 @@ class CardAPIUnitTest {
     }
 
     @Test
-    fun `it returns serverError when the order api call returns an error body`() = runBlockingTest {
+    fun `it returns serverError when the order api call returns an error body`() = runTest {
         // Status: SERVER_ERROR
         val httpResponse = HttpResponse(-3, headers, errorBody)
         coEvery { api.send(apiRequest) } returns httpResponse
@@ -241,7 +230,7 @@ class CardAPIUnitTest {
 
     @Test
     fun `when confirmPaymentSource fails to parse response, correlation ID is set in Error`() =
-        runBlockingTest {
+        runTest {
             coEvery { api.send(apiRequest) } returns HttpResponse(200, headers, unexpectedBody)
 
             lateinit var capturedError: PayPalSDKError
@@ -254,7 +243,7 @@ class CardAPIUnitTest {
         }
 
     @Test
-    fun `when confirmPaymentSource is errors, correlation ID is set in Error`() = runBlockingTest {
+    fun `when confirmPaymentSource is errors, correlation ID is set in Error`() = runTest {
         coEvery { api.send(apiRequest) } returns HttpResponse(400, headers, errorBody)
 
         lateinit var capturedError: PayPalSDKError

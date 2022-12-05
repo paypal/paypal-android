@@ -1,13 +1,32 @@
 package com.paypal.android.core
 
+import android.content.Context
+import android.util.Log
+import androidx.annotation.VisibleForTesting
+import com.paypal.android.core.analytics.AnalyticsEventData
+import com.paypal.android.core.analytics.DeviceInspector
+import java.util.UUID
+
+/**
+ * This class is exposed for internal PayPal use only. Do not use.
+ * It is not covered by Semantic Versioning and may change or be removed at any time.
+ */
 class API internal constructor(
     private val configuration: CoreConfig,
+    private val sessionID: String,
     private val http: Http,
-    private val httpRequestFactory: HttpRequestFactory
+    private val httpRequestFactory: HttpRequestFactory,
+    private val deviceInspector: DeviceInspector
 ) {
 
-    constructor(configuration: CoreConfig) :
-            this(configuration, Http(), HttpRequestFactory())
+    constructor(configuration: CoreConfig, context: Context) :
+            this(
+                configuration,
+                UUID.randomUUID().toString().replace("-", ""),
+                Http(),
+                HttpRequestFactory(),
+                DeviceInspector(context)
+            )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
         val httpRequest =
@@ -40,5 +59,20 @@ class API internal constructor(
             throw APIClientError.dataParsingError(correlationID)
         }
         return clientID
+    }
+
+    suspend fun sendAnalyticsEvent(name: String) {
+        sendAnalyticsEvent(name, System.currentTimeMillis())
+    }
+
+    @VisibleForTesting
+    internal suspend fun sendAnalyticsEvent(name: String, timestamp: Long) {
+        val analyticsEventData =
+            AnalyticsEventData(name, timestamp, sessionID, deviceInspector.inspect())
+        val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
+        val response = http.send(httpRequest)
+        if (!response.isSuccessful) {
+            Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
+        }
     }
 }

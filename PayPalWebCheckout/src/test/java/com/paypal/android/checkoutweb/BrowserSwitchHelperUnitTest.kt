@@ -31,7 +31,11 @@ class BrowserSwitchHelperUnitTest {
         every { mockCoreConfig.environment } returns Environment.SANDBOX
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, mockFundingSource)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+            mockOrderId,
+            mockCoreConfig,
+            mockFundingSource
+        )
 
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo(mockOrderId)
@@ -57,7 +61,11 @@ class BrowserSwitchHelperUnitTest {
         every { mockCoreConfig.environment } returns Environment.STAGING
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, mockFundingSource)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+            mockOrderId,
+            mockCoreConfig,
+            mockFundingSource
+        )
 
         expectThat(browserSwitchOptions) {
             get { url?.host }.isEqualTo(uri.host)
@@ -81,7 +89,11 @@ class BrowserSwitchHelperUnitTest {
         every { mockCoreConfig.environment } returns Environment.LIVE
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, mockFundingSource)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+            mockOrderId,
+            mockCoreConfig,
+            mockFundingSource
+        )
 
         expectThat(browserSwitchOptions) {
             get { url?.host }.isEqualTo(uri.host)
@@ -105,7 +117,11 @@ class BrowserSwitchHelperUnitTest {
         every { mockCoreConfig.environment } returns Environment.LIVE
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, mockFundingSource)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+            mockOrderId,
+            mockCoreConfig,
+            mockFundingSource
+        )
 
         expectThat(browserSwitchOptions) {
             get { url }.isEqualTo(uri)
@@ -129,7 +145,11 @@ class BrowserSwitchHelperUnitTest {
         every { mockCoreConfig.environment } returns Environment.LIVE
 
         val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(mockOrderId, mockCoreConfig, mockFundingSource)
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+            mockOrderId,
+            mockCoreConfig,
+            mockFundingSource
+        )
 
         expectThat(browserSwitchOptions) {
             get { url }.isEqualTo(uri)

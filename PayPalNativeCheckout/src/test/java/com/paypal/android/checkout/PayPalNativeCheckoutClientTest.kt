@@ -26,17 +26,12 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -54,25 +49,17 @@ class PayPalNativeCheckoutClientTest {
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
-    // Ref: https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test#dispatchersmain-delegation
-    private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
-
-
     @Before
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
         coEvery { api.getClientId() } returns mockClientId
-        mainThreadSurrogate = newSingleThreadContext("UI thread")
-        Dispatchers.setMain(mainThreadSurrogate)
     }
 
     @After
     fun dispose() {
         unmockkAll()
         resetField(PayPalCheckout::class.java, "isConfigSet", false)
-        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
-        mainThreadSurrogate.close()
     }
 
     @Test
@@ -356,6 +343,6 @@ class PayPalNativeCheckoutClientTest {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
             PayPalNativeCheckoutClient(mockApplication, coreConfig, api, dispatcher)
-        }?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
     }
 }

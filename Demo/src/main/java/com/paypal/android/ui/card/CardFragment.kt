@@ -19,7 +19,6 @@ import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.threedsecure.SCA
-import com.paypal.android.card.threedsecure.ThreeDSecureRequest
 import com.paypal.android.core.Address
 import com.paypal.android.core.CoreConfig
 import com.paypal.android.core.PayPalSDKError
@@ -39,7 +38,6 @@ class CardFragment : Fragment() {
     companion object {
         const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
-        const val APP_CANCEL_URL = "com.paypal.android.demo://example.com/cancelUrl"
     }
 
     @Inject
@@ -53,9 +51,6 @@ class CardFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
     private lateinit var binding: FragmentCardBinding
-
-    private val shouldRequestThreeDSecure: Boolean
-        get() = binding.threedsChkbox.isChecked
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -195,22 +190,22 @@ class CardFragment : Fragment() {
             )
 
             val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
-            CardRequest(order.id!!, card)
-        }
-
-        if (shouldRequestThreeDSecure) {
-            cardRequest.threeDSecureRequest = ThreeDSecureRequest(
-                sca = SCA.SCA_ALWAYS,
-                returnUrl = APP_RETURN_URL,
-                cancelUrl = APP_CANCEL_URL
+            val sca = when (radioGroup3DS.checkedRadioButtonId) {
+                R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
+                else -> SCA.SCA_ALWAYS
+            }
+            CardRequest(
+                order.id!!,
+                card,
+                APP_RETURN_URL,
+                sca
             )
         }
 
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
-    private fun buildOrderRequest(): CreateOrderRequest {
-        val createOrderRequest = CreateOrderRequest(
+    private fun buildOrderRequest(): CreateOrderRequest = CreateOrderRequest(
             intent = "AUTHORIZE",
             purchaseUnit = listOf(
                 com.paypal.android.api.model.PurchaseUnit(
@@ -222,8 +217,6 @@ class CardFragment : Fragment() {
             ),
             payee = Payee(emailAddress = "anpelaez@paypal.com")
         )
-        return createOrderRequest
-    }
 
     private fun updateStatusText(text: String) {
         if (!isDetached) {
