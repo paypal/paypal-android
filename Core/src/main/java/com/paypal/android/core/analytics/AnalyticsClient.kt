@@ -21,6 +21,10 @@ internal class AnalyticsClient(
         }
     }
 
+    suspend fun sendAnalyticsEvent(name: String) {
+        sendAnalyticsEvent(name, System.currentTimeMillis())
+    }
+
     companion object {
         private val sessionId = UUID.randomUUID().toString()
     }

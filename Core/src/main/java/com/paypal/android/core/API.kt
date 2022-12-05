@@ -1,9 +1,5 @@
 package com.paypal.android.core
 
-import android.content.Context
-import com.paypal.android.core.analytics.AnalyticsClient
-import com.paypal.android.core.analytics.DeviceInspector
-
 /**
  * This class is exposed for internal PayPal use only. Do not use.
  * It is not covered by Semantic Versioning and may change or be removed at any time.
@@ -12,15 +8,13 @@ class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val analyticsClient: AnalyticsClient,
 ) {
 
-    constructor(configuration: CoreConfig, context: Context) :
+    constructor(configuration: CoreConfig) :
             this(
                 configuration,
                 Http(),
-                HttpRequestFactory(),
-                AnalyticsClient(DeviceInspector(context), Http(), HttpRequestFactory())
+                HttpRequestFactory()
             )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
@@ -54,10 +48,6 @@ class API internal constructor(
             throw APIClientError.dataParsingError(correlationID)
         }
         return clientID
-    }
-
-    suspend fun sendAnalyticsEvent(name: String) {
-        analyticsClient.sendAnalyticsEvent(name, System.currentTimeMillis())
     }
 
 }

@@ -1,15 +1,9 @@
 package com.paypal.android.core
 
 import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import com.paypal.android.core.analytics.AnalyticsClient
-import com.paypal.android.core.analytics.DeviceData
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -25,7 +19,7 @@ import java.net.URL
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class APIUnitTest {
-    private val analyticsClient: AnalyticsClient = mockk(relaxed = true)
+
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
 
@@ -46,24 +40,12 @@ class APIUnitTest {
         HttpResponse(200, httpResponseHeaders, clientIdBody)
     }
 
-    private val deviceData = DeviceData(
-        appName = "app name",
-        appId = "app id",
-        clientSDKVersion = "1.2.3",
-        clientOS = "123",
-        deviceManufacturer = "device manufacturer",
-        deviceModel = "device model",
-        isSimulator = false,
-        merchantAppVersion = "4.5.6"
-    )
-
     private lateinit var context: Context
     private lateinit var sut: API
 
     @Before
     fun beforeEach() {
-        context = ApplicationProvider.getApplicationContext()
-        sut = API(configuration, http, httpRequestFactory, analyticsClient)
+        sut = API(configuration, http, httpRequestFactory)
     }
 
     @Test
@@ -173,13 +155,4 @@ class APIUnitTest {
             assertEquals(Code.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
             assertEquals("sample-correlation-id", capturedError?.correlationID)
         }
-
-    @Test
-    fun `send analytics event delegates it to analytics client`() = runTest {
-        coEvery { analyticsClient.sendAnalyticsEvent("sample.event.name", any()) } just runs
-        sut.sendAnalyticsEvent("sample.event.name")
-        coVerify(exactly = 1) {
-            analyticsClient.sendAnalyticsEvent("sample.event.name", any())
-        }
-    }
 }
