@@ -1,6 +1,5 @@
 package com.paypal.android.core
 
-import android.content.Context
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -40,7 +39,6 @@ class APIUnitTest {
         HttpResponse(200, httpResponseHeaders, clientIdBody)
     }
 
-    private lateinit var context: Context
     private lateinit var sut: API
 
     @Before

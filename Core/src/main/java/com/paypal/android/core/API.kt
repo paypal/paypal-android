@@ -49,5 +49,4 @@ class API internal constructor(
         }
         return clientID
     }
-
 }
