@@ -11,7 +11,11 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
 
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
-    private fun buildPayPalCheckoutUri(@NonNull orderId: String?, @NonNull config: CoreConfig, @NonNull funding: PayPalWebCheckoutFundingSource): Uri {
+    private fun buildPayPalCheckoutUri(
+        @NonNull orderId: String?,
+        @NonNull config: CoreConfig,
+        @NonNull funding: PayPalWebCheckoutFundingSource
+    ): Uri {
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"

@@ -49,7 +49,6 @@ class PayPalNativeCheckoutClientTest {
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
-
     @Before
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
@@ -344,6 +343,6 @@ class PayPalNativeCheckoutClientTest {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
             PayPalNativeCheckoutClient(mockApplication, coreConfig, api, dispatcher)
-        }?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
     }
 }

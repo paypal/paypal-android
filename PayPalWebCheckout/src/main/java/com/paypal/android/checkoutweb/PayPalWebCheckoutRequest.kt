@@ -6,4 +6,7 @@ package com.paypal.android.checkoutweb
  * @param orderID The ID of the order to be approved.
  * @param fundingSource specify funding (credit, paylater or default)
  */
-data class PayPalWebCheckoutRequest @JvmOverloads constructor (val orderID: String, val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL)
+data class PayPalWebCheckoutRequest @JvmOverloads constructor (
+    val orderID: String,
+    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
+)

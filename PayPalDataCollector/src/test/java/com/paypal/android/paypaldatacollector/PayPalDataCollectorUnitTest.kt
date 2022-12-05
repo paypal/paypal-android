@@ -16,14 +16,14 @@ import lib.android.paypal.com.magnessdk.MagnesSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
-import java.util.*
+import java.util.UUID
 import kotlin.collections.HashMap
 
 class PayPalDataCollectorUnitTest {
 
     @Test
     fun `when getClientMetadataId is called, magnes settings has default values`() {
-        val appGUID = UUID.randomUUID().toString();
+        val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
@@ -42,7 +42,7 @@ class PayPalDataCollectorUnitTest {
 
     @Test
     fun `when environment is STAGING, magnes settings environment is STAGE`() {
-        val appGUID = UUID.randomUUID().toString();
+        val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
         val magnesSettingsSlot = slot<MagnesSettings>()
@@ -79,7 +79,14 @@ class PayPalDataCollectorUnitTest {
     @Test
     fun `when appGUID is invalid, InvalidInputException is thrown`() {
         mockkStatic(Log::class)
-        val errorMessage = "Application’s Globally Unique Identifier (AppGUID) does not match the criteria, This is a string that identifies the merchant application that sets up Magnes on the mobile device. If the merchant app does not pass an AppGuid, Magnes creates one to identify the app. An AppGuid is an application identifier per-installation; that is, if a new instance of the app is installed on the mobile device, or the app is reinstalled, it will have a new AppGuid.\n ***AppGuid Criteria*** \n   Max length: 36 characters \n   Min Length: 30 characters \n   Regex: Letters, numbers and dashes only \n"
+        val errorMessage = "Application’s Globally Unique Identifier (AppGUID) does not match the criteria," +
+                " This is a string that identifies the merchant application that sets up Magnes on the mobile" +
+                " device. If the merchant app does not pass an AppGuid, Magnes creates one to identify" +
+                " the app. An AppGuid is an application identifier per-installation; that is," +
+                " if a new instance of the app is installed on the mobile device, or the app" +
+                " is reinstalled, it will have a new AppGuid.\n ***AppGuid Criteria*** \n   " +
+                "Max length: 36 characters \n   Min Length: 30 characters \n   " +
+                "Regex: Letters, numbers and dashes only \n"
         val appGUID = "invalid_uuid"
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
@@ -90,7 +97,7 @@ class PayPalDataCollectorUnitTest {
         val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.SANDBOX, mockMagnesSDK, mockUUIDHelper)
         val result = sut.getClientMetadataId(mockk(relaxed = true))
 
-        verify {  Log.e(any(), any(), capture(exceptionSlot)) }
+        verify { Log.e(any(), any(), capture(exceptionSlot)) }
 
         assertEquals(exceptionSlot.captured.message, errorMessage)
         assertEquals("", result)

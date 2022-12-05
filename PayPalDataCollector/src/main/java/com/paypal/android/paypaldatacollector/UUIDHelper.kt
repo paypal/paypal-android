@@ -1,7 +1,7 @@
 package com.paypal.android.paypaldatacollector
 
 import android.content.Context
-import java.util.*
+import java.util.UUID
 
 internal class UUIDHelper {
 
@@ -19,5 +19,4 @@ internal class UUIDHelper {
             newGuid
         }
     }
-
 }
