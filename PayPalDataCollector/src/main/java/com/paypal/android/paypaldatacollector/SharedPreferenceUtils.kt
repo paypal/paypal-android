@@ -10,7 +10,7 @@ internal class SharedPreferenceUtils {
         val instance = SharedPreferenceUtils()
     }
 
-    private fun getSharedPreferences(context: Context) : SharedPreferences =
+    private fun getSharedPreferences(context: Context): SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
 
     fun putString(context: Context, key: String, value: String) =
@@ -19,7 +19,6 @@ internal class SharedPreferenceUtils {
                 .putString(key, value)
                 .apply()
 
-    fun getString(context: Context, key: String, fallback: String?) : String? =
+    fun getString(context: Context, key: String, fallback: String?): String? =
          getSharedPreferences(context).getString(key, fallback) ?: fallback
-
 }

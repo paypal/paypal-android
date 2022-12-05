@@ -29,7 +29,6 @@ class PayPalNativeCheckoutClient internal constructor (
 
     constructor(application: Application, coreConfig: CoreConfig) : this(application, coreConfig, API(coreConfig, application))
 
-
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
     }

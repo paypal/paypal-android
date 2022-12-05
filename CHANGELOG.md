@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 0.0.6 (2022-12-02)
 * `Card`:
   * Remove `ThreeDSecureRequest` from `CardRequest`
   * Update `CardRequest` to pass `return_url` and an optional `sca`
