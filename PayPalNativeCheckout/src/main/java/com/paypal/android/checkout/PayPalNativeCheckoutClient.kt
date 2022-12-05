@@ -27,11 +27,13 @@ class PayPalNativeCheckoutClient internal constructor (
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
-    constructor(application: Application, coreConfig: CoreConfig) : this(application, coreConfig, API(coreConfig, application))
+    constructor(application: Application, coreConfig: CoreConfig) :
+            this(application, coreConfig, API(coreConfig))
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
     }
+
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
