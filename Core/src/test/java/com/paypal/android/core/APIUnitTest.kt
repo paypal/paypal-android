@@ -1,10 +1,7 @@
 package com.paypal.android.core
 
 import com.paypal.android.core.analytics.AnalyticsClient
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -155,4 +152,13 @@ class APIUnitTest {
             assertEquals(Code.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
             assertEquals("sample-correlation-id", capturedError?.correlationID)
         }
+
+    @Test
+    fun `send analytics event delegates it to analytics client`() = runTest {
+        coEvery { analyticsClient.sendAnalyticsEvent("sample.event.name") } just runs
+        sut.sendAnalyticsEvent("sample.event.name")
+        coVerify(exactly = 1) {
+            analyticsClient.sendAnalyticsEvent("sample.event.name")
+        }
+    }
 }
