@@ -1,20 +1,21 @@
 # Accepting PayPal Native Checkout Payments
-
+ 
 The PayPal Native Checkout module in the PayPal SDK enables PayPal payments in your app
 
 Follow these steps to add PayPal Native Checkout payments:
 
 1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
-1. [Add PayPal Native Checkout Module](#add-paypal-native-checkout-module)
-1. [Test and go live](#test-and-go-live)
+2. [Add PayPal Native Checkout Module](#add-paypal-native-checkout-module)
+3. After initial setup, follow instructions [here](#billing-agreement) for Billing Agreements
+4. [Test and go live](#test-and-go-live)
 
 ## Setup a PayPal Developer Account
 
 You will need to set up authorization to use the PayPal Payments SDK.
-Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and secret, to generate access tokens.
+Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and secret. These values are needed to generate an access token.
 
-You will need a server integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
-For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
+The SDK requires a server-side integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
+The order created on your server will be used to authorize or capture funds. For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
 ## Add PayPal Native Checkout Module
 
@@ -32,7 +33,7 @@ dependencies {
 
 In order to integrate PayPalNative checkout, you will need:
 
-1. An app client ID and corresponding secret. This is to generate and access token that will allow you to create payment tokens, capture funds and authorize customers to place orders.
+1. A PayPal client ID and corresponding secret. This is to generate an access token that will allow you to create payment tokens, capture funds and authorize customers to place orders.
 2. Setting a return URL.
 
 A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/) to create said url and also to learn about how to create a new PayPal application as well.
@@ -59,7 +60,7 @@ Set a listener on the client to receive payment flow callbacks:
 payPalClient.listener = object : PayPalNativeCheckoutListener {
 
     override fun onPayPalCheckoutStart() {
-        // the paypal paysheet is about to appear
+        // the PayPal paysheet is about to appear
     }
     
     override fun onPayPalSuccess(result: PayPalNativeCheckoutResult) {
@@ -147,6 +148,58 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw ''
 ```
+
+## Billing Agreement
+
+### 1. Create Billing Agreement
+
+**Request**
+
+```bash
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data-raw '{
+  "description": "Billing Agreement",
+  "shipping_address":
+  {
+    "line1": "1350 North First Street",
+    "city": "San Jose",
+    "state": "CA",
+    "postal_code": "95112",
+    "country_code": "US",
+    "recipient_name": "John Doe"
+  },
+  "payer":
+  {
+    "payment_method": "PAYPAL"
+  },
+  "plan":
+  {
+    "type": "MERCHANT_INITIATED_BILLING",
+  }
+}'
+```
+
+**Response**
+
+```json
+{
+   "token_id": "<BILLING_AGREEMENT_TOKEN>"
+}
+```
+
+### 2. Set Billing Agreement
+
+```kotlin
+paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
+   createOrderActions.setBillingAgreementId(BILLING_AGREEMENT_TOKEN)
+})
+```
+
+### 3. Start checkout
+
+Follow steps here to [Initiate PayPal Native Checkout](#3-initiate-paypal-native-checkout)
 
 ## Test and go live
 
