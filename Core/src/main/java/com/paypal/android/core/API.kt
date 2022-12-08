@@ -1,7 +1,7 @@
 package com.paypal.android.core
 
 import android.content.Context
-import com.paypal.android.core.analytics.AnalyticsClient
+import com.paypal.android.core.analytics.AnalyticsService
 import com.paypal.android.core.analytics.DeviceInspector
 
 /**
@@ -12,7 +12,7 @@ class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val analyticsClient: AnalyticsClient,
+    private val analyticsService: AnalyticsService,
 ) {
 
     constructor(configuration: CoreConfig, context: Context) :
@@ -20,7 +20,7 @@ class API internal constructor(
                 configuration,
                 Http(),
                 HttpRequestFactory(),
-                AnalyticsClient(
+                AnalyticsService(
                     deviceInspector = DeviceInspector(context),
                     http = Http(),
                     httpRequestFactory = HttpRequestFactory()
@@ -61,6 +61,6 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-        analyticsClient.sendAnalyticsEvent(name)
+        analyticsService.sendAnalyticsEvent(name)
     }
 }

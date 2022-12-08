@@ -1,7 +1,13 @@
 package com.paypal.android.core
 
-import com.paypal.android.core.analytics.AnalyticsClient
-import io.mockk.*
+import com.paypal.android.core.analytics.AnalyticsService
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -19,7 +25,7 @@ class APIUnitTest {
 
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
-    private val analyticsClient = mockk<AnalyticsClient>()
+    private val analyticsService = mockk<AnalyticsService>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
@@ -42,7 +48,7 @@ class APIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = API(configuration, http, httpRequestFactory, analyticsClient)
+        sut = API(configuration, http, httpRequestFactory, analyticsService)
     }
 
     @Test
@@ -155,10 +161,10 @@ class APIUnitTest {
 
     @Test
     fun `send analytics event delegates it to analytics client`() = runTest {
-        coEvery { analyticsClient.sendAnalyticsEvent("sample.event.name") } just runs
+        coEvery { analyticsService.sendAnalyticsEvent("sample.event.name") } just runs
         sut.sendAnalyticsEvent("sample.event.name")
         coVerify(exactly = 1) {
-            analyticsClient.sendAnalyticsEvent("sample.event.name")
+            analyticsService.sendAnalyticsEvent("sample.event.name")
         }
     }
 }

@@ -3,9 +3,9 @@ package com.paypal.android.core.analytics
 import android.util.Log
 import com.paypal.android.core.Http
 import com.paypal.android.core.HttpRequestFactory
-import java.util.UUID
+import java.util.*
 
-internal class AnalyticsClient(
+internal class AnalyticsService(
     private val deviceInspector: DeviceInspector,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory

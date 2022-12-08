@@ -5,7 +5,11 @@ import com.paypal.android.core.HttpMethod
 import com.paypal.android.core.HttpRequest
 import com.paypal.android.core.HttpRequestFactory
 import com.paypal.android.core.HttpResponse
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,11 +22,11 @@ import java.net.URL
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class AnalyticsClientTest {
+class AnalyticsServiceTest {
 
     private lateinit var http: Http
     private lateinit var httpRequestFactory: HttpRequestFactory
-    private lateinit var analyticsClient: AnalyticsClient
+    private lateinit var analyticsService: AnalyticsService
 
     lateinit var deviceInspector: DeviceInspector
 
@@ -46,7 +50,7 @@ class AnalyticsClientTest {
         httpRequestFactory = mockk()
         deviceInspector = mockk()
         every { deviceInspector.inspect() } returns deviceData
-        analyticsClient = AnalyticsClient(deviceInspector, http, httpRequestFactory)
+        analyticsService = AnalyticsService(deviceInspector, http, httpRequestFactory)
 
         coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
@@ -58,7 +62,7 @@ class AnalyticsClientTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsClient.sendAnalyticsEvent("sample.event.name")
+        analyticsService.sendAnalyticsEvent("sample.event.name")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
@@ -71,7 +75,7 @@ class AnalyticsClientTest {
             httpRequestFactory.createHttpRequestForAnalytics(any())
         } returns httpRequest
 
-        analyticsClient.sendAnalyticsEvent("sample.event.name")
+        analyticsService.sendAnalyticsEvent("sample.event.name")
 
         coVerify(exactly = 1) {
             http.send(httpRequest)
@@ -85,7 +89,7 @@ class AnalyticsClientTest {
         } returns httpRequest
 
         val timeBeforeEventSent = System.currentTimeMillis()
-        analyticsClient.sendAnalyticsEvent("sample.event.name")
+        analyticsService.sendAnalyticsEvent("sample.event.name")
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
 
@@ -101,7 +105,7 @@ class AnalyticsClientTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot1))
         } returns httpRequest
 
-        analyticsClient.sendAnalyticsEvent("event1")
+        analyticsService.sendAnalyticsEvent("event1")
         val analyticsEventData1 = analyticsEventDataSlot1.captured
 
         val analyticsEventDataSlot2 = slot<AnalyticsEventData>()
@@ -109,8 +113,8 @@ class AnalyticsClientTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot2))
         } returns httpRequest
 
-        val analyticsClient2 = AnalyticsClient(deviceInspector, http, httpRequestFactory)
-        analyticsClient2.sendAnalyticsEvent("event2")
+        val analyticsService2 = AnalyticsService(deviceInspector, http, httpRequestFactory)
+        analyticsService2.sendAnalyticsEvent("event2")
 
         val analyticsEventData2 = analyticsEventDataSlot2.captured
 
