@@ -1,14 +1,12 @@
 package com.paypal.android.core
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import com.paypal.android.core.analytics.AnalyticsEventData
-import com.paypal.android.core.analytics.DeviceData
-import com.paypal.android.core.analytics.DeviceInspector
+import com.paypal.android.core.analytics.AnalyticsService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -24,10 +22,10 @@ import java.net.URL
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class APIUnitTest {
+
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
-
-    private val deviceInspector = mockk<DeviceInspector>()
+    private val analyticsService = mockk<AnalyticsService>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig()
@@ -46,24 +44,11 @@ class APIUnitTest {
         HttpResponse(200, httpResponseHeaders, clientIdBody)
     }
 
-    private val deviceData = DeviceData(
-        appName = "app name",
-        appId = "app id",
-        clientSDKVersion = "1.2.3",
-        clientOS = "123",
-        deviceManufacturer = "device manufacturer",
-        deviceModel = "device model",
-        isSimulator = false,
-        merchantAppVersion = "4.5.6"
-    )
-
-    private lateinit var context: Context
     private lateinit var sut: API
 
     @Before
     fun beforeEach() {
-        context = ApplicationProvider.getApplicationContext()
-        sut = API(configuration, "session-id", http, httpRequestFactory, deviceInspector)
+        sut = API(configuration, http, httpRequestFactory, analyticsService)
     }
 
     @Test
@@ -175,29 +160,11 @@ class APIUnitTest {
         }
 
     @Test
-    fun `send analytics event creates an http request via http request factory`() = runTest {
-        every { deviceInspector.inspect() } returns deviceData
-
-        val analyticsEventDataSlot = slot<AnalyticsEventData>()
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
-        } returns httpRequest
-
-        sut.sendAnalyticsEvent("sample.event.name", 789)
-
-        val analyticsEventData = analyticsEventDataSlot.captured
-        assertEquals("sample.event.name", analyticsEventData.eventName)
-        assertEquals(789, analyticsEventData.timestamp)
-        assertEquals("session-id", analyticsEventData.sessionID)
-        assertSame(deviceData, analyticsEventData.deviceData)
-    }
-
-    @Test
-    fun `send analytics event sends an http request created from an analytics event`() = runTest {
-        every { deviceInspector.inspect() } returns deviceData
-        every { httpRequestFactory.createHttpRequestForAnalytics(any()) } returns httpRequest
-
-        sut.sendAnalyticsEvent("sample.event.name", 789)
-        coVerify { http.send(httpRequest) }
+    fun `send analytics event delegates it to analytics client`() = runTest {
+        coEvery { analyticsService.sendAnalyticsEvent("sample.event.name") } just runs
+        sut.sendAnalyticsEvent("sample.event.name")
+        coVerify(exactly = 1) {
+            analyticsService.sendAnalyticsEvent("sample.event.name")
+        }
     }
 }
