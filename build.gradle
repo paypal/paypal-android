@@ -74,7 +74,7 @@ buildscript {
             "json" : "org.json:json:20220320",
 
             // PayPal
-            "nativeCheckout"              : "com.paypal.checkout:android-sdk:0.8.2",
+            "nativeCheckout"              : "com.paypal.checkout:android-sdk:0.8.7",
 
             // Release modules
             "card"                        : "com.paypal.android:card:${modules.sdkVersionName}",
