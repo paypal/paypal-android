@@ -1,5 +1,10 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* `PayPalNativeCheckout`:
+  * Fix `MagnesSDK` not found error
+  * Bump NXO to 0.8.7
+
 ## 0.0.6 (2022-12-02)
 * `Card`:
   * Remove `ThreeDSecureRequest` from `CardRequest`
