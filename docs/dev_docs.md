@@ -453,9 +453,9 @@ curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/ord
     
 **Tab: PayPal UI**
 
-## Use PayPal UI to streamline creating frontend PayPal buttons
+## Use PayPal UI to add PayPal buttons 
 
-PayPal's default integration provides a set of ready-made PayPal-branded buttons to accept debit and credit card payments. You can apply custom styles to these buttons to change how they show up on your site.
+The `PayPalUI` module provides a set of ready-made PayPal-branded buttons to create a more seamless integration with PayPal `web` and `native` payments.
 
 Follow these steps to add PayPal buttons to your integration.
 
@@ -472,7 +472,7 @@ dependencies {
 
 ### 2. Create a PayPal button
 
-The PayPalUI module gives you 3 buttons you can use on your site, with a set of customizations like color, edges, size, and labels:
+The PayPalUI module gives you 3 buttons you can use in your application, with a set of customizations like color, edges, size, and labels:
   <ul>
     <li><code>PayPalButton</code>: generic PayPal button</li>
     <li><code>PayPalPayLater</code>: a PayPal button with a fixed PayLater label</li>
@@ -481,13 +481,13 @@ The PayPalUI module gives you 3 buttons you can use on your site, with a set of 
 
 Add a <code>PayPalButton</code> to your layout XML:
 
+
 ```xml
 <com.paypal.android.ui.paymentbutton.PayPalButton
 android:id="@+id/paypal_button"
 android:layout_width="match_parent"
 android:layout_height="wrap_content" />
 ```
-
 
 ### 3. Reference the PayPal button
 
@@ -496,7 +496,7 @@ Reference the button in your code:
 ```java
 val payPalButton = findViewById<PayPalButton>(R.id.paypal_button)
 payPalButton.setOnClickListener {
-        // start the PayPal flow
+        // start the PayPal web or native
 }
 ```
 </ContentTab>
