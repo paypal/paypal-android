@@ -59,7 +59,7 @@ Before you can accept card payments on your website, verify that your sandbox bu
 
 ## 2. Integrate
 
-Click on the **Card payments** or **PayPal Wallet** tab to get started.
+Click on the **Card payments**, **PayPal Web Payments** or **PayPal UI** tab to get started.
 
 <ContentTabs>
 <ContentTab label="Card payments">
@@ -217,7 +217,7 @@ Once your `CardRequest` has been constructed with the card details, call `cardCl
 class MyCardPaymentActivity: FragmentActivity {
     
     fun cardCheckoutTapped(cardRequest: CardRequest) {
-        val result = cardClient.approveOrder(this, cardRequest)
+        cardClient.approveOrder(this, cardRequest)
     }
 }
 ```
@@ -287,7 +287,170 @@ Use our list of [test numbers for various card brands](https://developer.paypal.
 </ContentTab>
 <ContentTab label="PayPal Wallet">
 
-**Tab: PayPal Wallet**
+**Tab: PayPal Web Payments**
+
+## PayPal Checkout Lite flow
+With `PayPalWebPayments` you can have PayPal Checkout in-app web flow. Its launches the checkout experience in a browser within your application, significantlly reducing the size of the SDK. Follow this steps to integrate `PayPalWebPayments`:
+
+### 1. Add `PayPalWebPayments` to your app
+
+In your <code>build.gradle</code> file, add the following dependency:
+
+```groovy
+dependencies {
+  implementation "com.paypal.android:paypal-wen-payments:<CURRENT-VERSION>"
+}
+```
+### 2. Configure your app to handle browser switching
+
+`PayPalWebPayments` redirects users to a web interface to complete the PayPal Checkout flow. After a user has completed the flow, a `custom-url-scheme` is used to return control back to your app.
+
+Edit your app's `AndroidManifest.xml` to include an `intent-filter` and set the `android:scheme` on the Activity that will be responsible for handling the deep link back into the app. Also set the activity `launchMode` to `singleTop`:
+> Note: `android:exported` is required if your app compile SDK version is API 31 (Android 12) or later.
+```xml
+<activity android:name="com.company.app.MyPaymentsActivity"
+    android:exported="true"
+    android:launchMode="singleTop">
+    ...
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <data android:scheme="custom-url-scheme"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+    </intent-filter>
+</activity>
+```
+Also, add `onNewIntent` to your activity:
+
+```kotlin
+override fun onNewIntent(newIntent: Intent?) {
+    super.onNewIntent(intent)
+    intent = newIntent
+}
+```
+    
+### 3. Fetch an Access Token on your server
+    
+On your server, fetch an `ACCESS_TOKEN` using the [following instructions](https://developer.paypal.com/api/rest/authentication/).
+
+> **Note:** This access token is only for the sandbox environment. When you're ready to go live, you need to get a live access token. To do so, replace the request sandbox URL with: https://api-m.paypal.com/v1/oauth2/token.
+
+
+### 4. Create a PayPalWebCheckoutClient
+In your Android app, use the `ACCESS_TOKEN` you fetched on your server in step 3 to construct a `CoreConfig`.
+
+```kotlin
+val config = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
+```
+Set a return URL using the custom scheme you configured in the `ActivityManifest.xml` step 2:
+
+```kotlin
+val returnUrl = "custom-url-scheme"
+```
+Create a `PayPalWebCheckoutClient` to approve an order with a PayPal payment method:
+
+```kotlin
+val payPalWebCheckoutClient = PayPalWebCheckoutClient(requireActivity(), config, returnUrl)
+```
+Set a `PayPalWebCheckoutListener` on the client to receive payment flow callbacks:
+
+```kotlin
+payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
+
+    override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
+        // order was successfully approved and is ready to be captured/authorized (see step 7)
+    }
+
+    override fun onPayPalWebFailure(error: PayPalSDKError) {
+        // handle the error
+    }
+
+    override fun onPayPalWebCanceled() {
+        // the user canceled the flow
+    }
+}
+```
+
+### 5. Fetch an Order ID on your server
+    
+On your server, use the <a href="https://developer.paypal.com/docs/api/orders/v2">Orders v2 API</a> to create an `ORDER_ID`. Use your `ACCESS_TOKEN` from step 3 in the `Authorization` header.
+    
+The `intent` type that you specify must either be `AUTHORIZE` or `CAPTURE`. This must match the `intent` type you use to process your order at the end of the integration (step 8).
+
+**cURL Request**
+```bash
+curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/orders/' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data-raw '{
+      "intent": "<CAPTURE|AUTHORIZE>",
+      "purchase_units": [
+          {
+              "amount": {
+                  "currency_code": "USD",
+                  "value": "5.00"
+              }
+          }
+      ]
+  }'
+```
+
+**Response**
+```
+{
+   "id":"<ORDER_ID>",
+   "status":"CREATED"
+}
+```
+When a buyer initiates the payment flow, you will need to send the `ORDER_ID` from your server to your client app.
+
+### 6. Create a web checkout request
+Configure your `PayPalWebCheckoutRequest` with the order ID generated in step 5. You can also specify one of the follwing funding sources for your order: `PayPal (default)`, `PayLater` or `PayPalCredit`.
+> Click [here](https://developer.paypal.com/docs/checkout/pay-later/us/) for more information on PayPal Pay Later
+
+```kotlin
+val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>", fundingSource = PayPalWebCheckoutFundingSource.PAYPAL)
+```
+
+### 7. Approve the order
+
+Once your `PayPalWebCheckoutRequest` has been call `payPalWebCheckoutClient.start()` to process the payment.
+
+```kotlin
+class MyCardPaymentActivity: FragmentActivity {
+    
+    fun payPalWebCheckoutTapped(payPalWebCheckoutRequest: PayPalWebCheckoutRequest) {
+        payPalWebCheckoutClient.start(payPalWebCheckoutRequest)
+    }
+}
+```
+
+### 8. Authorize and capture the order
+    
+When the PayPal Android SDK successfully calls `onPayPalWebSuccess` method on `PayPalWebCheckoutListener`, submit your `ORDER_ID` for authorization or capture.
+
+Call the <a href="https://developer.paypal.com/docs/api/orders/v2/#orders_authorize"> <code>authorize</code> endpoint of the Orders V2 API</a> to place funds on hold:
+    
+**cURL**
+```bash
+curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data-raw ''
+```
+    
+Call the <a href="https://developer.paypal.com/docs/api/orders/v2/#orders_capture"><code>capture</code> endpoint of the Orders V2 API</a> to capture funds immediately:
+    
+**cURL**
+```bash
+curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--data-raw ''
+```
+
+    
+**Tab: PayPal UI**
 
 ## Use PayPal UI to streamline creating frontend PayPal buttons
 
@@ -336,623 +499,6 @@ payPalButton.setOnClickListener {
 }
 ```
 
-    
-### 4. Add the PayPal Mobile SDK for Android to your app
-
-Add the following dependency in the <code>build.gradle</code> file for your app:
-
-```groovy
-dependencies {
-  implementation "com.paypal.android:paypal-web-checkout:<CURRENT-VERSION>"
-}
-```
-
-
-### 5. Configure your app to handle browser switching
-
-The PayPal payment flow uses a browser switch. You need to register a custom URL scheme to allow web applications to deep link back into your app. These flows include PayPal checkout and card checkout flows that result in a 3D Secure challenge.
-
-Edit your app's <code>AndroidManifest.xml</code> to include an <code>intent-filter</code> and set the <code>android:scheme</code> on your Activity to route the deep link back to your app:
-
-```xml
-<activity android:name="com.company.app.MyPaymentsActivity"
-    android:exported="true"
-    android:launchMode="singleTop">
-    ...
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <data android:scheme="custom-url-scheme"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-    </intent-filter>
-</activity>
-```
-
-
-### 6. Initiate the PayPal Mobile SDK for Android
-
-Request an <code>ACCESS_TOKEN</code> using the <code>CLIENT_ID</code> and <code>CLIENT_SECRET</code> from your app in the PayPal Developer Portal dashboard. You can also get an <code>ACCESS_TOKEN</code> using our Authentication API. <a href="https://developer.paypal.com/api/rest/authentication/">Learn more about authentication through PayPal</a>.
-
-**cURL**
-```bash
-curl -X POST 'https://api-m.sandbox.paypal.com/v1/oauth2/token' \\\n -u $CLIENT_ID:$CLIENT_SECRET \\\n -H 'Content-Type: application/x-www-form-urlencoded' \\\n -d '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"'
-```
-
-**Ruby**
-```bash
-require 'net/http'
-require 'uri'
-require 'json'\n
-uri = URI.parse("https://api-m.sandbox.paypal.com/v1/oauth2/token")
-request = Net::HTTP::Post.new(uri)
-request.content_type = "application/x-www-form-urlencoded"
-request["Authorization"] = "Basic base64(<CLIENT_ID>:<CLIENT_SECRET>)"
-request.body = JSON.dump("grant_type=client_credentials&response_type=token&return_authn_schemes=true")\n
-req_options = {
-    use_ssl: uri.scheme == "https",
-}\n
-response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-    http.request(request)
-end\n
-# response.code
-# response.body
-```
-
-**Python**
-```bash
-import requests\n
-headers = {
-  'Authorization': 'Basic base64(<CLIENT_ID>:<CLIENT_SECRET>)',
-  'Content-Type': 'application/x-www-form-urlencoded',
-}\n
-data = '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"'\n
-response = requests.post('https://api-m.sandbox.paypal.com/v1/oauth2/token', headers = headers, data = data)
-```
-
-**NodeJS (request)**
-```javascript
-var request = require('request');\n
-var headers = {
-  'Authorization': 'Basic base64(<CLIENT_ID>:<CLIENT_SECRET>)',
-  'Content-Type': 'application/x-www-form-urlencoded'
-};\n
-var dataString = '"grant_type=client_credentials&response_type=token&return_authn_schemes=true"';\n
-var options = {
-  url: 'https://api-m.sandbox.paypal.com/v1/oauth2/token',
-  method: 'POST',
-  headers: headers,
-  body: dataString
-};\n
-function callback(error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body);
-  }
-}\n
-request(options, callback);
-```
-
-**Java**
-```bash
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;\n
-class Main {\n
-  public static void main(String[] args) throws IOException {
-    URL url = new URL("https://api-m.sandbox.paypal.com/v1/oauth2/token");
-    HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-    httpConn.setRequestMethod("POST");\n
-    httpConn.setRequestProperty("Authorization", "Basic base64(<CLIENT_ID>:<CLIENT_SECRET>)");
-    httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");\n
-    httpConn.setDoOutput(true);
-    OutputStreamWriter writer = new OutputStreamWriter(httpConn.getOutputStream());
-    writer.write("\"grant_type=client_credentials&response_type=token&return_authn_schemes=true\"");
-    writer.flush();
-    writer.close();
-    httpConn.getOutputStream().close();\n
-    InputStream responseStream = httpConn.getResponseCode() / 100 == 2
-      ? httpConn.getInputStream()
-      : httpConn.getErrorStream();
-    Scanner s = new Scanner(responseStream).useDelimiter("\\A");
-    String response = s.hasNext() ? s.next() : "";
-    System.out.println(response);
-  }
-}
-```
-
-**Go**
-```javascript
-package main
-import(
-  "fmt"
-  "io/ioutil"
-  "log"
-  "net/http"
-  "strings"
-)
-func main() {
-    client: = &http.Client {}
-    var data = strings.NewReader(\`"grant_type=client_credentials&response_type=token&return_authn_schemes=true"\`)
-    req, err := http.NewRequest("POST", "https://api-m.sandbox.paypal.com/v1/oauth2/token", data)
-    if err != nil {
-      log.Fatal(err)
-    }
-    req.Header.Set("Authorization", "Basic base64(<CLIENT_ID>:<CLIENT_SECRET>)")
-    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-    resp, err := client.Do(req)
-    if err != nil {
-      log.Fatal(err)
-    }
-    defer resp.Body.Close()
-    bodyText, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-      log.Fatal(err)
-    }
-    fmt.Printf("%s", bodyText)
-}
-```
-
-> **Note:** This access token is only for the sandbox environment. When you're ready to go live, you'll need to grab the live access token. To do so, replace the request sandbox URL with: https://api-m.paypal.com/v1/oauth2/token.
-
-
-### 7. Use `CoreConfig` to create `PayPalWebCheckoutClient`
-
-Create a <code>CoreConfig</code> using the <code>ACCESS_TOKEN</code> you requested from the PayPal Developer Dashboard in step 6, "Initiate the PayPal Mobile SDK for Android". Set the return URL from the URL scheme you configured in the <code>ActivityManifest.xml</code> during step 5, "Configure your app to handle browser switching". Create a <code>PayPalClient</code> to approve an order with a PayPal payment method. Then set a listener on your <code>PayPalWebCheckoutClient</code> to handle the results.
-
-```kotlin
-val config = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)\n
-val returnUrl = "custom-url-scheme"\n
-val payPalWebCheckoutClient = PayPalWebCheckoutClient(requireActivity(), config, returnUrl)\n
-payPalWebCheckoutClient.listener = object : PayPalWebCheckoutListener {
-  override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-  // order was successfully approved and is ready to be captured/authorized (see step 8)
-  }
-  override fun onPayPalWebFailure(error: PayPalSDKError) {
-  // handle the error
-  }
-  override fun onPayPalWebCanceled() {
-  // the user canceled the flow
-  }
-}
-```
-
-
-### 8. Create an order
-
-When a buyer enters the payment flow, call the <a href="https://developer.paypal.com/docs/api/orders/v2">Orders v2 API</a> to create an order and obtain an order ID:
-
-**cURL**
-```bash
-curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/orders/' \\\n --header 'Content-Type: application/json' \\\n --header 'Authorization: Bearer <ACCESS_TOKEN>' \\\n --data-raw '{
-    "intent": "<CAPTURE|AUTHORIZE>",
-    "purchase_units": [
-        {
-            "amount": {
-                "currency_code": "USD",
-                "value": "5.00"
-            }
-        }
-    ]
-}'
-```
-
-**Ruby**
-```ruby
-require 'net/http'
-require 'uri'\n
-uri = URI.parse("https://api-m.sandbox.paypal.com/v2/checkout/orders/")
-request = Net::HTTP::Post.new(uri)
-request.content_type = "application/json"
-request["Authorization"] = "Bearer <ACCESS_TOKEN>"\n
-req_options = {
-  use_ssl: uri.scheme == "https",
-}\n
-response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http |
-    http.request(request)
-end\n
-# response.code
-# response.body
-```
-
-**Python**
-```python
-import requests\n
-headers = {
-  'Authorization': 'Bearer <ACCESS_TOKEN>',
-}\n
-json_data = {
-  'intent': '<CAPTURE|AUTHORIZE>',
-  'purchase_units': [{
-    'amount': {
-      'currency_code': 'USD',
-      'value': '5.00',
-      },
-    },
-  ],
-}\n
-response = requests.post('https://api-m.sandbox.paypal.com/v2/checkout/orders/', headers = headers, json = json_data)
-```
-
-**NodeJS (request)**
-```javascript
-var request = require('request');\n
-var headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer <ACCESS_TOKEN>'
-};\n
-var dataString = '{
-"intent": "<CAPTURE|AUTHORIZE>",
-"purchase_units": [
-    {
-      "amount": {
-        "currency_code": "USD",
-        "value": "5.00"
-      }
-    }
-  ]
-}';\n
-var options = {
-  url: 'https://api-m.sandbox.paypal.com/v2/checkout/orders/',
-  method: 'POST',
-  headers: headers,
-  body: dataString
-};\n
-function callback(error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body);
-  }
-}\n
-request(options, callback);'
-```
-
-**Java**
-```java
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;\n
-class Main {\n
-  public static void main(String[] args) throws IOException {
-    URL url = new URL("https://api-m.sandbox.paypal.com/v2/checkout/orders/");
-    HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-    httpConn.setRequestMethod("POST");
-    httpConn.setRequestProperty("Content-Type", "application/json");
-    httpConn.setRequestProperty("Authorization", "Bearer <ACCESS_TOKEN>");
-    httpConn.setDoOutput(true);
-    OutputStreamWriter writer = new OutputStreamWriter(httpConn.getOutputStream());
-    writer.write("{\n      \"intent\": \"<CAPTURE|AUTHORIZE>\",\n      \"purchase_units\": [\n          {\n              \"amount\": {\n                  \"currency_code\": \"USD\",\n                  \"value\": \"5.00\"\n              }\n          }\n      ]\n  }");
-    writer.flush();
-    writer.close();
-    httpConn.getOutputStream().close();
-    InputStream responseStream = httpConn.getResponseCode() / 100 == 2
-      ? httpConn.getInputStream()
-      : httpConn.getErrorStream();
-    Scanner s = new Scanner(responseStream).useDelimiter("\\A");
-    String response = s.hasNext() ? s.next() : "";
-    System.out.println(response);
-  }
-}
-```
-
-**Go**
-```javascript
-package main
-import(
-  "fmt"
-  "io/ioutil"
-  "log"
-  "net/http"
-  "strings"
-)
-func main() {
-    client: = &http.Client {}
-    var data = strings.NewReader(\`{
-      "intent": "<CAPTURE|AUTHORIZE>",
-      "purchase_units": [
-          {
-              "amount": {
-                  "currency_code": "USD",
-                  "value": "5.00"
-              }
-          }
-      ]
-  }\`)
-  req, err := http.NewRequest("POST", "https://api-m.sandbox.paypal.com/v2/checkout/orders/", data)
-  if err != nil {
-    log.Fatal(err)
-  }
-  req.Header.Set("Content-Type", "application/json")
-  req.Header.Set("Authorization", "Bearer <ACCESS_TOKEN>")
-  resp, err := client.Do(req)
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer resp.Body.Close()
-  bodyText, err := ioutil.ReadAll(resp.Body)
-  if err != nil {
-    log.Fatal(err)
-  }
-  fmt.Printf("%s", bodyText)
-}
-```
-
-The <code>id</code> field of the response passes the order ID to send to your client.
-
-    
-### 9. Create a request object for launching the PayPal flow
-
-Configure your <code>PayPalWebCheckoutRequest</code> and include the order ID generated in step 6, "Create an order":
-
-```kotlin
-val payPalWebCheckoutRequest = PayPalWebCheckoutRequest("<ORDER_ID>")
-```
-
-You can also specify the funding source for your order, either <code>PayPal</code> (default), <code>PayLater</code>, or <code>PayPalCredit</code>. For more information go to the <a href="https://developer.paypal.com/docs/checkout/pay-later/us/">Pay Later</a> page.
-
-When a buyer uses your application's UI to start a PayPal payment flow, the order is picked up by the listener that you created for `PayPalWebCheckoutClient` in step 5, "Use `CoreConfig` to create `CardClient`". Call `payPalClient.start(payPalWebCheckoutRequest)` to start the PayPal checkout web flow. When the buyer completes the PayPal payment flow, the result is returned to the `PayPalWebCheckoutClient` listener from step 5.
-
-### 10. Authorize and capture the order
-
-Once PayPal successfully returns your order, authorize and capture the order using the <a href="https://developer.paypal.com/docs/api/orders/v2/"><code>authorize</code> endpoint of the Orders V2 API</a>.
-
-> **Note:** If you've already completed the "Authorize and capture the order" step from the "Card fields" card payment integration, you can use the same endpoints.
-
-Call the <a href="https://developer.paypal.com/docs/api/orders/v2/#orders_authorize"> <code>authorize</code> endpoint of the Orders V2 API</a> to place funds on hold:
-
-**cURL**
-```bash
-curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \\\n --header 'Content-Type: application/json' \\\n --header 'Authorization: Bearer <ACCESS_TOKEN>' \\\n --data-raw ''
-```
-
-**Ruby**
-```ruby
-require 'net/http'
-require 'uri'\n
-uri = URI.parse("https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize")
-request = Net::HTTP::Post.new(uri)
-request.content_type = "application/json"
-request["Authorization"] = "Bearer <ACCESS_TOKEN>"\n
-req_options = {
-  use_ssl: uri.scheme == "https",
-}\n
-response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http |
-    http.request(request)
-end\n
-# response.code
-# response.body
-```
-
-**Python**
-```python
-import requests\n
-headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer <ACCESS_TOKEN>',
-}\n
-response = requests.post('https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize', headers = headers)
-```
-
-**NodeJS (request)**
-```javascript
-var request = require('request');\n
-var headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer <ACCESS_TOKEN>'
-};\n
-var options = {
-  url: 'https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize',
-  method: 'POST',
-  headers: headers
-};\n
-function callback(error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body);
-  }
-}\n
-request(options, callback);
-```
-
-**Java**
-```java
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;\n
-class Main {\n
-  public static void main(String[] args) throws IOException {
-    URL url = new URL("https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize");
-    HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-    httpConn.setRequestMethod("POST");
-    httpConn.setRequestProperty("Content-Type", "application/json");
-    httpConn.setRequestProperty("Authorization", "Bearer <ACCESS_TOKEN>");
-    InputStream responseStream = httpConn.getResponseCode() / 100 == 2
-      ? httpConn.getInputStream()
-      : httpConn.getErrorStream();
-    Scanner s = new Scanner(responseStream).useDelimiter("\\A");
-    String response = s.hasNext() ? s.next() : "";
-    System.out.println(response);
-  }
-}
-```
-
-**Go**
-```javascript
-package main
-import(
-  "fmt"
-  "io/ioutil"
-  "log"
-  "net/http"
-)
-func main() {
-  client: = &http.Client {}
-  req, err := http.NewRequest("POST", "https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize", nil)
-  if err != nil {
-    log.Fatal(err)
-  }
-  req.Header.Set("Content-Type", "application/json")
-  req.Header.Set("Authorization", "Bearer <ACCESS_TOKEN>")
-  resp, err := client.Do(req)
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer resp.Body.Close()
-  bodyText, err := ioutil.ReadAll(resp.Body)
-  if err != nil {
-    log.Fatal(err)
-  }
-  fmt.Printf("%s", bodyText)
-}
-```
-
-Call the <a href="https://developer.paypal.com/docs/api/orders/v2/#orders_capture"><code>capture</code> endpoint of the Orders V2 API</a> to capture funds immediately:
-
-**cURL**
-```kotlin
-curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture' \\\n --header 'Content-Type: application/json' \\\n --header 'Authorization: Bearer <ACCESS_TOKEN>' \\\n --data-raw ''
-```
-
-**Ruby**
-```ruby
-require 'net/http'
-require 'uri'\n
-uri = URI.parse("https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture")
-request = Net::HTTP::Post.new(uri)
-request.content_type = "application/json"
-request["Authorization"] = "Bearer <ACCESS_TOKEN>"\n
-req_options = {
-  use_ssl: uri.scheme == "https",
-}\n
-response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http |
-    http.request(request)
-end\n
-# response.code
-# response.body
-```
-
-**Python**
-```python
-import requests\n
-headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer <ACCESS_TOKEN>',
-}\n
-response = requests.post('https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture', headers = headers)
-```
-
-**NodeJS (request)**
-```javascript
-var request = require('request');\n
-var headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer <ACCESS_TOKEN>'
-};\n
-var options = {
-  url: 'https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture',
-  method: 'POST',
-  headers: headers
-};\n
-function callback(error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body);
-  }
-}\n
-request(options, callback);
-```
-
-**Java**
-```java
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Scanner;\n
-class Main {\n
-  public static void main(String[] args) throws IOException {
-    URL url = new URL("https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture");
-    HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-    httpConn.setRequestMethod("POST");
-    httpConn.setRequestProperty("Content-Type", "application/json");
-    httpConn.setRequestProperty("Authorization", "Bearer <ACCESS_TOKEN>");
-    InputStream responseStream = httpConn.getResponseCode() / 100 == 2
-      ? httpConn.getInputStream()
-      : httpConn.getErrorStream();
-    Scanner s = new Scanner(responseStream).useDelimiter("\\A");
-    String response = s.hasNext() ? s.next() : "";
-    System.out.println(response);
-  }
-}
-```
-
-**Go**
-```javascript
-package main
-import(
-  "fmt"
-  "io/ioutil"
-  "log"
-  "net/http"
-)
-func main() {
-  client: = &http.Client {}
-  req, err := http.NewRequest("POST", "https://api-m.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture", nil)
-  if err != nil {
-    log.Fatal(err)
-  }
-  req.Header.Set("Content-Type", "application/json")
-  req.Header.Set("Authorization", "Bearer <ACCESS_TOKEN>")
-  resp, err := client.Do(req)
-  if err != nil {
-    log.Fatal(err)
-  }
-  defer resp.Body.Close()
-  bodyText, err := ioutil.ReadAll(resp.Body)
-  if err != nil {
-    log.Fatal(err)
-  }
-  fmt.Printf("%s", bodyText)
-}
-```
-
-
-### 11. Test purchases
-
-To ensure that your PayPal Payments Standard payment buttons work correctly, PayPal recommends that you test them using the PayPal Sandbox before you place them on your live website.
-
-[Learn more about testing your PayPal buttons on your website](https://developer.paypal.com/api/nvp-soap/paypal-payments-standard/ht-test-pps-buttons/#link-testbuttonsonyourwebsite).
-
-When your tests are complete, log in to your [PayPal](https://www.paypal.com/?_ga=1.43245989.1625369690.1652045188) Business account and create the buttons for your website. For detailed instructions, see [Create a payment button](https://developer.paypal.com/api/nvp-soap/paypal-payments-standard/integration-guide/create-payment-button/).
-
-> **Tip:** If you process payments that require [Strong Customer Authentication](https://www.paypal.com/uk/webapps/mpp/psd2) (SCA), you'll need to provide additional context about the transaction with [payment indicators](https://developer.paypal.com/docs/checkout/advanced/customize/sca-payment-indicators/).
-
-### 12. Enable 3D Secure for your PayPal Wallet integration
-
-If you're based in Europe, you may need to comply with [The Second Payment Services Directive (PSD2)](https://www.paypal.com/uk/webapps/mpp/PSD2?_ga=1.18434873.1625369690.1652045188). PayPal recommends that you include 3D Secure as part of your integration and also pass the cardholder's billing address as part of the transaction processing.
-
-A seller needs to request Strong Consumer Authentication (SCA) for a <code>CardRequest</code> that requires buyers to provide additional authentication information using 3DS. To include SCA, add the following to <code>CardRequest</code>:
-
-```kotlin
-cardRequest.threeDSecureRequest = ThreeDSecureRequest(
-  sca = SCA.SCA_ALWAYS,
-  returnUrl = "myapp://return_url"
-  cancelUrl = "myapp://cancel_url"
-)
-```
-
-
-> **Important:** Notice the <code>myapp://</code> portion of the <code>returnUrl</code> and <code>cancelUrl</code> in the <code>ThreeDSecureRequest</code> code snippet. You also need to register the <code>myapp</code> custom URL scheme in your app's <code>AndroidManifest.xml</code>.
-
-In the PayPal sandbox, you can use test cards to simulate various scenarios to generate a 3DS response in the order details response.
-
-Get 3DS test cards on our [3D Secure test scenarios page](https://developer.paypal.com/docs/checkout/advanced/customize/3d-secure/test/).
-
-</ContentTab>
-</ContentTabs>
 
     
 ## Go live
