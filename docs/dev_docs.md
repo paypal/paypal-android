@@ -285,7 +285,7 @@ Use our list of [test numbers for various card brands](https://developer.paypal.
 
 
 </ContentTab>
-<ContentTab label="PayPal Wallet">
+<ContentTab label="PayPal Web Payments">
 
 **Tab: PayPal Web Payments**
 
@@ -448,7 +448,8 @@ curl --location --request POST 'https://api-m.sandbox.paypal.com/v2/checkout/ord
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw ''
 ```
-
+</ContentTab>
+<ContentTab label="PayPal UI">
     
 **Tab: PayPal UI**
 
@@ -498,6 +499,8 @@ payPalButton.setOnClickListener {
         // start the PayPal flow
 }
 ```
+</ContentTab>
+</ContentTabs>
 
 
     
