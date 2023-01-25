@@ -1,6 +1,6 @@
 package com.paypal.android.checkoutweb
 
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKError
 
 /**
  * Implement this callback to receive results from [PayPalWebCheckoutClient].

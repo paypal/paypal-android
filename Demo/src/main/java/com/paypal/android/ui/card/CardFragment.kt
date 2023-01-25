@@ -19,9 +19,9 @@ import com.paypal.android.card.CardClient
 import com.paypal.android.card.CardRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.threedsecure.SCA
-import com.paypal.android.core.Address
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.Address
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter

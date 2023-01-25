@@ -1,13 +1,13 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.api.CardAPI
-import com.paypal.android.core.API
-import com.paypal.android.core.APIRequest
-import com.paypal.android.core.HttpMethod
-import com.paypal.android.core.HttpResponse
-import com.paypal.android.core.OrderStatus
-import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.core.PaymentsJSON
+import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.APIRequest
+import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.corepayments.HttpResponse
+import com.paypal.android.corepayments.OrderStatus
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PaymentsJSON
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

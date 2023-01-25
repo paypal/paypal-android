@@ -2,7 +2,7 @@ package com.paypal.android.card.api
 
 import com.paypal.android.card.model.PaymentSource
 import com.paypal.android.card.model.PurchaseUnit
-import com.paypal.android.core.OrderStatus
+import com.paypal.android.corepayments.OrderStatus
 
 internal data class ConfirmPaymentSourceResponse(
     val orderID: String,

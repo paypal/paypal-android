@@ -32,8 +32,7 @@ android {
 }
 
 dependencies {
-    api project(':Core')
-
+    api project(':CorePayments')
     implementation deps.browserSwitch
 
     implementation deps.kotlinStdLib

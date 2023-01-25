@@ -5,7 +5,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.checkoutweb.errors.PayPalWebCheckoutError
-import com.paypal.android.core.CoreConfig
+import com.paypal.android.corepayments.CoreConfig
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].

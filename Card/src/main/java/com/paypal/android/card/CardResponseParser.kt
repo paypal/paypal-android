@@ -4,12 +4,12 @@ import com.paypal.android.card.api.ConfirmPaymentSourceResponse
 import com.paypal.android.card.api.GetOrderInfoResponse
 import com.paypal.android.card.model.PaymentSource
 import com.paypal.android.card.model.PurchaseUnit
-import com.paypal.android.core.APIClientError
-import com.paypal.android.core.HttpResponse
-import com.paypal.android.core.OrderErrorDetail
-import com.paypal.android.core.OrderStatus
-import com.paypal.android.core.PayPalSDKError
-import com.paypal.android.core.PaymentsJSON
+import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.HttpResponse
+import com.paypal.android.corepayments.OrderErrorDetail
+import com.paypal.android.corepayments.OrderStatus
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONException
 
 internal class CardResponseParser {

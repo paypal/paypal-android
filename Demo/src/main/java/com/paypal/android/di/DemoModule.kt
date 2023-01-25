@@ -1,7 +1,7 @@
 package com.paypal.android.di
 
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.Environment
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

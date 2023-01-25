@@ -3,8 +3,8 @@ package com.paypal.android.card.api
 import com.paypal.android.card.OrderIntent
 import com.paypal.android.card.model.PaymentSource
 import com.paypal.android.card.model.PurchaseUnit
-import com.paypal.android.core.OrderStatus
-import com.paypal.android.core.PaymentsJSON
+import com.paypal.android.corepayments.OrderStatus
+import com.paypal.android.corepayments.PaymentsJSON
 
 internal data class GetOrderInfoResponse(
     val orderId: String,

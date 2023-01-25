@@ -1,7 +1,7 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.threedsecure.SCA
-import com.paypal.android.core.Address
+import com.paypal.android.corepayments.Address
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Before
