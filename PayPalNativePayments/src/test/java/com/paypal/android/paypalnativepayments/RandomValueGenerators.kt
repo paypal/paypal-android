@@ -1,4 +1,4 @@
-package com.paypal.android.nativepayments
+package com.paypal.android.paypalnativepayments
 
 import java.util.UUID
 

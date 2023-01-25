@@ -1,4 +1,4 @@
-package com.paypal.android.nativepayments
+package com.paypal.android.paypalnativepayments
 
 import android.app.Application
 import com.paypal.android.corepayments.API

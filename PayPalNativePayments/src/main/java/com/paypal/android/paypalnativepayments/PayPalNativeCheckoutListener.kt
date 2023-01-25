@@ -1,4 +1,4 @@
-package com.paypal.android.nativepayments
+package com.paypal.android.paypalnativepayments
 
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.checkout.shipping.ShippingChangeActions
