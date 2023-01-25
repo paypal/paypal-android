@@ -1,9 +1,9 @@
-include ':Card'
+include ':CardPayments'
 include ':CorePayments'
 include ':Demo'
 rootProject.name = "AndroidSDK"
-include ':PayPalNativeCheckout'
+include ':PayPalNativePayments'
 include ':PayPalDataCollector'
-include ':PayPalWebCheckout'
+include ':PayPalWebPayments'
 include ':PaymentButtons'
 include ':Venmo'

@@ -153,9 +153,9 @@ detekt {
     config = files("detekt/detekt-config.yml")
     input = files(
             "CorePayments/src",
-            "Card/src",
-            "PayPalWebCheckout/src",
-            "PayPalNativeCheckout/src",
+            "CardPayments/src",
+            "PayPalWebPayments/src",
+            "PayPalNativePayments/src",
             "PayPalDataCollector/src",
             "Demo/src"
     )
