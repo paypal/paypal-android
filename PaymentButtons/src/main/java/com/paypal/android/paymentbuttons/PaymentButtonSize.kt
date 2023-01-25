@@ -1,6 +1,6 @@
 package com.paypal.android.paymentbuttons
 
-import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.nativepayments.paymentbutton.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
 /**

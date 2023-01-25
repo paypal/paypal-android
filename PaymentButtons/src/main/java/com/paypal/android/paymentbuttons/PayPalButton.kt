@@ -5,7 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
-import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.nativepayments.paymentbutton.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
 /**

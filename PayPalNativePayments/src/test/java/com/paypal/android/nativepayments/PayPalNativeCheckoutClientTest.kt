@@ -1,4 +1,4 @@
-package com.paypal.android.checkout
+package com.paypal.android.nativepayments
 
 import android.app.Application
 import com.paypal.android.corepayments.API
