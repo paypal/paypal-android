@@ -4,4 +4,4 @@
 - [PaymentButtons](PaymentButtons)
 - [PayPal Web Payments](PayPalWebPayments)
 - [PayPal Native Payments](PayPalNativePayments)
-- [PayPal Native Checkout with Billing Agreement](PayPalNativeCheckout/README.md#billing-agreement)
+- [PayPal Native Payments with Billing Agreement](PayPalNativePayments/README.md#billing-agreement)
