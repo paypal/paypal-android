@@ -1,6 +1,6 @@
-# Accepting PayPal Web Checkout Payments
+# Accepting PayPal Web Payments
 
-The PayPal Web Checkout module in the PayPal SDK enables PayPal payments in your browser launched from your app.
+The PayPal Web Payments module in the PayPal SDK enables PayPal payments in your browser launched from your app.
 
 Follow these steps to add PayPal Web Checkout payments:
 
@@ -16,18 +16,18 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 You will need a server integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
 For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
-## Add PayPal Web Checkout Module
+## Add PayPal Web Payments Module
 
 ### 1. Add the Payments SDK to your app
 
-![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/paypal-web-checkout?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/paypal-web-checkout?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/paypal-web-payments?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/paypal-web-payments?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
 
 
 In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-web-checkout:<CURRENT-VERSION>"
+   implementation "com.paypal.android:paypal-web-payments:<CURRENT-VERSION>"
 }
 ```
 
