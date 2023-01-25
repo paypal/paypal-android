@@ -17,13 +17,13 @@ This SDK is written in Kotlin and supports both Kotlin and Java integrations. Se
 
 ## Including the SDK
 You can support a specific payment method by adding its corresponding feature module as a dependency in your app's `build.gradle` file.
-For example, to support both CardPayments and PayPalWebCheckout payments in your app include the following dependencies with the current version:
+For example, to support both CardPayments and PayPalWebPayments in your app include the following dependencies with the current version:
 
 ![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card-payments?style=for-the-badge)
 ```groovy
 dependencies {
   implementation 'com.paypal.android:card-payments:<CURRENT-VERSION>'
-  implementation 'com.paypal.android:paypal-web-checkout:<CURRENT-VERSION>'
+  implementation 'com.paypal.android:paypal-web-payments:<CURRENT-VERSION>'
 }
 ```
 
@@ -95,8 +95,8 @@ Each feature module has its own onboarding guide:
 
 - [CardPayments](docs/CardPayments)
 - [PaymentButtons](docs/PaymentButtons)
-- [PayPal Web Checkout](docs/PayPalWebCheckout)
-- [PayPal Native Checkout](docs/PayPalNativeCheckout)
+- [PayPal Web Payments](docs/PayPalWebPayments)
+- [PayPal Native Payments](docs/PayPalNativePayments)
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.

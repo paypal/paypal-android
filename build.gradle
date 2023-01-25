@@ -154,8 +154,8 @@ detekt {
     input = files(
             "Core/src",
             "CardPayments/src",
-            "PayPalWebCheckout/src",
-            "PayPalNativeCheckout/src",
+            "PayPalWebPayments/src",
+            "PayPalNativePayments/src",
             "PayPalDataCollector/src",
             "Demo/src"
     )
