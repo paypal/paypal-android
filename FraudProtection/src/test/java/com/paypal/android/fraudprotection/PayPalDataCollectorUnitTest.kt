@@ -1,4 +1,4 @@
-package com.paypal.android.paypaldatacollector
+package com.paypal.android.fraudprotection
 
 import android.content.Context
 import android.util.Log

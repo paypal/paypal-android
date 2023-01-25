@@ -1,4 +1,4 @@
-package com.paypal.android.paypaldatacollector
+package com.paypal.android.fraudprotection
 
 import io.mockk.every
 import io.mockk.just

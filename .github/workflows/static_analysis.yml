@@ -56,9 +56,9 @@ jobs:
           name: main-aar
           path: |
             CorePayments/build/outputs/aar/CorePayments-release.aar
-            Card/build/outputs/aar/Card-release.aar
-            PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
-            PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
+            CardPayments/build/outputs/aar/CardPayments-release.aar
+            PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
+            PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
             PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
 
       # Assemble artifacts from current branch
@@ -90,12 +90,12 @@ jobs:
 
       # Run Diffuse analysis
       - name: Run Diffuse Analysis - CardPayments
-        run: diffuse diff --aar main-aar/Card/build/outputs/aar/Card-release.aar current-aar/CardPayments/build/outputs/aar/CardPayments-release.aar
+        run: diffuse diff --aar main-aar/CardPayments/build/outputs/aar/CardPayments-release.aar current-aar/CardPayments/build/outputs/aar/CardPayments-release.aar
       - name: Run Diffuse Analysis - CorePayments
         run: diffuse diff --aar main-aar/CorePayments/build/outputs/aar/CorePayments-release.aar current-aar/CorePayments/build/outputs/aar/CorePayments-release.aar
       - name: Run Diffuse Analysis - PayPalWebPayments
-        run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar current-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
+        run: diffuse diff --aar main-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar current-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
       - name: Run Diffuse Analysis - PayPalNativePayments
-        run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar current-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
+        run: diffuse diff --aar main-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar current-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
       - name: Run Diffuse Analysis - PaymentButtons
         run: diffuse diff --aar main-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar current-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar

@@ -61,7 +61,7 @@ android {
 
 dependencies {
     debugImplementation project(':CardPayments')
-    debugImplementation project(':PayPalDataCollector')
+    debugImplementation project(':FraudProtection')
     debugImplementation project(':PayPalNativePayments')
     debugImplementation project(':PayPalWebPayments')
     debugImplementation project(':PaymentButtons')
