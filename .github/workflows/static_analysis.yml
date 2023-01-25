@@ -60,6 +60,7 @@ jobs:
             PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
             PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
             PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
+            FraudProtection/build/outputs/aar/FraudProtection-release.aar
 
       # Assemble artifacts from current branch
       - name: Checkout Current Branch
@@ -76,6 +77,7 @@ jobs:
             PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
             PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
             PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
+            FraudProtection/build/outputs/aar/FraudProtection-release.aar
 
       # Set up Diffuse
       - name: Install Diffuse
@@ -99,3 +101,5 @@ jobs:
         run: diffuse diff --aar main-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar current-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
       - name: Run Diffuse Analysis - PaymentButtons
         run: diffuse diff --aar main-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar current-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
+      - name: Run Diffuse Analysis - FraudProtection
+        run: diffuse diff --aar main-aar/FraudProtection/build/outputs/aar/FraudProtection-release.aar current-aar/FraudProtection/build/outputs/aar/FraudProtection-release.aar
