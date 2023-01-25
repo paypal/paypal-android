@@ -36,8 +36,8 @@ dependencies {
     implementation deps.material
 }
 
-project.ext.name = "paypal-ui"
-project.ext.pom_name = "PayPal SDK - UI"
-project.ext.pom_desc = "Library for PayPal's UI components"
+project.ext.name = "payment-buttons"
+project.ext.pom_name = "PayPal SDK - Payment Buttons"
+project.ext.pom_desc = "Library for PayPal's payment buttons and UI components"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
