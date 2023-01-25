@@ -1,6 +1,7 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+* Rename `PayPalNativeCheckout` to `PayPalNativePayments`
 * Rename `PayPalWebCheckout` to `PayPalWebPayments`
 * Rename `Card` to `CardPayments`
 * Rename `PayPalUI` to `PaymentButtons`

@@ -64,8 +64,8 @@ dependencies {
     androidTestImplementation deps.androidxEspressoCore
 }
 
-project.ext.name = "paypal-native-checkout"
-project.ext.pom_name = "PayPal SDK - Native Checkout"
-project.ext.pom_desc = "Library for PayPal native checkout"
+project.ext.name = "paypal-native-payments"
+project.ext.pom_name = "PayPal SDK - Native Payments"
+project.ext.pom_desc = "Library for PayPal native payments"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
