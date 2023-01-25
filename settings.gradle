@@ -1,4 +1,4 @@
-include ':Card'
+include ':CardPayments'
 include ':CorePayments'
 include ':Demo'
 rootProject.name = "AndroidSDK"

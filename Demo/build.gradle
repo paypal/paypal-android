@@ -60,7 +60,7 @@ android {
 }
 
 dependencies {
-    debugImplementation project(':Card')
+    debugImplementation project(':CardPayments')
     debugImplementation project(':PayPalDataCollector')
     debugImplementation project(':PayPalNativeCheckout')
     debugImplementation project(':PayPalWebCheckout')
