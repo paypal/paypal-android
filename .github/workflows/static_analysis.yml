@@ -59,7 +59,7 @@ jobs:
             Card/build/outputs/aar/Card-release.aar
             PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
             PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
-            PayPalUI/build/outputs/aar/PayPalUI-release.aar
+            PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
 
       # Assemble artifacts from current branch
       - name: Checkout Current Branch
@@ -75,7 +75,7 @@ jobs:
             Card/build/outputs/aar/Card-release.aar
             PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
             PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
-            PayPalUI/build/outputs/aar/PayPalUI-release.aar
+            PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
 
       # Set up Diffuse
       - name: Install Diffuse
@@ -97,5 +97,5 @@ jobs:
         run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar current-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
       - name: Run Diffuse Analysis - PayPalNativeCheckout
         run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar current-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
-      - name: Run Diffuse Analysis - PayPalUI
-        run: diffuse diff --aar main-aar/PayPalUI/build/outputs/aar/PayPalUI-release.aar current-aar/PayPalUI/build/outputs/aar/PayPalUI-release.aar
+      - name: Run Diffuse Analysis - PaymentButtons
+        run: diffuse diff --aar main-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar current-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
