@@ -62,8 +62,8 @@ dependencies {
 
 }
 
-project.ext.name = "card"
-project.ext.pom_name = "PayPal SDK - Card"
-project.ext.pom_desc = "Library for PayPal card payment method"
+project.ext.name = "card-payments"
+project.ext.pom_name = "PayPal SDK - CardPayments"
+project.ext.pom_desc = "Library for PayPal card payment methods"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
