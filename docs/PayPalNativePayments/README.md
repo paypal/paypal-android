@@ -38,7 +38,7 @@ In order to integrate PayPal native payments, you will need:
 
 A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/) to create said url and also to learn about how to create a new PayPal application as well.
 
-### 3. Initiate PayPal native checkout
+### 3. Initiate PayPal Native checkout
 
 Create a `CoreConfig` using an [access token](../../README.md#access-token):
 

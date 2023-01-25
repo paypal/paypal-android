@@ -155,7 +155,7 @@ detekt {
             "Core/src",
             "CardPayments/src",
             "PayPalWebPayments/src",
-            "PayPalNativeCheckout/src",
+            "PayPalNativePayments/src",
             "PayPalDataCollector/src",
             "Demo/src"
     )
