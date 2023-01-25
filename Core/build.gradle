@@ -63,8 +63,8 @@ dependencies {
     androidTestImplementation deps.kotlinxAndroidCoroutinesTest
 }
 
-project.ext.name = "core"
-project.ext.pom_name = "PayPal SDK - Core"
-project.ext.pom_desc = "Core library for PayPal payment methods"
+project.ext.name = "core-payments"
+project.ext.pom_name = "PayPal SDK - CorePayments"
+project.ext.pom_desc = "CorePayments library for PayPal payment methods"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
