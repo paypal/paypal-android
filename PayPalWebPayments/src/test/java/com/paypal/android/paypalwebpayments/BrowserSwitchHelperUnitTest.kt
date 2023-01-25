@@ -1,4 +1,4 @@
-package com.paypal.android.webpayments
+package com.paypal.android.paypalwebpayments
 
 import android.net.Uri
 import com.paypal.android.corepayments.CoreConfig
