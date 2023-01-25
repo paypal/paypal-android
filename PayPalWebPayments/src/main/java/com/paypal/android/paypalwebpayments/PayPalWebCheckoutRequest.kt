@@ -1,4 +1,4 @@
-package com.paypal.android.webpayments
+package com.paypal.android.paypalwebpayments
 
 /**
  * Creates an instance of a PayPalRequest.

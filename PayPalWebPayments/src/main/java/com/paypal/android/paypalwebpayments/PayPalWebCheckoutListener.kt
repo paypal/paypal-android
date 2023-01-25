@@ -1,4 +1,4 @@
-package com.paypal.android.webpayments
+package com.paypal.android.paypalwebpayments
 
 import com.paypal.android.corepayments.PayPalSDKError
 
