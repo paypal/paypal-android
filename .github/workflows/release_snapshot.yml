@@ -54,7 +54,7 @@ jobs:
           module: CorePayments
 
   unit_test_card:
-    name: Card Unit Tests
+    name: CardPayments Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -67,7 +67,7 @@ jobs:
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
         with:
-          module: Card
+          module: CardPayments
   unit_test_paypal:
     name: PayPal Web Unit Tests
     runs-on: ubuntu-latest

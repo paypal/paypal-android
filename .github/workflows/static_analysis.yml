@@ -56,7 +56,7 @@ jobs:
           name: main-aar
           path: |
             CorePayments/build/outputs/aar/CorePayments-release.aar
-            Card/build/outputs/aar/Card-release.aar
+            CardPayments/build/outputs/aar/CardPayments-release.aar
             PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
             PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
             PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
@@ -72,7 +72,7 @@ jobs:
           name: current-aar
           path: |
             CorePayments/build/outputs/aar/CorePayments-release.aar
-            Card/build/outputs/aar/Card-release.aar
+            CardPayments/build/outputs/aar/CardPayments-release.aar
             PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar
             PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
             PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
@@ -89,8 +89,8 @@ jobs:
           java-version: '11'
 
       # Run Diffuse analysis
-      - name: Run Diffuse Analysis - Card
-        run: diffuse diff --aar main-aar/Card/build/outputs/aar/Card-release.aar current-aar/Card/build/outputs/aar/Card-release.aar
+      - name: Run Diffuse Analysis - CardPayments
+        run: diffuse diff --aar main-aar/CardPayments/build/outputs/aar/CardPayments-release.aar current-aar/CardPayments/build/outputs/aar/CardPayments-release.aar
       - name: Run Diffuse Analysis - CorePayments
         run: diffuse diff --aar main-aar/CorePayments/build/outputs/aar/CorePayments-release.aar current-aar/CorePayments/build/outputs/aar/CorePayments-release.aar
       - name: Run Diffuse Analysis - PayPalWebCheckout
