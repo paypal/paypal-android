@@ -64,7 +64,7 @@ dependencies {
     debugImplementation project(':PayPalDataCollector')
     debugImplementation project(':PayPalNativeCheckout')
     debugImplementation project(':PayPalWebCheckout')
-    debugImplementation project(':PayPalUI')
+    debugImplementation project(':PaymentButtons')
     debugImplementation project(':Venmo')
 
     releaseImplementation deps.card

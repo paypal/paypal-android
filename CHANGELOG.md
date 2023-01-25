@@ -1,6 +1,7 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+* Rename `PayPalUI` to `PaymentButtons`
 * Rename `Core` to `CorePayments`
 * `PayPalNativeCheckout`:
   * Fix `MagnesSDK` not found error

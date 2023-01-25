@@ -1,23 +1,23 @@
-# Pay using PayPal UI
+# Pay using Payment Buttons
 
-1. [Add PayPal UI](#add-paypal-ui)
+1. [Add Payment Buttons](#add-payment-buttons)
 
-## Add PayPal UI
+## Add Payment Buttons
 
-### 1. Add PayPalUI to your app
+### 1. Add PaymentButtons to your app
 
-![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/paypal-ui?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/paypal-ui?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/payment-buttons?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/payment-buttons?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
 
 In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-ui:<CURRENT-VERSION>"
+   implementation "com.paypal.android:payment-buttons:<CURRENT-VERSION>"
 }
 ```
 
 ### 2. Create a PayPal button
-The PayPalUI module allows you to render three buttons that can offer a set of customizations like color, edges, size and labels:
+The PaymentButtons module allows you to render three buttons that can offer a set of customizations like color, edges, size and labels:
 * `PayPalButton`: generic PayPal button
 * `PayLaterButton`: a PayPal button with a fixed PayLater label
 * `PayPalCreditButton`: a PayPal button with the PayPalCredit logo
@@ -25,7 +25,7 @@ The PayPalUI module allows you to render three buttons that can offer a set of c
 Add a `PayPalButton` to your layout XML:
 
 ```xml
-<com.paypal.android.ui.paymentbutton.PayPalButton
+<com.paypal.android.paymentbuttons.PayPalButton
     android:id="@+id/paypal_button"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />

@@ -10,15 +10,15 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.fragment.app.Fragment
 import com.paypal.android.databinding.FragmentPaypalButtonsStylingBinding
-import com.paypal.android.ui.paymentbutton.PayLaterButton
-import com.paypal.android.ui.paymentbutton.PayPalButton
-import com.paypal.android.ui.paymentbutton.PayPalButtonColor
-import com.paypal.android.ui.paymentbutton.PayPalButtonLabel
-import com.paypal.android.ui.paymentbutton.PayPalCreditButton
-import com.paypal.android.ui.paymentbutton.PayPalCreditButtonColor
-import com.paypal.android.ui.paymentbutton.PaymentButtonColor
-import com.paypal.android.ui.paymentbutton.PaymentButtonShape
-import com.paypal.android.ui.paymentbutton.PaymentButtonSize
+import com.paypal.android.paymentbuttons.PayLaterButton
+import com.paypal.android.paymentbuttons.PayPalButton
+import com.paypal.android.paymentbuttons.PayPalButtonColor
+import com.paypal.android.paymentbuttons.PayPalButtonLabel
+import com.paypal.android.paymentbuttons.PayPalCreditButton
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
+import com.paypal.android.paymentbuttons.PaymentButtonColor
+import com.paypal.android.paymentbuttons.PaymentButtonShape
+import com.paypal.android.paymentbuttons.PaymentButtonSize
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

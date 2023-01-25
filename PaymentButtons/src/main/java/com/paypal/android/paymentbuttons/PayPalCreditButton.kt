@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paymentbutton
+package com.paypal.android.paymentbuttons
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -6,8 +6,8 @@ import android.util.AttributeSet
 import androidx.core.content.res.use
 import com.paypal.android.checkout.paymentbutton.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
-import com.paypal.android.ui.paymentbutton.PayPalCreditButtonColor.BLACK
-import com.paypal.android.ui.paymentbutton.PayPalCreditButtonColor.DARK_BLUE
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.DARK_BLUE
 
 /**
  * PayPalCreditButton provides a PayPal Credit button with the ability to modify the [color], [shape],
