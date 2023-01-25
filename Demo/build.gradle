@@ -63,7 +63,7 @@ dependencies {
     debugImplementation project(':CardPayments')
     debugImplementation project(':PayPalDataCollector')
     debugImplementation project(':PayPalNativeCheckout')
-    debugImplementation project(':PayPalWebCheckout')
+    debugImplementation project(':PayPalWebPayments')
     debugImplementation project(':PaymentButtons')
     debugImplementation project(':Venmo')
 
