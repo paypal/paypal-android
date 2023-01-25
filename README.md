@@ -94,7 +94,7 @@ Use the value for `access_token` in the response to create an instance of `CoreC
 Each feature module has its own onboarding guide:
 
 - [Card](docs/Card)
-- [PayPalUI](docs/PayPalUI)
+- [PaymentButtons](docs/PaymentButtons)
 - [PayPal Web Checkout](docs/PayPalWebCheckout)
 - [PayPal Native Checkout](docs/PayPalNativeCheckout)
 
