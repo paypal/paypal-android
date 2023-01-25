@@ -1,4 +1,4 @@
-package com.paypal.android.checkout
+package com.paypal.android.paypalnativepayments
 import com.paypal.android.corepayments.Environment
 
 internal fun getPayPalEnvironment(environment: Environment) = when (environment) {

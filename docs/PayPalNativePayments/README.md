@@ -1,8 +1,8 @@
-# Accepting PayPal Native Checkout Payments
+# Accepting PayPal Native Payments
  
-The PayPal Native Checkout module in the PayPal SDK enables PayPal payments in your app
+The PayPal Native Payments module in the PayPal SDK enables PayPal payments in your app via the checkout flow.
 
-Follow these steps to add PayPal Native Checkout payments:
+Follow these steps to add PayPal Native payments:
 
 1. [Setup a PayPal Developer Account](#setup-a-paypal-developer-account)
 2. [Add PayPal Native Checkout Module](#add-paypal-native-checkout-module)
@@ -17,28 +17,28 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 The SDK requires a server-side integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
 The order created on your server will be used to authorize or capture funds. For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
 
-## Add PayPal Native Checkout Module
+## Add PayPal Native Payments Module
 
-### 1. Add the PayPal Native checkout module to your app
+### 1. Add the PayPal Native Payments module to your app
 
 In your `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:paypal-native-checkout:<CURRENT-VERSION>"
+   implementation "com.paypal.android:paypal-native-payments:<CURRENT-VERSION>"
 }
 ```
 
 ### 2. Sample App Preparation
 
-In order to integrate PayPalNative checkout, you will need:
+In order to integrate PayPal native payments, you will need:
 
 1. A PayPal client ID and corresponding secret. This is to generate an access token that will allow you to create payment tokens, capture funds and authorize customers to place orders.
 2. Setting a return URL.
 
 A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/) to create said url and also to learn about how to create a new PayPal application as well.
 
-### 3. Initiate PayPal Native Checkout
+### 3. Initiate PayPal Native checkout
 
 Create a `CoreConfig` using an [access token](../../README.md#access-token):
 
@@ -116,7 +116,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 The `id` field of the response contains the order ID to pass to your client.
 
-### 5. Start the PayPal Native Checkout flow
+### 5. Start the PayPal Native checkout flow
 
 To start the PayPal Native checkout flow, call the `startCheckout` function in `PayPalNativeCheckoutClient`, with the `CreateOrderCallback` and set the order ID from [step 4](#4-create-an-order) in `createOrderActions`:
 

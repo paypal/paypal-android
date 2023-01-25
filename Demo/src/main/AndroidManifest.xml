@@ -4,7 +4,7 @@
     package="com.paypal.android">
 
     <!-- We add this so that we can test on API 21, because NXO doesn't support below 23 (for now)  -->
-    <uses-sdk tools:overrideLibrary="com.paypal.android.checkout"/>
+    <uses-sdk tools:overrideLibrary="com.paypal.android.paypalnativepayments"/>
 
     <application
         android:allowBackup="true"
