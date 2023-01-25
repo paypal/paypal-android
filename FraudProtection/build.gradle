@@ -56,8 +56,8 @@ dependencies {
 }
 
 
-project.ext.name = "paypal-data-collector"
-project.ext.pom_name = "PayPal SDK - Data Collector"
-project.ext.pom_desc = "Library for PayPal's data collector"
+project.ext.name = "fraud-protection"
+project.ext.pom_name = "PayPal SDK - Fraud Protection"
+project.ext.pom_desc = "Library for PayPal's fraud protection"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")

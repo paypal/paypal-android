@@ -1,4 +1,4 @@
-package com.paypal.android.paypaldatacollector
+package com.paypal.android.fraudprotection
 
 /**
  * Enum to set the data collector environment

@@ -41,7 +41,7 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    implementation project(':PayPalDataCollector')
+    implementation project(':FraudProtection')
 
     api (deps.nativeCheckout) {
         exclude module: 'data-collector'
