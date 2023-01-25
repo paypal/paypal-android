@@ -1,4 +1,4 @@
-package com.paypal.android.checkoutweb
+package com.paypal.android.webpayments
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

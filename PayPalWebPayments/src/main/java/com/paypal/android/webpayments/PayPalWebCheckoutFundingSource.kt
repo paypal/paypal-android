@@ -1,4 +1,4 @@
-package com.paypal.android.checkoutweb
+package com.paypal.android.webpayments
 
 /**
  * Enum class to specify the type of funding for an order.

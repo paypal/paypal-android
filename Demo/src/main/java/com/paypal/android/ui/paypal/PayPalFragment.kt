@@ -11,11 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
-import com.paypal.android.checkoutweb.PayPalWebCheckoutClient
-import com.paypal.android.checkoutweb.PayPalWebCheckoutFundingSource
-import com.paypal.android.checkoutweb.PayPalWebCheckoutListener
-import com.paypal.android.checkoutweb.PayPalWebCheckoutRequest
-import com.paypal.android.checkoutweb.PayPalWebCheckoutResult
+import com.paypal.android.webpayments.PayPalWebCheckoutClient
+import com.paypal.android.webpayments.PayPalWebCheckoutFundingSource
+import com.paypal.android.webpayments.PayPalWebCheckoutListener
+import com.paypal.android.webpayments.PayPalWebCheckoutRequest
+import com.paypal.android.webpayments.PayPalWebCheckoutResult
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError

@@ -1,4 +1,4 @@
-package com.paypal.android.checkoutweb
+package com.paypal.android.webpayments
 
 import android.net.Uri
 import androidx.annotation.NonNull

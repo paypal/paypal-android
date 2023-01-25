@@ -1,4 +1,4 @@
-package com.paypal.android.checkoutweb.errors
+package com.paypal.android.webpayments.errors
 
 import com.paypal.android.corepayments.PayPalSDKError
 

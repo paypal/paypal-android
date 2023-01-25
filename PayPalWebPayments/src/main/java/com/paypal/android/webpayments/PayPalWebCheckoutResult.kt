@@ -1,4 +1,4 @@
-package com.paypal.android.checkoutweb
+package com.paypal.android.webpayments
 
 /**
  * A result passed to a [PayPalWebCheckoutListener] when the PayPal flow completes successfully.

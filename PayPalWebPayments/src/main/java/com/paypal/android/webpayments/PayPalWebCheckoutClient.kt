@@ -1,10 +1,10 @@
-package com.paypal.android.checkoutweb
+package com.paypal.android.webpayments
 
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.checkoutweb.errors.PayPalWebCheckoutError
+import com.paypal.android.webpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.corepayments.CoreConfig
 
 /**
