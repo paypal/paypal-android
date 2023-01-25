@@ -67,11 +67,11 @@ dependencies {
     debugImplementation project(':PaymentButtons')
     debugImplementation project(':Venmo')
 
-    releaseImplementation deps.card
-    releaseImplementation deps.paypalUI
-    releaseImplementation deps.paypalWebCheckout
-    releaseImplementation deps.paypalNativeCheckout
-    releaseImplementation deps.paypalDataCollector
+    releaseImplementation deps.cardPayments
+    releaseImplementation deps.paymentButtons
+    releaseImplementation deps.paypalWebPayments
+    releaseImplementation deps.paypalNativePayments
+    releaseImplementation deps.fraudProtection
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
