@@ -5,5 +5,5 @@ rootProject.name = "AndroidSDK"
 include ':PayPalNativeCheckout'
 include ':PayPalDataCollector'
 include ':PayPalWebCheckout'
-include ':PayPalUI'
+include ':PaymentButtons'
 include ':Venmo'
