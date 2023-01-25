@@ -1,6 +1,6 @@
 Welcome to the PayPal Android SDK. This library will help you accept Card, PayPal, and Venmo payments in your Android app.
 
-![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card-payments?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card-payments?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
 
 ## FAQ
 ### Availability
@@ -17,19 +17,19 @@ This SDK is written in Kotlin and supports both Kotlin and Java integrations. Se
 
 ## Including the SDK
 You can support a specific payment method by adding its corresponding feature module as a dependency in your app's `build.gradle` file.
-For example, to support both Card and PayPalWebCheckout payments in your app include the following dependencies with the current version:
+For example, to support both CardPayments and PayPalWebPayments in your app include the following dependencies with the current version:
 
-![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card?style=for-the-badge)
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card-payments?style=for-the-badge)
 ```groovy
 dependencies {
-  implementation 'com.paypal.android:card:<CURRENT-VERSION>'
-  implementation 'com.paypal.android:paypal-web-checkout:<CURRENT-VERSION>'
+  implementation 'com.paypal.android:card-payments:<CURRENT-VERSION>'
+  implementation 'com.paypal.android:paypal-web-payments:<CURRENT-VERSION>'
 }
 ```
 
 Snapshot builds of the latest SDK features are published from the `main` branch weekly. The snapshot builds can be used to test upcoming features before they have been released. To include a snapshot build, first add the repository to the top `build.gradle` file in your project.
 
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card-payments?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
 ```groovy
 repositories {
     maven {
@@ -42,7 +42,7 @@ Then, add the dependency:
 
 ```groovy
 dependencies {
-  implementation 'com.paypal.android:card:<CURRENT-VERSION>-SNAPSHOT'
+  implementation 'com.paypal.android:card-payments:<CURRENT-VERSION>-SNAPSHOT'
 }
 ```
 
@@ -93,10 +93,10 @@ Use the value for `access_token` in the response to create an instance of `CoreC
 
 Each feature module has its own onboarding guide:
 
-- [Card](docs/Card)
-- [PayPalUI](docs/PayPalUI)
-- [PayPal Web Checkout](docs/PayPalWebCheckout)
-- [PayPal Native Checkout](docs/PayPalNativeCheckout)
+- [CardPayments](docs/CardPayments)
+- [PaymentButtons](docs/PaymentButtons)
+- [PayPal Web Payments](docs/PayPalWebPayments)
+- [PayPal Native Payments](docs/PayPalNativePayments)
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.
@@ -133,7 +133,7 @@ To run code coverage analysis:
 ./gradlew jacocoTestReport
 ```
 
-The results are then generated in each module's respective `build/jacoco` folder (e.g. `Card/build/jacoco`).
+The results are then generated in each module's respective `build/jacoco` folder (e.g. `CardPayments/build/jacoco`).
 
 ## Contributing
 

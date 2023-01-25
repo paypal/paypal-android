@@ -2,6 +2,10 @@
 
 ## unreleased
 * Rename `PayPalDataCollector` to `FraudProtection`
+* Rename `PayPalNativeCheckout` to `PayPalNativePayments`
+* Rename `PayPalWebCheckout` to `PayPalWebPayments`
+* Rename `Card` to `CardPayments`
+* Rename `PayPalUI` to `PaymentButtons`
 * Rename `Core` to `CorePayments`
 * `PayPalNativeCheckout`:
   * Fix `MagnesSDK` not found error

@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.paypal.android.ui.paymentbutton.PayPalButton
+        <com.paypal.android.paymentbuttons.PayPalButton
             android:id="@+id/payPalButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.paypal.android.ui.paymentbutton.PayPalCreditButton
+        <com.paypal.android.paymentbuttons.PayPalCreditButton
             android:id="@+id/payPalCreditButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/payPalButton" />
-        <com.paypal.android.ui.paymentbutton.PayLaterButton
+        <com.paypal.android.paymentbuttons.PayLaterButton
             android:id="@+id/payPalPayLater"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

@@ -5,10 +5,10 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.checkout.PayPalNativeCheckoutError
-import com.paypal.android.checkout.PayPalNativeCheckoutListener
-import com.paypal.android.checkout.PayPalNativeCheckoutResult
-import com.paypal.android.checkout.PayPalNativeCheckoutClient
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.paypal.ShippingPreferenceType

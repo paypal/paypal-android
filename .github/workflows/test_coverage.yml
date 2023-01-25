@@ -27,8 +27,8 @@ jobs:
           curl -Os https://uploader.codecov.io/latest/macos/codecov
           chmod +x codecov
           ./codecov -f Core/build/jacoco/jacoco.xml -F core
-      - name: Upload Card coverage to Codecov
+      - name: Upload CardPayments coverage to Codecov
         run: |
           curl -Os https://uploader.codecov.io/latest/macos/codecov
           chmod +x codecov
-          ./codecov -f Card/build/jacoco/jacoco.xml -F card
+          ./codecov -f CardPayments/build/jacoco/jacoco.xml -F card

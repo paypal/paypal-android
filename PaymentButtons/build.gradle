@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
+        versionCode modules.sdkVersionCode
+        versionName modules.sdkVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            version = android.defaultConfig.versionName // had to add this to get the version in the build
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation deps.androidxCoreKtx
+    implementation deps.material
+}
+
+project.ext.name = "payment-buttons"
+project.ext.pom_name = "PayPal SDK - Payment Buttons"
+project.ext.pom_desc = "Library for PayPal's payment buttons and UI components"
+
+apply from: rootProject.file("gradle/gradle-publish.gradle")

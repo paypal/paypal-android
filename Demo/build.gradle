@@ -60,11 +60,11 @@ android {
 }
 
 dependencies {
-    debugImplementation project(':Card')
+    debugImplementation project(':CardPayments')
     debugImplementation project(':FraudProtection')
-    debugImplementation project(':PayPalNativeCheckout')
-    debugImplementation project(':PayPalWebCheckout')
-    debugImplementation project(':PayPalUI')
+    debugImplementation project(':PayPalNativePayments')
+    debugImplementation project(':PayPalWebPayments')
+    debugImplementation project(':PaymentButtons')
     debugImplementation project(':Venmo')
 
     releaseImplementation deps.card
