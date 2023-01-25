@@ -65,8 +65,8 @@ jobs:
         uses: ./.github/actions/unit_test_module
         with:
           module: CardPayments
-  unit_test_paypal:
-    name: PayPal Web Unit Tests
+  unit_test_paypal_web:
+    name: PayPal Web Payments Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -79,7 +79,7 @@ jobs:
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
         with:
-          module: PayPalWebCheckout
+          module: PayPalWebPayments
   unit_test_paypal_native:
     name: PayPal Native Unit Tests
     runs-on: ubuntu-latest
@@ -97,7 +97,7 @@ jobs:
           module: PayPalNativeCheckout
 
   unit_test_finished:
-    needs: [unit_test_card, unit_test_core, unit_test_paypal, unit_test_paypal_native]
+    needs: [unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_paypal_native]
     name: All Unit Test finished
     runs-on: ubuntu-latest
     steps:

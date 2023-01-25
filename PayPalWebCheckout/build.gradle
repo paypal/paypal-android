@@ -51,8 +51,8 @@ dependencies {
     androidTestImplementation deps.androidxEspressoCore
 }
 
-project.ext.name = "paypal-web-checkout"
-project.ext.pom_name = "PayPal SDK - Web Checkout"
-project.ext.pom_desc = "Library for PayPal web checkout"
+project.ext.name = "paypal-web-payments"
+project.ext.pom_name = "PayPal SDK - Web Payments"
+project.ext.pom_desc = "Library for PayPal web payments"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
