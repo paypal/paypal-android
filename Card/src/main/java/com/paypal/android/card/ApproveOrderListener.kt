@@ -2,7 +2,7 @@ package com.paypal.android.card
 
 import androidx.annotation.MainThread
 import com.paypal.android.card.model.CardResult
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKError
 
 /**
  * Implement this callback to receive results from [CardClient].

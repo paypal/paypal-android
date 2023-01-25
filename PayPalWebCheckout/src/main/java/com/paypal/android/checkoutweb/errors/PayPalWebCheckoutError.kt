@@ -1,6 +1,6 @@
 package com.paypal.android.checkoutweb.errors
 
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKError
 
 internal object PayPalWebCheckoutError {
 

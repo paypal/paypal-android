@@ -1,5 +1,5 @@
 package com.paypal.android.checkout
-import com.paypal.android.core.Environment
+import com.paypal.android.corepayments.Environment
 
 internal fun getPayPalEnvironment(environment: Environment) = when (environment) {
     Environment.LIVE -> com.paypal.checkout.config.Environment.LIVE

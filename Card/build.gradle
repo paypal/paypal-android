@@ -40,8 +40,7 @@ android {
 }
 
 dependencies {
-    api project(':Core')
-
+    api project(':CorePayments')
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat

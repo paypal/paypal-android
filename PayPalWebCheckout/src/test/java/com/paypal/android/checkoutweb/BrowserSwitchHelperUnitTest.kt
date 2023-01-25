@@ -1,8 +1,8 @@
 package com.paypal.android.checkoutweb
 
 import android.net.Uri
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.Environment
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test

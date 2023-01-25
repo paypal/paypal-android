@@ -9,8 +9,8 @@ import com.paypal.android.checkout.PayPalNativeCheckoutError
 import com.paypal.android.checkout.PayPalNativeCheckoutListener
 import com.paypal.android.checkout.PayPalNativeCheckoutResult
 import com.paypal.android.checkout.PayPalNativeCheckoutClient
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase

@@ -1,6 +1,6 @@
 package com.paypal.android.checkout
 
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.checkout.error.ErrorInfo
 
 class PayPalNativeCheckoutError(

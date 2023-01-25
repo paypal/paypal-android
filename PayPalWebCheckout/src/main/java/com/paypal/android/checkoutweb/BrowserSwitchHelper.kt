@@ -2,8 +2,8 @@ package com.paypal.android.checkoutweb
 
 import android.net.Uri
 import androidx.annotation.NonNull
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.Environment
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.braintreepayments.api.BrowserSwitchOptions
 import org.json.JSONObject
 

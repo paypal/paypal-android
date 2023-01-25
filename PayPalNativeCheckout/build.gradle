@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    api project(':Core')
+    api project(':CorePayments')
     implementation project(':PayPalDataCollector')
 
     api (deps.nativeCheckout) {

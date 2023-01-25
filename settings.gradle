@@ -1,5 +1,5 @@
 include ':Card'
-include ':Core'
+include ':CorePayments'
 include ':Demo'
 rootProject.name = "AndroidSDK"
 include ':PayPalNativeCheckout'

@@ -35,7 +35,7 @@ jobs:
 
   #Once building is finished, we unit test every module in parallel
   unit_test_core:
-    name: Core Unit Tests
+    name: CorePayments Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -48,7 +48,7 @@ jobs:
       - name: Run Unit Tests
         uses: ./.github/actions/unit_test_module
         with:
-          module: Card
+          module: CorePayments
 
   unit_test_card:
     name: Card Unit Tests

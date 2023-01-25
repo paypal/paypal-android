@@ -9,9 +9,9 @@ import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.card.api.CardAPI
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
-import com.paypal.android.core.API
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

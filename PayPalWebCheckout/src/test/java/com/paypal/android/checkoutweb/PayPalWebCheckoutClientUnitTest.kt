@@ -7,8 +7,8 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk

@@ -1,6 +1,7 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+* Rename `Core` to `CorePayments`
 * `PayPalNativeCheckout`:
   * Fix `MagnesSDK` not found error
   * Bump NXO to 0.8.7

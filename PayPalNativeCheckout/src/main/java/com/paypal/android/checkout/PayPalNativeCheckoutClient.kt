@@ -1,9 +1,9 @@
 package com.paypal.android.checkout
 
 import android.app.Application
-import com.paypal.android.core.API
-import com.paypal.android.core.CoreConfig
-import com.paypal.android.core.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel

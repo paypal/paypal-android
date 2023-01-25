@@ -1,8 +1,8 @@
 package com.paypal.android.card
 
 import com.paypal.android.card.api.GetOrderRequest
-import com.paypal.android.core.APIRequest
-import com.paypal.android.core.HttpMethod
+import com.paypal.android.corepayments.APIRequest
+import com.paypal.android.corepayments.HttpMethod
 import org.json.JSONObject
 
 internal class CardRequestFactory {

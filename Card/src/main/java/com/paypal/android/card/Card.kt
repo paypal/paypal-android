@@ -1,6 +1,6 @@
 package com.paypal.android.card
 
-import com.paypal.android.core.Address
+import com.paypal.android.corepayments.Address
 
 /**
  * Initialize a card object

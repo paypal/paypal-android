@@ -1,7 +1,7 @@
 package com.paypal.android.card.model
 
 import android.net.Uri
-import com.paypal.android.core.OrderStatus
+import com.paypal.android.corepayments.OrderStatus
 
 /**
  * A result returned by [CardClient] when an order was successfully approved with a [Card].

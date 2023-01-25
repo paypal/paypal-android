@@ -13,8 +13,8 @@ import com.paypal.android.card.api.GetOrderInfoResponse
 import com.paypal.android.card.api.GetOrderRequest
 import com.paypal.android.card.model.CardResult
 import com.paypal.android.card.model.PaymentSource
-import com.paypal.android.core.OrderStatus
-import com.paypal.android.core.PayPalSDKError
+import com.paypal.android.corepayments.OrderStatus
+import com.paypal.android.corepayments.PayPalSDKError
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

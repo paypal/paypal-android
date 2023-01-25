@@ -1,6 +1,6 @@
 package com.paypal.android.card.threedsecure
 
-import com.paypal.android.core.PaymentsJSON
+import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
 data class ThreeDSecureResult(
