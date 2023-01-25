@@ -94,7 +94,7 @@ jobs:
       - name: Run Diffuse Analysis - CorePayments
         run: diffuse diff --aar main-aar/Core/build/outputs/aar/Core-release.aar current-aar/CorePayments/build/outputs/aar/CorePayments-release.aar
       - name: Run Diffuse Analysis - PayPalWebPayments
-        run: diffuse diff --aar main-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar current-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
+        run: diffuse diff --aar main-aar/PayPalWebCheckout/build/outputs/aar/PayPalWebCheckout-release.aar current-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
       - name: Run Diffuse Analysis - PayPalNativeCheckout
         run: diffuse diff --aar main-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar current-aar/PayPalNativeCheckout/build/outputs/aar/PayPalNativeCheckout-release.aar
       - name: Run Diffuse Analysis - PaymentButtons
