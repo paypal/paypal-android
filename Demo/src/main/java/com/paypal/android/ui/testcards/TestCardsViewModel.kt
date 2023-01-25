@@ -1,7 +1,7 @@
 package com.paypal.android.ui.testcards
 
 import androidx.lifecycle.ViewModel
-import com.paypal.android.card.Card
+import com.paypal.android.cardpayments.Card
 import com.paypal.android.data.card.TestCard
 import com.paypal.android.data.card.TestCardGroup
 
