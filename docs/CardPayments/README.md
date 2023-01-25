@@ -1,6 +1,6 @@
 # Accepting Card Payments
 
-The Card module in the PayPal SDK enables Credit and Debit card payments in your app.
+The CardPayments module in the PayPal SDK enables Credit and Debit card payments in your app.
 
 Follow these steps to add Card payments:
 
@@ -16,17 +16,17 @@ Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-ge
 You will need a server integration to create an order and capture funds using [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2). 
 For initial setup, the `curl` commands below can be used in place of a server SDK.
 
-## Add Card Module
+## Add CardPayments Module
 
 ### 1. Add the Payments SDK Card module to your app
 
-![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/card-payments?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/card-payments?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
 
 In your app's `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
-   implementation "com.paypal.android:card:<CURRENT-VERSION>"
+   implementation "com.paypal.android:card-payments:<CURRENT-VERSION>"
 }
 ```
 
