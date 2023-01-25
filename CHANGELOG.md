@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 0.0.7 (2023-01-25)
 * Rename `PayPalDataCollector` to `FraudProtection`
 * Rename `PayPalNativeCheckout` to `PayPalNativePayments`
 * Rename `PayPalWebCheckout` to `PayPalWebPayments`
