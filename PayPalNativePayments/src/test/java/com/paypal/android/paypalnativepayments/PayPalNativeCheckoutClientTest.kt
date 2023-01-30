@@ -44,6 +44,7 @@ class PayPalNativeCheckoutClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
+    private val mockReturnUrl = "mock_return_url"
 
     private val api = mockk<API>(relaxed = true)
 
@@ -72,7 +73,7 @@ class PayPalNativeCheckoutClientTest {
         } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.startCheckout(mockk())
+        sut.startCheckout(mockReturnUrl, mockk())
         advanceUntilIdle()
 
         verify {
@@ -86,6 +87,35 @@ class PayPalNativeCheckoutClientTest {
     }
 
     @Test
+    fun `when startCheckout is invoked with an invalid return_url, onPayPalCheckout failure is called`() = runTest {
+        every { PayPalCheckout.setConfig(any()) } throws IllegalArgumentException(CheckoutConfig.INVALID_RETURN_URL)
+        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
+        val errorSlot = slot<PayPalSDKError>()
+        every {
+            payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
+        } answers { errorSlot.captured }
+
+        every {
+            PayPalCheckout.startCheckout(any())
+        } just runs
+
+        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+        sut.listener = payPalCheckoutListener
+
+        sut.startCheckout(mockReturnUrl, mockk())
+        advanceUntilIdle()
+
+        verify {
+            payPalCheckoutListener.onPayPalCheckoutFailure(any())
+        }
+
+        expectThat(errorSlot.captured) {
+            get { code }.isEqualTo(0)
+            get { errorDescription }.isEqualTo(CheckoutConfig.INVALID_RETURN_URL)
+        }
+    }
+
+    @Test
     fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runTest {
         val payPalCheckoutListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         every { PayPalCheckout.startCheckout(any()) } just runs
@@ -93,7 +123,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
-        sut.startCheckout(mockk(relaxed = true))
+        sut.startCheckout(mockReturnUrl, mockk(relaxed = true))
         advanceUntilIdle()
 
         verify {
@@ -117,7 +147,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
 
-        sut.startCheckout(mockk(relaxed = true))
+        sut.startCheckout(mockReturnUrl, mockk(relaxed = true))
         advanceUntilIdle()
 
         verify {
@@ -140,7 +170,7 @@ class PayPalNativeCheckoutClientTest {
             } just runs
 
             sut = getPayPalCheckoutClient(CoreConfig(environment = Environment.LIVE), testScheduler)
-            sut.startCheckout(mockk())
+            sut.startCheckout(mockReturnUrl, mockk())
             advanceUntilIdle()
 
             verify {
@@ -164,7 +194,7 @@ class PayPalNativeCheckoutClientTest {
             } just runs
 
             sut = getPayPalCheckoutClient(CoreConfig(environment = Environment.STAGING), testScheduler)
-            sut.startCheckout(mockk())
+            sut.startCheckout(mockReturnUrl, mockk())
             advanceUntilIdle()
 
             verify {
@@ -185,7 +215,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        sut.startCheckout(createOrder)
+        sut.startCheckout(mockReturnUrl, createOrder)
         advanceUntilIdle()
 
         verify {

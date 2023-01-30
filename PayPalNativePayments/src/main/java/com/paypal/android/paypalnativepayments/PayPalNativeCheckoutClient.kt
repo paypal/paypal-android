@@ -47,9 +47,14 @@ class PayPalNativeCheckoutClient internal constructor (
     /**
      * Initiate a PayPal checkout for an order.
      *
+     * @param returnUrl This is the Return URL value that was added to your app in the
+     * PayPal Developer Portal. Please ensure that this value is set in the PayPal Developer Portal,
+     * as it is required for a successful checkout flow. The Return URL should contain your app's
+     * package name appended with "://paypalpay". Example: "com.sample.example://paypalpay".
+     * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
      * @param createOrder the id of the order
      */
-    fun startCheckout(createOrder: CreateOrder) {
+    fun startCheckout(returnUrl: String, createOrder: CreateOrder) {
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             val config = CheckoutConfig(
                 application = application,
@@ -57,7 +62,8 @@ class PayPalNativeCheckoutClient internal constructor (
                 environment = getPayPalEnvironment(coreConfig.environment),
                 uiConfig = UIConfig(
                     showExitSurveyDialog = false
-                )
+                ),
+                returnUrl = returnUrl
             )
             PayPalCheckout.setConfig(config)
             listener?.onPayPalCheckoutStart()
