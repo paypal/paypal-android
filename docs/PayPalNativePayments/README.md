@@ -36,7 +36,7 @@ In order to integrate PayPal native payments, you will need:
 1. A PayPal client ID and corresponding secret. This is to generate an access token that will allow you to create payment tokens, capture funds and authorize customers to place orders.
 2. Setting a return URL.
 
-A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/) to create said url and also to learn about how to create a new PayPal application as well.
+A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/limited-release/paypal-mobile-checkout/android/#link-enablethesdk) to create said url and also to learn about how to create a new PayPal application as well.
 
 ### 3. Initiate PayPal Native checkout
 
