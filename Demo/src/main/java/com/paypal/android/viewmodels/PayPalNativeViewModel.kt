@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.BuildConfig
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
@@ -156,7 +157,8 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     private fun startCheckoutFlow(createOrder: CreateOrder) {
-        payPalClient.startCheckout(createOrder)
+        val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
+        payPalClient.startCheckout(returnUrl, createOrder)
     }
 
     private fun initPayPalClient(accessToken: String) {
