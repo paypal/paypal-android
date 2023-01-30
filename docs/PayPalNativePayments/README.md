@@ -46,18 +46,19 @@ Create a `CoreConfig` using an [access token](../../README.md#access-token):
 val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 ```
 
-Create a `PayPalClient`:
+Create a `PayPalNativeCheckoutClient` with your `RETURN_URL` created above::
 ```kotlin
-val payPalClient = PayPalNativeCheckoutClient(
+val payPalNativeClient = PayPalNativeCheckoutClient(
    application = requireActvitiy().application,
-   coreConfig = coreConfig
+   coreConfig = coreConfig,
+   returnUrl = "<RETURN_URL>" 
 )
 ```
 
 Set a listener on the client to receive payment flow callbacks:
 
 ```kotlin
-payPalClient.listener = object : PayPalNativeCheckoutListener {
+payPalNativeClient.listener = object : PayPalNativeCheckoutListener {
 
     override fun onPayPalCheckoutStart() {
         // the PayPal paysheet is about to appear

@@ -157,14 +157,14 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     private fun startCheckoutFlow(createOrder: CreateOrder) {
-        val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
-        payPalClient.startCheckout(returnUrl, createOrder)
+        payPalClient.startCheckout(createOrder)
     }
 
     private fun initPayPalClient(accessToken: String) {
         payPalClient = PayPalNativeCheckoutClient(
             getApplication(),
-            CoreConfig(accessToken)
+            CoreConfig(accessToken),
+            "${BuildConfig.APPLICATION_ID}://paypalpay"
         )
         payPalClient.listener = payPalListener
     }

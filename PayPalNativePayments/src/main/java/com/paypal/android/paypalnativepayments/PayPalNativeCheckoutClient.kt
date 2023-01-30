@@ -23,12 +23,13 @@ import kotlinx.coroutines.launch
 class PayPalNativeCheckoutClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
+    private val returnUrl: String,
     private val api: API,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
-    constructor(application: Application, coreConfig: CoreConfig) :
-            this(application, coreConfig, API(coreConfig, application))
+    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
+            this(application, coreConfig, returnUrl, API(coreConfig, application))
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
@@ -54,7 +55,7 @@ class PayPalNativeCheckoutClient internal constructor (
      * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
      * @param createOrder the id of the order
      */
-    fun startCheckout(returnUrl: String, createOrder: CreateOrder) {
+    fun startCheckout(createOrder: CreateOrder) {
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             val config = CheckoutConfig(
                 application = application,

@@ -73,7 +73,7 @@ class PayPalNativeCheckoutClientTest {
         } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.startCheckout(mockReturnUrl, mockk())
+        sut.startCheckout(mockk())
         advanceUntilIdle()
 
         verify {
@@ -102,7 +102,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
 
-        sut.startCheckout(mockReturnUrl, mockk())
+        sut.startCheckout(mockk())
         advanceUntilIdle()
 
         verify {
@@ -123,7 +123,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
-        sut.startCheckout(mockReturnUrl, mockk(relaxed = true))
+        sut.startCheckout(mockk(relaxed = true))
         advanceUntilIdle()
 
         verify {
@@ -147,7 +147,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
 
-        sut.startCheckout(mockReturnUrl, mockk(relaxed = true))
+        sut.startCheckout(mockk(relaxed = true))
         advanceUntilIdle()
 
         verify {
@@ -170,7 +170,7 @@ class PayPalNativeCheckoutClientTest {
             } just runs
 
             sut = getPayPalCheckoutClient(CoreConfig(environment = Environment.LIVE), testScheduler)
-            sut.startCheckout(mockReturnUrl, mockk())
+            sut.startCheckout(mockk())
             advanceUntilIdle()
 
             verify {
@@ -194,7 +194,7 @@ class PayPalNativeCheckoutClientTest {
             } just runs
 
             sut = getPayPalCheckoutClient(CoreConfig(environment = Environment.STAGING), testScheduler)
-            sut.startCheckout(mockReturnUrl, mockk())
+            sut.startCheckout(mockk())
             advanceUntilIdle()
 
             verify {
@@ -215,7 +215,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        sut.startCheckout(mockReturnUrl, createOrder)
+        sut.startCheckout(createOrder)
         advanceUntilIdle()
 
         verify {
@@ -372,7 +372,7 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, api, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
+            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
     }
 }
