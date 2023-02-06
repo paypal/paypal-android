@@ -53,7 +53,7 @@ class PayPalNativeCheckoutClient internal constructor (
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             val config = CheckoutConfig(
                 application = application,
-                clientId = api.getClientId(),
+                clientId = api.fetchCachedOrRemoteClientID(),
                 environment = getPayPalEnvironment(coreConfig.environment),
                 uiConfig = UIConfig(
                     showExitSurveyDialog = false

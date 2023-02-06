@@ -36,8 +36,12 @@ class API internal constructor(
         return http.send(httpRequest)
     }
 
+    /**
+     * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
+     * @return Merchant clientID.
+     */
     @Throws(PayPalSDKError::class)
-    suspend fun getClientId(): String {
+    suspend fun fetchCachedOrRemoteClientID(): String {
         configuration.accessToken?.let { accessToken ->
             clientIDCache.get(accessToken)?.let { cachedClientID ->
                 return cachedClientID
@@ -75,7 +79,7 @@ class API internal constructor(
 
     suspend fun sendAnalyticsEvent(name: String) {
         try {
-            val clientID = getClientId()
+            val clientID = fetchCachedOrRemoteClientID()
             analyticsService.sendAnalyticsEvent(name, clientID)
         } catch (e: Exception) {
             Log.d("[PayPal SDK]", "Failed to send analytics due to missing clientID: ${e.message}")

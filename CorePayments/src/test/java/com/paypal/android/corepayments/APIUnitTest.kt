@@ -52,7 +52,7 @@ class APIUnitTest {
     }
 
     @Test
-    fun `converts an api request to an http request and sends it`() = runTest {
+    fun `send() converts an api request to an http request and sends it`() = runTest {
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         } returns httpRequest
@@ -65,7 +65,7 @@ class APIUnitTest {
     }
 
     @Test
-    fun `get client id sends oauth api request when value not in cache`() = runTest {
+    fun `fetchCachedOrRemoteClientID() sends oauth api request when value not in cache`() = runTest {
         val apiRequestSlot = slot<APIRequest>()
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(
@@ -76,7 +76,7 @@ class APIUnitTest {
 
         coEvery { http.send(httpRequest) } returns clientIdSuccessResponse
 
-        sut.getClientId()
+        sut.fetchCachedOrRemoteClientID()
 
         val apiRequest = apiRequestSlot.captured
         assertEquals(HttpMethod.GET, apiRequest.method)
@@ -84,7 +84,7 @@ class APIUnitTest {
     }
 
     @Test
-    fun `get client id puts value in cache after fetched`() = runTest {
+    fun `fetchCachedOrRemoteClientID() puts value in cache after fetched`() = runTest {
         val apiRequestSlot = slot<APIRequest>()
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(
@@ -95,33 +95,33 @@ class APIUnitTest {
 
         coEvery { http.send(httpRequest) } returns clientIdSuccessResponse
 
-        sut.getClientId()
+        sut.fetchCachedOrRemoteClientID()
 
         assertEquals(API.clientIDCache.get("fake-access-token"), "sample-client-id")
     }
 
     @Test
-    fun `get client id returns cached value when exists in cache`() = runTest {
+    fun `fetchCachedOrRemoteClientID() returns cached value when exists in cache`() = runTest {
         API.clientIDCache.put("fake-access-token", "cached-id-123")
 
-        val clientID = sut.getClientId()
+        val clientID = sut.fetchCachedOrRemoteClientID()
         assertEquals(clientID, "cached-id-123")
     }
 
     @Test
-    fun `get client id returns client id from JSON`() = runTest {
+    fun `fetchCachedOrRemoteClientID() returns client id from JSON`() = runTest {
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(any(), any())
         } returns httpRequest
 
         coEvery { http.send(httpRequest) } returns clientIdSuccessResponse
 
-        val result = sut.getClientId()
+        val result = sut.fetchCachedOrRemoteClientID()
         assertEquals("sample-client-id", result)
     }
 
     @Test
-    fun `get client id throws no response data error when http response has no body`() =
+    fun `fetchCachedOrRemoteClientID() throws no response data error when http response has no body`() =
         runTest {
 
             every {
@@ -133,7 +133,7 @@ class APIUnitTest {
 
             var capturedError: PayPalSDKError? = null
             try {
-                sut.getClientId()
+                sut.fetchCachedOrRemoteClientID()
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -142,7 +142,7 @@ class APIUnitTest {
         }
 
     @Test
-    fun `get client id throws data parsing error when http response is missing client id`() =
+    fun `fetchCachedOrRemoteClientID() throws data parsing error when http response is missing client id`() =
         runTest {
 
             every {
@@ -155,7 +155,7 @@ class APIUnitTest {
 
             var capturedError: PayPalSDKError? = null
             try {
-                sut.getClientId()
+                sut.fetchCachedOrRemoteClientID()
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -164,7 +164,7 @@ class APIUnitTest {
         }
 
     @Test
-    fun `get client id throws server response error when http response is unsuccessful`() =
+    fun `fetchCachedOrRemoteClientID() throws server response error when http response is unsuccessful`() =
         runTest {
 
             every {
@@ -176,7 +176,7 @@ class APIUnitTest {
 
             var capturedError: PayPalSDKError? = null
             try {
-                sut.getClientId()
+                sut.fetchCachedOrRemoteClientID()
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -185,7 +185,7 @@ class APIUnitTest {
         }
 
     @Test
-    fun `send analytics event delegates it to analytics client`() = runTest {
+    fun `sendAnalyticsEvent() event delegates it to analytics client`() = runTest {
         coEvery {
             analyticsService.sendAnalyticsEvent(
                 "sample.event.name",
