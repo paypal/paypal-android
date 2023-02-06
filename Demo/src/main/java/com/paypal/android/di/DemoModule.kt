@@ -13,6 +13,7 @@ object DemoModule {
 
     @Provides
     fun provideCoreConfig(): CoreConfig = CoreConfig(
+        "demo-access-token",
         environment = Environment.SANDBOX
     )
 }

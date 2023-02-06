@@ -28,7 +28,7 @@ class APIUnitTest {
     private val analyticsService = mockk<AnalyticsService>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
-    private val configuration = CoreConfig()
+    private val configuration = CoreConfig("fake-access-token")
 
     private val httpResponseHeaders = mapOf(
         "Paypal-Debug-Id" to "sample-correlation-id"

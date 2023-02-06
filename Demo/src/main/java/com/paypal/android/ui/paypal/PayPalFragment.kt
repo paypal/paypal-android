@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
+import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
@@ -40,6 +41,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     lateinit var sdkSampleServerApi: SDKSampleServerApi
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
+    private lateinit var accessToken: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,12 +49,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
-
-        val coreConfig = CoreConfig()
-        paypalClient =
-            PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
-        paypalClient.listener = this
-
+        
         binding.submitButton.setOnClickListener { launchWebCheckout() }
         binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
         binding.payPalCreditButton.setOnClickListener {
@@ -104,6 +101,14 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     private fun launchWebCheckout(funding: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL) {
         showLoader()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            accessToken = sdkSampleServerApi.fetchAccessToken().value
+        }
+        val coreConfig = CoreConfig(accessToken = accessToken)
+        paypalClient =
+            PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+        paypalClient.listener = this
 
         lifecycleScope.launch {
             try {

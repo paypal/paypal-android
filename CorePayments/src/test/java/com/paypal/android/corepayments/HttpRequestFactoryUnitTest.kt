@@ -12,7 +12,7 @@ import java.net.URL
 
 class HttpRequestFactoryUnitTest {
 
-    private val configuration = CoreConfig()
+    private val configuration = CoreConfig("fake-access-token")
     private val requestBody = """{ "sample": "json" }"""
 
     private lateinit var sut: HttpRequestFactory
@@ -25,7 +25,7 @@ class HttpRequestFactoryUnitTest {
     @Test
     fun `it should properly format the url for the sandbox environment`() {
         val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
-        val sandboxConfig = CoreConfig(environment = Environment.SANDBOX)
+        val sandboxConfig = CoreConfig("fake-access-token", environment = Environment.SANDBOX)
 
         val result = sut.createHttpRequestFromAPIRequest(apiRequest, sandboxConfig)
         assertEquals(URL("https://api.sandbox.paypal.com/sample/path"), result.url)
@@ -34,7 +34,7 @@ class HttpRequestFactoryUnitTest {
     @Test
     fun `it should properly format the url for the staging environment`() {
         val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
-        val stagingConfig = CoreConfig(environment = Environment.STAGING)
+        val stagingConfig = CoreConfig("fake-access-token", environment = Environment.STAGING)
 
         val result = sut.createHttpRequestFromAPIRequest(apiRequest, stagingConfig)
         assertEquals(URL("https://api.msmaster.qa.paypal.com/sample/path"), result.url)
@@ -43,7 +43,7 @@ class HttpRequestFactoryUnitTest {
     @Test
     fun `it should properly format the url for the live environment`() {
         val apiRequest = APIRequest("sample/path", HttpMethod.GET, null)
-        val prodConfig = CoreConfig(environment = Environment.LIVE)
+        val prodConfig = CoreConfig("fake-access-token", environment = Environment.LIVE)
 
         val result = sut.createHttpRequestFromAPIRequest(apiRequest, prodConfig)
         assertEquals(URL("https://api.paypal.com/sample/path"), result.url)
