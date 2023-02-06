@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments
 
 import android.content.Context
+import android.util.LruCache
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.analytics.DeviceInspector
 
@@ -35,13 +36,19 @@ class API internal constructor(
 
     @Throws(PayPalSDKError::class)
     suspend fun getClientId(): String {
+        clientIDCache.get(configuration.accessToken)?.let {
+            return it
+        }
+
         val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
         val httpRequest =
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         val response = http.send(httpRequest)
         val correlationID = response.headers["Paypal-Debug-Id"]
         if (response.isSuccessful) {
-            return parseClientId(response.body, correlationID)
+            val clientID = parseClientId(response.body, correlationID)
+            clientIDCache.put(configuration.accessToken, clientID)
+            return clientID
         }
 
         throw APIClientError.serverResponseError(correlationID)
@@ -62,5 +69,9 @@ class API internal constructor(
 
     suspend fun sendAnalyticsEvent(name: String) {
         analyticsService.sendAnalyticsEvent(name)
+    }
+
+    companion object {
+        val clientIDCache = LruCache<String, String>(10)
     }
 }
