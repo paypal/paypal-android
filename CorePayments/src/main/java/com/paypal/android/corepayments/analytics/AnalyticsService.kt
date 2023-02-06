@@ -11,11 +11,16 @@ internal class AnalyticsService(
     private val httpRequestFactory: HttpRequestFactory
 ) {
 
-    internal suspend fun sendAnalyticsEvent(name: String) {
+    internal suspend fun sendAnalyticsEvent(name: String, clientID: String) {
         val timestamp = System.currentTimeMillis()
 
-        val analyticsEventData =
-            AnalyticsEventData(name, timestamp, sessionId, deviceInspector.inspect())
+        val analyticsEventData = AnalyticsEventData(
+            clientID,
+            name,
+            timestamp,
+            sessionId,
+            deviceInspector.inspect()
+        )
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
 
         val response = http.send(httpRequest)

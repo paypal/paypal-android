@@ -161,10 +161,15 @@ class APIUnitTest {
 
     @Test
     fun `send analytics event delegates it to analytics client`() = runTest {
-        coEvery { analyticsService.sendAnalyticsEvent("sample.event.name") } just runs
+        coEvery {
+            analyticsService.sendAnalyticsEvent(
+                "sample.event.name",
+                "fake-client-id"
+            )
+        } just runs
         sut.sendAnalyticsEvent("sample.event.name")
         coVerify(exactly = 1) {
-            analyticsService.sendAnalyticsEvent("sample.event.name")
+            analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id")
         }
     }
 }

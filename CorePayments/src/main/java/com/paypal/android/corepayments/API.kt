@@ -1,9 +1,11 @@
 package com.paypal.android.corepayments
 
 import android.content.Context
+import android.util.Log
 import android.util.LruCache
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.analytics.DeviceInspector
+import java.lang.Exception
 
 /**
  * This class is exposed for internal PayPal use only. Do not use.
@@ -68,7 +70,12 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-        analyticsService.sendAnalyticsEvent(name)
+        try {
+            val clientID = getClientId()
+            analyticsService.sendAnalyticsEvent(name, clientID)
+        } catch (e: Exception) {
+            Log.d("[PayPal SDK]", "Failed to send analytics due to missing clientID: ${e.message}")
+        }
     }
 
     companion object {
