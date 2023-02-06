@@ -65,6 +65,8 @@ class CardClient internal constructor(
     }
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
+        cardAPI.fetchClientID()
+
         val response = cardAPI.confirmPaymentSource(cardRequest)
         if (response.payerActionHref == null) {
             val result = response.run {

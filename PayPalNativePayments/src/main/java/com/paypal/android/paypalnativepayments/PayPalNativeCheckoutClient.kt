@@ -4,6 +4,8 @@ import android.app.Application
 import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -51,17 +53,23 @@ class PayPalNativeCheckoutClient internal constructor (
      */
     fun startCheckout(createOrder: CreateOrder) {
         CoroutineScope(dispatcher).launch(exceptionHandler) {
-            val config = CheckoutConfig(
-                application = application,
-                clientId = api.fetchCachedOrRemoteClientID(),
-                environment = getPayPalEnvironment(coreConfig.environment),
-                uiConfig = UIConfig(
-                    showExitSurveyDialog = false
+            try {
+                val clientID = api.fetchCachedOrRemoteClientID()
+
+                val config = CheckoutConfig(
+                    application = application,
+                    clientId = clientID,
+                    environment = getPayPalEnvironment(coreConfig.environment),
+                    uiConfig = UIConfig(
+                        showExitSurveyDialog = false
+                    )
                 )
-            )
-            PayPalCheckout.setConfig(config)
-            listener?.onPayPalCheckoutStart()
-            PayPalCheckout.startCheckout(createOrder)
+                PayPalCheckout.setConfig(config)
+                listener?.onPayPalCheckoutStart()
+                PayPalCheckout.startCheckout(createOrder)
+            } catch (e: PayPalSDKError) {
+                listener?.onPayPalCheckoutFailure(APIClientError.clientIDNotFoundError(e.correlationID))
+            }
         }
     }
 
