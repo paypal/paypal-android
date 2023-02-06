@@ -11,8 +11,7 @@ import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertSame
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +27,7 @@ class APIUnitTest {
     private val analyticsService = mockk<AnalyticsService>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
-    private val configuration = CoreConfig()
+    private val configuration = CoreConfig("fake-access-token")
 
     private val httpResponseHeaders = mapOf(
         "Paypal-Debug-Id" to "sample-correlation-id"
@@ -49,6 +48,7 @@ class APIUnitTest {
     @Before
     fun beforeEach() {
         sut = API(configuration, http, httpRequestFactory, analyticsService)
+        API.clientIDCache.evictAll()
     }
 
     @Test
@@ -65,7 +65,7 @@ class APIUnitTest {
     }
 
     @Test
-    fun `get client id sends oauth api request`() = runTest {
+    fun `get client id sends oauth api request when value not in cache`() = runTest {
         val apiRequestSlot = slot<APIRequest>()
         every {
             httpRequestFactory.createHttpRequestFromAPIRequest(
@@ -81,6 +81,31 @@ class APIUnitTest {
         val apiRequest = apiRequestSlot.captured
         assertEquals(HttpMethod.GET, apiRequest.method)
         assertEquals("v1/oauth2/token", apiRequest.path)
+    }
+
+    @Test
+    fun `get client id puts value in cache after fetched`() = runTest {
+        val apiRequestSlot = slot<APIRequest>()
+        every {
+            httpRequestFactory.createHttpRequestFromAPIRequest(
+                capture(apiRequestSlot),
+                configuration
+            )
+        } returns httpRequest
+
+        coEvery { http.send(httpRequest) } returns clientIdSuccessResponse
+
+        sut.getClientId()
+
+        assertEquals(API.clientIDCache.get("fake-access-token"), "sample-client-id")
+    }
+
+    @Test
+    fun `get client id returns cached value when exists in cache`() = runTest {
+        API.clientIDCache.put("fake-access-token", "cached-id-123")
+
+        val clientID = sut.getClientId()
+        assertEquals(clientID, "cached-id-123")
     }
 
     @Test
