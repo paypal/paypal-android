@@ -47,7 +47,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
-        
+
         binding.submitButton.setOnClickListener { launchWebCheckout() }
         binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
         binding.payPalCreditButton.setOnClickListener {
