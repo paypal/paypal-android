@@ -74,7 +74,7 @@ class PayPalWebCheckoutClient internal constructor(
             try {
                 api.fetchCachedOrRemoteClientID()
             } catch (e: PayPalSDKError) {
-                listener?.onPayPalWebFailure(APIClientError.clientIDNotFoundError(e.correlationID))
+                listener?.onPayPalWebFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             }
         }
 

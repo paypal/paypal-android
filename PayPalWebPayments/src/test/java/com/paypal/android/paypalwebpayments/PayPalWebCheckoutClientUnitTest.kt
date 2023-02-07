@@ -7,21 +7,24 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
+import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import io.mockk.Called
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import io.mockk.*
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
+import kotlinx.coroutines.test.*
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
 
@@ -29,11 +32,39 @@ class PayPalWebCheckoutClientUnitTest {
     private val browserSwitchHelper: BrowserSwitchHelper = mockk(relaxed = true)
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val coreConfig: CoreConfig = mockk(relaxed = true)
+    private val api = mockk<API>(relaxed = true)
 
     @Test
-    fun `approveOrder starts browserSwitchClient with correct parameters`() {
+    fun `start() throws error if error fetching clientID`() = runTest {
+        val fakeCode = 123
+        val error = PayPalSDKError(fakeCode, "fake-description")
+        val errorSlot = slot<PayPalSDKError>()
+        val payPalCheckoutListener = spyk<PayPalWebCheckoutListener>()
+
+        coEvery { api.fetchCachedOrRemoteClientID() } throws error
+        every {
+            payPalCheckoutListener.onPayPalWebFailure(capture(errorSlot))
+        } answers { errorSlot.captured }
+
+        val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+        sut.listener = payPalCheckoutListener
+
+        sut.start(mockk(relaxed = true))
+        advanceUntilIdle()
+
+        verify {
+            payPalCheckoutListener.onPayPalWebFailure(any())
+        }
+        expectThat(errorSlot.captured) {
+            get { code }.isEqualTo(fakeCode)
+            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
+        }
+    }
+
+    @Test
+    fun `start() starts browserSwitchClient with correct parameters`() {
         val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+            PayPalWebCheckoutClient(activity, coreConfig, api, browserSwitchClient, browserSwitchHelper)
         val payPalRequest = PayPalWebCheckoutRequest("mock_order_id")
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
@@ -52,8 +83,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult delivers SUCCESS when PayerId and order id are not null`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalWebCheckoutResult>()
@@ -82,8 +112,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult delivers Failure when PayerId is null or blank`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -112,8 +141,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult delivers Failure when order id is null or blank`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -142,8 +170,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult delivers Failure when deeplink is null`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -167,8 +194,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult delivers Failure when metadata is null`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         val slot = slot<PayPalSDKError>()
@@ -192,8 +218,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult delivers Cancelled when browserSwitchStatus is CANCELLED`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         val browserSwitchResult = mockk<BrowserSwitchResult>()
@@ -211,8 +236,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult doesn't deliver result when browserSwitchResult is null`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk(relaxed = true)
 
         every { browserSwitchClient.deliverResult(activity) } returns null
@@ -224,8 +248,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `handleBrowserSwitchResult doesn't deliver result when listener is null`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = null
 
         val browserSwitchResult = mockk<BrowserSwitchResult>()
@@ -239,8 +262,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `when listener is set and result is null, no result is delivered`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
         payPalClient.listener = mockk()
 
         verify { payPalClient.listener?.wasNot(Called) }
@@ -248,8 +270,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `when listener is set and result is not null, a result is delivered`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, browserSwitchClient, browserSwitchHelper)
+        val payPalClient = getPayPalCheckoutClient()
 
         val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
 
@@ -277,5 +298,15 @@ class PayPalWebCheckoutClientUnitTest {
         privateResult.isAccessible = true
         val result = privateResult.get(payPalClient)
         assertNull(result)
+    }
+
+    private fun getPayPalCheckoutClient(
+        coreConfig: CoreConfig = CoreConfig(),
+        testScheduler: TestCoroutineScheduler? = null
+    ): PayPalWebCheckoutClient {
+        return (testScheduler?.let {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            PayPalWebCheckoutClient(activity, coreConfig, api, browserSwitchClient, browserSwitchHelper, dispatcher)
+        } ?: PayPalWebCheckoutClient(activity, coreConfig, api, browserSwitchClient, browserSwitchHelper))
     }
 }

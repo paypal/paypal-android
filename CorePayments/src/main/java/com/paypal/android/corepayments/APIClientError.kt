@@ -59,8 +59,8 @@ object APIClientError {
         )
     }
 
-    fun clientIDNotFoundError(correlationID: String?) = PayPalSDKError(
-        code = Code.CHECKOUT_ERROR.ordinal,
+    fun clientIDNotFoundError(code: Int, correlationID: String?) = PayPalSDKError(
+        code = code,
         errorDescription = "Error fetching clientID. Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
