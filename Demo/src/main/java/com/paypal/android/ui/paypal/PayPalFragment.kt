@@ -22,7 +22,6 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.utils.OrderUtils
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
