@@ -22,6 +22,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.utils.OrderUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.UnknownHostException
@@ -40,7 +41,6 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     lateinit var sdkSampleServerApi: SDKSampleServerApi
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
-    private lateinit var accessToken: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -101,16 +101,14 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     private fun launchWebCheckout(funding: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL) {
         showLoader()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            accessToken = sdkSampleServerApi.fetchAccessToken().value
-        }
-        val coreConfig = CoreConfig(accessToken = accessToken)
-        paypalClient =
-            PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
-        paypalClient.listener = this
-
         lifecycleScope.launch {
             try {
+                binding.statusText.setText(R.string.getting_token)
+                val accessToken = sdkSampleServerApi.fetchAccessToken().value
+                val coreConfig = CoreConfig(accessToken)
+                paypalClient =
+                    PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+                paypalClient.listener = this@PayPalFragment
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderRequest = OrderUtils.createOrderBuilder("5.0")
