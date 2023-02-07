@@ -139,7 +139,8 @@ class PayPalNativeCheckoutClientTest {
                 PayPalCheckout.startCheckout(any())
             } just runs
 
-            sut = getPayPalCheckoutClient(CoreConfig(environment = Environment.LIVE), testScheduler)
+            val config = CoreConfig("fake-access-token", Environment.LIVE)
+            sut = getPayPalCheckoutClient(config, testScheduler)
             sut.startCheckout(mockk())
             advanceUntilIdle()
 
@@ -163,7 +164,8 @@ class PayPalNativeCheckoutClientTest {
                 PayPalCheckout.startCheckout(any())
             } just runs
 
-            sut = getPayPalCheckoutClient(CoreConfig(environment = Environment.STAGING), testScheduler)
+            val config = CoreConfig("fake-access-token", Environment.STAGING)
+            sut = getPayPalCheckoutClient(config, testScheduler)
             sut.startCheckout(mockk())
             advanceUntilIdle()
 
@@ -337,7 +339,7 @@ class PayPalNativeCheckoutClientTest {
     }
 
     private fun getPayPalCheckoutClient(
-        coreConfig: CoreConfig = CoreConfig(),
+        coreConfig: CoreConfig = CoreConfig("fake-access-token"),
         testScheduler: TestCoroutineScheduler? = null
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
