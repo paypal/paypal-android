@@ -23,12 +23,13 @@ import kotlinx.coroutines.launch
 class PayPalNativeCheckoutClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
+    private val returnUrl: String,
     private val api: API,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
-    constructor(application: Application, coreConfig: CoreConfig) :
-            this(application, coreConfig, API(coreConfig, application))
+    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
+            this(application, coreConfig, returnUrl, API(coreConfig, application))
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
@@ -47,6 +48,11 @@ class PayPalNativeCheckoutClient internal constructor (
     /**
      * Initiate a PayPal checkout for an order.
      *
+     * @param returnUrl This is the Return URL value that was added to your app in the
+     * PayPal Developer Portal. Please ensure that this value is set in the PayPal Developer Portal,
+     * as it is required for a successful checkout flow. The Return URL should contain your app's
+     * package name appended with "://paypalpay". Example: "com.sample.example://paypalpay".
+     * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
      * @param createOrder the id of the order
      */
     fun startCheckout(createOrder: CreateOrder) {
@@ -57,7 +63,8 @@ class PayPalNativeCheckoutClient internal constructor (
                 environment = getPayPalEnvironment(coreConfig.environment),
                 uiConfig = UIConfig(
                     showExitSurveyDialog = false
-                )
+                ),
+                returnUrl = returnUrl
             )
             PayPalCheckout.setConfig(config)
             listener?.onPayPalCheckoutStart()

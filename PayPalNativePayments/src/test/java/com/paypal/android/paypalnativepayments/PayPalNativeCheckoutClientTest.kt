@@ -44,6 +44,7 @@ class PayPalNativeCheckoutClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
+    private val mockReturnUrl = "mock_return_url"
 
     private val api = mockk<API>(relaxed = true)
 
@@ -82,6 +83,35 @@ class PayPalNativeCheckoutClientTest {
             get { clientId }.isEqualTo(mockClientId)
             get { application }.isEqualTo(mockApplication)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
+        }
+    }
+
+    @Test
+    fun `when startCheckout is invoked with an invalid return_url, onPayPalCheckout failure is called`() = runTest {
+        every { PayPalCheckout.setConfig(any()) } throws IllegalArgumentException(CheckoutConfig.INVALID_RETURN_URL)
+        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
+        val errorSlot = slot<PayPalSDKError>()
+        every {
+            payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
+        } answers { errorSlot.captured }
+
+        every {
+            PayPalCheckout.startCheckout(any())
+        } just runs
+
+        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+        sut.listener = payPalCheckoutListener
+
+        sut.startCheckout(mockk())
+        advanceUntilIdle()
+
+        verify {
+            payPalCheckoutListener.onPayPalCheckoutFailure(any())
+        }
+
+        expectThat(errorSlot.captured) {
+            get { code }.isEqualTo(0)
+            get { errorDescription }.isEqualTo(CheckoutConfig.INVALID_RETURN_URL)
         }
     }
 
@@ -342,7 +372,7 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, api, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
+            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
     }
 }
