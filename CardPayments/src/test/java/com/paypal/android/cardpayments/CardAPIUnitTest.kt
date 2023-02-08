@@ -4,7 +4,6 @@ import com.paypal.android.cardpayments.api.CardAPI
 import com.paypal.android.corepayments.*
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.json.JSONException
 import org.junit.Assert.assertEquals
@@ -12,8 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)

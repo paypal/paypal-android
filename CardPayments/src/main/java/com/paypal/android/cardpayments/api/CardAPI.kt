@@ -13,10 +13,11 @@ internal class CardAPI(
     private val responseParser: CardResponseParser = CardResponseParser()
 ) {
 
+    @Throws(PayPalSDKError::class)
     suspend fun fetchClientID() {
         try {
             api.fetchCachedOrRemoteClientID()
-        } catch(e: PayPalSDKError) {
+        } catch (e: PayPalSDKError) {
             throw APIClientError.clientIDNotFoundError(e.code, e.correlationID)
         }
     }

@@ -81,7 +81,7 @@ class API internal constructor(
         try {
             val clientID = fetchCachedOrRemoteClientID()
             analyticsService.sendAnalyticsEvent(name, clientID)
-        } catch (e: Exception) {
+        } catch (e: PayPalSDKError) {
             Log.d("[PayPal SDK]", "Failed to send analytics due to missing clientID: ${e.message}")
         }
     }

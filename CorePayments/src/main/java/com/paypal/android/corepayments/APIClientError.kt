@@ -64,7 +64,6 @@ object APIClientError {
         errorDescription = "Error fetching clientID. Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
-
 }
 
 internal enum class Code {
