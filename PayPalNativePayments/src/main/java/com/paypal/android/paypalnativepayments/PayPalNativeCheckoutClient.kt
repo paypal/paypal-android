@@ -68,7 +68,8 @@ class PayPalNativeCheckoutClient internal constructor (
                     environment = getPayPalEnvironment(coreConfig.environment),
                     uiConfig = UIConfig(
                         showExitSurveyDialog = false
-                    )
+                    ),
+                    returnUrl = returnUrl
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
