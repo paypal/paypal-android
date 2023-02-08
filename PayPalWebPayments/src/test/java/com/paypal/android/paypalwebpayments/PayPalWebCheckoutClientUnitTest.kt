@@ -35,7 +35,7 @@ class PayPalWebCheckoutClientUnitTest {
     private val api = mockk<API>(relaxed = true)
 
     @Test
-    fun `start() throws error if error fetching clientID`() = runTest {
+    fun `start() delivers error if error fetching clientID`() = runTest {
         val fakeCode = 123
         val error = PayPalSDKError(fakeCode, "fake-description")
         val errorSlot = slot<PayPalSDKError>()

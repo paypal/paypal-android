@@ -1,18 +1,10 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.CardAPI
-import com.paypal.android.corepayments.API
-import com.paypal.android.corepayments.APIRequest
-import com.paypal.android.corepayments.HttpMethod
-import com.paypal.android.corepayments.HttpResponse
-import com.paypal.android.corepayments.OrderStatus
-import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PaymentsJSON
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
+import com.paypal.android.corepayments.*
+import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.json.JSONException
 import org.junit.Assert.assertEquals
@@ -20,6 +12,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -87,6 +81,24 @@ class CardAPIUnitTest {
     fun beforeEach() {
         sut = CardAPI(api, requestFactory)
         every { requestFactory.createConfirmPaymentSourceRequest(cardRequest) } returns apiRequest
+    }
+
+    @Test
+    fun `getClientID() throws proper error if client ID fetch fails`() = runTest {
+        val fakeCode = 123
+        val error = PayPalSDKError(fakeCode, "fake-description", "fake-correlation-id")
+
+        coEvery { api.fetchCachedOrRemoteClientID() } throws error
+
+        lateinit var capturedError: PayPalSDKError
+        try {
+            sut.fetchClientID()
+        } catch (e: PayPalSDKError) {
+            capturedError = e
+        }
+        assertEquals(fakeCode, capturedError?.code)
+        assertEquals("fake-correlation-id", capturedError?.correlationID)
+        assertEquals("Error fetching clientID. Contact developer.paypal.com/support.", capturedError?.errorDescription)
     }
 
     @Test

@@ -73,17 +73,19 @@ class PayPalWebCheckoutClient internal constructor(
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
                 api.fetchCachedOrRemoteClientID()
+
+                val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+                    request.orderID,
+                    coreConfig,
+                    request.fundingSource
+                )
+                browserSwitchClient.start(activity, browserSwitchOptions)
             } catch (e: PayPalSDKError) {
-                listener?.onPayPalWebFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
+                listener?.onPayPalWebFailure(
+                    APIClientError.clientIDNotFoundError(e.code, e.correlationID)
+                )
             }
         }
-
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-            request.orderID,
-            coreConfig,
-            request.fundingSource
-        )
-        browserSwitchClient.start(activity, browserSwitchOptions)
     }
 
     internal fun handleBrowserSwitchResult() {
