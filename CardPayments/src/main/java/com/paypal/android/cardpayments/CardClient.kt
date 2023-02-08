@@ -60,13 +60,12 @@ class CardClient internal constructor(
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
         CoroutineScope(dispatcher).launch(exceptionHandler) {
+            cardAPI.fetchClientID()
             confirmPaymentSource(activity, cardRequest)
         }
     }
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
-        cardAPI.fetchClientID()
-
         val response = cardAPI.confirmPaymentSource(cardRequest)
         if (response.payerActionHref == null) {
             val result = response.run {
