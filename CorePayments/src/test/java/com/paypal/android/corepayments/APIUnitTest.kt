@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -185,7 +186,9 @@ class APIUnitTest {
         }
 
     @Test
-    fun `sendAnalyticsEvent() event delegates it to analytics client`() = runTest {
+    fun `sendAnalyticsEvent() event delegates it to analytics service`() = runTest {
+        API.clientIDCache.put("fake-access-token", "fake-client-id")
+
         coEvery {
             analyticsService.sendAnalyticsEvent(
                 "sample.event.name",
