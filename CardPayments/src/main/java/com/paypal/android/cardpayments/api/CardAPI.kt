@@ -17,7 +17,7 @@ internal class CardAPI(
         try {
             api.fetchCachedOrRemoteClientID()
         } catch(e: PayPalSDKError) {
-            throw APIClientError.clientIDNotFoundError(e.correlationID)
+            throw APIClientError.clientIDNotFoundError(e.code, e.correlationID)
         }
     }
 
