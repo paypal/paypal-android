@@ -133,9 +133,7 @@ class PayPalNativeCheckoutClientTest {
 
     @Test
     fun `when getting client id fails is invoked, it calls onPayPalFailure`() = runTest {
-        val mockCode = 0
-        val mockErrorDescription = "mock_error_description"
-        val error = PayPalSDKError(mockCode, mockErrorDescription)
+        val error = PayPalSDKError(123, "fake-description")
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
@@ -154,8 +152,8 @@ class PayPalNativeCheckoutClientTest {
             payPalCheckoutListener.onPayPalCheckoutFailure(any())
         }
         expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(mockCode)
-            get { errorDescription }.isEqualTo(mockErrorDescription)
+            get { code }.isEqualTo(123)
+            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
         }
     }
 
