@@ -36,7 +36,7 @@ In order to integrate PayPal native payments, you will need:
 1. A PayPal client ID and corresponding secret. This is to generate an access token that will allow you to create payment tokens, capture funds and authorize customers to place orders.
 2. Setting a return URL.
 
-A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/docs/business/native-checkout/android/) to create said url and also to learn about how to create a new PayPal application as well.
+A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/limited-release/paypal-mobile-checkout/android/#link-enablethesdk) to create said url and also to learn about how to create a new PayPal application as well.
 
 ### 3. Initiate PayPal Native checkout
 
@@ -46,18 +46,19 @@ Create a `CoreConfig` using an [access token](../../README.md#access-token):
 val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
 ```
 
-Create a `PayPalClient`:
+Create a `PayPalNativeCheckoutClient` with your `RETURN_URL` created above::
 ```kotlin
-val payPalClient = PayPalNativeCheckoutClient(
+val payPalNativeClient = PayPalNativeCheckoutClient(
    application = requireActvitiy().application,
-   coreConfig = coreConfig
+   coreConfig = coreConfig,
+   returnUrl = "<RETURN_URL>" 
 )
 ```
 
 Set a listener on the client to receive payment flow callbacks:
 
 ```kotlin
-payPalClient.listener = object : PayPalNativeCheckoutListener {
+payPalNativeClient.listener = object : PayPalNativeCheckoutListener {
 
     override fun onPayPalCheckoutStart() {
         // the PayPal paysheet is about to appear
