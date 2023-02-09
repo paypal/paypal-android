@@ -70,8 +70,9 @@ class CardClient internal constructor(
         try {
             cardAPI.fetchCachedOrRemoteClientID()
         } catch (e: PayPalSDKError) {
-            val merchantError = APIClientError.clientIDNotFoundError(e.code, e.correlationID)
-            approveOrderListener?.onApproveOrderFailure(merchantError)
+            approveOrderListener?.onApproveOrderFailure(
+                APIClientError.clientIDNotFoundError(e.code, e.correlationID)
+            )
             return
         }
 
