@@ -4,7 +4,6 @@ import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardRequestFactory
 import com.paypal.android.cardpayments.CardResponseParser
 import com.paypal.android.corepayments.API
-import com.paypal.android.corepayments.PayPalSDKError
 
 internal class CardAPI(
     private val api: API,
@@ -12,7 +11,6 @@ internal class CardAPI(
     private val responseParser: CardResponseParser = CardResponseParser()
 ) {
 
-    @Throws(PayPalSDKError::class)
     suspend fun fetchCachedOrRemoteClientID() {
         api.fetchCachedOrRemoteClientID()
     }
