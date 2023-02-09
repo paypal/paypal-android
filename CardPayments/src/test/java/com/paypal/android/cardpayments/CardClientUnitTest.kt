@@ -32,6 +32,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -82,8 +84,12 @@ class CardClientUnitTest {
     @Test
     fun `approveOrder() notifies listener if error fetching clientID`() = runTest {
         val error = PayPalSDKError(123, "fake-description")
+        val errorSlot = slot<PayPalSDKError>()
 
-        coEvery { cardAPI.fetchClientID() } throws error
+        coEvery { cardAPI.fetchCachedOrRemoteClientID() } throws error
+        every {
+            approveOrderListener.onApproveOrderFailure(capture(errorSlot))
+        } answers { errorSlot.captured }
 
         val sut = createCardClient(testScheduler)
 
@@ -92,6 +98,10 @@ class CardClientUnitTest {
 
         verify {
             approveOrderListener.onApproveOrderFailure(any())
+        }
+        expectThat(errorSlot.captured) {
+            get { code }.isEqualTo(123)
+            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
         }
     }
 

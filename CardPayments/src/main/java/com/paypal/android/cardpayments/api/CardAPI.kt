@@ -4,7 +4,6 @@ import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardRequestFactory
 import com.paypal.android.cardpayments.CardResponseParser
 import com.paypal.android.corepayments.API
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal class CardAPI(
@@ -14,12 +13,8 @@ internal class CardAPI(
 ) {
 
     @Throws(PayPalSDKError::class)
-    suspend fun fetchClientID() {
-        try {
-            api.fetchCachedOrRemoteClientID()
-        } catch (e: PayPalSDKError) {
-            throw APIClientError.clientIDNotFoundError(e.code, e.correlationID)
-        }
+    suspend fun fetchCachedOrRemoteClientID() {
+        api.fetchCachedOrRemoteClientID()
     }
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {

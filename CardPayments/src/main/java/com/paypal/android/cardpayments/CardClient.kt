@@ -10,8 +10,10 @@ import com.paypal.android.cardpayments.api.CardAPI
 import com.paypal.android.cardpayments.api.GetOrderRequest
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.PayPalSDKError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,12 +62,19 @@ class CardClient internal constructor(
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
         CoroutineScope(dispatcher).launch(exceptionHandler) {
-            cardAPI.fetchClientID()
             confirmPaymentSource(activity, cardRequest)
         }
     }
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
+        try {
+            cardAPI.fetchCachedOrRemoteClientID()
+        } catch (e: PayPalSDKError) {
+            val merchantError = APIClientError.clientIDNotFoundError(e.code, e.correlationID)
+            approveOrderListener?.onApproveOrderFailure(merchantError)
+            return
+        }
+
         val response = cardAPI.confirmPaymentSource(cardRequest)
         if (response.payerActionHref == null) {
             val result = response.run {

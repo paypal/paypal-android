@@ -81,24 +81,6 @@ class CardAPIUnitTest {
     }
 
     @Test
-    fun `getClientID() throws proper error if client ID fetch fails`() = runTest {
-        val fakeCode = 123
-        val error = PayPalSDKError(fakeCode, "fake-description", "fake-correlation-id")
-
-        coEvery { api.fetchCachedOrRemoteClientID() } throws error
-
-        lateinit var capturedError: PayPalSDKError
-        try {
-            sut.fetchClientID()
-        } catch (e: PayPalSDKError) {
-            capturedError = e
-        }
-        assertEquals(fakeCode, capturedError?.code)
-        assertEquals("fake-correlation-id", capturedError?.correlationID)
-        assertEquals("Error fetching clientID. Contact developer.paypal.com/support.", capturedError?.errorDescription)
-    }
-
-    @Test
     fun `it sends a confirm payment source api request`() = runTest {
         val httpResponse = HttpResponse(200, emptyMap(), successBody)
         coEvery { api.send(apiRequest) } returns httpResponse
