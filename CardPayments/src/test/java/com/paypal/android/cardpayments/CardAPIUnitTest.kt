@@ -1,8 +1,17 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.CardAPI
-import com.paypal.android.corepayments.*
-import io.mockk.*
+import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.APIRequest
+import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.corepayments.HttpResponse
+import com.paypal.android.corepayments.OrderStatus
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PaymentsJSON
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONException
