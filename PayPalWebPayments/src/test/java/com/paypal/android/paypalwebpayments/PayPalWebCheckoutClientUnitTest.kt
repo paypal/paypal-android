@@ -62,21 +62,18 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() starts browserSwitchClient with correct parameters`() {
-        val payPalClient =
-            PayPalWebCheckoutClient(activity, coreConfig, api, browserSwitchClient, browserSwitchHelper)
-        val payPalRequest = PayPalWebCheckoutRequest("mock_order_id")
+    fun `start() starts browserSwitchClient with correct parameters`() = runTest {
+        val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
-        every {
-            browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-                any(),
-                coreConfig,
-                payPalRequest.fundingSource
-            )
+        coEvery { api.fetchCachedOrRemoteClientID() } returns "fake-client-id"
+
+        coEvery {
+            browserSwitchHelper.configurePayPalBrowserSwitchOptions(any(), any(), any())
         } returns browserSwitchOptions
 
-        payPalClient.start(payPalRequest)
+        sut.start(mockk(relaxed = true))
+        advanceUntilIdle()
 
         verify(exactly = 1) { browserSwitchClient.start(activity, browserSwitchOptions) }
     }
