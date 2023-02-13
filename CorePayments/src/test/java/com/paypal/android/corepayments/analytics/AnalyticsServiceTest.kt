@@ -102,7 +102,7 @@ class AnalyticsServiceTest {
     }
 
     @Test
-    fun `sendAnalyticsEvent sends proper tag when production`() = runTest {
+    fun `sendAnalyticsEvent sends proper tag when LIVE`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
         every {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
@@ -115,7 +115,7 @@ class AnalyticsServiceTest {
     }
 
     @Test
-    fun `sendAnalyticsEvent sends proper tag when sandbox`() = runTest {
+    fun `sendAnalyticsEvent sends proper tag when SANDBOX`() = runTest {
         analyticsService = AnalyticsService(deviceInspector, Environment.LIVE, http, httpRequestFactory)
 
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
@@ -126,7 +126,7 @@ class AnalyticsServiceTest {
         analyticsService.sendAnalyticsEvent("fake-event", "fake-client-id")
 
         val analyticsEventData = analyticsEventDataSlot.captured
-        assertEquals("production", analyticsEventData.environment)
+        assertEquals("live", analyticsEventData.environment)
     }
 
     @Test
