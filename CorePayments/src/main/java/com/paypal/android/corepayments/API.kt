@@ -24,6 +24,7 @@ class API internal constructor(
                 HttpRequestFactory(),
                 AnalyticsService(
                     deviceInspector = DeviceInspector(context),
+                    environment = configuration.environment,
                     http = Http(),
                     httpRequestFactory = HttpRequestFactory()
                 )

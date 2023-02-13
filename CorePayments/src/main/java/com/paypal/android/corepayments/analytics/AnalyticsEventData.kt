@@ -4,6 +4,7 @@ import org.json.JSONObject
 
 data class AnalyticsEventData(
     val clientID: String,
+    val environment: String,
     val eventName: String,
     val timestamp: Long,
     val sessionID: String,
@@ -19,6 +20,7 @@ data class AnalyticsEventData(
         const val KEY_COMPONENT = "comp"
         const val KEY_DEVICE_MANUFACTURER = "device_manufacturer"
         const val KEY_DEVICE_MODEL = "mobile_device_model"
+        const val KEY_ENVIRONMENT = "merchant_app_environment"
         const val KEY_EVENT_NAME = "event_name"
         const val KEY_EVENT_SOURCE = "event_source"
         const val KEY_IS_SIMULATOR = "is_simulator"
@@ -42,6 +44,7 @@ data class AnalyticsEventData(
             .put(KEY_COMPONENT, "ppunifiedsdk")
             .put(KEY_DEVICE_MANUFACTURER, deviceData.deviceManufacturer)
             .put(KEY_DEVICE_MODEL, deviceData.deviceModel)
+            .put(KEY_ENVIRONMENT, environment)
             .put(KEY_EVENT_NAME, eventName)
             .put(KEY_EVENT_SOURCE, "mobile-native")
             .put(KEY_IS_SIMULATOR, deviceData.isSimulator)
