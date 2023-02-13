@@ -18,7 +18,7 @@ internal class AnalyticsService(
 
         val analyticsEventData = AnalyticsEventData(
             clientID,
-            environment.name,
+            environment.name.lowercase(),
             name,
             timestamp,
             sessionId,
