@@ -298,7 +298,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     private fun getPayPalCheckoutClient(
-        coreConfig: CoreConfig = CoreConfig(),
+        coreConfig: CoreConfig = CoreConfig("fake-access-token"),
         testScheduler: TestCoroutineScheduler? = null
     ): PayPalWebCheckoutClient {
         return (testScheduler?.let {

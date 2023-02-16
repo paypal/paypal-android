@@ -48,11 +48,6 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     ): View {
         binding = FragmentPaymentButtonBinding.inflate(inflater, container, false)
 
-        val coreConfig = CoreConfig()
-        paypalClient =
-            PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
-        paypalClient.listener = this
-
         binding.submitButton.setOnClickListener { launchWebCheckout() }
         binding.payPalButton.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
         binding.payPalCreditButton.setOnClickListener {
@@ -107,6 +102,12 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
         lifecycleScope.launch {
             try {
+                binding.statusText.setText(R.string.getting_token)
+                val accessToken = sdkSampleServerApi.fetchAccessToken().value
+                val coreConfig = CoreConfig(accessToken)
+                paypalClient =
+                    PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+                paypalClient.listener = this@PayPalFragment
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderRequest = OrderUtils.createOrderBuilder("5.0")

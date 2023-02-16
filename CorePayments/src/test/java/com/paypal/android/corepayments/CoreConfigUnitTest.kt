@@ -7,7 +7,7 @@ class CoreConfigUnitTest {
 
     @Test
     fun `it should default to SANDBOX environment`() {
-        val sut = CoreConfig()
+        val sut = CoreConfig("fake-access-token")
         assertEquals(Environment.SANDBOX, sut.environment)
     }
 }
