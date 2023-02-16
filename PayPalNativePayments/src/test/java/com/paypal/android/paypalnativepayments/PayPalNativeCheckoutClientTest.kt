@@ -44,6 +44,7 @@ class PayPalNativeCheckoutClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
     private val mockClientId = generateRandomString()
+    private val mockReturnUrl = "mock_return_url"
 
     private val api = mockk<API>(relaxed = true)
 
@@ -53,7 +54,7 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { api.getClientId() } returns mockClientId
+        coEvery { api.fetchCachedOrRemoteClientID() } returns mockClientId
     }
 
     @After
@@ -86,6 +87,35 @@ class PayPalNativeCheckoutClientTest {
     }
 
     @Test
+    fun `when startCheckout is invoked with an invalid return_url, onPayPalCheckout failure is called`() = runTest {
+        every { PayPalCheckout.setConfig(any()) } throws IllegalArgumentException(CheckoutConfig.INVALID_RETURN_URL)
+        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
+        val errorSlot = slot<PayPalSDKError>()
+        every {
+            payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
+        } answers { errorSlot.captured }
+
+        every {
+            PayPalCheckout.startCheckout(any())
+        } just runs
+
+        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+        sut.listener = payPalCheckoutListener
+
+        sut.startCheckout(mockk())
+        advanceUntilIdle()
+
+        verify {
+            payPalCheckoutListener.onPayPalCheckoutFailure(any())
+        }
+
+        expectThat(errorSlot.captured) {
+            get { code }.isEqualTo(0)
+            get { errorDescription }.isEqualTo(CheckoutConfig.INVALID_RETURN_URL)
+        }
+    }
+
+    @Test
     fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runTest {
         val payPalCheckoutListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         every { PayPalCheckout.startCheckout(any()) } just runs
@@ -103,13 +133,11 @@ class PayPalNativeCheckoutClientTest {
 
     @Test
     fun `when getting client id fails is invoked, it calls onPayPalFailure`() = runTest {
-        val mockCode = 0
-        val mockErrorDescription = "mock_error_description"
-        val error = PayPalSDKError(mockCode, mockErrorDescription)
+        val error = PayPalSDKError(123, "fake-description")
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
-        coEvery { api.getClientId() } throws error
+        coEvery { api.fetchCachedOrRemoteClientID() } throws error
         every {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -124,8 +152,8 @@ class PayPalNativeCheckoutClientTest {
             payPalCheckoutListener.onPayPalCheckoutFailure(any())
         }
         expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(mockCode)
-            get { errorDescription }.isEqualTo(mockErrorDescription)
+            get { code }.isEqualTo(123)
+            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
         }
     }
 
@@ -344,7 +372,7 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, api, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, api)
+            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
     }
 }

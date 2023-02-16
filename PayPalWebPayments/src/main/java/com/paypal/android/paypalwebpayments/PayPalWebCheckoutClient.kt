@@ -4,8 +4,16 @@ import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
@@ -13,8 +21,10 @@ import com.paypal.android.corepayments.CoreConfig
 class PayPalWebCheckoutClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
+    private val api: API,
     private val browserSwitchClient: BrowserSwitchClient,
-    private val browserSwitchHelper: BrowserSwitchHelper
+    private val browserSwitchHelper: BrowserSwitchHelper,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     /**
@@ -28,7 +38,17 @@ class PayPalWebCheckoutClient internal constructor(
         activity: FragmentActivity,
         configuration: CoreConfig,
         urlScheme: String
-    ) : this(activity, configuration, BrowserSwitchClient(), BrowserSwitchHelper(urlScheme))
+    ) : this(
+        activity,
+        configuration,
+        API(configuration, activity),
+        BrowserSwitchClient(),
+        BrowserSwitchHelper(urlScheme)
+    )
+
+    private val exceptionHandler = CoreCoroutineExceptionHandler {
+        listener?.onPayPalWebFailure(it)
+    }
 
     private var browserSwitchResult: BrowserSwitchResult? = null
 
@@ -56,12 +76,22 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-            request.orderID,
-            coreConfig,
-            request.fundingSource
-        )
-        browserSwitchClient.start(activity, browserSwitchOptions)
+        CoroutineScope(dispatcher).launch(exceptionHandler) {
+            try {
+                api.fetchCachedOrRemoteClientID()
+
+                val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
+                    request.orderID,
+                    coreConfig,
+                    request.fundingSource
+                )
+                browserSwitchClient.start(activity, browserSwitchOptions)
+            } catch (e: PayPalSDKError) {
+                listener?.onPayPalWebFailure(
+                    APIClientError.clientIDNotFoundError(e.code, e.correlationID)
+                )
+            }
+        }
     }
 
     internal fun handleBrowserSwitchResult() {

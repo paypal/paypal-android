@@ -36,7 +36,7 @@ internal class EligibilityAPI internal constructor(
      */
     suspend fun checkEligibility(): Eligibility {
         val fundingEligibilityQuery = FundingEligibilityQuery(
-            clientId = api.getClientId(),
+            clientId = api.fetchCachedOrRemoteClientID(),
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,
             currencyCode = SupportedCountryCurrencyType.USD,
             enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
