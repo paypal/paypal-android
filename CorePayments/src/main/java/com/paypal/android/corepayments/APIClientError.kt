@@ -58,6 +58,12 @@ object APIClientError {
             errorDescription = description
         )
     }
+
+    fun clientIDNotFoundError(code: Int, correlationID: String?) = PayPalSDKError(
+        code = code,
+        errorDescription = "Error fetching clientID. Contact developer.paypal.com/support.",
+        correlationID = correlationID
+    )
 }
 
 internal enum class Code {

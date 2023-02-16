@@ -1,6 +1,8 @@
 package com.paypal.android.corepayments
 
 import android.content.Context
+import android.util.Log
+import android.util.LruCache
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.analytics.DeviceInspector
 
@@ -33,15 +35,29 @@ class API internal constructor(
         return http.send(httpRequest)
     }
 
+    /**
+     * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
+     * @return Merchant clientID.
+     */
     @Throws(PayPalSDKError::class)
-    suspend fun getClientId(): String {
+    suspend fun fetchCachedOrRemoteClientID(): String {
+        configuration.accessToken?.let { accessToken ->
+            clientIDCache.get(accessToken)?.let { cachedClientID ->
+                return cachedClientID
+            }
+        }
+
         val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
         val httpRequest =
             httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
         val response = http.send(httpRequest)
         val correlationID = response.headers["Paypal-Debug-Id"]
         if (response.isSuccessful) {
-            return parseClientId(response.body, correlationID)
+            val clientID = parseClientId(response.body, correlationID)
+            configuration.accessToken?.let { accessToken ->
+                clientIDCache.put(accessToken, clientID)
+            }
+            return clientID
         }
 
         throw APIClientError.serverResponseError(correlationID)
@@ -61,6 +77,15 @@ class API internal constructor(
     }
 
     suspend fun sendAnalyticsEvent(name: String) {
-        analyticsService.sendAnalyticsEvent(name)
+        try {
+            val clientID = fetchCachedOrRemoteClientID()
+            analyticsService.sendAnalyticsEvent(name, clientID)
+        } catch (e: PayPalSDKError) {
+            Log.d("[PayPal SDK]", "Failed to send analytics due to missing clientID: ${e.message}")
+        }
+    }
+
+    companion object {
+        val clientIDCache = LruCache<String, String>(10)
     }
 }

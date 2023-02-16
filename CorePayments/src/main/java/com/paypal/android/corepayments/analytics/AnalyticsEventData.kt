@@ -3,6 +3,7 @@ package com.paypal.android.corepayments.analytics
 import org.json.JSONObject
 
 data class AnalyticsEventData(
+    val clientID: String,
     val eventName: String,
     val timestamp: Long,
     val sessionID: String,
@@ -12,6 +13,7 @@ data class AnalyticsEventData(
     companion object {
         const val KEY_APP_ID = "app_id"
         const val KEY_APP_NAME = "app_name"
+        const val KEY_CLIENT_ID = "partner_client_id"
         const val KEY_CLIENT_SDK_VERSION = "c_sdk_ver"
         const val KEY_CLIENT_OS = "client_os"
         const val KEY_COMPONENT = "comp"
@@ -34,6 +36,7 @@ data class AnalyticsEventData(
         val eventParams = JSONObject()
             .put(KEY_APP_ID, deviceData.appId)
             .put(KEY_APP_NAME, deviceData.appName)
+            .put(KEY_CLIENT_ID, clientID)
             .put(KEY_CLIENT_SDK_VERSION, deviceData.clientSDKVersion)
             .put(KEY_CLIENT_OS, deviceData.clientOS)
             .put(KEY_COMPONENT, "ppunifiedsdk")

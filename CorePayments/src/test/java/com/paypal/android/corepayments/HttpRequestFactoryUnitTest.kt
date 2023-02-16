@@ -113,6 +113,7 @@ class HttpRequestFactoryUnitTest {
     @Test
     fun `createHttpRequestForAnalytics properly constructs HTTP request`() {
         val analyticsEventData = AnalyticsEventData(
+            clientID = "fake-client-id",
             eventName = "fake-event",
             timestamp = 10000,
             sessionID = "fake-session-id",
@@ -137,6 +138,7 @@ class HttpRequestFactoryUnitTest {
                     "event_params": {
                         "app_id": "fake-app-id",
                         "app_name": "fake-app-name",
+                        "partner_client_id": "fake-client-id",
                         "c_sdk_ver": "fake-sdk-version",
                         "client_os": "fake client OS",
                         "comp": "ppunifiedsdk",

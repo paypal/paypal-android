@@ -11,6 +11,10 @@ internal class CardAPI(
     private val responseParser: CardResponseParser = CardResponseParser()
 ) {
 
+    suspend fun fetchCachedOrRemoteClientID() {
+        api.fetchCachedOrRemoteClientID()
+    }
+
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
         val httpResponse = api.send(apiRequest)
