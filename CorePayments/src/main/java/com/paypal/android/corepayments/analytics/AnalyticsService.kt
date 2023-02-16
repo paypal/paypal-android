@@ -1,12 +1,14 @@
 package com.paypal.android.corepayments.analytics
 
 import android.util.Log
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequestFactory
 import java.util.*
 
 internal class AnalyticsService(
     private val deviceInspector: DeviceInspector,
+    private val environment: Environment,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory
 ) {
@@ -16,6 +18,7 @@ internal class AnalyticsService(
 
         val analyticsEventData = AnalyticsEventData(
             clientID,
+            environment.name.lowercase(),
             name,
             timestamp,
             sessionId,

@@ -1,10 +1,6 @@
 package com.paypal.android.corepayments.analytics
 
-import com.paypal.android.corepayments.Http
-import com.paypal.android.corepayments.HttpMethod
-import com.paypal.android.corepayments.HttpRequest
-import com.paypal.android.corepayments.HttpRequestFactory
-import com.paypal.android.corepayments.HttpResponse
+import com.paypal.android.corepayments.*
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,6 +23,7 @@ class AnalyticsServiceTest {
     private lateinit var http: Http
     private lateinit var httpRequestFactory: HttpRequestFactory
     private lateinit var analyticsService: AnalyticsService
+    private lateinit var environment: Environment
 
     lateinit var deviceInspector: DeviceInspector
 
@@ -49,8 +46,15 @@ class AnalyticsServiceTest {
         http = mockk()
         httpRequestFactory = mockk()
         deviceInspector = mockk()
+        environment = Environment.SANDBOX
+
         every { deviceInspector.inspect() } returns deviceData
-        analyticsService = AnalyticsService(deviceInspector, http, httpRequestFactory)
+        analyticsService = AnalyticsService(
+            deviceInspector,
+            environment,
+            http,
+            httpRequestFactory
+        )
 
         coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
@@ -98,6 +102,34 @@ class AnalyticsServiceTest {
     }
 
     @Test
+    fun `sendAnalyticsEvent sends proper tag when LIVE`() = runTest {
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
+        } returns httpRequest
+
+        analyticsService.sendAnalyticsEvent("fake-event", "fake-client-id")
+
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals("sandbox", analyticsEventData.environment)
+    }
+
+    @Test
+    fun `sendAnalyticsEvent sends proper tag when SANDBOX`() = runTest {
+        analyticsService = AnalyticsService(deviceInspector, Environment.LIVE, http, httpRequestFactory)
+
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        every {
+            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
+        } returns httpRequest
+
+        analyticsService.sendAnalyticsEvent("fake-event", "fake-client-id")
+
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals("live", analyticsEventData.environment)
+    }
+
+    @Test
     fun `analyticsClient uses singleton for sessionId`() = runTest {
         val analyticsEventDataSlot1 = slot<AnalyticsEventData>()
 
@@ -113,7 +145,8 @@ class AnalyticsServiceTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot2))
         } returns httpRequest
 
-        val analyticsService2 = AnalyticsService(deviceInspector, http, httpRequestFactory)
+        val analyticsService2 = AnalyticsService(deviceInspector, environment, http, httpRequestFactory)
+
         analyticsService2.sendAnalyticsEvent("event2", "fake-client-id")
 
         val analyticsEventData2 = analyticsEventDataSlot2.captured
