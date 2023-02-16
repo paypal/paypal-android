@@ -41,10 +41,8 @@ class API internal constructor(
      */
     @Throws(PayPalSDKError::class)
     suspend fun fetchCachedOrRemoteClientID(): String {
-        configuration.accessToken?.let { accessToken ->
-            clientIDCache.get(accessToken)?.let { cachedClientID ->
-                return cachedClientID
-            }
+        clientIDCache.get(configuration.accessToken)?.let { cachedClientID ->
+            return cachedClientID
         }
 
         val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
@@ -54,9 +52,7 @@ class API internal constructor(
         val correlationID = response.headers["Paypal-Debug-Id"]
         if (response.isSuccessful) {
             val clientID = parseClientId(response.body, correlationID)
-            configuration.accessToken?.let { accessToken ->
-                clientIDCache.put(accessToken, clientID)
-            }
+            clientIDCache.put(configuration.accessToken, clientID)
             return clientID
         }
 
