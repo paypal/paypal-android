@@ -146,6 +146,7 @@ class AnalyticsServiceTest {
         } returns httpRequest
 
         val analyticsService2 = AnalyticsService(deviceInspector, environment, http, httpRequestFactory)
+
         analyticsService2.sendAnalyticsEvent("event2", "fake-client-id")
 
         val analyticsEventData2 = analyticsEventDataSlot2.captured
