@@ -78,7 +78,7 @@ class API internal constructor(
     /**
      * Sends analytics event to https://api.paypal.com/v1/tracking/events/ via a background task.
      */
-    fun sendAnalyticsEvent(name: String)  {
+    fun sendAnalyticsEvent(name: String) {
         GlobalScope.launch {
             try {
                 val clientID = fetchCachedOrRemoteClientID()

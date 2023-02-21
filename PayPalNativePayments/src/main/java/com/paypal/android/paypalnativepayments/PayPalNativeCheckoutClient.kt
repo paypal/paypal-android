@@ -46,7 +46,7 @@ class PayPalNativeCheckoutClient internal constructor (
         set(value) {
             field = value
             if (value != null) {
-                registerCallbacks(value)
+                registerCallbacks()
             }
         }
     /**
@@ -84,7 +84,7 @@ class PayPalNativeCheckoutClient internal constructor (
         }
     }
 
-    private fun registerCallbacks(listener: PayPalNativeCheckoutListener) {
+    private fun registerCallbacks() {
         PayPalCheckout.registerCallbacks(
             onApprove = OnApprove { approval ->
                 val result = approval.run {
