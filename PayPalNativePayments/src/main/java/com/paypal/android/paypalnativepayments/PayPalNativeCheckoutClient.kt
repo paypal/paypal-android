@@ -14,6 +14,8 @@ import com.paypal.checkout.config.UIConfig
 import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
+import com.paypal.checkout.shipping.ShippingChangeActions
+import com.paypal.checkout.shipping.ShippingChangeData
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +60,8 @@ class PayPalNativeCheckoutClient internal constructor (
      * @param createOrder the id of the order
      */
     fun startCheckout(createOrder: CreateOrder) {
+        api.sendAnalyticsEvent("paypal-native-payments:started")
+
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
                 val clientID = api.fetchCachedOrRemoteClientID()
@@ -86,17 +90,40 @@ class PayPalNativeCheckoutClient internal constructor (
                 val result = approval.run {
                     PayPalNativeCheckoutResult(this)
                 }
-                listener.onPayPalCheckoutSuccess(result)
+                notifyOnSuccess(result)
             },
             onCancel = OnCancel {
-                listener.onPayPalCheckoutCanceled()
+                notifyOnCancel()
             },
             onError = OnError { errorInfo ->
-                listener.onPayPalCheckoutFailure(PayPalNativeCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
+                notifyOnFailure(PayPalNativeCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
             },
             onShippingChange = OnShippingChange { shippingChangeData, shippingChangeActions ->
-                listener.onPayPalCheckoutShippingChange(shippingChangeData, shippingChangeActions)
+                notifyOnShippingChange(shippingChangeData, shippingChangeActions)
             }
         )
+    }
+
+    private fun notifyOnFailure(error: PayPalSDKError) {
+        api.sendAnalyticsEvent("paypal-native-payments:failed")
+        listener?.onPayPalCheckoutFailure(error)
+    }
+
+    private fun notifyOnSuccess(result: PayPalNativeCheckoutResult) {
+        api.sendAnalyticsEvent("paypal-native-payments:succeeded")
+        listener?.onPayPalCheckoutSuccess(result)
+    }
+
+    private fun notifyOnShippingChange(
+        shippingChangeData: ShippingChangeData,
+        shippingChangeActions: ShippingChangeActions
+    ) {
+        api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
+        listener?.onPayPalCheckoutShippingChange(shippingChangeData, shippingChangeActions)
+    }
+
+    private fun notifyOnCancel() {
+        api.sendAnalyticsEvent("paypal-native-payments:canceled")
+        listener?.onPayPalCheckoutCanceled()
     }
 }
