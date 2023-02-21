@@ -142,7 +142,7 @@ class HttpRequestFactoryUnitTest {
                         "partner_client_id": "fake-client-id",
                         "c_sdk_ver": "fake-sdk-version",
                         "client_os": "fake client OS",
-                        "comp": "ppunifiedsdk",
+                        "comp": "ppcpmobilesdk",
                         "device_manufacturer": "fake-manufacturer",
                         "merchant_app_environment": "fake-environment",
                         "event_name": "fake-event",
