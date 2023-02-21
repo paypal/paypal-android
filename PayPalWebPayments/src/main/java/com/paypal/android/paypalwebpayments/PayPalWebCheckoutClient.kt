@@ -113,7 +113,6 @@ class PayPalWebCheckoutClient internal constructor(
                 browserSwitchResult?.requestMetadata!!
             )
             if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
-                api.sendAnalyticsEvent("paypal-web-payments:succeeded")
                 deliverSuccess(
                     PayPalWebCheckoutResult(
                         webResult.orderId,
@@ -141,6 +140,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
+        api.sendAnalyticsEvent("paypal-web-payments:succeeded")
         listener?.onPayPalWebSuccess(result)
     }
 }
