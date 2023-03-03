@@ -72,7 +72,8 @@ class CardClient internal constructor(
         try {
             cardAPI.fetchCachedOrRemoteClientID()
         } catch (e: PayPalSDKError) {
-            throw APIClientError.clientIDNotFoundError(e.code, e.correlationID)
+            notifyApproveOrderFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
+            return
         }
 
         val response = cardAPI.confirmPaymentSource(cardRequest)
