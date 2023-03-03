@@ -5,6 +5,8 @@ import android.util.Log
 import android.util.LruCache
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.analytics.DeviceInspector
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * This class is exposed for internal PayPal use only. Do not use.
@@ -73,12 +75,20 @@ class API internal constructor(
         return clientID
     }
 
-    suspend fun sendAnalyticsEvent(name: String) {
-        try {
-            val clientID = fetchCachedOrRemoteClientID()
-            analyticsService.sendAnalyticsEvent(name, clientID)
-        } catch (e: PayPalSDKError) {
-            Log.d("[PayPal SDK]", "Failed to send analytics due to missing clientID: ${e.message}")
+    /**
+     * Sends analytics event to https://api.paypal.com/v1/tracking/events/ via a background task.
+     */
+    fun sendAnalyticsEvent(name: String) {
+        GlobalScope.launch {
+            try {
+                val clientID = fetchCachedOrRemoteClientID()
+                analyticsService.sendAnalyticsEvent(name, clientID)
+            } catch (e: PayPalSDKError) {
+                Log.d(
+                    "[PayPal SDK]",
+                    "Failed to send analytics due to missing clientID: ${e.message}"
+                )
+            }
         }
     }
 

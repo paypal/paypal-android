@@ -41,7 +41,7 @@ data class AnalyticsEventData(
             .put(KEY_CLIENT_ID, clientID)
             .put(KEY_CLIENT_SDK_VERSION, deviceData.clientSDKVersion)
             .put(KEY_CLIENT_OS, deviceData.clientOS)
-            .put(KEY_COMPONENT, "ppunifiedsdk")
+            .put(KEY_COMPONENT, "ppcpmobilesdk")
             .put(KEY_DEVICE_MANUFACTURER, deviceData.deviceManufacturer)
             .put(KEY_DEVICE_MODEL, deviceData.deviceModel)
             .put(KEY_ENVIRONMENT, environment)

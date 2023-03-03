@@ -47,7 +47,7 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
-        listener?.onPayPalWebFailure(it)
+        deliverFailure(it)
     }
 
     private var browserSwitchResult: BrowserSwitchResult? = null
@@ -76,6 +76,8 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
+        api.sendAnalyticsEvent("paypal-web-payments:started")
+
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
                 api.fetchCachedOrRemoteClientID()
@@ -87,9 +89,7 @@ class PayPalWebCheckoutClient internal constructor(
                 )
                 browserSwitchClient.start(activity, browserSwitchOptions)
             } catch (e: PayPalSDKError) {
-                listener?.onPayPalWebFailure(
-                    APIClientError.clientIDNotFoundError(e.code, e.correlationID)
-                )
+                deliverFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             }
         }
     }
@@ -113,23 +113,34 @@ class PayPalWebCheckoutClient internal constructor(
                 browserSwitchResult?.requestMetadata!!
             )
             if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
-                listener?.onPayPalWebSuccess(
+                deliverSuccess(
                     PayPalWebCheckoutResult(
                         webResult.orderId,
                         webResult.payerId
                     )
                 )
             } else {
-                listener?.onPayPalWebFailure(PayPalWebCheckoutError.malformedResultError)
+                deliverFailure(PayPalWebCheckoutError.malformedResultError)
             }
         } else {
-            listener?.onPayPalWebFailure(PayPalWebCheckoutError.unknownError)
+            deliverFailure(PayPalWebCheckoutError.unknownError)
         }
         browserSwitchResult = null
     }
 
     private fun deliverCancellation() {
         browserSwitchResult = null
+        api.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled")
         listener?.onPayPalWebCanceled()
+    }
+
+    private fun deliverFailure(error: PayPalSDKError) {
+        api.sendAnalyticsEvent("paypal-web-payments:failed")
+        listener?.onPayPalWebFailure(error)
+    }
+
+    private fun deliverSuccess(result: PayPalWebCheckoutResult) {
+        api.sendAnalyticsEvent("paypal-web-payments:succeeded")
+        listener?.onPayPalWebSuccess(result)
     }
 }
