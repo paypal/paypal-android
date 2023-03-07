@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'microsoft'
+          distribution: 'zulu'
       - name: Generate Code Coverage Reports
         run: ./gradlew jacocoTestReport
       - name: Upload Core coverage to Codecov

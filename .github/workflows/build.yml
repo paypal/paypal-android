@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'microsoft'
+          distribution: 'zulu'
             #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
       - name: Decode Signing Key
         uses: ./.github/actions/decode_signing_key_action
