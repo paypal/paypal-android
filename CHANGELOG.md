@@ -1,5 +1,9 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* `PayPalNativePayments`:
+  * Remove `Approval` from `PayPalNativeCheckoutResult`, expose only `orderID` and `payerID`
+
 ## 0.0.8 (2023-03-13)
 * `PayPalNativePayments`:
   *  Bump `PayPal Native Checkout` to `0.8.8` and add `return_url`
