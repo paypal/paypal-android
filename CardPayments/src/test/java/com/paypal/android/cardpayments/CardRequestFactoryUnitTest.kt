@@ -95,6 +95,7 @@ class CardRequestFactoryUnitTest {
                 "card": {
                   "number": "4111111111111111",
                   "expiry": "2022-01",
+                  "security_code": "123",
                   "attributes": {
                     "verification": {
                       "method": "SCA_WHEN_REQUIRED"
@@ -128,6 +129,7 @@ class CardRequestFactoryUnitTest {
                 "card": {
                   "number": "4111111111111111",
                   "expiry": "2022-01",
+                  "security_code": "123",
                   "attributes": {
                     "verification": {
                       "method": "SCA_ALWAYS"
