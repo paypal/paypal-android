@@ -3,30 +3,29 @@ package com.paypal.android.cardpayments
 import com.paypal.android.corepayments.Address
 
 /**
- * Initialize a card object
+ * Represents raw credit or debit card data provided by the customer.
  */
-
 data class Card @JvmOverloads constructor(
 
     /**
-     * The card number
+     * The primary account number (PAN) for the payment card
      */
     var number: String,
 
     /**
-     * 2-digit card expiration month
+     * The 2-digit card expiration month in `MM` format
      */
     val expirationMonth: String,
 
     /**
-     * 4-digit card expiration year
+     * The 4-digit card expiration year in `YYYY` format
      */
     val expirationYear: String,
 
     /**
-     * Optional. The card's security code (CVV, CVC, CVN, CVE, or CID)
+     * The three- or four-digit security code of the card. Also known as the CVV, CVC, CVN, CVE, or CID.
      */
-    var securityCode: String? = null,
+    var securityCode: String,
 
     /**
      * Optional. The card holder's name as it appears on the card
@@ -34,7 +33,7 @@ data class Card @JvmOverloads constructor(
     var cardholderName: String? = null,
 
     /**
-     * Optional. The portable international postal address
+     * Optional. The billing address
      */
     var billingAddress: Address? = null,
 )
