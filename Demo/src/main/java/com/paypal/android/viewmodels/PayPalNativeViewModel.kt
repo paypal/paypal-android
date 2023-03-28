@@ -18,7 +18,6 @@ import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.android.utils.OrderUtils.asValueString
 import com.paypal.android.utils.OrderUtils.getAmount
-import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.order.Options
 import com.paypal.checkout.order.patch.PatchOrderRequest
 import com.paypal.checkout.order.patch.fields.PatchAmount
