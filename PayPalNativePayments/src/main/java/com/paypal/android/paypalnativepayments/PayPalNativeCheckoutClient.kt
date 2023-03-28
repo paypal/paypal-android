@@ -88,7 +88,7 @@ class PayPalNativeCheckoutClient internal constructor (
         PayPalCheckout.registerCallbacks(
             onApprove = OnApprove { approval ->
                 val result = approval.run {
-                    PayPalNativeCheckoutResult(this)
+                    PayPalNativeCheckoutResult(this.data.orderId, this.data.payerId)
                 }
                 notifyOnSuccess(result)
             },

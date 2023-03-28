@@ -241,7 +241,11 @@ class PayPalNativeCheckoutClientTest {
 
     @Test
     fun `when OnApprove is invoked, onPayPalSuccess is called`() {
-        val approval = mockk<Approval>()
+        val mockOrderID = "mock_order_id"
+        val mockPayerID = "mock_payer_id"
+        val approval = mockk<Approval>(relaxed = true)
+        every { approval.data.payerId } returns mockPayerID
+        every { approval.data.orderId } returns mockOrderID
         val onApproveSlot = slot<OnApprove>()
         val paypalCheckoutResultSlot = slot<PayPalNativeCheckoutResult>()
 
@@ -262,7 +266,8 @@ class PayPalNativeCheckoutClientTest {
         every {
             payPalClientListener.onPayPalCheckoutSuccess(capture(paypalCheckoutResultSlot))
         } answers {
-            assert(paypalCheckoutResultSlot.captured.approval == approval)
+            assert(paypalCheckoutResultSlot.captured.orderID == mockOrderID)
+            assert(paypalCheckoutResultSlot.captured.payerID == mockOrderID)
         }
 
         verify { payPalClientListener.onPayPalCheckoutSuccess(any()) }
