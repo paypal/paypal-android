@@ -10,7 +10,6 @@ import com.paypal.checkout.approve.Approval
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
-import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.error.ErrorInfo
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
@@ -209,17 +208,17 @@ class PayPalNativeCheckoutClientTest {
 
     @Test
     fun `when startCheckout is invoked, PayPalCheckout startCheckout is called`() = runTest {
-        val createOrder = mockk<CreateOrder>(relaxed = true)
+        val request = PayPalNativeCheckoutRequest("mock_order_id")
         every { PayPalCheckout.startCheckout(any()) } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         resetField(PayPalCheckout::class.java, "isConfigSet", true)
 
-        sut.startCheckout(createOrder)
+        sut.startCheckout(request)
         advanceUntilIdle()
 
         verify {
-            PayPalCheckout.startCheckout(createOrder)
+            PayPalCheckout.startCheckout(any())
         }
     }
 
