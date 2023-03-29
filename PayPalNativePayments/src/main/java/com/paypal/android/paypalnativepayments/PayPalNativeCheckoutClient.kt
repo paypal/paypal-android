@@ -132,13 +132,17 @@ class PayPalNativeCheckoutClient internal constructor (
         shippingChangeData: ShippingChangeData,
         shippingChangeActions: ShippingChangeActions
     ) {
-        //TODO: ask for spepcific an fpti events
-        api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
         shippingChangeActions.approve()
         shippingListener?.let {
             when (shippingChangeData.shippingChangeType) {
-                ShippingChangeType.ADDRESS_CHANGE -> it.onPayPalNativeShippingAddressChange()
-                ShippingChangeType.OPTION_CHANGE -> it.onPayPalNativeShippingMethodChange()
+                ShippingChangeType.ADDRESS_CHANGE -> {
+                    api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
+                    it.onPayPalNativeShippingAddressChange()
+                }
+                ShippingChangeType.OPTION_CHANGE -> {
+                    api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+                    it.onPayPalNativeShippingMethodChange()
+                }
             }
         }
     }
