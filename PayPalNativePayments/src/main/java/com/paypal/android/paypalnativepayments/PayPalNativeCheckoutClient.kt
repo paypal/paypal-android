@@ -16,6 +16,7 @@ import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
+import com.paypal.checkout.shipping.ShippingChangeType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +60,12 @@ class PayPalNativeCheckoutClient internal constructor (
                 registerCallbacks()
             }
         }
+
+    /**
+     * Sets a listener to receive notifications when a change in shipping address or method occurs.
+     */
+    var shippingListener: PayPalNativeShippingListener? = null
+
     /**
      * Present a Paypal Payseet and start a PayPal transaction.
      *
@@ -125,8 +132,15 @@ class PayPalNativeCheckoutClient internal constructor (
         shippingChangeData: ShippingChangeData,
         shippingChangeActions: ShippingChangeActions
     ) {
+        //TODO: ask for spepcific an fpti events
         api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
-        listener?.onPayPalCheckoutShippingChange(shippingChangeData, shippingChangeActions)
+        shippingChangeActions.approve()
+        shippingListener?.let {
+            when (shippingChangeData.shippingChangeType) {
+                ShippingChangeType.ADDRESS_CHANGE -> it.onPayPalNativeShippingAddressChange()
+                ShippingChangeType.OPTION_CHANGE -> it.onPayPalNativeShippingMethodChange()
+            }
+        }
     }
 
     private fun notifyOnCancel() {
