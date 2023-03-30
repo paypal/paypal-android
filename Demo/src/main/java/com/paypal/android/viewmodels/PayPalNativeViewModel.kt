@@ -50,12 +50,10 @@ class PayPalNativeViewModel @Inject constructor(
         }
 
         override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
-            result.approval.data.apply {
+            result.apply {
                 internalState.postValue(NativeCheckoutViewState.CheckoutComplete(
-                    payerId,
-                    orderId,
-                    paymentId,
-                    billingToken
+                    payerID,
+                    orderID
                 ))
             }
         }

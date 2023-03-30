@@ -14,8 +14,6 @@ sealed class NativeCheckoutViewState {
     class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) : NativeCheckoutViewState()
     data class CheckoutComplete(
         val payerId: String?,
-        val orderId: String?,
-        val paymentId: String?,
-        val billingToken: String? = null,
+        val orderId: String?
     ) : NativeCheckoutViewState()
 }

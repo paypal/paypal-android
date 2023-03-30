@@ -158,9 +158,7 @@ class PayPalNativeFragment : Fragment() {
 
     private fun checkoutComplete(viewState: NativeCheckoutViewState.CheckoutComplete) {
         val content = "Order Id: ${viewState.orderId} \n" +
-                "Payer Id: ${viewState.payerId} \n" +
-                "Payment Id: ${viewState.paymentId} \n" +
-                "Billing Token: ${viewState.billingToken}"
+                "Payer Id: ${viewState.payerId} \n"
         setContent(getString(R.string.approved), content)
         hideProgress()
         with(binding) {
