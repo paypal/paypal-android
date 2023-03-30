@@ -12,12 +12,12 @@ import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.android.utils.OrderUtils.asValueString
 import com.paypal.android.utils.OrderUtils.getAmount
-import com.paypal.checkout.createorder.CreateOrder
 import com.paypal.checkout.order.Options
 import com.paypal.checkout.order.patch.PatchOrderRequest
 import com.paypal.checkout.order.patch.fields.PatchAmount
@@ -141,10 +141,7 @@ class PayPalNativeViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             val orderId = getOrderIdUseCase(shippingPreferenceType)
             orderId?.also {
-                startCheckoutFlow(CreateOrder { createOrderActions ->
-                    createOrderActions.set(it)
-                    internalState.postValue(NativeCheckoutViewState.OrderCreated(it))
-                })
+                payPalClient.startCheckout(PayPalNativeCheckoutRequest(it))
             }
         }
     }
@@ -152,10 +149,6 @@ class PayPalNativeViewModel @Inject constructor(
     fun reset() {
         accessToken = ""
         internalState.postValue(NativeCheckoutViewState.Initial)
-    }
-
-    private fun startCheckoutFlow(createOrder: CreateOrder) {
-        payPalClient.startCheckout(createOrder)
     }
 
     private fun initPayPalClient(accessToken: String) {
