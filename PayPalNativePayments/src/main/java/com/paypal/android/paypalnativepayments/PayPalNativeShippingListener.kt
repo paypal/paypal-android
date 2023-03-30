@@ -18,5 +18,4 @@ interface PayPalNativeShippingListener {
      * @param shippingMethod the user's most recently selected shipping method
      */
     fun onPayPalNativeShippingMethodChange(shippingMethod: PayPalNativeShippingMethod)
-
 }

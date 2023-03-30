@@ -30,12 +30,4 @@ interface PayPalNativeCheckoutListener {
      * Called when the PayPal flow was canceled by the user.
      */
     fun onPayPalCheckoutCanceled()
-
-    /**
-     * Called when a shipping address changes
-     */
-    fun onPayPalCheckoutShippingChange(
-        shippingChangeData: ShippingChangeData,
-        shippingChangeActions: ShippingChangeActions
-    )
 }
