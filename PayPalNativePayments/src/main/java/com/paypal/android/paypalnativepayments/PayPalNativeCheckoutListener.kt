@@ -1,8 +1,6 @@
 package com.paypal.android.paypalnativepayments
 
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.checkout.shipping.ShippingChangeActions
-import com.paypal.checkout.shipping.ShippingChangeData
 
 /**
  * Implement this callback to receive results from [PayPalNativeCheckoutClient].
