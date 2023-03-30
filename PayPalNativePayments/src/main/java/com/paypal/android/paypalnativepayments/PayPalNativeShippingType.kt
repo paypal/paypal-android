@@ -17,6 +17,6 @@ enum class PayPalNativeShippingType {
     PICKUP;
 
     companion object {
-        internal fun fromShippingType(type: ShippingType?) = valueOf(type.toString())
+        internal fun fromShippingType(type: ShippingType?) = type?.let { valueOf(type.toString()) }
     }
 }
