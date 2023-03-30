@@ -137,11 +137,17 @@ class PayPalNativeCheckoutClient internal constructor (
             when (shippingChangeData.shippingChangeType) {
                 ShippingChangeType.ADDRESS_CHANGE -> {
                     api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
-                    it.onPayPalNativeShippingAddressChange()
+                    it.onPayPalNativeShippingAddressChange(
+                        PayPalNativeShippingAddress(shippingChangeData.shippingAddress)
+                    )
                 }
                 ShippingChangeType.OPTION_CHANGE -> {
-                    api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
-                    it.onPayPalNativeShippingMethodChange()
+                    shippingChangeData.selectedShippingOption?.let { options ->
+                        api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+                        it.onPayPalNativeShippingMethodChange(
+                            PayPalNativeShippingMethod(options)
+                        )
+                    }
                 }
             }
         }

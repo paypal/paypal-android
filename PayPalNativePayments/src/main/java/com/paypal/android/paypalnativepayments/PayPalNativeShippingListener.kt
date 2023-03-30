@@ -10,13 +10,13 @@ interface PayPalNativeShippingListener {
      *
      * @param shippingAddress the user's most recently selected shipping address
      */
-    fun onPayPalNativeShippingAddressChange()
+    fun onPayPalNativeShippingAddressChange(shippingAddress: PayPalNativeShippingAddress)
 
     /**
      * Notify when the users selected shipping method changes
      *
      * @param shippingMethod the user's most recently selected shipping method
      */
-    fun onPayPalNativeShippingMethodChange()
+    fun onPayPalNativeShippingMethodChange(shippingMethod: PayPalNativeShippingMethod)
 
 }
