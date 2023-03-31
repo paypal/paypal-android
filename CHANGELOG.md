@@ -3,6 +3,9 @@
 ## unreleased
 * CardPayments:
   * Make `Card.securityCode` required
+* `PayPalNativePayments`:
+  * Remove `Approval` from `PayPalNativeCheckoutResult`, expose only `orderID` and `payerID`
+  * Add `PayPalNativeCheckoutRequest` to `startCheckout`, removing `CreateOrder` callback
 
 ## 0.0.8 (2023-03-13)
 * `PayPalNativePayments`:

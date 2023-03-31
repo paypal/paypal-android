@@ -32,6 +32,16 @@ class PayPalNativeCheckoutClient internal constructor (
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
+    /**
+     * Create an instance of PayPalNativeCheckoutClient to process PayPal transactions
+     * @param application your app's Application object
+     * @param coreConfig CoreConfig to configure the paypal client
+     * @param returnUrl This is the Return URL value that was added to your app in the
+     * PayPal Developer Portal. Please ensure that this value is set in the PayPal Developer Portal,
+     * as it is required for a successful checkout flow. The Return URL should contain your app's
+     * package name appended with "://paypalpay". Example: "com.sample.example://paypalpay".
+     * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
+     */
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
             this(application, coreConfig, returnUrl, API(coreConfig, application))
 
@@ -50,16 +60,11 @@ class PayPalNativeCheckoutClient internal constructor (
             }
         }
     /**
-     * Initiate a PayPal checkout for an order.
+     * Present a Paypal Payseet and start a PayPal transaction.
      *
-     * @param returnUrl This is the Return URL value that was added to your app in the
-     * PayPal Developer Portal. Please ensure that this value is set in the PayPal Developer Portal,
-     * as it is required for a successful checkout flow. The Return URL should contain your app's
-     * package name appended with "://paypalpay". Example: "com.sample.example://paypalpay".
-     * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
-     * @param createOrder the id of the order
+     * @param request the PayPalNativeCheckoutRequest for the transaction
      */
-    fun startCheckout(createOrder: CreateOrder) {
+    fun startCheckout(request: PayPalNativeCheckoutRequest) {
         api.sendAnalyticsEvent("paypal-native-payments:started")
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
@@ -77,7 +82,9 @@ class PayPalNativeCheckoutClient internal constructor (
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
-                PayPalCheckout.startCheckout(createOrder)
+                PayPalCheckout.startCheckout(CreateOrder {
+                    it.set(request.orderID)
+                })
             } catch (e: PayPalSDKError) {
                 listener?.onPayPalCheckoutFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             }
@@ -88,7 +95,7 @@ class PayPalNativeCheckoutClient internal constructor (
         PayPalCheckout.registerCallbacks(
             onApprove = OnApprove { approval ->
                 val result = approval.run {
-                    PayPalNativeCheckoutResult(this)
+                    PayPalNativeCheckoutResult(this.data.orderId, this.data.payerId)
                 }
                 notifyOnSuccess(result)
             },
