@@ -5,7 +5,6 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.PayPalSDKError

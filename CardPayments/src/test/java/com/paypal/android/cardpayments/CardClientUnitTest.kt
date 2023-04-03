@@ -7,7 +7,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.cardpayments.api.CardAPI
+import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
 import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import com.paypal.android.cardpayments.api.GetOrderRequest
@@ -44,7 +44,7 @@ class CardClientUnitTest {
 
     private val cardRequest = CardRequest(orderID, card, "return_url")
 
-    private val cardAPI = mockk<CardAPI>(relaxed = true)
+    private val cardAPI = mockk<OrdersAPI>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
 

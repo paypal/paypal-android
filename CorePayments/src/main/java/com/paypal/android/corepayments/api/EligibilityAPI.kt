@@ -1,7 +1,6 @@
 package com.paypal.android.corepayments.api
 
 import android.content.Context
-import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.api.models.Eligibility

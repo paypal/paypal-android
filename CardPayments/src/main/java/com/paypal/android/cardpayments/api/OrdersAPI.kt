@@ -3,47 +3,39 @@ package com.paypal.android.cardpayments.api
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardRequestFactory
 import com.paypal.android.cardpayments.CardResponseParser
-import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.APIClient
 
-internal class CardAPI(
-    private val api: API,
+internal class OrdersAPI(
+    private val apiClient: APIClient,
     private val requestFactory: CardRequestFactory = CardRequestFactory(),
-    private val responseParser: CardResponseParser = CardResponseParser()
+    private val responseParser: CardResponseParser = CardResponseParser(),
 ) {
-
-    suspend fun fetchCachedOrRemoteClientID() {
-        api.fetchCachedOrRemoteClientID()
-    }
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
-        val httpResponse = api.send(apiRequest)
+        val httpResponse = apiClient.send(apiRequest)
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed")
+//            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed")
             throw error
         } else {
-            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:succeeded")
+//            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:succeeded")
             return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
         }
     }
 
     suspend fun getOrderInfo(getOrderRequest: GetOrderRequest): GetOrderInfoResponse {
         val apiRequest = requestFactory.createGetOrderInfoRequest(getOrderRequest)
-        val httpResponse = api.send(apiRequest)
+        val httpResponse = apiClient.send(apiRequest)
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-            sendAnalyticsEvent("card-payments:3ds:get-order-info:failed")
+//            sendAnalyticsEvent("card-payments:3ds:get-order-info:failed")
             throw error
         } else {
-            sendAnalyticsEvent("card-payments:3ds:get-order-info:succeeded")
+//            sendAnalyticsEvent("card-payments:3ds:get-order-info:succeeded")
             return responseParser.parseGetOrderInfoResponse(httpResponse)
         }
-    }
-
-    fun sendAnalyticsEvent(name: String) {
-        api.sendAnalyticsEvent(name)
     }
 }
