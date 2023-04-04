@@ -1,6 +1,7 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
+import android.util.Log
 import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
@@ -12,7 +13,13 @@ import com.paypal.checkout.cancel.OnCancel
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.config.UIConfig
 import com.paypal.checkout.createorder.CreateOrder
+import com.paypal.checkout.createorder.CurrencyCode
 import com.paypal.checkout.error.OnError
+import com.paypal.checkout.order.Amount
+import com.paypal.checkout.order.Options
+import com.paypal.checkout.order.patch.PatchOrderRequest
+import com.paypal.checkout.order.patch.fields.PatchAmount
+import com.paypal.checkout.order.patch.fields.PatchShippingOptions
 import com.paypal.checkout.shipping.OnShippingChange
 import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
@@ -20,7 +27,11 @@ import com.paypal.checkout.shipping.ShippingChangeType
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Use this client to checkout with PayPal.
@@ -132,7 +143,6 @@ class PayPalNativeCheckoutClient internal constructor (
         shippingChangeData: ShippingChangeData,
         shippingChangeActions: ShippingChangeActions
     ) {
-        shippingChangeActions.approve()
         shippingListener?.let {
             when (shippingChangeData.shippingChangeType) {
                 ShippingChangeType.ADDRESS_CHANGE -> {
@@ -140,13 +150,30 @@ class PayPalNativeCheckoutClient internal constructor (
                     it.onPayPalNativeShippingAddressChange(
                         PayPalNativeShippingAddress(shippingChangeData.shippingAddress)
                     )
+                    shippingChangeActions.approve()
                 }
                 ShippingChangeType.OPTION_CHANGE -> {
-                    shippingChangeData.selectedShippingOption?.let { options ->
-                        api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
-                        it.onPayPalNativeShippingMethodChange(
-                            PayPalNativeShippingMethod(options)
+//                    shippingChangeData.selectedShippingOption?.let { options ->
+//                        api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+//                        it.onPayPalNativeShippingMethodChange(
+//                            PayPalNativeShippingMethod(options)
+//                        )
+//                    }
+
+                    val options: List<Options> = shippingChangeData.shippingOptions
+                    val updatedShippingAmount = shippingChangeData.selectedShippingOption?.amount?.value?.toDouble()!!
+                    val newTotalValue = 5.00 + updatedShippingAmount
+                    val patchRequest = PatchOrderRequest(
+                        PatchShippingOptions.Replace(options),
+                        PatchAmount.Replace(
+                            Amount(
+                                currencyCode = CurrencyCode.USD,
+                                value = newTotalValue.toString()
+                            )
                         )
+                    )
+                    shippingChangeActions.patchOrder(patchRequest) {
+
                     }
                 }
             }
