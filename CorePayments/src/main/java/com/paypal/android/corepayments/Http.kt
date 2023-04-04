@@ -14,6 +14,7 @@ internal class Http(
     private val httpResponseParser: HttpResponseParser = HttpResponseParser()
 ) {
 
+
     companion object {
         private val TAG = Http::class.qualifiedName
     }
