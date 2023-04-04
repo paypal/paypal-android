@@ -9,12 +9,12 @@ import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CardAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
-import com.paypal.android.cardpayments.api.GetOrderInfoResponse
-import com.paypal.android.cardpayments.api.GetOrderRequest
-import com.paypal.android.cardpayments.model.CardResult
-import com.paypal.android.cardpayments.model.PaymentSource
+import com.paypal.android.corepayments.api.models.GetOrderInfoResponse
+import com.paypal.android.corepayments.models.CardResult
+import com.paypal.android.corepayments.models.PaymentSource
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.models.OrderIntent
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher

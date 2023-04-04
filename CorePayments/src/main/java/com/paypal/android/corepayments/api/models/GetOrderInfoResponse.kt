@@ -1,12 +1,12 @@
-package com.paypal.android.cardpayments.api
+package com.paypal.android.corepayments.api.models
 
-import com.paypal.android.cardpayments.OrderIntent
-import com.paypal.android.cardpayments.model.PaymentSource
-import com.paypal.android.cardpayments.model.PurchaseUnit
+import com.paypal.android.corepayments.models.PaymentSource
+import com.paypal.android.corepayments.models.PurchaseUnit
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PaymentsJSON
+import com.paypal.android.corepayments.models.OrderIntent
 
-internal data class GetOrderInfoResponse(
+data class GetOrderInfoResponse(
     val orderId: String,
     val orderStatus: OrderStatus,
     val orderIntent: OrderIntent,
