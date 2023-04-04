@@ -5,9 +5,9 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalGraphQLClient
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.R
+import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.api.models.Eligibility
-import com.paypal.android.corepayments.graphql.common.GraphQLRequest
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibility
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
@@ -21,6 +21,7 @@ import org.json.JSONObject
 internal class EligibilityAPI internal constructor(
     private val secureTokenServiceAPI: SecureTokenServiceAPI,
     private val graphQLClient: PayPalGraphQLClient,
+    private val resourceLoader: ResourceLoader
 ) {
 
     /**
@@ -29,20 +30,23 @@ internal class EligibilityAPI internal constructor(
      */
     constructor(context: Context, coreConfig: CoreConfig) : this(
         SecureTokenServiceAPI(coreConfig),
-        PayPalGraphQLClient(context, coreConfig),
+        PayPalGraphQLClient(coreConfig),
+        ResourceLoader(context)
     )
 
     suspend fun checkEligibility2(): Eligibility {
         val clientId = secureTokenServiceAPI.fetchCachedOrRemoteClientID()
 
-        // Ref: https://www.apollographql.com/docs/react/data/operation-best-practices/#use-graphql-variables-to-provide-arguments
+        val query = resourceLoader.loadRawResource(R.raw.graphql_query_funding_eligibility)
         val variables = JSONObject()
             .put("clientId", clientId)
             .put("intent", FundingEligibilityIntent.CAPTURE)
             .put("currency", SupportedCountryCurrencyType.USD)
             .put("enableFunding", listOf(SupportedPaymentMethodsType.VENMO))
 
-        val graphQLRequest = GraphQLRequest(R.raw.graphql_query_funding_eligibility, variables)
+        val graphQLRequest = JSONObject()
+            .put("query", query)
+            .put("variables", variables)
         val graphQLResponse = graphQLClient.send(graphQLRequest)
 
         return if (graphQLResponse.isSuccessful) {
