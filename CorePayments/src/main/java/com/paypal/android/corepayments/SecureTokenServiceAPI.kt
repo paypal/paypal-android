@@ -8,6 +8,8 @@ class SecureTokenServiceAPI internal constructor(
     private val httpRequestFactory: HttpRequestFactory,
 ) {
 
+    constructor(configuration: CoreConfig): this(configuration, Http(), HttpRequestFactory())
+
     companion object {
         val clientIDCache = LruCache<String, String>(10)
     }

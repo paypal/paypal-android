@@ -3,17 +3,17 @@ package com.paypal.android.cardpayments.api
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardRequestFactory
 import com.paypal.android.cardpayments.CardResponseParser
-import com.paypal.android.corepayments.APIClient
+import com.paypal.android.corepayments.PayPalRESTClient
 
 internal class OrdersAPI(
-    private val apiClient: APIClient,
+    private val PayPalRESTClient: PayPalRESTClient,
     private val requestFactory: CardRequestFactory = CardRequestFactory(),
     private val responseParser: CardResponseParser = CardResponseParser(),
 ) {
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
-        val httpResponse = apiClient.send(apiRequest)
+        val httpResponse = PayPalRESTClient.send(apiRequest)
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
@@ -27,7 +27,7 @@ internal class OrdersAPI(
 
     suspend fun getOrderInfo(getOrderRequest: GetOrderRequest): GetOrderInfoResponse {
         val apiRequest = requestFactory.createGetOrderInfoRequest(getOrderRequest)
-        val httpResponse = apiClient.send(apiRequest)
+        val httpResponse = PayPalRESTClient.send(apiRequest)
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {

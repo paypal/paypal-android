@@ -6,14 +6,15 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.api.GetOrderRequest
+import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
-import com.paypal.android.corepayments.APIClient
+import com.paypal.android.corepayments.PayPalRESTClient
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,8 @@ class CardClient internal constructor(
     private val ordersAPI: OrdersAPI,
     private val browserSwitchClient: BrowserSwitchClient,
     private val analyticsService: AnalyticsService,
-    private val dispatcher: CoroutineDispatcher
+    private val secureTokenServiceAPI: SecureTokenServiceAPI,
+    private val dispatcher: CoroutineDispatcher,
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
@@ -38,6 +40,7 @@ class CardClient internal constructor(
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         notifyApproveOrderFailure(it)
     }
+
     /**
      *  CardClient constructor
      *
@@ -47,9 +50,10 @@ class CardClient internal constructor(
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
                 activity,
-                OrdersAPI(APIClient(configuration)),
+                OrdersAPI(PayPalRESTClient(configuration)),
                 BrowserSwitchClient(),
-                AnalyticsService(),
+                AnalyticsService(activity.applicationContext, configuration),
+                SecureTokenServiceAPI(configuration),
                 Dispatchers.Main
             )
 
@@ -64,8 +68,7 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
-        ordersAPI.sendAnalyticsEvent("card-payments:3ds:started")
-
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:started")
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
         }
@@ -73,7 +76,7 @@ class CardClient internal constructor(
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         try {
-            ordersAPI.fetchCachedOrRemoteClientID()
+            secureTokenServiceAPI.fetchCachedOrRemoteClientID()
         } catch (e: PayPalSDKError) {
             notifyApproveOrderFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             return
@@ -86,7 +89,7 @@ class CardClient internal constructor(
             }
             notifyApproveOrderSuccess(result)
         } else {
-            ordersAPI.sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:challenge-required")
+            analyticsService.sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:challenge-required")
             approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
             // launch the 3DS flow
@@ -130,17 +133,17 @@ class CardClient internal constructor(
     }
 
     private fun notifyApproveOrderCanceled() {
-        ordersAPI.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled")
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled")
         approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        ordersAPI.sendAnalyticsEvent("card-payments:3ds:succeeded")
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded")
         approveOrderListener?.onApproveOrderSuccess(result)
     }
 
     private fun notifyApproveOrderFailure(error: PayPalSDKError) {
-        ordersAPI.sendAnalyticsEvent("card-payments:3ds:failed")
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed")
         approveOrderListener?.onApproveOrderFailure(error)
     }
 }
