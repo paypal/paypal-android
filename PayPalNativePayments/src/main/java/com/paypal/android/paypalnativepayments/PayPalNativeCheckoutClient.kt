@@ -1,10 +1,12 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.SecureTokenServiceAPI
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -27,12 +29,19 @@ class PayPalNativeCheckoutClient internal constructor (
     private val application: Application,
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
-    private val api: API,
+    private val secureTokenServiceAPI: SecureTokenServiceAPI,
+    private val analyticsService: AnalyticsService,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
-            this(application, coreConfig, returnUrl, API(coreConfig, application))
+            this(
+                application,
+                coreConfig,
+                returnUrl,
+                SecureTokenServiceAPI(coreConfig),
+                AnalyticsService(application.applicationContext, coreConfig)
+            )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
@@ -59,11 +68,11 @@ class PayPalNativeCheckoutClient internal constructor (
      * @param createOrder the id of the order
      */
     fun startCheckout(createOrder: CreateOrder) {
-        api.sendAnalyticsEvent("paypal-native-payments:started")
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:started")
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                val clientID = api.fetchCachedOrRemoteClientID()
+                val clientID = secureTokenServiceAPI.fetchCachedOrRemoteClientID()
 
                 val config = CheckoutConfig(
                     application = application,
@@ -104,12 +113,12 @@ class PayPalNativeCheckoutClient internal constructor (
     }
 
     private fun notifyOnFailure(error: PayPalSDKError) {
-        api.sendAnalyticsEvent("paypal-native-payments:failed")
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:failed")
         listener?.onPayPalCheckoutFailure(error)
     }
 
     private fun notifyOnSuccess(result: PayPalNativeCheckoutResult) {
-        api.sendAnalyticsEvent("paypal-native-payments:succeeded")
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:succeeded")
         listener?.onPayPalCheckoutSuccess(result)
     }
 
@@ -117,12 +126,12 @@ class PayPalNativeCheckoutClient internal constructor (
         shippingChangeData: ShippingChangeData,
         shippingChangeActions: ShippingChangeActions
     ) {
-        api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
         listener?.onPayPalCheckoutShippingChange(shippingChangeData, shippingChangeActions)
     }
 
     private fun notifyOnCancel() {
-        api.sendAnalyticsEvent("paypal-native-payments:canceled")
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:canceled")
         listener?.onPayPalCheckoutCanceled()
     }
 }
