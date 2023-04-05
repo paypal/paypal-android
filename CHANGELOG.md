@@ -1,6 +1,8 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+* CardPayments:
+  * Make `Card.securityCode` required
 * `PayPalNativePayments`:
   * Remove `Approval` from `PayPalNativeCheckoutResult`, expose only `orderID` and `payerID`
   * Add `PayPalNativeCheckoutRequest` to `startCheckout`, removing `CreateOrder` callback

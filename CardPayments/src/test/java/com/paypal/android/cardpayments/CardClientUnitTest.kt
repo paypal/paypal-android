@@ -39,7 +39,7 @@ import strikt.assertions.isEqualTo
 @RunWith(RobolectricTestRunner::class)
 class CardClientUnitTest {
 
-    private val card = Card("4111111111111111", "01", "24")
+    private val card = Card("4111111111111111", "01", "24", "123")
     private val orderID = "sample-order-id"
 
     private val cardRequest = CardRequest(orderID, card, "return_url")

@@ -82,7 +82,7 @@ class CardRequestFactoryUnitTest {
     @Test
     fun `it omits optional params when they are not set`() {
         val card =
-            Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
+            Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022", "123")
 
         val cardRequest = CardRequest(orderID, card, returnUrl)
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
@@ -95,6 +95,7 @@ class CardRequestFactoryUnitTest {
                 "card": {
                   "number": "4111111111111111",
                   "expiry": "2022-01",
+                  "security_code": "123",
                   "attributes": {
                     "verification": {
                       "method": "SCA_WHEN_REQUIRED"
@@ -114,7 +115,7 @@ class CardRequestFactoryUnitTest {
     @Test
     fun `it request 3DS strong consumer authentication with SCA_ALWAYS`() {
         val card =
-            Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022")
+            Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022", "123")
 
         val cardRequest = CardRequest(orderID, card, returnUrl, SCA.SCA_ALWAYS)
 
@@ -128,6 +129,7 @@ class CardRequestFactoryUnitTest {
                 "card": {
                   "number": "4111111111111111",
                   "expiry": "2022-01",
+                  "security_code": "123",
                   "attributes": {
                     "verification": {
                       "method": "SCA_ALWAYS"
