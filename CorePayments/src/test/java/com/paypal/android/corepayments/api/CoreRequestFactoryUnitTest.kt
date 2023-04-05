@@ -5,7 +5,6 @@ import com.paypal.android.corepayments.api.models.GetOrderRequest
 import org.junit.Test
 import org.junit.Assert.assertEquals
 
-
 class CoreRequestFactoryUnitTest {
 
     @Test

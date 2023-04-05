@@ -56,27 +56,7 @@ class CoreRequestParserUnitTest {
                             "merchant_id":"87YQEA4JG8AUW"
                         }
                     }
-                ],
-                "create_time":"2023-04-04T16:25:26Z",
-                "links":[
-                    {
-                        "href":"https://api.sandbox.paypal.com/v2/checkout/orders/89H32494DY5382259",
-                        "rel":"self","method":"GET"
-                    },
-                    {
-                        "href":"https://www.sandbox.paypal.com/checkoutnow?token=89H32494DY5382259",
-                        "rel":"approve","method":"GET"
-                    },
-                    {
-                        "href":"https://api.sandbox.paypal.com/v2/checkout/orders/89H32494DY5382259",
-                        "rel":"update",
-                        "method":"PATCH"
-                    },
-                    {
-                        "href":"https://api.sandbox.paypal.com/v2/checkout/orders/89H32494DY5382259/authorize",
-                        "rel":"authorize",
-                        "method":"POST"
-                    }
+                ]
                 ]
             }
         """.trimIndent()
@@ -104,7 +84,7 @@ class CoreRequestParserUnitTest {
             var capturedError: PayPalSDKError? = null
             try {
                 sut.parseGetOrderInfoResponse(mockHttpResponse)
-            } catch (e: PayPalSDKError){
+            } catch (e: PayPalSDKError) {
                 capturedError = e
             }
             Assert.assertEquals(Code.DATA_PARSING_ERROR.ordinal, capturedError?.code)
@@ -186,7 +166,6 @@ class CoreRequestParserUnitTest {
             every { httpResponse.headers } returns headers
             every { httpResponse.status } returns status
             every { httpResponse.body } returns body
-
 
             val sut = CoreRequestParser()
             val error = sut.parseError(httpResponse)
