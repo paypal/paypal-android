@@ -20,31 +20,15 @@ import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
-import com.paypal.android.utils.OrderUtils.asValueString
-import com.paypal.android.utils.OrderUtils.getAmount
-import com.paypal.checkout.order.Options
-import com.paypal.checkout.order.patch.PatchOrderRequest
-import com.paypal.checkout.order.patch.fields.PatchAmount
-import com.paypal.checkout.order.patch.fields.PatchShippingOptions
-import com.paypal.checkout.shipping.ShippingChangeActions
-import com.paypal.checkout.shipping.ShippingChangeData
-import com.paypal.checkout.shipping.ShippingChangeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class PayPalNativeViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
-
-    private companion object {
-        private const val SHIPPING_METHOD_INCREASE = 10f
-    }
 
     @Inject
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
@@ -76,51 +60,6 @@ class PayPalNativeViewModel @Inject constructor(
         override fun onPayPalCheckoutCanceled() {
             internalState.postValue(NativeCheckoutViewState.CheckoutCancelled)
         }
-
-//        override fun onPayPalCheckoutShippingChange(
-//            shippingChangeData: ShippingChangeData,
-//            shippingChangeActions: ShippingChangeActions
-//        ) {
-//            val options: List<Options>
-//            val updatedShippingAmount: String?
-//
-//            when (shippingChangeData.shippingChangeType) {
-//                ShippingChangeType.OPTION_CHANGE -> {
-//
-//                    options = shippingChangeData.shippingOptions
-//                    updatedShippingAmount = shippingChangeData.selectedShippingOption?.amount?.value
-//                }
-//                ShippingChangeType.ADDRESS_CHANGE -> {
-//                    options = shippingChangeData.shippingOptions.map {
-//                        it.copy(
-//                            amount = it.amount?.copy(
-//                                value = ((it.amount?.value?.toFloat() ?: 0f) + SHIPPING_METHOD_INCREASE).asValueString()
-//                            )
-//                        )
-//                    }
-//                    updatedShippingAmount = options.find { it.selected }?.amount?.value
-//                }
-//            }
-//
-//            val patchRequest = PatchOrderRequest(
-//                PatchShippingOptions.Replace(
-//                    purchaseUnitReferenceId = "PUHF",
-//                    options = options
-//                ),
-//                PatchAmount.Replace(
-//                    purchaseUnitReferenceId = "PUHF",
-//                    amount = getAmount(
-//                        value = "100.0",
-//                        shippingValue = updatedShippingAmount ?: "0.00"
-//                    )
-//                )
-//            )
-//            // TODO: patch order will fail because of bug in NXO. Ticket: https://paypal.atlassian.net/browse/DTNOR-607
-//            // issue reported at NXO: https://paypal.atlassian.net/browse/MXO-279
-//            shippingChangeActions.patchOrder(patchRequest) {
-//                internalState.postValue(NativeCheckoutViewState.OrderPatched)
-//            }
-//        }
     }
 
     private val shippingListener = object : PayPalNativeShippingListener {
@@ -132,7 +71,6 @@ class PayPalNativeViewModel @Inject constructor(
         override fun onPayPalNativeShippingMethodChange(shippingMethod: PayPalNativeShippingMethod) {
             Log.d("PayPalNativeViewModel", "Method change")
         }
-
     }
 
     private val internalState = MutableLiveData<NativeCheckoutViewState>(NativeCheckoutViewState.Initial)
