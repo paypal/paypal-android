@@ -25,7 +25,7 @@ class CoreRequestParserUnitTest {
         )
 
         @Test
-        fun `it parses an get info order response`() {
+        fun `it parses a get info order response`() {
             val response = """ 
             {
                 "id":"89H32494DY5382259",
@@ -56,7 +56,6 @@ class CoreRequestParserUnitTest {
                             "merchant_id":"87YQEA4JG8AUW"
                         }
                     }
-                ]
                 ]
             }
         """.trimIndent()
