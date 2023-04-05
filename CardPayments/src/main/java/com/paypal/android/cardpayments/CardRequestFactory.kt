@@ -1,11 +1,11 @@
 package com.paypal.android.cardpayments
 
-import com.paypal.android.cardpayments.api.GetOrderRequest
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.corepayments.api.CoreRequestFactory
 import org.json.JSONObject
 
-internal class CardRequestFactory {
+internal class CardRequestFactory : CoreRequestFactory() {
 
     fun createConfirmPaymentSourceRequest(cardRequest: CardRequest): APIRequest =
         cardRequest.run {
@@ -17,7 +17,7 @@ internal class CardRequestFactory {
                 .put("expiry", cardExpiry)
 
             card.cardholderName?.let { cardJSON.put("name", it) }
-            card.securityCode?.let { cardJSON.put("security_code", it) }
+            cardJSON.put("security_code", card.securityCode)
 
             card.billingAddress?.apply {
                 val billingAddressJSON = JSONObject()
@@ -50,9 +50,4 @@ internal class CardRequestFactory {
             val path = "v2/checkout/orders/$orderID/confirm-payment-source"
             APIRequest(path, HttpMethod.POST, body)
         }
-
-    fun createGetOrderInfoRequest(getOrderRequest: GetOrderRequest): APIRequest {
-        val path = "v2/checkout/orders/${getOrderRequest.orderId}"
-        return APIRequest(path, HttpMethod.GET, "")
-    }
 }
