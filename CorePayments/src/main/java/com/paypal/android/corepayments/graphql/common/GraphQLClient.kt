@@ -17,6 +17,10 @@ internal class GraphQLClientImpl(
     private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
 ) : GraphQLClient {
 
+    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<String> {
+        TODO("implement")
+    }
+
     override suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T> {
             val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
                 query.requestBody()
