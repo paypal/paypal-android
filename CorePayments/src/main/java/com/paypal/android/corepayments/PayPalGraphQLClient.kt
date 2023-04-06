@@ -8,13 +8,13 @@ class PayPalGraphQLClient internal constructor(
     private val coreConfig: CoreConfig,
     private val http: Http = Http()
 ) {
-    suspend fun send(request: JSONObject): GraphQLQueryResponse2 {
-        val httpRequest = mapGraphQLRequestToHttpRequest(request)
+    suspend fun send(graphQLRequest: JSONObject): GraphQLQueryResponse2 {
+        val httpRequest = createGraphQLHttpPOSTRequest(graphQLRequest)
         val response = http.send(httpRequest)
         return GraphQLQueryResponse2(response)
     }
 
-    private fun mapGraphQLRequestToHttpRequest(graphQLRequest: JSONObject): HttpRequest {
+    private fun createGraphQLHttpPOSTRequest(graphQLRequest: JSONObject): HttpRequest {
         val baseUrl = coreConfig.environment.grqphQlUrl
         val url = URL("$baseUrl/graphql")
         val body = graphQLRequest.toString()
