@@ -5,6 +5,7 @@ import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.api.models.GetOrderRequest
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.Approval
 import com.paypal.checkout.approve.OnApprove
@@ -19,6 +20,7 @@ import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 import com.paypal.checkout.shipping.ShippingChangeType
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -49,7 +51,7 @@ class PayPalNativeCheckoutClientTest {
     private val mockClientId = generateRandomString()
     private val mockReturnUrl = "mock_return_url"
 
-    private val api = mockk<API>(relaxed = true)
+    private val payPalNativeAPI = mockk<PayPalNativeAPI>(relaxed = true)
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
@@ -57,7 +59,7 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { api.fetchCachedOrRemoteClientID() } returns mockClientId
+        coEvery { payPalNativeAPI.fetchCachedOrRemoteClientID() } returns mockClientId
     }
 
     @After
@@ -76,7 +78,7 @@ class PayPalNativeCheckoutClientTest {
         } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.startCheckout(mockk())
+        sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
         advanceUntilIdle()
 
         verify {
@@ -105,7 +107,7 @@ class PayPalNativeCheckoutClientTest {
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         sut.listener = payPalCheckoutListener
 
-        sut.startCheckout(mockk())
+        sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
         advanceUntilIdle()
 
         verify {
@@ -140,7 +142,7 @@ class PayPalNativeCheckoutClientTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
-        coEvery { api.fetchCachedOrRemoteClientID() } throws error
+        coEvery { payPalNativeAPI.fetchCachedOrRemoteClientID() } throws error
         every {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -172,7 +174,7 @@ class PayPalNativeCheckoutClientTest {
 
             val config = CoreConfig("fake-access-token", Environment.LIVE)
             sut = getPayPalCheckoutClient(config, testScheduler)
-            sut.startCheckout(mockk())
+            sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
             advanceUntilIdle()
 
             verify {
@@ -197,7 +199,7 @@ class PayPalNativeCheckoutClientTest {
 
             val config = CoreConfig("fake-access-token", Environment.STAGING)
             sut = getPayPalCheckoutClient(config, testScheduler)
-            sut.startCheckout(mockk())
+            sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
             advanceUntilIdle()
 
             verify {
@@ -364,11 +366,11 @@ class PayPalNativeCheckoutClientTest {
             assert(shippingAddressSlot.captured.countryCode == "pepe")
         }
 
-        verify { shippingActions.approve() }
+        verify { shippingListener.onPayPalNativeShippingAddressChange(ofType(PayPalNativeShippingAddress::class)) }
     }
 
     @Test
-    fun `when OnShippingChange is invoked with method change, onPayPalNativeShippingMethodChange is called`() {
+    fun `when OnShippingChange is invoked with method change, onPayPalNativeShippingMethodChange is called`() = runTest {
         val onShippingChangeSlot = slot<OnShippingChange>()
         val shippingMethodSlot = slot<PayPalNativeShippingMethod>()
 
@@ -389,10 +391,13 @@ class PayPalNativeCheckoutClientTest {
             )
         } answers { onShippingChangeSlot.captured.onShippingChanged(shippingData, shippingActions) }
 
-        sut = getPayPalCheckoutClient()
+        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
 
         val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         val shippingListener = mockk<PayPalNativeShippingListener>(relaxed = true)
+
+        //every { shippingActions.patchOrder(any()) { } }
+
         sut.shippingListener = shippingListener
         sut.listener = payPalClientListener
 
@@ -404,7 +409,7 @@ class PayPalNativeCheckoutClientTest {
             assert(shippingMethodSlot.captured.label == mockLabel)
         }
 
-        verify { shippingActions.approve() }
+        coVerify { payPalNativeAPI.getOrderInfo(ofType(GetOrderRequest::class)) }
     }
 
     /**
@@ -426,7 +431,7 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
+            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, payPalNativeAPI, dispatcher)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, payPalNativeAPI)
     }
 }
