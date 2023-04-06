@@ -11,6 +11,7 @@ import com.paypal.android.corepayments.graphql.fundingEligibility.FundingEligibi
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsType
+import org.json.JSONObject
 
 /**
  *  API that checks merchants eligibility for different payment methods.
@@ -35,6 +36,9 @@ internal class EligibilityAPI internal constructor(
      *  @throws PayPalSDKError if something went wrong in the API call
      */
     suspend fun checkEligibility(): Eligibility {
+        graphQLClient.send(JSONObject())
+        return Eligibility(false, false, false, false, false)
+
         val fundingEligibilityQuery = FundingEligibilityQuery(
             clientId = api.fetchCachedOrRemoteClientID(),
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,

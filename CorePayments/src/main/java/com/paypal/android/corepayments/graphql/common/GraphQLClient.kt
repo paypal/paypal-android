@@ -8,6 +8,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 
 internal interface GraphQLClient {
+    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<String>
     suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T>
 }
 
@@ -17,7 +18,7 @@ internal class GraphQLClientImpl(
     private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
 ) : GraphQLClient {
 
-    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<String> {
+    override suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<String> {
         TODO("implement")
     }
 
