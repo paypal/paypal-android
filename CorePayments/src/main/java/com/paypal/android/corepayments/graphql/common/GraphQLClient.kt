@@ -8,7 +8,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 
 internal interface GraphQLClient {
-    suspend fun <T> executeQuery(query: Query<T>): GraphQlQueryResponse<T>
+    suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T>
 }
 
 internal class GraphQLClientImpl(
@@ -17,7 +17,7 @@ internal class GraphQLClientImpl(
     private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
 ) : GraphQLClient {
 
-    override suspend fun <T> executeQuery(query: Query<T>): GraphQlQueryResponse<T> {
+    override suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T> {
             val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
                 query.requestBody()
             )
@@ -30,12 +30,12 @@ internal class GraphQLClientImpl(
             val status = httpResponse.status
             return if (status == HttpURLConnection.HTTP_OK && !bodyResponse.isNullOrBlank()) {
                 val data = query.parse(JSONObject(bodyResponse).getJSONObject("data"))
-                GraphQlQueryResponse(
+                GraphQLQueryResponse(
                     data = data,
                     correlationId = correlationID
                 )
             } else {
-                GraphQlQueryResponse()
+                GraphQLQueryResponse()
             }
     }
 
