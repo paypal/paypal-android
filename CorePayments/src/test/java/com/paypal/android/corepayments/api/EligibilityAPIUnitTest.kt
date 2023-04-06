@@ -1,19 +1,21 @@
 package com.paypal.android.corepayments.api
 
-import com.paypal.android.corepayments.R
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
+import com.paypal.android.corepayments.graphql.common.GraphQLQueryResponse
+import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsTypeEligibility
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,12 +39,12 @@ class EligibilityAPIUnitTest {
     fun beforeEach() {
         api = mockk(relaxed = true)
         graphQLClient = mockk(relaxed = true)
+
+        coEvery { api.fetchCachedOrRemoteClientID() } returns "sample-client-id"
     }
 
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
-        coEvery { api.fetchCachedOrRemoteClientID() } returns "sample-client-id"
-
         sut = EligibilityAPI(api, graphQLClient, resourceLoader)
         sut.checkEligibility()
 
@@ -65,5 +67,32 @@ class EligibilityAPIUnitTest {
         """
 
         JSONAssert.assertEquals(JSONObject(expectedRequestBody), actualRequestBody, true)
+    }
+
+    @Test
+    fun checkEligibility_parsesGraphQLResponse() = runTest {
+        // language=JSON
+        val data = """
+            {
+              "fundingEligibility": {
+                "venmo": { "eligible": true },
+                "card": { "eligible": true },
+                "paypal": { "eligible": true },
+                "paylater": { "eligible": true },
+                "credit": { "eligible": true }
+              }
+            }
+        """
+        val graphQLResponse = GraphQLQueryResponse(JSONObject(data))
+        coEvery { graphQLClient.send(any()) } returns graphQLResponse
+
+        sut = EligibilityAPI(api, graphQLClient, resourceLoader)
+        val result = sut.checkEligibility()
+
+        assertTrue(result.isCreditCardEligible)
+        assertTrue(result.isVenmoEligible)
+        assertTrue(result.isPayLaterEligible)
+        assertTrue(result.isPaypalCreditEligible)
+        assertTrue(result.isPaypalEligible)
     }
 }

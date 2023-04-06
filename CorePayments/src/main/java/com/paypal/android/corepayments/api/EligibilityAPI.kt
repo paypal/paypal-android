@@ -11,6 +11,7 @@ import com.paypal.android.corepayments.graphql.common.GraphQLClient
 import com.paypal.android.corepayments.graphql.common.GraphQLClientImpl
 import com.paypal.android.corepayments.graphql.fundingEligibility.FundingEligibilityQuery
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
+import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsType
 import org.json.JSONArray
@@ -52,28 +53,20 @@ internal class EligibilityAPI internal constructor(
             .put("query", query)
             .put("variables", variables)
         val graphQLResponse = graphQLClient.send(graphQLRequest)
-        return Eligibility(false, false, false, false, false)
-
-        val fundingEligibilityQuery = FundingEligibilityQuery(
-            clientId = api.fetchCachedOrRemoteClientID(),
-            fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,
-            currencyCode = SupportedCountryCurrencyType.USD,
-            enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
-        )
-        val response = graphQLClient.executeQuery(fundingEligibilityQuery)
-        return if (response.data != null) {
+        return if (graphQLResponse.data != null) {
+            val result = FundingEligibilityResponse(graphQLResponse.data!!)
             Eligibility(
-                isCreditCardEligible = response.data.fundingEligibility.card.eligible,
-                isPayLaterEligible = response.data.fundingEligibility.payLater.eligible,
-                isPaypalCreditEligible = response.data.fundingEligibility.credit.eligible,
-                isPaypalEligible = response.data.fundingEligibility.paypal.eligible,
-                isVenmoEligible = response.data.fundingEligibility.venmo.eligible,
+                isCreditCardEligible = result.fundingEligibility.card.eligible,
+                isPayLaterEligible = result.fundingEligibility.payLater.eligible,
+                isPaypalCreditEligible = result.fundingEligibility.credit.eligible,
+                isPaypalEligible = result.fundingEligibility.paypal.eligible,
+                isVenmoEligible = result.fundingEligibility.venmo.eligible,
             )
         } else {
             throw PayPalSDKError(
                 0,
-                "Error in checking eligibility: ${response.errors}",
-                response.correlationId
+                "Error in checking eligibility: ${graphQLResponse.errors}",
+                graphQLResponse.correlationId
             )
         }
     }
