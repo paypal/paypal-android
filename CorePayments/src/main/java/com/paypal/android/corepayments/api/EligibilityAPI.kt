@@ -25,6 +25,15 @@ internal class EligibilityAPI internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader
 ) {
+    companion object {
+        const val TAG = "Eligibility API"
+
+        const val VARIABLE_CLIENT_ID = "clientId"
+        const val VARIABLE_INTENT = "intent"
+        const val VARIABLE_CURRENCY = "currency"
+        const val VARIABLE_ENABLE_FUNDING = "enableFunding"
+    }
+
     /**
      *  EligibilityAPI constructor.
      *  @param context Android context
@@ -44,10 +53,10 @@ internal class EligibilityAPI internal constructor(
         val query = resourceLoader.loadRawResource(R.raw.graphql_query_funding_eligibility)
         val enableFundingMethods = listOf(SupportedPaymentMethodsType.VENMO.name)
         val variables = JSONObject()
-            .put("clientId", clientID)
-            .put("intent", FundingEligibilityIntent.CAPTURE.name)
-            .put("currency", SupportedCountryCurrencyType.USD.name)
-            .put("enableFunding", JSONArray(enableFundingMethods))
+            .put(VARIABLE_CLIENT_ID, clientID)
+            .put(VARIABLE_INTENT, FundingEligibilityIntent.CAPTURE.name)
+            .put(VARIABLE_CURRENCY, SupportedCountryCurrencyType.USD.name)
+            .put(VARIABLE_ENABLE_FUNDING, JSONArray(enableFundingMethods))
 
         val graphQLRequest = JSONObject()
             .put("query", query)
@@ -69,9 +78,5 @@ internal class EligibilityAPI internal constructor(
                 graphQLResponse.correlationId
             )
         }
-    }
-
-    companion object {
-        const val TAG = "Eligibility API"
     }
 }
