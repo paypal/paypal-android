@@ -9,7 +9,7 @@ internal class GraphQLRequestFactory(
 
     fun createHttpRequestFromQuery(requestBody: JSONObject): HttpRequest {
         return HttpRequest(
-            url = URL(coreConfig.environment.grqphQlUrl),
+            url = URL(coreConfig.environment.graphQLEndpoint),
             method = HttpMethod.POST,
             body = requestBody.toString().trimIndent(),
             headers = headers()
@@ -20,6 +20,6 @@ internal class GraphQLRequestFactory(
         "Content-type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",
-        "Origin" to Environment.SANDBOX.grqphQlUrl
+        "Origin" to Environment.SANDBOX.graphQLEndpoint
     )
 }

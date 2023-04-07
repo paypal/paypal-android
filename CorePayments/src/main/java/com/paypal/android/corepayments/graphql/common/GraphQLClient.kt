@@ -22,16 +22,16 @@ internal class GraphQLClientImpl(
 ) : GraphQLClient {
 
     override suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject> {
-        val baseUrl = coreConfig.environment.grqphQlUrl
+        val baseUrl = coreConfig.environment.graphQLEndpoint
         val url = URL("$baseUrl/graphql")
         val body = graphQLRequestBody.toString()
 
         // default headers
-        val headers: MutableMap<String, String> = mutableMapOf(
+        val headers = mutableMapOf(
             "Content-Type" to "application/json",
             "Accept" to "application/json",
             "x-app-name" to "nativecheckout",
-            "Origin" to coreConfig.environment.grqphQlUrl
+            "Origin" to coreConfig.environment.graphQLEndpoint
         )
 
         val httpRequest = HttpRequest(url, HttpMethod.POST, body, headers)

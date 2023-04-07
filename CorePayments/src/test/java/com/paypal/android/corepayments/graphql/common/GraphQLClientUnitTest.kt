@@ -1,29 +1,40 @@
 package com.paypal.android.corepayments.graphql.common
 
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.GraphQLRequestFactory
 import com.paypal.android.corepayments.Http
+import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.graphql.common.GraphQLClientImpl.Companion.PAYPAL_DEBUG_ID
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
+import io.mockk.CapturingSlot
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
+import java.net.URL
 
+@ExperimentalCoroutinesApi
+@RunWith(RobolectricTestRunner::class)
 internal class GraphQLClientUnitTest {
-
-    @MockK
-    private lateinit var mockHttp: Http
 
     @MockK
     private lateinit var mockCoreConfig: CoreConfig
@@ -31,16 +42,93 @@ internal class GraphQLClientUnitTest {
     @MockK
     private lateinit var mockGraphQLRequestFactory: GraphQLRequestFactory
 
-    private lateinit var client: GraphQLClient
+    private val graphQLRequestBody = JSONObject("""{"fake":"json"}""")
+
+    private lateinit var mockHttp: Http
+    private lateinit var httpRequestSlot: CapturingSlot<HttpRequest>
+
+    private val sandboxConfig = CoreConfig("fake-access-token", Environment.SANDBOX)
+    private val stagingConfig = CoreConfig("fake-access-token", Environment.STAGING)
+    private val liveConfig = CoreConfig("fake-access-token", Environment.LIVE)
+
+    private lateinit var sut: GraphQLClient
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        client = GraphQLClientImpl(
+        mockHttp = mockk(relaxed = true)
+        httpRequestSlot = slot()
+
+        sut = GraphQLClientImpl(
             coreConfig = mockCoreConfig,
             http = mockHttp,
             graphQlRequestFactory = mockGraphQLRequestFactory
         )
+    }
+
+    @Test
+    fun `send sends an http request to sandbox environment`() = runTest {
+        val sut = GraphQLClientImpl(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut.send(graphQLRequestBody)
+        coVerify { mockHttp.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.sandbox.paypal.com/graphql"), httpRequest.url)
+        assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
+    fun `send sends an http request to staging environment`() = runTest {
+        val sut = GraphQLClientImpl(stagingConfig, mockHttp, mockGraphQLRequestFactory)
+        sut.send(graphQLRequestBody)
+        coVerify { mockHttp.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.msmaster.qa.paypal.com/graphql"), httpRequest.url)
+        assertEquals("https://www.msmaster.qa.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
+    fun `send sends an http request to live environment`() = runTest {
+        val sut = GraphQLClientImpl(liveConfig, mockHttp, mockGraphQLRequestFactory)
+        sut.send(graphQLRequestBody)
+        coVerify { mockHttp.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.paypal.com/graphql"), httpRequest.url)
+        assertEquals("https://www.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
+    fun `send forwards graphQL request body as an http request body`() = runTest {
+        val sut = GraphQLClientImpl(liveConfig, mockHttp, mockGraphQLRequestFactory)
+        sut.send(graphQLRequestBody)
+        coVerify { mockHttp.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals("""{"fake":"json"}""", httpRequest.body)
+    }
+
+    @Test
+    fun `send sends an HTTP POST request`() = runTest {
+        val sut = GraphQLClientImpl(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut.send(graphQLRequestBody)
+        coVerify { mockHttp.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(HttpMethod.POST, httpRequest.method)
+    }
+
+    @Test
+    fun `send sets default headers`() = runTest {
+        val sut = GraphQLClientImpl(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut.send(graphQLRequestBody)
+        coVerify { mockHttp.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals("application/json", httpRequest.headers["Content-Type"])
+        assertEquals("application/json", httpRequest.headers["Accept"])
+        assertEquals("application/json", httpRequest.headers["x-app-name"])
     }
 
     @Test
@@ -58,7 +146,7 @@ internal class GraphQLClientUnitTest {
             ),
             body = graphQlQueryResponseWithData
         )
-        val response = client.executeQuery(mockQuery)
+        val response = sut.executeQuery(mockQuery)
         verify {
             mockQuery.parse(any())
         }
@@ -78,7 +166,7 @@ internal class GraphQLClientUnitTest {
             ),
             body = graphQlQueryResponseWithoutData
         )
-        val result = client.executeQuery(mockQuery)
+        val result = sut.executeQuery(mockQuery)
         assertNull(result.data)
     }
 

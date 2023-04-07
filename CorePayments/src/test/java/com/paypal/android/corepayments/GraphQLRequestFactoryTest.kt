@@ -29,7 +29,7 @@ class GraphQLRequestFactoryTest : TestCase() {
         val result = graphQLRequestFactory.createHttpRequestFromQuery(
             requestBody = requestBody
         )
-        val expectedUrl = Environment.SANDBOX.grqphQlUrl
+        val expectedUrl = Environment.SANDBOX.graphQLEndpoint
         assertEquals(result.url.toString(), expectedUrl)
         assertEquals(result.method, HttpMethod.POST)
         assertEquals(result.body, requestBody.toString())
