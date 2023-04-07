@@ -7,9 +7,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.api.models.Eligibility
-import com.paypal.android.corepayments.graphql.common.GraphQLClient
 import com.paypal.android.corepayments.graphql.common.GraphQLClientImpl
-import com.paypal.android.corepayments.graphql.fundingEligibility.FundingEligibilityQuery
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
@@ -22,7 +20,7 @@ import org.json.JSONObject
  */
 internal class EligibilityAPI internal constructor(
     private val api: API,
-    private val graphQLClient: GraphQLClient,
+    private val graphQLClient: GraphQLClientImpl,
     private val resourceLoader: ResourceLoader
 ) {
     companion object {

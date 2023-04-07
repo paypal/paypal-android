@@ -10,22 +10,17 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal interface GraphQLClient {
-    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject>
-    suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T>
-}
-
 internal class GraphQLClientImpl(
     private val coreConfig: CoreConfig,
     private val http: Http = Http(),
     private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
-) : GraphQLClient {
+) {
 
     companion object {
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 
-    override suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject> {
+    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject> {
         val baseUrl = coreConfig.environment.graphQLEndpoint
         val url = URL("$baseUrl/graphql")
         val body = graphQLRequestBody.toString()
@@ -55,7 +50,7 @@ internal class GraphQLClientImpl(
         }
     }
 
-    override suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T> {
+    suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T> {
         val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
             query.requestBody()
         )

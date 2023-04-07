@@ -53,7 +53,7 @@ internal class GraphQLClientUnitTest {
     private val stagingConfig = CoreConfig("fake-access-token", Environment.STAGING)
     private val liveConfig = CoreConfig("fake-access-token", Environment.LIVE)
 
-    private lateinit var sut: GraphQLClient
+    private lateinit var sut: GraphQLClientImpl
 
     @Before
     fun setUp() {

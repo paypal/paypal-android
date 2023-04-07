@@ -5,9 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.graphql.common.GraphQLClient
+import com.paypal.android.corepayments.graphql.common.GraphQLClientImpl
 import com.paypal.android.corepayments.graphql.common.GraphQLQueryResponse
-import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsTypeEligibility
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -27,7 +26,7 @@ import org.skyscreamer.jsonassert.JSONAssert
 class EligibilityAPIUnitTest {
 
     private lateinit var api: API
-    private lateinit var graphQLClient: GraphQLClient
+    private lateinit var graphQLClient: GraphQLClientImpl
 
     private lateinit var sut: EligibilityAPI
 
