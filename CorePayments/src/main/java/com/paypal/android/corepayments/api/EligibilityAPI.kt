@@ -11,6 +11,7 @@ import com.paypal.android.corepayments.graphql.common.GraphQLClient
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsType
+import com.paypal.android.corepayments.optBooleanAtKeyPath
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -62,19 +63,16 @@ internal class EligibilityAPI internal constructor(
         return if (graphQLResponse.data != null) {
             val fundingEligibility =
                 graphQLResponse.data.optJSONObject("fundingEligibility") ?: JSONObject()
-            val venmoEligibility = fundingEligibility.optJSONObject("venmo") ?: JSONObject()
-            val cardEligibility = fundingEligibility.optJSONObject("card") ?: JSONObject()
-            val payPalEligibility = fundingEligibility.optJSONObject("paypal") ?: JSONObject()
-            val payLaterEligibility = fundingEligibility.optJSONObject("paylater") ?: JSONObject()
-            val payPalCreditEligibility = fundingEligibility.optJSONObject("credit") ?: JSONObject()
 
-            Eligibility(
-                isCreditCardEligible = cardEligibility.optBoolean("eligible", false),
-                isPayLaterEligible = payLaterEligibility.optBoolean("eligible", false),
-                isPaypalCreditEligible = payPalCreditEligibility.optBoolean("eligible", false),
-                isPaypalEligible = payPalEligibility.optBoolean("eligible", false),
-                isVenmoEligible = venmoEligibility.optBoolean("eligible", false),
-            )
+            return fundingEligibility.run {
+                Eligibility(
+                    isCreditCardEligible = optBooleanAtKeyPath("venmo.eligible"),
+                    isPayLaterEligible = optBooleanAtKeyPath("card.eligible"),
+                    isPaypalCreditEligible = optBooleanAtKeyPath("paypal.eligible"),
+                    isPaypalEligible = optBooleanAtKeyPath("paylater.eligible"),
+                    isVenmoEligible = optBooleanAtKeyPath("credit.eligible"),
+                )
+            }
         } else {
             throw PayPalSDKError(
                 0,
