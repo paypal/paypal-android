@@ -18,7 +18,7 @@ internal class GraphQLClient(
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 
-    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse {
+    suspend fun send(graphQLRequestBody: JSONObject): GraphQLResponse {
         val baseUrl = coreConfig.environment.graphQLEndpoint
         val url = URL("$baseUrl/graphql")
         val body = graphQLRequestBody.toString()
@@ -40,11 +40,11 @@ internal class GraphQLClient(
                 throw APIClientError.noResponseData(correlationID)
             } else {
                 val responseAsJSON = JSONObject(httpResponse.body)
-                GraphQLQueryResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationID)
+                GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationID)
             }
         } else {
             // TODO: GraphQL error handling logic still needs requirements and unit testing
-            GraphQLQueryResponse(null, correlationId = correlationID)
+            GraphQLResponse(null, correlationId = correlationID)
         }
     }
 }

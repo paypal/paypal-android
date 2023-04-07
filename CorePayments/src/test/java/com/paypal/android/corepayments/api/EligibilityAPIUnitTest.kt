@@ -6,7 +6,7 @@ import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
-import com.paypal.android.corepayments.graphql.common.GraphQLQueryResponse
+import com.paypal.android.corepayments.graphql.common.GraphQLResponse
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -82,7 +82,7 @@ class EligibilityAPIUnitTest {
               }
             }
         """
-        val graphQLResponse = GraphQLQueryResponse(JSONObject(data))
+        val graphQLResponse = GraphQLResponse(JSONObject(data))
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
         sut = EligibilityAPI(api, graphQLClient, resourceLoader)
