@@ -10,7 +10,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal class GraphQLClientImpl(
+internal class GraphQLClient(
     private val coreConfig: CoreConfig,
     private val http: Http = Http(),
     private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)

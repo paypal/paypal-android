@@ -7,7 +7,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.api.models.Eligibility
-import com.paypal.android.corepayments.graphql.common.GraphQLClientImpl
+import com.paypal.android.corepayments.graphql.common.GraphQLClient
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
@@ -20,7 +20,7 @@ import org.json.JSONObject
  */
 internal class EligibilityAPI internal constructor(
     private val api: API,
-    private val graphQLClient: GraphQLClientImpl,
+    private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader
 ) {
     companion object {
@@ -38,7 +38,7 @@ internal class EligibilityAPI internal constructor(
      *  @param config configuration parameters for eligibility API
      */
     constructor(context: Context, config: CoreConfig) :
-            this(API(config, context), GraphQLClientImpl(config), ResourceLoader(context))
+            this(API(config, context), GraphQLClient(config), ResourceLoader(context))
 
     /**
      *  Checks if merchant is eligible for a set of payment methods
