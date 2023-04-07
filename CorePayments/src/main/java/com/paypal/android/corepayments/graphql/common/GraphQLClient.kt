@@ -49,26 +49,4 @@ internal class GraphQLClient(
             GraphQLQueryResponse(JSONObject(), correlationId = correlationID)
         }
     }
-
-    suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T> {
-        val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
-            query.requestBody()
-        )
-        val httpResponse = http.send(httpRequest)
-        val bodyResponse = httpResponse.body
-        val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
-        if (bodyResponse.isNullOrBlank()) {
-            throw APIClientError.noResponseData(correlationID)
-        }
-        val status = httpResponse.status
-        return if (status == HttpURLConnection.HTTP_OK && !bodyResponse.isNullOrBlank()) {
-            val data = query.parse(JSONObject(bodyResponse).getJSONObject("data"))
-            GraphQLQueryResponse(
-                data = data,
-                correlationId = correlationID
-            )
-        } else {
-            GraphQLQueryResponse()
-        }
-    }
 }

@@ -9,37 +9,26 @@ import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.graphql.common.GraphQLClient.Companion.PAYPAL_DEBUG_ID
-import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import io.mockk.CapturingSlot
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.net.HttpURLConnection
 import java.net.URL
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class GraphQLClientUnitTest {
-
-    @MockK
-    private lateinit var mockCoreConfig: CoreConfig
 
     @MockK
     private lateinit var mockGraphQLRequestFactory: GraphQLRequestFactory
@@ -60,17 +49,11 @@ internal class GraphQLClientUnitTest {
         MockKAnnotations.init(this)
         mockHttp = mockk(relaxed = true)
         httpRequestSlot = slot()
-
-        sut = GraphQLClient(
-            coreConfig = mockCoreConfig,
-            http = mockHttp,
-            graphQlRequestFactory = mockGraphQLRequestFactory
-        )
     }
 
     @Test
     fun `send sends an http request to sandbox environment`() = runTest {
-        val sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
         sut.send(graphQLRequestBody)
         coVerify { mockHttp.send(capture(httpRequestSlot)) }
 
@@ -81,7 +64,7 @@ internal class GraphQLClientUnitTest {
 
     @Test
     fun `send sends an http request to staging environment`() = runTest {
-        val sut = GraphQLClient(stagingConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(stagingConfig, mockHttp, mockGraphQLRequestFactory)
         sut.send(graphQLRequestBody)
         coVerify { mockHttp.send(capture(httpRequestSlot)) }
 
@@ -92,7 +75,7 @@ internal class GraphQLClientUnitTest {
 
     @Test
     fun `send sends an http request to live environment`() = runTest {
-        val sut = GraphQLClient(liveConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(liveConfig, mockHttp, mockGraphQLRequestFactory)
         sut.send(graphQLRequestBody)
         coVerify { mockHttp.send(capture(httpRequestSlot)) }
 
@@ -103,7 +86,7 @@ internal class GraphQLClientUnitTest {
 
     @Test
     fun `send forwards graphQL request body as an http request body`() = runTest {
-        val sut = GraphQLClient(liveConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(liveConfig, mockHttp, mockGraphQLRequestFactory)
         sut.send(graphQLRequestBody)
         coVerify { mockHttp.send(capture(httpRequestSlot)) }
 
@@ -113,7 +96,7 @@ internal class GraphQLClientUnitTest {
 
     @Test
     fun `send sends an HTTP POST request`() = runTest {
-        val sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
         sut.send(graphQLRequestBody)
         coVerify { mockHttp.send(capture(httpRequestSlot)) }
 
@@ -123,7 +106,7 @@ internal class GraphQLClientUnitTest {
 
     @Test
     fun `send sets default headers`() = runTest {
-        val sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
         sut.send(graphQLRequestBody)
         coVerify { mockHttp.send(capture(httpRequestSlot)) }
 
@@ -141,7 +124,7 @@ internal class GraphQLClientUnitTest {
         val successHttpResponse = HttpResponse(200, successHeaders, successBody)
         coEvery { mockHttp.send(any()) } returns successHttpResponse
 
-        val sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
         val response = sut.send(graphQLRequestBody)
 
         assertEquals("""{"fake":"success_data"}""", response.data?.toString())
@@ -156,7 +139,7 @@ internal class GraphQLClientUnitTest {
         val successHttpResponse = HttpResponse(200, successHeaders, emptyBody)
         coEvery { mockHttp.send(any()) } returns successHttpResponse
 
-        val sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        sut = GraphQLClient(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
         try {
             sut.send(graphQLRequestBody)
         } catch (e: PayPalSDKError) {
@@ -166,57 +149,5 @@ internal class GraphQLClientUnitTest {
             assertEquals(expectedErrorMessage, e.errorDescription)
             assertEquals("fake-debug-id", e.correlationID)
         }
-    }
-
-    @Test
-    fun `verify non empty response`() = runBlocking {
-        val mockQuery: Query<Any> = mockk(relaxed = true)
-        every { mockQuery.requestBody() } returns mockk()
-        val mockHttpRequest: HttpRequest = mockk(relaxed = true)
-        val fundingEligibilityResponse: FundingEligibilityResponse = mockk(relaxed = true)
-        every { mockGraphQLRequestFactory.createHttpRequestFromQuery(any()) } returns mockHttpRequest
-        every { mockQuery.parse(any()) } returns fundingEligibilityResponse
-        coEvery { mockHttp.send(mockHttpRequest) } returns HttpResponse(
-            status = HttpURLConnection.HTTP_OK,
-            headers = mapOf(
-                PAYPAL_DEBUG_ID to "454532"
-            ),
-            body = graphQlQueryResponseWithData
-        )
-        val response = sut.executeQuery(mockQuery)
-        verify {
-            mockQuery.parse(any())
-        }
-        assertNotNull(response.data)
-    }
-
-    @Test
-    fun `verify non success response`(): Unit = runBlocking {
-        val mockQuery: Query<Any> = mockk(relaxed = true)
-        every { mockQuery.requestBody() } returns mockk()
-        val mockHttpRequest: HttpRequest = mockk(relaxed = true)
-        every { mockGraphQLRequestFactory.createHttpRequestFromQuery(any()) } returns mockHttpRequest
-        coEvery { mockHttp.send(mockHttpRequest) } returns HttpResponse(
-            status = HttpURLConnection.HTTP_BAD_REQUEST,
-            headers = mapOf(
-                PAYPAL_DEBUG_ID to "454532"
-            ),
-            body = graphQlQueryResponseWithoutData
-        )
-        val result = sut.executeQuery(mockQuery)
-        assertNull(result.data)
-    }
-
-    companion object {
-        const val graphQlQueryResponseWithData = """
-          { "data": {
-            }
-          }
-        """
-
-        const val graphQlQueryResponseWithoutData = """
-          { 
-          }
-        """
     }
 }
