@@ -132,6 +132,21 @@ internal class GraphQLClientUnitTest {
     }
 
     @Test
+    fun `send parses GraphQL success response`() = runTest {
+        // language=JSON
+        val successBody = """{ "data": { "fake": "success_data" } }"""
+        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+        val successHttpResponse = HttpResponse(200, successHeaders, successBody)
+        coEvery { mockHttp.send(any()) } returns successHttpResponse
+
+        val sut = GraphQLClientImpl(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        val response = sut.send(graphQLRequestBody)
+
+        assertEquals("""{"fake":"success_data"}""", response.data?.toString())
+        assertEquals("fake-debug-id", response.correlationId)
+    }
+
+    @Test
     fun `verify non empty response`() = runBlocking {
         val mockQuery: Query<Any> = mockk(relaxed = true)
         every { mockQuery.requestBody() } returns mockk()

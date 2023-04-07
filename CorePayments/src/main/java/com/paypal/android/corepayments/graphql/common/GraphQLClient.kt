@@ -42,7 +42,8 @@ internal class GraphQLClientImpl(
             if (httpResponse.body.isNullOrBlank()) {
                 throw APIClientError.noResponseData(correlationID)
             } else {
-                GraphQLQueryResponse(JSONObject(httpResponse.body), correlationId = correlationID)
+                val responseAsJSON = JSONObject(httpResponse.body)
+                GraphQLQueryResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationID)
             }
         } else {
             GraphQLQueryResponse(JSONObject())
