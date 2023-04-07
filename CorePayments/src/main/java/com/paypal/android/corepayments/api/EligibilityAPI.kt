@@ -9,10 +9,8 @@ import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.api.models.Eligibility
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityIntent
-import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsType
-import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsTypeEligibility
 import org.json.JSONArray
 import org.json.JSONObject
 
