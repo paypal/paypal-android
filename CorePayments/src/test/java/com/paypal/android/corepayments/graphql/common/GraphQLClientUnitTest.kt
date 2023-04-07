@@ -20,7 +20,7 @@ import org.junit.Before
 import org.junit.Test
 import java.net.HttpURLConnection
 
-internal class GraphQLClientImplTest {
+internal class GraphQLClientUnitTest {
 
     @MockK
     private lateinit var mockHttp: Http
