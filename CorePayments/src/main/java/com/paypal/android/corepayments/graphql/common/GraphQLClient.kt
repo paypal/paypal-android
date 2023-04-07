@@ -21,6 +21,10 @@ internal class GraphQLClientImpl(
     private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
 ) : GraphQLClient {
 
+    companion object {
+        const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
+    }
+
     override suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject> {
         val baseUrl = coreConfig.environment.graphQLEndpoint
         val url = URL("$baseUrl/graphql")
@@ -71,9 +75,5 @@ internal class GraphQLClientImpl(
         } else {
             GraphQLQueryResponse()
         }
-    }
-
-    companion object {
-        const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 }
