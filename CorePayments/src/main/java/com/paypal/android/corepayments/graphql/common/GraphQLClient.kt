@@ -18,7 +18,7 @@ internal class GraphQLClient(
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 
-    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject> {
+    suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse {
         val baseUrl = coreConfig.environment.graphQLEndpoint
         val url = URL("$baseUrl/graphql")
         val body = graphQLRequestBody.toString()

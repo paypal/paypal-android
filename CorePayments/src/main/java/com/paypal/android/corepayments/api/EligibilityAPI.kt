@@ -12,6 +12,7 @@ import com.paypal.android.corepayments.graphql.fundingEligibility.models.Funding
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedCountryCurrencyType
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsType
+import com.paypal.android.corepayments.graphql.fundingEligibility.models.SupportedPaymentMethodsTypeEligibility
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -61,13 +62,20 @@ internal class EligibilityAPI internal constructor(
             .put("variables", variables)
         val graphQLResponse = graphQLClient.send(graphQLRequest)
         return if (graphQLResponse.data != null) {
-            val result = FundingEligibilityResponse(graphQLResponse.data!!)
+            val fundingEligibility =
+                graphQLResponse.data.optJSONObject("fundingEligibility") ?: JSONObject()
+            val venmoEligibility = fundingEligibility.optJSONObject("venmo") ?: JSONObject()
+            val cardEligibility = fundingEligibility.optJSONObject("card") ?: JSONObject()
+            val payPalEligibility = fundingEligibility.optJSONObject("paypal") ?: JSONObject()
+            val payLaterEligibility = fundingEligibility.optJSONObject("paylater") ?: JSONObject()
+            val payPalCreditEligibility = fundingEligibility.optJSONObject("credit") ?: JSONObject()
+
             Eligibility(
-                isCreditCardEligible = result.fundingEligibility.card.eligible,
-                isPayLaterEligible = result.fundingEligibility.payLater.eligible,
-                isPaypalCreditEligible = result.fundingEligibility.credit.eligible,
-                isPaypalEligible = result.fundingEligibility.paypal.eligible,
-                isVenmoEligible = result.fundingEligibility.venmo.eligible,
+                isCreditCardEligible = cardEligibility.optBoolean("eligible", false),
+                isPayLaterEligible = payLaterEligibility.optBoolean("eligible", false),
+                isPaypalCreditEligible = payPalCreditEligibility.optBoolean("eligible", false),
+                isPaypalEligible = payPalEligibility.optBoolean("eligible", false),
+                isVenmoEligible = venmoEligibility.optBoolean("eligible", false),
             )
         } else {
             throw PayPalSDKError(
