@@ -2,7 +2,6 @@ package com.paypal.android.corepayments.graphql.common
 
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.GraphQLRequestFactory
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
@@ -13,7 +12,6 @@ import java.net.URL
 internal class GraphQLClient(
     private val coreConfig: CoreConfig,
     private val http: Http = Http(),
-    private val graphQlRequestFactory: GraphQLRequestFactory = GraphQLRequestFactory(coreConfig)
 ) {
 
     companion object {
