@@ -1,5 +1,6 @@
 package com.paypal.android.corepayments.graphql.common
 
+import com.paypal.android.corepayments.Code
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.GraphQLRequestFactory
@@ -7,6 +8,7 @@ import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.graphql.common.GraphQLClientImpl.Companion.PAYPAL_DEBUG_ID
 import com.paypal.android.corepayments.graphql.fundingEligibility.models.FundingEligibilityResponse
 import io.mockk.CapturingSlot
@@ -128,7 +130,7 @@ internal class GraphQLClientUnitTest {
         val httpRequest = httpRequestSlot.captured
         assertEquals("application/json", httpRequest.headers["Content-Type"])
         assertEquals("application/json", httpRequest.headers["Accept"])
-        assertEquals("application/json", httpRequest.headers["x-app-name"])
+        assertEquals("nativecheckout", httpRequest.headers["x-app-name"])
     }
 
     @Test
@@ -144,6 +146,26 @@ internal class GraphQLClientUnitTest {
 
         assertEquals("""{"fake":"success_data"}""", response.data?.toString())
         assertEquals("fake-debug-id", response.correlationId)
+    }
+
+    @Test
+    fun `send throws an error when GraphQL response is successful with an empty body`() = runTest {
+        // language=JSON
+        val emptyBody = ""
+        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+        val successHttpResponse = HttpResponse(200, successHeaders, emptyBody)
+        coEvery { mockHttp.send(any()) } returns successHttpResponse
+
+        val sut = GraphQLClientImpl(sandboxConfig, mockHttp, mockGraphQLRequestFactory)
+        try {
+            sut.send(graphQLRequestBody)
+        } catch (e: PayPalSDKError) {
+            assertEquals(Code.NO_RESPONSE_DATA.ordinal, e.code)
+            val expectedErrorMessage =
+                "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support."
+            assertEquals(expectedErrorMessage, e.errorDescription)
+            assertEquals("fake-debug-id", e.correlationID)
+        }
     }
 
     @Test
