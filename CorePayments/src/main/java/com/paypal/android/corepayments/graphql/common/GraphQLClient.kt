@@ -46,7 +46,8 @@ internal class GraphQLClientImpl(
                 GraphQLQueryResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationID)
             }
         } else {
-            GraphQLQueryResponse(JSONObject())
+            // TODO: GraphQL error handling logic still needs requirements and unit testing
+            GraphQLQueryResponse(JSONObject(), correlationId = correlationID)
         }
     }
 
