@@ -4,8 +4,11 @@ import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.GraphQLRequestFactory
 import com.paypal.android.corepayments.Http
+import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.corepayments.HttpRequest
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.URL
 
 internal interface GraphQLClient {
     suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject>
@@ -19,29 +22,53 @@ internal class GraphQLClientImpl(
 ) : GraphQLClient {
 
     override suspend fun send(graphQLRequestBody: JSONObject): GraphQLQueryResponse<JSONObject> {
-        TODO("implement")
+        val baseUrl = coreConfig.environment.grqphQlUrl
+        val url = URL("$baseUrl/graphql")
+        val body = graphQLRequestBody.toString()
+
+        // default headers
+        val headers: MutableMap<String, String> = mutableMapOf(
+            "Content-Type" to "application/json",
+            "Accept" to "application/json",
+            "x-app-name" to "nativecheckout",
+            "Origin" to coreConfig.environment.grqphQlUrl
+        )
+
+        val httpRequest = HttpRequest(url, HttpMethod.POST, body, headers)
+        val httpResponse = http.send(httpRequest)
+        val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
+        val status = httpResponse.status
+        return if (status == HttpURLConnection.HTTP_OK) {
+            if (httpResponse.body.isNullOrBlank()) {
+                throw APIClientError.noResponseData(correlationID)
+            } else {
+                GraphQLQueryResponse(JSONObject(httpResponse.body), correlationId = correlationID)
+            }
+        } else {
+            GraphQLQueryResponse(JSONObject())
+        }
     }
 
     override suspend fun <T> executeQuery(query: Query<T>): GraphQLQueryResponse<T> {
-            val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
-                query.requestBody()
+        val httpRequest = graphQlRequestFactory.createHttpRequestFromQuery(
+            query.requestBody()
+        )
+        val httpResponse = http.send(httpRequest)
+        val bodyResponse = httpResponse.body
+        val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
+        if (bodyResponse.isNullOrBlank()) {
+            throw APIClientError.noResponseData(correlationID)
+        }
+        val status = httpResponse.status
+        return if (status == HttpURLConnection.HTTP_OK && !bodyResponse.isNullOrBlank()) {
+            val data = query.parse(JSONObject(bodyResponse).getJSONObject("data"))
+            GraphQLQueryResponse(
+                data = data,
+                correlationId = correlationID
             )
-            val httpResponse = http.send(httpRequest)
-            val bodyResponse = httpResponse.body
-            val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
-            if (bodyResponse.isNullOrBlank()) {
-                throw APIClientError.noResponseData(correlationID)
-            }
-            val status = httpResponse.status
-            return if (status == HttpURLConnection.HTTP_OK && !bodyResponse.isNullOrBlank()) {
-                val data = query.parse(JSONObject(bodyResponse).getJSONObject("data"))
-                GraphQLQueryResponse(
-                    data = data,
-                    correlationId = correlationID
-                )
-            } else {
-                GraphQLQueryResponse()
-            }
+        } else {
+            GraphQLQueryResponse()
+        }
     }
 
     companion object {
