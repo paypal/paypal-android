@@ -24,8 +24,6 @@ internal class EligibilityAPI internal constructor(
     private val resourceLoader: ResourceLoader
 ) {
     companion object {
-        const val TAG = "Eligibility API"
-
         const val VARIABLE_CLIENT_ID = "clientId"
         const val VARIABLE_INTENT = "intent"
         const val VARIABLE_CURRENCY = "currency"
@@ -60,7 +58,7 @@ internal class EligibilityAPI internal constructor(
             .put("query", query)
             .put("variables", variables)
         val graphQLResponse = graphQLClient.send(graphQLRequest)
-        return if (graphQLResponse.data != null) {
+        if (graphQLResponse.data != null) {
             val fundingEligibility =
                 graphQLResponse.data.optJSONObject("fundingEligibility") ?: JSONObject()
 

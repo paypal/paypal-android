@@ -44,7 +44,7 @@ internal class GraphQLClient(
             }
         } else {
             // TODO: GraphQL error handling logic still needs requirements and unit testing
-            GraphQLQueryResponse(JSONObject(), correlationId = correlationID)
+            GraphQLQueryResponse(null, correlationId = correlationID)
         }
     }
 }
