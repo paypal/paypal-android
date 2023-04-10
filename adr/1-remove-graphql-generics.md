@@ -24,6 +24,8 @@ We should refactor the GraphQL portion of the code base to be centered around th
 
 > <img src="./figure-graph-ql-client.png" height="400" alt="GraphQL Client Source Code">
 
+The `GraphQLClient` is a part of the HTTP layers, since GraphQL requests are made over HTTP. GraphQL responses are JSON formatted, and can be parsed in the API layer to extract information from the JSON into a value object that's returned to the client. Clients can inspect the value objects returned by the API layer and forward this information to the merchant app, or they can make additional API calls as needed without having to be concerned with low-level networking details.
+
 ## Consequences
 
 The code will become less DRY, but the task to create a JSONObject GraphQL query isn't overly complex. In this scenario, we may benefit less from DRY code than we do from having readible code that's easy to follow.
