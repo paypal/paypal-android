@@ -4,9 +4,13 @@
 
 ## Context
 
-We have [limited test coverage][1] in our GraphQL portion of the codebase. The way it's [currently written][2] does have the benefit of being DRY, allthough it does come with a cost of being difficult to test. The current implementation also relies heavily on Generics for strong typing which can make the code difficult to read and maintain.
+We have [limited test coverage][1] in our GraphQL portion of the codebase. The way it's [currently written][2] does have the benefit of being DRY, allthough it does come with a cost of being difficult to test.
+
+Here is a snippet of the abstract base class `Query`:
 
 > <img src="./figure-query-abstract-base-class.png" height="500" alt="Query Abstract Base Class Source Code">
+
+The current implementation also relies heavily on Generics for strong typing which can make the code difficult to read and maintain. The design is very similar to the iOS implementation. Generics are used on iOS to conform to a `Codable` interface for JSON parsing. There is no `Codable` equivalent on Android.
 
 ## Decision
 
