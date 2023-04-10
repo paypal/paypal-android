@@ -10,7 +10,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 internal class GraphQLClient(
-    private val coreConfig: CoreConfig,
+    coreConfig: CoreConfig,
     private val http: Http = Http(),
 ) {
 
@@ -18,20 +18,19 @@ internal class GraphQLClient(
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 
+    private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
+    private val graphQLURL = URL("$graphQLEndpoint/graphql")
+
+    private val httpRequestHeaders = mutableMapOf(
+        "Content-Type" to "application/json",
+        "Accept" to "application/json",
+        "x-app-name" to "nativecheckout",
+        "Origin" to coreConfig.environment.graphQLEndpoint
+    )
+
     suspend fun send(graphQLRequestBody: JSONObject): GraphQLResponse {
-        val baseUrl = coreConfig.environment.graphQLEndpoint
-        val url = URL("$baseUrl/graphql")
         val body = graphQLRequestBody.toString()
-
-        // default headers
-        val headers = mutableMapOf(
-            "Content-Type" to "application/json",
-            "Accept" to "application/json",
-            "x-app-name" to "nativecheckout",
-            "Origin" to coreConfig.environment.graphQLEndpoint
-        )
-
-        val httpRequest = HttpRequest(url, HttpMethod.POST, body, headers)
+        val httpRequest = HttpRequest(graphQLURL, HttpMethod.POST, body, httpRequestHeaders)
         val httpResponse = http.send(httpRequest)
         val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
         val status = httpResponse.status
@@ -43,7 +42,6 @@ internal class GraphQLClient(
                 GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationID)
             }
         } else {
-            // TODO: GraphQL error handling logic still needs requirements and unit testing
             GraphQLResponse(null, correlationId = correlationID)
         }
     }
