@@ -1,8 +1,6 @@
 # Remove GraphQL Generics
 
-## Status
-
-Proposed
+Status: Proposed
 
 ## Context
 
