@@ -26,6 +26,8 @@ We should refactor the GraphQL portion of the code base to be centered around th
 
 The `GraphQLClient` is a part of the HTTP layers, since GraphQL requests are made over HTTP. GraphQL responses are JSON formatted, and can be parsed in the API layer to extract information from the JSON into a value object that's returned to the client. Clients can inspect the value objects returned by the API layer and forward this information to the merchant app, or they can make additional API calls as needed without having to be concerned with low-level networking details.
 
+We can also have an opportunity to follow a GraphQL best practice of [providing variables via JSON][5]. We can turn each query into an Android raw resource and take advantage of the [IntelliJ GraphQL Plugin][6] for compile time syntax checking and auto completion.
+
 ## Consequences
 
 The code will become less DRY, but the task to create a JSONObject GraphQL query isn't overly complex. In this scenario, we may benefit less from DRY code than we do from having readible code that's easy to follow. We do gain flexibility by removing generics, since the API layer will have access to the full `HttpRequest` object.
@@ -34,3 +36,5 @@ The code will become less DRY, but the task to create a JSONObject GraphQL query
 [2]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/main/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQuery.kt#L10
 [3]: https://www.baeldung.com/cs/layered-architecture
 [4]: https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/
+[5]: https://www.apollographql.com/docs/react/data/operation-best-practices/#use-graphql-variables-to-provide-arguments
+[6]: https://plugins.jetbrains.com/plugin/8097-graphql
