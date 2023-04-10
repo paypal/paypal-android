@@ -6,7 +6,7 @@
 
 We have [limited test coverage][1] in our GraphQL portion of the codebase. The way it's [currently written][2] does have the benefit of being DRY, allthough it does come with a cost of being difficult to test. The current implementation also relies heavily on Generics for strong typing which can make the code difficult to read and maintain.
 
-![Query Abstract Base Class Source Code](./figure-query-abstract-base-class.png)
+![Query Abstract Base Class Source Code](./figure-query-abstract-base-class.png | height=200)
 
 ## Decision
 
