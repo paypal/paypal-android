@@ -22,6 +22,8 @@ As seen in the diagram above, the API layer is a self contained component respon
 
 We should refactor the GraphQL portion of the code base to be centered around the actual JSON request. We can enforce strong typing within the API layer by returning value objects detailing the parsed API response.
 
+> <img src="./figure-graph-ql-client.png" height="400" alt="GraphQL Client Source Code">
+
 ## Consequences
 
 The code will become less DRY, but the task to create a JSONObject GraphQL query isn't overly complex. In this scenario, we may benefit less from DRY code than we do from having readible code that's easy to follow.
