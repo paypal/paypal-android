@@ -16,6 +16,8 @@ The current implementation also relies heavily on Generics for strong typing whi
 
 We should refactor the GraphQL portion of the code base to be centered around the actual JSON request. Each GraphQL API class can enforce strong typing by parsing the response internally.
 
+> <img src="./figure-payments-sdk-architecture" height="400" alt="Payments SDK Architecture Layers: Merchant App, Feature Client, API, HTTP Client">
+
 ## Consequences
 
 The code will become less DRY, but the task to create a JSONObject GraphQL query isn't overly complex. In this scenario, we may benefit less from DRY code than we do from having readible code that's easy to follow.
