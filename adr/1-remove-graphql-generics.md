@@ -14,9 +14,13 @@ The current implementation also relies heavily on Generics for strong typing whi
 
 ## Decision
 
-We should refactor the GraphQL portion of the code base to be centered around the actual JSON request. Each GraphQL API class can enforce strong typing by parsing the response internally.
+The Payments SDK has a [layered architecture][3]. It can be thought of as an extension to the [OSI Model][4], adding additional layers within the application layer. Each layer communicates with the layer directly below it:
 
 > <img src="./figure-payments-sdk-architecture.png" height="400" alt="Payments SDK Architecture Layers: Merchant App, Feature Client, API, HTTP Client">
+
+As seen in the diagram above, the API layer is a self contained component responsible for translating merchant payment requests into HTTP requests. The API layer encapsulates the fine grained details required to communicate with either a RESTful or GraphQL web service. With encapsulation, the caller doesn't need to know how each API is accessed.  The API layer is respsible for making web requests and parsing their results.
+
+We should refactor the GraphQL portion of the code base to be centered around the actual JSON request. We can enforce strong typing within the API layer by returning value objects detailing the parsed API response.
 
 ## Consequences
 
@@ -24,3 +28,5 @@ The code will become less DRY, but the task to create a JSONObject GraphQL query
 
 [1]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/test/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQueryTest.kt#L12
 [2]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/main/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQuery.kt#L10
+[3]: https://www.baeldung.com/cs/layered-architecture
+[4]: https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/
