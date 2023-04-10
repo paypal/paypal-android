@@ -82,3 +82,6 @@ lint/tmp/
 
 # PayPal
 paypal.properties
+
+# vim
+*.swp
