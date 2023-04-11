@@ -16,11 +16,11 @@ The usage of generics in the Android Payments SDK is very similar to the usage o
 
 ## Decision
 
-The Payments SDK has a [layered architecture][3]. It can be thought of as an extension to the [OSI Model][4], adding additional layers within the application layer. Each layer communicates with the layer directly below it:
+The Payments SDK has a [layered architecture][3]–it can be thought of as an extension to the [OSI Model][4]. The SDK adds additional layers within the OSI application layer. Each layer communicates with the layer directly below it:
 
 > <img src="./figure-payments-sdk-architecture.png" height="400" alt="Payments SDK Architecture Layers: Merchant App, Feature Client, API, HTTP Client">
 
-As seen in the diagram above, the API layer is a self contained component responsible for translating merchant payment requests into HTTP requests. The API layer encapsulates the fine grained details required to communicate with either a RESTful or GraphQL web service. With encapsulation, the caller doesn't need to know how each API is accessed.  The API layer is respsible for making web requests and parsing their results.
+As seen in the diagram above, the API layer is a self contained component responsible for translating merchant payment requests into HTTP requests. The API layer encapsulates all of the business logic required to communicate with either a RESTful or GraphQL web service, depending on the payment method. Through encapsulation, the feature client doesn't need to know how each API is accessed.  The API layer is responsible for making web requests and parsing each result.
 
 We should refactor the GraphQL portion of the code base to be centered around the actual JSON request. We can enforce strong typing within the API layer by returning value objects detailing the parsed API response.
 
