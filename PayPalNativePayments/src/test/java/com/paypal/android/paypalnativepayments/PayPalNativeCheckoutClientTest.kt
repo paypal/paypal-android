@@ -1,11 +1,9 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.api.models.GetOrderRequest
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.Approval
 import com.paypal.checkout.approve.OnApprove
@@ -20,7 +18,6 @@ import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeData
 import com.paypal.checkout.shipping.ShippingChangeType
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -37,6 +34,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -253,7 +251,6 @@ class PayPalNativeCheckoutClientTest {
         every { approval.data.payerId } returns mockPayerID
         every { approval.data.orderId } returns mockOrderID
         val onApproveSlot = slot<OnApprove>()
-        val paypalCheckoutResultSlot = slot<PayPalNativeCheckoutResult>()
 
         every {
             PayPalCheckout.registerCallbacks(
@@ -269,14 +266,12 @@ class PayPalNativeCheckoutClientTest {
         val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         sut.listener = payPalClientListener
 
-        every {
-            payPalClientListener.onPayPalCheckoutSuccess(capture(paypalCheckoutResultSlot))
-        } answers {
-            assert(paypalCheckoutResultSlot.captured.orderID == mockOrderID)
-            assert(paypalCheckoutResultSlot.captured.payerID == mockOrderID)
+        verify {
+            payPalClientListener.onPayPalCheckoutSuccess(withArg { approve ->
+                assertEquals(approve.orderID, mockOrderID)
+                assertEquals(approve.payerID, mockPayerID)
+            })
         }
-
-        verify { payPalClientListener.onPayPalCheckoutSuccess(any()) }
     }
 
     @Test
@@ -304,7 +299,6 @@ class PayPalNativeCheckoutClientTest {
     fun `when OnError is invoked, onPayPalFailure is called`() {
         val errorMessage = "mock_error_message"
         val onError = slot<OnError>()
-        val paypalSdkErrorSlot = slot<PayPalSDKError>()
         val errorInfo = mockk<ErrorInfo>(relaxed = true).also {
             every { it.reason }.returns(errorMessage)
         }
@@ -323,20 +317,16 @@ class PayPalNativeCheckoutClientTest {
         val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         sut.listener = payPalClientListener
 
-        every {
-            payPalClientListener.onPayPalCheckoutFailure(capture(paypalSdkErrorSlot))
-        } answers {
-            assert(paypalSdkErrorSlot.captured.errorDescription == errorMessage)
+        verify {
+            payPalClientListener.onPayPalCheckoutFailure( withArg { error ->
+                assertEquals(error.errorDescription, errorMessage)
+            })
         }
-
-        verify { payPalClientListener.onPayPalCheckoutFailure(any()) }
     }
 
     @Test
     fun `when OnShippingChange is invoked with address change, onPayPalNativeShippingAddressChange is called`() {
         val onShippingChangeSlot = slot<OnShippingChange>()
-        val shippingAddressSlot = slot<PayPalNativeShippingAddress>()
-
         val mockCountryCode = "mock_country_code"
         val shippingActions = mockk<ShippingChangeActions>(relaxed = true)
         val shippingData = mockk<ShippingChangeData>(relaxed = true)
@@ -360,27 +350,28 @@ class PayPalNativeCheckoutClientTest {
         sut.shippingListener = shippingListener
         sut.listener = payPalClientListener
 
-        every {
-            shippingListener.onPayPalNativeShippingAddressChange(capture(shippingAddressSlot))
-        } answers {
-            assert(shippingAddressSlot.captured.countryCode == "pepe")
+        verify {
+            shippingListener.onPayPalNativeShippingAddressChange(
+                ofType(PayPalNativeShippingActions::class),
+                withArg { address ->
+                    assertEquals(address.countryCode, mockCountryCode)
+                }
+            )
+            payPalNativeAPI.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
         }
-
-        verify { shippingListener.onPayPalNativeShippingAddressChange(ofType(PayPalNativeShippingAddress::class)) }
     }
 
     @Test
     fun `when OnShippingChange is invoked with method change, onPayPalNativeShippingMethodChange is called`() = runTest {
         val onShippingChangeSlot = slot<OnShippingChange>()
-        val shippingMethodSlot = slot<PayPalNativeShippingMethod>()
 
-        val mockId = "mock_country_code"
+        val mockID = "mock_ID"
         val mockLabel = "mock_label"
         val shippingActions = mockk<ShippingChangeActions>(relaxed = true)
         val shippingData = mockk<ShippingChangeData>(relaxed = true)
 
         every { shippingData.shippingChangeType } returns ShippingChangeType.OPTION_CHANGE
-        every { shippingData.selectedShippingOption } returns Options(mockId, true, mockLabel)
+        every { shippingData.selectedShippingOption } returns Options(mockID, true, mockLabel)
 
         every {
             PayPalCheckout.registerCallbacks(
@@ -391,25 +382,26 @@ class PayPalNativeCheckoutClientTest {
             )
         } answers { onShippingChangeSlot.captured.onShippingChanged(shippingData, shippingActions) }
 
-        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+        sut = getPayPalCheckoutClient()
 
         val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
         val shippingListener = mockk<PayPalNativeShippingListener>(relaxed = true)
 
-        //every { shippingActions.patchOrder(any()) { } }
 
         sut.shippingListener = shippingListener
         sut.listener = payPalClientListener
 
-        every {
-            shippingListener.onPayPalNativeShippingMethodChange(capture(shippingMethodSlot))
-        } answers {
-            assert(shippingMethodSlot.captured.id == mockId)
-            assertTrue(shippingMethodSlot.captured.selected)
-            assert(shippingMethodSlot.captured.label == mockLabel)
+        verify {
+            shippingListener.onPayPalNativeShippingMethodChange(
+                ofType(PayPalNativeShippingActions::class),
+                withArg { option ->
+                    assertEquals(option.id, mockID)
+                    assertEquals(option.label, mockLabel)
+                    assertTrue(option.selected)
+                }
+            )
+            payPalNativeAPI.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
         }
-
-        coVerify { payPalNativeAPI.getOrderInfo(ofType(GetOrderRequest::class)) }
     }
 
     /**
