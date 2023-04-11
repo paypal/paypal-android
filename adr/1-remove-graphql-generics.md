@@ -22,7 +22,7 @@ The Payments SDK has a [layered architecture][3]–it can be thought of as an ex
 
 As seen in the diagram above, the API layer is a self contained component responsible for translating merchant payment requests into HTTP requests. The API layer encapsulates all of the business logic required to communicate with either a RESTful or GraphQL web service, depending on the payment method. Through encapsulation, the feature client doesn't need to know how each API is accessed.  The API layer is responsible for making web requests and parsing each result.
 
-`JSONObject` is an existing data type provided by the Android SDK that we can use in place of `Query`. This will allow us to keep the query at the center of our GraphQL architecture and also gives us more flexibility when writing unit tests. We can still enforce strong typing within the API layer by parsing each `HttpResponse` into an associated [value object][10] that provides transaction details.
+`JSONObject` is an existing data type provided by the Android SDK that we can use in place of `Query`. This will allow us to keep the query at the center of our GraphQL architecture and also gives us more flexibility when writing unit tests. We can still enforce strong typing within the API layer by parsing each `HttpResponse` into an associated [value object][10] that provides transaction details (see updated [Eligibility API implementation][11]).
 
 > <img src="./figure-graph-ql-client.png" height="400" alt="GraphQL Client Source Code">
 
@@ -46,3 +46,4 @@ We also will gain more flexibility by removing generics, since the API layer wil
 [8]: https://refactoring.guru/design-patterns/strategy
 [9]: https://www.swiftbysundell.com/basics/codable/
 [10]: https://martinfowler.com/bliki/ValueObject.html
+[11]: https://github.com/paypal/Android-SDK/blob/71dcb84d08fd9be88d1df9c404b812d636678891/CorePayments/src/main/java/com/paypal/android/corepayments/api/EligibilityAPI.kt#L21
