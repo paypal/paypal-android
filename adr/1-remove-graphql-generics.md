@@ -34,7 +34,7 @@ We can also follow GraphQL best practices and [provide query variables via JSON]
 
 The proposed GraphQL refactor will make the code less DRY in some ways, but the task to create a `JSONObject` for each GraphQL API call isn't overly complex. The tradeoff is increased repetition in the codebase in exchange for more readable code that's easy to follow. A cleaner codebase will reduce the cost of onboarding new contributors.
 
-We also will gain more flexibility by removing abstraction through generics, since the API layer will now have access to the full `HttpRequest` object.
+We will also gain more flexibility by removing abstraction through generics, since the API layer will now have access to the full `HttpRequest` object.
 
 [1]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/test/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQueryTest.kt#L12
 [2]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/main/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQuery.kt#L10
