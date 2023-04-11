@@ -16,7 +16,7 @@ The usage of generics in the Android Payments SDK is very similar to the usage o
 
 ## Decision
 
-The Payments SDK has a [layered architecture][3]–it can be thought of as an extension to the [OSI Model][4]. The SDK adds additional layers within the OSI application layer. Each layer communicates with the layer directly below it:
+The Payments SDK has a [layered architecture][3]–it can be thought of as an extension to the [OSI Model][4]. The SDK adds additional layers within the OSI Application layer. Each layer communicates with the layer directly below it:
 
 > <img src="./figure-payments-sdk-architecture.png" height="400" alt="Payments SDK Architecture Layers: Merchant App, Feature Client, API, HTTP Client">
 
