@@ -319,7 +319,7 @@ class PayPalNativeCheckoutClientTest {
         sut.listener = payPalClientListener
 
         verify {
-            payPalClientListener.onPayPalCheckoutFailure( withArg { error ->
+            payPalClientListener.onPayPalCheckoutFailure(withArg { error ->
                 assertEquals(error.errorDescription, errorMessage)
             })
         }
@@ -363,47 +363,47 @@ class PayPalNativeCheckoutClientTest {
     }
 
     @Test
-    fun `when OnShippingChange is invoked with method change, onPayPalNativeShippingMethodChange is called`() = runTest {
-        val onShippingChangeSlot = slot<OnShippingChange>()
+    fun `when OnShippingChange is invoked with method change, onPayPalNativeShippingMethodChange is called`() =
+        runTest {
+            val onShippingChangeSlot = slot<OnShippingChange>()
 
-        val mockID = "mock_ID"
-        val mockLabel = "mock_label"
-        val shippingActions = mockk<ShippingChangeActions>(relaxed = true)
-        val shippingData = mockk<ShippingChangeData>(relaxed = true)
+            val mockID = "mock_ID"
+            val mockLabel = "mock_label"
+            val shippingActions = mockk<ShippingChangeActions>(relaxed = true)
+            val shippingData = mockk<ShippingChangeData>(relaxed = true)
 
-        every { shippingData.shippingChangeType } returns ShippingChangeType.OPTION_CHANGE
-        every { shippingData.selectedShippingOption } returns Options(mockID, true, mockLabel)
+            every { shippingData.shippingChangeType } returns ShippingChangeType.OPTION_CHANGE
+            every { shippingData.selectedShippingOption } returns Options(mockID, true, mockLabel)
 
-        every {
-            PayPalCheckout.registerCallbacks(
-                any(),
-                capture(onShippingChangeSlot),
-                any(),
-                any()
-            )
-        } answers { onShippingChangeSlot.captured.onShippingChanged(shippingData, shippingActions) }
+            every {
+                PayPalCheckout.registerCallbacks(
+                    any(),
+                    capture(onShippingChangeSlot),
+                    any(),
+                    any()
+                )
+            } answers { onShippingChangeSlot.captured.onShippingChanged(shippingData, shippingActions) }
 
-        sut = getPayPalCheckoutClient()
+            sut = getPayPalCheckoutClient()
 
-        val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
-        val shippingListener = mockk<PayPalNativeShippingListener>(relaxed = true)
+            val payPalClientListener = mockk<PayPalNativeCheckoutListener>(relaxed = true)
+            val shippingListener = mockk<PayPalNativeShippingListener>(relaxed = true)
 
+            sut.shippingListener = shippingListener
+            sut.listener = payPalClientListener
 
-        sut.shippingListener = shippingListener
-        sut.listener = payPalClientListener
-
-        verify {
-            shippingListener.onPayPalNativeShippingMethodChange(
-                ofType(PayPalNativeShippingActions::class),
-                withArg { option ->
-                    assertEquals(option.id, mockID)
-                    assertEquals(option.label, mockLabel)
-                    assertTrue(option.selected)
-                }
-            )
-            api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+            verify {
+                shippingListener.onPayPalNativeShippingMethodChange(
+                    ofType(PayPalNativeShippingActions::class),
+                        withArg { option ->
+                        assertEquals(option.id, mockID)
+                        assertEquals(option.label, mockLabel)
+                        assertTrue(option.selected)
+                    }
+                )
+                api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+            }
         }
-    }
 
     /**
      * Resets a private variable on a singleton.
