@@ -1,6 +1,7 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
+import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -49,7 +50,7 @@ class PayPalNativeCheckoutClientTest {
     private val mockClientId = generateRandomString()
     private val mockReturnUrl = "mock_return_url"
 
-    private val payPalNativeAPI = mockk<PayPalNativeAPI>(relaxed = true)
+    private val api = mockk<API>(relaxed = true)
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
@@ -57,7 +58,7 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { payPalNativeAPI.fetchCachedOrRemoteClientID() } returns mockClientId
+        coEvery { api.fetchCachedOrRemoteClientID() } returns mockClientId
     }
 
     @After
@@ -140,7 +141,7 @@ class PayPalNativeCheckoutClientTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
-        coEvery { payPalNativeAPI.fetchCachedOrRemoteClientID() } throws error
+        coEvery { api.fetchCachedOrRemoteClientID() } throws error
         every {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -357,7 +358,7 @@ class PayPalNativeCheckoutClientTest {
                     assertEquals(address.countryCode, mockCountryCode)
                 }
             )
-            payPalNativeAPI.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
+            api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
         }
     }
 
@@ -400,7 +401,7 @@ class PayPalNativeCheckoutClientTest {
                     assertTrue(option.selected)
                 }
             )
-            payPalNativeAPI.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+            api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
         }
     }
 
@@ -423,7 +424,7 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, payPalNativeAPI, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, payPalNativeAPI)
+            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
+        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
     }
 }
