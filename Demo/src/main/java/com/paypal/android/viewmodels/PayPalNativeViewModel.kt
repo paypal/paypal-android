@@ -14,6 +14,7 @@ import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
+import com.paypal.android.paypalnativepayments.PayPalNativeShippingActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
@@ -64,12 +65,20 @@ class PayPalNativeViewModel @Inject constructor(
 
     private val shippingListener = object : PayPalNativeShippingListener {
 
-        override fun onPayPalNativeShippingAddressChange(shippingAddress: PayPalNativeShippingAddress) {
+        override fun onPayPalNativeShippingAddressChange(
+            actions: PayPalNativeShippingActions,
+            shippingAddress: PayPalNativeShippingAddress
+        ) {
             Log.d("PayPalNativeViewModel", "Address change")
+            actions.approve()
         }
 
-        override fun onPayPalNativeShippingMethodChange(shippingMethod: PayPalNativeShippingMethod) {
+        override fun onPayPalNativeShippingMethodChange(
+            actions: PayPalNativeShippingActions,
+            shippingMethod: PayPalNativeShippingMethod
+        ) {
             Log.d("PayPalNativeViewModel", "Method change")
+            actions.approve()
         }
     }
 
