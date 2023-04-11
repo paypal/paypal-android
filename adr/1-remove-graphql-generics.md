@@ -4,7 +4,7 @@
 
 ## Context
 
-Our GraphQL portion of the codebase has [limited unit test coverage][1]. The [current implementation][2] follows [DRY programming][7] principles very well–however this comes with a cost of being difficult to test.  
+Our GraphQL portion of the codebase has [limited unit test coverage][1]. The [current implementation][2] follows [DRY programming][7] principles very well–however the usage of generics to decrease repetition makes the code harder to test and maintain.
 
 The core of the current implementation is the `Query` type, an abstract base class:
 
