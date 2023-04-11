@@ -32,7 +32,7 @@ We can also follow GraphQL best practices and [provide query variables via JSON]
 
 ## Consequences
 
-The proposed GraphQL refactor will make the code less DRY in some ways, but the task to create a `JSONObject` for each GraphQL API call isn't overly complex. The tradeoff is more repetition in the codebase for more readible code that's easy to follow, reducing onboarding costs for new contributors.
+The proposed GraphQL refactor will make the code less DRY in some ways, but the task to create a `JSONObject` for each GraphQL API call isn't overly complex. The tradeoff is more repetition in the codebase for more readable code that's easy to follow, reducing onboarding costs for new contributors.
 
 We also will gain more flexibility by removing generics, since the API layer will now have access to the full `HttpRequest` object.
 
