@@ -4,9 +4,9 @@
 
 ## Context
 
-We have [limited test coverage][1] in our GraphQL portion of the codebase. The way it's [currently written][2] does have the benefit of being DRY, allthough it does come with a cost of being difficult to test.
+Our GraphQL portion of the codebase has [limited unit test coverage][1]. The [current implementation][2] follows [DRY programming][7] principles very well–however this comes with a cost of being difficult to test.  
 
-Here is a snippet of the abstract base class `Query`:
+The core of the current implementation is the `Query` type, an abstract base class:
 
 > <img src="./figure-query-abstract-base-class.png" height="400" alt="Query Abstract Base Class Source Code">
 
@@ -38,3 +38,4 @@ The code will become less DRY, but the task to create a JSONObject GraphQL query
 [4]: https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/
 [5]: https://www.apollographql.com/docs/react/data/operation-best-practices/#use-graphql-variables-to-provide-arguments
 [6]: https://plugins.jetbrains.com/plugin/8097-graphql
+[7]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
