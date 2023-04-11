@@ -149,42 +149,16 @@ class PayPalNativeCheckoutClient internal constructor (
                 ShippingChangeType.ADDRESS_CHANGE -> {
                     payPalNativeAPI.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
                     it.onPayPalNativeShippingAddressChange(
+                        PayPalNativeShippingActions(shippingChangeActions),
                         PayPalNativeShippingAddress(shippingChangeData.shippingAddress)
                     )
-                    shippingChangeActions.approve()
                 }
                 ShippingChangeType.OPTION_CHANGE -> {
-                    CoroutineScope(dispatcher).launch(exceptionHandler) {
-                        orderID?.let { id ->
-                            val order = payPalNativeAPI.getOrderInfo(GetOrderRequest(id))
-                            val orderAmount = order.purchaseUnits?.first()?.amount?.value ?: "0.00"
-                            val options: List<Options> = shippingChangeData.shippingOptions
-                            val selectedShippingOption = shippingChangeData.selectedShippingOption
-                            val updatedShippingAmount = selectedShippingOption?.amount?.value ?: "0.00"
-
-                            val orderAmountAsFloat = orderAmount.toFloat()
-                            val shippingAmountAsFloat = updatedShippingAmount.toFloat()
-                            val updatedOrderValue = orderAmountAsFloat + shippingAmountAsFloat
-
-                            val patchRequest = PatchOrderRequest(
-                                PatchShippingOptions.Replace(options),
-                                PatchAmount.Replace(
-                                    Amount(
-                                        currencyCode = CurrencyCode.USD,
-                                        value = "%.2f".format(updatedOrderValue),
-                                    )
-                                )
-                            )
-                            // TODO: patch order will fail because of bug in NXO. Ticket: https://paypal.atlassian.net/browse/DTNOR-607
-                            shippingChangeActions.patchOrder(patchRequest) {
-                                selectedShippingOption?.let { shippingOption ->
-                                    it.onPayPalNativeShippingMethodChange(
-                                        PayPalNativeShippingMethod(shippingOption)
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    payPalNativeAPI.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+                    it.onPayPalNativeShippingMethodChange(
+                        PayPalNativeShippingActions(shippingChangeActions),
+                        PayPalNativeShippingMethod(shippingChangeData.selectedShippingOption!!)
+                    )
                 }
             }
         }
