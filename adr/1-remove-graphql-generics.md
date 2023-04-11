@@ -4,13 +4,15 @@
 
 ## Context
 
-Our GraphQL portion of the codebase has [limited unit test coverage][1]. The [current implementation][2] follows [DRY programming][7] principles very well–however the usage of generics to decrease repetition makes the code harder to test and maintain.
+Our GraphQL portion of the codebase has [limited unit test coverage][1]. The current implementation follows [DRY programming][7] principles very well–however the usage of generics to decrease repetition makes the code harder to test and maintain.
 
 The core of the current implementation is the `Query` type, an abstract base class:
 
 > <img src="./figure-query-abstract-base-class.png" height="400" alt="Query Abstract Base Class Source Code">
 
-The current implementation also relies heavily on Generics for strong typing which can make the code difficult to read and maintain. The design is very similar to the iOS implementation. Generics are used on iOS to conform to a `Codable` interface for JSON parsing. There is no `Codable` equivalent on Android.
+The `Query` class uses a generic type `T` to allow subclasses to provide their own parsing [strategy][8]. The [FundingEligibilityQuery][2] class shows how new GraphQL queries can be created by subclassing `Query`. Generics are a powerful feature in Kotlin, but the resulting code can be difficult to read and maintain when compared to code without generics.
+
+The usage of generics in the Android Payments SDK is very similar to the usage of generics by the iOS Payments SDK. Generics are used on iOS to conform to a [Codable][9] interface to enable JSON parsing by first-party Apple libraries. Unfortunately, there is no `Codable` equivalent on Android.
 
 ## Decision
 
@@ -39,3 +41,5 @@ The code will become less DRY, but the task to create a JSONObject GraphQL query
 [5]: https://www.apollographql.com/docs/react/data/operation-best-practices/#use-graphql-variables-to-provide-arguments
 [6]: https://plugins.jetbrains.com/plugin/8097-graphql
 [7]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
+[8]: https://refactoring.guru/design-patterns/strategy
+[9]: https://www.swiftbysundell.com/basics/codable/
