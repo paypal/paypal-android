@@ -26,9 +26,9 @@ As seen in the diagram above, the API layer is a self contained component respon
 
 > <img src="./figure-graph-ql-client.png" height="400" alt="GraphQL Client Source Code">
 
-The `GraphQLClient` is a part of the HTTP layers, since GraphQL requests are made over HTTP. GraphQL responses are JSON formatted, and can be parsed in the API layer to extract information from the JSON into a value object that's returned to the client. Clients can inspect the value objects returned by the API layer and forward this information to the merchant app, or they can make additional API calls as needed without having to be concerned with low-level networking details.
+`GraphQLClient` is part of the HTTP layer, since GraphQL requests are made over HTTP. GraphQL responses have a common JSON format and can be parsed entirely in the API layer. Feature Clients can inspect the value objects returned by the API layer and either make additional API calls or forward results to the Merchant application. The primary benefit for Feature Clients within the layered architecture is the ability to make API calls without needing to know low-level networking details.
 
-We can also have an opportunity to follow a GraphQL best practice of [providing variables via JSON][5]. We can turn each query into an Android raw resource and take advantage of the [IntelliJ GraphQL Plugin][6] for compile time syntax checking and auto completion.
+We can also follow GraphQL best practices and [provide query variables via JSON][5]. By making each query a `raw` Android resource, we can even take advantage of plugins like the [IntelliJ GraphQL Plugin][6] for compile time syntax checking and auto completion of GraphQL queries.
 
 ## Consequences
 
