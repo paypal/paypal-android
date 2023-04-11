@@ -22,19 +22,19 @@ The Payments SDK has a [layered architecture][3]–it can be thought of as an ex
 
 As seen in the diagram above, the API layer is a self contained component responsible for translating merchant payment requests into HTTP requests. The API layer encapsulates all of the business logic required to communicate with either a RESTful or GraphQL web service, depending on the payment method. Through encapsulation, the feature client doesn't need to know how each API is accessed.  The API layer is responsible for making web requests and parsing each result.
 
-`JSONObject` is an existing data type provided by the Android SDK that we can use in place of `Query`. This will allow us to keep the query at the center of our GraphQL architecture and also gives us more flexibility when writing unit tests. We can still enforce strong typing within the API layer by parsing each `HttpResponse` into an associated [value object][10] that provides transaction details (see updated [Eligibility API implementation][11]).
+`JSONObject` is an existing data type provided by the Android SDK that we can use in place of `Query`. We can keep the query at the center of our GraphQL architecture and also gain flexibility to write simpler unit tests. We can still enforce strong typing within the API layer by parsing each `HttpResponse` into an associated [value object][10] that provides transaction details (see updated [Eligibility API implementation][11]).
 
 > <img src="./figure-graph-ql-client.png" height="400" alt="GraphQL Client Source Code">
 
-`GraphQLClient` is part of the HTTP layer, since GraphQL requests are made over HTTP. GraphQL responses have a common JSON format and can be parsed entirely in the API layer. Feature Clients can inspect the value objects returned by the API layer and either make additional API calls or forward results to the Merchant application. The primary benefit for Feature Clients within the layered architecture is the ability to make API calls without needing to know low-level networking details.
+`GraphQLClient` can be considered part of the HTTP layer since GraphQL requests are made over HTTP. GraphQL responses have a common JSON format and can be parsed entirely within the API layer. Feature Clients can inspect the value objects returned by the API layer and either make additional API calls, or forward results to the Merchant application. The primary benefit for Feature Clients within the layered architecture is the ability to make API calls without needing to know low-level networking details.
 
-We can also follow GraphQL best practices and [provide query variables via JSON][5]. By making each query a `raw` Android resource, we can even take advantage of plugins like the [IntelliJ GraphQL Plugin][6] for compile time syntax checking and auto completion of GraphQL queries.
+We can also follow GraphQL best practices and [provide query variables via JSON][5]. By making each query a `raw` Android resource, we can take advantage of plugins like the [IntelliJ GraphQL Plugin][6] for compile time syntax checking and auto completion of GraphQL queries.
 
 ## Consequences
 
-The proposed GraphQL refactor will make the code less DRY in some ways, but the task to create a `JSONObject` for each GraphQL API call isn't overly complex. The tradeoff is more repetition in the codebase for more readable code that's easy to follow, reducing onboarding costs for new contributors.
+The proposed GraphQL refactor will make the code less DRY in some ways, but the task to create a `JSONObject` for each GraphQL API call isn't overly complex. The tradeoff is increased repetition in the codebase in exchange for more readable code that's easy to follow. A cleaner codebase will reduce the cost of onboarding new contributors.
 
-We also will gain more flexibility by removing generics, since the API layer will now have access to the full `HttpRequest` object.
+We also will gain more flexibility by removing abstraction through generics, since the API layer will now have access to the full `HttpRequest` object.
 
 [1]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/test/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQueryTest.kt#L12
 [2]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/main/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQuery.kt#L10
