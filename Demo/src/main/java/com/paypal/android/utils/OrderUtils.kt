@@ -181,8 +181,9 @@ object OrderUtils {
         return listOf(item1, item2)
     }
 
-    private fun createShippingOptionsBuilder(
-        currency: CurrencyCode,
+    fun createShippingOptionsBuilder(
+        currency: CurrencyCode = CurrencyCode.USD,
+        selectedId: String = "5"
     ): List<Options> {
         val shippingOption1 = Options.Builder()
             .id("1")
@@ -195,7 +196,6 @@ object OrderUtils {
                     .value("10.00")
                     .build()
             )
-            .build()
 
         val shippingOption2 = Options.Builder()
             .id("2")
@@ -208,7 +208,6 @@ object OrderUtils {
                     .value("9.00")
                     .build()
             )
-            .build()
 
         val shippingOption3 = Options.Builder()
             .id("3")
@@ -221,7 +220,6 @@ object OrderUtils {
                     .value("8.00")
                     .build()
             )
-            .build()
 
         val shippingOption4 = Options.Builder()
             .id("4")
@@ -234,7 +232,18 @@ object OrderUtils {
                     .value("7.00")
                     .build()
             )
-            .build()
+
+        val shippingOption5 = Options.Builder()
+            .id("5")
+            .selected(true)
+            .label("1 day Shipping")
+            .type(ShippingType.SHIPPING)
+            .amount(
+                UnitAmount.Builder()
+                    .currencyCode(currency)
+                    .value("00.00")
+                    .build()
+            )
 
         val pickUpOption6 = Options.Builder()
             .id("6")
@@ -247,10 +256,9 @@ object OrderUtils {
                     .value("5.00")
                     .build()
             )
-            .build()
 
         val pickUpOption7 = Options.Builder()
-            .id("8")
+            .id("7")
             .selected(false)
             .label("Pick up from 999 N 1st st, San Fransisco CA, 95009")
             .type(ShippingType.PICKUP)
@@ -260,10 +268,9 @@ object OrderUtils {
                     .value("4.00")
                     .build()
             )
-            .build()
 
         val pickUpOption8 = Options.Builder()
-            .id("9")
+            .id("8")
             .selected(false)
             .label("In store pickup")
             .type(ShippingType.PICKUP)
@@ -273,10 +280,9 @@ object OrderUtils {
                     .value("3.00")
                     .build()
             )
-            .build()
 
         val pickUpOption9 = Options.Builder()
-            .id("10")
+            .id("9")
             .selected(false)
             .label("Pick up from Amazon")
             .type(ShippingType.PICKUP)
@@ -286,10 +292,9 @@ object OrderUtils {
                     .value("2.00")
                     .build()
             )
-            .build()
 
         val pickUpOption10 = Options.Builder()
-            .id("11")
+            .id("10")
             .selected(false)
             .label("Pick up from Tesla warehouse")
             .type(ShippingType.PICKUP)
@@ -299,33 +304,23 @@ object OrderUtils {
                     .value("1.00")
                     .build()
             )
-            .build()
 
-        val selectedShippingOption5 = Options.Builder()
-            .id("5")
-            .selected(true)
-            .label("1 day Shipping")
-            .type(ShippingType.SHIPPING)
-            .amount(
-                UnitAmount.Builder()
-                    .currencyCode(currency)
-                    .value("00.00")
-                    .build()
-            )
-            .build()
-
-        return listOf(
+        val options =  listOf(
             shippingOption1,
             shippingOption2,
             shippingOption3,
             shippingOption4,
-            selectedShippingOption5,
+            shippingOption5,
             pickUpOption6,
             pickUpOption7,
             pickUpOption8,
             pickUpOption9,
             pickUpOption10
         )
+        return options.mapIndexed { index, builder ->
+            val id = "${index + 1}"
+            builder.id(id).selected(selectedId == id).build()
+        }
     }
 
     fun Float.asValueString(): String = "%.2f".format(this)
