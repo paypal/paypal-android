@@ -1,7 +1,6 @@
 package com.paypal.android.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -25,6 +24,7 @@ import com.paypal.android.usecase.UpdateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,7 +91,7 @@ class PayPalNativeViewModel @Inject constructor(
                     try {
                         updateOrderUseCase(it, shippingMethod)
                         actions.approve()
-                    } catch (e: Exception) {
+                    } catch (e: IOException) {
                         actions.reject()
                         throw e
                     }

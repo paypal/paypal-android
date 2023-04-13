@@ -305,7 +305,7 @@ object OrderUtils {
                     .build()
             )
 
-        val options =  listOf(
+        val options = listOf(
             shippingOption1,
             shippingOption2,
             shippingOption3,

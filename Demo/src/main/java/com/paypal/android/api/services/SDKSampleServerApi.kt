@@ -27,5 +27,8 @@ interface SDKSampleServerApi {
     suspend fun fetchAccessToken(): AccessToken
 
     @PATCH("/orders/{orderID}")
-    suspend fun patchOrder(@Path("orderID") orderId: String, @Body body: List<UpdateOrderUseCase.PatchRequestBody>): ResponseBody
+    suspend fun patchOrder(
+        @Path("orderID") orderId: String,
+        @Body body: List<UpdateOrderUseCase.PatchRequestBody>
+    ): ResponseBody
 }
