@@ -1,20 +1,11 @@
 package com.paypal.android.paypalnativepayments
 
 import com.paypal.checkout.order.Address
-// TODO: this object is diferent in iOS, check with MXO for better consistency
+// TODO: this object is diferent in iOS, check with MXO for better consistency (missing addressId)
 /**
  * The user's selected shipping address via the PayPal Native Checkout UI.
  */
 data class PayPalNativeShippingAddress internal constructor(
-    /**
-     * Line 1 of the Address (eg. number, street, etc)
-     */
-    val addressLine1: String?,
-
-    /**
-     * Line 2 of the Address (eg. suite, apt #, etc.)
-     */
-    val addressLine2: String?,
     /**
      * The highest level sub-division in a country, which is usually a province, state, or ISO-3166-2 subdivision.
      * Format for postal delivery. For example, `CA` and not `California`. Value, by country, is:
@@ -43,8 +34,6 @@ data class PayPalNativeShippingAddress internal constructor(
 ) {
 
     internal constructor(address: Address) : this(
-        address.addressLine1,
-        address.addressLine2,
         address.adminArea1,
         address.adminArea2,
         address.postalCode,
