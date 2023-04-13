@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.api
+package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.Code
 import com.paypal.android.corepayments.HttpResponse
@@ -8,6 +8,7 @@ import com.paypal.android.corepayments.api.models.GetOrderInfoResponse
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
@@ -23,6 +24,13 @@ class CoreRequestParserUnitTest {
         private val headers: Map<String, String> = mapOf(
             "Paypal-Debug-Id" to correlationID,
         )
+
+        private lateinit var sut: CardResponseParser
+
+        @Before
+        fun setUp() {
+            sut = CardResponseParser()
+        }
 
         @Test
         fun `it parses a get info order response`() {
@@ -63,8 +71,6 @@ class CoreRequestParserUnitTest {
             val mockHttpResponse = mockk<HttpResponse>(relaxed = true)
             every { mockHttpResponse.body } returns response
 
-            val sut = CoreRequestParser()
-
             val expected = GetOrderInfoResponse(PaymentsJSON(response))
             val actual = sut.parseGetOrderInfoResponse(mockHttpResponse)
 
@@ -77,8 +83,6 @@ class CoreRequestParserUnitTest {
             val mockHttpResponse = mockk<HttpResponse>(relaxed = true)
             every { mockHttpResponse.body } returns invalidJsonResponse
             every { mockHttpResponse.headers } returns headers
-
-            val sut = CoreRequestParser()
 
             var capturedError: PayPalSDKError? = null
             try {
@@ -95,7 +99,6 @@ class CoreRequestParserUnitTest {
             val httpResponse = mockk<HttpResponse>(relaxed = true)
             every { httpResponse.isSuccessful } returns true
 
-            val sut = CoreRequestParser()
             Assert.assertNull(sut.parseError(httpResponse))
         }
     }
@@ -166,7 +169,7 @@ class CoreRequestParserUnitTest {
             every { httpResponse.status } returns status
             every { httpResponse.body } returns body
 
-            val sut = CoreRequestParser()
+            val sut = CardResponseParser()
             val error = sut.parseError(httpResponse)
 
             if (status != HttpURLConnection.HTTP_OK) Assert.assertEquals(resultCode.ordinal, error?.code)

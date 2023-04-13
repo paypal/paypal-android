@@ -2,10 +2,10 @@ package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
-import com.paypal.android.corepayments.api.CoreRequestFactory
+import com.paypal.android.corepayments.api.models.GetOrderRequest
 import org.json.JSONObject
 
-internal class CardRequestFactory : CoreRequestFactory() {
+internal class CardRequestFactory {
 
     fun createConfirmPaymentSourceRequest(cardRequest: CardRequest): APIRequest =
         cardRequest.run {
@@ -50,4 +50,9 @@ internal class CardRequestFactory : CoreRequestFactory() {
             val path = "v2/checkout/orders/$orderID/confirm-payment-source"
             APIRequest(path, HttpMethod.POST, body)
         }
+
+    fun createGetOrderInfoRequest(getOrderRequest: GetOrderRequest): APIRequest {
+        val path = "v2/checkout/orders/${getOrderRequest.orderId}"
+        return APIRequest(path, HttpMethod.GET, "")
+    }
 }
