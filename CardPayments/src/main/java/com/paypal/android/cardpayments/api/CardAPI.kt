@@ -4,8 +4,6 @@ import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardRequestFactory
 import com.paypal.android.cardpayments.CardResponseParser
 import com.paypal.android.corepayments.API
-import com.paypal.android.corepayments.api.models.GetOrderInfoResponse
-import com.paypal.android.corepayments.api.models.GetOrderRequest
 
 internal class CardAPI(
     private val api: API,

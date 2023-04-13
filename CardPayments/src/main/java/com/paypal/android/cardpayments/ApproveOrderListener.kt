@@ -1,7 +1,7 @@
 package com.paypal.android.cardpayments
 
 import androidx.annotation.MainThread
-import com.paypal.android.corepayments.models.CardResult
+import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.PayPalSDKError
 
 /**

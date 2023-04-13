@@ -4,7 +4,7 @@ import com.paypal.android.corepayments.Code
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PaymentsJSON
-import com.paypal.android.corepayments.api.models.GetOrderInfoResponse
+import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert

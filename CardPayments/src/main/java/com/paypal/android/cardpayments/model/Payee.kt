@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.models
+package com.paypal.android.cardpayments.model
 
 import com.paypal.android.corepayments.PaymentsJSON
 

@@ -1,10 +1,10 @@
-package com.paypal.android.corepayments.api.models
+package com.paypal.android.cardpayments.api
 
-import com.paypal.android.corepayments.models.PaymentSource
-import com.paypal.android.corepayments.models.PurchaseUnit
+import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.cardpayments.model.PaymentSource
+import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PaymentsJSON
-import com.paypal.android.corepayments.models.OrderIntent
 
 data class GetOrderInfoResponse(
     val orderId: String,
@@ -17,7 +17,15 @@ data class GetOrderInfoResponse(
         json.getString("id"),
         OrderStatus.valueOf(json.getString("status")),
         OrderIntent.valueOf(json.getString("intent")),
-        json.optMapObject("payment_source.card") { PaymentSource(it) },
-        json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
+        json.optMapObject("payment_source.card") {
+            PaymentSource(
+                it
+            )
+        },
+        json.optMapObjectArray("purchase_units") {
+            PurchaseUnit(
+                it
+            )
+        }
     )
 }

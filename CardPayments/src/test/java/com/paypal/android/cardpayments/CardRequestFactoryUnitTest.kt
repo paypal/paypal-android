@@ -3,7 +3,7 @@ package com.paypal.android.cardpayments
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.Address
 import com.paypal.android.corepayments.HttpMethod
-import com.paypal.android.corepayments.api.models.GetOrderRequest
+import com.paypal.android.cardpayments.api.GetOrderRequest
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Before

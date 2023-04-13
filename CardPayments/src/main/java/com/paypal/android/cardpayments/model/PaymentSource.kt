@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.models
+package com.paypal.android.cardpayments.model
 
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
@@ -7,7 +7,7 @@ data class PaymentSource(
     val lastDigits: String,
     val brand: String,
     val type: String? = null,
-    val authenticationResult: AuthenticationResult? = null
+    val authenticationResult: com.paypal.android.cardpayments.model.AuthenticationResult? = null
 ) {
 
     companion object {
@@ -21,7 +21,11 @@ data class PaymentSource(
         json.getString(KEY_LAST_DIGITS),
         json.getString(KEY_BRAND),
         json.optString(KEY_TYPE),
-        json.optMapObject(KEY_AUTHENTICATION_RESULT) { AuthenticationResult(it) }
+        json.optMapObject(KEY_AUTHENTICATION_RESULT) {
+            com.paypal.android.cardpayments.model.AuthenticationResult(
+                it
+            )
+        }
     )
 
     fun toJSON(): JSONObject {

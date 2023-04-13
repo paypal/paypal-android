@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.models
+package com.paypal.android.cardpayments.threedsecure
 
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject

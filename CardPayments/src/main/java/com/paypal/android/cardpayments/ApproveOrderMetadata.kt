@@ -1,6 +1,6 @@
 package com.paypal.android.cardpayments
 
-import com.paypal.android.corepayments.models.PaymentSource
+import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
