@@ -17,15 +17,7 @@ internal data class GetOrderInfoResponse(
         json.getString("id"),
         OrderStatus.valueOf(json.getString("status")),
         OrderIntent.valueOf(json.getString("intent")),
-        json.optMapObject("payment_source.card") {
-            PaymentSource(
-                it
-            )
-        },
-        json.optMapObjectArray("purchase_units") {
-            PurchaseUnit(
-                it
-            )
-        }
+        json.optMapObject("payment_source.card") { PaymentSource(it) },
+        json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
     )
 }

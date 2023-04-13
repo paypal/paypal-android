@@ -21,11 +21,7 @@ data class PaymentSource(
         json.getString(KEY_LAST_DIGITS),
         json.getString(KEY_BRAND),
         json.optString(KEY_TYPE),
-        json.optMapObject(KEY_AUTHENTICATION_RESULT) {
-            AuthenticationResult(
-                it
-            )
-        }
+        json.optMapObject(KEY_AUTHENTICATION_RESULT) { AuthenticationResult(it) }
     )
 
     fun toJSON(): JSONObject {
