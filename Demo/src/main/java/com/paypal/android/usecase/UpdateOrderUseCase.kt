@@ -4,7 +4,6 @@ package com.paypal.android.usecase
 import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.utils.OrderUtils
-import com.paypal.checkout.order.Options
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -13,6 +12,7 @@ class UpdateOrderUseCase @Inject constructor(
     private val sdkSampleServerApi: SDKSampleServerApi
 ) {
     suspend operator fun invoke(orderID: String, shippingMethod: PayPalNativeShippingMethod) = withContext(Dispatchers.IO) {
+        // https://developer.paypal.com/docs/api/orders/v2/#orders_patch
         val options = OrderUtils.createShippingOptionsBuilder(selectedId = shippingMethod.id)
         val patchShipping = PatchRequestBody(
             path = "/purchase_units/@reference_id=='PUHF'/shipping/options",
