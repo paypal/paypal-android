@@ -16,9 +16,9 @@ import org.junit.runners.Parameterized
 import java.net.HttpURLConnection
 
 @RunWith(Enclosed::class)
-class CoreRequestParserUnitTest {
+class CardRequestParserUnitTest {
 
-    class CoreRequestParserFunctionsUnitTest {
+    class CardRequestParserFunctionsUnitTest {
 
         private val correlationID = "correlationID"
         private val headers: Map<String, String> = mapOf(
@@ -104,7 +104,7 @@ class CoreRequestParserUnitTest {
     }
 
     @RunWith(Parameterized::class)
-    internal class CoreRequestParserErrorParameterized(
+    internal class CardRequestParserErrorParameterized(
         private val isSuccessful: Boolean,
         private val status: Int,
         private val body: String,
