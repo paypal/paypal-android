@@ -6,7 +6,7 @@ import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PaymentsJSON
 
-data class GetOrderInfoResponse(
+internal data class GetOrderInfoResponse(
     val orderId: String,
     val orderStatus: OrderStatus,
     val orderIntent: OrderIntent,

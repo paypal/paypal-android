@@ -8,12 +8,12 @@ import com.paypal.android.corepayments.PaymentsJSON
  */
 data class PurchaseUnit(
     val referenceId: String?,
-    val amount: com.paypal.android.cardpayments.model.Amount? = null,
+    val amount: Amount? = null,
     val payee: Payee? = null
 ) {
-    constructor(json: PaymentsJSON) : this(
+    internal constructor(json: PaymentsJSON) : this(
         json.optString("reference_id"),
-        json.optMapObject("amount") { com.paypal.android.cardpayments.model.Amount(it) },
+        json.optMapObject("amount") { Amount(it) },
         json.optMapObject("payee") { Payee(json) }
     )
 }

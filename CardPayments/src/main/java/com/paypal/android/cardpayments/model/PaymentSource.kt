@@ -7,7 +7,7 @@ data class PaymentSource(
     val lastDigits: String,
     val brand: String,
     val type: String? = null,
-    val authenticationResult: com.paypal.android.cardpayments.model.AuthenticationResult? = null
+    val authenticationResult: AuthenticationResult? = null
 ) {
 
     companion object {
@@ -17,12 +17,12 @@ data class PaymentSource(
         const val KEY_AUTHENTICATION_RESULT = "authentication_result"
     }
 
-    constructor(json: PaymentsJSON) : this(
+    internal constructor(json: PaymentsJSON) : this(
         json.getString(KEY_LAST_DIGITS),
         json.getString(KEY_BRAND),
         json.optString(KEY_TYPE),
         json.optMapObject(KEY_AUTHENTICATION_RESULT) {
-            com.paypal.android.cardpayments.model.AuthenticationResult(
+            AuthenticationResult(
                 it
             )
         }
