@@ -1,6 +1,7 @@
 package com.paypal.android.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,18 +14,13 @@ import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
+import com.paypal.android.paypalnativepayments.PayPalNativeShippingActions
+import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
+import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
+import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
-import com.paypal.android.utils.OrderUtils.asValueString
-import com.paypal.android.utils.OrderUtils.getAmount
-import com.paypal.checkout.order.Options
-import com.paypal.checkout.order.patch.PatchOrderRequest
-import com.paypal.checkout.order.patch.fields.PatchAmount
-import com.paypal.checkout.order.patch.fields.PatchShippingOptions
-import com.paypal.checkout.shipping.ShippingChangeActions
-import com.paypal.checkout.shipping.ShippingChangeData
-import com.paypal.checkout.shipping.ShippingChangeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -34,10 +30,6 @@ import javax.inject.Inject
 class PayPalNativeViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
-
-    private companion object {
-        private const val SHIPPING_METHOD_INCREASE = 10f
-    }
 
     @Inject
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
@@ -69,50 +61,24 @@ class PayPalNativeViewModel @Inject constructor(
         override fun onPayPalCheckoutCanceled() {
             internalState.postValue(NativeCheckoutViewState.CheckoutCancelled)
         }
+    }
 
-        override fun onPayPalCheckoutShippingChange(
-            shippingChangeData: ShippingChangeData,
-            shippingChangeActions: ShippingChangeActions
+    private val shippingListener = object : PayPalNativeShippingListener {
+
+        override fun onPayPalNativeShippingAddressChange(
+            actions: PayPalNativeShippingActions,
+            shippingAddress: PayPalNativeShippingAddress
         ) {
-            val options: List<Options>
-            val updatedShippingAmount: String?
+            Log.d("PayPalNativeViewModel", "Address change")
+            actions.approve()
+        }
 
-            when (shippingChangeData.shippingChangeType) {
-                ShippingChangeType.OPTION_CHANGE -> {
-
-                    options = shippingChangeData.shippingOptions
-                    updatedShippingAmount = shippingChangeData.selectedShippingOption?.amount?.value
-                }
-                ShippingChangeType.ADDRESS_CHANGE -> {
-                    options = shippingChangeData.shippingOptions.map {
-                        it.copy(
-                            amount = it.amount?.copy(
-                                value = ((it.amount?.value?.toFloat() ?: 0f) + SHIPPING_METHOD_INCREASE).asValueString()
-                            )
-                        )
-                    }
-                    updatedShippingAmount = options.find { it.selected }?.amount?.value
-                }
-            }
-
-            val patchRequest = PatchOrderRequest(
-                PatchShippingOptions.Replace(
-                    purchaseUnitReferenceId = "PUHF",
-                    options = options
-                ),
-                PatchAmount.Replace(
-                    purchaseUnitReferenceId = "PUHF",
-                    amount = getAmount(
-                        value = "100.0",
-                        shippingValue = updatedShippingAmount ?: "0.00"
-                    )
-                )
-            )
-            // TODO: patch order will fail because of bug in NXO. Ticket: https://paypal.atlassian.net/browse/DTNOR-607
-            // issue reported at NXO: https://paypal.atlassian.net/browse/MXO-279
-            shippingChangeActions.patchOrder(patchRequest) {
-                internalState.postValue(NativeCheckoutViewState.OrderPatched)
-            }
+        override fun onPayPalNativeShippingMethodChange(
+            actions: PayPalNativeShippingActions,
+            shippingMethod: PayPalNativeShippingMethod
+        ) {
+            Log.d("PayPalNativeViewModel", "Method change")
+            actions.approve()
         }
     }
 
@@ -158,5 +124,6 @@ class PayPalNativeViewModel @Inject constructor(
             "${BuildConfig.APPLICATION_ID}://paypalpay"
         )
         payPalClient.listener = payPalListener
+        payPalClient.shippingListener = shippingListener
     }
 }

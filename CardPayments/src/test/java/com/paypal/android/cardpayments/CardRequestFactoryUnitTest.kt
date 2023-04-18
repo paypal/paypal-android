@@ -2,6 +2,8 @@ package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.Address
+import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.cardpayments.api.GetOrderRequest
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -22,6 +24,17 @@ class CardRequestFactoryUnitTest {
     @Before
     fun beforeEach() {
         sut = CardRequestFactory()
+    }
+
+    @Test
+    fun `it builds a get order info request`() {
+        val mockOrderID = "mock_order_ID"
+
+        val apiRequest = sut.createGetOrderInfoRequest(GetOrderRequest(mockOrderID))
+
+        assertEquals(apiRequest.path, "v2/checkout/orders/$mockOrderID")
+        assertEquals(apiRequest.method, HttpMethod.GET)
+        assertEquals(apiRequest.body, "")
     }
 
     @Test

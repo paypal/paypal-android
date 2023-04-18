@@ -66,7 +66,7 @@ object APIClientError {
     )
 }
 
-internal enum class Code {
+enum class Code {
     UNKNOWN,
     DATA_PARSING_ERROR,
     UNKNOWN_HOST,

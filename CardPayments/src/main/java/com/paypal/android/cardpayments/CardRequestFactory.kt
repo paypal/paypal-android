@@ -17,7 +17,7 @@ internal class CardRequestFactory {
                 .put("expiry", cardExpiry)
 
             card.cardholderName?.let { cardJSON.put("name", it) }
-            card.securityCode?.let { cardJSON.put("security_code", it) }
+            cardJSON.put("security_code", card.securityCode)
 
             card.billingAddress?.apply {
                 val billingAddressJSON = JSONObject()
