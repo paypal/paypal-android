@@ -3,9 +3,9 @@ package com.paypal.android.paypalnativepayments
 import com.paypal.checkout.shipping.ShippingChangeActions
 
 /**
- * The actions that can be performed when the [PayPalNativeShippingListener] methods are invoked.
+ * The actions that can be used to update the Paysheet UI after [PayPalNativeShippingListener] methods are invoked.
  */
-class PayPalNativeShippingActions(private val shippingChangeActions: ShippingChangeActions) {
+class PayPalNativePaysheetActions(private val shippingChangeActions: ShippingChangeActions) {
 
     /**
      * Will refresh the paysheet with the latests updates to the current order. Call [approve] when:

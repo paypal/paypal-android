@@ -13,7 +13,7 @@ import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
-import com.paypal.android.paypalnativepayments.PayPalNativeShippingActions
+import com.paypal.android.paypalnativepayments.PayPalNativePaysheetActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
@@ -71,7 +71,7 @@ class PayPalNativeViewModel @Inject constructor(
     private val shippingListener = object : PayPalNativeShippingListener {
 
         override fun onPayPalNativeShippingAddressChange(
-            actions: PayPalNativeShippingActions,
+            actions: PayPalNativePaysheetActions,
             shippingAddress: PayPalNativeShippingAddress
         ) {
             if (shippingAddress.adminArea1.isNullOrBlank() || shippingAddress.adminArea1 == "NV") {
@@ -82,7 +82,7 @@ class PayPalNativeViewModel @Inject constructor(
         }
 
         override fun onPayPalNativeShippingMethodChange(
-            actions: PayPalNativeShippingActions,
+            actions: PayPalNativePaysheetActions,
             shippingMethod: PayPalNativeShippingMethod
         ) {
 

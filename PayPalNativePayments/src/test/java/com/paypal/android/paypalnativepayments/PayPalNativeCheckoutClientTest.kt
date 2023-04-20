@@ -353,7 +353,7 @@ class PayPalNativeCheckoutClientTest {
 
         verify {
             shippingListener.onPayPalNativeShippingAddressChange(
-                ofType(PayPalNativeShippingActions::class),
+                ofType(PayPalNativePaysheetActions::class),
                 withArg { address ->
                     assertEquals(address.countryCode, mockCountryCode)
                 }
@@ -394,7 +394,7 @@ class PayPalNativeCheckoutClientTest {
 
             verify {
                 shippingListener.onPayPalNativeShippingMethodChange(
-                    ofType(PayPalNativeShippingActions::class),
+                    ofType(PayPalNativePaysheetActions::class),
                         withArg { option ->
                         assertEquals(option.id, mockID)
                         assertEquals(option.label, mockLabel)
