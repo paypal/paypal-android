@@ -1,7 +1,6 @@
 package com.paypal.android.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,9 +20,11 @@ import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.GetAccessTokenUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
+import com.paypal.android.usecase.UpdateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,6 +36,10 @@ class PayPalNativeViewModel @Inject constructor(
     lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
+    @Inject
+    lateinit var updateOrderUseCase: UpdateOrderUseCase
+
+    private var orderID: String? = null
 
     private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {
@@ -69,16 +74,29 @@ class PayPalNativeViewModel @Inject constructor(
             actions: PayPalNativeShippingActions,
             shippingAddress: PayPalNativeShippingAddress
         ) {
-            Log.d("PayPalNativeViewModel", "Address change")
-            actions.approve()
+            if (shippingAddress.adminArea1.isNullOrBlank() || shippingAddress.adminArea1 == "NV") {
+                actions.reject()
+            } else {
+                actions.approve()
+            }
         }
 
         override fun onPayPalNativeShippingMethodChange(
             actions: PayPalNativeShippingActions,
             shippingMethod: PayPalNativeShippingMethod
         ) {
-            Log.d("PayPalNativeViewModel", "Method change")
-            actions.approve()
+
+            viewModelScope.launch(exceptionHandler) {
+                orderID?.also {
+                    try {
+                        updateOrderUseCase(it, shippingMethod)
+                        actions.approve()
+                    } catch (e: IOException) {
+                        actions.reject()
+                        throw e
+                    }
+                }
+            }
         }
     }
 
@@ -105,8 +123,8 @@ class PayPalNativeViewModel @Inject constructor(
     fun orderIdCheckout(shippingPreferenceType: ShippingPreferenceType) {
         internalState.postValue(NativeCheckoutViewState.CheckoutInit)
         viewModelScope.launch(exceptionHandler) {
-            val orderId = getOrderIdUseCase(shippingPreferenceType)
-            orderId?.also {
+            orderID = getOrderIdUseCase(shippingPreferenceType)
+            orderID?.also {
                 payPalClient.startCheckout(PayPalNativeCheckoutRequest(it))
             }
         }

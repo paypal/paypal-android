@@ -8,7 +8,7 @@ import com.paypal.checkout.shipping.ShippingChangeActions
 class PayPalNativeShippingActions(private val shippingChangeActions: ShippingChangeActions) {
 
     /**
-     * Will refresh the paysheet with the latest updates to the current order. Call [approve] when:
+     * Will refresh the paysheet with the latests updates to the current order. Call [approve] when:
      * <p><ul>
      * <li>A buyer selects a shipping address that is supported. Removes the error message on the
      * paysheet displayed after calling [reject].
