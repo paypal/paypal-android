@@ -7,7 +7,8 @@
   * Remove `Approval` from `PayPalNativeCheckoutResult`, expose only `orderID` and `payerID`
   * Add `PayPalNativeCheckoutRequest` to `startCheckout`, removing `CreateOrder` callback
   * Remove `onPayPalCheckoutShippingChange` method from `PayPalNativeCheckoutListener`.
-  * Add `PayPalNativeShippingListener` to receive events on changes in shipping information. Add `PayPalNativeShippingAddress`, `PayPalNativeShippingMethod` and `PayPalNativeShippingActions`
+  * Add `PayPalNativeShippingListener` to receive events on changes in shipping information. Add `PayPalNativeShippingAddress`, `PayPalNativeShippingMethod` and `PayPalNativePaysheetActions`
+  * Remove `PayPalCheckout` as an `api` dependency
 
 ## 0.0.8 (2023-03-13)
 * `PayPalNativePayments`:
