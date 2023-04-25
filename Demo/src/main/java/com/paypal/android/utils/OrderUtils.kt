@@ -13,7 +13,7 @@ import com.paypal.checkout.order.AppContext
 import com.paypal.checkout.order.BreakDown
 import com.paypal.checkout.order.Items
 import com.paypal.checkout.order.Options
-import com.paypal.checkout.order.Order
+import com.paypal.checkout.order.OrderRequest
 import com.paypal.checkout.order.PurchaseUnit
 import com.paypal.checkout.order.Shipping
 import com.paypal.checkout.order.UnitAmount
@@ -28,9 +28,9 @@ object OrderUtils {
         currency: CurrencyCode = CurrencyCode.USD,
         orderIntent: OrderIntent = OrderIntent.CAPTURE,
         processingInstruction: ProcessingInstruction? = null
-    ): Order {
+    ): OrderRequest {
 
-        return Order.Builder()
+        return OrderRequest.Builder()
             .intent(orderIntent)
             .processingInstruction(processingInstruction)
             .appContext(
@@ -99,7 +99,7 @@ object OrderUtils {
                     .itemTotal(
                         UnitAmount.Builder()
                             .currencyCode(currency)
-                            .value("00.00")
+                            .value(value)
                             .build()
                     )
                     .shipping(
@@ -117,7 +117,7 @@ object OrderUtils {
                     .taxTotal(
                         UnitAmount.Builder()
                             .currencyCode(currency)
-                            .value(value)
+                            .value("00.00")
                             .build()
                     )
                     .shippingDiscount(
