@@ -16,6 +16,7 @@ import com.paypal.checkout.order.Address
 import com.paypal.checkout.order.Options
 import com.paypal.checkout.shipping.OnShippingChange
 import com.paypal.checkout.shipping.ShippingChangeActions
+import com.paypal.checkout.shipping.ShippingChangeAddress
 import com.paypal.checkout.shipping.ShippingChangeData
 import com.paypal.checkout.shipping.ShippingChangeType
 import io.mockk.coEvery
@@ -333,7 +334,7 @@ class PayPalNativeCheckoutClientTest {
         val shippingData = mockk<ShippingChangeData>(relaxed = true)
 
         every { shippingData.shippingChangeType } returns ShippingChangeType.ADDRESS_CHANGE
-        every { shippingData.shippingAddress } returns Address(countryCode = mockCountryCode)
+        every { shippingData.shippingAddress } returns ShippingChangeAddress(countryCode = mockCountryCode)
 
         every {
             PayPalCheckout.registerCallbacks(
