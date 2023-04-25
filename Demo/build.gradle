@@ -81,6 +81,11 @@ dependencies {
     implementation deps.androidxLifecycleRuntimeKtx
     implementation deps.fragmentKtx
 
+    // TODO: remove dependency when we don't relay on nxo models anymore
+    implementation (deps.nativeCheckout) {
+        exclude module: 'data-collector'
+    }
+
     implementation deps.composeUi
     implementation deps.composeUiTooling
     implementation deps.composeRuntimeLivedata

@@ -21,7 +21,7 @@ interface SDKSampleServerApi {
     suspend fun createOrder(@Body jsonObject: JsonObject): Order
 
     @POST("/orders")
-    suspend fun createOrder(@Body order: com.paypal.checkout.order.Order): Order
+    suspend fun createOrder(@Body order: com.paypal.checkout.order.OrderRequest): Order
 
     @POST("/access_tokens")
     suspend fun fetchAccessToken(): AccessToken

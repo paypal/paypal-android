@@ -1,7 +1,7 @@
 package com.paypal.android.paypalnativepayments
 
-import com.paypal.checkout.order.Address
-// TODO: this object is diferent in iOS, check with MXO for better consistency (missing addressId)
+import com.paypal.checkout.shipping.ShippingChangeAddress
+
 /**
  * The user's selected shipping address via the PayPal Native Checkout UI.
  */
@@ -33,10 +33,10 @@ data class PayPalNativeShippingAddress internal constructor(
     val countryCode: String?
 ) {
 
-    internal constructor(address: Address) : this(
-        address.adminArea1,
-        address.adminArea2,
-        address.postalCode,
-        address.countryCode
+    internal constructor(shippingChangeAddress: ShippingChangeAddress) : this(
+        shippingChangeAddress.adminArea1,
+        shippingChangeAddress.adminArea2,
+        shippingChangeAddress.postalCode,
+        shippingChangeAddress.countryCode
     )
 }
