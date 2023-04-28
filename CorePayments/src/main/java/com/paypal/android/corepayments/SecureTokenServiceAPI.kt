@@ -4,10 +4,9 @@ import android.util.LruCache
 
 class SecureTokenServiceAPI internal constructor(
     private val configuration: CoreConfig,
-    private val http: Http,
-    private val httpRequestFactory: HttpRequestFactory,
+    private val restClient: RestClient,
 ){
-    constructor(configuration: CoreConfig): this(configuration, Http(), HttpRequestFactory())
+    constructor(configuration: CoreConfig): this(configuration, RestClient(configuration))
 
     /**
      * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
@@ -20,9 +19,7 @@ class SecureTokenServiceAPI internal constructor(
         }
 
         val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
-        val httpRequest =
-            httpRequestFactory.createHttpRequestFromAPIRequest(apiRequest, configuration)
-        val response = http.send(httpRequest)
+        val response = restClient.send(apiRequest)
         val correlationID = response.headers["Paypal-Debug-Id"]
         if (response.isSuccessful) {
             val clientID = parseClientId(response.body, correlationID)

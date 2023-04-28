@@ -2,21 +2,21 @@ package com.paypal.android.corepayments.analytics
 
 import android.content.Context
 import android.util.Log
+import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.paypal.android.corepayments.Http
-import com.paypal.android.corepayments.HttpRequestFactory
+import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.SecureTokenServiceAPI
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
     private val environment: Environment,
-    private val http: Http,
-    private val httpRequestFactory: HttpRequestFactory,
+    private val restClient: RestClient,
     private val secureTokenServiceAPI: SecureTokenServiceAPI
 ) {
 
@@ -24,8 +24,7 @@ class AnalyticsService internal constructor(
             this(
                 DeviceInspector(context),
                 coreConfig.environment,
-                Http(),
-                HttpRequestFactory(),
+                RestClient(coreConfig),
                 SecureTokenServiceAPI(coreConfig)
             )
 
@@ -42,9 +41,8 @@ class AnalyticsService internal constructor(
                 sessionId,
                 deviceInspector.inspect()
             )
-            val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
-
-            val response = http.send(httpRequest)
+            val apiRequest = createHttpRequestForAnalytics(analyticsEventData)
+            val response = restClient.send(apiRequest)
             if (!response.isSuccessful) {
                 Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
             }
@@ -54,6 +52,11 @@ class AnalyticsService internal constructor(
                 "Failed to send analytics due to missing clientID: ${e.message}"
             )
         }
+    }
+
+    private fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): APIRequest {
+        val body = analyticsEventData.toJSON().toString()
+        return APIRequest("v1/tracking/events", HttpMethod.POST, body)
     }
 
     companion object {
