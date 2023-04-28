@@ -6,14 +6,13 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.api.GetOrderRequest
+import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,6 +39,7 @@ class CardClient internal constructor(
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         notifyApproveOrderFailure(it)
     }
+
     /**
      *  CardClient constructor
      *
@@ -49,9 +49,9 @@ class CardClient internal constructor(
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
                 activity,
-                OrdersAPI(RestClient(configuration)),
+                OrdersAPI(configuration),
                 SecureTokenServiceAPI(configuration),
-                AnalyticsService(activity, configuration),
+                AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
             )
