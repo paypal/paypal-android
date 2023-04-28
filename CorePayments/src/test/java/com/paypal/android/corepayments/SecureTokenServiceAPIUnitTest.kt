@@ -11,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.net.URL
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -19,9 +18,6 @@ class SecureTokenServiceAPIUnitTest {
 
     private val restClient = mockk<RestClient>()
     private val configuration = CoreConfig("fake-access-token")
-
-    private val url = URL("https://example.com/resolved/path")
-    private val httpRequest = HttpRequest(url, HttpMethod.GET)
 
     private val httpResponseHeaders = mapOf(
         "Paypal-Debug-Id" to "sample-correlation-id"

@@ -74,5 +74,4 @@ class TrackingEventsAPI internal constructor(private val restClient: RestClient)
         const val KEY_EVENT_PARAMETERS = "event_params"
         const val KEY_EVENTS = "events"
     }
-
 }

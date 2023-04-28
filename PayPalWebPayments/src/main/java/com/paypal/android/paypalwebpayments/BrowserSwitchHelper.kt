@@ -1,10 +1,9 @@
 package com.paypal.android.paypalwebpayments
 
 import android.net.Uri
-import androidx.annotation.NonNull
+import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.braintreepayments.api.BrowserSwitchOptions
 import org.json.JSONObject
 
 internal class BrowserSwitchHelper(private val urlScheme: String) {

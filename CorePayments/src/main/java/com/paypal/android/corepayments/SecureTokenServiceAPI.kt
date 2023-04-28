@@ -5,8 +5,8 @@ import android.util.LruCache
 class SecureTokenServiceAPI internal constructor(
     private val configuration: CoreConfig,
     private val restClient: RestClient,
-){
-    constructor(configuration: CoreConfig): this(configuration, RestClient(configuration))
+) {
+    constructor(configuration: CoreConfig) : this(configuration, RestClient(configuration))
 
     /**
      * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
@@ -28,7 +28,6 @@ class SecureTokenServiceAPI internal constructor(
         }
 
         throw APIClientError.serverResponseError(correlationID)
-        return ""
     }
 
     @Throws(PayPalSDKError::class)
