@@ -6,7 +6,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -46,8 +50,6 @@ class AnalyticsServiceTest {
 
         every { deviceInspector.inspect() } returns deviceData
         coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } returns "fake-client-id"
-        sut =
-            AnalyticsService(deviceInspector, environment, trackingEventsAPI, secureTokenServiceAPI)
     }
 
     @Test
@@ -57,7 +59,9 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
         } returns httpSuccessResponse
 
+        sut = createAnalyticsService(environment, testScheduler)
         sut.sendAnalyticsEvent("sample.event.name")
+        advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
@@ -70,7 +74,9 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         val timeBeforeEventSent = System.currentTimeMillis()
+        sut = createAnalyticsService(environment, testScheduler)
         sut.sendAnalyticsEvent("sample.event.name")
+        advanceUntilIdle()
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
         assert(actualTimestamp > timeBeforeEventSent)
@@ -84,7 +90,9 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
         } returns httpSuccessResponse
 
+        sut = createAnalyticsService(environment, testScheduler)
         sut.sendAnalyticsEvent("fake-event")
+        advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sandbox", analyticsEventData.environment)
@@ -92,19 +100,14 @@ class AnalyticsServiceTest {
 
     @Test
     fun `sendAnalyticsEvent sends proper tag when LIVE`() = runTest {
-        sut = AnalyticsService(
-            deviceInspector,
-            Environment.LIVE,
-            trackingEventsAPI,
-            secureTokenServiceAPI
-        )
-
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
         coEvery {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
         } returns httpSuccessResponse
 
+        sut = createAnalyticsService(Environment.LIVE, testScheduler)
         sut.sendAnalyticsEvent("fake-event")
+        advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
@@ -117,7 +120,9 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot1), deviceData)
         } returns httpSuccessResponse
 
+        sut = createAnalyticsService(environment, testScheduler)
         sut.sendAnalyticsEvent("event1")
+        advanceUntilIdle()
         val analyticsEventData1 = analyticsEventDataSlot1.captured
 
         val analyticsEventDataSlot2 = slot<AnalyticsEventData>()
@@ -125,11 +130,28 @@ class AnalyticsServiceTest {
             trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot2), deviceData)
         } returns httpSuccessResponse
 
-        val sut2 =
-            AnalyticsService(deviceInspector, environment, trackingEventsAPI, secureTokenServiceAPI)
+        val sut2 = createAnalyticsService(environment, testScheduler)
         sut2.sendAnalyticsEvent("event2")
+        advanceUntilIdle()
 
         val analyticsEventData2 = analyticsEventDataSlot2.captured
         assertEquals(analyticsEventData1.sessionID, analyticsEventData2.sessionID)
+    }
+
+    private fun createAnalyticsService(
+        environment: Environment,
+        testScheduler: TestCoroutineScheduler
+    ): AnalyticsService {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val scope = CoroutineScope(testDispatcher)
+
+        // Ref: https://developer.android.com/kotlin/coroutines/test#injecting-test-dispatchers
+        return AnalyticsService(
+            deviceInspector,
+            environment,
+            trackingEventsAPI,
+            secureTokenServiceAPI,
+            scope
+        )
     }
 }
