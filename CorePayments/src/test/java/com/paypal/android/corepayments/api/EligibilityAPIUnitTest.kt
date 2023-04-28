@@ -2,7 +2,6 @@ package com.paypal.android.corepayments.api
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
-import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient

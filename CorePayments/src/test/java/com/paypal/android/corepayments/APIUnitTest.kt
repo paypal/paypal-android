@@ -188,7 +188,7 @@ class APIUnitTest {
 
         sut.sendAnalyticsEvent("sample.event.name")
         coVerify(exactly = 1) {
-            analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id")
+            analyticsService.sendAnalyticsEvent("sample.event.name")
         }
     }
 }

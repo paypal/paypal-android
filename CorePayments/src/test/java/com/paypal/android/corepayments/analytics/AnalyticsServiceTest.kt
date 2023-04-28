@@ -66,7 +66,7 @@ class AnalyticsServiceTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id")
+        analyticsService.sendAnalyticsEvent("sample.event.name")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
@@ -79,7 +79,7 @@ class AnalyticsServiceTest {
             httpRequestFactory.createHttpRequestForAnalytics(any())
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id")
+        analyticsService.sendAnalyticsEvent("sample.event.name")
 
         coVerify(exactly = 1) {
             http.send(httpRequest)
@@ -93,7 +93,7 @@ class AnalyticsServiceTest {
         } returns httpRequest
 
         val timeBeforeEventSent = System.currentTimeMillis()
-        analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id")
+        analyticsService.sendAnalyticsEvent("sample.event.name")
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
 
@@ -108,7 +108,7 @@ class AnalyticsServiceTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("fake-event", "fake-client-id")
+        analyticsService.sendAnalyticsEvent("fake-event")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sandbox", analyticsEventData.environment)
@@ -123,7 +123,7 @@ class AnalyticsServiceTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("fake-event", "fake-client-id")
+        analyticsService.sendAnalyticsEvent("fake-event")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
@@ -137,7 +137,7 @@ class AnalyticsServiceTest {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot1))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("event1", "fake-client-id")
+        analyticsService.sendAnalyticsEvent("event1")
         val analyticsEventData1 = analyticsEventDataSlot1.captured
 
         val analyticsEventDataSlot2 = slot<AnalyticsEventData>()
@@ -147,7 +147,7 @@ class AnalyticsServiceTest {
 
         val analyticsService2 = AnalyticsService(deviceInspector, environment, http, httpRequestFactory)
 
-        analyticsService2.sendAnalyticsEvent("event2", "fake-client-id")
+        analyticsService2.sendAnalyticsEvent("event2")
 
         val analyticsEventData2 = analyticsEventDataSlot2.captured
 
