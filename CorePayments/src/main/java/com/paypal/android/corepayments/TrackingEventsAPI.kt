@@ -1,26 +1,22 @@
 package com.paypal.android.corepayments
 
-import android.content.Context
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
-import com.paypal.android.corepayments.analytics.DeviceInspector
+import com.paypal.android.corepayments.analytics.DeviceData
 import org.json.JSONObject
 
-class TrackingEventsAPI internal constructor(
-    private val restClient: RestClient,
-    private val deviceInspector: DeviceInspector
-) {
+class TrackingEventsAPI internal constructor(private val restClient: RestClient) {
+    constructor(coreConfig: CoreConfig) :
+            this(RestClient(coreConfig))
 
-    constructor(context: Context, coreConfig: CoreConfig) :
-            this(RestClient(coreConfig), DeviceInspector(context))
-
-    suspend fun sendEvent(event: AnalyticsEventData): HttpResponse {
-        val apiRequest = createAPIRequestForEvent(event)
+    suspend fun sendEvent(event: AnalyticsEventData, deviceData: DeviceData): HttpResponse {
+        val apiRequest = createAPIRequestForEvent(event, deviceData)
         return restClient.send(apiRequest)
     }
 
-    private fun createAPIRequestForEvent(event: AnalyticsEventData): APIRequest {
-        val deviceData = deviceInspector.inspect()
-
+    private fun createAPIRequestForEvent(
+        event: AnalyticsEventData,
+        deviceData: DeviceData
+    ): APIRequest {
         val appId = deviceData.appId
         val appName = deviceData.appName
         val clientSDKVersion = deviceData.clientSDKVersion

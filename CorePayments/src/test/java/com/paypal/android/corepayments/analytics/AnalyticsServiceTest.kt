@@ -2,33 +2,29 @@ package com.paypal.android.corepayments.analytics
 
 import com.paypal.android.corepayments.*
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.net.URL
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class AnalyticsServiceTest {
 
-    private lateinit var http: Http
-    private lateinit var httpRequestFactory: HttpRequestFactory
-    private lateinit var analyticsService: AnalyticsService
+    private lateinit var sut: AnalyticsService
     private lateinit var environment: Environment
 
-    lateinit var deviceInspector: DeviceInspector
+    private lateinit var trackingEventsAPI: TrackingEventsAPI
+    private lateinit var secureTokenServiceAPI: SecureTokenServiceAPI
+    private lateinit var deviceInspector: DeviceInspector
 
-    private val url = URL("https://example.com/resolved/path")
-    private val httpRequest = HttpRequest(url, HttpMethod.GET)
+    private val httpSuccessResponse = HttpResponse(200)
 
     private val deviceData = DeviceData(
         appName = "app name",
@@ -43,87 +39,69 @@ class AnalyticsServiceTest {
 
     @Before
     fun setup() {
-        http = mockk()
-        httpRequestFactory = mockk()
         deviceInspector = mockk()
         environment = Environment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
-        analyticsService = AnalyticsService(
-            deviceInspector,
-            environment,
-            http,
-            httpRequestFactory
-        )
-
-        coEvery { http.send(httpRequest) } returns HttpResponse(200)
+        sut =
+            AnalyticsService(deviceInspector, environment, trackingEventsAPI, secureTokenServiceAPI)
     }
 
     @Test
     fun `sendAnalyticsEvent send proper AnalyticsEventData`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
-        } returns httpRequest
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
 
-        analyticsService.sendAnalyticsEvent("sample.event.name")
+        sut.sendAnalyticsEvent("sample.event.name")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
-        assertSame(deviceData, analyticsEventData.deviceData)
-    }
-
-    @Test
-    fun `sendAnalyticsEvent calls HTTP send`() = runTest {
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(any())
-        } returns httpRequest
-
-        analyticsService.sendAnalyticsEvent("sample.event.name")
-
-        coVerify(exactly = 1) {
-            http.send(httpRequest)
-        }
     }
 
     fun `sendAnalyticsEvent sends proper timestamp`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
-        } returns httpRequest
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
 
         val timeBeforeEventSent = System.currentTimeMillis()
-        analyticsService.sendAnalyticsEvent("sample.event.name")
+        sut.sendAnalyticsEvent("sample.event.name")
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
-
         assert(actualTimestamp > timeBeforeEventSent)
         assert(actualTimestamp < System.currentTimeMillis())
     }
 
     @Test
-    fun `sendAnalyticsEvent sends proper tag when LIVE`() = runTest {
+    fun `sendAnalyticsEvent sends proper tag when SANDBOX`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
-        } returns httpRequest
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
 
-        analyticsService.sendAnalyticsEvent("fake-event")
+        sut.sendAnalyticsEvent("fake-event")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sandbox", analyticsEventData.environment)
     }
 
     @Test
-    fun `sendAnalyticsEvent sends proper tag when SANDBOX`() = runTest {
-        analyticsService = AnalyticsService(deviceInspector, Environment.LIVE, http, httpRequestFactory)
+    fun `sendAnalyticsEvent sends proper tag when LIVE`() = runTest {
+        sut = AnalyticsService(
+            deviceInspector,
+            Environment.LIVE,
+            trackingEventsAPI,
+            secureTokenServiceAPI
+        )
 
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
-        } returns httpRequest
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
 
-        analyticsService.sendAnalyticsEvent("fake-event")
+        sut.sendAnalyticsEvent("fake-event")
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
@@ -132,25 +110,23 @@ class AnalyticsServiceTest {
     @Test
     fun `analyticsClient uses singleton for sessionId`() = runTest {
         val analyticsEventDataSlot1 = slot<AnalyticsEventData>()
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot1), deviceData)
+        } returns httpSuccessResponse
 
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot1))
-        } returns httpRequest
-
-        analyticsService.sendAnalyticsEvent("event1")
+        sut.sendAnalyticsEvent("event1")
         val analyticsEventData1 = analyticsEventDataSlot1.captured
 
         val analyticsEventDataSlot2 = slot<AnalyticsEventData>()
-        every {
-            httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot2))
-        } returns httpRequest
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot2), deviceData)
+        } returns httpSuccessResponse
 
-        val analyticsService2 = AnalyticsService(deviceInspector, environment, http, httpRequestFactory)
-
-        analyticsService2.sendAnalyticsEvent("event2")
+        val sut2 =
+            AnalyticsService(deviceInspector, environment, trackingEventsAPI, secureTokenServiceAPI)
+        sut2.sendAnalyticsEvent("event2")
 
         val analyticsEventData2 = analyticsEventDataSlot2.captured
-
         assertEquals(analyticsEventData1.sessionID, analyticsEventData2.sessionID)
     }
 }

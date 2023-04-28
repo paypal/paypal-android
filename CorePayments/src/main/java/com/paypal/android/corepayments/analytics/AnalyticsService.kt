@@ -31,15 +31,15 @@ class AnalyticsService internal constructor(
 
         try {
             val clientID = secureTokenServiceAPI.fetchCachedOrRemoteClientID()
+            val deviceData = deviceInspector.inspect()
             val analyticsEventData = AnalyticsEventData(
                 clientID,
                 environment.name.lowercase(),
                 name,
                 timestamp,
-                sessionId,
-                deviceInspector.inspect()
+                sessionId
             )
-            val response = trackingEventsAPI.sendEvent(analyticsEventData)
+            val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
             if (!response.isSuccessful) {
                 Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
             }

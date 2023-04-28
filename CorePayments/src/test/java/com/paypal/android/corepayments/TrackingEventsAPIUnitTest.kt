@@ -2,14 +2,11 @@ package com.paypal.android.corepayments
 
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.DeviceData
-import com.paypal.android.corepayments.analytics.DeviceInspector
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -35,7 +32,6 @@ class TrackingEventsAPIUnitTest {
     )
 
     private lateinit var restClient: RestClient
-    private lateinit var deviceInspector: DeviceInspector
     private lateinit var apiRequestSlot: CapturingSlot<APIRequest>
 
     private lateinit var sut: TrackingEventsAPI
@@ -43,14 +39,12 @@ class TrackingEventsAPIUnitTest {
     @Before
     fun beforeEach() {
         restClient = mockk(relaxed = true)
-        deviceInspector = mockk(relaxed = true)
 
         apiRequestSlot = slot()
-        sut = TrackingEventsAPI(restClient, deviceInspector)
+        sut = TrackingEventsAPI(restClient)
     }
 
     fun `sendEvent() should send an API request to the tracking API`() = runTest {
-        every { deviceInspector.inspect() } returns deviceData
         coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
 
         val event = AnalyticsEventData(
@@ -60,14 +54,11 @@ class TrackingEventsAPIUnitTest {
             timestamp = 123L,
             sessionID = "fake-session-id"
         )
-        sut.sendEvent(event)
+        sut.sendEvent(event, deviceData)
 
         val apiRequest = apiRequestSlot.captured
         assertEquals("sample/path", apiRequest.path)
         assertEquals(HttpMethod.POST, apiRequest.method)
-
-        val actualBody = apiRequest.body
-        assertNotNull(actualBody)
 
         // language=JSON
         val expectedBody = """
@@ -96,6 +87,7 @@ class TrackingEventsAPIUnitTest {
             }
             """
 
+        val actualBody = apiRequest.body!!
         JSONAssert.assertEquals(JSONObject(expectedBody), JSONObject(actualBody), false)
     }
 }
