@@ -8,8 +8,37 @@ data class AnalyticsEventData(
     val eventName: String,
     val timestamp: Long,
     val sessionID: String,
-    val deviceData: DeviceData
+    val appId: String,
+    val appName: String,
+    val clientSDKVersion: String,
+    val clientOS: String,
+    val deviceManufacturer: String,
+    val deviceModel: String,
+    val isSimulator: Boolean,
+    val merchantAppVersion: String
 ) {
+    constructor(
+        clientID: String,
+        environment: String,
+        eventName: String,
+        timestamp: Long,
+        sessionID: String,
+        deviceData: DeviceData,
+    ) : this(
+        clientID,
+        environment,
+        eventName,
+        timestamp,
+        sessionID,
+        deviceData.appId,
+        deviceData.appName,
+        deviceData.clientSDKVersion,
+        deviceData.clientOS,
+        deviceData.deviceManufacturer,
+        deviceData.deviceModel,
+        deviceData.isSimulator,
+        deviceData.merchantAppVersion
+    )
 
     companion object {
         const val KEY_APP_ID = "app_id"
@@ -36,19 +65,19 @@ data class AnalyticsEventData(
 
     fun toJSON(): JSONObject {
         val eventParams = JSONObject()
-            .put(KEY_APP_ID, deviceData.appId)
-            .put(KEY_APP_NAME, deviceData.appName)
+            .put(KEY_APP_ID, appId)
+            .put(KEY_APP_NAME, appName)
             .put(KEY_CLIENT_ID, clientID)
-            .put(KEY_CLIENT_SDK_VERSION, deviceData.clientSDKVersion)
-            .put(KEY_CLIENT_OS, deviceData.clientOS)
+            .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
+            .put(KEY_CLIENT_OS, clientOS)
             .put(KEY_COMPONENT, "ppcpmobilesdk")
-            .put(KEY_DEVICE_MANUFACTURER, deviceData.deviceManufacturer)
-            .put(KEY_DEVICE_MODEL, deviceData.deviceModel)
+            .put(KEY_DEVICE_MANUFACTURER, deviceManufacturer)
+            .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_ENVIRONMENT, environment)
             .put(KEY_EVENT_NAME, eventName)
             .put(KEY_EVENT_SOURCE, "mobile-native")
-            .put(KEY_IS_SIMULATOR, deviceData.isSimulator)
-            .put(KEY_MERCHANT_APP_VERSION, deviceData.merchantAppVersion)
+            .put(KEY_IS_SIMULATOR, isSimulator)
+            .put(KEY_MERCHANT_APP_VERSION, merchantAppVersion)
             .put(KEY_PLATFORM, "Android")
             .put(KEY_SESSION_ID, sessionID)
             .put(KEY_TIMESTAMP, timestamp.toString())
