@@ -52,7 +52,7 @@ class TrackingEventsAPIUnitTest {
         val event = AnalyticsEventData(
             clientID = "fake-client-id",
             environment = "fake-environment",
-            eventName = "fake-event-name",
+            eventName = "fake-event",
             timestamp = 123L,
             sessionID = "fake-session-id"
         )
@@ -82,7 +82,7 @@ class TrackingEventsAPIUnitTest {
                         "mobile_device_model": "fake-device-model",
                         "platform": "Android",
                         "session_id": "fake-session-id",
-                        "t": "10000",
+                        "t": "123",
                         "tenant_name": "PayPal"
                     }
                 }
