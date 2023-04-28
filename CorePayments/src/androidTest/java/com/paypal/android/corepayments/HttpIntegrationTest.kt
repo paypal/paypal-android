@@ -2,34 +2,22 @@ package com.paypal.android.corepayments
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
-import org.junit.After
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.URL
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class HttpIntegrationTest {
 
-    private lateinit var testDispatcher: TestCoroutineDispatcher
-
-    @Before
-    fun beforeEach() {
-        testDispatcher = TestCoroutineDispatcher()
-    }
-
-    @After
-    fun afterEach() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun send_makesAnHttpRequest() = runBlockingTest {
-        val request = HttpRequest("https://www.google.com")
+    fun send_makesAnHttpRequest() = runTest {
+        val request = HttpRequest(URL("https://www.google.com"))
 
+        val testDispatcher = StandardTestDispatcher(testScheduler)
         val sut = Http(testDispatcher)
         val result = sut.send(request)
         assertEquals(200, result.status)
