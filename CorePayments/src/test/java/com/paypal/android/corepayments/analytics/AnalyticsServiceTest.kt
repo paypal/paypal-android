@@ -40,9 +40,12 @@ class AnalyticsServiceTest {
     @Before
     fun setup() {
         deviceInspector = mockk()
+        trackingEventsAPI = mockk(relaxed = true)
+        secureTokenServiceAPI = mockk(relaxed = true)
         environment = Environment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
+        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } returns "fake-client-id"
         sut =
             AnalyticsService(deviceInspector, environment, trackingEventsAPI, secureTokenServiceAPI)
     }

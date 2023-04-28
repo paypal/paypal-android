@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.skyscreamer.jsonassert.JSONAssert
@@ -44,6 +45,7 @@ class TrackingEventsAPIUnitTest {
         sut = TrackingEventsAPI(restClient)
     }
 
+    @Test
     fun `sendEvent() should send an API request to the tracking API`() = runTest {
         coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
 
@@ -57,7 +59,7 @@ class TrackingEventsAPIUnitTest {
         sut.sendEvent(event, deviceData)
 
         val apiRequest = apiRequestSlot.captured
-        assertEquals("sample/path", apiRequest.path)
+        assertEquals("v1/tracking/events", apiRequest.path)
         assertEquals(HttpMethod.POST, apiRequest.method)
 
         // language=JSON
