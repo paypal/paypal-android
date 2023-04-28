@@ -7,11 +7,11 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.RestClient
 
 internal class OrdersAPI(
-    coreConfig: CoreConfig,
-    private val restClient: RestClient = RestClient(coreConfig),
+    private val restClient: RestClient,
     private val requestFactory: CardRequestFactory = CardRequestFactory(),
     private val responseParser: CardResponseParser = CardResponseParser()
 ) {
+    constructor(coreConfig: CoreConfig) : this(RestClient(coreConfig))
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)

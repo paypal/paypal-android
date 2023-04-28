@@ -7,14 +7,16 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
 import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import com.paypal.android.cardpayments.api.GetOrderRequest
+import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.SecureTokenServiceAPI
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -45,6 +47,8 @@ class CardClientUnitTest {
     private val cardRequest = CardRequest(orderID, card, "return_url")
 
     private val ordersAPI = mockk<OrdersAPI>(relaxed = true)
+    private val secureTokenServiceAPI = mockk<SecureTokenServiceAPI>(relaxed = true)
+    private val analyticsService = mockk<AnalyticsService>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
 
@@ -86,7 +90,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(123, "fake-description")
         val errorSlot = slot<PayPalSDKError>()
 
-        coEvery { ordersAPI.fetchCachedOrRemoteClientID() } throws error
+        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } throws error
         every {
             approveOrderListener.onApproveOrderFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -241,7 +245,14 @@ class CardClientUnitTest {
 
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val sut = CardClient(activity, ordersAPI, browserSwitchClient, dispatcher)
+        val sut = CardClient(
+            activity,
+            ordersAPI,
+            secureTokenServiceAPI,
+            analyticsService,
+            browserSwitchClient,
+            dispatcher
+        )
         sut.approveOrderListener = approveOrderListener
         return sut
     }

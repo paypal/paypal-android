@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PaymentsJSON
+import com.paypal.android.corepayments.RestClient
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -39,7 +40,7 @@ class OrdersAPIUnitTest {
             }
         """
 
-    private val api = mockk<API>(relaxed = true)
+    private val restClient = mockk<RestClient>(relaxed = true)
     private val requestFactory = mockk<CardRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
 
@@ -77,30 +78,30 @@ class OrdersAPIUnitTest {
     private val cardRequest = CardRequest(
         orderID,
         card,
-       "return_url"
+        "return_url"
     )
 
     private lateinit var sut: OrdersAPI
 
     @Before
     fun beforeEach() {
-        sut = OrdersAPI(api, requestFactory)
+        sut = OrdersAPI(restClient, requestFactory)
         every { requestFactory.createConfirmPaymentSourceRequest(cardRequest) } returns apiRequest
     }
 
     @Test
     fun `it sends a confirm payment source api request`() = runTest {
         val httpResponse = HttpResponse(200, emptyMap(), successBody)
-        coEvery { api.send(apiRequest) } returns httpResponse
+        coEvery { restClient.send(apiRequest) } returns httpResponse
 
         sut.confirmPaymentSource(cardRequest)
-        coVerify { api.send(apiRequest) }
+        coVerify { restClient.send(apiRequest) }
     }
 
     @Test
     fun `it returns a confirm payment source result`() = runTest {
         val httpResponse = HttpResponse(200, headers, successBody)
-        coEvery { api.send(apiRequest) } returns httpResponse
+        coEvery { restClient.send(apiRequest) } returns httpResponse
 
         val result = sut.confirmPaymentSource(cardRequest)
 
@@ -111,7 +112,7 @@ class OrdersAPIUnitTest {
     @Test
     fun `it returns an error when the order is not found`() = runTest {
         val httpResponse = HttpResponse(404, headers, errorBody)
-        coEvery { api.send(apiRequest) } returns httpResponse
+        coEvery { restClient.send(apiRequest) } returns httpResponse
 
         lateinit var capturedError: PayPalSDKError
         try {
@@ -132,7 +133,7 @@ class OrdersAPIUnitTest {
         runTest {
             // Status: STATUS_UNDETERMINED
             val httpResponse = HttpResponse(-1, headers, errorBody)
-            coEvery { api.send(apiRequest) } returns httpResponse
+            coEvery { restClient.send(apiRequest) } returns httpResponse
 
             lateinit var capturedError: PayPalSDKError
             try {
@@ -152,7 +153,7 @@ class OrdersAPIUnitTest {
         runTest {
             // Status: ANY
             val httpResponse = HttpResponse(-10, headers, emptyErrorBody)
-            coEvery { api.send(apiRequest) } returns httpResponse
+            coEvery { restClient.send(apiRequest) } returns httpResponse
 
             lateinit var capturedError: PayPalSDKError
             try {
@@ -173,7 +174,7 @@ class OrdersAPIUnitTest {
             // Status: OK
             val httpResponse = HttpResponse(200, headers, errorBody)
             val parsingException = JSONException("Parsing Error")
-            coEvery { api.send(apiRequest) } returns httpResponse
+            coEvery { restClient.send(apiRequest) } returns httpResponse
             every { paymentsJSON.getString(any()) } throws parsingException
 
             lateinit var capturedError: PayPalSDKError
@@ -193,7 +194,7 @@ class OrdersAPIUnitTest {
     fun `it returns unknownHost when the order api call returns an error body`() = runTest {
         // Status: STATUS_UNKNOWN_HOST
         val httpResponse = HttpResponse(-2, headers, errorBody)
-        coEvery { api.send(apiRequest) } returns httpResponse
+        coEvery { restClient.send(apiRequest) } returns httpResponse
 
         lateinit var capturedError: PayPalSDKError
         try {
@@ -212,7 +213,7 @@ class OrdersAPIUnitTest {
     fun `it returns serverError when the order api call returns an error body`() = runTest {
         // Status: SERVER_ERROR
         val httpResponse = HttpResponse(-3, headers, errorBody)
-        coEvery { api.send(apiRequest) } returns httpResponse
+        coEvery { restClient.send(apiRequest) } returns httpResponse
 
         lateinit var capturedError: PayPalSDKError
         try {
@@ -230,7 +231,11 @@ class OrdersAPIUnitTest {
     @Test
     fun `when confirmPaymentSource fails to parse response, correlation ID is set in Error`() =
         runTest {
-            coEvery { api.send(apiRequest) } returns HttpResponse(200, headers, unexpectedBody)
+            coEvery { restClient.send(apiRequest) } returns HttpResponse(
+                200,
+                headers,
+                unexpectedBody
+            )
 
             lateinit var capturedError: PayPalSDKError
             try {
@@ -243,7 +248,7 @@ class OrdersAPIUnitTest {
 
     @Test
     fun `when confirmPaymentSource is errors, correlation ID is set in Error`() = runTest {
-        coEvery { api.send(apiRequest) } returns HttpResponse(400, headers, errorBody)
+        coEvery { restClient.send(apiRequest) } returns HttpResponse(400, headers, errorBody)
 
         lateinit var capturedError: PayPalSDKError
         try {
