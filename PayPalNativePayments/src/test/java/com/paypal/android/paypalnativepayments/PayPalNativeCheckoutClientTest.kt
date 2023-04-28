@@ -382,7 +382,20 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, analyticsService, secureTokenServiceAPI, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, analyticsService, secureTokenServiceAPI)
+            PayPalNativeCheckoutClient(
+                mockApplication,
+                coreConfig,
+                mockReturnUrl,
+                analyticsService,
+                secureTokenServiceAPI,
+                dispatcher
+            )
+        } ?: PayPalNativeCheckoutClient(
+            mockApplication,
+            coreConfig,
+            mockReturnUrl,
+            analyticsService,
+            secureTokenServiceAPI
+        )
     }
 }

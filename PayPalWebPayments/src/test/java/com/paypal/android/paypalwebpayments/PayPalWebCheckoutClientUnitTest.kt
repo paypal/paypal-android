@@ -9,11 +9,13 @@ import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.SecureTokenServiceAPI
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.*
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +23,6 @@ import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
-import kotlinx.coroutines.test.*
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -31,7 +32,9 @@ class PayPalWebCheckoutClientUnitTest {
     private val browserSwitchHelper: BrowserSwitchHelper = mockk(relaxed = true)
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val coreConfig: CoreConfig = mockk(relaxed = true)
-    private val api = mockk<API>(relaxed = true)
+
+    private val analyticsService = mockk<AnalyticsService>(relaxed = true)
+    private val secureTokenServiceAPI = mockk<SecureTokenServiceAPI>(relaxed = true)
 
     @Test
     fun `start() delivers error if error fetching clientID`() = runTest {
@@ -40,7 +43,7 @@ class PayPalWebCheckoutClientUnitTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalWebCheckoutListener>()
 
-        coEvery { api.fetchCachedOrRemoteClientID() } throws error
+        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } throws error
         every {
             payPalCheckoutListener.onPayPalWebFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -65,7 +68,7 @@ class PayPalWebCheckoutClientUnitTest {
         val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
-        coEvery { api.fetchCachedOrRemoteClientID() } returns "fake-client-id"
+        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } returns "fake-client-id"
 
         coEvery {
             browserSwitchHelper.configurePayPalBrowserSwitchOptions(any(), any(), any())
@@ -129,8 +132,10 @@ class PayPalWebCheckoutClientUnitTest {
         payPalClient.handleBrowserSwitchResult()
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(slot.captured.errorDescription,
-            "Result did not contain the expected data. Payer ID or Order ID is null.")
+        assertEquals(
+            slot.captured.errorDescription,
+            "Result did not contain the expected data. Payer ID or Order ID is null."
+        )
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -158,8 +163,10 @@ class PayPalWebCheckoutClientUnitTest {
         payPalClient.handleBrowserSwitchResult()
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(slot.captured.errorDescription,
-            "Result did not contain the expected data. Payer ID or Order ID is null.")
+        assertEquals(
+            slot.captured.errorDescription,
+            "Result did not contain the expected data. Payer ID or Order ID is null."
+        )
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -182,8 +189,10 @@ class PayPalWebCheckoutClientUnitTest {
         payPalClient.handleBrowserSwitchResult()
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(slot.captured.errorDescription,
-            "An unknown error occurred. Contact developer.paypal.com/support.")
+        assertEquals(
+            slot.captured.errorDescription,
+            "An unknown error occurred. Contact developer.paypal.com/support."
+        )
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -206,8 +215,10 @@ class PayPalWebCheckoutClientUnitTest {
         payPalClient.handleBrowserSwitchResult()
 
         verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(slot.captured.errorDescription,
-            "An unknown error occurred. Contact developer.paypal.com/support.")
+        assertEquals(
+            slot.captured.errorDescription,
+            "An unknown error occurred. Contact developer.paypal.com/support."
+        )
 
         assertNullBrowserSwitchResult(payPalClient)
     }
@@ -290,7 +301,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     private fun assertNullBrowserSwitchResult(payPalClient: PayPalWebCheckoutClient) {
-        val privateResult: Field = PayPalWebCheckoutClient::class.java.getDeclaredField("browserSwitchResult")
+        val privateResult: Field =
+            PayPalWebCheckoutClient::class.java.getDeclaredField("browserSwitchResult")
         privateResult.isAccessible = true
         val result = privateResult.get(payPalClient)
         assertNull(result)
@@ -302,7 +314,22 @@ class PayPalWebCheckoutClientUnitTest {
     ): PayPalWebCheckoutClient {
         return (testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalWebCheckoutClient(activity, coreConfig, api, browserSwitchClient, browserSwitchHelper, dispatcher)
-        } ?: PayPalWebCheckoutClient(activity, coreConfig, api, browserSwitchClient, browserSwitchHelper))
+            PayPalWebCheckoutClient(
+                activity,
+                coreConfig,
+                analyticsService,
+                secureTokenServiceAPI,
+                browserSwitchClient,
+                browserSwitchHelper,
+                dispatcher
+            )
+        } ?: PayPalWebCheckoutClient(
+            activity,
+            coreConfig,
+            analyticsService,
+            secureTokenServiceAPI,
+            browserSwitchClient,
+            browserSwitchHelper
+        ))
     }
 }
