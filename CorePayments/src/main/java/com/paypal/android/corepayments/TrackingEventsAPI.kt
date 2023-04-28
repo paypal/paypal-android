@@ -1,13 +1,17 @@
 package com.paypal.android.corepayments
 
+import android.content.Context
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
+import com.paypal.android.corepayments.analytics.DeviceInspector
 import org.json.JSONObject
 
 class TrackingEventsAPI internal constructor(
     private val restClient: RestClient,
+    private val deviceInspector: DeviceInspector
 ) {
 
-    constructor(coreConfig: CoreConfig) : this(RestClient(coreConfig))
+    constructor(context: Context, coreConfig: CoreConfig) :
+            this(RestClient(coreConfig), DeviceInspector(context))
 
     suspend fun sendEvent(event: AnalyticsEventData): HttpResponse {
         val apiRequest = createAPIRequestForEvent(event)
@@ -15,20 +19,31 @@ class TrackingEventsAPI internal constructor(
     }
 
     private fun createAPIRequestForEvent(event: AnalyticsEventData): APIRequest {
+        val deviceData = deviceInspector.inspect()
+
+        val appId = deviceData.appId
+        val appName = deviceData.appName
+        val clientSDKVersion = deviceData.clientSDKVersion
+        val clientOS = deviceData.clientOS
+        val deviceManufacturer = deviceData.deviceManufacturer
+        val deviceModel = deviceData.deviceModel
+        val isSimulator = deviceData.isSimulator
+        val merchantAppVersion = deviceData.merchantAppVersion
+
         val eventParams = JSONObject()
-            .put(KEY_APP_ID, event.appId)
-            .put(KEY_APP_NAME, event.appName)
+            .put(KEY_APP_ID, appId)
+            .put(KEY_APP_NAME, appName)
             .put(KEY_CLIENT_ID, event.clientID)
-            .put(KEY_CLIENT_SDK_VERSION, event.clientSDKVersion)
-            .put(KEY_CLIENT_OS, event.clientOS)
+            .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
+            .put(KEY_CLIENT_OS, clientOS)
             .put(KEY_COMPONENT, "ppcpmobilesdk")
-            .put(KEY_DEVICE_MANUFACTURER, event.deviceManufacturer)
-            .put(KEY_DEVICE_MODEL, event.deviceModel)
+            .put(KEY_DEVICE_MANUFACTURER, deviceManufacturer)
+            .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_ENVIRONMENT, event.environment)
             .put(KEY_EVENT_NAME, event.eventName)
             .put(KEY_EVENT_SOURCE, "mobile-native")
-            .put(KEY_IS_SIMULATOR, event.isSimulator)
-            .put(KEY_MERCHANT_APP_VERSION, event.merchantAppVersion)
+            .put(KEY_IS_SIMULATOR, isSimulator)
+            .put(KEY_MERCHANT_APP_VERSION, merchantAppVersion)
             .put(KEY_PLATFORM, "Android")
             .put(KEY_SESSION_ID, event.sessionID)
             .put(KEY_TIMESTAMP, event.timestamp.toString())
