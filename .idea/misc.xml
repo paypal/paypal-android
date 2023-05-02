@@ -28,6 +28,7 @@
         <entry key="Demo/src/main/res/layout/fragment_paypal_buttons_styling.xml" value="0.3763586956521739" />
         <entry key="Demo/src/main/res/layout/fragment_test_cards.xml" value="0.2234375" />
         <entry key="Demo/src/main/res/layout/fragment_three_d_secure.xml" value="0.3802083333333333" />
+        <entry key="Demo/src/main/res/xml/network_security_config.xml" value="0.2956204379562044" />
         <entry key="Demo/src/main/res/xml/preferences.xml" value="0.3188405797101449" />
         <entry key="Demo/src/main/res/xml/root_preferences.xml" value="0.32382246376811596" />
         <entry key="PayPalNativeCheckout/src/main/res/drawable/wordmark_paypal_credit_monochrome.xml" value="0.11574074074074074" />
