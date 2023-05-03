@@ -55,7 +55,7 @@ val payPalNativeClient = PayPalNativeCheckoutClient(
 )
 ```
 
-Set a listener on the client to receive payment flow callbacks:
+Set the required `listener` on the `PayPalNativeCheckoutClient` to receive result notifications for the SDK.
 
 ```kotlin
 payPalNativeClient.listener = object : PayPalNativeCheckoutListener {
@@ -75,12 +75,43 @@ payPalNativeClient.listener = object : PayPalNativeCheckoutListener {
     override fun onPayPalCanceled() {
        // the user canceled the flow
     }
+}
+```
 
-    override fun onPayPalCheckoutShippingChange(
-        shippingChangeData: ShippingChangeData,
-        shippingChangeActions: ShippingChangeActions
+You can optionally set the `shippingListener` on the `PayPalNativeCheckoutClient` to receive notifications when the user updates their shipping address or shipping method details.
+
+```kotlin
+payPalNativeClient.shippingListener = object : PayPalNativeShippingListener {
+
+    override fun onPayPalNativeShippingAddressChange(
+        actions: PayPalNativePaysheetActions,
+        shippingAddress: PayPalNativeShippingAddress
     ) {
-        // there has been a change in shipping address or shipping method. Patch the order accordingly
+        // called when the user updates their chosen shipping address
+
+        // OPTIONAL: if you patch your order server-side, call actions.approve() or actions.reject() once complete.
+        // try {
+        //     patchOrder()
+        //     actions.approve()
+        // } catch {
+        //     actions.reject()
+        // }
+    }
+
+    override fun onPayPalNativeShippingMethodChange(
+        actions: PayPalNativePaysheetActions,
+        shippingMethod: PayPalNativeShippingMethod
+    ) {
+        // called when the user updates their chosen shipping method
+
+        // REQUIRED: patch your order server-side with the updated shipping amount.
+        // Once complete, call `actions.approve()` or `actions.reject()`
+        try {
+            patchOrder()
+            actions.approve()
+        } else {
+            actions.reject()
+        }
     }
 }
 ```
