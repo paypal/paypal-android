@@ -92,7 +92,7 @@ payPalNativeClient.shippingListener = object : PayPalNativeShippingListener {
         // REQUIRED: you must call actions.approve() or actions.reject() in this callback
         actions.approve()
 
-        // OPTIONAL: you can optionally patch your order. Once complete, call actions.approve() if successful, and actions.reject() if not.
+        // OPTIONAL: you can optionally patch your order. Once complete, call actions.approve() if successful or actions.reject() if not.
     }
 
     override fun onPayPalNativeShippingMethodChange(
