@@ -9,6 +9,9 @@ import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +25,6 @@ class AnalyticsServiceTest {
 
     private lateinit var http: Http
     private lateinit var httpRequestFactory: HttpRequestFactory
-    private lateinit var analyticsService: AnalyticsService
     private lateinit var environment: Environment
     private lateinit var clientIDAPI: ClientIDAPI
     private lateinit var deviceInspector: DeviceInspector
@@ -41,6 +43,8 @@ class AnalyticsServiceTest {
         merchantAppVersion = "4.5.6"
     )
 
+    private lateinit var sut: AnalyticsService
+
     @Before
     fun setup() {
         http = mockk()
@@ -50,15 +54,9 @@ class AnalyticsServiceTest {
         environment = Environment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
-        analyticsService = AnalyticsService(
-            deviceInspector,
-            clientIDAPI,
-            environment,
-            http,
-            httpRequestFactory,
-            "fake-order-id"
-        )
-
+        coEvery {
+            clientIDAPI.fetchCachedOrRemoteClientID()
+        } returns "fake-client-id"
         coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
 
@@ -67,24 +65,32 @@ class AnalyticsServiceTest {
     @Test
     fun `sendAnalyticsEvent send proper AnalyticsEventData`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        sut = getAnalyticsService(testScheduler = testScheduler)
+
         every {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("sample.event.name")
+        sut.sendAnalyticsEvent("sample.event.name")
+        advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
         assertSame(deviceData, analyticsEventData.deviceData)
     }
 
+    // TODO: - need test for performEventRequest throws on no client ID
+
     @Test
     fun `sendAnalyticsEvent calls HTTP send`() = runTest {
+        sut = getAnalyticsService(testScheduler)
+
         every {
             httpRequestFactory.createHttpRequestForAnalytics(any())
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("sample.event.name")
+        sut.sendAnalyticsEvent("sample.event.name")
+        advanceUntilIdle()
 
         coVerify(exactly = 1) {
             http.send(httpRequest)
@@ -98,7 +104,7 @@ class AnalyticsServiceTest {
         } returns httpRequest
 
         val timeBeforeEventSent = System.currentTimeMillis()
-        analyticsService.sendAnalyticsEvent("sample.event.name")
+        sut.sendAnalyticsEvent("sample.event.name")
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
 
@@ -109,11 +115,14 @@ class AnalyticsServiceTest {
     @Test
     fun `sendAnalyticsEvent sends proper tag when SANDBOX`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        sut = getAnalyticsService(testScheduler)
+
         every {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("fake-event")
+        sut.sendAnalyticsEvent("fake-event")
+        advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sandbox", analyticsEventData.environment)
@@ -121,23 +130,42 @@ class AnalyticsServiceTest {
 
     @Test
     fun `sendAnalyticsEvent sends proper tag when LIVE`() = runTest {
-        analyticsService = AnalyticsService(
-            deviceInspector,
-            clientIDAPI,
-            Environment.LIVE,
-            http,
-            httpRequestFactory,
-            "fake-order-id"
-        )
-
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        sut = getAnalyticsService(testScheduler, Environment.LIVE)
+
         every {
             httpRequestFactory.createHttpRequestForAnalytics(capture(analyticsEventDataSlot))
         } returns httpRequest
 
-        analyticsService.sendAnalyticsEvent("fake-event")
+        sut.sendAnalyticsEvent("fake-event")
+        advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
+    }
+
+    private fun getAnalyticsService(
+        testScheduler: TestCoroutineScheduler? = null,
+        environment: Environment = Environment.SANDBOX
+    ): AnalyticsService {
+        return testScheduler?.let {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+            AnalyticsService(
+                deviceInspector,
+                clientIDAPI,
+                environment,
+                http,
+                httpRequestFactory,
+                "fake-order-id",
+                dispatcher
+            )
+        } ?: AnalyticsService(
+            deviceInspector,
+            clientIDAPI,
+            environment,
+            http,
+            httpRequestFactory,
+            "fake-order-id"
+        )
     }
 }

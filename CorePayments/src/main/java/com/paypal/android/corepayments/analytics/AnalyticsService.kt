@@ -2,13 +2,13 @@ package com.paypal.android.corepayments.analytics
 
 import android.content.Context
 import android.util.Log
-import android.util.LruCache
 import com.paypal.android.corepayments.*
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequestFactory
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
+import kotlinx.coroutines.CoroutineScope
 
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
@@ -16,7 +16,8 @@ class AnalyticsService internal constructor(
     private val environment: Environment,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val orderID: String
+    private val orderID: String,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     constructor(configuration: CoreConfig, context: Context, orderID: String) :
@@ -33,7 +34,7 @@ class AnalyticsService internal constructor(
      * Sends analytics event to https://api.paypal.com/v1/tracking/events/ via a background task.
      */
     fun sendAnalyticsEvent(name: String) {
-        GlobalScope.launch {
+        CoroutineScope(dispatcher).launch() {
             try {
                 val clientID = clientIDAPI.fetchCachedOrRemoteClientID()
                 performEventRequest(name, clientID)
