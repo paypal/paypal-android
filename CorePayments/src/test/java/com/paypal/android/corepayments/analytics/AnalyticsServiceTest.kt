@@ -62,6 +62,8 @@ class AnalyticsServiceTest {
         coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
 
+    // TODO: - Instead need to mock clientIDAPI.fetchOrReturnRemoteClientID()
+
     @Test
     fun `sendAnalyticsEvent send proper AnalyticsEventData`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()

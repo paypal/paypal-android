@@ -21,15 +21,13 @@ class ClientIDAPIUnitTest {
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
 
-    private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig("fake-access-token")
 
     private val httpResponseHeaders = mapOf(
         "Paypal-Debug-Id" to "sample-correlation-id"
     )
 
-    private val url = URL("https://example.com/resolved/path")
-    private val httpRequest = HttpRequest(url, HttpMethod.GET)
+    private val httpRequest = HttpRequest(URL("https://example.com/resolved/path"), HttpMethod.GET)
 
     private val clientIdSuccessResponse by lazy {
         val clientIdBody = JSONObject()
@@ -45,8 +43,6 @@ class ClientIDAPIUnitTest {
         sut = ClientIDAPI(configuration, http, httpRequestFactory)
         ClientIDAPI.clientIDCache.evictAll()
     }
-
-    // COPIED FROM API_UNIT_TESTS
 
     @Test
     fun `fetchCachedOrRemoteClientID() sends oauth api request when value not in cache`() = runTest {

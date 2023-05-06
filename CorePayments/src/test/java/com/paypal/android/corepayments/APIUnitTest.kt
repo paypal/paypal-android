@@ -1,11 +1,8 @@
 package com.paypal.android.corepayments
 
-import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -22,24 +19,12 @@ class APIUnitTest {
 
     private val http = mockk<Http>(relaxed = true)
     private val httpRequestFactory = mockk<HttpRequestFactory>()
-    private val analyticsService = mockk<AnalyticsService>()
 
     private val apiRequest = APIRequest("/sample/path", HttpMethod.GET, null)
     private val configuration = CoreConfig("fake-access-token")
 
-    private val httpResponseHeaders = mapOf(
-        "Paypal-Debug-Id" to "sample-correlation-id"
-    )
-
     private val url = URL("https://example.com/resolved/path")
     private val httpRequest = HttpRequest(url, HttpMethod.GET)
-
-    private val clientIdSuccessResponse by lazy {
-        val clientIdBody = JSONObject()
-            .put("client_id", "sample-client-id")
-            .toString()
-        HttpResponse(200, httpResponseHeaders, clientIdBody)
-    }
 
     private lateinit var sut: API
 
