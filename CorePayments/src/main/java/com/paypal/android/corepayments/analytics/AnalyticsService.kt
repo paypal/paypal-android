@@ -13,7 +13,7 @@ import java.util.*
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
     private val clientIDAPI: ClientIDAPI,
-    private val configuration: CoreConfig,
+    private val environment: Environment,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
     private val orderID: String
@@ -23,7 +23,7 @@ class AnalyticsService internal constructor(
         this(
             deviceInspector = DeviceInspector(context),
             clientIDAPI = ClientIDAPI(configuration),
-            configuration = configuration,
+            environment = configuration.environment,
             http = Http(),
             httpRequestFactory = HttpRequestFactory(),
             orderID = orderID
@@ -52,7 +52,7 @@ class AnalyticsService internal constructor(
         // TODO: rename sessionID to orderID
         val analyticsEventData = AnalyticsEventData(
             clientID,
-            configuration.environment.name.lowercase(),
+            environment.name.lowercase(),
             name,
             timestamp,
             orderID,
