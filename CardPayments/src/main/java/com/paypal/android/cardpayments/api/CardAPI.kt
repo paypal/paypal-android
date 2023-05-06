@@ -12,7 +12,7 @@ internal class CardAPI(
 ) {
 
     suspend fun fetchCachedOrRemoteClientID() {
-        api.fetchCachedOrRemoteClientID()
+//        api.fetchCachedOrRemoteClientID() // TODO: - remove API here, too.
     }
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
@@ -44,6 +44,6 @@ internal class CardAPI(
     }
 
     fun sendAnalyticsEvent(name: String) {
-        api.sendAnalyticsEvent(name)
+//        api.sendAnalyticsEvent(name)
     }
 }

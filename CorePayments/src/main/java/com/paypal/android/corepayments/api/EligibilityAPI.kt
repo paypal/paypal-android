@@ -2,6 +2,7 @@ package com.paypal.android.corepayments.api
 
 import android.content.Context
 import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.ClientIDAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.api.models.Eligibility
@@ -15,8 +16,10 @@ import com.paypal.android.corepayments.graphql.fundingEligibility.models.Support
 /**
  *  API that checks merchants eligibility for different payment methods.
  */
+// TODO: - remove unused API
 internal class EligibilityAPI internal constructor(
     private val api: API,
+    private val clientIDAPI: ClientIDAPI,
     private val graphQLClient: GraphQLClient
 ) {
 
@@ -26,6 +29,7 @@ internal class EligibilityAPI internal constructor(
      */
     constructor(coreConfig: CoreConfig, context: Context) : this(
         API(coreConfig, context),
+        ClientIDAPI(coreConfig),
         GraphQLClientImpl(coreConfig)
     )
 
@@ -36,7 +40,7 @@ internal class EligibilityAPI internal constructor(
      */
     suspend fun checkEligibility(): Eligibility {
         val fundingEligibilityQuery = FundingEligibilityQuery(
-            clientId = api.fetchCachedOrRemoteClientID(),
+            clientId = clientIDAPI.fetchCachedOrRemoteClientID(),
             fundingEligibilityIntent = FundingEligibilityIntent.CAPTURE,
             currencyCode = SupportedCountryCurrencyType.USD,
             enableFunding = listOf(SupportedPaymentMethodsType.VENMO)
