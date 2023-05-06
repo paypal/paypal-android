@@ -52,6 +52,7 @@ object APIClientError {
             correlationID = correlationID
         )
 
+    // 6.
     val payPalCheckoutError: (description: String) -> PayPalSDKError = { description ->
         PayPalSDKError(
             code = Code.CHECKOUT_ERROR.ordinal,
@@ -64,6 +65,12 @@ object APIClientError {
         errorDescription = "Error fetching clientID. Contact developer.paypal.com/support.",
         correlationID = correlationID
     )
+
+    // 7. There was an error fetching clientID
+    val clientIDNotFoundError = PayPalSDKError(
+        code = Code.MISSING_CLIENT_ID.ordinal,
+        errorDescription = "An error occurred fetching the merchant's underlying PayPal client ID."
+    )
 }
 
 enum class Code {
@@ -73,5 +80,6 @@ enum class Code {
     NO_RESPONSE_DATA,
     INVALID_URL_REQUEST,
     SERVER_RESPONSE_ERROR,
-    CHECKOUT_ERROR
+    CHECKOUT_ERROR,
+    MISSING_CLIENT_ID
 }

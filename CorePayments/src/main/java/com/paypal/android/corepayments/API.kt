@@ -16,20 +16,13 @@ class API internal constructor(
     private val configuration: CoreConfig,
     private val http: Http,
     private val httpRequestFactory: HttpRequestFactory,
-    private val analyticsService: AnalyticsService,
 ) {
 
     constructor(configuration: CoreConfig, context: Context) :
             this(
                 configuration,
                 Http(),
-                HttpRequestFactory(),
-                AnalyticsService(
-                    deviceInspector = DeviceInspector(context),
-                    environment = configuration.environment,
-                    http = Http(),
-                    httpRequestFactory = HttpRequestFactory()
-                )
+                HttpRequestFactory()
             )
 
     suspend fun send(apiRequest: APIRequest): HttpResponse {
@@ -82,7 +75,7 @@ class API internal constructor(
         GlobalScope.launch {
             try {
                 val clientID = fetchCachedOrRemoteClientID()
-                analyticsService.sendAnalyticsEvent(name, clientID)
+//                analyticsService.sendAnalyticsEvent(name, clientID)
             } catch (e: PayPalSDKError) {
                 Log.d(
                     "[PayPal SDK]",

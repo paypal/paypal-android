@@ -9,6 +9,7 @@ import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,6 +53,8 @@ class PayPalWebCheckoutClient internal constructor(
 
     private var browserSwitchResult: BrowserSwitchResult? = null
 
+    var analyticsService: AnalyticsService? = null
+
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
@@ -76,12 +79,11 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        api.sendAnalyticsEvent("paypal-web-payments:started")
+        analyticsService = AnalyticsService(coreConfig, activity, request.orderID)
+        analyticsService?.sendAnalyticsEvent("paypal-web-payments:started")
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                api.fetchCachedOrRemoteClientID()
-
                 val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
                     request.orderID,
                     coreConfig,
@@ -130,17 +132,17 @@ class PayPalWebCheckoutClient internal constructor(
 
     private fun deliverCancellation() {
         browserSwitchResult = null
-        api.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled")
+        analyticsService?.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled")
         listener?.onPayPalWebCanceled()
     }
 
     private fun deliverFailure(error: PayPalSDKError) {
-        api.sendAnalyticsEvent("paypal-web-payments:failed")
+        analyticsService?.sendAnalyticsEvent("paypal-web-payments:failed")
         listener?.onPayPalWebFailure(error)
     }
 
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
-        api.sendAnalyticsEvent("paypal-web-payments:succeeded")
+        analyticsService?.sendAnalyticsEvent("paypal-web-payments:succeeded")
         listener?.onPayPalWebSuccess(result)
     }
 }
