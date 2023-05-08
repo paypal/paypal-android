@@ -80,7 +80,7 @@ payPalNativeClient.listener = object : PayPalNativeCheckoutListener {
 
 You can optionally set the `shippingListener` on the `PayPalNativeCheckoutClient` to receive notifications when the user updates their shipping address or shipping method details.
 
-Setting this optional listener will require your server implementation support the [PayPal Orders API - Update order](https://developer.paypal.com/docs/api/orders/v2/#orders_patch) or `PATCH` functionality.
+Setting this optional listener will require your server implementation support the [PayPal Orders API - Update order](https://developer.paypal.com/docs/api/orders/v2/#orders_patch) (or `PATCH`) functionality.
 
 ```kotlin
 payPalNativeClient.shippingListener = object : PayPalNativeShippingListener {
