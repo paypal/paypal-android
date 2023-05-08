@@ -13,6 +13,8 @@ import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import com.paypal.android.cardpayments.api.GetOrderRequest
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
 import io.mockk.*
@@ -41,6 +43,7 @@ class CardClientUnitTest {
 
     private val card = Card("4111111111111111", "01", "24", "123")
     private val orderID = "sample-order-id"
+    private val coreConfig = CoreConfig("fake-access-token", Environment.SANDBOX)
 
     private val cardRequest = CardRequest(orderID, card, "return_url")
 
@@ -79,30 +82,6 @@ class CardClientUnitTest {
     fun `register lifecycle observer on init`() = runTest {
         createCardClient(testScheduler)
         verify(exactly = 1) { activityLifecycle.addObserver(any<CardLifeCycleObserver>()) }
-    }
-
-    @Test
-    fun `approveOrder() notifies listener if error fetching clientID`() = runTest {
-        val error = PayPalSDKError(123, "fake-description")
-        val errorSlot = slot<PayPalSDKError>()
-
-        coEvery { cardAPI.fetchCachedOrRemoteClientID() } throws error
-        every {
-            approveOrderListener.onApproveOrderFailure(capture(errorSlot))
-        } answers { errorSlot.captured }
-
-        val sut = createCardClient(testScheduler)
-
-        sut.approveOrder(mockk(relaxed = true), cardRequest)
-        advanceUntilIdle()
-
-        verify {
-            approveOrderListener.onApproveOrderFailure(any())
-        }
-        expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(123)
-            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
-        }
     }
 
     @Test
@@ -239,9 +218,11 @@ class CardClientUnitTest {
             assertEquals("mock_error_message", capturedError.errorDescription)
         }
 
+    // TODO: - Move over analytics tests that used to be send in CardPI
+
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        val sut = CardClient(activity, cardAPI, coreConfig, browserSwitchClient, dispatcher)
         sut.approveOrderListener = approveOrderListener
         return sut
     }

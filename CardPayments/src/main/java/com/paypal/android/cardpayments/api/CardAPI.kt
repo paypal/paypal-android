@@ -11,20 +11,14 @@ internal class CardAPI(
     private val responseParser: CardResponseParser = CardResponseParser()
 ) {
 
-    suspend fun fetchCachedOrRemoteClientID() {
-//        api.fetchCachedOrRemoteClientID() // TODO: - remove API here, too.
-    }
-
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
         val httpResponse = api.send(apiRequest)
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed")
             throw error
         } else {
-            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:succeeded")
             return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
         }
     }
@@ -35,15 +29,9 @@ internal class CardAPI(
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-            sendAnalyticsEvent("card-payments:3ds:get-order-info:failed")
             throw error
         } else {
-            sendAnalyticsEvent("card-payments:3ds:get-order-info:succeeded")
             return responseParser.parseGetOrderInfoResponse(httpResponse)
         }
-    }
-
-    fun sendAnalyticsEvent(name: String) {
-//        api.sendAnalyticsEvent(name)
     }
 }
