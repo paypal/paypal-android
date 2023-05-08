@@ -1,0 +1,63 @@
+name: Bug report
+description: Create a report to help us improve
+body:
+- type: input
+  attributes:
+    label: PayPal Android SDK Version
+    placeholder: "e.g. 1.12.0"
+  validations:
+    required: true
+- type: dropdown
+  attributes:
+    label: Environment
+    options:
+      - Sandbox
+      - Live
+      - Both
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Android Version & Device
+    placeholder: "e.g Google Pixel 6a - Android 12.0"
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: PayPal dependencies
+    placeholder: |
+      <!-- Examples -->
+      <!-- implementation 'com.paypal.android:card-payments:x.y.z' -->
+      <!-- implementation 'com.paypal.android:paypal-web-payments:x.y.z' -->
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Describe the bug
+    description: Description of what the bug is. Please include as many details as possible.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: To reproduce
+    description: Steps to reproduce the behavior.
+    placeholder: |
+      1. Go to '...'
+      2. Click on '....'
+      3. See error
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Expected behavior
+    description: Description of what you expected to happen.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Screenshots
+    description: If applicable, add screenshots to help explain your problem.
+    placeholder: |
+      Do not reveal sensitive data. For example, credit card numbers & customer credentials.
+  validations:
+    required: false
