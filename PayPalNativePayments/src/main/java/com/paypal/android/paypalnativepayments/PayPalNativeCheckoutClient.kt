@@ -1,11 +1,10 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
