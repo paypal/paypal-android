@@ -1,6 +1,6 @@
 # Remove GraphQL Generics
 
-**Status: Proposed**
+**Status: Approved**
 
 ## Context
 
