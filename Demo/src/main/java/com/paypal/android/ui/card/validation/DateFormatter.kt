@@ -22,6 +22,8 @@ object DateFormatter {
                 3 -> newDateString.substring(0, 2) + "/" + newDateString.substring(2, 3)
                 else -> newDateString
             }
-        } else newDateString
+        } else {
+            newDateString
+        }
     }
 }
