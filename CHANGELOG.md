@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 0.0.9 (2023-05-09)
 * CardPayments:
   * Make `Card.securityCode` required
 * `PayPalNativePayments`:
