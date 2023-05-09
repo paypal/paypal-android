@@ -1,11 +1,7 @@
 package com.paypal.android.corepayments.analytics
 
 import com.paypal.android.corepayments.*
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
+import io.mockk.*
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,8 +56,6 @@ class AnalyticsServiceTest {
         coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
 
-    // TODO: - Instead need to mock clientIDAPI.fetchOrReturnRemoteClientID()
-
     @Test
     fun `sendAnalyticsEvent send proper AnalyticsEventData`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
@@ -78,8 +72,6 @@ class AnalyticsServiceTest {
         assertEquals("sample.event.name", analyticsEventData.eventName)
         assertSame(deviceData, analyticsEventData.deviceData)
     }
-
-    // TODO: - need test for performEventRequest throws on no client ID
 
     @Test
     fun `sendAnalyticsEvent calls HTTP send`() = runTest {
@@ -142,6 +134,19 @@ class AnalyticsServiceTest {
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
+    }
+
+    @Test
+    fun `sendAnalyticEvent does not send analytics via HTTP if clientID fetch fails`() = runTest {
+        val error = PayPalSDKError(0, "client_id_error")
+        coEvery { clientIDAPI.fetchCachedOrRemoteClientID() } throws error
+
+        sut = getAnalyticsService(testScheduler)
+
+        sut.sendAnalyticsEvent("sample.event.name")
+        advanceUntilIdle()
+
+        verify(exactly = 0) { httpRequestFactory.createHttpRequestForAnalytics(any()) }
     }
 
     private fun getAnalyticsService(
