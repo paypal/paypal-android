@@ -2,7 +2,11 @@ package com.paypal.android.corepayments.analytics
 
 import android.content.Context
 import android.util.Log
-import com.paypal.android.corepayments.*
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.ClientIDAPI
+import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequestFactory
 import kotlinx.coroutines.CoroutineDispatcher
@@ -10,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 
+@Suppress("LongParameterList")
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
     private val clientIDAPI: ClientIDAPI,

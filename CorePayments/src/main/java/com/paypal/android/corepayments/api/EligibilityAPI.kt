@@ -1,7 +1,5 @@
 package com.paypal.android.corepayments.api
 
-import android.content.Context
-import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.ClientIDAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -25,7 +23,7 @@ internal class EligibilityAPI internal constructor(
      *  EligibilityAPI constructor
      *  @param coreConfig configuration parameters for eligibility API
      */
-    constructor(coreConfig: CoreConfig, context: Context) : this(
+    constructor(coreConfig: CoreConfig) : this(
         ClientIDAPI(coreConfig),
         GraphQLClientImpl(coreConfig)
     )

@@ -10,7 +10,6 @@ import com.paypal.android.cardpayments.api.CardAPI
 import com.paypal.android.cardpayments.api.GetOrderRequest
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.API
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
@@ -100,7 +99,7 @@ class CardClient internal constructor(
 
                 browserSwitchClient.start(activity, options)
             }
-        } catch (error: PayPalSDKError){
+        } catch (error: PayPalSDKError) {
             analyticsService?.sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed")
             throw error
         }

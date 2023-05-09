@@ -50,9 +50,7 @@ class AnalyticsServiceTest {
         environment = Environment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
-        coEvery {
-            clientIDAPI.fetchCachedOrRemoteClientID()
-        } returns "fake-client-id"
+        coEvery { clientIDAPI.fetchCachedOrRemoteClientID() } returns "fake-client-id"
         coEvery { http.send(httpRequest) } returns HttpResponse(200)
     }
 

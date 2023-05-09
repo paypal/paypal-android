@@ -1,7 +1,11 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.*
+import com.paypal.android.corepayments.ClientIDAPI
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
@@ -22,13 +26,11 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to checkout with PayPal.
  */
-// TODO: - remove api
 class PayPalNativeCheckoutClient internal constructor (
     private val application: Application,
     private val clientIDAPI: ClientIDAPI,
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
-    private val api: API,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -46,8 +48,7 @@ class PayPalNativeCheckoutClient internal constructor (
         application,
         ClientIDAPI(coreConfig),
         coreConfig,
-        returnUrl,
-        API(coreConfig)
+        returnUrl
     )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {

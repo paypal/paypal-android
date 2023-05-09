@@ -34,8 +34,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
