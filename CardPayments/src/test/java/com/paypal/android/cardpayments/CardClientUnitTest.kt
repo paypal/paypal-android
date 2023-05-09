@@ -218,8 +218,6 @@ class CardClientUnitTest {
             assertEquals("mock_error_message", capturedError.errorDescription)
         }
 
-    // TODO: - Move over analytics tests that used to be send in CardPI
-
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(activity, cardAPI, coreConfig, browserSwitchClient, dispatcher)

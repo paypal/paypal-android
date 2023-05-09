@@ -63,7 +63,7 @@ class AnalyticsService internal constructor(
 
         val response = http.send(httpRequest)
         if (!response.isSuccessful) {
-            throw APIClientError.clientIDNotFoundError(response.status, "")
+            throw APIClientError.clientIDNotFoundError()
         }
     }
 }

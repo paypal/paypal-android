@@ -91,7 +91,7 @@ class PayPalWebCheckoutClient internal constructor(
                 )
                 browserSwitchClient.start(activity, browserSwitchOptions)
             } catch (e: PayPalSDKError) {
-                deliverFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
+                deliverFailure(APIClientError.clientIDNotFoundError(e.correlationID))
             }
         }
     }

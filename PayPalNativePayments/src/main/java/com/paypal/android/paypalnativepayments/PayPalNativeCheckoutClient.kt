@@ -102,7 +102,7 @@ class PayPalNativeCheckoutClient internal constructor (
                     it.set(request.orderID)
                 })
             } catch (e: PayPalSDKError) {
-                listener?.onPayPalCheckoutFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
+                listener?.onPayPalCheckoutFailure(APIClientError.clientIDNotFoundError(e.correlationID))
             }
         }
     }
