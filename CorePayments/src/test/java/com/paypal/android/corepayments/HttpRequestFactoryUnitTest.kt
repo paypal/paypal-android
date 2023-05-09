@@ -117,7 +117,7 @@ class HttpRequestFactoryUnitTest {
             environment = "fake-environment",
             eventName = "fake-event",
             timestamp = 10000,
-            sessionID = "fake-session-id",
+            orderID = "fake-order-id",
             deviceData = DeviceData(
                 appId = "fake-app-id",
                 appName = "fake-app-name",
@@ -144,14 +144,14 @@ class HttpRequestFactoryUnitTest {
                         "client_os": "fake client OS",
                         "comp": "ppcpmobilesdk",
                         "device_manufacturer": "fake-manufacturer",
-                        "merchant_app_environment": "fake-environment",
+                        "merchant_sdk_env": "fake-environment",
                         "event_name": "fake-event",
                         "event_source": "mobile-native",
                         "is_simulator": false,
                         "mapv": "fake-merchant-app-version",
-                        "mobile_device_model": "fake-device-model",
+                        "mobile_device_model": "fake-device-model", 
+                        "order_id": "fake-order-id",
                         "platform": "Android",
-                        "session_id": "fake-session-id",
                         "t": "10000",
                         "tenant_name": "PayPal"
                     }

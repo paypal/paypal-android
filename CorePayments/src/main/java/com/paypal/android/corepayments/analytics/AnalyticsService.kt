@@ -50,7 +50,6 @@ class AnalyticsService internal constructor(
     internal suspend fun performEventRequest(name: String, clientID: String) {
         val timestamp = System.currentTimeMillis()
 
-        // TODO: rename sessionID to orderID
         val analyticsEventData = AnalyticsEventData(
             clientID,
             environment.name.lowercase(),
