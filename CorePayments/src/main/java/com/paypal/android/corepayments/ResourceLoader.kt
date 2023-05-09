@@ -7,10 +7,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class ResourceLoader(context: Context) {
+/**
+ * Convenience class to simplify interaction with Android resource APIs.
+ */
+internal class ResourceLoader(context: Context) {
 
     private val applicationContext = context.applicationContext
 
+    /**
+     * Load an Android raw resource as a String using a background IO thread.
+     *
+     * @param resId ID of the resource that will be loaded
+     */
     suspend fun loadRawResource(@RawRes resId: Int): String = withContext(Dispatchers.IO) {
         try {
             val resInputStream = applicationContext.resources.openRawResource(resId)
@@ -19,11 +27,11 @@ class ResourceLoader(context: Context) {
             resInputStream.close()
             String(resAsBytes)
         } catch (e: Resources.NotFoundException) {
-            // TODO: come up with better error messages
-            throw PayPalSDKError(0, "Resource not found.", reason = e)
+            val errorDescription = "Resource with id $resId not found."
+            throw PayPalSDKError(0, errorDescription, reason = e)
         } catch (e: IOException) {
-            // TODO: come up with better error messages
-            throw PayPalSDKError(0, "Error loading raw resource.", reason = e)
+            val errorDescription = "Error loading resource with id $resId."
+            throw PayPalSDKError(0, errorDescription, reason = e)
         }
     }
 }
