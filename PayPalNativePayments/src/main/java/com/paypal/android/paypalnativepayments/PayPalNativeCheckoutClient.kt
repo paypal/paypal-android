@@ -47,7 +47,7 @@ class PayPalNativeCheckoutClient internal constructor (
         ClientIDAPI(coreConfig),
         coreConfig,
         returnUrl,
-        API(coreConfig, application)
+        API(coreConfig)
     )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {

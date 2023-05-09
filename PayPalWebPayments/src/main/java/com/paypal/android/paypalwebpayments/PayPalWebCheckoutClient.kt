@@ -42,7 +42,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) : this(
         activity,
         configuration,
-        API(configuration, activity),
+        API(configuration),
         BrowserSwitchClient(),
         BrowserSwitchHelper(urlScheme)
     )

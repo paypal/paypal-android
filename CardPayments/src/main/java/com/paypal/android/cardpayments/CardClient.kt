@@ -50,7 +50,7 @@ class CardClient internal constructor(
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
                 activity,
-                CardAPI(API(configuration, activity)),
+                CardAPI(API(configuration)),
                 configuration,
                 BrowserSwitchClient(),
                 Dispatchers.Main

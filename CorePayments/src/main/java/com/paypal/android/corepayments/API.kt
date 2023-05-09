@@ -18,8 +18,7 @@ class API internal constructor(
     private val httpRequestFactory: HttpRequestFactory,
 ) {
 
-    // TODO: - remove unused context reference
-    constructor(configuration: CoreConfig, context: Context) :
+    constructor(configuration: CoreConfig) :
             this(
                 configuration,
                 Http(),
