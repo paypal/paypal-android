@@ -82,7 +82,7 @@ class API internal constructor(
         GlobalScope.launch {
             try {
                 val clientID = fetchCachedOrRemoteClientID()
-                analyticsService.sendAnalyticsEvent(name, clientID)
+                analyticsService.sendAnalyticsEvent(name, clientID, "order-id")
             } catch (e: PayPalSDKError) {
                 Log.d(
                     "[PayPal SDK]",
