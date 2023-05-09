@@ -9,6 +9,8 @@
   * Remove `onPayPalCheckoutShippingChange` method from `PayPalNativeCheckoutListener`.
   * Add `PayPalNativeShippingListener` to receive events on changes in shipping information. Add `PayPalNativeShippingAddress`, `PayPalNativeShippingMethod` and `PayPalNativePaysheetActions`
   * Remove `PayPalCheckout` as an `api` dependency
+* CorePayments:
+  * Send `orderID` instead of `sessionID` for analytics
 
 ## 0.0.8 (2023-03-13)
 * `PayPalNativePayments`:
