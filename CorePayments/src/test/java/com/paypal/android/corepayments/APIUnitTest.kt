@@ -186,9 +186,9 @@ class APIUnitTest {
     fun `sendAnalyticsEvent() event delegates it to analytics service`() = runTest {
         API.clientIDCache.put("fake-access-token", "fake-client-id")
 
-        sut.sendAnalyticsEvent("sample.event.name",)
+        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
         coVerify(exactly = 1) {
-            analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id", "TODO")
+            analyticsService.sendAnalyticsEvent("sample.event.name", "fake-client-id", "fake-order-id")
         }
     }
 }
