@@ -21,10 +21,10 @@ internal class CardAPI(
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed")
+            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed", cardRequest.orderID)
             throw error
         } else {
-            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:succeeded")
+            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:succeeded", cardRequest.orderID)
             return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
         }
     }
@@ -35,15 +35,15 @@ internal class CardAPI(
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-            sendAnalyticsEvent("card-payments:3ds:get-order-info:failed")
+            sendAnalyticsEvent("card-payments:3ds:get-order-info:failed", getOrderRequest.orderId)
             throw error
         } else {
-            sendAnalyticsEvent("card-payments:3ds:get-order-info:succeeded")
+            sendAnalyticsEvent("card-payments:3ds:get-order-info:succeeded", getOrderRequest.orderId)
             return responseParser.parseGetOrderInfoResponse(httpResponse)
         }
     }
 
-    fun sendAnalyticsEvent(name: String) {
-        api.sendAnalyticsEvent(name)
+    fun sendAnalyticsEvent(name: String, orderID: String?) {
+        api.sendAnalyticsEvent(name, orderID)
     }
 }

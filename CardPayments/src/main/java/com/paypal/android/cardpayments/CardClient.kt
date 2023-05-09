@@ -36,6 +36,9 @@ class CardClient internal constructor(
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         notifyApproveOrderFailure(it)
     }
+
+    private var orderID: String? = null
+
     /**
      *  CardClient constructor
      *
@@ -61,7 +64,8 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:started")
+        orderID = cardRequest.orderID
+        cardAPI.sendAnalyticsEvent("card-payments:3ds:started", orderID)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
@@ -83,7 +87,7 @@ class CardClient internal constructor(
             }
             notifyApproveOrderSuccess(result)
         } else {
-            cardAPI.sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:challenge-required")
+            cardAPI.sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:challenge-required", orderID)
             approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
             // launch the 3DS flow
@@ -127,17 +131,17 @@ class CardClient internal constructor(
     }
 
     private fun notifyApproveOrderCanceled() {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled")
+        cardAPI.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderID)
         approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:succeeded")
+        cardAPI.sendAnalyticsEvent("card-payments:3ds:succeeded", orderID)
         approveOrderListener?.onApproveOrderSuccess(result)
     }
 
     private fun notifyApproveOrderFailure(error: PayPalSDKError) {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:failed")
+        cardAPI.sendAnalyticsEvent("card-payments:3ds:failed", orderID)
         approveOrderListener?.onApproveOrderFailure(error)
     }
 }

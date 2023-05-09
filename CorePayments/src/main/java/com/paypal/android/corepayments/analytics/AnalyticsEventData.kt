@@ -7,7 +7,7 @@ data class AnalyticsEventData(
     val environment: String,
     val eventName: String,
     val timestamp: Long,
-    val orderID: String,
+    val orderID: String?,
     val deviceData: DeviceData
 ) {
 

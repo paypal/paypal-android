@@ -52,6 +52,8 @@ class PayPalWebCheckoutClient internal constructor(
 
     private var browserSwitchResult: BrowserSwitchResult? = null
 
+    private var orderID: String? = null
+
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
@@ -76,7 +78,8 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        api.sendAnalyticsEvent("paypal-web-payments:started")
+        orderID = request.orderID
+        api.sendAnalyticsEvent("paypal-web-payments:started", orderID)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
@@ -130,17 +133,17 @@ class PayPalWebCheckoutClient internal constructor(
 
     private fun deliverCancellation() {
         browserSwitchResult = null
-        api.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled")
+        api.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderID)
         listener?.onPayPalWebCanceled()
     }
 
     private fun deliverFailure(error: PayPalSDKError) {
-        api.sendAnalyticsEvent("paypal-web-payments:failed")
+        api.sendAnalyticsEvent("paypal-web-payments:failed", orderID)
         listener?.onPayPalWebFailure(error)
     }
 
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
-        api.sendAnalyticsEvent("paypal-web-payments:succeeded")
+        api.sendAnalyticsEvent("paypal-web-payments:succeeded", orderID)
         listener?.onPayPalWebSuccess(result)
     }
 }
