@@ -4,14 +4,15 @@ import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.API
-import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.SecureTokenServiceAPI
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 class PayPalWebCheckoutClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
-    private val api: API,
+    private val analyticsService: AnalyticsService,
+    private val secureTokenServiceAPI: SecureTokenServiceAPI,
     private val browserSwitchClient: BrowserSwitchClient,
     private val browserSwitchHelper: BrowserSwitchHelper,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
@@ -41,7 +43,8 @@ class PayPalWebCheckoutClient internal constructor(
     ) : this(
         activity,
         configuration,
-        API(configuration, activity),
+        AnalyticsService(activity.applicationContext, configuration),
+        SecureTokenServiceAPI(configuration),
         BrowserSwitchClient(),
         BrowserSwitchHelper(urlScheme)
     )
@@ -78,12 +81,11 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        orderID = request.orderID
-        api.sendAnalyticsEvent("paypal-web-payments:started", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", orderID)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                api.fetchCachedOrRemoteClientID()
+                secureTokenServiceAPI.fetchCachedOrRemoteClientID()
 
                 val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
                     request.orderID,
@@ -133,17 +135,17 @@ class PayPalWebCheckoutClient internal constructor(
 
     private fun deliverCancellation() {
         browserSwitchResult = null
-        api.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderID)
         listener?.onPayPalWebCanceled()
     }
 
     private fun deliverFailure(error: PayPalSDKError) {
-        api.sendAnalyticsEvent("paypal-web-payments:failed", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderID)
         listener?.onPayPalWebFailure(error)
     }
 
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
-        api.sendAnalyticsEvent("paypal-web-payments:succeeded", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", orderID)
         listener?.onPayPalWebSuccess(result)
     }
 }
