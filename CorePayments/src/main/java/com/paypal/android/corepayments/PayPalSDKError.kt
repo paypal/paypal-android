@@ -6,5 +6,6 @@ package com.paypal.android.corepayments
 open class PayPalSDKError(
     val code: Int,
     val errorDescription: String,
-    val correlationID: String? = null
-) : Exception("Error: $code - Description: $errorDescription")
+    val correlationID: String? = null,
+    reason: Exception? = null
+) : Exception("Error: $code - Description: $errorDescription", reason)
