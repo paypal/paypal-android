@@ -78,9 +78,11 @@ payPalNativeClient.listener = object : PayPalNativeCheckoutListener {
 }
 ```
 
-You can optionally set the `shippingListener` on the `PayPalNativeCheckoutClient` to receive notifications when the user updates their shipping address or shipping method details.
+### 4. Inspect shipping details
 
-Setting this optional listener will require your server implementation support the [PayPal Orders API - Update order](https://developer.paypal.com/docs/api/orders/v2/#orders_patch) (or `PATCH`) functionality.
+:warning: Only implement `PayPalNativeShippingListener` if your order ID was created with [`shipping_preference`](https://developer.paypal.com/docs/api/orders/v2/#definition-order_application_context) = `GET_FROM_FILE`. If you created your order ID with [`shipping_preference`](https://developer.paypal.com/docs/api/orders/v2/#definition-order_application_context) = `NO_SHIPPING` or `SET_PROVIDED_ADDRESS`, **skip this step**.
+
+Setting this `shippingListener` on the `PayPalNativeCheckoutClient` notifies your app when the user updates their shipping address or shipping method. You are required to `PATCH` the order details on your server if the shipping method (or amount) changes. Do this with the [PayPal Orders API - Update order](https://developer.paypal.com/docs/api/orders/v2/#orders_patch) functionality.
 
 ```kotlin
 payPalNativeClient.shippingListener = object : PayPalNativeShippingListener {
@@ -115,7 +117,7 @@ payPalNativeClient.shippingListener = object : PayPalNativeShippingListener {
 }
 ```
 
-### 4. Create an order
+### 5. Create an order
 
 When a user initiates a payment flow, call `v2/checkout/orders` to create an order and obtain an order ID:
 
@@ -147,7 +149,7 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 
 The `id` field of the response contains the order ID to pass to your client.
 
-### 5. Start the PayPal Native checkout flow
+### 6. Start the PayPal Native checkout flow
 
 To start the PayPal Native checkout flow, call the `startCheckout` function on `PayPalNativeCheckoutClient`, with a `PayPalNativeCheckoutRequest` using your order ID from [step 4](#4-create-an-order):
 
@@ -157,7 +159,7 @@ payPalClient.startCheckout(request)
 ```
 When a user completes the PayPal payment flow successfully, the result will be returned to the listener set in [step 3](#3-initiate-paypal-native-checkout).
 
-### 6. Capture/Authorize the order
+### 7. Capture/Authorize the order
 
 After receiving a successful result from the `onPayPalSuccess()` callback, you can now capture or authorize the order.
 
