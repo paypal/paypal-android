@@ -3,7 +3,10 @@ package com.paypal.android.paypalnativepayments
 /**
  * A listener to receive notifications if the user changes their shipping information.
  *
- * This is **only required** if the order ID was created with `shipping_preferences = GET_FROM_FILE`. [See Orders V2 documentation](https://developer.paypal.com/docs/api/orders/v2/#definition-order_application_context). If the order ID was created with `shipping_preferences = NO_SHIPPING` or `SET_PROVIDED_ADDRESS`, don't implement this listener.
+ * This is **only required** if the order ID was created with `shipping_preferences = GET_FROM_FILE`.
+ * [See Orders V2 documentation](https://developer.paypal.com/docs/api/orders/v2/#definition-order_application_context).
+ * If the order ID was created with `shipping_preferences = NO_SHIPPING` or `SET_PROVIDED_ADDRESS`,
+ * don't implement this listener.
  */
 interface PayPalNativeShippingListener {
 
