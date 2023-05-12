@@ -5,7 +5,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -23,13 +22,10 @@ object NetworkModule {
     private const val SAMPLE_SERVER_BASE_URL = "https://sdk-sample-merchant-server.herokuapp.com/"
     private const val SANDBOX_BASE_URL = "https://api.sandbox.paypal.com"
 
-    private fun provideRetrofitService(
-        baseUrl: String,
-        vararg interceptors: Interceptor
-    ): Retrofit {
+    private fun provideRetrofitService(baseUrl: String): Retrofit {
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .client(initHttpClientAndInterceptor(*interceptors))
+            .client(initHttpClientAndInterceptor())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -39,15 +35,15 @@ object NetworkModule {
         return provideApi(provideRetrofitService(SAMPLE_SERVER_BASE_URL))
     }
 
-    private fun initHttpClientAndInterceptor(vararg interceptors: Interceptor): OkHttpClient {
+    private fun initHttpClientAndInterceptor(): OkHttpClient {
         val okHttpBuilder = OkHttpClient.Builder()
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         // Timeouts
-        okHttpBuilder.connectTimeout(CONNECT_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+        okHttpBuilder
+            .connectTimeout(CONNECT_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
             .writeTimeout(WRITE_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
-        interceptors.forEach { interceptor -> okHttpBuilder.addInterceptor(interceptor) }
         okHttpBuilder.addInterceptor(httpLoggingInterceptor)
         return okHttpBuilder.build()
     }
