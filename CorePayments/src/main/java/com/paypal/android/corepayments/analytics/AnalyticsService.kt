@@ -4,7 +4,6 @@ import android.util.Log
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequestFactory
-import java.util.*
 
 internal class AnalyticsService(
     private val deviceInspector: DeviceInspector,
@@ -13,7 +12,7 @@ internal class AnalyticsService(
     private val httpRequestFactory: HttpRequestFactory
 ) {
 
-    internal suspend fun sendAnalyticsEvent(name: String, clientID: String) {
+    internal suspend fun sendAnalyticsEvent(name: String, clientID: String, orderId: String?) {
         val timestamp = System.currentTimeMillis()
 
         val analyticsEventData = AnalyticsEventData(
@@ -21,7 +20,7 @@ internal class AnalyticsService(
             environment.name.lowercase(),
             name,
             timestamp,
-            sessionId,
+            orderId,
             deviceInspector.inspect()
         )
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)
@@ -30,9 +29,5 @@ internal class AnalyticsService(
         if (!response.isSuccessful) {
             Log.d("[PayPal SDK]", "Failed to send analytics: ${response.error?.message}")
         }
-    }
-
-    companion object {
-        private val sessionId = UUID.randomUUID().toString()
     }
 }

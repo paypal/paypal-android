@@ -358,7 +358,7 @@ class PayPalNativeCheckoutClientTest {
                     assertEquals(address.countryCode, mockCountryCode)
                 }
             )
-            api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed")
+            api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed", null)
         }
     }
 
@@ -401,7 +401,7 @@ class PayPalNativeCheckoutClientTest {
                         assertTrue(option.selected)
                     }
                 )
-                api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed")
+                api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed", null)
             }
         }
 
