@@ -5,6 +5,7 @@ import com.paypal.android.api.model.AccessToken
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.usecase.UpdateOrderUseCase
+import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -20,6 +21,9 @@ private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
+private val DEFAULT_ACCESS_TOKEN: String? = null
+private val DEFAULT_ORDER_ID: String? = null
+
 class SDKSampleServerAPI(baseUrl: String) {
 
     @JvmSuppressWildcards
@@ -32,7 +36,7 @@ class SDKSampleServerAPI(baseUrl: String) {
         suspend fun createOrder(@Body jsonObject: JsonObject): Order
 
         @POST("/orders")
-        suspend fun createOrder(@Body order: com.paypal.checkout.order.OrderRequest): Order
+        suspend fun createOrder(@Body order: OrderRequest): Order
 
         @POST("/access_tokens")
         suspend fun fetchAccessToken(): AccessToken
@@ -68,16 +72,22 @@ class SDKSampleServerAPI(baseUrl: String) {
         service = retrofit.create(RetrofitService::class.java)
     }
 
-    suspend fun fetchAccessToken() = service.fetchAccessToken()
+    suspend fun fetchAccessToken() = DEFAULT_ACCESS_TOKEN?.let {
+        AccessToken(it)
+    } ?: service.fetchAccessToken()
 
-    suspend fun createOrder(jsonObject: JsonObject) = service.createOrder(jsonObject)
+    suspend fun createOrder(orderRequest: CreateOrderRequest): Order = DEFAULT_ORDER_ID?.let {
+        Order(it, "CREATED")
+    } ?: service.createOrder(orderRequest)
+
+    suspend fun createOrder(jsonObject: JsonObject) = DEFAULT_ORDER_ID?.let {
+        Order(it, "CREATED")
+    } ?: service.createOrder(jsonObject)
+
+    suspend fun createOrder(orderRequest: OrderRequest): Order = DEFAULT_ORDER_ID?.let {
+        Order(it, "CREATED")
+    } ?: service.createOrder(orderRequest)
 
     suspend fun patchOrder(orderId: String, body: List<UpdateOrderUseCase.PatchRequestBody>) =
         service.patchOrder(orderId, body)
-
-    suspend fun createOrder(orderRequest: com.paypal.checkout.order.OrderRequest): Order =
-        service.createOrder(orderRequest)
-
-    suspend fun createOrder(orderRequest: CreateOrderRequest): Order =
-        service.createOrder(orderRequest)
 }
