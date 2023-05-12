@@ -9,18 +9,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.InjectedValues
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.corepayments.APIClientError
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
+import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.utils.OrderUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -107,20 +106,14 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 val accessToken = sdkSampleServerAPI.fetchAccessToken().value
                 val coreConfig = CoreConfig(accessToken)
                 paypalClient =
-                    PayPalWebCheckoutClient(
-                        requireActivity(),
-                        coreConfig,
-                        "com.paypal.android.demo"
-                    )
+                    PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
                 paypalClient.listener = this@PayPalFragment
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderRequest = OrderUtils.createOrderBuilder("5.0")
-                val orderId =
-                    InjectedValues.DEFAULT_ORDER_ID
-                        ?: sdkSampleServerAPI.createOrder(orderRequest).id
-                orderId?.let {
-                    paypalClient.start(PayPalWebCheckoutRequest(it, funding))
+                val order = sdkSampleServerAPI.createOrder(orderRequest)
+                order.id?.let { orderId ->
+                    paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)

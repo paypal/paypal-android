@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.InjectedValues
 import com.paypal.android.R
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Payee
@@ -121,9 +120,8 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun createOrder() {
-        val accessToken =
-            InjectedValues.DEFAULT_ACCESS_TOKEN ?: sdkSampleServerAPI.fetchAccessToken().value
 
+        val accessToken = sdkSampleServerAPI.fetchAccessToken().value
         val configuration = CoreConfig(accessToken = accessToken)
         cardClient = CardClient(requireActivity(), configuration)
 
@@ -169,10 +167,9 @@ class CardFragment : Fragment() {
         updateStatusText("Creating order...")
 
         val orderRequest = buildOrderRequest()
-        val orderId = InjectedValues.DEFAULT_ORDER_ID
-            ?: sdkSampleServerAPI.createOrder(orderRequest = orderRequest).id
+        val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
 
-        val clientMetadataId = dataCollectorHandler.getClientMetadataId(orderId)
+        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
         updateStatusText("Authorizing order...")
@@ -192,19 +189,13 @@ class CardFragment : Fragment() {
                 postalCode = "97007"
             )
 
-            val card = Card(
-                cardNumber,
-                monthString,
-                yearString,
-                securityCode,
-                billingAddress = billingAddress
-            )
+            val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
             val sca = when (radioGroup3DS.checkedRadioButtonId) {
                 R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
                 else -> SCA.SCA_ALWAYS
             }
             CardRequest(
-                orderId!!,
+                order.id!!,
                 card,
                 APP_RETURN_URL,
                 sca
@@ -215,17 +206,17 @@ class CardFragment : Fragment() {
     }
 
     private fun buildOrderRequest(): CreateOrderRequest = CreateOrderRequest(
-        intent = "AUTHORIZE",
-        purchaseUnit = listOf(
-            com.paypal.android.api.model.PurchaseUnit(
-                amount = com.paypal.android.api.model.Amount(
-                    currencyCode = "USD",
-                    value = "10.99"
+            intent = "AUTHORIZE",
+            purchaseUnit = listOf(
+                com.paypal.android.api.model.PurchaseUnit(
+                    amount = com.paypal.android.api.model.Amount(
+                        currencyCode = "USD",
+                        value = "10.99"
+                    )
                 )
-            )
-        ),
-        payee = Payee(emailAddress = "anpelaez@paypal.com")
-    )
+            ),
+            payee = Payee(emailAddress = "anpelaez@paypal.com")
+        )
 
     private fun updateStatusText(text: String) {
         if (!isDetached) {
