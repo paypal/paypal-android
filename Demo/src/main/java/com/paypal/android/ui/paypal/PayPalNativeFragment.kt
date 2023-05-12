@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.paypal.android.R
-import com.paypal.android.api.services.SDKSampleServerApi
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
 import com.paypal.android.viewmodels.NativeCheckoutViewState
 import com.paypal.android.viewmodels.PayPalNativeViewModel
@@ -25,7 +25,7 @@ class PayPalNativeFragment : Fragment() {
     private lateinit var binding: FragmentPayPalNativeBinding
 
     @Inject
-    lateinit var sdkSampleServerApi: SDKSampleServerApi
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private var selectedShippingPreference: ShippingPreferenceType? = null
 

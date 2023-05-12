@@ -13,7 +13,7 @@ import com.paypal.android.InjectedValues
 import com.paypal.android.R
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Payee
-import com.paypal.android.api.services.SDKSampleServerApi
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -45,7 +45,7 @@ class CardFragment : Fragment() {
     lateinit var preferenceUtil: SharedPreferenceUtil
 
     @Inject
-    lateinit var sdkSampleServerApi: SDKSampleServerApi
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
@@ -122,7 +122,7 @@ class CardFragment : Fragment() {
 
     private suspend fun createOrder() {
         val accessToken =
-            InjectedValues.DEFAULT_ACCESS_TOKEN ?: sdkSampleServerApi.fetchAccessToken().value
+            InjectedValues.DEFAULT_ACCESS_TOKEN ?: sdkSampleServerAPI.fetchAccessToken().value
 
         val configuration = CoreConfig(accessToken = accessToken)
         cardClient = CardClient(requireActivity(), configuration)
@@ -170,7 +170,7 @@ class CardFragment : Fragment() {
 
         val orderRequest = buildOrderRequest()
         val orderId = InjectedValues.DEFAULT_ORDER_ID
-            ?: sdkSampleServerApi.createOrder(orderRequest = orderRequest).id
+            ?: sdkSampleServerAPI.createOrder(orderRequest = orderRequest).id
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(orderId)
         Log.i(TAG, "MetadataId: $clientMetadataId")
