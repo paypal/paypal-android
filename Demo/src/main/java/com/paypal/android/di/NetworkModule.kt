@@ -1,6 +1,5 @@
 package com.paypal.android.di
 
-import com.paypal.android.api.services.PayPalApi
 import com.paypal.android.api.services.SDKSampleServerApi
 import dagger.Module
 import dagger.Provides
@@ -38,15 +37,6 @@ object NetworkModule {
     @Provides
     fun provideSDKSampleServerApi(): SDKSampleServerApi {
         return provideApi(provideRetrofitService(SAMPLE_SERVER_BASE_URL))
-    }
-
-    @Provides
-    fun providePayPalApi(): PayPalApi {
-        return provideApi(
-            provideRetrofitService(
-                SANDBOX_BASE_URL
-            )
-        )
     }
 
     private fun initHttpClientAndInterceptor(vararg interceptors: Interceptor): OkHttpClient {
