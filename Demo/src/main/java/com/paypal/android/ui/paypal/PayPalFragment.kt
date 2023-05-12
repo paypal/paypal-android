@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.paypal.android.InjectedValues
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerApi
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
@@ -106,14 +107,20 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 val accessToken = sdkSampleServerApi.fetchAccessToken().value
                 val coreConfig = CoreConfig(accessToken)
                 paypalClient =
-                    PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+                    PayPalWebCheckoutClient(
+                        requireActivity(),
+                        coreConfig,
+                        "com.paypal.android.demo"
+                    )
                 paypalClient.listener = this@PayPalFragment
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderRequest = OrderUtils.createOrderBuilder("5.0")
-                val order = sdkSampleServerApi.createOrder(orderRequest)
-                order.id?.let { orderId ->
-                    paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
+                val orderId =
+                    InjectedValues.DEFAULT_ORDER_ID
+                        ?: sdkSampleServerApi.createOrder(orderRequest).id
+                orderId?.let {
+                    paypalClient.start(PayPalWebCheckoutRequest(it, funding))
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)
