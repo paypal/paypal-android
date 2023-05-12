@@ -12,7 +12,7 @@ internal class AnalyticsService(
     private val httpRequestFactory: HttpRequestFactory
 ) {
 
-    internal suspend fun sendAnalyticsEvent(name: String, clientID: String, orderID: String?) {
+    internal suspend fun sendAnalyticsEvent(name: String, clientID: String, orderId: String?) {
         val timestamp = System.currentTimeMillis()
 
         val analyticsEventData = AnalyticsEventData(
@@ -20,7 +20,7 @@ internal class AnalyticsService(
             environment.name.lowercase(),
             name,
             timestamp,
-            orderID,
+            orderId,
             deviceInspector.inspect()
         )
         val httpRequest = httpRequestFactory.createHttpRequestForAnalytics(analyticsEventData)

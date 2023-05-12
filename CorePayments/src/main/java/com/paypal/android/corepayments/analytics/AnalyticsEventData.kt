@@ -7,7 +7,7 @@ data class AnalyticsEventData(
     val environment: String,
     val eventName: String,
     val timestamp: Long,
-    val orderID: String?,
+    val orderId: String?,
     val deviceData: DeviceData
 ) {
 
@@ -49,7 +49,7 @@ data class AnalyticsEventData(
             .put(KEY_EVENT_SOURCE, "mobile-native")
             .put(KEY_IS_SIMULATOR, deviceData.isSimulator)
             .put(KEY_MERCHANT_APP_VERSION, deviceData.merchantAppVersion)
-            .put(KEY_ORDER_ID, orderID)
+            .put(KEY_ORDER_ID, orderId)
             .put(KEY_PLATFORM, "Android")
             .put(KEY_TIMESTAMP, timestamp.toString())
             .put(KEY_TENANT_NAME, "PayPal")

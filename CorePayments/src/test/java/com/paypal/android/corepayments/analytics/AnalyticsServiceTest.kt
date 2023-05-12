@@ -75,7 +75,7 @@ class AnalyticsServiceTest {
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
         assertSame(deviceData, analyticsEventData.deviceData)
-        assertEquals("fake-order-id", analyticsEventData.orderID)
+        assertEquals("fake-order-id", analyticsEventData.orderId)
     }
 
     @Test

@@ -117,7 +117,7 @@ class HttpRequestFactoryUnitTest {
             environment = "fake-environment",
             eventName = "fake-event",
             timestamp = 10000,
-            orderID = "fake-order-id",
+            orderId = "fake-order-id",
             deviceData = DeviceData(
                 appId = "fake-app-id",
                 appName = "fake-app-name",

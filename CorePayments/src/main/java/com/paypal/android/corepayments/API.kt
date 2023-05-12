@@ -79,12 +79,12 @@ class API internal constructor(
      * Sends analytics event to https://api.paypal.com/v1/tracking/events/ via a background task.
      */
     // TODO: - Refactor analytics to have feature clients depend on `AnalyticsService`.
-    // Pass `orderID` into `AnalyticsService.init()` versus at each `sendAnalyticsEvent()` callsite.
-    fun sendAnalyticsEvent(name: String, orderID: String?) {
+    // Pass `orderId` into `AnalyticsService.init()` versus at each `sendAnalyticsEvent()` callsite.
+    fun sendAnalyticsEvent(name: String, orderId: String?) {
         GlobalScope.launch {
             try {
                 val clientID = fetchCachedOrRemoteClientID()
-                analyticsService.sendAnalyticsEvent(name, clientID, orderID)
+                analyticsService.sendAnalyticsEvent(name, clientID, orderId)
             } catch (e: PayPalSDKError) {
                 Log.d(
                     "[PayPal SDK]",
