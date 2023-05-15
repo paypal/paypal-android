@@ -120,6 +120,11 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun createOrder() {
+        val intent = when (binding.radioGroupIntent.checkedRadioButtonId) {
+            R.id.intent_authorize -> "AUTHORIZE"
+            else -> "CAPTURE"
+        }
+
         val clientId = sdkSampleServerAPI.fetchClientId()
         val configuration = CoreConfig(clientId = clientId)
         cardClient = CardClient(requireActivity(), configuration)
@@ -152,7 +157,7 @@ class CardFragment : Fragment() {
         dataCollectorHandler.setLogging(true)
         updateStatusText("Creating order...")
 
-        val orderRequest = buildOrderRequest()
+        val orderRequest = buildOrderRequest(intent)
         val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
@@ -175,7 +180,13 @@ class CardFragment : Fragment() {
                 postalCode = "97007"
             )
 
-            val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
+            val card = Card(
+                cardNumber,
+                monthString,
+                yearString,
+                securityCode,
+                billingAddress = billingAddress
+            )
             val sca = when (radioGroup3DS.checkedRadioButtonId) {
                 R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
                 else -> SCA.SCA_ALWAYS
@@ -191,18 +202,18 @@ class CardFragment : Fragment() {
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
-    private fun buildOrderRequest(): CreateOrderRequest = CreateOrderRequest(
-            intent = "AUTHORIZE",
-            purchaseUnit = listOf(
-                com.paypal.android.api.model.PurchaseUnit(
-                    amount = com.paypal.android.api.model.Amount(
-                        currencyCode = "USD",
-                        value = "10.99"
-                    )
+    private fun buildOrderRequest(intent: String): CreateOrderRequest = CreateOrderRequest(
+        intent = intent,
+        purchaseUnit = listOf(
+            com.paypal.android.api.model.PurchaseUnit(
+                amount = com.paypal.android.api.model.Amount(
+                    currencyCode = "USD",
+                    value = "10.99"
                 )
-            ),
-            payee = Payee(emailAddress = "anpelaez@paypal.com")
-        )
+            )
+        ),
+        payee = Payee(emailAddress = "anpelaez@paypal.com")
+    )
 
     private fun updateStatusText(text: String) {
         requireActivity().runOnUiThread {
