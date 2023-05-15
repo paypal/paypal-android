@@ -120,7 +120,7 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun createOrder() {
-        val intent = when (binding.radioGroupIntent.checkedRadioButtonId) {
+        val orderIntent = when (binding.radioGroupIntent.checkedRadioButtonId) {
             R.id.intent_authorize -> "AUTHORIZE"
             else -> "CAPTURE"
         }
@@ -131,10 +131,12 @@ class CardFragment : Fragment() {
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
-                val statusText = "Confirmed Order: ${result.orderId}"
-                val deepLink = result.deepLinkUrl?.toString().orEmpty()
-                val joinedText = listOf(statusText, deepLink).joinToString("\n")
-                updateStatusText(joinedText)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    when (orderIntent) {
+                        "CAPTURE" -> captureOrder(result)
+                        else -> authorizeOrder(result)
+                    }
+                }
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
@@ -157,7 +159,7 @@ class CardFragment : Fragment() {
         dataCollectorHandler.setLogging(true)
         updateStatusText("Creating order...")
 
-        val orderRequest = buildOrderRequest(intent)
+        val orderRequest = buildOrderRequest(orderIntent)
         val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
@@ -200,6 +202,18 @@ class CardFragment : Fragment() {
         }
 
         cardClient.approveOrder(requireActivity(), cardRequest)
+    }
+
+    private suspend fun captureOrder(cardResult: CardResult) {
+        updateStatusText("Capturing order with ID: ${cardResult.orderID}...")
+        val result = sdkSampleServerApi.captureOrder(cardResult.orderID)
+        updateStatusTextWithCardResult(cardResult, result.status)
+    }
+
+    private suspend fun authorizeOrder(cardResult: CardResult) {
+        updateStatusText("Authorizing order with ID: ${cardResult.orderID}...")
+        val result = sdkSampleServerApi.authorizeOrder(cardResult.orderID)
+        updateStatusTextWithCardResult(cardResult, result.status)
     }
 
     private fun buildOrderRequest(intent: String): CreateOrderRequest = CreateOrderRequest(
