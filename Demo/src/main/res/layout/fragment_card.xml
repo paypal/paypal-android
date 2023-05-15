@@ -81,6 +81,32 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <RadioGroup
+        android:id="@+id/radioGroupIntent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_security_code">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intent_title" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/intent_authorize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/intent_authorize" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/intent_capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intent_capture" />
+    </RadioGroup>
 
     <RadioGroup
         android:id="@+id/radioGroup3DS"
@@ -88,23 +114,27 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_16dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_security_code">
+        app:layout_constraintTop_toBottomOf="@id/radioGroupIntent">
+
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sca_title"/>
+            android:text="@string/sca_title" />
+
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sca_always"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="@string/sca_always"/>
+            android:text="@string/sca_always" />
+
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sca_when_required"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sca_when_required"/>
+            android:text="@string/sca_when_required" />
     </RadioGroup>
+
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/submit_button"

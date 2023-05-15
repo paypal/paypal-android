@@ -42,6 +42,10 @@
 
     <string name="use_test_card">Use a Test Card</string>
 
+    <string name="intent_title">Intent:</string>
+    <string name="intent_authorize">AUTHORIZE</string>
+    <string name="intent_capture">CAPTURE</string>
+
     <!-- NXO -->
     <string name="get_client_id">Get Client ID</string>
     <string name="try_again">Try Again</string>
