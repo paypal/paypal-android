@@ -82,7 +82,7 @@ class PayPalNativeCheckoutClient internal constructor(
      * @param request the PayPalNativeCheckoutRequest for the transaction
      */
     fun startCheckout(request: PayPalNativeCheckoutRequest) {
-analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.orderID)
         orderID = request.orderID
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
@@ -102,7 +102,12 @@ analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.or
                     it.set(request.orderID)
                 })
             } catch (e: PayPalSDKError) {
-                listener?.onPayPalCheckoutFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
+                listener?.onPayPalCheckoutFailure(
+                    APIClientError.clientIDNotFoundError(
+                        e.code,
+                        e.correlationID
+                    )
+                )
             }
         }
     }
@@ -119,7 +124,13 @@ analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.or
                 notifyOnCancel()
             },
             onError = OnError { errorInfo ->
-                notifyOnFailure(PayPalNativeCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
+                notifyOnFailure(
+                    PayPalNativeCheckoutError(
+                        0,
+                        errorInfo.reason,
+                        errorInfo = errorInfo
+                    )
+                )
             },
             onShippingChange = OnShippingChange { shippingChangeData, shippingChangeActions ->
                 notifyOnShippingChange(shippingChangeData, shippingChangeActions)
@@ -144,14 +155,21 @@ analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.or
         shippingListener?.let {
             when (shippingChangeData.shippingChangeType) {
                 ShippingChangeType.ADDRESS_CHANGE -> {
-                    analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed", orderID)
+                    analyticsService.sendAnalyticsEvent(
+                        "paypal-native-payments:shipping-address-changed",
+                        orderID
+                    )
                     it.onPayPalNativeShippingAddressChange(
                         PayPalNativePaysheetActions(shippingChangeActions),
                         PayPalNativeShippingAddress(shippingChangeData.shippingAddress)
                     )
                 }
+
                 ShippingChangeType.OPTION_CHANGE -> {
-                    analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed", orderID)
+                    analyticsService.sendAnalyticsEvent(
+                        "paypal-native-payments:shipping-method-changed",
+                        orderID
+                    )
                     it.onPayPalNativeShippingMethodChange(
                         PayPalNativePaysheetActions(shippingChangeActions),
                         PayPalNativeShippingMethod(shippingChangeData.selectedShippingOption!!)
