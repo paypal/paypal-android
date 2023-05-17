@@ -7,9 +7,9 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
 import junit.framework.TestCase.assertEquals
@@ -34,7 +34,7 @@ class PayPalWebCheckoutClientUnitTest {
     private val coreConfig: CoreConfig = mockk(relaxed = true)
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
-    private val secureTokenServiceAPI = mockk<SecureTokenServiceAPI>(relaxed = true)
+    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
 
     @Test
     fun `start() delivers error if error fetching clientID`() = runTest {
@@ -43,7 +43,7 @@ class PayPalWebCheckoutClientUnitTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalWebCheckoutListener>()
 
-        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } throws error
+        coEvery { clientIdRepository.getClientId() } throws error
         every {
             payPalCheckoutListener.onPayPalWebFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -68,7 +68,7 @@ class PayPalWebCheckoutClientUnitTest {
         val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
-        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } returns "fake-client-id"
+        coEvery { clientIdRepository.getClientId() } returns "fake-client-id"
 
         coEvery {
             browserSwitchHelper.configurePayPalBrowserSwitchOptions(any(), any(), any())
@@ -318,7 +318,7 @@ class PayPalWebCheckoutClientUnitTest {
                 activity,
                 coreConfig,
                 analyticsService,
-                secureTokenServiceAPI,
+                clientIdRepository,
                 browserSwitchClient,
                 browserSwitchHelper,
                 dispatcher
@@ -327,7 +327,7 @@ class PayPalWebCheckoutClientUnitTest {
             activity,
             coreConfig,
             analyticsService,
-            secureTokenServiceAPI,
+            clientIdRepository,
             browserSwitchClient,
             browserSwitchHelper
         ))

@@ -1,7 +1,5 @@
 package com.paypal.android.corepayments
 
-import android.util.LruCache
-
 class SecureTokenServiceAPI internal constructor(
     private val restClient: RestClient,
 ) {
@@ -29,9 +27,5 @@ class SecureTokenServiceAPI internal constructor(
             throw APIClientError.dataParsingError(correlationID)
         }
         return clientID
-    }
-
-    companion object {
-        val clientIDCache = LruCache<String, String>(10)
     }
 }

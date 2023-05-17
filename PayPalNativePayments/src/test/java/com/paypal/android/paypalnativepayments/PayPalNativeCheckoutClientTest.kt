@@ -1,6 +1,7 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -52,7 +53,7 @@ class PayPalNativeCheckoutClientTest {
     private val mockReturnUrl = "mock_return_url"
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
-    private val secureTokenServiceAPI = mockk<SecureTokenServiceAPI>(relaxed = true)
+    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
@@ -60,7 +61,7 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } returns mockClientId
+        coEvery { clientIdRepository.getClientId() } returns mockClientId
     }
 
     @After
@@ -144,7 +145,7 @@ class PayPalNativeCheckoutClientTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
-        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } throws error
+        coEvery { clientIdRepository.getClientId() } throws error
         every {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -437,7 +438,7 @@ class PayPalNativeCheckoutClientTest {
                 coreConfig,
                 mockReturnUrl,
                 analyticsService,
-                secureTokenServiceAPI,
+                clientIdRepository,
                 dispatcher
             )
         } ?: PayPalNativeCheckoutClient(
@@ -445,7 +446,7 @@ class PayPalNativeCheckoutClientTest {
             coreConfig,
             mockReturnUrl,
             analyticsService,
-            secureTokenServiceAPI
+            clientIdRepository
         )
     }
 }

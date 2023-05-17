@@ -17,8 +17,6 @@ import org.robolectric.RobolectricTestRunner
 class SecureTokenServiceAPIUnitTest {
 
     private val restClient = mockk<RestClient>()
-    private val configuration = CoreConfig("fake-access-token")
-
     private val httpResponseHeaders = mapOf(
         "Paypal-Debug-Id" to "sample-correlation-id"
     )
@@ -35,16 +33,15 @@ class SecureTokenServiceAPIUnitTest {
     @Before
     fun beforeEach() {
         sut = SecureTokenServiceAPI(restClient)
-        SecureTokenServiceAPI.clientIDCache.evictAll()
     }
 
     @Test
-    fun `fetchCachedOrRemoteClientID() sends oauth api request when value not in cache`() =
+    fun `getClientId() sends oauth api request when value not in cache`() =
         runTest {
             val apiRequestSlot = slot<APIRequest>()
             coEvery { restClient.send(capture(apiRequestSlot)) } returns clientIdSuccessResponse
 
-            sut.fetchCachedOrRemoteClientID()
+            sut.getClientId()
 
             val apiRequest = apiRequestSlot.captured
             assertEquals(HttpMethod.GET, apiRequest.method)
@@ -52,57 +49,37 @@ class SecureTokenServiceAPIUnitTest {
         }
 
     @Test
-    fun `fetchCachedOrRemoteClientID() puts value in cache after fetched`() = runTest {
-        coEvery { restClient.send(any()) } returns clientIdSuccessResponse
-        sut.fetchCachedOrRemoteClientID()
-
-        assertEquals(
-            SecureTokenServiceAPI.clientIDCache.get("fake-access-token"),
-            "sample-client-id"
-        )
-    }
-
-    @Test
-    fun `fetchCachedOrRemoteClientID() returns cached value when exists in cache`() = runTest {
-        SecureTokenServiceAPI.clientIDCache.put("fake-access-token", "cached-id-123")
-
-        val clientID = sut.fetchCachedOrRemoteClientID()
-        assertEquals(clientID, "cached-id-123")
-    }
-
-    @Test
-    fun `fetchCachedOrRemoteClientID() returns client id from JSON`() = runTest {
+    fun `getClientId() returns client id from JSON`() = runTest {
         coEvery { restClient.send(any()) } returns clientIdSuccessResponse
 
-        val result = sut.fetchCachedOrRemoteClientID()
+        val result = sut.getClientId()
         assertEquals("sample-client-id", result)
     }
 
     @Test
-    fun `fetchCachedOrRemoteClientID() throws no response data error when http response has no body`() =
-        runTest {
-            val noBodyHttpResponse = HttpResponse(200, httpResponseHeaders)
-            coEvery { restClient.send(any()) } returns noBodyHttpResponse
+    fun `getClientId() throws no response data error when http response has no body`() = runTest {
+        val noBodyHttpResponse = HttpResponse(200, httpResponseHeaders)
+        coEvery { restClient.send(any()) } returns noBodyHttpResponse
 
-            var capturedError: PayPalSDKError? = null
-            try {
-                sut.fetchCachedOrRemoteClientID()
-            } catch (e: PayPalSDKError) {
-                capturedError = e
-            }
-            assertEquals(Code.NO_RESPONSE_DATA.ordinal, capturedError?.code)
-            assertEquals("sample-correlation-id", capturedError?.correlationID)
+        var capturedError: PayPalSDKError? = null
+        try {
+            sut.getClientId()
+        } catch (e: PayPalSDKError) {
+            capturedError = e
         }
+        assertEquals(Code.NO_RESPONSE_DATA.ordinal, capturedError?.code)
+        assertEquals("sample-correlation-id", capturedError?.correlationID)
+    }
 
     @Test
-    fun `fetchCachedOrRemoteClientID() throws data parsing error when http response is missing client id`() =
+    fun `getClientId() throws data parsing error when http response is missing client id`() =
         runTest {
             val missingClientIdResponse = HttpResponse(200, httpResponseHeaders, "{}")
             coEvery { restClient.send(any()) } returns missingClientIdResponse
 
             var capturedError: PayPalSDKError? = null
             try {
-                sut.fetchCachedOrRemoteClientID()
+                sut.getClientId()
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
@@ -111,14 +88,14 @@ class SecureTokenServiceAPIUnitTest {
         }
 
     @Test
-    fun `fetchCachedOrRemoteClientID() throws server response error when http response is unsuccessful`() =
+    fun `getClientId() throws server response error when http response is unsuccessful`() =
         runTest {
             val failedServerResponse = HttpResponse(500, httpResponseHeaders)
             coEvery { restClient.send(any()) } returns failedServerResponse
 
             var capturedError: PayPalSDKError? = null
             try {
-                sut.fetchCachedOrRemoteClientID()
+                sut.getClientId()
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }

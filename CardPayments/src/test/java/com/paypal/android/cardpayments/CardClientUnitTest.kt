@@ -13,9 +13,9 @@ import com.paypal.android.cardpayments.api.GetOrderRequest
 import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +47,7 @@ class CardClientUnitTest {
     private val cardRequest = CardRequest(orderID, card, "return_url")
 
     private val ordersAPI = mockk<OrdersAPI>(relaxed = true)
-    private val secureTokenServiceAPI = mockk<SecureTokenServiceAPI>(relaxed = true)
+    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
@@ -90,7 +90,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(123, "fake-description")
         val errorSlot = slot<PayPalSDKError>()
 
-        coEvery { secureTokenServiceAPI.fetchCachedOrRemoteClientID() } throws error
+        coEvery { clientIdRepository.getClientId() } throws error
         every {
             approveOrderListener.onApproveOrderFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -248,7 +248,7 @@ class CardClientUnitTest {
         val sut = CardClient(
             activity,
             ordersAPI,
-            secureTokenServiceAPI,
+            clientIdRepository,
             analyticsService,
             browserSwitchClient,
             dispatcher
