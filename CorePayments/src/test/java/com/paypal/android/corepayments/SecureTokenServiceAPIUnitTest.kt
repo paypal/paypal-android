@@ -34,7 +34,7 @@ class SecureTokenServiceAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        sut = SecureTokenServiceAPI(configuration, restClient)
+        sut = SecureTokenServiceAPI(restClient)
         SecureTokenServiceAPI.clientIDCache.evictAll()
     }
 

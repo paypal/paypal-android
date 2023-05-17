@@ -10,6 +10,7 @@ import com.paypal.android.cardpayments.api.GetOrderRequest
 import com.paypal.android.cardpayments.api.OrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
@@ -26,7 +27,7 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val ordersAPI: OrdersAPI,
-    private val secureTokenServiceAPI: SecureTokenServiceAPI,
+    private val clientIdRepository: ClientIdRepository,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
@@ -52,7 +53,7 @@ class CardClient internal constructor(
             this(
                 activity,
                 OrdersAPI(configuration),
-                SecureTokenServiceAPI(configuration),
+                ClientIdRepository(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
@@ -79,7 +80,7 @@ class CardClient internal constructor(
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         try {
-            secureTokenServiceAPI.fetchCachedOrRemoteClientID()
+            clientIdRepository.getClientId()
         } catch (e: PayPalSDKError) {
             notifyApproveOrderFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             return

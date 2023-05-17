@@ -9,6 +9,10 @@ class ClientIdRepository internal constructor(
     constructor(configuration: CoreConfig) :
             this(configuration, SecureTokenServiceAPI(configuration))
 
+    /**
+     * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
+     * @return Merchant clientID.
+     */
     suspend fun getClientId(): String {
         clientIDCache.get(configuration.accessToken)?.let { cachedClientID ->
             return cachedClientID

@@ -5,10 +5,10 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,7 +23,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
     private val analyticsService: AnalyticsService,
-    private val secureTokenServiceAPI: SecureTokenServiceAPI,
+    private val clientIdRepository: ClientIdRepository,
     private val browserSwitchClient: BrowserSwitchClient,
     private val browserSwitchHelper: BrowserSwitchHelper,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
@@ -44,7 +44,7 @@ class PayPalWebCheckoutClient internal constructor(
         activity,
         configuration,
         AnalyticsService(activity.applicationContext, configuration),
-        SecureTokenServiceAPI(configuration),
+        ClientIdRepository(configuration),
         BrowserSwitchClient(),
         BrowserSwitchHelper(urlScheme)
     )
@@ -85,7 +85,7 @@ class PayPalWebCheckoutClient internal constructor(
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                secureTokenServiceAPI.fetchCachedOrRemoteClientID()
+                clientIdRepository.getClientId()
 
                 val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
                     request.orderID,

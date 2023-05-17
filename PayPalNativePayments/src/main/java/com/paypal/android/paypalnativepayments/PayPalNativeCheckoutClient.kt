@@ -2,10 +2,10 @@ package com.paypal.android.paypalnativepayments
 
 import android.app.Application
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.SecureTokenServiceAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
@@ -31,7 +31,7 @@ class PayPalNativeCheckoutClient internal constructor(
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
     private val analyticsService: AnalyticsService,
-    private val secureTokenServiceAPI: SecureTokenServiceAPI,
+    private val clientIdRepository: ClientIdRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -51,7 +51,7 @@ class PayPalNativeCheckoutClient internal constructor(
                 coreConfig,
                 returnUrl,
                 AnalyticsService(application, coreConfig),
-                SecureTokenServiceAPI(coreConfig)
+                ClientIdRepository(coreConfig)
             )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
@@ -86,7 +86,7 @@ analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.or
         orderID = request.orderID
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                val clientID = secureTokenServiceAPI.fetchCachedOrRemoteClientID()
+                val clientID = clientIdRepository.getClientId()
                 val config = CheckoutConfig(
                     application = application,
                     clientId = clientID,

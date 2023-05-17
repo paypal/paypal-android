@@ -3,39 +3,17 @@ package com.paypal.android.corepayments
 import android.util.LruCache
 
 class SecureTokenServiceAPI internal constructor(
-    private val configuration: CoreConfig,
     private val restClient: RestClient,
 ) {
-    constructor(configuration: CoreConfig) : this(configuration, RestClient(configuration))
+    constructor(configuration: CoreConfig) : this(RestClient(configuration))
 
-    @Throws
+    @Throws(PayPalSDKError::class)
     suspend fun getClientId(): String {
         val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
         val response = restClient.send(apiRequest)
         val correlationID = response.headers["Paypal-Debug-Id"]
         if (response.isSuccessful) {
             return parseClientId(response.body, correlationID)
-        }
-        throw APIClientError.serverResponseError(correlationID)
-    }
-
-    /**
-     * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
-     * @return Merchant clientID.
-     */
-    @Throws(PayPalSDKError::class)
-    suspend fun fetchCachedOrRemoteClientID(): String {
-        clientIDCache.get(configuration.accessToken)?.let { cachedClientID ->
-            return cachedClientID
-        }
-
-        val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
-        val response = restClient.send(apiRequest)
-        val correlationID = response.headers["Paypal-Debug-Id"]
-        if (response.isSuccessful) {
-            val clientID = parseClientId(response.body, correlationID)
-            clientIDCache.put(configuration.accessToken, clientID)
-            return clientID
         }
         throw APIClientError.serverResponseError(correlationID)
     }
