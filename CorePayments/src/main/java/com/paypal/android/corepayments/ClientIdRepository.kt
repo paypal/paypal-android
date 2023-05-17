@@ -9,7 +9,7 @@ class ClientIdRepository internal constructor(
     constructor(configuration: CoreConfig) :
             this(configuration, SecureTokenServiceAPI(configuration))
 
-    suspend fun fetchClientId(): String {
+    suspend fun getClientId(): String {
         clientIDCache.get(configuration.accessToken)?.let { cachedClientID ->
             return cachedClientID
         }
