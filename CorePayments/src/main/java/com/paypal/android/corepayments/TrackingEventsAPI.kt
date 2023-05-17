@@ -17,6 +17,7 @@ class TrackingEventsAPI internal constructor(private val restClient: RestClient)
         event: AnalyticsEventData,
         deviceData: DeviceData
     ): APIRequest {
+
         val appId = deviceData.appId
         val appName = deviceData.appName
         val clientSDKVersion = deviceData.clientSDKVersion
@@ -41,7 +42,7 @@ class TrackingEventsAPI internal constructor(private val restClient: RestClient)
             .put(KEY_IS_SIMULATOR, isSimulator)
             .put(KEY_MERCHANT_APP_VERSION, merchantAppVersion)
             .put(KEY_PLATFORM, "Android")
-            .put(KEY_SESSION_ID, event.sessionID)
+            .put(KEY_ORDER_ID, event.orderId)
             .put(KEY_TIMESTAMP, event.timestamp.toString())
             .put(KEY_TENANT_NAME, "PayPal")
 
@@ -66,8 +67,8 @@ class TrackingEventsAPI internal constructor(private val restClient: RestClient)
         const val KEY_EVENT_SOURCE = "event_source"
         const val KEY_IS_SIMULATOR = "is_simulator"
         const val KEY_MERCHANT_APP_VERSION = "mapv"
+        const val KEY_ORDER_ID = "order_id"
         const val KEY_PLATFORM = "platform"
-        const val KEY_SESSION_ID = "session_id"
         const val KEY_TIMESTAMP = "t"
         const val KEY_TENANT_NAME = "tenant_name"
 
