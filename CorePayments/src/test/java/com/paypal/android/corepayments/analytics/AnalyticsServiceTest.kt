@@ -113,31 +113,6 @@ class AnalyticsServiceTest {
         assertEquals("live", analyticsEventData.environment)
     }
 
-    @Test
-    fun `analyticsClient uses singleton for sessionId`() = runTest {
-        val analyticsEventDataSlot1 = slot<AnalyticsEventData>()
-        coEvery {
-            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot1), deviceData)
-        } returns httpSuccessResponse
-
-        sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("event1", "fake-order-id")
-        advanceUntilIdle()
-        val analyticsEventData1 = analyticsEventDataSlot1.captured
-
-        val analyticsEventDataSlot2 = slot<AnalyticsEventData>()
-        coEvery {
-            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot2), deviceData)
-        } returns httpSuccessResponse
-
-        val sut2 = createAnalyticsService(environment, testScheduler)
-        sut2.sendAnalyticsEvent("event2", "fake-order-id")
-        advanceUntilIdle()
-
-        val analyticsEventData2 = analyticsEventDataSlot2.captured
-        assertEquals(analyticsEventData1.sessionID, analyticsEventData2.sessionID)
-    }
-
     private fun createAnalyticsService(
         environment: Environment,
         testScheduler: TestCoroutineScheduler
