@@ -8,6 +8,17 @@ class SecureTokenServiceAPI internal constructor(
 ) {
     constructor(configuration: CoreConfig) : this(configuration, RestClient(configuration))
 
+    @Throws
+    suspend fun getClientId(): String {
+        val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
+        val response = restClient.send(apiRequest)
+        val correlationID = response.headers["Paypal-Debug-Id"]
+        if (response.isSuccessful) {
+            return parseClientId(response.body, correlationID)
+        }
+        throw APIClientError.serverResponseError(correlationID)
+    }
+
     /**
      * Retrieves the merchant's clientID either from the local cache, or via an HTTP request if not cached.
      * @return Merchant clientID.
@@ -26,7 +37,6 @@ class SecureTokenServiceAPI internal constructor(
             clientIDCache.put(configuration.accessToken, clientID)
             return clientID
         }
-
         throw APIClientError.serverResponseError(correlationID)
     }
 
