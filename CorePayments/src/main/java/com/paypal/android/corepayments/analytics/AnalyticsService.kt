@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import java.util.UUID
 
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
