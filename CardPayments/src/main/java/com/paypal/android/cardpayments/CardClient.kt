@@ -79,7 +79,7 @@ class CardClient internal constructor(
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         try {
-            clientIdRepository.getClientId()
+            clientIdRepository.fetchClientId()
         } catch (e: PayPalSDKError) {
             notifyApproveOrderFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             return

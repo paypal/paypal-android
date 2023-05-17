@@ -60,7 +60,7 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { clientIdRepository.getClientId() } returns mockClientId
+        coEvery { clientIdRepository.fetchClientId() } returns mockClientId
     }
 
     @After
@@ -144,7 +144,7 @@ class PayPalNativeCheckoutClientTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
-        coEvery { clientIdRepository.getClientId() } throws error
+        coEvery { clientIdRepository.fetchClientId() } throws error
         every {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }

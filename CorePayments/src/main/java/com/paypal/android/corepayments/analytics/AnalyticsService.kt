@@ -39,7 +39,7 @@ fun sendAnalyticsEvent(name: String, orderId: String?) {
         scope.async {
             val timestamp = System.currentTimeMillis()
             try {
-                val clientID = clientIdRepository.getClientId()
+                val clientID = clientIdRepository.fetchClientId()
                 val deviceData = deviceInspector.inspect()
                 val analyticsEventData = AnalyticsEventData(
                     clientID,

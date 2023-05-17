@@ -44,7 +44,7 @@ internal class EligibilityAPI internal constructor(
      *  @throws PayPalSDKError if something went wrong in the API call
      */
     suspend fun checkEligibility(): Eligibility {
-        val clientID = clientIdRepository.getClientId()
+        val clientID = clientIdRepository.fetchClientId()
 
         val query = resourceLoader.loadRawResource(R.raw.graphql_query_funding_eligibility)
         val enableFundingMethods = listOf(SupportedPaymentMethodsType.VENMO.name)

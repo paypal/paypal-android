@@ -43,7 +43,7 @@ class PayPalWebCheckoutClientUnitTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalWebCheckoutListener>()
 
-        coEvery { clientIdRepository.getClientId() } throws error
+        coEvery { clientIdRepository.fetchClientId() } throws error
         every {
             payPalCheckoutListener.onPayPalWebFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -68,7 +68,7 @@ class PayPalWebCheckoutClientUnitTest {
         val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
 
-        coEvery { clientIdRepository.getClientId() } returns "fake-client-id"
+        coEvery { clientIdRepository.fetchClientId() } returns "fake-client-id"
 
         coEvery {
             browserSwitchHelper.configurePayPalBrowserSwitchOptions(any(), any(), any())

@@ -49,7 +49,7 @@ class AnalyticsServiceTest {
         environment = Environment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
-        coEvery { clientIdRepository.getClientId() } returns "fake-client-id"
+        coEvery { clientIdRepository.fetchClientId() } returns "fake-client-id"
     }
 
     @Test

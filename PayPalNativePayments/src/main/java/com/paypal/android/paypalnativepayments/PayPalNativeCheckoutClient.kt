@@ -86,7 +86,7 @@ class PayPalNativeCheckoutClient internal constructor(
         orderID = request.orderID
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                val clientID = clientIdRepository.getClientId()
+                val clientID = clientIdRepository.fetchClientId()
                 val config = CheckoutConfig(
                     application = application,
                     clientId = clientID,

@@ -28,20 +28,20 @@ class ClientIdRepositoryUnitTest {
     }
 
     @Test
-    fun `getClientId() on cache miss returns client id from secure token service api`() = runTest {
+    fun `fetchClientId() on cache miss returns client id from secure token service api`() = runTest {
         coEvery { secureTokenServiceAPI.getClientId() } returns "fake-client-id"
         sut = ClientIdRepository(configuration, secureTokenServiceAPI)
 
-        val result = sut.getClientId()
+        val result = sut.fetchClientId()
         assertEquals("fake-client-id", result)
     }
 
     @Test
-    fun `getClientId() on cache hit returns client id from cache`() = runTest {
+    fun `fetchClientId() on cache hit returns client id from cache`() = runTest {
         ClientIdRepository.clientIDCache.put("fake-access-token", "cached-id-123")
         sut = ClientIdRepository(configuration, secureTokenServiceAPI)
 
-        val result = sut.getClientId()
+        val result = sut.fetchClientId()
         assertEquals("cached-id-123", result)
         coVerify(exactly = 0) { secureTokenServiceAPI.getClientId() }
     }

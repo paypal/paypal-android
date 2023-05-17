@@ -85,7 +85,7 @@ class PayPalWebCheckoutClient internal constructor(
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                clientIdRepository.getClientId()
+                clientIdRepository.fetchClientId()
 
                 val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
                     request.orderID,

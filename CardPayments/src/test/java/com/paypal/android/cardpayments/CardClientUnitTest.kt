@@ -90,7 +90,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(123, "fake-description")
         val errorSlot = slot<PayPalSDKError>()
 
-        coEvery { clientIdRepository.getClientId() } throws error
+        coEvery { clientIdRepository.fetchClientId() } throws error
         every {
             approveOrderListener.onApproveOrderFailure(capture(errorSlot))
         } answers { errorSlot.captured }

@@ -39,7 +39,7 @@ class EligibilityAPIUnitTest {
         clientIdRepository = mockk(relaxed = true)
         graphQLClient = mockk(relaxed = true)
 
-        coEvery { clientIdRepository.getClientId() } returns "sample-client-id"
+        coEvery { clientIdRepository.fetchClientId() } returns "sample-client-id"
     }
 
     @Test
