@@ -19,10 +19,8 @@ internal class OrdersAPI(
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-//            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:failed", cardRequest.orderID)
             throw error
         } else {
-//            sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:succeeded", cardRequest.orderID)
             return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
         }
     }
@@ -33,10 +31,8 @@ internal class OrdersAPI(
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {
-//            sendAnalyticsEvent("card-payments:3ds:get-order-info:failed", cardRequest.orderID)
             throw error
         } else {
-//            sendAnalyticsEvent("card-payments:3ds:get-order-info:succeeded", cardRequest.orderID)
             return responseParser.parseGetOrderInfoResponse(httpResponse)
         }
     }
