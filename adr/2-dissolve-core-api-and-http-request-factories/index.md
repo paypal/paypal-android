@@ -8,7 +8,7 @@ The PayPal SDK for Android currently has a layered architecture. Merchant applic
 
 By convention, every `<FEATURE_NAME>Client` instance has a corresponding `<FEATURE_NAME>API` dependency. Each API component is responsible for encapsulating low-level networking and multi-threading logic so that Feature Clients can focus primarily on high-level business logic.
 
-The current architecture also encapsulates core API functionality in an `API` class, similar to how `BraintreeClient` in the Braintree Android SDK allows access to the following behaviors through composition:
+The current architecture also encapsulates core API functionality in an `API` class, similar to how `BraintreeClient` in the Braintree Android SDK allows access to the following behavior through composition:
 
 - Load Merchant Configuration
 - Initiate a Browser Switch
