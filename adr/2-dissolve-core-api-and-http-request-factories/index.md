@@ -25,9 +25,15 @@ Currently our naming convention and division of responsibility is build on a one
 
 A more scalable solution would be to offer feature clients a one-to-many relationship with API components. We can map each API class to its own corresponding microservice. API networking code can then be shared among different features. It will then become clear what the responsibility of each API class is, which is good for DRYness, Single Responsibility Principle, and tesability.
 
-
 > <img src="./figure-card-client-example.png" height="400" alt="Example CardClient architecture without a Core API component">
+
+We also have an opportunity to implement each API component as a [Deep Module][1]. We created `HttpRequestFactory` as a temporary concept because it provided a highly testable interface for asserting `APIRequest` JSON bodies. Since API classes will have a single responsibility to execute API requests internally, we can simplify our design by making this a responsibility of the API class. Response parsing can also be done internally.
+
+> <img src="./figure-deep-module-vs-shallow-module.png" height="400" alt="Example CardClient architecture without a Core API component">
+
 
 ## Consequences
 
 Composing each API within a feature client does lead to an increased parameter count when constructing feature clients. This is unsightly for the most part. The number of dependencies for a given feature client will correspond directly to the number of APIs a given feature client interacts with.
+
+[1]: https://nakabonne.dev/posts/depth-of-module/
