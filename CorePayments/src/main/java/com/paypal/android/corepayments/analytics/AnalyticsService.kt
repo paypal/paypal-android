@@ -2,6 +2,7 @@ package com.paypal.android.corepayments.analytics
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -20,10 +21,14 @@ class AnalyticsService internal constructor(
     private val scope: CoroutineScope
 ) {
 
-    constructor(
+    constructor(context: Context, coreConfig: CoreConfig) :
+            this(context, coreConfig, Dispatchers.IO)
+
+    @VisibleForTesting
+    internal constructor(
         context: Context,
         coreConfig: CoreConfig,
-        dispatcher: CoroutineDispatcher = Dispatchers.IO
+        dispatcher: CoroutineDispatcher
     ) :
             this(
                 DeviceInspector(context),
@@ -33,7 +38,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-fun sendAnalyticsEvent(name: String, orderId: String?) {
+    fun sendAnalyticsEvent(name: String, orderId: String?) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.async {
