@@ -1,4 +1,4 @@
-# Dissolve Core API and HTTP Request Factories
+# Remove Core API and HTTP Request Factories
 
 **Status: Proposed**
 
