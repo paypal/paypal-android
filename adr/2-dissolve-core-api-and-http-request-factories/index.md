@@ -25,7 +25,7 @@ Currently our naming convention and division of responsibility is build on a one
 
 A more scalable solution would be to offer feature clients a one-to-many relationship with API components. We can map each API class to its own corresponding microservice. API networking code can then be shared among different features. It will then become clear what the responsibility of each API class is, which is good for DRYness, Single Responsibility Principle, and tesability.
 
-> <img src="./figure-multi-api-uml.png" height="400" alt="Example CardClient architecture without a Core API component">
+> <img src="./figure-multi-api-uml.png" height="500" alt="Example CardClient architecture without a Core API component">
 
 > <img src="./figure-card-client-example.png" height="400" alt="Example CardClient architecture without a Core API component">
 
