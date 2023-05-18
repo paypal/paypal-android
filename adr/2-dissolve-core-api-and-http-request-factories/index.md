@@ -42,6 +42,10 @@ The idea is to create API components with simple interfaces and powerful functio
 
 ## Consequences
 
-Feature Clients will have a dependency on each microservice they use. A side effect of a Feature Client having a lot of dependencies is an increased parameter count for a client's constructor. This could result in decreased readability, cause linting errors, and a decrease in code coverage until we pick a suitable dependency injection framework.
+Feature Clients will have a dependency on each microservice they use. A side effect of a Feature Client having a lot of dependencies is an increased parameter count for the client's constructor. This could result in:
+
+1. Decreased readability
+1. Linting errors
+1. A decrease in code coverage until we pick a suitable dependency injection framework
 
 [1]: https://nakabonne.dev/posts/depth-of-module/
