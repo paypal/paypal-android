@@ -16,9 +16,7 @@ The current architecture also encapsulates core API functionality in an `API` cl
 - Send GraphQL Requests
 - Send Analytics
 
-This works well in the Braintree SDK. Having a shared resource for common Braintree API calls correlates nicely with the monolithic nature of the Braintree gateway's API.
-
-On the other hand, the PayPal SDK works by combining a set of microservice APIs to offer each payment method as a standalone feature. With a microservices architecture, it becomes difficult to identify "core" functionality.
+This works well for the Braintree SDK–a shared resource for common Braintree API calls correlates nicely with the monolithic nature of the Braintree gateway's API. On the other hand, the PayPal SDK works by combining a set of microservice APIs to offer each payment method as a standalone feature. With a microservice architecture, it becomes difficult for us to identify "core" functionality.
 
 ## Decision
 
