@@ -26,7 +26,7 @@ We should remove the core `API` component and refactor each `<FEATURE_NAME>API` 
 
 We can restrict API components to not depend on other API components to maximize API call composition within feature clients. We are also preserving part of the existing architecture by encapsulating complexity when it makes sense to allow Feature Clients to efficiently execute business logic. In some cases, it may make sense to create an intermediary "Utility" layer to allow for the composition of platform specific behavior within Feature Clients:
 
-> <img src="./figure-card-client-example.png" height="400" alt="Example CardClient architecture without a Core API component">
+> <img src="./figure-card-client-example.png" height="500" alt="Example CardClient architecture without a Core API component">
 
 As seen in the figure above, an `AnalyticsService` can be helpful to abstract away the delivery of event tracking from FeatureClients. A `ClientIdRepository` may also be helpful to efficiently fetch a Client Id that is associated with a given access token.
 
