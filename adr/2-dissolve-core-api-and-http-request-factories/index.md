@@ -20,22 +20,25 @@ This works well for the Braintree SDK–a shared resource for common Braintree A
 
 ## Decision
 
-While the PayPal SDK doesn't have a core client, it does have a core `API` class that is similar to `BraintreeClient`. In the PayPal SDK, each feature client has an associated API class used to execute requests over the network to a given web service.
-
-The API pattern is a great way to shield feature clients from the complexities of making a network request, similar to how `BraintreeClient` `sendPost()` and `sendGraphQL` post do in the Braintree SDK. It allows feature clients to focus on business logic and success (or failure) tracking with Analytics.
-
-Currently our naming convention and division of responsibility is build on a one-to-one relationship between `<FEATURE_NAME>Client` and `<FEATURE_NAME>API`. While in most cases this does result in a positive feature client implementation because, as mentioned before, there is no low-level networking code in the feature client, the set of behavior offered by each API component is arbitrary. The API components in our architecture currently do not map to a known real world entity. Feature clients may rely on multiple PayPal web services, and if multiple features rely on the same microservices, we run the risk of introducing duplication within the codebase.
-
-A more scalable solution would be to offer feature clients a one-to-many relationship with API components. We can map each API class to its own corresponding microservice. API networking code can then be shared among different features. It will then become clear what the responsibility of each API class is, which is good for DRYness, Single Responsibility Principle, and tesability.
+We should remove the core `API` component and refactor each `<FEATURE_NAME>API` component into individual `<SERVICE_NAME>API` components for each microservice used by the SDK. 
 
 > <img src="./figure-multi-api-uml.png" height="500" alt="Example CardClient architecture without a Core API component">
 
+We can restrict API components to not depend on other API components to maximize API call composition within feature clients. We are also preserving part of the existing architecture by encapsulating complexity when it makes sense to allow Feature Clients to efficiently execute business logic. In some cases, it may make sense to create an intermediary "Utility" layer to allow for the composition of platform specific behavior within Feature Clients:
+
 > <img src="./figure-card-client-example.png" height="400" alt="Example CardClient architecture without a Core API component">
 
-We also have an opportunity to implement each API component as a [Deep Module][1]. We created `HttpRequestFactory` as a temporary concept because it provided a highly testable interface for asserting `APIRequest` JSON bodies. Since API classes will have a single responsibility to execute API requests internally, we can simplify our design by making this a responsibility of the API class. Response parsing can also be done internally.
+As seen in the figure above, an `AnalyticsService` can be helpful to abstract away the delivery of event tracking from FeatureClients. A `ClientIdRepository` may also be helpful to efficiently fetch a Client Id that is associated with a given access token.
+
+### Remove HTTP Request Factories
+
+The current design also resulted in the creation of `HttpRequestFactory` objects through TDD. These objects make testing `HTTPRequest` objects easier, but they exist mostly because of the one-to-one relationship between Feature Clients and their API component.
+
+We should remove http request factories as well and implement each `API` class as a [Deep Module][1]:
 
 > <img src="./figure-deep-module-vs-shallow-module.png" height="400" alt="Example CardClient architecture without a Core API component">
 
+The idea is to create API components with simple interfaces and powerful functionality. The API components will also be easy to test since its the only component where we have to verify the path of the HTTP request, the HTTP method used to make the request, and the HTTP body of the request when making an API call. (TODO: mention flexibility offered by black box testing)
 
 ## Consequences
 
