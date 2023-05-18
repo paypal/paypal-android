@@ -4,16 +4,21 @@
 
 ## Context
 
-- We've borrowed the Braintree Android SDK design pattern of having a core component to encapsulate the following behaviors:
-  * Load Braintree Configuration
-  * Initiate a Browser Switch
-  * Send HTTP Requests
-  * Send GraphQL Requests
-  * Send Analytics
+The PayPal SDK for Android currently has a layered architecture. Merchant applications interact with the surface of our SDK through Feature Clients. Each Feature Client transforms a merchant request into an API call that is then delegated to an underlying API layer.
 
-Since the Braintree Gateway is effectively a monolith, this pattern makes sense. It also allows reduces the dependencies required by Feature Clients, in most cases limiting them to a single BraintreeClient instance.
+By convention, every `<FEATURE_NAME>Client` instance has a corresponding `<FEATURE_NAME>API` dependency. Each API component is responsible for encapsulating low-level networking and multi-threading logic so that Feature Clients can focus primarily on high-level business logic.
 
-In the PayPal SDK, having a core component is less beneficial. There is a much larger diversity of web services offered by the PayPal platform. With the PayPal platform, it becomes difficult to determine which components are considered "core" components.
+The current architecture also encapsulates core API functionality in an `API` class, similar to how `BraintreeClient` in the Braintree Android SDK allows access to the following behaviors through composition:
+
+- Load Merchant Configuration
+- Initiate a Browser Switch
+- Send HTTP Requests
+- Send GraphQL Requests
+- Send Analytics
+
+This works well in the Braintree SDK. Having a shared resource for common Braintree API calls correlates nicely with the monolithic nature of the Braintree gateway's API.
+
+On the other hand, the PayPal SDK works by combining a set of microservice APIs to offer each payment method as a standalone feature. With a microservices architecture, it becomes difficult to identify "core" functionality.
 
 ## Decision
 
