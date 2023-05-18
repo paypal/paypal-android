@@ -30,7 +30,7 @@ We can restrict API components to not depend on other API components to maximize
 
 As seen in the figure above, an `AnalyticsService` can be helpful to abstract away the delivery of event tracking from FeatureClients. A `ClientIdRepository` may also be helpful to efficiently fetch a Client Id that is associated with a given access token.
 
-### Remove HTTP Request Factories
+### Also: Remove HTTP Request Factories
 
 The current design also resulted in the creation of `HttpRequestFactory` objects through TDD. These objects make testing `HTTPRequest` objects easier, but they exist mostly because of the one-to-one relationship between Feature Clients and their API component.
 
