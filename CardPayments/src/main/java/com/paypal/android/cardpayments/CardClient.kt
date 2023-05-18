@@ -19,7 +19,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 /**
  * Use this client to approve an order with a [Card].
@@ -116,7 +115,6 @@ class CardClient internal constructor(
 
                 browserSwitchClient.start(activity, options)
             }
-
         } catch (error: PayPalSDKError) {
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:confirm-payment-source:failed",
@@ -151,12 +149,12 @@ class CardClient internal constructor(
                         CardResult(orderId, orderStatus, paymentSource, deepLinkUrl)
                     }
                     notifyApproveOrderSuccess(result)
-
-                } catch (e: PayPalSDKError) {
+                } catch (error: PayPalSDKError) {
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:get-order-info:failed",
                         metadata.orderID
                     )
+                    throw error
                 }
             }
         }
