@@ -33,7 +33,7 @@ In order to use this migration guide, you must:
         * *Note*: This no longer needs to live in your application class.
     * Construct a `PayPalNativeCheckoutClient`.
         
-    ```diff=
+    ```diff
     class SampleApp : Application() {
 
         override fun onCreate() {
@@ -68,7 +68,7 @@ In order to use this migration guide, you must:
     * Update your UI to display a `com.paypal.android.paymentbuttons.PayPalButton`, instead of a `com.paypal.checkout.paymentbutton.PaymentButtonContainer`.
     
     
-    ```diff=
+    ```diff
     <?xml version="1.0" encoding="utf-8"?>
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -103,7 +103,7 @@ In order to use this migration guide, you must:
     </androidx.constraintlayout.widget.ConstraintLayout>
     ```
 
-    ```diff=
+    ```diff
     class MainActivity : AppCompatActivity() {
 
     -   lateinit var paymentButtonContainer: PaymentButtonContainer
@@ -127,7 +127,7 @@ In order to use this migration guide, you must:
     * Create a `PayPalNativeCheckoutRequest` with your Order ID from the [pre-requisite](#pre-requisites) steps.
     * Call `PayPalNativeCheckoutClient.startCheckout()` to present the PayPal Paysheet.
     
-    ```diff=
+    ```
         fun paypalButtonTapped() {
             val request = PayPalNativeCheckoutRequest("<ORDER_ID>")
             paypalClient.startCheckout(request)
@@ -139,7 +139,7 @@ In order to use this migration guide, you must:
      * Implement the required `PayPalNativeCheckoutListener`. This is how your app will receive notifications of the PayPal flow's success, cancel, error, and willStart events.
         * Remove the analogous callback methods set on your previous `PaymentButtonContainer`.
     
-    ```diff=
+    ```diff
     private fun configurePayPalCheckout() {
     -    paymentButtonContainer.setup(
     -        createOrder = CreateOrder { createOrderActions ->
@@ -188,7 +188,7 @@ In order to use this migration guide, you must:
     * You are required to PATCH the order details on your server if the shipping method (or amount) changes. Do this with the [PayPal Orders API - Update order](https://developer.paypal.com/docs/api/orders/v2/#orders_patch) functionality.
 
 
-    ```diff=
+    ```diff
     private fun configureShippingCallbacks() {
     +    paypalClient.shippingListener = object : PayPalNativeShippingListener {
     +        override fun onPayPalNativeShippingAddressChange(
