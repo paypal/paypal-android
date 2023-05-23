@@ -1,6 +1,6 @@
 package com.paypal.android.cardpayments
 
-import com.paypal.android.cardpayments.api.OrdersAPI
+import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
@@ -23,7 +23,7 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class OrdersAPIUnitTest {
+class CheckoutOrdersAPIUnitTest {
 
     // language=JSON
     private val successBody = """
@@ -81,11 +81,11 @@ class OrdersAPIUnitTest {
         "return_url"
     )
 
-    private lateinit var sut: OrdersAPI
+    private lateinit var sut: CheckoutOrdersAPI
 
     @Before
     fun beforeEach() {
-        sut = OrdersAPI(restClient, requestFactory)
+        sut = CheckoutOrdersAPI(restClient, requestFactory)
         every { requestFactory.createConfirmPaymentSourceRequest(cardRequest) } returns apiRequest
     }
 

@@ -6,7 +6,7 @@ import com.paypal.android.cardpayments.CardResponseParser
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.RestClient
 
-internal class OrdersAPI(
+internal class CheckoutOrdersAPI(
     private val restClient: RestClient,
     private val requestFactory: CardRequestFactory = CardRequestFactory(),
     private val responseParser: CardResponseParser = CardResponseParser()

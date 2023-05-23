@@ -7,7 +7,7 @@ import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.GetOrderRequest
-import com.paypal.android.cardpayments.api.OrdersAPI
+import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.ClientIdRepository
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
  */
 class CardClient internal constructor(
     activity: FragmentActivity,
-    private val ordersAPI: OrdersAPI,
+    private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val clientIdRepository: ClientIdRepository,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
@@ -51,7 +51,7 @@ class CardClient internal constructor(
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
                 activity,
-                OrdersAPI(configuration),
+                CheckoutOrdersAPI(configuration),
                 ClientIdRepository(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
@@ -86,7 +86,7 @@ class CardClient internal constructor(
         }
 
         try {
-            val response = ordersAPI.confirmPaymentSource(cardRequest)
+            val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:confirm-payment-source:succeeded",
                 cardRequest.orderID
@@ -139,7 +139,7 @@ class CardClient internal constructor(
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
             CoroutineScope(dispatcher).launch(exceptionHandler) {
                 try {
-                    val getOrderResponse = ordersAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
+                    val getOrderResponse = checkoutOrdersAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:get-order-info:succeeded",
                         metadata.orderID
