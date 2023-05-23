@@ -21,8 +21,9 @@ private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
-private val DEFAULT_ACCESS_TOKEN: String? = null
-private val DEFAULT_ORDER_ID: String? = null
+// To hardcode an access token and order ID for this demo app, set the below values:
+private val DEFAULT_ACCESS_TOKEN: String? = null // = "your-token"
+private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 class SDKSampleServerAPI(baseUrl: String) {
 
