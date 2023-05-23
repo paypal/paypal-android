@@ -32,7 +32,7 @@ As seen in the figure above, an `AnalyticsService` can be helpful to abstract aw
 
 ### Also: Remove HTTP Request Factories
 
-The current design also resulted in the creation of `HttpRequestFactory` objects through TDD. These objects make testing `HTTPRequest` objects easier, but they exist mostly because of the one-to-one relationship between Feature Clients and their API component.
+The current design also resulted in the creation of [HttpRequestFactory][2] objects through TDD. These objects make testing `HttpRequest` objects easier, but they exist mostly because of the one-to-one relationship between Feature Clients and their API component.
 
 We should remove http request factories as well and implement each `API` class as a [Deep Module][1]:
 
@@ -49,3 +49,5 @@ Feature Clients will have a dependency on each microservice they use. A side eff
 1. A decrease in code coverage until we pick a suitable dependency injection framework
 
 [1]: https://nakabonne.dev/posts/depth-of-module/
+[2]: https://github.com/paypal/Android-SDK/blob/da0f20c22b0c958f6f5b97a78e4d0814484d5ff2/CorePayments/src/main/java/com/paypal/android/corepayments/HttpRequestFactory.kt#L7
+
