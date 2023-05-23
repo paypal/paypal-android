@@ -38,7 +38,7 @@ We should remove http request factories as well and implement each `API` class a
 
 > <img src="./figure-deep-module-vs-shallow-module.png" height="400" alt="Example CardClient architecture without a Core API component">
 
-The idea is to create API components with simple interfaces and powerful functionality. The API components will also be easy to test since its the only component where we have to verify the path of the HTTP request, the HTTP method used to make the request, and the HTTP body of the request when making an API call. (TODO: mention flexibility offered by black box testing)
+The idea is to create API components with simple interfaces and powerful functionality. The API components will also be easy to test since its the only component where we have to verify the path of the HTTP request, the HTTP method used to make the request, and the HTTP body of the request when making an API call.
 
 ## Consequences
 
