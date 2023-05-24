@@ -67,8 +67,14 @@ class CardFragment : Fragment() {
             cardNumberInput.onValueChange = ::onCardNumberChange
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
-            useTestCardButton.setOnClickListener { showTestCards() }
-            submitButton.setOnClickListener { onCardFieldSubmit() }
+            useTestCardButton.setOnClickListener {
+                findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
+            }
+            submitButton.setOnClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    createOrder()
+                }
+            }
         }
 
         setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
@@ -107,16 +113,6 @@ class CardFragment : Fragment() {
         val formattedExpirationDate = DateFormatter.formatExpirationDate(newValue, oldValue)
         binding.cardExpirationInput.setText(formattedExpirationDate)
         binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
-    }
-
-    private fun onCardFieldSubmit() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            createOrder()
-        }
-    }
-
-    private fun showTestCards() {
-        findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
     }
 
     private suspend fun createOrder() {
@@ -159,7 +155,19 @@ class CardFragment : Fragment() {
         dataCollectorHandler.setLogging(true)
         updateStatusText("Creating order...")
 
-        val orderRequest = buildOrderRequest(orderIntent)
+        val orderRequest = CreateOrderRequest(
+            intent = orderIntent,
+            purchaseUnit = listOf(
+                com.paypal.android.api.model.PurchaseUnit(
+                    amount = com.paypal.android.api.model.Amount(
+                        currencyCode = "USD",
+                        value = "10.99"
+                    )
+                )
+            ),
+            payee = Payee(emailAddress = "anpelaez@paypal.com")
+        )
+
         val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
@@ -193,12 +201,7 @@ class CardFragment : Fragment() {
                 R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
                 else -> SCA.SCA_ALWAYS
             }
-            CardRequest(
-                order.id!!,
-                card,
-                APP_RETURN_URL,
-                sca
-            )
+            CardRequest(order.id!!, card, APP_RETURN_URL, sca)
         }
 
         cardClient.approveOrder(requireActivity(), cardRequest)
@@ -215,19 +218,6 @@ class CardFragment : Fragment() {
         val result = sdkSampleServerApi.authorizeOrder(cardResult.orderID)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
-
-    private fun buildOrderRequest(intent: String): CreateOrderRequest = CreateOrderRequest(
-        intent = intent,
-        purchaseUnit = listOf(
-            com.paypal.android.api.model.PurchaseUnit(
-                amount = com.paypal.android.api.model.Amount(
-                    currencyCode = "USD",
-                    value = "10.99"
-                )
-            )
-        ),
-        payee = Payee(emailAddress = "anpelaez@paypal.com")
-    )
 
     private fun updateStatusText(text: String) {
         requireActivity().runOnUiThread {
