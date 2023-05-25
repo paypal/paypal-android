@@ -1,22 +1,26 @@
 package com.paypal.android.corepayments
 
-import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import java.net.URL
 import java.util.Locale
 
-internal class HttpRequestFactory(private val language: String = Locale.getDefault().language) {
+class RestClient internal constructor(
+    private val configuration: CoreConfig,
+    private val http: Http = Http(),
+    private val language: String = Locale.getDefault().language
+) {
 
-    fun createHttpRequestFromAPIRequest(
+    constructor(configuration: CoreConfig) : this(configuration, Http())
+
+    suspend fun send(apiRequest: APIRequest): HttpResponse {
+        val httpRequest = createHttpRequestFromAPIRequest(apiRequest, configuration)
+        return http.send(httpRequest)
+    }
+
+    private fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
         configuration: CoreConfig,
     ): HttpRequest =
         configuration.run { createHttpRequestFromAPIRequest(apiRequest, environment, accessToken) }
-
-    fun createHttpRequestForAnalytics(analyticsEventData: AnalyticsEventData): HttpRequest {
-        val body = analyticsEventData.toJSON().toString()
-        val apiRequest = APIRequest("v1/tracking/events", HttpMethod.POST, body)
-        return createHttpRequestFromAPIRequest(apiRequest, Environment.LIVE)
-    }
 
     private fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,

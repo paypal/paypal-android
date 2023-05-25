@@ -1,10 +1,9 @@
 package com.paypal.android.paypalwebpayments
 
 import android.net.Uri
-import androidx.annotation.NonNull
+import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.braintreepayments.api.BrowserSwitchOptions
 import org.json.JSONObject
 
 internal class BrowserSwitchHelper(private val urlScheme: String) {
@@ -12,9 +11,9 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
     private fun buildPayPalCheckoutUri(
-        @NonNull orderId: String?,
-        @NonNull config: CoreConfig,
-        @NonNull funding: PayPalWebCheckoutFundingSource
+        orderId: String?,
+        config: CoreConfig,
+        funding: PayPalWebCheckoutFundingSource
     ): Uri {
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
@@ -32,9 +31,9 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
     }
 
     fun configurePayPalBrowserSwitchOptions(
-        @NonNull orderId: String?,
-        @NonNull config: CoreConfig,
-        @NonNull funding: PayPalWebCheckoutFundingSource
+        orderId: String?,
+        config: CoreConfig,
+        funding: PayPalWebCheckoutFundingSource
     ): BrowserSwitchOptions {
         val metadata = JSONObject().put("order_id", orderId)
         return BrowserSwitchOptions()

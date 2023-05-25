@@ -1,11 +1,12 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
@@ -25,11 +26,12 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to checkout with PayPal.
  */
-class PayPalNativeCheckoutClient internal constructor (
+class PayPalNativeCheckoutClient internal constructor(
     private val application: Application,
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
-    private val api: API,
+    private val analyticsService: AnalyticsService,
+    private val clientIdRepository: ClientIdRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -43,12 +45,14 @@ class PayPalNativeCheckoutClient internal constructor (
      * package name appended with "://paypalpay". Example: "com.sample.example://paypalpay".
      * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
      */
-    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) : this(
-        application,
-        coreConfig,
-        returnUrl,
-        API(coreConfig, application)
-    )
+    constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
+            this(
+                application,
+                coreConfig,
+                returnUrl,
+                AnalyticsService(application, coreConfig),
+                ClientIdRepository(coreConfig)
+            )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
@@ -78,12 +82,11 @@ class PayPalNativeCheckoutClient internal constructor (
      * @param request the PayPalNativeCheckoutRequest for the transaction
      */
     fun startCheckout(request: PayPalNativeCheckoutRequest) {
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.orderID)
         orderID = request.orderID
-        api.sendAnalyticsEvent("paypal-native-payments:started", orderID)
-
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                val clientID = api.fetchCachedOrRemoteClientID()
+                val clientID = clientIdRepository.fetchClientId()
                 val config = CheckoutConfig(
                     application = application,
                     clientId = clientID,
@@ -99,7 +102,12 @@ class PayPalNativeCheckoutClient internal constructor (
                     it.set(request.orderID)
                 })
             } catch (e: PayPalSDKError) {
-                listener?.onPayPalCheckoutFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
+                listener?.onPayPalCheckoutFailure(
+                    APIClientError.clientIDNotFoundError(
+                        e.code,
+                        e.correlationID
+                    )
+                )
             }
         }
     }
@@ -116,7 +124,13 @@ class PayPalNativeCheckoutClient internal constructor (
                 notifyOnCancel()
             },
             onError = OnError { errorInfo ->
-                notifyOnFailure(PayPalNativeCheckoutError(0, errorInfo.reason, errorInfo = errorInfo))
+                notifyOnFailure(
+                    PayPalNativeCheckoutError(
+                        0,
+                        errorInfo.reason,
+                        errorInfo = errorInfo
+                    )
+                )
             },
             onShippingChange = OnShippingChange { shippingChangeData, shippingChangeActions ->
                 notifyOnShippingChange(shippingChangeData, shippingChangeActions)
@@ -125,12 +139,12 @@ class PayPalNativeCheckoutClient internal constructor (
     }
 
     private fun notifyOnFailure(error: PayPalSDKError) {
-        api.sendAnalyticsEvent("paypal-native-payments:failed", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:failed", orderID)
         listener?.onPayPalCheckoutFailure(error)
     }
 
     private fun notifyOnSuccess(result: PayPalNativeCheckoutResult) {
-        api.sendAnalyticsEvent("paypal-native-payments:succeeded", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:succeeded", orderID)
         listener?.onPayPalCheckoutSuccess(result)
     }
 
@@ -141,7 +155,7 @@ class PayPalNativeCheckoutClient internal constructor (
         shippingListener?.let {
             when (shippingChangeData.shippingChangeType) {
                 ShippingChangeType.ADDRESS_CHANGE -> {
-                    api.sendAnalyticsEvent(
+                    analyticsService.sendAnalyticsEvent(
                         "paypal-native-payments:shipping-address-changed",
                         orderID
                     )
@@ -150,8 +164,9 @@ class PayPalNativeCheckoutClient internal constructor (
                         PayPalNativeShippingAddress(shippingChangeData.shippingAddress)
                     )
                 }
+
                 ShippingChangeType.OPTION_CHANGE -> {
-                    api.sendAnalyticsEvent(
+                    analyticsService.sendAnalyticsEvent(
                         "paypal-native-payments:shipping-method-changed",
                         orderID
                     )
@@ -165,7 +180,7 @@ class PayPalNativeCheckoutClient internal constructor (
     }
 
     private fun notifyOnCancel() {
-        api.sendAnalyticsEvent("paypal-native-payments:canceled", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:canceled", orderID)
         listener?.onPayPalCheckoutCanceled()
     }
 }

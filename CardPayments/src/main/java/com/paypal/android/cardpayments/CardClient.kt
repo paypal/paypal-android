@@ -6,14 +6,15 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.cardpayments.api.CardAPI
 import com.paypal.android.cardpayments.api.GetOrderRequest
+import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
-import com.paypal.android.corepayments.API
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +25,9 @@ import kotlinx.coroutines.launch
  */
 class CardClient internal constructor(
     activity: FragmentActivity,
-    private val cardAPI: CardAPI,
+    private val checkoutOrdersAPI: CheckoutOrdersAPI,
+    private val clientIdRepository: ClientIdRepository,
+    private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
 ) {
@@ -48,7 +51,9 @@ class CardClient internal constructor(
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
                 activity,
-                CardAPI(API(configuration, activity)),
+                CheckoutOrdersAPI(configuration),
+                ClientIdRepository(configuration),
+                AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
             )
@@ -65,7 +70,7 @@ class CardClient internal constructor(
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
         orderId = cardRequest.orderID
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:started", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
@@ -74,32 +79,48 @@ class CardClient internal constructor(
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         try {
-            cardAPI.fetchCachedOrRemoteClientID()
+            clientIdRepository.fetchClientId()
         } catch (e: PayPalSDKError) {
             notifyApproveOrderFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationID))
             return
         }
 
-        val response = cardAPI.confirmPaymentSource(cardRequest)
-        if (response.payerActionHref == null) {
-            val result = response.run {
-                CardResult(orderID, status, paymentSource)
+        try {
+            val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
+            analyticsService.sendAnalyticsEvent(
+                "card-payments:3ds:confirm-payment-source:succeeded",
+                cardRequest.orderID
+            )
+
+            if (response.payerActionHref == null) {
+                val result = response.run {
+                    CardResult(orderID, status, paymentSource)
+                }
+                notifyApproveOrderSuccess(result)
+            } else {
+                analyticsService.sendAnalyticsEvent(
+                    "card-payments:3ds:confirm-payment-source:challenge-required",
+                    orderId
+                )
+                approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
+
+                // launch the 3DS flow
+                val urlScheme = cardRequest.run { Uri.parse(returnUrl).scheme }
+                val approveOrderMetadata =
+                    ApproveOrderMetadata(cardRequest.orderID, response.paymentSource)
+                val options = BrowserSwitchOptions()
+                    .url(Uri.parse(response.payerActionHref))
+                    .returnUrlScheme(urlScheme)
+                    .metadata(approveOrderMetadata.toJSON())
+
+                browserSwitchClient.start(activity, options)
             }
-            notifyApproveOrderSuccess(result)
-        } else {
-            cardAPI.sendAnalyticsEvent("card-payments:3ds:confirm-payment-source:challenge-required", orderId)
-            approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
-
-            // launch the 3DS flow
-            val urlScheme = cardRequest.run { Uri.parse(returnUrl).scheme }
-            val approveOrderMetadata =
-                ApproveOrderMetadata(cardRequest.orderID, response.paymentSource)
-            val options = BrowserSwitchOptions()
-                .url(Uri.parse(response.payerActionHref))
-                .returnUrlScheme(urlScheme)
-                .metadata(approveOrderMetadata.toJSON())
-
-            browserSwitchClient.start(activity, options)
+        } catch (error: PayPalSDKError) {
+            analyticsService.sendAnalyticsEvent(
+                "card-payments:3ds:confirm-payment-source:failed",
+                cardRequest.orderID
+            )
+            throw error
         }
     }
 
@@ -117,31 +138,40 @@ class CardClient internal constructor(
     private fun getOrderInfo(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
             CoroutineScope(dispatcher).launch(exceptionHandler) {
-                val getOrderResponse = cardAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
-                notifyApproveOrderSuccess(
-                    CardResult(
-                        getOrderResponse.orderId,
-                        getOrderResponse.orderStatus,
-                        getOrderResponse.paymentSource,
-                        browserSwitchResult.deepLinkUrl
+                try {
+                    val getOrderResponse = checkoutOrdersAPI.getOrderInfo(GetOrderRequest(metadata.orderID))
+                    analyticsService.sendAnalyticsEvent(
+                        "card-payments:3ds:get-order-info:succeeded",
+                        metadata.orderID
                     )
-                )
+                    val deepLinkUrl = browserSwitchResult.deepLinkUrl
+                    val result = getOrderResponse.run {
+                        CardResult(orderId, orderStatus, paymentSource, deepLinkUrl)
+                    }
+                    notifyApproveOrderSuccess(result)
+                } catch (error: PayPalSDKError) {
+                    analyticsService.sendAnalyticsEvent(
+                        "card-payments:3ds:get-order-info:failed",
+                        metadata.orderID
+                    )
+                    throw error
+                }
             }
         }
     }
 
     private fun notifyApproveOrderCanceled() {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
         approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
         approveOrderListener?.onApproveOrderSuccess(result)
     }
 
     private fun notifyApproveOrderFailure(error: PayPalSDKError) {
-        cardAPI.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
         approveOrderListener?.onApproveOrderFailure(error)
     }
 }

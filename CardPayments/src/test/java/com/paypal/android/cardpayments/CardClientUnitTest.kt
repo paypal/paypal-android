@@ -7,14 +7,16 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.cardpayments.api.CardAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
 import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import com.paypal.android.cardpayments.api.GetOrderRequest
+import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -44,7 +46,9 @@ class CardClientUnitTest {
 
     private val cardRequest = CardRequest(orderID, card, "return_url")
 
-    private val cardAPI = mockk<CardAPI>(relaxed = true)
+    private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
+    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
+    private val analyticsService = mockk<AnalyticsService>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
 
@@ -86,7 +90,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(123, "fake-description")
         val errorSlot = slot<PayPalSDKError>()
 
-        coEvery { cardAPI.fetchCachedOrRemoteClientID() } throws error
+        coEvery { clientIdRepository.fetchClientId() } throws error
         every {
             approveOrderListener.onApproveOrderFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -109,7 +113,7 @@ class CardClientUnitTest {
     fun `approve order notifies listener of confirm payment source success`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        coEvery { cardAPI.confirmPaymentSource(cardRequest) } returns confirmPaymentSourceResponse
+        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns confirmPaymentSourceResponse
 
         sut.approveOrder(activity, cardRequest)
         advanceUntilIdle()
@@ -126,7 +130,7 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(0, "mock_error_message")
-        coEvery { cardAPI.confirmPaymentSource(cardRequest) } throws error
+        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } throws error
 
         sut.approveOrder(activity, cardRequest)
         advanceUntilIdle()
@@ -145,7 +149,7 @@ class CardClientUnitTest {
         val threeDSecureAuthChallengeResponse =
             ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED, "/payer/action/href")
 
-        coEvery { cardAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
+        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
 
         sut.approveOrder(activity, cardRequest)
         advanceUntilIdle()
@@ -175,7 +179,7 @@ class CardClientUnitTest {
             advanceUntilIdle()
 
             val orderRequestSlot = slot<GetOrderRequest>()
-            coVerify(exactly = 1) { cardAPI.getOrderInfo(capture(orderRequestSlot)) }
+            coVerify(exactly = 1) { checkoutOrdersAPI.getOrderInfo(capture(orderRequestSlot)) }
 
             val orderRequest = orderRequestSlot.captured
             assertEquals("sample-order-id", orderRequest.orderId)
@@ -192,7 +196,7 @@ class CardClientUnitTest {
 
             val response =
                 GetOrderInfoResponse("sample-order-id", OrderStatus.APPROVED, OrderIntent.CAPTURE)
-            coEvery { cardAPI.getOrderInfo(any()) } returns response
+            coEvery { checkoutOrdersAPI.getOrderInfo(any()) } returns response
 
             sut.handleBrowserSwitchResult(activity)
             advanceUntilIdle()
@@ -227,7 +231,7 @@ class CardClientUnitTest {
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
             val error = PayPalSDKError(0, "mock_error_message")
-            coEvery { cardAPI.getOrderInfo(any()) } throws error
+            coEvery { checkoutOrdersAPI.getOrderInfo(any()) } throws error
 
             sut.handleBrowserSwitchResult(activity)
             advanceUntilIdle()
@@ -241,7 +245,14 @@ class CardClientUnitTest {
 
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val sut = CardClient(activity, cardAPI, browserSwitchClient, dispatcher)
+        val sut = CardClient(
+            activity,
+            checkoutOrdersAPI,
+            clientIdRepository,
+            analyticsService,
+            browserSwitchClient,
+            dispatcher
+        )
         sut.approveOrderListener = approveOrderListener
         return sut
     }

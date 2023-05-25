@@ -1,10 +1,11 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.Approval
 import com.paypal.checkout.approve.OnApprove
@@ -50,7 +51,8 @@ class PayPalNativeCheckoutClientTest {
     private val mockClientId = generateRandomString()
     private val mockReturnUrl = "mock_return_url"
 
-    private val api = mockk<API>(relaxed = true)
+    private val analyticsService = mockk<AnalyticsService>(relaxed = true)
+    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
@@ -58,7 +60,7 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { api.fetchCachedOrRemoteClientID() } returns mockClientId
+        coEvery { clientIdRepository.fetchClientId() } returns mockClientId
     }
 
     @After
@@ -91,33 +93,34 @@ class PayPalNativeCheckoutClientTest {
     }
 
     @Test
-    fun `when startCheckout is invoked with an invalid return_url, onPayPalCheckout failure is called`() = runTest {
-        every { PayPalCheckout.setConfig(any()) } throws IllegalArgumentException(CheckoutConfig.INVALID_RETURN_URL)
-        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
-        val errorSlot = slot<PayPalSDKError>()
-        every {
-            payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
-        } answers { errorSlot.captured }
+    fun `when startCheckout is invoked with an invalid return_url, onPayPalCheckout failure is called`() =
+        runTest {
+            every { PayPalCheckout.setConfig(any()) } throws IllegalArgumentException(CheckoutConfig.INVALID_RETURN_URL)
+            val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
+            val errorSlot = slot<PayPalSDKError>()
+            every {
+                payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
+            } answers { errorSlot.captured }
 
-        every {
-            PayPalCheckout.startCheckout(any())
-        } just runs
+            every {
+                PayPalCheckout.startCheckout(any())
+            } just runs
 
-        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.listener = payPalCheckoutListener
+            sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+            sut.listener = payPalCheckoutListener
 
-        sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
-        advanceUntilIdle()
+            sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
+            advanceUntilIdle()
 
-        verify {
-            payPalCheckoutListener.onPayPalCheckoutFailure(any())
+            verify {
+                payPalCheckoutListener.onPayPalCheckoutFailure(any())
+            }
+
+            expectThat(errorSlot.captured) {
+                get { code }.isEqualTo(0)
+                get { errorDescription }.isEqualTo(CheckoutConfig.INVALID_RETURN_URL)
+            }
         }
-
-        expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(0)
-            get { errorDescription }.isEqualTo(CheckoutConfig.INVALID_RETURN_URL)
-        }
-    }
 
     @Test
     fun `when startCheckout is invoked, onPayPalCheckoutStart is called`() = runTest {
@@ -141,7 +144,7 @@ class PayPalNativeCheckoutClientTest {
         val errorSlot = slot<PayPalSDKError>()
         val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
 
-        coEvery { api.fetchCachedOrRemoteClientID() } throws error
+        coEvery { clientIdRepository.fetchClientId() } throws error
         every {
             payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
         } answers { errorSlot.captured }
@@ -358,7 +361,7 @@ class PayPalNativeCheckoutClientTest {
                     assertEquals(address.countryCode, mockCountryCode)
                 }
             )
-            api.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed", null)
+            analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed", null)
         }
     }
 
@@ -382,7 +385,12 @@ class PayPalNativeCheckoutClientTest {
                     any(),
                     any()
                 )
-            } answers { onShippingChangeSlot.captured.onShippingChanged(shippingData, shippingActions) }
+            } answers {
+                onShippingChangeSlot.captured.onShippingChanged(
+                    shippingData,
+                    shippingActions
+                )
+            }
 
             sut = getPayPalCheckoutClient()
 
@@ -395,13 +403,13 @@ class PayPalNativeCheckoutClientTest {
             verify {
                 shippingListener.onPayPalNativeShippingMethodChange(
                     ofType(PayPalNativePaysheetActions::class),
-                        withArg { option ->
+                    withArg { option ->
                         assertEquals(option.id, mockID)
                         assertEquals(option.label, mockLabel)
                         assertTrue(option.selected)
                     }
                 )
-                api.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed", null)
+                analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed", null)
             }
         }
 
@@ -424,7 +432,20 @@ class PayPalNativeCheckoutClientTest {
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
             val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api, dispatcher)
-        } ?: PayPalNativeCheckoutClient(mockApplication, coreConfig, mockReturnUrl, api)
+            PayPalNativeCheckoutClient(
+                mockApplication,
+                coreConfig,
+                mockReturnUrl,
+                analyticsService,
+                clientIdRepository,
+                dispatcher
+            )
+        } ?: PayPalNativeCheckoutClient(
+            mockApplication,
+            coreConfig,
+            mockReturnUrl,
+            analyticsService,
+            clientIdRepository
+        )
     }
 }

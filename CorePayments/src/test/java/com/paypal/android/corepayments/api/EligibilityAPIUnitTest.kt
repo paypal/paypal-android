@@ -2,7 +2,7 @@ package com.paypal.android.corepayments.api
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
-import com.paypal.android.corepayments.API
+import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
@@ -25,7 +25,7 @@ import org.skyscreamer.jsonassert.JSONAssert
 @RunWith(RobolectricTestRunner::class)
 class EligibilityAPIUnitTest {
 
-    private lateinit var api: API
+    private lateinit var clientIdRepository: ClientIdRepository
     private lateinit var graphQLClient: GraphQLClient
 
     private lateinit var sut: EligibilityAPI
@@ -36,15 +36,15 @@ class EligibilityAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        api = mockk(relaxed = true)
+        clientIdRepository = mockk(relaxed = true)
         graphQLClient = mockk(relaxed = true)
 
-        coEvery { api.fetchCachedOrRemoteClientID() } returns "sample-client-id"
+        coEvery { clientIdRepository.fetchClientId() } returns "sample-client-id"
     }
 
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
-        sut = EligibilityAPI(api, graphQLClient, resourceLoader)
+        sut = EligibilityAPI(clientIdRepository, graphQLClient, resourceLoader)
         sut.checkEligibility()
 
         val requestBodySlot = slot<JSONObject>()
@@ -85,7 +85,7 @@ class EligibilityAPIUnitTest {
         val graphQLResponse = GraphQLResponse(JSONObject(data))
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
-        sut = EligibilityAPI(api, graphQLClient, resourceLoader)
+        sut = EligibilityAPI(clientIdRepository, graphQLClient, resourceLoader)
         val result = sut.checkEligibility()
 
         assertTrue(result.isCreditCardEligible)

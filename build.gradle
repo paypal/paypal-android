@@ -146,6 +146,7 @@ task clean(type: Delete) {
 
 dependencies {
     detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}"
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-rules-libraries:${detektVersion}"
 }
 
 detekt {
