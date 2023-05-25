@@ -48,6 +48,12 @@ class SDKSampleServerAPI(baseUrl: String) {
             @Path("orderId") orderId: String,
             @Body body: List<UpdateOrderUseCase.PatchRequestBody>
         ): ResponseBody
+
+        @POST("/orders/{orderID}/capture")
+        suspend fun captureOrder(@Path("orderID") orderId: String): Order
+
+        @POST("/orders/{orderID}/authorize")
+        suspend fun authorizeOrder(@Path("orderID") orderId: String): Order
     }
 
     private val service: RetrofitService
@@ -90,4 +96,8 @@ class SDKSampleServerAPI(baseUrl: String) {
 
     suspend fun patchOrder(orderId: String, body: List<UpdateOrderUseCase.PatchRequestBody>) =
         service.patchOrder(orderId, body)
+
+    suspend fun captureOrder(orderId: String) = service.captureOrder(orderId)
+
+    suspend fun authorizeOrder(orderId: String) = service.authorizeOrder(orderId)
 }

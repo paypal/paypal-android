@@ -209,13 +209,13 @@ class CardFragment : Fragment() {
 
     private suspend fun captureOrder(cardResult: CardResult) {
         updateStatusText("Capturing order with ID: ${cardResult.orderID}...")
-        val result = sdkSampleServerApi.captureOrder(cardResult.orderID)
+        val result = sdkSampleServerAPI.captureOrder(cardResult.orderID)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
 
     private suspend fun authorizeOrder(cardResult: CardResult) {
         updateStatusText("Authorizing order with ID: ${cardResult.orderID}...")
-        val result = sdkSampleServerApi.authorizeOrder(cardResult.orderID)
+        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderID)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
 
