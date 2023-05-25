@@ -1,6 +1,6 @@
 # Remove Core API and HTTP Request Factories
 
-**Status: Proposed**
+**Status: Approved**
 
 ## Context
 
