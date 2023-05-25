@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Payee
-import com.paypal.android.api.services.SDKSampleServerApi
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -44,7 +44,7 @@ class CardFragment : Fragment() {
     lateinit var preferenceUtil: SharedPreferenceUtil
 
     @Inject
-    lateinit var sdkSampleServerApi: SDKSampleServerApi
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
@@ -121,7 +121,7 @@ class CardFragment : Fragment() {
 
     private suspend fun createOrder() {
 
-        val accessToken = sdkSampleServerApi.fetchAccessToken().value
+        val accessToken = sdkSampleServerAPI.fetchAccessToken().value
         val configuration = CoreConfig(accessToken = accessToken)
         cardClient = CardClient(requireActivity(), configuration)
 
@@ -167,7 +167,7 @@ class CardFragment : Fragment() {
         updateStatusText("Creating order...")
 
         val orderRequest = buildOrderRequest()
-        val order = sdkSampleServerApi.createOrder(orderRequest = orderRequest)
+        val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
         Log.i(TAG, "MetadataId: $clientMetadataId")

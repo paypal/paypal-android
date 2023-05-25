@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
-import com.paypal.android.api.services.SDKSampleServerApi
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
@@ -37,7 +37,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     private lateinit var binding: FragmentPaymentButtonBinding
 
     @Inject
-    lateinit var sdkSampleServerApi: SDKSampleServerApi
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
 
@@ -103,7 +103,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.getting_token)
-                val accessToken = sdkSampleServerApi.fetchAccessToken().value
+                val accessToken = sdkSampleServerAPI.fetchAccessToken().value
                 val coreConfig = CoreConfig(accessToken)
                 paypalClient =
                     PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
@@ -111,7 +111,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderRequest = OrderUtils.createOrderBuilder("5.0")
-                val order = sdkSampleServerApi.createOrder(orderRequest)
+                val order = sdkSampleServerAPI.createOrder(orderRequest)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
                 }
