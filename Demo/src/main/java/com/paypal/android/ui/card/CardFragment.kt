@@ -126,8 +126,7 @@ class CardFragment : Fragment() {
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
-                val statusText =
-                    "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
+                val statusText = "Confirmed Order: ${result.orderID}"
                 val paymentSourceText = result.paymentSource?.let {
                     val text =
                         "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"

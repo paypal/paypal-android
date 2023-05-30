@@ -82,7 +82,7 @@ class CardClient internal constructor(
 
             if (response.payerActionHref == null) {
                 val result = response.run {
-                    CardResult(orderID, status, paymentSource)
+                    CardResult(orderID, paymentSource)
                 }
                 notifyApproveOrderSuccess(result)
             } else {
@@ -133,7 +133,7 @@ class CardClient internal constructor(
                     )
                     val deepLinkUrl = browserSwitchResult.deepLinkUrl
                     val result = metadata.run {
-                        CardResult(orderID, null, paymentSource, deepLinkUrl)
+                        CardResult(orderID, paymentSource, deepLinkUrl)
                     }
                     notifyApproveOrderSuccess(result)
                 } catch (error: PayPalSDKError) {
