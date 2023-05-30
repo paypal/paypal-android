@@ -2,6 +2,8 @@ package com.paypal.android.corepayments.api
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
@@ -24,7 +26,8 @@ import org.skyscreamer.jsonassert.JSONAssert
 @RunWith(RobolectricTestRunner::class)
 class EligibilityAPIUnitTest {
 
-    private lateinit var clientIdRepository: ClientIdRepository
+    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+
     private lateinit var graphQLClient: GraphQLClient
 
     private lateinit var sut: EligibilityAPI
@@ -35,15 +38,12 @@ class EligibilityAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        clientIdRepository = mockk(relaxed = true)
         graphQLClient = mockk(relaxed = true)
-
-        coEvery { clientIdRepository.fetchClientId() } returns "sample-client-id"
     }
 
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
-        sut = EligibilityAPI(clientIdRepository, graphQLClient, resourceLoader)
+        sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
         sut.checkEligibility()
 
         val requestBodySlot = slot<JSONObject>()
@@ -56,7 +56,7 @@ class EligibilityAPIUnitTest {
         {
             "query": "$expectedQuery",
             "variables": {
-              "clientId": "sample-client-id",
+              "clientId": "fake-client-id",
               "intent": "CAPTURE",
               "currency": "USD",
               "enableFunding": ["VENMO"]
@@ -84,7 +84,7 @@ class EligibilityAPIUnitTest {
         val graphQLResponse = GraphQLResponse(JSONObject(data))
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
-        sut = EligibilityAPI(clientIdRepository, graphQLClient, resourceLoader)
+        sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
         val result = sut.checkEligibility()
 
         assertTrue(result.isCreditCardEligible)

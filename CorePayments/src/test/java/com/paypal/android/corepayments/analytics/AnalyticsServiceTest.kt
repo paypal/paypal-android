@@ -25,7 +25,6 @@ class AnalyticsServiceTest {
     private lateinit var environment: Environment
 
     private lateinit var trackingEventsAPI: TrackingEventsAPI
-    private lateinit var clientIdRepository: ClientIdRepository
     private lateinit var deviceInspector: DeviceInspector
 
     private val httpSuccessResponse = HttpResponse(200)
@@ -45,11 +44,9 @@ class AnalyticsServiceTest {
     fun setup() {
         deviceInspector = mockk()
         trackingEventsAPI = mockk(relaxed = true)
-        clientIdRepository = mockk(relaxed = true)
         environment = Environment.SANDBOX
 
         every { deviceInspector.inspect() } returns deviceData
-        coEvery { clientIdRepository.fetchClientId() } returns "fake-client-id"
     }
 
     @Test
@@ -125,7 +122,6 @@ class AnalyticsServiceTest {
             deviceInspector,
             environment,
             trackingEventsAPI,
-            clientIdRepository,
             scope
         )
     }

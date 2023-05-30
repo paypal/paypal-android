@@ -26,9 +26,9 @@ class RestClientUnitTest {
 
     private val httpSuccessResponse = HttpResponse(200)
 
-    private val sandboxConfig = CoreConfig("sandbox-access-token", Environment.SANDBOX)
-    private val stagingConfig = CoreConfig("staging-access-token", Environment.STAGING)
-    private val liveConfig = CoreConfig("live-access-token", Environment.LIVE)
+    private val sandboxConfig = CoreConfig("fake-sandbox-client-id", Environment.SANDBOX)
+    private val stagingConfig = CoreConfig("fake-staging-client-id", Environment.STAGING)
+    private val liveConfig = CoreConfig("fake-live-client-id", Environment.LIVE)
 
     private lateinit var http: Http
     private lateinit var httpRequestSlot: CapturingSlot<HttpRequest>
@@ -119,14 +119,14 @@ class RestClientUnitTest {
     }
 
     @Test
-    fun `send() should add bearer token authorization header`() = runTest {
+    fun `send() should add basic authorization header using client id from config`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
         sut = RestClient(liveConfig, http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
-        assertEquals("Bearer live-access-token", httpRequest.headers["Authorization"])
+        assertEquals("Basic ZmFrZS1saXZlLWNsaWVudC1pZDo=", httpRequest.headers["Authorization"])
     }
 
     @Test
