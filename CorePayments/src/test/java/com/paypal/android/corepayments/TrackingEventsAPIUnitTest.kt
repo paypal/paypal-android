@@ -50,7 +50,6 @@ class TrackingEventsAPIUnitTest {
         coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
 
         val event = AnalyticsEventData(
-            clientID = "fake-client-id",
             environment = "fake-environment",
             eventName = "fake-event",
             timestamp = 123L,

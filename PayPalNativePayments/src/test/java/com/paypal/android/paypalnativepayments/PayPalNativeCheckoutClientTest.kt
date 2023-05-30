@@ -1,7 +1,6 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError

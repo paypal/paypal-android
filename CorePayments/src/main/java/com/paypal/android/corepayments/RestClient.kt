@@ -20,12 +20,12 @@ class RestClient internal constructor(
         apiRequest: APIRequest,
         configuration: CoreConfig,
     ): HttpRequest =
-        configuration.run { createHttpRequestFromAPIRequest(apiRequest, environment, accessToken) }
+        configuration.run { createHttpRequestFromAPIRequest(apiRequest, environment, clientId) }
 
     private fun createHttpRequestFromAPIRequest(
         apiRequest: APIRequest,
         environment: Environment,
-        accessToken: String? = null
+        clientId: String? = null
     ): HttpRequest {
         val path = apiRequest.path
         val baseUrl = environment.url
@@ -40,8 +40,10 @@ class RestClient internal constructor(
             "Accept-Language" to language
         )
 
-        accessToken?.let { token ->
-            headers["Authorization"] = "Bearer $token"
+        if (clientId != null) {
+            // use client-id-only Basic authentication
+            val credentials = "$clientId:"
+            headers["Authorization"] = "Basic ${credentials.base64encoded()}"
         }
 
         if (method == HttpMethod.POST) {

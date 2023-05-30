@@ -115,7 +115,7 @@ class PayPalNativeViewModel @Inject constructor(
         internalState.postValue(NativeCheckoutViewState.GeneratingToken)
         viewModelScope.launch(exceptionHandler) {
             accessToken = getAccessTokenUseCase()
-            initPayPalClient(accessToken)
+            initPayPalClient()
             internalState.postValue(NativeCheckoutViewState.TokenGenerated(accessToken))
         }
     }
@@ -135,10 +135,11 @@ class PayPalNativeViewModel @Inject constructor(
         internalState.postValue(NativeCheckoutViewState.Initial)
     }
 
-    private fun initPayPalClient(accessToken: String) {
+    private fun initPayPalClient() {
+        val clientId = "AcXwOk3dof7NCNcriyS8RVh5q39ozvdWUF9oHPrWqfyrDS4AwVdKe32Axuk2ADo6rI_31Vv6MGgOyzRt"
         payPalClient = PayPalNativeCheckoutClient(
             getApplication(),
-            CoreConfig(accessToken),
+            CoreConfig(clientId),
             "${BuildConfig.APPLICATION_ID}://paypalpay"
         )
         payPalClient.listener = payPalListener

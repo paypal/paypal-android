@@ -3,7 +3,6 @@ package com.paypal.android.corepayments.analytics
 import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -17,7 +16,6 @@ class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
     private val environment: Environment,
     private val trackingEventsAPI: TrackingEventsAPI,
-    private val clientIdRepository: ClientIdRepository,
     private val scope: CoroutineScope
 ) {
 
@@ -34,7 +32,6 @@ class AnalyticsService internal constructor(
                 DeviceInspector(context),
                 coreConfig.environment,
                 TrackingEventsAPI(coreConfig),
-                ClientIdRepository(coreConfig),
                 CoroutineScope(dispatcher)
             )
 
@@ -44,10 +41,8 @@ class AnalyticsService internal constructor(
         scope.async {
             val timestamp = System.currentTimeMillis()
             try {
-                val clientID = clientIdRepository.fetchClientId()
                 val deviceData = deviceInspector.inspect()
                 val analyticsEventData = AnalyticsEventData(
-                    clientID,
                     environment.name.lowercase(),
                     name,
                     timestamp,

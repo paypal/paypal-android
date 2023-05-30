@@ -2,7 +2,6 @@ package com.paypal.android.paypalnativepayments
 
 import android.app.Application
 import com.paypal.android.corepayments.APIClientError
-import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
@@ -31,7 +30,6 @@ class PayPalNativeCheckoutClient internal constructor(
     private val coreConfig: CoreConfig,
     private val returnUrl: String,
     private val analyticsService: AnalyticsService,
-    private val clientIdRepository: ClientIdRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -51,7 +49,6 @@ class PayPalNativeCheckoutClient internal constructor(
                 coreConfig,
                 returnUrl,
                 AnalyticsService(application, coreConfig),
-                ClientIdRepository(coreConfig)
             )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
@@ -86,10 +83,9 @@ class PayPalNativeCheckoutClient internal constructor(
         orderID = request.orderID
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                val clientID = clientIdRepository.fetchClientId()
                 val config = CheckoutConfig(
                     application = application,
-                    clientId = clientID,
+                    clientId = coreConfig.clientId,
                     environment = getPayPalEnvironment(coreConfig.environment),
                     uiConfig = UIConfig(
                         showExitSurveyDialog = false
