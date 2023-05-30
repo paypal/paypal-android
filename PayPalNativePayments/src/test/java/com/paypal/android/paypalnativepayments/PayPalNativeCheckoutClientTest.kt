@@ -51,7 +51,6 @@ class PayPalNativeCheckoutClientTest {
     private val mockReturnUrl = "mock_return_url"
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
-    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
@@ -59,7 +58,6 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { clientIdRepository.fetchClientId() } returns mockClientId
     }
 
     @After
@@ -134,32 +132,6 @@ class PayPalNativeCheckoutClientTest {
 
         verify {
             payPalCheckoutListener.onPayPalCheckoutStart()
-        }
-    }
-
-    @Test
-    fun `when getting client id fails is invoked, it calls onPayPalFailure`() = runTest {
-        val error = PayPalSDKError(123, "fake-description")
-        val errorSlot = slot<PayPalSDKError>()
-        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
-
-        coEvery { clientIdRepository.fetchClientId() } throws error
-        every {
-            payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
-        } answers { errorSlot.captured }
-
-        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.listener = payPalCheckoutListener
-
-        sut.startCheckout(mockk(relaxed = true))
-        advanceUntilIdle()
-
-        verify {
-            payPalCheckoutListener.onPayPalCheckoutFailure(any())
-        }
-        expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(123)
-            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
         }
     }
 
@@ -360,7 +332,10 @@ class PayPalNativeCheckoutClientTest {
                     assertEquals(address.countryCode, mockCountryCode)
                 }
             )
-            analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed", null)
+            analyticsService.sendAnalyticsEvent(
+                "paypal-native-payments:shipping-address-changed",
+                null
+            )
         }
     }
 
@@ -408,7 +383,10 @@ class PayPalNativeCheckoutClientTest {
                         assertTrue(option.selected)
                     }
                 )
-                analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed", null)
+                analyticsService.sendAnalyticsEvent(
+                    "paypal-native-payments:shipping-method-changed",
+                    null
+                )
             }
         }
 
@@ -436,7 +414,6 @@ class PayPalNativeCheckoutClientTest {
                 coreConfig,
                 mockReturnUrl,
                 analyticsService,
-                clientIdRepository,
                 dispatcher
             )
         } ?: PayPalNativeCheckoutClient(
@@ -444,7 +421,6 @@ class PayPalNativeCheckoutClientTest {
             coreConfig,
             mockReturnUrl,
             analyticsService,
-            clientIdRepository
         )
     }
 }
