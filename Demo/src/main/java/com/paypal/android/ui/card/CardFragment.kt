@@ -120,7 +120,7 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun createOrder() {
-        val clientId = sdkSampleServerAPI.fetchClientId().value
+        val clientId = sdkSampleServerAPI.fetchClientId()
         val configuration = CoreConfig(clientId = clientId)
         cardClient = CardClient(requireActivity(), configuration)
 

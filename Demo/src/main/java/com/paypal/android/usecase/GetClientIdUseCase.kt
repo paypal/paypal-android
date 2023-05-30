@@ -9,7 +9,6 @@ class GetClientIdUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
     suspend operator fun invoke(): String = withContext(Dispatchers.IO) {
-        val tokenResponse = sdkSampleServerAPI.fetchClientId()
-        tokenResponse.value
+        sdkSampleServerAPI.fetchClientId()
     }
 }

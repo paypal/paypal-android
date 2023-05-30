@@ -103,7 +103,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.getting_token)
-                val clientId = sdkSampleServerAPI.fetchClientId().value
+                val clientId = sdkSampleServerAPI.fetchClientId()
                 val coreConfig = CoreConfig(clientId)
                 paypalClient =
                     PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")

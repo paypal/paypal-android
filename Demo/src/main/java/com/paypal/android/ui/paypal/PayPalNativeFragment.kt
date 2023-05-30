@@ -95,7 +95,7 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun generatingToken() {
-        showProgress(getString(R.string.fetching_access_token))
+        showProgress(getString(R.string.fetching_client_id))
         with(binding) {
             fetchClientIdButton.isEnabled = false
             startNativeCheckout.visibility = View.GONE
