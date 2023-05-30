@@ -3,7 +3,6 @@
 ## unreleased
 * Breaking Changes
   * CorePayments
-    * Access token integrations are now deprecated
     * CoreConfig instances must now be instantiated using a `clientId` instead of an `accessToken`
 
 ## 0.0.9 (2023-05-09)
