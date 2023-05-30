@@ -217,8 +217,8 @@ class CardFragment : Fragment() {
         )
 
     private fun updateStatusText(text: String) {
-        if (!isDetached) {
-            requireActivity().runOnUiThread {
+        requireActivity().runOnUiThread {
+            if (!isDetached) {
                 binding.statusText.text = text
             }
         }
