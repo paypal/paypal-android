@@ -4,8 +4,8 @@ import com.paypal.checkout.error.ErrorInfo
 
 sealed class NativeCheckoutViewState {
     object Initial : NativeCheckoutViewState()
-    object GeneratingToken : NativeCheckoutViewState()
-    class TokenGenerated(val token: String) : NativeCheckoutViewState()
+    object FetchingClientId : NativeCheckoutViewState()
+    class ClientIdFetched(val token: String) : NativeCheckoutViewState()
     class OrderCreated(val orderId: String) : NativeCheckoutViewState()
     object CheckoutInit : NativeCheckoutViewState()
     object CheckoutStart : NativeCheckoutViewState()

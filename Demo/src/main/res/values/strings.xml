@@ -43,7 +43,7 @@
     <string name="use_test_card">Use a Test Card</string>
 
     <!-- NXO -->
-    <string name="get_token">Get Access Token</string>
+    <string name="get_client_id">Get Client ID</string>
     <string name="try_again">Try Again</string>
     <string name="fetching_access_token">Fetching access token…</string>
     <string name="approved">Approved</string>

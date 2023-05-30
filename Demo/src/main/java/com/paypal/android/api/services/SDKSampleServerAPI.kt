@@ -2,6 +2,7 @@ package com.paypal.android.api.services
 
 import com.google.gson.JsonObject
 import com.paypal.android.api.model.AccessToken
+import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.usecase.UpdateOrderUseCase
@@ -12,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -41,6 +43,9 @@ class SDKSampleServerAPI(baseUrl: String) {
 
         @POST("/access_tokens")
         suspend fun fetchAccessToken(): AccessToken
+
+        @GET("/client_id")
+        suspend fun fetchClientId(): ClientId
 
         @PATCH("/orders/{orderID}")
         suspend fun patchOrder(
@@ -72,6 +77,8 @@ class SDKSampleServerAPI(baseUrl: String) {
 
         service = retrofit.create(RetrofitService::class.java)
     }
+
+    suspend fun fetchClientId() = service.fetchClientId()
 
     suspend fun fetchAccessToken() = DEFAULT_ACCESS_TOKEN?.let {
         AccessToken(it)
