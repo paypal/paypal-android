@@ -7,10 +7,9 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
+import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
 import com.paypal.android.cardpayments.api.GetOrderInfoResponse
-import com.paypal.android.cardpayments.api.GetOrderRequest
-import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.OrderStatus
@@ -33,8 +32,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
