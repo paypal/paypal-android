@@ -4,6 +4,7 @@
 * Breaking Changes
   * CardPayments
     * Remove `status` property from `CardResult`
+    * Remove `paymentSource` property from `CardResult`
   * CorePayments
     * CoreConfig instances must now be instantiated using a `clientId` instead of an `accessToken`
 
