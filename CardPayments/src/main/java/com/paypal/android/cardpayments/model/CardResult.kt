@@ -7,6 +7,5 @@ import android.net.Uri
  */
 data class CardResult(
     val orderID: String,
-    val paymentSource: PaymentSource? = null,
     val deepLinkUrl: Uri? = null
 )

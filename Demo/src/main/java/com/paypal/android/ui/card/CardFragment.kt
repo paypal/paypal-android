@@ -127,20 +127,8 @@ class CardFragment : Fragment() {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 val statusText = "Confirmed Order: ${result.orderID}"
-                val paymentSourceText = result.paymentSource?.let {
-                    val text =
-                        "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
-                    val authText = it.authenticationResult?.let { auth ->
-                        val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
-                                "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
-                                "Authentication: ${auth.threeDSecure?.authenticationStatus}"
-                        threeDtext
-                    }
-                    text + authText
-                } ?: ""
-
                 val deepLink = result.deepLinkUrl?.toString().orEmpty()
-                val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
+                val joinedText = listOf(statusText, deepLink).joinToString("\n")
                 updateStatusText(joinedText)
             }
 
