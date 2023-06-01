@@ -219,6 +219,13 @@ class CardFragment : Fragment() {
         updateStatusTextWithCardResult(cardResult, result.status)
     }
 
+    private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
+        val statusText = "Confirmed Order: ${result.orderID} Status: $orderStatus"
+        val deepLink = result.deepLinkUrl?.toString().orEmpty()
+        val joinedText = listOf(statusText, deepLink).joinToString("\n")
+        updateStatusText(joinedText)
+    }
+
     private fun updateStatusText(text: String) {
         requireActivity().runOnUiThread {
             if (!isDetached) {
