@@ -12,7 +12,7 @@ Follow these steps to add PayPal Native payments:
 ## Setup a PayPal Developer Account
 
 You will need to set up authorization to use the PayPal Payments SDK.
-Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID and secret. These values are needed to generate an access token.
+Follow the steps in [Get Started](https://developer.paypal.com/api/rest/#link-getstarted) to create a client ID.
 
 The SDK requires a server-side integration to create an order to capture funds using the [PayPal Orders v2 API](https://developer.paypal.com/docs/api/orders/v2).
 The order created on your server will be used to authorize or capture funds. For initial setup, the `curl` commands below can be used as a reference for making server-side RESTful API calls.
@@ -40,10 +40,10 @@ A return URL is required for redirecting users back to the app after authenticat
 
 ### 3. Initiate PayPal Native checkout
 
-Create a `CoreConfig` using an [access token](../../README.md#access-token):
+Create a `CoreConfig` using an [client id](https://developer.paypal.com/api/rest/):
 
 ```kotlin
-val coreConfig = CoreConfig("<ACCESS_TOKEN>", environment = Environment.SANDBOX)
+val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
 ```
 
 Create a `PayPalNativeCheckoutClient` with your `RETURN_URL` created above::

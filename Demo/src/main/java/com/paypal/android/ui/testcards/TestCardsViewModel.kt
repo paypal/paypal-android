@@ -4,8 +4,14 @@ import androidx.lifecycle.ViewModel
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.data.card.TestCard
 import com.paypal.android.data.card.TestCardGroup
+import java.util.Calendar
 
 class TestCardsViewModel : ViewModel() {
+
+    companion object {
+        // 2 years into the future of the current year
+        val validExpirationYear = "${Calendar.getInstance().get(Calendar.YEAR) + 2}"
+    }
 
     val testCardGroups = listOf(
         TestCardGroup(
@@ -16,7 +22,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4111111111111111",
                         expirationMonth = "01",
-                        expirationYear = "2026",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     )
                 ),
@@ -25,7 +31,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4032035809742661",
                         expirationMonth = "09",
-                        expirationYear = "2026",
+                        expirationYear = validExpirationYear,
                         securityCode = "655"
                     )
                 ),
@@ -39,7 +45,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000002",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -48,7 +54,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000010",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -57,7 +63,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000028",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -66,7 +72,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000101",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -75,7 +81,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000044",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -84,7 +90,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000051",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -93,7 +99,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000069",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -102,7 +108,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000093",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -111,7 +117,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000036",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -120,7 +126,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000990000000004",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -129,7 +135,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000077",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),
@@ -138,7 +144,7 @@ class TestCardsViewModel : ViewModel() {
                     card = Card(
                         number = "4000000000000085",
                         expirationMonth = "01",
-                        expirationYear = "2023",
+                        expirationYear = validExpirationYear,
                         securityCode = "123"
                     ),
                 ),

@@ -1,5 +1,13 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* Breaking Changes
+  * CardPayments
+    * Remove `status` property from `CardResult`
+    * Remove `paymentSource` property from `CardResult`
+  * CorePayments
+    * CoreConfig instances must now be instantiated using a `clientId` instead of an `accessToken`
+
 ## 0.0.9 (2023-05-09)
 * CardPayments:
   * Make `Card.securityCode` required

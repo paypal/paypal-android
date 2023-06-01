@@ -1,7 +1,7 @@
 package com.paypal.android.api.services
 
 import com.google.gson.JsonObject
-import com.paypal.android.api.model.AccessToken
+import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.usecase.UpdateOrderUseCase
@@ -12,6 +12,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -21,8 +22,8 @@ private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
-// To hardcode an access token and order ID for this demo app, set the below values:
-private val DEFAULT_ACCESS_TOKEN: String? = null // = "your-token"
+// To hardcode an clientId and orderId for this demo app, set the below values:
+private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 class SDKSampleServerAPI(baseUrl: String) {
@@ -39,8 +40,8 @@ class SDKSampleServerAPI(baseUrl: String) {
         @POST("/orders")
         suspend fun createOrder(@Body order: OrderRequest): Order
 
-        @POST("/access_tokens")
-        suspend fun fetchAccessToken(): AccessToken
+        @GET("/client_id")
+        suspend fun fetchClientId(): ClientId
 
         @PATCH("/orders/{orderID}")
         suspend fun patchOrder(
@@ -73,9 +74,7 @@ class SDKSampleServerAPI(baseUrl: String) {
         service = retrofit.create(RetrofitService::class.java)
     }
 
-    suspend fun fetchAccessToken() = DEFAULT_ACCESS_TOKEN?.let {
-        AccessToken(it)
-    } ?: service.fetchAccessToken()
+    suspend fun fetchClientId() = DEFAULT_CLIENT_ID ?: service.fetchClientId().value
 
     suspend fun createOrder(orderRequest: CreateOrderRequest): Order = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")

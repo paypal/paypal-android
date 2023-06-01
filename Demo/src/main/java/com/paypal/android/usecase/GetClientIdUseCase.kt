@@ -5,11 +5,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class GetAccessTokenUseCase @Inject constructor(
+class GetClientIdUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
     suspend operator fun invoke(): String = withContext(Dispatchers.IO) {
-        val tokenResponse = sdkSampleServerAPI.fetchAccessToken()
-        tokenResponse.value
+        sdkSampleServerAPI.fetchClientId()
     }
 }

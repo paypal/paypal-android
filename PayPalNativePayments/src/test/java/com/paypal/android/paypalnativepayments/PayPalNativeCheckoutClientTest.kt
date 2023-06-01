@@ -1,7 +1,6 @@
 package com.paypal.android.paypalnativepayments
 
 import android.app.Application
-import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -19,7 +18,6 @@ import com.paypal.checkout.shipping.ShippingChangeActions
 import com.paypal.checkout.shipping.ShippingChangeAddress
 import com.paypal.checkout.shipping.ShippingChangeData
 import com.paypal.checkout.shipping.ShippingChangeType
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -48,11 +46,9 @@ import java.lang.reflect.Field
 class PayPalNativeCheckoutClientTest {
 
     private val mockApplication = mockk<Application>(relaxed = true)
-    private val mockClientId = generateRandomString()
     private val mockReturnUrl = "mock_return_url"
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
-    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
 
     private lateinit var sut: PayPalNativeCheckoutClient
 
@@ -60,7 +56,6 @@ class PayPalNativeCheckoutClientTest {
     fun setUp() {
         mockkStatic(PayPalCheckout::class)
         every { PayPalCheckout.setConfig(any()) } just runs
-        coEvery { clientIdRepository.fetchClientId() } returns mockClientId
     }
 
     @After
@@ -86,7 +81,7 @@ class PayPalNativeCheckoutClientTest {
             PayPalCheckout.setConfig(any())
         }
         expectThat(configSlot.captured) {
-            get { clientId }.isEqualTo(mockClientId)
+            get { clientId }.isEqualTo("fake-client-id")
             get { application }.isEqualTo(mockApplication)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
         }
@@ -139,32 +134,6 @@ class PayPalNativeCheckoutClientTest {
     }
 
     @Test
-    fun `when getting client id fails is invoked, it calls onPayPalFailure`() = runTest {
-        val error = PayPalSDKError(123, "fake-description")
-        val errorSlot = slot<PayPalSDKError>()
-        val payPalCheckoutListener = spyk<PayPalNativeCheckoutListener>()
-
-        coEvery { clientIdRepository.fetchClientId() } throws error
-        every {
-            payPalCheckoutListener.onPayPalCheckoutFailure(capture(errorSlot))
-        } answers { errorSlot.captured }
-
-        sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.listener = payPalCheckoutListener
-
-        sut.startCheckout(mockk(relaxed = true))
-        advanceUntilIdle()
-
-        verify {
-            payPalCheckoutListener.onPayPalCheckoutFailure(any())
-        }
-        expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(123)
-            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
-        }
-    }
-
-    @Test
     fun `when checkout is invoked with LIVE env, PayPalCheckout config is set with LIVE`() =
         runTest {
             val configSlot = slot<CheckoutConfig>()
@@ -174,7 +143,7 @@ class PayPalNativeCheckoutClientTest {
                 PayPalCheckout.startCheckout(any())
             } just runs
 
-            val config = CoreConfig("fake-access-token", Environment.LIVE)
+            val config = CoreConfig("fake-client-id", Environment.LIVE)
             sut = getPayPalCheckoutClient(config, testScheduler)
             sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
             advanceUntilIdle()
@@ -183,7 +152,7 @@ class PayPalNativeCheckoutClientTest {
                 PayPalCheckout.setConfig(any())
             }
             expectThat(configSlot.captured) {
-                get { clientId }.isEqualTo(mockClientId)
+                get { clientId }.isEqualTo("fake-client-id")
                 get { application }.isEqualTo(mockApplication)
                 get { environment }.isEqualTo(com.paypal.checkout.config.Environment.LIVE)
             }
@@ -199,7 +168,7 @@ class PayPalNativeCheckoutClientTest {
                 PayPalCheckout.startCheckout(any())
             } just runs
 
-            val config = CoreConfig("fake-access-token", Environment.STAGING)
+            val config = CoreConfig("fake-client-id", Environment.STAGING)
             sut = getPayPalCheckoutClient(config, testScheduler)
             sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
             advanceUntilIdle()
@@ -208,7 +177,7 @@ class PayPalNativeCheckoutClientTest {
                 PayPalCheckout.setConfig(any())
             }
             expectThat(configSlot.captured) {
-                get { clientId }.isEqualTo(mockClientId)
+                get { clientId }.isEqualTo("fake-client-id")
                 get { application }.isEqualTo(mockApplication)
                 get { environment }.isEqualTo(com.paypal.checkout.config.Environment.STAGE)
             }
@@ -361,7 +330,10 @@ class PayPalNativeCheckoutClientTest {
                     assertEquals(address.countryCode, mockCountryCode)
                 }
             )
-            analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-address-changed", null)
+            analyticsService.sendAnalyticsEvent(
+                "paypal-native-payments:shipping-address-changed",
+                null
+            )
         }
     }
 
@@ -409,7 +381,10 @@ class PayPalNativeCheckoutClientTest {
                         assertTrue(option.selected)
                     }
                 )
-                analyticsService.sendAnalyticsEvent("paypal-native-payments:shipping-method-changed", null)
+                analyticsService.sendAnalyticsEvent(
+                    "paypal-native-payments:shipping-method-changed",
+                    null
+                )
             }
         }
 
@@ -427,7 +402,7 @@ class PayPalNativeCheckoutClientTest {
     }
 
     private fun getPayPalCheckoutClient(
-        coreConfig: CoreConfig = CoreConfig("fake-access-token"),
+        coreConfig: CoreConfig = CoreConfig("fake-client-id"),
         testScheduler: TestCoroutineScheduler? = null
     ): PayPalNativeCheckoutClient {
         return testScheduler?.let {
@@ -437,7 +412,6 @@ class PayPalNativeCheckoutClientTest {
                 coreConfig,
                 mockReturnUrl,
                 analyticsService,
-                clientIdRepository,
                 dispatcher
             )
         } ?: PayPalNativeCheckoutClient(
@@ -445,7 +419,6 @@ class PayPalNativeCheckoutClientTest {
             coreConfig,
             mockReturnUrl,
             analyticsService,
-            clientIdRepository
         )
     }
 }

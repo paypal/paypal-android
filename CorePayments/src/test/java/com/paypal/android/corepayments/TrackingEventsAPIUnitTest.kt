@@ -32,6 +32,8 @@ class TrackingEventsAPIUnitTest {
         clientOS = "fake client OS"
     )
 
+    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+
     private lateinit var restClient: RestClient
     private lateinit var apiRequestSlot: CapturingSlot<APIRequest>
 
@@ -42,7 +44,7 @@ class TrackingEventsAPIUnitTest {
         restClient = mockk(relaxed = true)
 
         apiRequestSlot = slot()
-        sut = TrackingEventsAPI(restClient)
+        sut = TrackingEventsAPI(coreConfig, restClient)
     }
 
     @Test
@@ -50,7 +52,6 @@ class TrackingEventsAPIUnitTest {
         coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
 
         val event = AnalyticsEventData(
-            clientID = "fake-client-id",
             environment = "fake-environment",
             eventName = "fake-event",
             timestamp = 123L,

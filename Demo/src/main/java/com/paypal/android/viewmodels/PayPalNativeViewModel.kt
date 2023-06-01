@@ -18,7 +18,7 @@ import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
-import com.paypal.android.usecase.GetAccessTokenUseCase
+import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,9 +33,11 @@ class PayPalNativeViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     @Inject
-    lateinit var getAccessTokenUseCase: GetAccessTokenUseCase
+    lateinit var getClientIdUseCase: GetClientIdUseCase
+
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
+
     @Inject
     lateinit var updateOrderUseCase: UpdateOrderUseCase
 
@@ -105,18 +107,18 @@ class PayPalNativeViewModel @Inject constructor(
 
     lateinit var payPalClient: PayPalNativeCheckoutClient
 
-    private var accessToken = ""
+    private var clientId = ""
 
     private val exceptionHandler = CoroutineExceptionHandler { _, e ->
         internalState.postValue(NativeCheckoutViewState.CheckoutError(message = e.message))
     }
 
-    fun fetchAccessToken() {
-        internalState.postValue(NativeCheckoutViewState.GeneratingToken)
+    fun fetchClientId() {
+        internalState.postValue(NativeCheckoutViewState.FetchingClientId)
         viewModelScope.launch(exceptionHandler) {
-            accessToken = getAccessTokenUseCase()
-            initPayPalClient(accessToken)
-            internalState.postValue(NativeCheckoutViewState.TokenGenerated(accessToken))
+            clientId = getClientIdUseCase()
+            initPayPalClient()
+            internalState.postValue(NativeCheckoutViewState.ClientIdFetched(clientId))
         }
     }
 
@@ -131,14 +133,15 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun reset() {
-        accessToken = ""
+        clientId = ""
         internalState.postValue(NativeCheckoutViewState.Initial)
     }
 
-    private fun initPayPalClient(accessToken: String) {
+    private fun initPayPalClient() {
+        val clientId = "AcXwOk3dof7NCNcriyS8RVh5q39ozvdWUF9oHPrWqfyrDS4AwVdKe32Axuk2ADo6rI_31Vv6MGgOyzRt"
         payPalClient = PayPalNativeCheckoutClient(
             getApplication(),
-            CoreConfig(accessToken),
+            CoreConfig(clientId),
             "${BuildConfig.APPLICATION_ID}://paypalpay"
         )
         payPalClient.listener = payPalListener

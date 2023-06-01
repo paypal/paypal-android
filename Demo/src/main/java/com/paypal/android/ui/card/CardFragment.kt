@@ -120,29 +120,15 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun createOrder() {
-
-        val accessToken = sdkSampleServerAPI.fetchAccessToken().value
-        val configuration = CoreConfig(accessToken = accessToken)
+        val clientId = sdkSampleServerAPI.fetchClientId()
+        val configuration = CoreConfig(clientId = clientId)
         cardClient = CardClient(requireActivity(), configuration)
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
-                val statusText =
-                    "Confirmed Order: ${result.orderID}, status: ${result.status?.name}"
-                val paymentSourceText = result.paymentSource?.let {
-                    val text =
-                        "\nCard -> lastDigits: ${it.lastDigits}, brand: ${it.brand}, type: ${it.type}"
-                    val authText = it.authenticationResult?.let { auth ->
-                        val threeDtext = "\nLiability shift: ${auth.liabilityShift}," +
-                                "Enrollment: ${auth.threeDSecure?.enrollmentStatus}," +
-                                "Authentication: ${auth.threeDSecure?.authenticationStatus}"
-                        threeDtext
-                    }
-                    text + authText
-                } ?: ""
-
+                val statusText = "Confirmed Order: ${result.orderID}"
                 val deepLink = result.deepLinkUrl?.toString().orEmpty()
-                val joinedText = listOf(statusText, paymentSourceText, deepLink).joinToString("\n")
+                val joinedText = listOf(statusText, deepLink).joinToString("\n")
                 updateStatusText(joinedText)
             }
 
@@ -219,8 +205,8 @@ class CardFragment : Fragment() {
         )
 
     private fun updateStatusText(text: String) {
-        if (!isDetached) {
-            requireActivity().runOnUiThread {
+        requireActivity().runOnUiThread {
+            if (!isDetached) {
                 binding.statusText.text = text
             }
         }

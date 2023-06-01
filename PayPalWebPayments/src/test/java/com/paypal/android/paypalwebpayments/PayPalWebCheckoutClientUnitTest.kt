@@ -7,7 +7,6 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.corepayments.ClientIdRepository
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -20,8 +19,6 @@ import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 import java.lang.reflect.Field
 
 @ExperimentalCoroutinesApi
@@ -34,41 +31,11 @@ class PayPalWebCheckoutClientUnitTest {
     private val coreConfig: CoreConfig = mockk(relaxed = true)
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
-    private val clientIdRepository = mockk<ClientIdRepository>(relaxed = true)
-
-    @Test
-    fun `start() delivers error if error fetching clientID`() = runTest {
-        val fakeCode = 123
-        val error = PayPalSDKError(fakeCode, "fake-description")
-        val errorSlot = slot<PayPalSDKError>()
-        val payPalCheckoutListener = spyk<PayPalWebCheckoutListener>()
-
-        coEvery { clientIdRepository.fetchClientId() } throws error
-        every {
-            payPalCheckoutListener.onPayPalWebFailure(capture(errorSlot))
-        } answers { errorSlot.captured }
-
-        val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.listener = payPalCheckoutListener
-
-        sut.start(mockk(relaxed = true))
-        advanceUntilIdle()
-
-        verify {
-            payPalCheckoutListener.onPayPalWebFailure(any())
-        }
-        expectThat(errorSlot.captured) {
-            get { code }.isEqualTo(fakeCode)
-            get { errorDescription }.isEqualTo("Error fetching clientID. Contact developer.paypal.com/support.")
-        }
-    }
 
     @Test
     fun `start() starts browserSwitchClient with correct parameters`() = runTest {
         val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
         val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
-
-        coEvery { clientIdRepository.fetchClientId() } returns "fake-client-id"
 
         coEvery {
             browserSwitchHelper.configurePayPalBrowserSwitchOptions(any(), any(), any())
@@ -318,7 +285,6 @@ class PayPalWebCheckoutClientUnitTest {
                 activity,
                 coreConfig,
                 analyticsService,
-                clientIdRepository,
                 browserSwitchClient,
                 browserSwitchHelper,
                 dispatcher
@@ -327,7 +293,6 @@ class PayPalWebCheckoutClientUnitTest {
             activity,
             coreConfig,
             analyticsService,
-            clientIdRepository,
             browserSwitchClient,
             browserSwitchHelper
         ))

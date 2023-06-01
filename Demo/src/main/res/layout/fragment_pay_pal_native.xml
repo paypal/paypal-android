@@ -87,11 +87,11 @@
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/fetch_access_token_button"
+            android:id="@+id/fetch_client_id_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/standard_margin"
-            android:text="@string/get_token"
+            android:text="@string/get_client_id"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>

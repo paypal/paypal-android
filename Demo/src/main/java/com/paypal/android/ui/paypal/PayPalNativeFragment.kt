@@ -42,7 +42,7 @@ class PayPalNativeFragment : Fragment() {
         }
         with(binding) {
             startNativeCheckout.setOnClickListener { startCheckout() }
-            fetchAccessTokenButton.setOnClickListener { viewModel.fetchAccessToken() }
+            fetchClientIdButton.setOnClickListener { viewModel.fetchClientId() }
             tryAgainButton.setOnClickListener { viewModel.reset() }
         }
         initShippingOptions()
@@ -74,10 +74,10 @@ class PayPalNativeFragment : Fragment() {
             is NativeCheckoutViewState.CheckoutComplete -> checkoutComplete(viewState)
             is NativeCheckoutViewState.CheckoutError -> checkoutError(viewState)
             NativeCheckoutViewState.CheckoutStart -> checkoutStart()
-            NativeCheckoutViewState.GeneratingToken -> generatingToken()
+            NativeCheckoutViewState.FetchingClientId -> generatingToken()
             NativeCheckoutViewState.Initial -> setInitialState()
             is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
-            is NativeCheckoutViewState.TokenGenerated -> tokenGenerated(viewState)
+            is NativeCheckoutViewState.ClientIdFetched -> tokenGenerated(viewState)
             NativeCheckoutViewState.CheckoutInit -> checkoutInit()
             NativeCheckoutViewState.OrderPatched -> orderPatched()
         }
@@ -85,8 +85,8 @@ class PayPalNativeFragment : Fragment() {
 
     private fun setInitialState() {
         with(binding) {
-            fetchAccessTokenButton.visibility = View.VISIBLE
-            fetchAccessTokenButton.isEnabled = true
+            fetchClientIdButton.visibility = View.VISIBLE
+            fetchClientIdButton.isEnabled = true
             startNativeCheckout.visibility = View.GONE
             contentGroup.visibility = View.GONE
             tryAgainButton.visibility = View.GONE
@@ -95,19 +95,19 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun generatingToken() {
-        showProgress(getString(R.string.fetching_access_token))
+        showProgress(getString(R.string.fetching_client_id))
         with(binding) {
-            fetchAccessTokenButton.isEnabled = false
+            fetchClientIdButton.isEnabled = false
             startNativeCheckout.visibility = View.GONE
         }
     }
 
-    private fun tokenGenerated(viewState: NativeCheckoutViewState.TokenGenerated) {
+    private fun tokenGenerated(viewState: NativeCheckoutViewState.ClientIdFetched) {
         hideProgress()
         setContent(getString(R.string.token_generated), viewState.token)
         with(binding) {
             startNativeCheckout.visibility = View.VISIBLE
-            fetchAccessTokenButton.visibility = View.GONE
+            fetchClientIdButton.visibility = View.GONE
             checkoutOptionsRadioGroup.clearCheck()
             checkoutOptionsRadioGroup.isVisible = true
         }
