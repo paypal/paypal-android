@@ -24,16 +24,4 @@ internal class CheckoutOrdersAPI(
             return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
         }
     }
-
-    suspend fun getOrderInfo(getOrderRequest: GetOrderRequest): GetOrderInfoResponse {
-        val apiRequest = requestFactory.createGetOrderInfoRequest(getOrderRequest)
-        val httpResponse = restClient.send(apiRequest)
-
-        val error = responseParser.parseError(httpResponse)
-        if (error != null) {
-            throw error
-        } else {
-            return responseParser.parseGetOrderInfoResponse(httpResponse)
-        }
-    }
 }

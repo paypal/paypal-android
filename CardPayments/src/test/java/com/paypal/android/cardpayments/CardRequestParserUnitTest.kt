@@ -2,9 +2,6 @@ package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.Code
 import com.paypal.android.corepayments.HttpResponse
-import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PaymentsJSON
-import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
@@ -30,68 +27,6 @@ class CardRequestParserUnitTest {
         @Before
         fun setUp() {
             sut = CardResponseParser()
-        }
-
-        @Test
-        fun `it parses a get info order response`() {
-            val response = """ 
-            {
-                "id":"89H32494DY5382259",
-                "intent":"AUTHORIZE",
-                "status":"CREATED",
-                "payment_source":{
-                    "card":{
-                        "last_digits":"2661",
-                        "brand":"VISA",
-                        "type":"CREDIT",
-                        "authentication_result":{
-                            "liability_shift":"NO",
-                            "three_d_secure":{
-                                "enrollment_status":"U"
-                            }
-                        }
-                    }
-                },
-                "purchase_units":[
-                    {
-                        "reference_id":"default",
-                        "amount":{
-                            "currency_code":"USD",
-                            "value":"10.99"
-                        },
-                        "payee":{
-                            "email_address":"sb-nsaqd6969163@business.example.com",
-                            "merchant_id":"87YQEA4JG8AUW"
-                        }
-                    }
-                ]
-            }
-        """.trimIndent()
-
-            val mockHttpResponse = mockk<HttpResponse>(relaxed = true)
-            every { mockHttpResponse.body } returns response
-
-            val expected = GetOrderInfoResponse(PaymentsJSON(response))
-            val actual = sut.parseGetOrderInfoResponse(mockHttpResponse)
-
-            Assert.assertEquals(expected, actual)
-        }
-
-        @Test
-        fun `it throws an error if json is invalid`() {
-            val invalidJsonResponse = "invalid_json"
-            val mockHttpResponse = mockk<HttpResponse>(relaxed = true)
-            every { mockHttpResponse.body } returns invalidJsonResponse
-            every { mockHttpResponse.headers } returns headers
-
-            var capturedError: PayPalSDKError? = null
-            try {
-                sut.parseGetOrderInfoResponse(mockHttpResponse)
-            } catch (e: PayPalSDKError) {
-                capturedError = e
-            }
-            Assert.assertEquals(Code.DATA_PARSING_ERROR.ordinal, capturedError?.code)
-            Assert.assertEquals(correlationID, capturedError?.correlationID)
         }
 
         @Test

@@ -9,7 +9,6 @@ import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
-import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.OrderStatus
@@ -145,10 +144,6 @@ class CardClientUnitTest {
             val browserSwitchResult =
                 createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, approveOrderMetadata)
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-            val response =
-                GetOrderInfoResponse("sample-order-id", OrderStatus.APPROVED, OrderIntent.CAPTURE)
-            coEvery { checkoutOrdersAPI.getOrderInfo(any()) } returns response
 
             sut.handleBrowserSwitchResult(activity)
             advanceUntilIdle()

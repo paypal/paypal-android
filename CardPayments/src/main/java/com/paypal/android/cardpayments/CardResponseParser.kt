@@ -1,7 +1,6 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
-import com.paypal.android.cardpayments.api.GetOrderInfoResponse
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.APIClientError
@@ -32,17 +31,6 @@ internal class CardResponseParser {
                 json.optMapObject("payment_source.card") { PaymentSource(it) },
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
-        } catch (ignored: JSONException) {
-            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
-            throw APIClientError.dataParsingError(correlationID)
-        }
-
-    @Throws(PayPalSDKError::class)
-    fun parseGetOrderInfoResponse(httpResponse: HttpResponse): GetOrderInfoResponse =
-        try {
-            val bodyResponse = httpResponse.body!!
-            val json = PaymentsJSON(bodyResponse)
-            GetOrderInfoResponse(json)
         } catch (ignored: JSONException) {
             val correlationID = httpResponse.headers["Paypal-Debug-Id"]
             throw APIClientError.dataParsingError(correlationID)
