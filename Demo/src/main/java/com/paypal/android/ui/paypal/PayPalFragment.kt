@@ -65,15 +65,40 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
         Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
 
+        when (binding.radioGroupIntent.checkedRadioButtonId) {
+            R.id.intent_authorize -> captureOrder(result)
+            R.id.intent_capture -> authorizeOrder(result)
+        }
+
         val title = getString(R.string.order_approved)
 
         val payerId = getString(R.string.payer_id, result.payerId)
         val orderId = getString(R.string.order_id, result.orderId)
         val statusText = "$payerId\n$orderId"
 
-        binding.statusText.text = "$title\n$statusText"
-        hideLoader()
+        updateStatusText("$title\n$statusText")
     }
+
+    private fun captureOrder(payPalResult: PayPalWebCheckoutResult) =
+        viewLifecycleOwner.lifecycleScope.launch {
+            payPalResult.orderId?.let { orderId ->
+                updateStatusText("Capturing order with ID: $orderId")
+                val result = sdkSampleServerAPI.captureOrder(orderId)
+                updateStatusTextWithPayPalResult(payPalResult, result.status)
+                hideLoader()
+            }
+        }
+
+
+    private fun authorizeOrder(payPalResult: PayPalWebCheckoutResult) =
+        viewLifecycleOwner.lifecycleScope.launch {
+            payPalResult.orderId?.let { orderId ->
+                updateStatusText("Authorizing order with ID: $orderId")
+                val result = sdkSampleServerAPI.authorizeOrder(orderId)
+                updateStatusTextWithPayPalResult(payPalResult, result.status)
+                hideLoader()
+            }
+        }
 
     @SuppressLint("SetTextI18n")
     override fun onPayPalWebFailure(error: PayPalSDKError) {
@@ -106,7 +131,11 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 val clientId = sdkSampleServerAPI.fetchClientId()
                 val coreConfig = CoreConfig(clientId)
                 paypalClient =
-                    PayPalWebCheckoutClient(requireActivity(), coreConfig, "com.paypal.android.demo")
+                    PayPalWebCheckoutClient(
+                        requireActivity(),
+                        coreConfig,
+                        "com.paypal.android.demo"
+                    )
                 paypalClient.listener = this@PayPalFragment
                 binding.statusText.setText(R.string.creating_order)
 
@@ -134,5 +163,21 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     private fun hideLoader() {
         binding.progressIndicator.visibility = View.INVISIBLE
+    }
+
+    private fun updateStatusTextWithPayPalResult(
+        result: PayPalWebCheckoutResult,
+        orderStatus: String?
+    ) {
+        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
+        updateStatusText(statusText)
+    }
+
+    private fun updateStatusText(text: String) {
+        requireActivity().runOnUiThread {
+            if (!isDetached) {
+                binding.statusText.text = text
+            }
+        }
     }
 }
