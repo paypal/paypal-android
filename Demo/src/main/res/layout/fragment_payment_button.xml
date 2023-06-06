@@ -29,6 +29,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/payPalButton" />
+
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:id="@+id/payPalPayLater"
             android:layout_width="0dp"
@@ -44,6 +45,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/standard_margin"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="48dp"
             android:text="@string/start_checkout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -54,6 +58,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/standard_margin"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:text="@string/custom_styling"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,11 +70,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/standard_margin"
-            android:visibility="invisible"
             android:indeterminate="true"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/submit_button"
+            app:layout_constraintTop_toBottomOf="@id/customize_button"
             tools:visibility="visible" />
 
         <TextView
