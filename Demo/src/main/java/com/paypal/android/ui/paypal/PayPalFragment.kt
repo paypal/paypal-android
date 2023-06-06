@@ -21,6 +21,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.utils.OrderUtils
+import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -35,6 +36,11 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     }
 
     private lateinit var binding: FragmentPaymentButtonBinding
+    private val orderIntent: OrderIntent
+        get() = when (binding.radioGroupIntent.checkedRadioButtonId) {
+            R.id.intent_authorize -> OrderIntent.AUTHORIZE
+            else -> OrderIntent.CAPTURE
+        }
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
@@ -65,11 +71,10 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
         Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
 
-        when (binding.radioGroupIntent.checkedRadioButtonId) {
-            R.id.intent_authorize -> captureOrder(result)
-            R.id.intent_capture -> authorizeOrder(result)
+        when (orderIntent) {
+            OrderIntent.CAPTURE -> captureOrder(result)
+            OrderIntent.AUTHORIZE -> authorizeOrder(result)
         }
-
         val title = getString(R.string.order_approved)
 
         val payerId = getString(R.string.payer_id, result.payerId)
@@ -139,7 +144,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                 paypalClient.listener = this@PayPalFragment
                 binding.statusText.setText(R.string.creating_order)
 
-                val orderRequest = OrderUtils.createOrderBuilder("5.0")
+                val orderRequest =
+                    OrderUtils.createOrderBuilder("5.0", orderIntent = orderIntent)
                 val order = sdkSampleServerAPI.createOrder(orderRequest)
                 order.id?.let { orderId ->
                     paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
