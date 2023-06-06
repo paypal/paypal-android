@@ -92,7 +92,8 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/intent_title" />
+            android:text="@string/intent_title"
+            android:textColor="@color/black" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/intent_authorize"
@@ -119,7 +120,8 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sca_title" />
+            android:text="@string/sca_title"
+            android:textColor="@color/black" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
             android:id="@+id/sca_always"
