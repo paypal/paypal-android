@@ -89,7 +89,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             payPalResult.orderId?.let { orderId ->
                 updateStatusText("Capturing order with ID: $orderId")
                 val result = sdkSampleServerAPI.captureOrder(orderId)
-                updateStatusTextWithPayPalResult(payPalResult, result.status)
+                updateStatusTextWithPayPalResult(payPalResult, result.status, OrderIntent.CAPTURE)
                 hideLoader()
             }
         }
@@ -100,7 +100,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
             payPalResult.orderId?.let { orderId ->
                 updateStatusText("Authorizing order with ID: $orderId")
                 val result = sdkSampleServerAPI.authorizeOrder(orderId)
-                updateStatusTextWithPayPalResult(payPalResult, result.status)
+                updateStatusTextWithPayPalResult(payPalResult, result.status, OrderIntent.AUTHORIZE)
                 hideLoader()
             }
         }
@@ -173,9 +173,10 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
 
     private fun updateStatusTextWithPayPalResult(
         result: PayPalWebCheckoutResult,
-        orderStatus: String?
+        orderStatus: String?,
+        intent: OrderIntent
     ) {
-        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
+        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus Intent: $intent"
         updateStatusText(statusText)
     }
 
