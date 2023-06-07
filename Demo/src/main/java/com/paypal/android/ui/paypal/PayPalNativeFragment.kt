@@ -75,19 +75,17 @@ class PayPalNativeFragment : Fragment() {
 
     private fun checkViewState(viewState: NativeCheckoutViewState) {
         when (viewState) {
+            NativeCheckoutViewState.Initial -> setInitialState()
+            NativeCheckoutViewState.CheckoutInit -> checkoutInit()
             NativeCheckoutViewState.CheckoutCancelled -> checkoutCancelled()
             is NativeCheckoutViewState.CheckoutComplete -> checkoutComplete(viewState)
             is NativeCheckoutViewState.CheckoutError -> checkoutError(viewState)
             NativeCheckoutViewState.CheckoutStart -> checkoutStart()
             NativeCheckoutViewState.FetchingClientId -> generatingToken()
-            NativeCheckoutViewState.Initial -> setInitialState()
             is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
             is NativeCheckoutViewState.ClientIdFetched -> clientIdFetched(viewState)
-            NativeCheckoutViewState.CheckoutInit -> checkoutInit()
             NativeCheckoutViewState.OrderPatched -> orderPatched()
-            NativeCheckoutViewState.CapturingOrder -> showProgress("Capturing Order...")
             is NativeCheckoutViewState.OrderCaptured -> orderCaptured(viewState)
-            NativeCheckoutViewState.AuthorizingOrder -> showProgress("Authorizing Order...")
             is NativeCheckoutViewState.OrderAuthorized -> orderAuthorized(viewState)
         }
     }
@@ -189,8 +187,14 @@ class PayPalNativeFragment : Fragment() {
         }
         viewState.orderId?.let { orderId ->
             when (orderIntent) {
-                OrderIntent.CAPTURE -> viewModel.captureOrder(orderId)
-                OrderIntent.AUTHORIZE -> viewModel.authorizeOrder(orderId)
+                OrderIntent.CAPTURE -> {
+                    showProgress("Capturing Order...")
+                    viewModel.captureOrder(orderId)
+                }
+                OrderIntent.AUTHORIZE -> {
+                    showProgress("Authorizing Order...")
+                    viewModel.authorizeOrder(orderId)
+                }
             }
         }
     }

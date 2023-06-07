@@ -158,13 +158,11 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun captureOrder(orderId: String) = viewModelScope.launch {
-        internalState.postValue(NativeCheckoutViewState.CapturingOrder)
         val order = captureOrderUseCase(orderId)
         internalState.postValue(NativeCheckoutViewState.OrderCaptured(order))
     }
 
     fun authorizeOrder(orderId: String) = viewModelScope.launch {
-        internalState.postValue(NativeCheckoutViewState.AuthorizingOrder)
         val order = authorizeOrderUseCase(orderId)
         internalState.postValue(NativeCheckoutViewState.OrderAuthorized(order))
     }

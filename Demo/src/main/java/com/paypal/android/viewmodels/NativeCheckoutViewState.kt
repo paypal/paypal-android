@@ -12,8 +12,6 @@ sealed class NativeCheckoutViewState {
     object CheckoutStart : NativeCheckoutViewState()
     object CheckoutCancelled : NativeCheckoutViewState()
     object OrderPatched : NativeCheckoutViewState()
-    object CapturingOrder : NativeCheckoutViewState()
-    object AuthorizingOrder : NativeCheckoutViewState()
     class OrderCaptured(val order: Order) : NativeCheckoutViewState()
     class OrderAuthorized(val order: Order) : NativeCheckoutViewState()
     class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) :
