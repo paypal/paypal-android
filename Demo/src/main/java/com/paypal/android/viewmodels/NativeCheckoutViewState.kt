@@ -1,5 +1,6 @@
 package com.paypal.android.viewmodels
 
+import com.paypal.android.api.model.Order
 import com.paypal.checkout.error.ErrorInfo
 
 sealed class NativeCheckoutViewState {
@@ -11,7 +12,13 @@ sealed class NativeCheckoutViewState {
     object CheckoutStart : NativeCheckoutViewState()
     object CheckoutCancelled : NativeCheckoutViewState()
     object OrderPatched : NativeCheckoutViewState()
-    class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) : NativeCheckoutViewState()
+    object CapturingOrder : NativeCheckoutViewState()
+    object AuthorizingOrder : NativeCheckoutViewState()
+    class OrderCaptured(val order: Order) : NativeCheckoutViewState()
+    class OrderAuthorized(val order: Order) : NativeCheckoutViewState()
+    class CheckoutError(val message: String? = null, val error: ErrorInfo? = null) :
+        NativeCheckoutViewState()
+
     data class CheckoutComplete(
         val payerId: String?,
         val orderId: String?

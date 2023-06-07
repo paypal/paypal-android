@@ -88,6 +88,34 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/content" />
 
+    <RadioGroup
+        android:id="@+id/radioGroupIntent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_margin="@dimen/padding_16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkout_options_radio_group">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intent_title"
+            android:textColor="@color/black" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/intent_authorize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/intent_authorize" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/intent_capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/intent_capture" />
+    </RadioGroup>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/fetch_client_id_button"

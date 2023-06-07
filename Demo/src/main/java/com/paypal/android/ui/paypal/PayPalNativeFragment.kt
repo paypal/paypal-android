@@ -15,6 +15,7 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
 import com.paypal.android.viewmodels.NativeCheckoutViewState
 import com.paypal.android.viewmodels.PayPalNativeViewModel
+import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -30,11 +31,14 @@ class PayPalNativeFragment : Fragment() {
     private var selectedShippingPreference: ShippingPreferenceType? = null
 
     private val viewModel: PayPalNativeViewModel by viewModels()
+    private val orderIntent: OrderIntent
+        get() = when (binding.radioGroupIntent.checkedRadioButtonId) {
+            R.id.intent_authorize -> OrderIntent.AUTHORIZE
+            else -> OrderIntent.CAPTURE
+        }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentPayPalNativeBinding.inflate(inflater, container, false)
         viewModel.state.observe(viewLifecycleOwner) { viewState ->
@@ -51,9 +55,10 @@ class PayPalNativeFragment : Fragment() {
 
     private fun startCheckout() {
         selectedShippingPreference?.let {
-            viewModel.orderIdCheckout(it)
+            viewModel.orderIdCheckout(it, orderIntent)
         }
         binding.checkoutOptionsRadioGroup.isVisible = false
+        binding.radioGroupIntent.isVisible = false
     }
 
     private fun initShippingOptions() {
@@ -77,9 +82,13 @@ class PayPalNativeFragment : Fragment() {
             NativeCheckoutViewState.FetchingClientId -> generatingToken()
             NativeCheckoutViewState.Initial -> setInitialState()
             is NativeCheckoutViewState.OrderCreated -> orderCreated(viewState)
-            is NativeCheckoutViewState.ClientIdFetched -> tokenGenerated(viewState)
+            is NativeCheckoutViewState.ClientIdFetched -> clientIdFetched(viewState)
             NativeCheckoutViewState.CheckoutInit -> checkoutInit()
             NativeCheckoutViewState.OrderPatched -> orderPatched()
+            NativeCheckoutViewState.CapturingOrder -> showProgress("Capturing Order...")
+            is NativeCheckoutViewState.OrderCaptured -> orderCaptured(viewState)
+            NativeCheckoutViewState.AuthorizingOrder -> showProgress("Authorizing Order...")
+            is NativeCheckoutViewState.OrderAuthorized -> orderAuthorized(viewState)
         }
     }
 
@@ -102,14 +111,15 @@ class PayPalNativeFragment : Fragment() {
         }
     }
 
-    private fun tokenGenerated(viewState: NativeCheckoutViewState.ClientIdFetched) {
+    private fun clientIdFetched(viewState: NativeCheckoutViewState.ClientIdFetched) {
         hideProgress()
-        setContent(getString(R.string.token_generated), viewState.token)
+        setContent(getString(R.string.client_id_fetched), viewState.token)
         with(binding) {
             startNativeCheckout.visibility = View.VISIBLE
             fetchClientIdButton.visibility = View.GONE
             checkoutOptionsRadioGroup.clearCheck()
             checkoutOptionsRadioGroup.isVisible = true
+            radioGroupIntent.isVisible = true
         }
     }
 
@@ -133,7 +143,8 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun checkoutError(viewState: NativeCheckoutViewState.CheckoutError) {
-        val message = viewState.message ?: viewState.error?.reason ?: getString(R.string.something_went_wrong)
+        val message =
+            viewState.message ?: viewState.error?.reason ?: getString(R.string.something_went_wrong)
         setContent(getString(R.string.error), message)
         hideProgress()
         with(binding) {
@@ -147,6 +158,18 @@ class PayPalNativeFragment : Fragment() {
         hideProgress()
     }
 
+    private fun orderCaptured(viewState: NativeCheckoutViewState.OrderCaptured) {
+        val contentText = viewState.order.run { "OrderId: $id Status: $status Intent: CAPTURE" }
+        setContent(getString(R.string.order_created), contentText)
+        hideProgress()
+    }
+
+    private fun orderAuthorized(viewState: NativeCheckoutViewState.OrderAuthorized) {
+        val contentText = viewState.order.run { "OrderId: $id Status: $status Intent: AUTHORIZE" }
+        setContent(getString(R.string.order_created), contentText)
+        hideProgress()
+    }
+
     private fun checkoutCancelled() {
         setContent(getString(R.string.cancelled), getString(R.string.checkout_cancelled_by_user))
         hideProgress()
@@ -157,13 +180,18 @@ class PayPalNativeFragment : Fragment() {
     }
 
     private fun checkoutComplete(viewState: NativeCheckoutViewState.CheckoutComplete) {
-        val content = "Order Id: ${viewState.orderId} \n" +
-                "Payer Id: ${viewState.payerId} \n"
+        val content = "Order Id: ${viewState.orderId} \n" + "Payer Id: ${viewState.payerId} \n"
         setContent(getString(R.string.approved), content)
         hideProgress()
         with(binding) {
             tryAgainButton.visibility = View.VISIBLE
             startNativeCheckout.visibility = View.GONE
+        }
+        viewState.orderId?.let { orderId ->
+            when (orderIntent) {
+                OrderIntent.CAPTURE -> viewModel.captureOrder(orderId)
+                OrderIntent.AUTHORIZE -> viewModel.authorizeOrder(orderId)
+            }
         }
     }
 

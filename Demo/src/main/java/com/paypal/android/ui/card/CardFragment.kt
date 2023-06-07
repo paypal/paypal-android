@@ -28,6 +28,7 @@ import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.ui.testcards.TestCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
+import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,6 +52,11 @@ class CardFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
     private lateinit var binding: FragmentCardBinding
+    private val orderIntent: OrderIntent
+        get() = when (binding.radioGroupIntent.checkedRadioButtonId) {
+            R.id.intent_authorize -> OrderIntent.AUTHORIZE
+            else -> OrderIntent.CAPTURE
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,11 +122,6 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun createOrder() {
-        val orderIntent = when (binding.radioGroupIntent.checkedRadioButtonId) {
-            R.id.intent_authorize -> "AUTHORIZE"
-            else -> "CAPTURE"
-        }
-
         val clientId = sdkSampleServerAPI.fetchClientId()
         val configuration = CoreConfig(clientId = clientId)
         cardClient = CardClient(requireActivity(), configuration)
@@ -129,8 +130,8 @@ class CardFragment : Fragment() {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewLifecycleOwner.lifecycleScope.launch {
                     when (orderIntent) {
-                        "CAPTURE" -> captureOrder(result)
-                        else -> authorizeOrder(result)
+                        OrderIntent.CAPTURE -> captureOrder(result)
+                        OrderIntent.AUTHORIZE -> authorizeOrder(result)
                     }
                 }
             }
@@ -156,7 +157,7 @@ class CardFragment : Fragment() {
         updateStatusText("Creating order...")
 
         val orderRequest = CreateOrderRequest(
-            intent = orderIntent,
+            intent = orderIntent.name,
             purchaseUnit = listOf(
                 com.paypal.android.api.model.PurchaseUnit(
                     amount = com.paypal.android.api.model.Amount(
