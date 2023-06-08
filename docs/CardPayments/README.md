@@ -101,7 +101,7 @@ val card = Card(
 Attach the card and the order ID from [step 3](#3-create-an-order) to a `CardRequest`. Strong Consumer Authentication (SCA) is enabled by default, so you need to specify a `return_url` to re direct to your app after the SCA challenge finishes. You can optionally set `sca` to `SCA_ALWAYS` if you want to require 3D Secure for every transaction.
 ```kotlin
 val cardRequest  = CardRequest(
-    orderID = "<ORDER_ID>",
+    orderId = "<ORDER_ID>",
     card = card,
     returnUrl = "myapp://return_url", // custom url scheme needs to be configured in AndroidManifest.xml (see below)
     sca = SCA.SCA_ALWAYS // default value is SCA_WHEN_REQUIRED

@@ -143,7 +143,7 @@ In order to use this migration guide, you must:
     private fun configurePayPalCheckout() {
     -    paymentButtonContainer.setup(
     -        createOrder = CreateOrder { createOrderActions ->
-    -            createOrderActions.set(orderID!!)
+    -            createOrderActions.set(orderId!!)
     -        },
     -        onApprove = OnApprove {
     -            // Handle result of order approval (authorize or capture)
