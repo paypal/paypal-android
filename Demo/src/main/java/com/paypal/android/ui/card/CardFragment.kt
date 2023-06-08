@@ -126,7 +126,7 @@ class CardFragment : Fragment() {
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
-                val statusText = "Confirmed Order: ${result.orderID}"
+                val statusText = "Confirmed Order: ${result.orderId}"
                 val deepLink = result.deepLinkUrl?.toString().orEmpty()
                 val joinedText = listOf(statusText, deepLink).joinToString("\n")
                 updateStatusText(joinedText)

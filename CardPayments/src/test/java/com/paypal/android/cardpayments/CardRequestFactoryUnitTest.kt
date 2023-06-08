@@ -13,7 +13,7 @@ import org.skyscreamer.jsonassert.JSONAssert
 @RunWith(RobolectricTestRunner::class)
 class CardRequestFactoryUnitTest {
 
-    private val orderID = "sample-order-id"
+    private val orderId = "sample-order-id"
 
     private val returnUrl = "return_url"
 
@@ -42,7 +42,7 @@ class CardRequestFactoryUnitTest {
             )
         )
 
-        val cardRequest = CardRequest(orderID, card, returnUrl)
+        val cardRequest = CardRequest(orderId, card, returnUrl)
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
@@ -84,7 +84,7 @@ class CardRequestFactoryUnitTest {
         val card =
             Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022", "123")
 
-        val cardRequest = CardRequest(orderID, card, returnUrl)
+        val cardRequest = CardRequest(orderId, card, returnUrl)
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
@@ -117,7 +117,7 @@ class CardRequestFactoryUnitTest {
         val card =
             Card(number = "4111111111111111", expirationMonth = "01", expirationYear = "2022", "123")
 
-        val cardRequest = CardRequest(orderID, card, returnUrl, SCA.SCA_ALWAYS)
+        val cardRequest = CardRequest(orderId, card, returnUrl, SCA.SCA_ALWAYS)
 
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)

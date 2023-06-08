@@ -140,7 +140,7 @@ internal class GraphQLClientUnitTest {
             val expectedErrorMessage =
                 "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support."
             assertEquals(expectedErrorMessage, e.errorDescription)
-            assertEquals("fake-debug-id", e.correlationID)
+            assertEquals("fake-debug-id", e.correlationId)
         }
     }
 }

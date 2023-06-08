@@ -43,9 +43,9 @@ class SDKSampleServerAPI(baseUrl: String) {
         @GET("/client_id")
         suspend fun fetchClientId(): ClientId
 
-        @PATCH("/orders/{orderID}")
+        @PATCH("/orders/{orderId}")
         suspend fun patchOrder(
-            @Path("orderID") orderId: String,
+            @Path("orderId") orderId: String,
             @Body body: List<UpdateOrderUseCase.PatchRequestBody>
         ): ResponseBody
     }

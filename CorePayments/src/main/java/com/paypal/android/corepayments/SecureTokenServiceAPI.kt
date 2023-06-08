@@ -9,23 +9,23 @@ class SecureTokenServiceAPI internal constructor(
     suspend fun getClientId(): String {
         val apiRequest = APIRequest("v1/oauth2/token", HttpMethod.GET)
         val response = restClient.send(apiRequest)
-        val correlationID = response.headers["Paypal-Debug-Id"]
+        val correlationId = response.headers["Paypal-Debug-Id"]
         if (response.isSuccessful) {
-            return parseClientId(response.body, correlationID)
+            return parseClientId(response.body, correlationId)
         }
-        throw APIClientError.serverResponseError(correlationID)
+        throw APIClientError.serverResponseError(correlationId)
     }
 
     @Throws(PayPalSDKError::class)
-    private fun parseClientId(responseBody: String?, correlationID: String?): String {
+    private fun parseClientId(responseBody: String?, correlationId: String?): String {
         if (responseBody.isNullOrBlank()) {
-            throw APIClientError.noResponseData(correlationID)
+            throw APIClientError.noResponseData(correlationId)
         }
         val json = PaymentsJSON(responseBody)
-        val clientID = json.optString("client_id")
-        if (clientID.isNullOrBlank()) {
-            throw APIClientError.dataParsingError(correlationID)
+        val clientId = json.optString("client_id")
+        if (clientId.isNullOrBlank()) {
+            throw APIClientError.dataParsingError(correlationId)
         }
-        return clientID
+        return clientId
     }
 }

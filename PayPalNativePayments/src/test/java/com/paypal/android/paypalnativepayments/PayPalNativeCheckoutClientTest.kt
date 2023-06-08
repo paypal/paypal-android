@@ -217,12 +217,12 @@ class PayPalNativeCheckoutClientTest {
 
     @Test
     fun `when OnApprove is invoked, onPayPalSuccess is called`() {
-        val mockOrderID = "mock_order_id"
-        val mockPayerID = "mock_payer_id"
+        val mockOrderId = "mock_order_id"
+        val mockPayerId = "mock_payer_id"
         val approval = mockk<Approval>(relaxed = true)
 
-        every { approval.data.payerId } returns mockPayerID
-        every { approval.data.orderId } returns mockOrderID
+        every { approval.data.payerId } returns mockPayerId
+        every { approval.data.orderId } returns mockOrderId
         val onApproveSlot = slot<OnApprove>()
 
         every {
@@ -241,8 +241,8 @@ class PayPalNativeCheckoutClientTest {
 
         verify {
             payPalClientListener.onPayPalCheckoutSuccess(withArg { approve ->
-                assertEquals(approve.orderID, mockOrderID)
-                assertEquals(approve.payerID, mockPayerID)
+                assertEquals(approve.orderId, mockOrderId)
+                assertEquals(approve.payerId, mockPayerId)
             })
         }
     }
@@ -342,13 +342,13 @@ class PayPalNativeCheckoutClientTest {
         runTest {
             val onShippingChangeSlot = slot<OnShippingChange>()
 
-            val mockID = "mock_ID"
+            val mockId = "mock-id"
             val mockLabel = "mock_label"
             val shippingActions = mockk<ShippingChangeActions>(relaxed = true)
             val shippingData = mockk<ShippingChangeData>(relaxed = true)
 
             every { shippingData.shippingChangeType } returns ShippingChangeType.OPTION_CHANGE
-            every { shippingData.selectedShippingOption } returns Options(mockID, true, mockLabel)
+            every { shippingData.selectedShippingOption } returns Options(mockId, true, mockLabel)
 
             every {
                 PayPalCheckout.registerCallbacks(
@@ -376,7 +376,7 @@ class PayPalNativeCheckoutClientTest {
                 shippingListener.onPayPalNativeShippingMethodChange(
                     ofType(PayPalNativePaysheetActions::class),
                     withArg { option ->
-                        assertEquals(option.id, mockID)
+                        assertEquals(option.id, mockId)
                         assertEquals(option.label, mockLabel)
                         assertTrue(option.selected)
                     }

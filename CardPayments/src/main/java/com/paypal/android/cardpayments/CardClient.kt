@@ -64,7 +64,7 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
-        orderId = cardRequest.orderID
+        orderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
@@ -77,11 +77,11 @@ class CardClient internal constructor(
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:confirm-payment-source:succeeded",
-                cardRequest.orderID
+                cardRequest.orderId
             )
 
             if (response.payerActionHref == null) {
-                val result = CardResult(response.orderID)
+                val result = CardResult(response.orderId)
                 notifyApproveOrderSuccess(result)
             } else {
                 analyticsService.sendAnalyticsEvent(
@@ -93,7 +93,7 @@ class CardClient internal constructor(
                 // launch the 3DS flow
                 val urlScheme = cardRequest.run { Uri.parse(returnUrl).scheme }
                 val approveOrderMetadata =
-                    ApproveOrderMetadata(cardRequest.orderID, response.paymentSource)
+                    ApproveOrderMetadata(cardRequest.orderId, response.paymentSource)
                 val options = BrowserSwitchOptions()
                     .url(Uri.parse(response.payerActionHref))
                     .returnUrlScheme(urlScheme)
@@ -104,7 +104,7 @@ class CardClient internal constructor(
         } catch (error: PayPalSDKError) {
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:confirm-payment-source:failed",
-                cardRequest.orderID
+                cardRequest.orderId
             )
             throw error
         }
@@ -127,15 +127,15 @@ class CardClient internal constructor(
                 try {
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:get-order-info:succeeded",
-                        metadata.orderID
+                        metadata.orderId
                     )
                     val deepLinkUrl = browserSwitchResult.deepLinkUrl
-                    val result = CardResult(metadata.orderID, deepLinkUrl)
+                    val result = CardResult(metadata.orderId, deepLinkUrl)
                     notifyApproveOrderSuccess(result)
                 } catch (error: PayPalSDKError) {
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:get-order-info:failed",
-                        metadata.orderID
+                        metadata.orderId
                     )
                     throw error
                 }

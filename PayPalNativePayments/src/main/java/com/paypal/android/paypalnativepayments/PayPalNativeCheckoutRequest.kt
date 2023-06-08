@@ -7,5 +7,5 @@ data class PayPalNativeCheckoutRequest(
     /**
      * The order ID associated with the request.
      */
-    val orderID: String
+    val orderId: String
 )

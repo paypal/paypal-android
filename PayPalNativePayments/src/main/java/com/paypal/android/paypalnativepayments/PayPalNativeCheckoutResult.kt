@@ -7,9 +7,9 @@ data class PayPalNativeCheckoutResult(
     /**
      *  The order ID associated with the transaction
      */
-    val orderID: String?,
+    val orderId: String?,
     /**
      * The Payer ID (or user ID) associated with the transaction
      */
-    val payerID: String?
+    val payerId: String?
 )

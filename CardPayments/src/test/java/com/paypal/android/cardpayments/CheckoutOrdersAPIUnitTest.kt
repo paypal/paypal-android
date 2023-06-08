@@ -28,7 +28,7 @@ class CheckoutOrdersAPIUnitTest {
     // language=JSON
     private val successBody = """
             {
-                "id": "testOrderID",
+                "id": "test-order-id",
                 "status": "APPROVED",
                 "payment_source": {
                     "card": {
@@ -45,7 +45,7 @@ class CheckoutOrdersAPIUnitTest {
     private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24", "123")
-    private val orderID = "sample-order-id"
+    private val orderId = "sample-order-id"
     private val apiRequest = APIRequest("/sample/path", HttpMethod.POST, null)
 
     // language=JSON
@@ -76,7 +76,7 @@ class CheckoutOrdersAPIUnitTest {
     private val headers = mapOf("Paypal-Debug-Id" to correlationId)
 
     private val cardRequest = CardRequest(
-        orderID,
+        orderId,
         card,
         "return_url"
     )
@@ -105,7 +105,7 @@ class CheckoutOrdersAPIUnitTest {
 
         val result = sut.confirmPaymentSource(cardRequest)
 
-        assertEquals("testOrderID", result.orderID)
+        assertEquals("test-order-id", result.orderId)
         assertEquals(OrderStatus.APPROVED, result.status)
     }
 
@@ -243,7 +243,7 @@ class CheckoutOrdersAPIUnitTest {
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
-            assertEquals(correlationId, capturedError.correlationID)
+            assertEquals(correlationId, capturedError.correlationId)
         }
 
     @Test
@@ -257,6 +257,6 @@ class CheckoutOrdersAPIUnitTest {
             capturedError = e
         }
 
-        assertEquals(correlationId, capturedError.correlationID)
+        assertEquals(correlationId, capturedError.correlationId)
     }
 }

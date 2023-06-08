@@ -46,7 +46,7 @@ internal class CardRequestFactory {
 
             val body = bodyJSON.toString().replace("\\/", "/")
 
-            val path = "v2/checkout/orders/$orderID/confirm-payment-source"
+            val path = "v2/checkout/orders/$orderId/confirm-payment-source"
             APIRequest(path, HttpMethod.POST, body)
         }
 }

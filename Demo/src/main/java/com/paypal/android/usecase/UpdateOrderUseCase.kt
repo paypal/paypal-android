@@ -10,7 +10,7 @@ import javax.inject.Inject
 class UpdateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
-    suspend operator fun invoke(orderID: String, shippingMethod: PayPalNativeShippingMethod) =
+    suspend operator fun invoke(orderId: String, shippingMethod: PayPalNativeShippingMethod) =
         withContext(Dispatchers.IO) {
             // https://developer.paypal.com/docs/api/orders/v2/#orders_patch
             val options = OrderUtils.createShippingOptionsBuilder(selectedId = shippingMethod.id)
@@ -23,7 +23,7 @@ class UpdateOrderUseCase @Inject constructor(
                 path = "/purchase_units/@reference_id=='PUHF'/amount",
                 value = amount
             )
-            sdkSampleServerAPI.patchOrder(orderID, listOf(patchAmount, patchShipping))
+            sdkSampleServerAPI.patchOrder(orderId, listOf(patchAmount, patchShipping))
         }
 
     data class PatchRequestBody(

@@ -55,7 +55,7 @@ class AnalyticsService internal constructor(
             } catch (e: PayPalSDKError) {
                 Log.d(
                     "[PayPal SDK]",
-                    "Failed to send analytics due to missing clientID: ${e.message}"
+                    "Failed to send analytics due to missing clientId: ${e.message}"
                 )
             }
         }

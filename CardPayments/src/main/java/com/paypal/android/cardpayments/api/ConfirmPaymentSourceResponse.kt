@@ -5,7 +5,7 @@ import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.OrderStatus
 
 internal data class ConfirmPaymentSourceResponse(
-    val orderID: String,
+    val orderId: String,
     val status: OrderStatus? = null,
     val payerActionHref: String? = null,
     val paymentSource: PaymentSource? = null,
