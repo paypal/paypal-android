@@ -209,19 +209,19 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun captureOrder(cardResult: CardResult) {
-        updateStatusText("Capturing order with ID: ${cardResult.orderID}...")
-        val result = sdkSampleServerAPI.captureOrder(cardResult.orderID)
+        updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
+        val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
 
     private suspend fun authorizeOrder(cardResult: CardResult) {
-        updateStatusText("Authorizing order with ID: ${cardResult.orderID}...")
-        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderID)
+        updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
+        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
 
     private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
-        val statusText = "Confirmed Order: ${result.orderID} Status: $orderStatus"
+        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
         val deepLink = result.deepLinkUrl?.toString().orEmpty()
         val joinedText = listOf(statusText, deepLink).joinToString("\n")
         updateStatusText(joinedText)

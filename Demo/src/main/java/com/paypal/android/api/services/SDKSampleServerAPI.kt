@@ -49,11 +49,11 @@ class SDKSampleServerAPI(baseUrl: String) {
             @Body body: List<UpdateOrderUseCase.PatchRequestBody>
         ): ResponseBody
 
-        @POST("/orders/{orderID}/capture")
-        suspend fun captureOrder(@Path("orderID") orderId: String): Order
+        @POST("/orders/{orderId}/capture")
+        suspend fun captureOrder(@Path("orderId") orderId: String): Order
 
-        @POST("/orders/{orderID}/authorize")
-        suspend fun authorizeOrder(@Path("orderID") orderId: String): Order
+        @POST("/orders/{orderId}/authorize")
+        suspend fun authorizeOrder(@Path("orderId") orderId: String): Order
     }
 
     private val service: RetrofitService
