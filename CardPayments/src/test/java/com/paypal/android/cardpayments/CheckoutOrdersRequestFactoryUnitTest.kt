@@ -77,7 +77,7 @@ class CheckoutOrdersRequestFactoryUnitTest {
               }             
             }
         """.trimIndent()
-        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
     }
 
     @Test
@@ -196,7 +196,7 @@ class CheckoutOrdersRequestFactoryUnitTest {
               }             
             }
         """.trimIndent()
-        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
     }
 
     @Test
@@ -247,6 +247,54 @@ class CheckoutOrdersRequestFactoryUnitTest {
               }             
             }
         """.trimIndent()
-        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), false)
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
+    }
+
+    @Test
+    fun `it should ignore empty string customer ids`() {
+        val card = Card(
+            cardholderName = "Cardholder Name",
+            number = "4111111111111111",
+            expirationMonth = "01",
+            expirationYear = "2022",
+            securityCode = "123"
+        )
+
+        val cardRequest = CardRequest(
+            orderId,
+            card,
+            returnUrl,
+            shouldVault = true,
+            vaultCustomerId = ""
+        )
+        val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
+        assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
+
+        // language=JSON
+        val expectedJSON = """
+            {
+              "payment_source": {
+                "card": {
+                  "name": "Cardholder Name",
+                  "number": "4111111111111111",
+                  "expiry": "2022-01",
+                  "security_code": "123",
+                  "attributes": {
+                    "verification": {
+                      "method": "SCA_WHEN_REQUIRED"
+                    },
+                    "vault": {
+                      "store_in_vault": "ON_SUCCESS"
+                    }
+                  }
+                }
+              },
+              "application_context": {
+                "return_url": "return_url",
+                "cancel_url": "return_url"
+              }             
+            }
+        """.trimIndent()
+        JSONAssert.assertEquals(JSONObject(expectedJSON), JSONObject(apiRequest.body!!), true)
     }
 }
