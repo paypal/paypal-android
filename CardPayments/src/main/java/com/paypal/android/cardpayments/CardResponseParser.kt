@@ -32,8 +32,8 @@ internal class CardResponseParser {
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (ignored: JSONException) {
-            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
-            throw APIClientError.dataParsingError(correlationID)
+            val correlationId = httpResponse.headers["Paypal-Debug-Id"]
+            throw APIClientError.dataParsingError(correlationId)
         }
 
     fun parseError(httpResponse: HttpResponse): PayPalSDKError? {
@@ -42,20 +42,20 @@ internal class CardResponseParser {
             result = null
         } else {
 
-            val correlationID = httpResponse.headers["Paypal-Debug-Id"]
+            val correlationId = httpResponse.headers["Paypal-Debug-Id"]
             val bodyResponse = httpResponse.body
             if (bodyResponse.isNullOrBlank()) {
-                result = APIClientError.noResponseData(correlationID)
+                result = APIClientError.noResponseData(correlationId)
             } else {
                 result = when (val status = httpResponse.status) {
                     HttpResponse.STATUS_UNKNOWN_HOST -> {
-                        APIClientError.unknownHost(correlationID)
+                        APIClientError.unknownHost(correlationId)
                     }
                     HttpResponse.STATUS_UNDETERMINED -> {
-                        APIClientError.unknownError(correlationID)
+                        APIClientError.unknownError(correlationId)
                     }
                     HttpResponse.SERVER_ERROR -> {
-                        APIClientError.serverResponseError(correlationID)
+                        APIClientError.serverResponseError(correlationId)
                     }
                     else -> {
                         val json = PaymentsJSON(bodyResponse)
@@ -68,7 +68,7 @@ internal class CardResponseParser {
                         }
 
                         val description = "$message -> $errorDetails"
-                        APIClientError.httpURLConnectionError(status, description, correlationID)
+                        APIClientError.httpURLConnectionError(status, description, correlationId)
                     }
                 }
             }

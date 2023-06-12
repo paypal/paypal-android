@@ -6,6 +6,6 @@ import com.paypal.checkout.error.ErrorInfo
 class PayPalNativeCheckoutError(
     code: Int,
     errorDescription: String,
-    correlationID: String? = null,
+    correlationId: String? = null,
     val errorInfo: ErrorInfo
-) : PayPalSDKError(code, errorDescription, correlationID)
+) : PayPalSDKError(code, errorDescription, correlationId)

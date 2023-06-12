@@ -4,7 +4,7 @@ import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
-data class ApproveOrderMetadata(val orderID: String, val paymentSource: PaymentSource?) {
+data class ApproveOrderMetadata(val orderId: String, val paymentSource: PaymentSource?) {
 
     companion object {
 
@@ -23,6 +23,6 @@ data class ApproveOrderMetadata(val orderID: String, val paymentSource: PaymentS
 
     fun toJSON(): JSONObject =
         JSONObject()
-            .put(KEY_ORDER_ID, orderID)
+            .put(KEY_ORDER_ID, orderId)
             .putOpt(KEY_PAYMENT_SOURCE, paymentSource?.toJSON())
 }

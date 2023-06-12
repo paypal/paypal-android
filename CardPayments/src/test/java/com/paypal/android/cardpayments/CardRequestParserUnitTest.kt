@@ -17,9 +17,9 @@ class CardRequestParserUnitTest {
 
     class CardRequestParserFunctionsUnitTest {
 
-        private val correlationID = "correlationID"
+        private val correlationId = "correlation-id"
         private val headers: Map<String, String> = mapOf(
-            "Paypal-Debug-Id" to correlationID,
+            "Paypal-Debug-Id" to correlationId,
         )
 
         private lateinit var sut: CardResponseParser
@@ -90,9 +90,9 @@ class CardRequestParserUnitTest {
             )
         }
 
-        private val correlationID = "correlationID"
+        private val correlationId = "correlation-id"
         private val headers: Map<String, String> = mapOf(
-            "Paypal-Debug-Id" to correlationID,
+            "Paypal-Debug-Id" to correlationId,
         )
 
         @Test
@@ -108,7 +108,7 @@ class CardRequestParserUnitTest {
             val error = sut.parseError(httpResponse)
 
             if (status != HttpURLConnection.HTTP_OK) Assert.assertEquals(resultCode.ordinal, error?.code)
-            Assert.assertEquals(correlationID, error?.correlationID)
+            Assert.assertEquals(correlationId, error?.correlationId)
             Assert.assertEquals(message, error?.errorDescription)
         }
     }

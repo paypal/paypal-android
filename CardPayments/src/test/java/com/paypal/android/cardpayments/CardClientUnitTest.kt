@@ -37,14 +37,14 @@ import org.robolectric.RobolectricTestRunner
 class CardClientUnitTest {
 
     private val card = Card("4111111111111111", "01", "24", "123")
-    private val orderID = "sample-order-id"
+    private val orderId = "sample-order-id"
 
-    private val cardRequest = CardRequest(orderID, card, "return_url")
+    private val cardRequest = CardRequest(orderId, card, "return_url")
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
     private val confirmPaymentSourceResponse =
-        ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED)
+        ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED)
 
     private val paymentSource = PaymentSource("1111", "Visa")
     private val approveOrderMetadata = ApproveOrderMetadata("sample-order-id", paymentSource)
@@ -92,7 +92,7 @@ class CardClientUnitTest {
         verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
-        assertEquals("sample-order-id", actual.orderID)
+        assertEquals("sample-order-id", actual.orderId)
     }
 
     @Test
@@ -117,7 +117,7 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
 
         val threeDSecureAuthChallengeResponse =
-            ConfirmPaymentSourceResponse(orderID, OrderStatus.APPROVED, "/payer/action/href")
+            ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED, "/payer/action/href")
 
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
 
@@ -154,7 +154,7 @@ class CardClientUnitTest {
             }
 
             val cardResult = cardResultSlot.captured
-            assertEquals("sample-order-id", cardResult.orderID)
+            assertEquals("sample-order-id", cardResult.orderId)
         }
 
     @Test

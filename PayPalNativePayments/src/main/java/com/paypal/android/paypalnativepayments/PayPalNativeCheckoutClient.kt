@@ -55,7 +55,7 @@ class PayPalNativeCheckoutClient internal constructor(
         listener?.onPayPalCheckoutFailure(it)
     }
 
-    private var orderID: String? = null
+    private var orderId: String? = null
 
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
@@ -79,8 +79,8 @@ class PayPalNativeCheckoutClient internal constructor(
      * @param request the PayPalNativeCheckoutRequest for the transaction
      */
     fun startCheckout(request: PayPalNativeCheckoutRequest) {
-        analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.orderID)
-        orderID = request.orderID
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.orderId)
+        orderId = request.orderId
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
                 val config = CheckoutConfig(
@@ -95,13 +95,13 @@ class PayPalNativeCheckoutClient internal constructor(
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
                 PayPalCheckout.startCheckout(CreateOrder {
-                    it.set(request.orderID)
+                    it.set(request.orderId)
                 })
             } catch (e: PayPalSDKError) {
                 listener?.onPayPalCheckoutFailure(
                     APIClientError.clientIDNotFoundError(
                         e.code,
-                        e.correlationID
+                        e.correlationId
                     )
                 )
             }
@@ -135,12 +135,12 @@ class PayPalNativeCheckoutClient internal constructor(
     }
 
     private fun notifyOnFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-native-payments:failed", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:failed", orderId)
         listener?.onPayPalCheckoutFailure(error)
     }
 
     private fun notifyOnSuccess(result: PayPalNativeCheckoutResult) {
-        analyticsService.sendAnalyticsEvent("paypal-native-payments:succeeded", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:succeeded", orderId)
         listener?.onPayPalCheckoutSuccess(result)
     }
 
@@ -153,7 +153,7 @@ class PayPalNativeCheckoutClient internal constructor(
                 ShippingChangeType.ADDRESS_CHANGE -> {
                     analyticsService.sendAnalyticsEvent(
                         "paypal-native-payments:shipping-address-changed",
-                        orderID
+                        orderId
                     )
                     it.onPayPalNativeShippingAddressChange(
                         PayPalNativePaysheetActions(shippingChangeActions),
@@ -164,7 +164,7 @@ class PayPalNativeCheckoutClient internal constructor(
                 ShippingChangeType.OPTION_CHANGE -> {
                     analyticsService.sendAnalyticsEvent(
                         "paypal-native-payments:shipping-method-changed",
-                        orderID
+                        orderId
                     )
                     it.onPayPalNativeShippingMethodChange(
                         PayPalNativePaysheetActions(shippingChangeActions),
@@ -176,7 +176,7 @@ class PayPalNativeCheckoutClient internal constructor(
     }
 
     private fun notifyOnCancel() {
-        analyticsService.sendAnalyticsEvent("paypal-native-payments:canceled", orderID)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:canceled", orderId)
         listener?.onPayPalCheckoutCanceled()
     }
 }

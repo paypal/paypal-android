@@ -68,7 +68,7 @@ class SecureTokenServiceAPIUnitTest {
             capturedError = e
         }
         assertEquals(Code.NO_RESPONSE_DATA.ordinal, capturedError?.code)
-        assertEquals("sample-correlation-id", capturedError?.correlationID)
+        assertEquals("sample-correlation-id", capturedError?.correlationId)
     }
 
     @Test
@@ -84,7 +84,7 @@ class SecureTokenServiceAPIUnitTest {
                 capturedError = e
             }
             assertEquals(Code.DATA_PARSING_ERROR.ordinal, capturedError?.code)
-            assertEquals("sample-correlation-id", capturedError?.correlationID)
+            assertEquals("sample-correlation-id", capturedError?.correlationId)
         }
 
     @Test
@@ -100,6 +100,6 @@ class SecureTokenServiceAPIUnitTest {
                 capturedError = e
             }
             assertEquals(Code.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
-            assertEquals("sample-correlation-id", capturedError?.correlationID)
+            assertEquals("sample-correlation-id", capturedError?.correlationId)
         }
 }

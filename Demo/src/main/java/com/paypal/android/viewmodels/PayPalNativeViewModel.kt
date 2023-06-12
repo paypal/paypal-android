@@ -41,7 +41,7 @@ class PayPalNativeViewModel @Inject constructor(
     @Inject
     lateinit var updateOrderUseCase: UpdateOrderUseCase
 
-    private var orderID: String? = null
+    private var orderId: String? = null
 
     private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {
@@ -51,8 +51,8 @@ class PayPalNativeViewModel @Inject constructor(
         override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
             result.apply {
                 internalState.postValue(NativeCheckoutViewState.CheckoutComplete(
-                    payerID,
-                    orderID
+                    payerId,
+                    orderId
                 ))
             }
         }
@@ -89,7 +89,7 @@ class PayPalNativeViewModel @Inject constructor(
         ) {
 
             viewModelScope.launch(exceptionHandler) {
-                orderID?.also {
+                orderId?.also {
                     try {
                         updateOrderUseCase(it, shippingMethod)
                         actions.approve()
@@ -125,8 +125,8 @@ class PayPalNativeViewModel @Inject constructor(
     fun orderIdCheckout(shippingPreferenceType: ShippingPreferenceType) {
         internalState.postValue(NativeCheckoutViewState.CheckoutInit)
         viewModelScope.launch(exceptionHandler) {
-            orderID = getOrderIdUseCase(shippingPreferenceType)
-            orderID?.also {
+            orderId = getOrderIdUseCase(shippingPreferenceType)
+            orderId?.also {
                 payPalClient.startCheckout(PayPalNativeCheckoutRequest(it))
             }
         }

@@ -32,17 +32,17 @@ internal class GraphQLClient(
         val body = graphQLRequestBody.toString()
         val httpRequest = HttpRequest(graphQLURL, HttpMethod.POST, body, httpRequestHeaders)
         val httpResponse = http.send(httpRequest)
-        val correlationID: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
+        val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
         val status = httpResponse.status
         return if (status == HttpURLConnection.HTTP_OK) {
             if (httpResponse.body.isNullOrBlank()) {
-                throw APIClientError.noResponseData(correlationID)
+                throw APIClientError.noResponseData(correlationId)
             } else {
                 val responseAsJSON = JSONObject(httpResponse.body)
-                GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationID)
+                GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
             }
         } else {
-            GraphQLResponse(null, correlationId = correlationID)
+            GraphQLResponse(null, correlationId = correlationId)
         }
     }
 }
