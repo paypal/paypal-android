@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
+import com.paypal.android.cardpayments.api.CheckoutOrdersRequestFactory
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse

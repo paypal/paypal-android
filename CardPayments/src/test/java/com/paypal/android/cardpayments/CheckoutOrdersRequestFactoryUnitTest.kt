@@ -1,5 +1,6 @@
 package com.paypal.android.cardpayments
 
+import com.paypal.android.cardpayments.api.CheckoutOrdersRequestFactory
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.Address
 import org.json.JSONObject
