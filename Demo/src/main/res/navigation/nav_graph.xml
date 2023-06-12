@@ -25,9 +25,16 @@
         android:label="CardFragment">
         <argument
             android:name="prefillCard"
-            app:argType="com.paypal.android.data.card.TestCard"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            android:defaultValue="@null"
+            app:argType="com.paypal.android.models.TestCard"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_cardFragment_to_approveOrderProgressFragment"
+            app:destination="@id/approveOrderProgressFragment">
+            <argument
+                android:name="cardRequest"
+                app:argType="com.paypal.android.cardpayments.CardRequest" />
+        </action>
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
@@ -42,6 +49,14 @@
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
     <fragment
+        android:id="@+id/approveOrderProgressFragment"
+        android:name="com.paypal.android.ui.approveorderprogress.ApproveOrderProgressFragment"
+        android:label="Approve Order">
+        <argument
+            android:name="cardRequest"
+            app:argType="com.paypal.android.cardpayments.CardRequest" />
+    </fragment>
+    <fragment
         android:id="@+id/payPalNativeFragment"
         android:name="com.paypal.android.ui.paypal.PayPalNativeFragment"
         android:label="PayPalNativeFragment" />
@@ -54,9 +69,9 @@
             app:destination="@id/cardFragment">
             <argument
                 android:name="prefillCard"
-                app:argType="com.paypal.android.data.card.TestCard"
-                app:nullable="true"
-                android:defaultValue="@null" />
+                android:defaultValue="@null"
+                app:argType="com.paypal.android.models.TestCard"
+                app:nullable="true" />
         </action>
     </fragment>
 </navigation>

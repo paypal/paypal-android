@@ -7,8 +7,10 @@ buildscript {
             "androidTargetVersion": 30
     ]
 
+    // kotlin version defined in gradle.properties file so it can be accessible by buildscript
+    // the buildscript block is required to be first in this file or it will cause a compilation error
     ext.versions = [
-            "kotlin"    : "1.8.21",
+            "kotlin"    : kotlinVersion,
             "compose"   : "1.4.7",
             "navigation": "2.3.5",
             "hilt"      : "2.44"

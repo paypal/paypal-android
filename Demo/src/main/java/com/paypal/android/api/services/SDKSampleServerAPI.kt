@@ -9,6 +9,7 @@ import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -43,6 +44,9 @@ class SDKSampleServerAPI(baseUrl: String) {
         @GET("/client_id")
         suspend fun fetchClientId(): ClientId
 
+        @GET("/orders/{orderId}")
+        suspend fun getOrder(@Path("orderId") orderId: String): ResponseBody
+
         @PATCH("/orders/{orderId}")
         suspend fun patchOrder(
             @Path("orderId") orderId: String,
@@ -50,10 +54,10 @@ class SDKSampleServerAPI(baseUrl: String) {
         ): ResponseBody
 
         @POST("/orders/{orderId}/capture")
-        suspend fun captureOrder(@Path("orderId") orderId: String): Order
+        suspend fun captureOrder(@Path("orderId") orderId: String): ResponseBody
 
         @POST("/orders/{orderId}/authorize")
-        suspend fun authorizeOrder(@Path("orderId") orderId: String): Order
+        suspend fun authorizeOrder(@Path("orderId") orderId: String): ResponseBody
     }
 
     private val service: RetrofitService
@@ -97,7 +101,40 @@ class SDKSampleServerAPI(baseUrl: String) {
     suspend fun patchOrder(orderId: String, body: List<UpdateOrderUseCase.PatchRequestBody>) =
         service.patchOrder(orderId, body)
 
-    suspend fun captureOrder(orderId: String) = service.captureOrder(orderId)
+    suspend fun captureOrder(orderId: String): Order {
+        val response = service.captureOrder(orderId)
+        return parseOrder(JSONObject(response.string()))
+    }
 
-    suspend fun authorizeOrder(orderId: String) = service.authorizeOrder(orderId)
+    suspend fun authorizeOrder(orderId: String): Order {
+        val response = service.authorizeOrder(orderId)
+        return parseOrder(JSONObject(response.string()))
+    }
+
+    suspend fun getOrder(orderId: String): Order {
+        val response = service.getOrder(orderId)
+        return parseOrder(JSONObject(response.string()))
+    }
+
+    private fun parseOrder(json: JSONObject): Order {
+        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
+        val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
+        val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
+
+        return Order(
+            id = optNonEmptyString(json, "id"),
+            intent = optNonEmptyString(json, "intent"),
+            status = optNonEmptyString(json, "status"),
+            cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
+            cardBrand = optNonEmptyString(cardJSON, "brand"),
+            vaultId = optNonEmptyString(vaultJSON, "id"),
+            customerId = optNonEmptyString(vaultCustomerJSON, "id")
+        )
+    }
+
+    private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
+        it.optString(key).ifEmpty {
+            null
+        }
+    }
 }

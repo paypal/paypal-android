@@ -1,4 +1,4 @@
-package com.paypal.android.data.card
+package com.paypal.android.models
 
 import android.os.Parcelable
 import com.paypal.android.cardpayments.Card
