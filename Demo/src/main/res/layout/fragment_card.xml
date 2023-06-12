@@ -155,6 +155,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/radioGroup3DS" />
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/vault_customer_id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="@string/vault_customer_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/should_vault_check_box">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/vault_customer_id_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLines="1"
+            android:textSize="17sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <TextView
         android:id="@+id/integration_text"
         android:layout_width="0dp"
@@ -165,7 +185,7 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/should_vault_check_box" />
+        app:layout_constraintTop_toBottomOf="@id/vault_customer_id" />
 
     <TextView
         android:id="@+id/status_text"

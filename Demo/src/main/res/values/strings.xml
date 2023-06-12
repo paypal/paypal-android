@@ -40,6 +40,8 @@
     <string name="select_shape">Select Shape</string>
     <string name="select_size">Select Size</string>
 
+    <string name="vault_customer_id">Vault Customer Id</string>
+
     <string name="use_test_card">Use a Test Card</string>
 
     <string name="intent_title">Intent:</string>
