@@ -42,9 +42,11 @@ internal class CheckoutOrdersRequestFactory {
                 attributesJSON.put("vault", vaultJSON)
 
                 cardRequest.vaultCustomerId?.let { customerId ->
-                    val customerJSON = JSONObject()
-                        .put("id", customerId)
-                    attributesJSON.put("customer", customerJSON)
+                    if (customerId.isNotEmpty()) {
+                        val customerJSON = JSONObject()
+                            .put("id", customerId)
+                        attributesJSON.put("customer", customerJSON)
+                    }
                 }
             }
 
