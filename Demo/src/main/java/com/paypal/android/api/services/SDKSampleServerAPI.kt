@@ -9,6 +9,7 @@ import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -50,10 +51,10 @@ class SDKSampleServerAPI(baseUrl: String) {
         ): ResponseBody
 
         @POST("/orders/{orderId}/capture")
-        suspend fun captureOrder(@Path("orderId") orderId: String): Order
+        suspend fun captureOrder(@Path("orderId") orderId: String): ResponseBody
 
         @POST("/orders/{orderId}/authorize")
-        suspend fun authorizeOrder(@Path("orderId") orderId: String): Order
+        suspend fun authorizeOrder(@Path("orderId") orderId: String): ResponseBody
     }
 
     private val service: RetrofitService
@@ -97,7 +98,19 @@ class SDKSampleServerAPI(baseUrl: String) {
     suspend fun patchOrder(orderId: String, body: List<UpdateOrderUseCase.PatchRequestBody>) =
         service.patchOrder(orderId, body)
 
-    suspend fun captureOrder(orderId: String) = service.captureOrder(orderId)
+    suspend fun captureOrder(orderId: String): Order {
+        val response = service.captureOrder(orderId)
+        return parseOrder(JSONObject(response.string()))
+    }
 
-    suspend fun authorizeOrder(orderId: String) = service.authorizeOrder(orderId)
+    suspend fun authorizeOrder(orderId: String): Order {
+        val response = service.authorizeOrder(orderId)
+        return parseOrder(JSONObject(response.string()))
+    }
+
+    private fun parseOrder(json: JSONObject): Order {
+        val id = json.optString("id")
+        val status = json.optString("status")
+        return Order(id, status)
+    }
 }
