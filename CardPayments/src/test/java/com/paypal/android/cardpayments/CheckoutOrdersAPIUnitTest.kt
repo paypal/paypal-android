@@ -41,7 +41,7 @@ class CheckoutOrdersAPIUnitTest {
         """
 
     private val restClient = mockk<RestClient>(relaxed = true)
-    private val requestFactory = mockk<CardRequestFactory>()
+    private val requestFactory = mockk<CheckoutOrdersRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24", "123")

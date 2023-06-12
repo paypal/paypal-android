@@ -11,17 +11,17 @@ import org.robolectric.RobolectricTestRunner
 import org.skyscreamer.jsonassert.JSONAssert
 
 @RunWith(RobolectricTestRunner::class)
-class CardRequestFactoryUnitTest {
+class CheckoutOrdersRequestFactoryUnitTest {
 
     private val orderId = "sample-order-id"
 
     private val returnUrl = "return_url"
 
-    private lateinit var sut: CardRequestFactory
+    private lateinit var sut: CheckoutOrdersRequestFactory
 
     @Before
     fun beforeEach() {
-        sut = CardRequestFactory()
+        sut = CheckoutOrdersRequestFactory()
     }
 
     @Test
