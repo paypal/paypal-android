@@ -11,7 +11,6 @@ def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
     compileSdkVersion 33
-    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.paypal.android"
@@ -103,13 +102,14 @@ dependencies {
     // to be compatible with one another. The set of dependencies output by the bom have been tested
     // and are known to be compatible by the Jetpack Team
     // More info: https://developer.android.com/jetpack/compose/bom
-    def composeBom = platform('androidx.compose:compose-bom:2023.04.01')
+    def composeBom = platform('androidx.compose:compose-bom:2023.05.01')
     implementation composeBom
     androidTestImplementation composeBom
 
     implementation deps.composeMaterial3
     implementation deps.composeUiToolingPreview
     debugImplementation deps.composeUiTooling
+
     implementation deps.lifecycleViewModelCompose
     implementation deps.lifecycleRuntimeCompose
 

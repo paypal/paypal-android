@@ -1,7 +1,6 @@
 package com.paypal.android.ui.card
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,21 +42,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
 import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
-import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
@@ -69,21 +65,15 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CardFragment : Fragment() {
 
-    private val args: CardFragmentArgs by navArgs()
-    private val viewModel by viewModels<CardViewModel>()
-
     companion object {
-        const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
-    @Inject
-    lateinit var dataCollectorHandler: DataCollectorHandler
-
-    private lateinit var cardClient: CardClient
+    private val args: CardFragmentArgs by navArgs()
+    private val viewModel by viewModels<CardViewModel>()
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -107,7 +97,12 @@ class CardFragment : Fragment() {
 
     private fun approveOrder() {
         viewLifecycleOwner.lifecycleScope.launch {
-            createOrder(viewModel.uiState.value)
+            val uiState = viewModel.uiState.value
+            val order = createOrder(uiState)
+            val cardRequest = createCardRequest(uiState, order)
+            findNavController().navigate(
+                CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest)
+            )
         }
     }
 
@@ -292,42 +287,11 @@ class CardFragment : Fragment() {
         )
     }
 
-    private suspend fun createOrder(uiState: CardViewUiState) {
+    private suspend fun createOrder(uiState: CardViewUiState): Order {
         val orderIntent = when (uiState.intentOption) {
             "AUTHORIZE" -> OrderIntent.AUTHORIZE
             else -> OrderIntent.CAPTURE
         }
-
-        val clientId = sdkSampleServerAPI.fetchClientId()
-        val configuration = CoreConfig(clientId = clientId)
-        cardClient = CardClient(requireActivity(), configuration)
-
-        cardClient.approveOrderListener = object : ApproveOrderListener {
-            override fun onApproveOrderSuccess(result: CardResult) {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    finishOrder(result, orderIntent)
-                }
-            }
-
-            override fun onApproveOrderFailure(error: PayPalSDKError) {
-                viewModel.updateStatusText("CAPTURE fail: ${error.errorDescription}")
-            }
-
-            override fun onApproveOrderCanceled() {
-                viewModel.updateStatusText("USER CANCELED")
-            }
-
-            override fun onApproveOrderThreeDSecureWillLaunch() {
-                viewModel.updateStatusText("3DS launched")
-            }
-
-            override fun onApproveOrderThreeDSecureDidFinish() {
-                viewModel.updateStatusText("3DS finished")
-            }
-        }
-
-        dataCollectorHandler.setLogging(true)
-        viewModel.updateStatusText("Creating order...")
 
         val orderRequest = CreateOrderRequest(
             intent = orderIntent.name,
@@ -341,23 +305,20 @@ class CardFragment : Fragment() {
             ),
             payee = Payee(emailAddress = "anpelaez@paypal.com")
         )
+        viewModel.updateStatusText("Creating order...")
+        return sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
+    }
 
-        val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
-
-        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-        Log.i(TAG, "MetadataId: $clientMetadataId")
-
-        viewModel.updateStatusText("Authorizing order...")
-
-        // build card request
+    private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {
         val card = parseCard(uiState)
         val sca = when (uiState.scaOption) {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
+        val shouldVault = (uiState.shouldVaultOption == "YES")
+        val vaultCustomerId = uiState.customerId
 
-        val cardRequest = CardRequest(order.id!!, card, APP_RETURN_URL, sca)
-        cardClient.approveOrder(requireActivity(), cardRequest)
+        return CardRequest(order.id!!, card, APP_RETURN_URL, sca, shouldVault, vaultCustomerId)
     }
 
     private fun parseCard(uiState: CardViewUiState): Card {
@@ -387,26 +348,5 @@ class CardFragment : Fragment() {
             expirationYear = expirationYear,
             securityCode = uiState.cardSecurityCode
         )
-    }
-
-    private suspend fun finishOrder(cardResult: CardResult, orderIntent: OrderIntent) {
-        val orderId = cardResult.orderId
-        val finishResult = when (orderIntent) {
-            OrderIntent.CAPTURE -> {
-                viewModel.updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
-                sdkSampleServerAPI.captureOrder(orderId)
-            }
-
-            OrderIntent.AUTHORIZE -> {
-                viewModel.updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
-                sdkSampleServerAPI.authorizeOrder(orderId)
-            }
-        }
-
-        viewModel.updateStatusText("Status: ${finishResult.status}")
-        val orderDetailsText = "Confirmed Order: $orderId"
-        val deepLink = cardResult.deepLinkUrl?.toString().orEmpty()
-        val joinedText = listOf(orderDetailsText, deepLink).joinToString("\n")
-        viewModel.updateOrderDetailsText(joinedText)
     }
 }
