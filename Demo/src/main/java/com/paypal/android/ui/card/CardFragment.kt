@@ -28,6 +28,7 @@ import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.ui.testcards.TestCardsFragment
 import com.paypal.android.utils.SharedPreferenceUtil
+import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,6 +52,11 @@ class CardFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
     private lateinit var binding: FragmentCardBinding
+    private val orderIntent: OrderIntent
+        get() = when (binding.radioGroupIntent.checkedRadioButtonId) {
+            R.id.intent_authorize -> OrderIntent.AUTHORIZE
+            else -> OrderIntent.CAPTURE
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,8 +73,14 @@ class CardFragment : Fragment() {
             cardNumberInput.onValueChange = ::onCardNumberChange
             cardExpirationInput.onValueChange = ::onCardExpirationDateChange
 
-            useTestCardButton.setOnClickListener { showTestCards() }
-            submitButton.setOnClickListener { onCardFieldSubmit() }
+            useTestCardButton.setOnClickListener {
+                findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
+            }
+            submitButton.setOnClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    createOrder()
+                }
+            }
         }
 
         setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
@@ -109,16 +121,6 @@ class CardFragment : Fragment() {
         binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
     }
 
-    private fun onCardFieldSubmit() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            createOrder()
-        }
-    }
-
-    private fun showTestCards() {
-        findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
-    }
-
     private suspend fun createOrder() {
         val clientId = sdkSampleServerAPI.fetchClientId()
         val configuration = CoreConfig(clientId = clientId)
@@ -126,10 +128,12 @@ class CardFragment : Fragment() {
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
-                val statusText = "Confirmed Order: ${result.orderId}"
-                val deepLink = result.deepLinkUrl?.toString().orEmpty()
-                val joinedText = listOf(statusText, deepLink).joinToString("\n")
-                updateStatusText(joinedText)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    when (orderIntent) {
+                        OrderIntent.CAPTURE -> captureOrder(result)
+                        OrderIntent.AUTHORIZE -> authorizeOrder(result)
+                    }
+                }
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
@@ -152,7 +156,19 @@ class CardFragment : Fragment() {
         dataCollectorHandler.setLogging(true)
         updateStatusText("Creating order...")
 
-        val orderRequest = buildOrderRequest()
+        val orderRequest = CreateOrderRequest(
+            intent = orderIntent.name,
+            purchaseUnit = listOf(
+                com.paypal.android.api.model.PurchaseUnit(
+                    amount = com.paypal.android.api.model.Amount(
+                        currencyCode = "USD",
+                        value = "10.99"
+                    )
+                )
+            ),
+            payee = Payee(emailAddress = "anpelaez@paypal.com")
+        )
+
         val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
 
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
@@ -175,34 +191,41 @@ class CardFragment : Fragment() {
                 postalCode = "97007"
             )
 
-            val card = Card(cardNumber, monthString, yearString, securityCode, billingAddress = billingAddress)
+            val card = Card(
+                cardNumber,
+                monthString,
+                yearString,
+                securityCode,
+                billingAddress = billingAddress
+            )
             val sca = when (radioGroup3DS.checkedRadioButtonId) {
                 R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
                 else -> SCA.SCA_ALWAYS
             }
-            CardRequest(
-                order.id!!,
-                card,
-                APP_RETURN_URL,
-                sca
-            )
+            CardRequest(order.id!!, card, APP_RETURN_URL, sca)
         }
 
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
-    private fun buildOrderRequest(): CreateOrderRequest = CreateOrderRequest(
-            intent = "AUTHORIZE",
-            purchaseUnit = listOf(
-                com.paypal.android.api.model.PurchaseUnit(
-                    amount = com.paypal.android.api.model.Amount(
-                        currencyCode = "USD",
-                        value = "10.99"
-                    )
-                )
-            ),
-            payee = Payee(emailAddress = "anpelaez@paypal.com")
-        )
+    private suspend fun captureOrder(cardResult: CardResult) {
+        updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
+        val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
+        updateStatusTextWithCardResult(cardResult, result.status)
+    }
+
+    private suspend fun authorizeOrder(cardResult: CardResult) {
+        updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
+        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
+        updateStatusTextWithCardResult(cardResult, result.status)
+    }
+
+    private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
+        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
+        val deepLink = result.deepLinkUrl?.toString().orEmpty()
+        val joinedText = listOf(statusText, deepLink).joinToString("\n")
+        updateStatusText(joinedText)
+    }
 
     private fun updateStatusText(text: String) {
         requireActivity().runOnUiThread {

@@ -18,9 +18,12 @@ import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
+import com.paypal.android.usecase.AuthorizeOrderUseCase
+import com.paypal.android.usecase.CaptureOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
+import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -37,6 +40,12 @@ class PayPalNativeViewModel @Inject constructor(
 
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
+
+    @Inject
+    lateinit var captureOrderUseCase: CaptureOrderUseCase
+
+    @Inject
+    lateinit var authorizeOrderUseCase: AuthorizeOrderUseCase
 
     @Inject
     lateinit var updateOrderUseCase: UpdateOrderUseCase
@@ -102,7 +111,8 @@ class PayPalNativeViewModel @Inject constructor(
         }
     }
 
-    private val internalState = MutableLiveData<NativeCheckoutViewState>(NativeCheckoutViewState.Initial)
+    private val internalState =
+        MutableLiveData<NativeCheckoutViewState>(NativeCheckoutViewState.Initial)
     val state: LiveData<NativeCheckoutViewState> = internalState
 
     lateinit var payPalClient: PayPalNativeCheckoutClient
@@ -122,10 +132,10 @@ class PayPalNativeViewModel @Inject constructor(
         }
     }
 
-    fun orderIdCheckout(shippingPreferenceType: ShippingPreferenceType) {
+    fun orderIdCheckout(shippingPreferenceType: ShippingPreferenceType, orderIntent: OrderIntent) {
         internalState.postValue(NativeCheckoutViewState.CheckoutInit)
         viewModelScope.launch(exceptionHandler) {
-            orderId = getOrderIdUseCase(shippingPreferenceType)
+            orderId = getOrderIdUseCase(shippingPreferenceType, orderIntent)
             orderId?.also {
                 payPalClient.startCheckout(PayPalNativeCheckoutRequest(it))
             }
@@ -138,7 +148,6 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     private fun initPayPalClient() {
-        val clientId = "AcXwOk3dof7NCNcriyS8RVh5q39ozvdWUF9oHPrWqfyrDS4AwVdKe32Axuk2ADo6rI_31Vv6MGgOyzRt"
         payPalClient = PayPalNativeCheckoutClient(
             getApplication(),
             CoreConfig(clientId),
@@ -146,5 +155,15 @@ class PayPalNativeViewModel @Inject constructor(
         )
         payPalClient.listener = payPalListener
         payPalClient.shippingListener = shippingListener
+    }
+
+    fun captureOrder(orderId: String) = viewModelScope.launch {
+        val order = captureOrderUseCase(orderId)
+        internalState.postValue(NativeCheckoutViewState.OrderCaptured(order))
+    }
+
+    fun authorizeOrder(orderId: String) = viewModelScope.launch {
+        val order = authorizeOrderUseCase(orderId)
+        internalState.postValue(NativeCheckoutViewState.OrderAuthorized(order))
     }
 }
