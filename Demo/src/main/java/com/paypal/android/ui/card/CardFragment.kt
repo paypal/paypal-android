@@ -202,7 +202,17 @@ class CardFragment : Fragment() {
                 R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
                 else -> SCA.SCA_ALWAYS
             }
-            CardRequest(order.id!!, card, APP_RETURN_URL, sca)
+
+            val shouldVault = binding.shouldVaultCheckBox.isChecked
+            val vaultCustomerId = binding.vaultCustomerIdInput.text?.toString()
+            CardRequest(
+                order.id!!,
+                card,
+                APP_RETURN_URL,
+                sca,
+                shouldVault = shouldVault,
+                vaultCustomerId = vaultCustomerId
+            )
         }
 
         cardClient.approveOrder(requireActivity(), cardRequest)
