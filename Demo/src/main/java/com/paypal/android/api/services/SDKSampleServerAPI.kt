@@ -109,8 +109,17 @@ class SDKSampleServerAPI(baseUrl: String) {
     }
 
     private fun parseOrder(json: JSONObject): Order {
-        val id = json.optString("id")
-        val status = json.optString("status")
-        return Order(id, status)
+        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
+        val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
+        val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
+
+        return Order(
+            id = json.optString("id"),
+            status = json.optString("status"),
+            cardLast4 = cardJSON?.optString("last_digits"),
+            cardBrand = cardJSON?.optString("brand"),
+            vaultId = vaultJSON?.optString("id"),
+            customerId = vaultCustomerJSON?.optString("id")
+        )
     }
 }

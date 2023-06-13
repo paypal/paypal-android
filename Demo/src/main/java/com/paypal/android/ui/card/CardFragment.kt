@@ -47,6 +47,7 @@ import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
 import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
