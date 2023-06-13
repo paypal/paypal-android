@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 import com.paypal.android.api.model.CreateOrderRequest
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
@@ -220,21 +221,35 @@ class CardFragment : Fragment() {
 
     private suspend fun captureOrder(cardResult: CardResult) {
         updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
-        val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
-        updateStatusTextWithCardResult(cardResult, result.status)
+        val order = sdkSampleServerAPI.captureOrder(cardResult.orderId)
+        updateStatusTextWithCardResult(cardResult, order)
     }
 
     private suspend fun authorizeOrder(cardResult: CardResult) {
         updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
-        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
-        updateStatusTextWithCardResult(cardResult, result.status)
+        val order = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
+        updateStatusTextWithCardResult(cardResult, order)
     }
 
-    private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
-        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
-        val deepLink = result.deepLinkUrl?.toString().orEmpty()
-        val joinedText = listOf(statusText, deepLink).joinToString("\n")
-        updateStatusText(joinedText)
+    private fun updateStatusTextWithCardResult(result: CardResult, order: Order) {
+        val defaultFieldValue = "UNSET"
+        val orderStatus = order.status ?: defaultFieldValue
+        val deepLinkUrl = result.deepLinkUrl?.toString() ?: defaultFieldValue
+        val cardLast4 = order.cardLast4 ?: defaultFieldValue
+        val cardBrand = order.cardBrand ?: defaultFieldValue
+        val vaultId = order.vaultId ?: defaultFieldValue
+        val customerId = order.customerId ?: defaultFieldValue
+
+        val statusText = """
+            Confirmed Order: ${result.orderId}
+            Status: $orderStatus
+            Deep Link URL: $deepLinkUrl
+            Card Last 4: $cardLast4
+            Card Brand: $cardBrand
+            Vault Id: $vaultId
+            Customer Id: $customerId
+        """.trimIndent()
+        updateStatusText(statusText)
     }
 
     private fun updateStatusText(text: String) {
