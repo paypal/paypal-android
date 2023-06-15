@@ -231,14 +231,21 @@ class CardFragment : Fragment() {
         updateStatusTextWithCardResult(cardResult, order)
     }
 
+    private fun fallbackIfEmptyOrNull(value: String?, fallback: String) =
+        if (value.isNullOrEmpty()) {
+            fallback
+        } else {
+            value
+        }
+
     private fun updateStatusTextWithCardResult(result: CardResult, order: Order) {
         val defaultFieldValue = "UNSET"
-        val orderStatus = order.status ?: defaultFieldValue
-        val deepLinkUrl = result.deepLinkUrl?.toString() ?: defaultFieldValue
-        val cardLast4 = order.cardLast4 ?: defaultFieldValue
-        val cardBrand = order.cardBrand ?: defaultFieldValue
-        val vaultId = order.vaultId ?: defaultFieldValue
-        val customerId = order.customerId ?: defaultFieldValue
+        val orderStatus = fallbackIfEmptyOrNull(order.status, defaultFieldValue)
+        val deepLinkUrl = fallbackIfEmptyOrNull(result.deepLinkUrl?.toString(), defaultFieldValue)
+        val cardLast4 = fallbackIfEmptyOrNull(order.cardLast4, defaultFieldValue)
+        val cardBrand = fallbackIfEmptyOrNull(order.cardBrand, defaultFieldValue)
+        val vaultId = fallbackIfEmptyOrNull(order.vaultId, defaultFieldValue)
+        val customerId = fallbackIfEmptyOrNull(order.customerId, defaultFieldValue)
 
         val statusText = """
             Confirmed Order: ${result.orderId}
