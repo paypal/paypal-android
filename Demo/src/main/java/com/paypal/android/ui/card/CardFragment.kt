@@ -103,6 +103,18 @@ class CardFragment : Fragment() {
                 options = listOf("AUTHORIZE", "CAPTURE"),
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(modifier = Modifier.size(8.dp))
+            OptionDropDown(
+                hint = "SHOULD VAULT",
+                options = listOf("YES", "NO"),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            TextField(
+                value = "CUSTOMER ID FOR VAULT",
+                onValueChange = {},
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 
