@@ -34,8 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.databinding.FragmentCardBinding
 import com.paypal.android.ui.card.validation.CardViewUiState
@@ -46,6 +48,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class CardFragment : Fragment() {
+
+    val args: CardFragmentArgs by navArgs()
 
     companion object {
         const val TAG = "CardFragment"
@@ -72,12 +76,13 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val card = args.prefillCard?.card
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        CardView(onFormSubmit = { uiState -> approveOrder(uiState) })
+                        CardView(card = card, onFormSubmit = { uiState -> approveOrder(uiState) })
                     }
                 }
             }
@@ -94,6 +99,7 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
+        card: Card? = null,
         onFormSubmit: (CardViewUiState) -> Unit = {},
         viewModel: CardViewModel = viewModel()
     ) {
@@ -122,7 +128,7 @@ class CardFragment : Fragment() {
                     .padding(all = 8.dp)
                     .fillMaxWidth()
             ) {
-                Text("Visa ending in XXXX", fontSize = 24.sp)
+                Text("Visa ending in ${card?.number?.takeLast(4) ?: "XXXX"}", fontSize = 24.sp)
                 Spacer(modifier = Modifier.size(8.dp))
                 Text("Simulate Successful SCA Auth Challenge")
             }

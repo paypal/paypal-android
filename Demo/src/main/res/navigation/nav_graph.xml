@@ -26,6 +26,11 @@
         android:id="@+id/cardFragment"
         android:name="com.paypal.android.ui.card.CardFragment"
         android:label="CardFragment">
+        <argument
+            android:name="prefillCard"
+            app:argType="com.paypal.android.data.card.TestCard"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_cardFragment_to_testCardFragment"
             app:destination="@id/testCardFragment" />
