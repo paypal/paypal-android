@@ -59,4 +59,6 @@
     <string name="something_went_wrong">Oops! Something went wrong</string>
     <string name="order_created">Order Created</string>
     <string name="checkout_cancelled_by_user">Checkout cancelled by user</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

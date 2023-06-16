@@ -10,8 +10,8 @@
         android:name="com.paypal.android.ui.PaymentMethodsFragment"
         android:label="PaymentMethodsFragment">
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_cardFragment"
-            app:destination="@id/cardFragment" />
+            android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"
+            app:destination="@id/selectCardFragment" />
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalFragment"
             app:destination="@id/payPalFragment" />
@@ -55,4 +55,8 @@
         android:id="@+id/payPalNativeFragment"
         android:name="com.paypal.android.ui.paypal.PayPalNativeFragment"
         android:label="PayPalNativeFragment" />
+    <fragment
+        android:id="@+id/selectCardFragment"
+        android:name="com.paypal.android.ui.selectcard.SelectCardFragment"
+        android:label="SelectCardFragment" />
 </navigation>

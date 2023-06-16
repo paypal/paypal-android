@@ -56,7 +56,7 @@ class PaymentMethodsFragment : Fragment() {
     }
 
     private fun launchCardFragment() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToCardFragment())
+        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment())
     }
 
     private fun launchPayPalNativeFragment() {
