@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -20,10 +21,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -33,9 +37,6 @@ import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key.Companion.Menu
-import androidx.compose.ui.unit.dp
 
 
 @AndroidEntryPoint
@@ -89,8 +90,21 @@ class CardFragment : Fragment() {
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            Text("Visa ending in XXXX")
-            Text("Simulate Successful SCA Auth Challenge")
+            Spacer(modifier = Modifier.size(8.dp))
+            Column(
+                modifier = Modifier
+                    .border(
+                        width = 2.dp,
+                        color = Color.Black,
+                        shape = RoundedCornerShape(size = 4.dp)
+                    )
+                    .padding(all = 8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text("Visa ending in XXXX", fontSize = 24.sp)
+                Spacer(modifier = Modifier.size(8.dp))
+                Text("Simulate Successful SCA Auth Challenge")
+            }
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "SCA",
