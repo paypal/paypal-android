@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,7 +38,6 @@ class SelectCardFragment : Fragment() {
 
     @OptIn(ExperimentalFoundationApi::class)
     @ExperimentalMaterial3Api
-    @Preview
     @Composable
     fun SelectCardView(viewModel: SelectCardViewModel = viewModel()) {
         LazyColumn {
@@ -54,6 +52,17 @@ class SelectCardFragment : Fragment() {
             }
             items(viewModel.threeDSCards) { card ->
                 Text(card.name)
+            }
+        }
+    }
+
+    @ExperimentalMaterial3Api
+    @Preview
+    @Composable
+    fun SelectCardViewPreview() {
+        MaterialTheme {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                SelectCardView()
             }
         }
     }
