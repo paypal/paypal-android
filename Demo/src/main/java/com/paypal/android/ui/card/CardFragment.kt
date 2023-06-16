@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.navArgs
@@ -60,7 +61,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CardFragment : Fragment() {
 
-    val args: CardFragmentArgs by navArgs()
+    private val args: CardFragmentArgs by navArgs()
+    private val viewModel by viewModels<CardViewModel>()
 
     companion object {
         const val TAG = "CardFragment"
@@ -89,7 +91,10 @@ class CardFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        CardView(card = card, onFormSubmit = { uiState -> approveOrder(uiState) })
+                        CardView(
+                            card = card,
+                            viewModel = viewModel,
+                            onFormSubmit = { uiState -> approveOrder(uiState) })
                     }
                 }
             }
@@ -105,9 +110,9 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
+        viewModel: CardViewModel,
         card: Card? = null,
         onFormSubmit: (CardViewUiState) -> Unit = {},
-        viewModel: CardViewModel = viewModel()
     ) {
         val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsState(initial = false)
         val intentOptionExpanded by viewModel.intentOptionExpanded.collectAsState(initial = false)
@@ -118,12 +123,14 @@ class CardFragment : Fragment() {
         val shouldVaultOption by viewModel.shouldVaultOption.collectAsState(initial = "")
         val customerId by viewModel.customerId.collectAsState(initial = "")
 
+        val statusText by viewModel.statusText.collectAsState(initial = "")
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             Column(
                 modifier = Modifier
                     .border(
@@ -211,6 +218,10 @@ class CardFragment : Fragment() {
                     }
             )
             Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = statusText,
+                modifier = Modifier.weight(1.0f)
+            )
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
@@ -219,6 +230,7 @@ class CardFragment : Fragment() {
             ) {
                 Text("CREATE & APPROVE ORDER")
             }
+            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 
@@ -228,7 +240,7 @@ class CardFragment : Fragment() {
     fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView()
+                CardView(viewModel = viewModel())
             }
         }
     }
@@ -346,24 +358,24 @@ class CardFragment : Fragment() {
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
-                updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                viewModel.updateStatusText("CAPTURE fail: ${error.errorDescription}")
             }
 
             override fun onApproveOrderCanceled() {
-                updateStatusText("USER CANCELED")
+                viewModel.updateStatusText("USER CANCELED")
             }
 
             override fun onApproveOrderThreeDSecureWillLaunch() {
-                updateStatusText("3DS launched")
+                viewModel.updateStatusText("3DS launched")
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
-                updateStatusText("3DS finished")
+                viewModel.updateStatusText("3DS finished")
             }
         }
 
         dataCollectorHandler.setLogging(true)
-        updateStatusText("Creating order...")
+        viewModel.updateStatusText("Creating order...")
 
         val orderRequest = CreateOrderRequest(
             intent = orderIntent.name,
@@ -383,11 +395,11 @@ class CardFragment : Fragment() {
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
-        updateStatusText("Authorizing order...")
+        viewModel.updateStatusText("Authorizing order...")
 
         // build card request
         val card = args.prefillCard!!.card
-        val sca = when(uiState.scaOption) {
+        val sca = when (uiState.scaOption) {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
@@ -397,13 +409,13 @@ class CardFragment : Fragment() {
     }
 
     private suspend fun captureOrder(cardResult: CardResult) {
-        updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
+        viewModel.updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
         val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
 
     private suspend fun authorizeOrder(cardResult: CardResult) {
-        updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
+        viewModel.updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
         val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
         updateStatusTextWithCardResult(cardResult, result.status)
     }
@@ -412,14 +424,6 @@ class CardFragment : Fragment() {
         val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
         val deepLink = result.deepLinkUrl?.toString().orEmpty()
         val joinedText = listOf(statusText, deepLink).joinToString("\n")
-        updateStatusText(joinedText)
-    }
-
-    private fun updateStatusText(text: String) {
-//        requireActivity().runOnUiThread {
-//            if (!isDetached) {
-//                binding.statusText.text = text
-//            }
-//        }
+        viewModel.updateStatusText(joinedText)
     }
 }

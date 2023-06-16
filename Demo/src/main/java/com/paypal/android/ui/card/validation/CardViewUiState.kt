@@ -8,4 +8,5 @@ data class CardViewUiState(
     val intentOption: String = "",
     val shouldVaultOption: String = "",
     val customerId: String = "",
+    val statusText: String = ""
 )

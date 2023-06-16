@@ -12,6 +12,8 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
 
+    val statusText = uiState.map { it.statusText }.distinctUntilChanged()
+
     val scaOptionExpanded =
         uiState.map { it.focusedOption == CardOption.SCA }.distinctUntilChanged()
     val intentOptionExpanded =
@@ -50,6 +52,12 @@ class CardViewModel : ViewModel() {
     fun clearFocus() {
         _uiState.update { currentState ->
             currentState.copy(focusedOption = null)
+        }
+    }
+
+    fun updateStatusText(statusText: String) {
+        _uiState.update { currentState ->
+            currentState.copy(statusText = statusText)
         }
     }
 }
