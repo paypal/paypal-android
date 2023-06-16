@@ -89,9 +89,16 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun CardView() {
+        var scaOption by remember { mutableStateOf("") }
         var scaOptionExpanded by remember { mutableStateOf(false) }
+
+        var intentOption by remember { mutableStateOf("") }
         var intentOptionExpanded by remember { mutableStateOf(false) }
+
+        var shouldVaultOption by remember { mutableStateOf("") }
         var shouldVaultOptionExpanded by remember { mutableStateOf(false) }
+
+        var customerId by remember { mutableStateOf("") }
 
         Column(
             modifier = Modifier
@@ -116,34 +123,47 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "SCA",
+                value = scaOption,
                 expanded = scaOptionExpanded,
                 options = listOf("ALWAYS", "WHEN REQUIRED"),
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { scaOptionExpanded = !scaOptionExpanded },
-                onOptionSelected = { scaOptionExpanded = false }
+                onValueChange = { value ->
+                    scaOption = value
+                    scaOptionExpanded = false
+                }
             )
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "INTENT",
+                value = intentOption,
                 expanded = intentOptionExpanded,
                 options = listOf("AUTHORIZE", "CAPTURE"),
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { intentOptionExpanded = !intentOptionExpanded },
-                onOptionSelected = { intentOptionExpanded = false }
+                onValueChange = { value ->
+                    intentOption = value
+                    intentOptionExpanded = false
+                }
             )
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "SHOULD VAULT",
+                value = shouldVaultOption,
                 options = listOf("YES", "NO"),
                 expanded = shouldVaultOptionExpanded,
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { shouldVaultOptionExpanded = !shouldVaultOptionExpanded },
-                onOptionSelected = { shouldVaultOptionExpanded = false }
+                onValueChange = { value ->
+                    shouldVaultOption = value
+                    shouldVaultOptionExpanded = false
+                }
             )
             Spacer(modifier = Modifier.size(8.dp))
             TextField(
-                value = "CUSTOMER ID FOR VAULT",
-                onValueChange = {},
+                value = customerId,
+                label = { Text("CUSTOMER ID FOR VAULT") },
+                onValueChange = { customerId = it },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -164,11 +184,12 @@ class CardFragment : Fragment() {
     @Composable
     fun OptionDropDown(
         hint: String,
+        value: String,
         options: List<String>,
         expanded: Boolean,
         modifier: Modifier,
         onExpandedChange: (Boolean) -> Unit,
-        onOptionSelected: (String) -> Unit
+        onValueChange: (String) -> Unit
     ) {
         // Ref: https://alexzh.com/jetpack-compose-dropdownmenu/
         ExposedDropdownMenuBox(
@@ -177,7 +198,8 @@ class CardFragment : Fragment() {
             modifier = modifier
         ) {
             TextField(
-                value = hint,
+                value = value,
+                label = { Text(hint) },
                 readOnly = true,
                 onValueChange = {},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -188,7 +210,7 @@ class CardFragment : Fragment() {
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = {}) {
                 options.forEach { item ->
                     DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                        onOptionSelected(item)
+                        onValueChange(item)
                     })
                 }
             }
