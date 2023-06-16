@@ -22,7 +22,7 @@ class CardViewModel : ViewModel() {
     val scaOption = uiState.map { it.scaOption }.distinctUntilChanged()
     var intentOption = uiState.map { it.intentOption }.distinctUntilChanged()
     var shouldVaultOption = uiState.map { it.shouldVaultOption }.distinctUntilChanged()
-    var customerId = uiState.map { it.shouldVaultOption }.distinctUntilChanged()
+    var customerId = uiState.map { it.customerId }.distinctUntilChanged()
 
     fun onOptionChange(option: CardOption, value: String) {
         when (option) {
@@ -33,7 +33,6 @@ class CardViewModel : ViewModel() {
                     shouldVaultOption = value
                 )
             }
-
             CardOption.CUSTOMER_VAULT_ID -> _uiState.update { currentState ->
                 currentState.copy(
                     customerId = value
