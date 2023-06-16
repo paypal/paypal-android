@@ -1,6 +1,7 @@
 package com.paypal.android.ui.card
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,17 +34,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.navArgs
-import com.paypal.android.R
+import com.paypal.android.api.model.Amount
+import com.paypal.android.api.model.CreateOrderRequest
+import com.paypal.android.api.model.Payee
+import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.databinding.FragmentCardBinding
+import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -63,12 +74,8 @@ class CardFragment : Fragment() {
     lateinit var dataCollectorHandler: DataCollectorHandler
 
     private lateinit var cardClient: CardClient
-    private lateinit var binding: FragmentCardBinding
-    private val orderIntent: OrderIntent
-        get() = when (binding.radioGroupIntent.checkedRadioButtonId) {
-            R.id.intent_authorize -> OrderIntent.AUTHORIZE
-            else -> OrderIntent.CAPTURE
-        }
+
+    private var orderIntent: OrderIntent? = null
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -87,13 +94,12 @@ class CardFragment : Fragment() {
                 }
             }
         }
-//
-//        binding = FragmentCardBinding.inflate(inflater, container, false)
-//        return binding.root
     }
 
     private fun approveOrder(uiState: CardViewUiState) {
-        print(uiState)
+        viewLifecycleOwner.lifecycleScope.launch {
+            createOrder(uiState)
+        }
     }
 
     @ExperimentalMaterial3Api
@@ -264,8 +270,8 @@ class CardFragment : Fragment() {
         }
     }
 
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 //        binding.run {
 //            cardNumberInput.onValueChange = ::onCardNumberChange
 //            cardExpirationInput.onValueChange = ::onCardExpirationDateChange
@@ -278,8 +284,9 @@ class CardFragment : Fragment() {
 //                    createOrder()
 //                }
 //            }
-//        }
-//
+    }
+
+    //
 //        setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
 //            handleTestCardSelected(bundle)
 //        }
@@ -318,117 +325,101 @@ class CardFragment : Fragment() {
 //        binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
 //    }
 //
-//    private suspend fun createOrder() {
-//        val clientId = sdkSampleServerAPI.fetchClientId()
-//        val configuration = CoreConfig(clientId = clientId)
-//        cardClient = CardClient(requireActivity(), configuration)
-//
-//        cardClient.approveOrderListener = object : ApproveOrderListener {
-//            override fun onApproveOrderSuccess(result: CardResult) {
-//                viewLifecycleOwner.lifecycleScope.launch {
-//                    when (orderIntent) {
-//                        OrderIntent.CAPTURE -> captureOrder(result)
-//                        OrderIntent.AUTHORIZE -> authorizeOrder(result)
-//                    }
-//                }
-//            }
-//
-//            override fun onApproveOrderFailure(error: PayPalSDKError) {
-//                updateStatusText("CAPTURE fail: ${error.errorDescription}")
-//            }
-//
-//            override fun onApproveOrderCanceled() {
-//                updateStatusText("USER CANCELED")
-//            }
-//
-//            override fun onApproveOrderThreeDSecureWillLaunch() {
-//                updateStatusText("3DS launched")
-//            }
-//
-//            override fun onApproveOrderThreeDSecureDidFinish() {
-//                updateStatusText("3DS finished")
-//            }
-//        }
-//
-//        dataCollectorHandler.setLogging(true)
-//        updateStatusText("Creating order...")
-//
-//        val orderRequest = CreateOrderRequest(
-//            intent = orderIntent.name,
-//            purchaseUnit = listOf(
-//                com.paypal.android.api.model.PurchaseUnit(
-//                    amount = com.paypal.android.api.model.Amount(
-//                        currencyCode = "USD",
-//                        value = "10.99"
-//                    )
-//                )
-//            ),
-//            payee = Payee(emailAddress = "anpelaez@paypal.com")
-//        )
-//
-//        val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
-//
-//        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
-//        Log.i(TAG, "MetadataId: $clientMetadataId")
-//
-//        updateStatusText("Authorizing order...")
-//
-//        // build card request
-//        val cardRequest = binding.run {
-//            val cardNumber = cardNumberInput.text.toString().replace(" ", "")
-//            val expirationDate = cardExpirationInput.text.toString()
-//            val securityCode = cardSecurityCodeInput.text.toString()
-//
-//            val (monthString, yearString) = expirationDate.split("/")
-//
-//            val billingAddress = Address(
-//                countryCode = "US",
-//                streetAddress = "3272 Gateway Road",
-//                locality = "Aloha",
-//                postalCode = "97007"
-//            )
-//
-//            val card = Card(
-//                cardNumber,
-//                monthString,
-//                yearString,
-//                securityCode,
-//                billingAddress = billingAddress
-//            )
-//            val sca = when (radioGroup3DS.checkedRadioButtonId) {
-//                R.id.sca_when_required -> SCA.SCA_WHEN_REQUIRED
-//                else -> SCA.SCA_ALWAYS
-//            }
-//            CardRequest(order.id!!, card, APP_RETURN_URL, sca)
-//        }
-//
-//        cardClient.approveOrder(requireActivity(), cardRequest)
-//    }
-//
-//    private suspend fun captureOrder(cardResult: CardResult) {
-//        updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
-//        val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
-//        updateStatusTextWithCardResult(cardResult, result.status)
-//    }
-//
-//    private suspend fun authorizeOrder(cardResult: CardResult) {
-//        updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
-//        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
-//        updateStatusTextWithCardResult(cardResult, result.status)
-//    }
-//
-//    private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
-//        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
-//        val deepLink = result.deepLinkUrl?.toString().orEmpty()
-//        val joinedText = listOf(statusText, deepLink).joinToString("\n")
-//        updateStatusText(joinedText)
-//    }
-//
-//    private fun updateStatusText(text: String) {
+    private suspend fun createOrder(uiState: CardViewUiState) {
+        val orderIntent = when (uiState.intentOption) {
+            "AUTHORIZE" -> OrderIntent.AUTHORIZE
+            else -> OrderIntent.CAPTURE
+        }
+
+        val clientId = sdkSampleServerAPI.fetchClientId()
+        val configuration = CoreConfig(clientId = clientId)
+        cardClient = CardClient(requireActivity(), configuration)
+
+        cardClient.approveOrderListener = object : ApproveOrderListener {
+            override fun onApproveOrderSuccess(result: CardResult) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    when (orderIntent) {
+                        OrderIntent.CAPTURE -> captureOrder(result)
+                        OrderIntent.AUTHORIZE -> authorizeOrder(result)
+                    }
+                }
+            }
+
+            override fun onApproveOrderFailure(error: PayPalSDKError) {
+                updateStatusText("CAPTURE fail: ${error.errorDescription}")
+            }
+
+            override fun onApproveOrderCanceled() {
+                updateStatusText("USER CANCELED")
+            }
+
+            override fun onApproveOrderThreeDSecureWillLaunch() {
+                updateStatusText("3DS launched")
+            }
+
+            override fun onApproveOrderThreeDSecureDidFinish() {
+                updateStatusText("3DS finished")
+            }
+        }
+
+        dataCollectorHandler.setLogging(true)
+        updateStatusText("Creating order...")
+
+        val orderRequest = CreateOrderRequest(
+            intent = orderIntent.name,
+            purchaseUnit = listOf(
+                PurchaseUnit(
+                    amount = Amount(
+                        currencyCode = "USD",
+                        value = "10.99"
+                    )
+                )
+            ),
+            payee = Payee(emailAddress = "anpelaez@paypal.com")
+        )
+
+        val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
+
+        val clientMetadataId = dataCollectorHandler.getClientMetadataId(order.id)
+        Log.i(TAG, "MetadataId: $clientMetadataId")
+
+        updateStatusText("Authorizing order...")
+
+        // build card request
+        val card = args.prefillCard!!.card
+        val sca = when(uiState.scaOption) {
+            "ALWAYS" -> SCA.SCA_ALWAYS
+            else -> SCA.SCA_WHEN_REQUIRED
+        }
+
+        val cardRequest = CardRequest(order.id!!, card, APP_RETURN_URL, sca)
+        cardClient.approveOrder(requireActivity(), cardRequest)
+    }
+
+    private suspend fun captureOrder(cardResult: CardResult) {
+        updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
+        val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
+        updateStatusTextWithCardResult(cardResult, result.status)
+    }
+
+    private suspend fun authorizeOrder(cardResult: CardResult) {
+        updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
+        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
+        updateStatusTextWithCardResult(cardResult, result.status)
+    }
+
+    private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
+        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
+        val deepLink = result.deepLinkUrl?.toString().orEmpty()
+        val joinedText = listOf(statusText, deepLink).joinToString("\n")
+        updateStatusText(joinedText)
+    }
+
+    private fun updateStatusText(text: String) {
 //        requireActivity().runOnUiThread {
 //            if (!isDetached) {
 //                binding.statusText.text = text
 //            }
 //        }
-//    }
+    }
 }
