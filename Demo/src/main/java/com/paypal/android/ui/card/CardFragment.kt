@@ -24,9 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -41,6 +38,7 @@ import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.databinding.FragmentCardBinding
+import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -79,7 +77,7 @@ class CardFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        CardView()
+                        CardView(onFormSubmit = { uiState -> approveOrder(uiState) })
                     }
                 }
             }
@@ -89,17 +87,24 @@ class CardFragment : Fragment() {
 //        return binding.root
     }
 
+    private fun approveOrder(uiState: CardViewUiState) {
+        print(uiState)
+    }
+
     @ExperimentalMaterial3Api
     @Composable
-    fun CardView(viewModel: CardViewModel = viewModel()) {
+    fun CardView(
+        onFormSubmit: (CardViewUiState) -> Unit = {},
+        viewModel: CardViewModel = viewModel()
+    ) {
         val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsState(initial = false)
         val intentOptionExpanded by viewModel.intentOptionExpanded.collectAsState(initial = false)
         val shouldVaultOptionExpanded by viewModel.shouldVaultOptionExpanded.collectAsState(initial = false)
 
-        var scaOption by remember { mutableStateOf("") }
-        var intentOption by remember { mutableStateOf("") }
-        var shouldVaultOption by remember { mutableStateOf("") }
-        var customerId by remember { mutableStateOf("") }
+        val scaOption by viewModel.scaOption.collectAsState(initial = "")
+        val intentOption by viewModel.intentOption.collectAsState(initial = "")
+        val shouldVaultOption by viewModel.shouldVaultOption.collectAsState(initial = "")
+        val customerId by viewModel.customerId.collectAsState(initial = "")
 
         Column(
             modifier = Modifier
@@ -136,7 +141,7 @@ class CardFragment : Fragment() {
                     }
                 },
                 onValueChange = { value ->
-                    scaOption = value
+                    viewModel.onOptionChange(CardOption.SCA, value)
                     viewModel.clearFocus()
                 }
             )
@@ -155,7 +160,7 @@ class CardFragment : Fragment() {
                     }
                 },
                 onValueChange = { value ->
-                    intentOption = value
+                    viewModel.onOptionChange(CardOption.INTENT, value)
                     viewModel.clearFocus()
                 }
             )
@@ -166,7 +171,7 @@ class CardFragment : Fragment() {
                 options = listOf("YES", "NO"),
                 expanded = shouldVaultOptionExpanded,
                 modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = {expanded ->
+                onExpandedChange = { expanded ->
                     if (expanded) {
                         viewModel.onFocusChange(CardOption.SHOULD_VAULT)
                     } else {
@@ -174,7 +179,7 @@ class CardFragment : Fragment() {
                     }
                 },
                 onValueChange = { value ->
-                    shouldVaultOption = value
+                    viewModel.onOptionChange(CardOption.SHOULD_VAULT, value)
                     viewModel.clearFocus()
                 }
             )
@@ -182,7 +187,9 @@ class CardFragment : Fragment() {
             OutlinedTextField(
                 value = customerId,
                 label = { Text("CUSTOMER ID FOR VAULT") },
-                onValueChange = { customerId = it },
+                onValueChange = { value ->
+                    viewModel.onOptionChange(CardOption.CUSTOMER_VAULT_ID, value)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .onFocusChanged {
@@ -194,7 +201,9 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(8.dp))
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {}
+                onClick = {
+                    onFormSubmit(viewModel.uiState.value)
+                }
             ) {
                 Text("APPROVE ORDER")
             }
