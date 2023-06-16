@@ -217,7 +217,7 @@ class CardFragment : Fragment() {
                     onFormSubmit(viewModel.uiState.value)
                 }
             ) {
-                Text("APPROVE ORDER")
+                Text("CREATE & APPROVE ORDER")
             }
         }
     }
