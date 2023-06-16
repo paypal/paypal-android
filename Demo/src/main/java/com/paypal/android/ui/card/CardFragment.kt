@@ -4,10 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -17,6 +33,10 @@ import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key.Companion.Menu
+import androidx.compose.ui.unit.dp
+
 
 @AndroidEntryPoint
 class CardFragment : Fragment() {
@@ -40,6 +60,7 @@ class CardFragment : Fragment() {
             else -> OrderIntent.CAPTURE
         }
 
+    @ExperimentalMaterial3Api
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,7 +69,11 @@ class CardFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                CardView()
+                MaterialTheme {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        CardView(options = listOf("ALWAYS", "WHEN REQUIRED"))
+                    }
+                }
             }
         }
 //
@@ -56,9 +81,67 @@ class CardFragment : Fragment() {
 //        return binding.root
     }
 
+    @ExperimentalMaterial3Api
     @Composable
-    fun CardView() {
-        Text("Hello")
+    fun CardView(options: List<String>) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            Text("Visa ending in XXXX")
+            Text("Simulate Successful SCA Auth Challenge")
+            Spacer(modifier = Modifier.size(8.dp))
+            OptionDropDown(
+                hint = "SCA",
+                options = listOf("ALWAYS", "WHEN REQUIRED"),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            OptionDropDown(
+                hint = "INTENT",
+                options = listOf("AUTHORIZE", "CAPTURE"),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+    @ExperimentalMaterial3Api
+    @Preview
+    @Composable
+    fun CardViewPreview() {
+        MaterialTheme {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                CardView(
+                    options = listOf("ALWAYS", "WHEN REQUIRED")
+                )
+            }
+        }
+    }
+
+    @ExperimentalMaterial3Api
+    @Composable
+    fun OptionDropDown(hint: String, options: List<String>, modifier: Modifier) {
+        ExposedDropdownMenuBox(
+            expanded = false,
+            onExpandedChange = {},
+            modifier = modifier
+        ) {
+            TextField(
+                value = hint,
+                readOnly = true,
+                onValueChange = {},
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()
+            )
+            ExposedDropdownMenu(expanded = false, onDismissRequest = {}) {
+                options.forEach { item ->
+                    DropdownMenuItem(text = { Text(text = item) }, onClick = {})
+                }
+            }
+        }
     }
 
 //    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
