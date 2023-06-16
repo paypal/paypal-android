@@ -9,13 +9,13 @@ plugins {
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.paypal.android"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -25,7 +25,14 @@ android {
     }
 
     buildFeatures {
+        // Ref: https://developer.android.com/jetpack/compose/setup
+        compose true
         viewBinding = true
+    }
+
+    composeOptions {
+        // Ref: https://developer.android.com/jetpack/androidx/releases/compose-kotlin#pre-release_kotlin_compatibility
+        kotlinCompilerExtensionVersion "${versions.compose}"
     }
 
     buildTypes {
@@ -34,16 +41,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.compose}"
     }
 
     lintOptions {
@@ -57,6 +61,12 @@ android {
             java.srcDirs += "src/androidTestShared/java"
         }
     }
+}
+
+// Ref: https://developer.android.com/training/dependency-injection/hilt-android#setup
+kapt {
+    // allow references to generated code
+    correctErrorTypes true
 }
 
 dependencies {
@@ -86,12 +96,20 @@ dependencies {
         exclude module: 'data-collector'
     }
 
-    implementation deps.composeUi
-    implementation deps.composeUiTooling
-    implementation deps.composeRuntimeLivedata
-    implementation deps.composeFoundation
-    implementation deps.composeMaterial
-    implementation deps.composeConstraintLayout
+    // Compose Bill of Materials (BOM) dependency manages compose dependency versions without
+    // us having to explicitly state versions of individual compose dependencies; the BOM project
+    // selects dependency versions for each compose dependency that are known by the JetPack team
+    // to be compatible with one another. The set of dependencies output by the bom have been tested
+    // and are known to be compatible by the Jetpack Team
+    // More info: https://developer.android.com/jetpack/compose/bom
+    def composeBom = platform('androidx.compose:compose-bom:2023.04.01')
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    implementation deps.composeMaterial3
+    implementation deps.composeUiToolingPreview
+    debugImplementation deps.composeUiTooling
+
     implementation deps.navigationFragment
     implementation deps.navigationUI
     implementation deps.preference
@@ -102,8 +120,6 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
-    implementation deps.androidHiltViewModel
-    kapt deps.androidHiltKapt
 
     testImplementation deps.junit
 
