@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.data.card.TestCard
+import androidx.navigation.fragment.findNavController
 
 class SelectCardFragment : Fragment() {
 
@@ -45,7 +46,9 @@ class SelectCardFragment : Fragment() {
     }
 
     private fun onTestCardSelected(card: TestCard) {
-        print(card)
+        findNavController().navigate(
+            SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(card)
+        )
     }
 
     @OptIn(ExperimentalFoundationApi::class)
