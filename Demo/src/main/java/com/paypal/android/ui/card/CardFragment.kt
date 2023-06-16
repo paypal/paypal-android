@@ -18,13 +18,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -32,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.CardClient
@@ -40,9 +45,6 @@ import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 
 @AndroidEntryPoint
 class CardFragment : Fragment() {
@@ -89,16 +91,14 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardView() {
+    fun CardView(viewModel: CardViewModel = viewModel()) {
+        val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsState(initial = false)
+        val intentOptionExpanded by viewModel.intentOptionExpanded.collectAsState(initial = false)
+        val shouldVaultOptionExpanded by viewModel.shouldVaultOptionExpanded.collectAsState(initial = false)
+
         var scaOption by remember { mutableStateOf("") }
-        var scaOptionExpanded by remember { mutableStateOf(false) }
-
         var intentOption by remember { mutableStateOf("") }
-        var intentOptionExpanded by remember { mutableStateOf(false) }
-
         var shouldVaultOption by remember { mutableStateOf("") }
-        var shouldVaultOptionExpanded by remember { mutableStateOf(false) }
-
         var customerId by remember { mutableStateOf("") }
 
         Column(
@@ -110,7 +110,7 @@ class CardFragment : Fragment() {
             Column(
                 modifier = Modifier
                     .border(
-                        width = 2.dp,
+                        width = 1.dp,
                         color = Color.Black,
                         shape = RoundedCornerShape(size = 4.dp)
                     )
@@ -128,10 +128,16 @@ class CardFragment : Fragment() {
                 expanded = scaOptionExpanded,
                 options = listOf("ALWAYS", "WHEN REQUIRED"),
                 modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { scaOptionExpanded = !scaOptionExpanded },
+                onExpandedChange = { expanded ->
+                    if (expanded) {
+                        viewModel.onFocusChange(CardOption.SCA)
+                    } else {
+                        viewModel.clearFocus()
+                    }
+                },
                 onValueChange = { value ->
                     scaOption = value
-                    scaOptionExpanded = false
+                    viewModel.clearFocus()
                 }
             )
             Spacer(modifier = Modifier.size(8.dp))
@@ -141,10 +147,16 @@ class CardFragment : Fragment() {
                 expanded = intentOptionExpanded,
                 options = listOf("AUTHORIZE", "CAPTURE"),
                 modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { intentOptionExpanded = !intentOptionExpanded },
+                onExpandedChange = { expanded ->
+                    if (expanded) {
+                        viewModel.onFocusChange(CardOption.INTENT)
+                    } else {
+                        viewModel.clearFocus()
+                    }
+                },
                 onValueChange = { value ->
                     intentOption = value
-                    intentOptionExpanded = false
+                    viewModel.clearFocus()
                 }
             )
             Spacer(modifier = Modifier.size(8.dp))
@@ -154,18 +166,30 @@ class CardFragment : Fragment() {
                 options = listOf("YES", "NO"),
                 expanded = shouldVaultOptionExpanded,
                 modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { shouldVaultOptionExpanded = !shouldVaultOptionExpanded },
+                onExpandedChange = {expanded ->
+                    if (expanded) {
+                        viewModel.onFocusChange(CardOption.SHOULD_VAULT)
+                    } else {
+                        viewModel.clearFocus()
+                    }
+                },
                 onValueChange = { value ->
                     shouldVaultOption = value
-                    shouldVaultOptionExpanded = false
+                    viewModel.clearFocus()
                 }
             )
             Spacer(modifier = Modifier.size(8.dp))
-            TextField(
+            OutlinedTextField(
                 value = customerId,
                 label = { Text("CUSTOMER ID FOR VAULT") },
                 onValueChange = { customerId = it },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            viewModel.onFocusChange(CardOption.CUSTOMER_VAULT_ID)
+                        }
+                    }
             )
             Spacer(modifier = Modifier.size(8.dp))
             Button(
@@ -205,7 +229,7 @@ class CardFragment : Fragment() {
             onExpandedChange = onExpandedChange,
             modifier = modifier
         ) {
-            TextField(
+            OutlinedTextField(
                 value = value,
                 label = { Text(hint) },
                 readOnly = true,

@@ -109,6 +109,7 @@ dependencies {
     implementation deps.composeMaterial3
     implementation deps.composeUiToolingPreview
     debugImplementation deps.composeUiTooling
+    implementation deps.lifecycleViewModelCompose
 
     implementation deps.navigationFragment
     implementation deps.navigationUI
