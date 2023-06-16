@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -166,6 +167,13 @@ class CardFragment : Fragment() {
                 onValueChange = { customerId = it },
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(modifier = Modifier.size(8.dp))
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {}
+            ) {
+                Text("APPROVE ORDER")
+            }
         }
     }
 
