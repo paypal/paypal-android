@@ -21,6 +21,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -38,6 +40,8 @@ import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @AndroidEntryPoint
 class CardFragment : Fragment() {
@@ -72,7 +76,7 @@ class CardFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        CardView(options = listOf("ALWAYS", "WHEN REQUIRED"))
+                        CardView()
                     }
                 }
             }
@@ -84,7 +88,11 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardView(options: List<String>) {
+    fun CardView() {
+        var scaOptionExpanded by remember { mutableStateOf(false) }
+        var intentOptionExpanded by remember { mutableStateOf(false) }
+        var shouldVaultOptionExpanded by remember { mutableStateOf(false) }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -108,20 +116,29 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "SCA",
+                expanded = scaOptionExpanded,
                 options = listOf("ALWAYS", "WHEN REQUIRED"),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onExpandedChange = { scaOptionExpanded = !scaOptionExpanded },
+                onOptionSelected = { scaOptionExpanded = false }
             )
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "INTENT",
+                expanded = intentOptionExpanded,
                 options = listOf("AUTHORIZE", "CAPTURE"),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onExpandedChange = { intentOptionExpanded = !intentOptionExpanded },
+                onOptionSelected = { intentOptionExpanded = false }
             )
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "SHOULD VAULT",
                 options = listOf("YES", "NO"),
-                modifier = Modifier.fillMaxWidth()
+                expanded = shouldVaultOptionExpanded,
+                modifier = Modifier.fillMaxWidth(),
+                onExpandedChange = { shouldVaultOptionExpanded = !shouldVaultOptionExpanded },
+                onOptionSelected = { shouldVaultOptionExpanded = false }
             )
             Spacer(modifier = Modifier.size(8.dp))
             TextField(
@@ -138,33 +155,41 @@ class CardFragment : Fragment() {
     fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(
-                    options = listOf("ALWAYS", "WHEN REQUIRED")
-                )
+                CardView()
             }
         }
     }
 
     @ExperimentalMaterial3Api
     @Composable
-    fun OptionDropDown(hint: String, options: List<String>, modifier: Modifier) {
+    fun OptionDropDown(
+        hint: String,
+        options: List<String>,
+        expanded: Boolean,
+        modifier: Modifier,
+        onExpandedChange: (Boolean) -> Unit,
+        onOptionSelected: (String) -> Unit
+    ) {
+        // Ref: https://alexzh.com/jetpack-compose-dropdownmenu/
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {},
+            expanded = expanded,
+            onExpandedChange = onExpandedChange,
             modifier = modifier
         ) {
             TextField(
                 value = hint,
                 readOnly = true,
                 onValueChange = {},
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor()
             )
-            ExposedDropdownMenu(expanded = false, onDismissRequest = {}) {
+            ExposedDropdownMenu(expanded = expanded, onDismissRequest = {}) {
                 options.forEach { item ->
-                    DropdownMenuItem(text = { Text(text = item) }, onClick = {})
+                    DropdownMenuItem(text = { Text(text = item) }, onClick = {
+                        onOptionSelected(item)
+                    })
                 }
             }
         }
