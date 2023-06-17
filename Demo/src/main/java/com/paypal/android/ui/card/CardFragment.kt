@@ -242,7 +242,7 @@ class CardFragment : Fragment() {
             ) {
                 Text("CREATE & APPROVE ORDER")
             }
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(24.dp))
         }
     }
 
