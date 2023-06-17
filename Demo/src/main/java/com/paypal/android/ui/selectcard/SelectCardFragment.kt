@@ -88,7 +88,7 @@ class SelectCardFragment : Fragment() {
             }
             items(viewModel.nonThreeDSCards) { card ->
                 TestCardView(
-                    card = card,
+                    testCard = card,
                     selected = false,
                     onClick = {
                         onTestCardSelected(card)
@@ -101,7 +101,7 @@ class SelectCardFragment : Fragment() {
             }
             items(viewModel.threeDSCards) { card ->
                 TestCardView(
-                    card = card,
+                    testCard = card,
                     selected = false,
                     onClick = {
                         onTestCardSelected(card)
@@ -132,6 +132,7 @@ class SelectCardFragment : Fragment() {
         ) {
             Text(
                 text = text,
+                style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 modifier = Modifier.padding(8.dp)
             )
@@ -139,7 +140,7 @@ class SelectCardFragment : Fragment() {
     }
 
     @Composable
-    fun TestCardView(card: TestCard, selected: Boolean, onClick: () -> Unit) {
+    fun TestCardView(testCard: TestCard, selected: Boolean, onClick: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -149,11 +150,13 @@ class SelectCardFragment : Fragment() {
                 )
         ) {
             Text(
-                text = card.name,
+                text = testCard.name,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)
             )
             Text(
-                text = card.card.number,
+                text = testCard.formattedCardNumber,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(top = 4.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             )
         }
