@@ -69,13 +69,15 @@ class SelectCardFragment : Fragment() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
                         .selectable(
                             selected = false,
                             onClick = { navigateToCardForm() }
                         )
                 ) {
-                    Text("ENTER CARD MANUALLY")
+                    Text(
+                        text = "ENTER CARD MANUALLY",
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
             stickyHeader {
