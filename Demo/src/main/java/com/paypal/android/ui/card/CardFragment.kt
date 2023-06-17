@@ -128,6 +128,9 @@ class CardFragment : Fragment() {
         val statusText by viewModel.statusText.collectAsState(initial = "")
         val card by viewModel.card.collectAsState(initial = Card("", "", "", ""))
 
+        val cardNumber by viewModel.cardNumber.collectAsState(initial = "")
+        val expirationDate by viewModel.expirationDate.collectAsState(initial = "")
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,7 +142,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            CardInputView(card = card)
+            CardInputView(card = card, cardNumber = cardNumber, expirationDate = expirationDate)
             Spacer(modifier = Modifier.size(24.dp))
             Text(
                 text = "Approve Order Options",
@@ -291,20 +294,25 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardInputView(card: Card) {
+    fun CardInputView(card: Card, cardNumber: String, expirationDate: String) {
         OutlinedTextField(
-            value = card.number,
+            value = cardNumber,
             label = { Text("CARD NUMBER") },
-            onValueChange = {},
+            onValueChange = {
+                viewModel.onCardNumberChanged(it)
+            },
+            visualTransformation = CardNumberVisualTransformation(""),
             modifier = Modifier.fillMaxWidth()
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedTextField(
-                value = "",
+                value = expirationDate,
                 label = { Text("EXP. DATE") },
-                onValueChange = {},
+                onValueChange = {
+                    viewModel.onExpirationDateChanged(it)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(2.0f)

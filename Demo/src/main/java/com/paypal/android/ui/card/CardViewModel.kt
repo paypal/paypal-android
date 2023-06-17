@@ -2,7 +2,9 @@ package com.paypal.android.ui.card
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.ui.card.validation.DateFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -12,6 +14,12 @@ import kotlinx.coroutines.flow.update
 class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val _cardNumber = MutableStateFlow("")
+    val cardNumber = _cardNumber.asStateFlow()
+
+    private val _expirationDate = MutableStateFlow("")
+    val expirationDate = _expirationDate.asStateFlow()
 
     val card = uiState.map { it.card }
     val statusText = uiState.map { it.statusText }.distinctUntilChanged()
@@ -67,5 +75,13 @@ class CardViewModel : ViewModel() {
         _uiState.update { currentState ->
             currentState.copy(card = card)
         }
+    }
+
+    fun onCardNumberChanged(newValue: String) {
+        _cardNumber.value = newValue
+    }
+
+    fun onExpirationDateChanged(newValue: String) {
+        _expirationDate.value = DateFormatter.formatExpirationDate(newValue, _expirationDate.value)
     }
 }
