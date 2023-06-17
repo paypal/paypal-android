@@ -6,12 +6,14 @@ import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -76,7 +78,8 @@ class SelectCardFragment : Fragment() {
                 ) {
                     Text(
                         text = "ENTER CARD MANUALLY",
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
             }
@@ -91,6 +94,7 @@ class SelectCardFragment : Fragment() {
                         onTestCardSelected(card)
                     }
                 )
+                Divider(color = Color.Black)
             }
             stickyHeader {
                 TestCardHeader("Cards with 3DS")
@@ -103,6 +107,7 @@ class SelectCardFragment : Fragment() {
                         onTestCardSelected(card)
                     }
                 )
+                Divider(color = Color.Black)
             }
         }
     }
@@ -135,7 +140,7 @@ class SelectCardFragment : Fragment() {
 
     @Composable
     fun TestCardView(card: TestCard, selected: Boolean, onClick: () -> Unit) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .selectable(
@@ -145,7 +150,11 @@ class SelectCardFragment : Fragment() {
         ) {
             Text(
                 text = card.name,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)
+            )
+            Text(
+                text = card.card.number,
+                modifier = Modifier.padding(top = 4.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
             )
         }
     }
