@@ -46,6 +46,10 @@ class SelectCardFragment : Fragment() {
     }
 
     private fun onTestCardSelected(card: TestCard) {
+        navigateToCardForm(card)
+    }
+
+    private fun navigateToCardForm(card: TestCard? = null) {
         findNavController().navigate(
             SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(card)
         )
@@ -61,6 +65,19 @@ class SelectCardFragment : Fragment() {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .selectable(
+                            selected = false,
+                            onClick = { navigateToCardForm() }
+                        )
+                ) {
+                    Text("ENTER CARD MANUALLY")
+                }
+            }
             stickyHeader {
                 TestCardHeader("Cards without 3DS")
             }
