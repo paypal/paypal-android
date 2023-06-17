@@ -6,7 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +33,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +58,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
+import com.paypal.pyplcheckout.common.extensions.textLazy
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -130,22 +135,19 @@ class CardFragment : Fragment() {
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Column(
-                modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = Color.Black,
-                        shape = RoundedCornerShape(size = 4.dp)
-                    )
-                    .padding(all = 8.dp)
-                    .fillMaxWidth()
-            ) {
-                Text("Visa ending in ${card?.number?.takeLast(4) ?: "XXXX"}", fontSize = 24.sp)
-                Spacer(modifier = Modifier.size(8.dp))
-                Text("Simulate Successful SCA Auth Challenge")
-            }
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(24.dp))
+            Text(
+                text = "Card Details",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Spacer(modifier = Modifier.size(2.dp))
+            CardInputView()
+            Spacer(modifier = Modifier.size(24.dp))
+            Text(
+                text = "Approve Order Options",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Spacer(modifier = Modifier.size(2.dp))
             OptionDropDown(
                 hint = "SCA",
                 value = scaOption,
@@ -279,6 +281,37 @@ class CardFragment : Fragment() {
                     })
                 }
             }
+        }
+    }
+
+    @ExperimentalMaterial3Api
+    @Composable
+    fun CardInputView() {
+        OutlinedTextField(
+            value = "",
+            label = { Text("CARD NUMBER") },
+            onValueChange = {},
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = "",
+                label = { Text("EXP. DATE") },
+                onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(2.0f)
+            )
+            OutlinedTextField(
+                value = "",
+                label = { Text("CVV") },
+                onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1.0f)
+            )
         }
     }
 
