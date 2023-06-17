@@ -87,14 +87,15 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val card = args.prefillCard?.card
+        args.prefillCard?.card?.let {
+            viewModel.updateCard(it)
+        }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         CardView(
-                            card = card,
                             viewModel = viewModel,
                             onFormSubmit = { uiState -> approveOrder(uiState) })
                     }
@@ -113,7 +114,6 @@ class CardFragment : Fragment() {
     @Composable
     fun CardView(
         viewModel: CardViewModel,
-        card: Card? = null,
         onFormSubmit: (CardViewUiState) -> Unit = {},
     ) {
         val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsState(initial = false)
@@ -126,6 +126,7 @@ class CardFragment : Fragment() {
         val customerId by viewModel.customerId.collectAsState(initial = "")
 
         val statusText by viewModel.statusText.collectAsState(initial = "")
+        val card by viewModel.card.collectAsState(initial = Card("", "", "", ""))
 
         Column(
             modifier = Modifier
@@ -138,7 +139,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            CardInputView()
+            CardInputView(card = card)
             Spacer(modifier = Modifier.size(24.dp))
             Text(
                 text = "Approve Order Options",
@@ -290,9 +291,9 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardInputView() {
+    fun CardInputView(card: Card) {
         OutlinedTextField(
-            value = "",
+            value = card.number,
             label = { Text("CARD NUMBER") },
             onValueChange = {},
             modifier = Modifier.fillMaxWidth()

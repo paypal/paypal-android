@@ -1,6 +1,7 @@
 package com.paypal.android.ui.card
 
 import androidx.lifecycle.ViewModel
+import com.paypal.android.cardpayments.Card
 import com.paypal.android.ui.card.validation.CardViewUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,6 +13,7 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
 
+    val card = uiState.map { it.card }
     val statusText = uiState.map { it.statusText }.distinctUntilChanged()
 
     val scaOptionExpanded =
@@ -58,6 +60,12 @@ class CardViewModel : ViewModel() {
     fun updateStatusText(statusText: String) {
         _uiState.update { currentState ->
             currentState.copy(statusText = statusText)
+        }
+    }
+
+    fun updateCard(card: Card) {
+        _uiState.update { currentState ->
+            currentState.copy(card = card)
         }
     }
 }
