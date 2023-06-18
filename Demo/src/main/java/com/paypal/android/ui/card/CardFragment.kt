@@ -128,7 +128,6 @@ class CardFragment : Fragment() {
         val customerId by viewModel.customerId.collectAsStateWithLifecycle(initialValue = "")
 
         val statusText by viewModel.statusText.collectAsStateWithLifecycle(initialValue = "")
-        val card by viewModel.card.collectAsStateWithLifecycle(initialValue = Card("", "", "", ""))
 
         val cardNumber by viewModel.cardNumber.collectAsStateWithLifecycle(initialValue = "")
         val expirationDate by viewModel.expirationDate.collectAsStateWithLifecycle(initialValue = "")
@@ -144,7 +143,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            CardInputView(card = card, cardNumber = cardNumber, expirationDate = expirationDate)
+            CardInputView(cardNumber = cardNumber, expirationDate = expirationDate)
             Spacer(modifier = Modifier.size(24.dp))
             Text(
                 text = "Approve Order Options",
@@ -296,7 +295,7 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardInputView(card: Card, cardNumber: String, expirationDate: String) {
+    fun CardInputView(cardNumber: String, expirationDate: String) {
         OutlinedTextField(
             value = cardNumber,
             label = { Text("CARD NUMBER") },
