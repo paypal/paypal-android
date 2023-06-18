@@ -40,7 +40,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
@@ -48,7 +47,6 @@ import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
-import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
@@ -90,48 +88,33 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         args.prefillCard?.card?.let {
-            viewModel.updateCard(it)
+            viewModel.applyCardToCardFields(it)
         }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        CardView(
-                            viewModel = viewModel,
-                            onFormSubmit = { uiState -> approveOrder(uiState) })
+                        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                        CardView(uiState = uiState, onFormSubmit = { approveOrder() })
                     }
                 }
             }
         }
     }
 
-    private fun approveOrder(uiState: CardViewUiState) {
+    private fun approveOrder() {
         viewLifecycleOwner.lifecycleScope.launch {
-            createOrder(uiState)
+            createOrder(viewModel.uiState.value)
         }
     }
 
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
-        viewModel: CardViewModel,
-        onFormSubmit: (CardViewUiState) -> Unit = {},
+        uiState: CardViewUiState,
+        onFormSubmit: () -> Unit = {},
     ) {
-        val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsStateWithLifecycle(initialValue = false)
-        val intentOptionExpanded by viewModel.intentOptionExpanded.collectAsStateWithLifecycle(initialValue = false)
-        val shouldVaultOptionExpanded by viewModel.shouldVaultOptionExpanded.collectAsStateWithLifecycle(initialValue = false)
-
-        val scaOption by viewModel.scaOption.collectAsStateWithLifecycle(initialValue = "")
-        val intentOption by viewModel.intentOption.collectAsStateWithLifecycle(initialValue = "")
-        val shouldVaultOption by viewModel.shouldVaultOption.collectAsStateWithLifecycle(initialValue = "")
-        val customerId by viewModel.customerId.collectAsStateWithLifecycle(initialValue = "")
-
-        val statusText by viewModel.statusText.collectAsStateWithLifecycle(initialValue = "")
-
-        val cardNumber by viewModel.cardNumber.collectAsStateWithLifecycle(initialValue = "")
-        val expirationDate by viewModel.expirationDate.collectAsStateWithLifecycle(initialValue = "")
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,7 +126,10 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            CardInputView(cardNumber = cardNumber, expirationDate = expirationDate)
+            CardInputView(
+                cardNumber = uiState.cardNumber,
+                expirationDate = uiState.cardExpirationDate
+            )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
                 text = "Approve Order Options",
@@ -152,8 +138,8 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(2.dp))
             OptionDropDown(
                 hint = "SCA",
-                value = scaOption,
-                expanded = scaOptionExpanded,
+                value = uiState.scaOption,
+                expanded = uiState.scaOptionExpanded,
                 options = listOf("ALWAYS", "WHEN REQUIRED"),
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { expanded ->
@@ -171,8 +157,8 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "INTENT",
-                value = intentOption,
-                expanded = intentOptionExpanded,
+                value = uiState.intentOption,
+                expanded = uiState.intentOptionExpanded,
                 options = listOf("AUTHORIZE", "CAPTURE"),
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { expanded ->
@@ -190,9 +176,9 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(8.dp))
             OptionDropDown(
                 hint = "SHOULD VAULT",
-                value = shouldVaultOption,
+                value = uiState.shouldVaultOption,
                 options = listOf("YES", "NO"),
-                expanded = shouldVaultOptionExpanded,
+                expanded = uiState.shouldVaultOptionExpanded,
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { expanded ->
                     if (expanded) {
@@ -208,7 +194,7 @@ class CardFragment : Fragment() {
             )
             Spacer(modifier = Modifier.size(8.dp))
             OutlinedTextField(
-                value = customerId,
+                value = uiState.customerId,
                 label = { Text("CUSTOMER ID FOR VAULT") },
                 onValueChange = { value ->
                     viewModel.onOptionChange(CardOption.CUSTOMER_VAULT_ID, value)
@@ -223,13 +209,11 @@ class CardFragment : Fragment() {
             )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
-                text = statusText,
+                text = uiState.statusText,
                 modifier = Modifier.weight(1.0f)
             )
             OutlinedButton(
-                onClick = {
-                    onFormSubmit(viewModel.uiState.value)
-                },
+                onClick = { onFormSubmit() },
                 shape = RoundedCornerShape(4.dp),
                 contentPadding = PaddingValues(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -251,7 +235,7 @@ class CardFragment : Fragment() {
     fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(viewModel = viewModel())
+                CardView(uiState = CardViewUiState())
             }
         }
     }
