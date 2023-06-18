@@ -128,7 +128,8 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(2.dp))
             CardInputView(
                 cardNumber = uiState.cardNumber,
-                expirationDate = uiState.cardExpirationDate
+                expirationDate = uiState.cardExpirationDate,
+                securityCode = uiState.cardSecurityCode
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
@@ -279,16 +280,22 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardInputView(cardNumber: String, expirationDate: String) {
+    fun CardInputView(cardNumber: String, expirationDate: String, securityCode: String) {
         OutlinedTextField(
             value = cardNumber,
             label = { Text("CARD NUMBER") },
             onValueChange = {
-                viewModel.onCardNumberChanged(it)
+                viewModel.onOptionChange(CardOption.CARD_NUMBER, it)
             },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             visualTransformation = CardNumberVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (it.isFocused) {
+                        viewModel.onFocusChange(CardOption.CARD_NUMBER)
+                    }
+                }
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -297,19 +304,29 @@ class CardFragment : Fragment() {
                 value = expirationDate,
                 label = { Text("EXP. DATE") },
                 onValueChange = {
-                    viewModel.onExpirationDateChanged(it)
+                    viewModel.onOptionChange(CardOption.CARD_EXPIRATION_DATE, it)
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(2.0f)
+                    .weight(1.5f)
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            viewModel.onFocusChange(CardOption.CARD_EXPIRATION_DATE)
+                        }
+                    }
             )
             OutlinedTextField(
-                value = "",
-                label = { Text("CVV") },
-                onValueChange = {},
+                value = securityCode,
+                label = { Text("SEC. CODE") },
+                onValueChange = {
+                    viewModel.onOptionChange(CardOption.CARD_SECURITY_CODE, it)
+                },
                 modifier = Modifier
-                    .fillMaxWidth()
                     .weight(1.0f)
+                    .onFocusChanged {
+                        if (it.isFocused) {
+                            viewModel.onFocusChange(CardOption.CARD_SECURITY_CODE)
+                        }
+                    }
             )
         }
     }

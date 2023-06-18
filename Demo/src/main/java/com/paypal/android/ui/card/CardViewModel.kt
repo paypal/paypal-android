@@ -16,15 +16,23 @@ class CardViewModel : ViewModel() {
             CardOption.SCA -> _uiState.update { currentState -> currentState.copy(scaOption = value) }
             CardOption.INTENT -> _uiState.update { currentState -> currentState.copy(intentOption = value) }
             CardOption.SHOULD_VAULT -> _uiState.update { currentState ->
-                currentState.copy(
-                    shouldVaultOption = value
-                )
+                currentState.copy(shouldVaultOption = value)
             }
 
             CardOption.CUSTOMER_VAULT_ID -> _uiState.update { currentState ->
-                currentState.copy(
-                    customerId = value
-                )
+                currentState.copy(customerId = value)
+            }
+
+            CardOption.CARD_NUMBER -> _uiState.update { currentState ->
+                currentState.copy(cardNumber = value)
+            }
+
+            CardOption.CARD_EXPIRATION_DATE -> _uiState.update { currentState ->
+                currentState.copy(cardExpirationDate = value)
+            }
+
+            CardOption.CARD_SECURITY_CODE -> _uiState.update { currentState ->
+                currentState.copy(cardSecurityCode = value)
             }
         }
     }
@@ -54,18 +62,6 @@ class CardViewModel : ViewModel() {
                 cardExpirationDate = card.run { "$expirationMonth/$expirationYear" },
                 cardSecurityCode = card.securityCode
             )
-        }
-    }
-
-    fun onCardNumberChanged(cardNumber: String) {
-        _uiState.update { currentState ->
-            currentState.copy(cardNumber = cardNumber)
-        }
-    }
-
-    fun onExpirationDateChanged(expirationDate: String) {
-        _uiState.update { currentState ->
-            currentState.copy(expirationDate = expirationDate)
         }
     }
 }
