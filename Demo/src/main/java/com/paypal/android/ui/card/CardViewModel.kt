@@ -82,6 +82,6 @@ class CardViewModel : ViewModel() {
     }
 
     fun onExpirationDateChanged(newValue: String) {
-        _expirationDate.value = DateFormatter.formatExpirationDate(newValue, _expirationDate.value)
+        _expirationDate.value = newValue
     }
 }

@@ -27,7 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -39,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.navArgs
@@ -118,20 +118,20 @@ class CardFragment : Fragment() {
         viewModel: CardViewModel,
         onFormSubmit: (CardViewUiState) -> Unit = {},
     ) {
-        val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsState(initial = false)
-        val intentOptionExpanded by viewModel.intentOptionExpanded.collectAsState(initial = false)
-        val shouldVaultOptionExpanded by viewModel.shouldVaultOptionExpanded.collectAsState(initial = false)
+        val scaOptionExpanded by viewModel.scaOptionExpanded.collectAsStateWithLifecycle(initialValue = false)
+        val intentOptionExpanded by viewModel.intentOptionExpanded.collectAsStateWithLifecycle(initialValue = false)
+        val shouldVaultOptionExpanded by viewModel.shouldVaultOptionExpanded.collectAsStateWithLifecycle(initialValue = false)
 
-        val scaOption by viewModel.scaOption.collectAsState(initial = "")
-        val intentOption by viewModel.intentOption.collectAsState(initial = "")
-        val shouldVaultOption by viewModel.shouldVaultOption.collectAsState(initial = "")
-        val customerId by viewModel.customerId.collectAsState(initial = "")
+        val scaOption by viewModel.scaOption.collectAsStateWithLifecycle(initialValue = "")
+        val intentOption by viewModel.intentOption.collectAsStateWithLifecycle(initialValue = "")
+        val shouldVaultOption by viewModel.shouldVaultOption.collectAsStateWithLifecycle(initialValue = "")
+        val customerId by viewModel.customerId.collectAsStateWithLifecycle(initialValue = "")
 
-        val statusText by viewModel.statusText.collectAsState(initial = "")
-        val card by viewModel.card.collectAsState(initial = Card("", "", "", ""))
+        val statusText by viewModel.statusText.collectAsStateWithLifecycle(initialValue = "")
+        val card by viewModel.card.collectAsStateWithLifecycle(initialValue = Card("", "", "", ""))
 
-        val cardNumber by viewModel.cardNumber.collectAsState(initial = "")
-        val expirationDate by viewModel.expirationDate.collectAsState(initial = "")
+        val cardNumber by viewModel.cardNumber.collectAsStateWithLifecycle(initialValue = "")
+        val expirationDate by viewModel.expirationDate.collectAsStateWithLifecycle(initialValue = "")
 
         Column(
             modifier = Modifier

@@ -40,6 +40,7 @@ buildscript {
             "composeMaterial"             : "androidx.compose.material:material",
             "composeConstraintLayout"     : "androidx.constraintlayout:constraintlayout-compose",
             "lifecycleViewModelCompose"   : "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1",
+            "lifecycleRuntimeCompose"     : "androidx.lifecycle:lifecycle-runtime-compose:2.6.1",
 
             // Navigation Component
             "navigationFragment"          : "androidx.navigation:navigation-fragment-ktx:${versions.navigation}",

@@ -111,6 +111,7 @@ dependencies {
     implementation deps.composeUiToolingPreview
     debugImplementation deps.composeUiTooling
     implementation deps.lifecycleViewModelCompose
+    implementation deps.lifecycleRuntimeCompose
 
     implementation deps.navigationFragment
     implementation deps.navigationUI
