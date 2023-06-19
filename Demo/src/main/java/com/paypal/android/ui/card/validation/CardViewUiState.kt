@@ -1,8 +1,9 @@
 package com.paypal.android.ui.card.validation
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import com.paypal.android.ui.card.CardOption
 
+@Immutable
 data class CardViewUiState(
     val focusedOption: CardOption? = null,
     val scaOption: String = "",
@@ -17,5 +18,6 @@ data class CardViewUiState(
 ) {
     val scaOptionExpanded: Boolean = focusedOption?.let { it == CardOption.SCA } ?: false
     val intentOptionExpanded: Boolean = focusedOption?.let { it == CardOption.INTENT } ?: false
-    val shouldVaultOptionExpanded: Boolean = focusedOption?.let { it == CardOption.SHOULD_VAULT } ?: false
+    val shouldVaultOptionExpanded: Boolean =
+        focusedOption?.let { it == CardOption.SHOULD_VAULT } ?: false
 }

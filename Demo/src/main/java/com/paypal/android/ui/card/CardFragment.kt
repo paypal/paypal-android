@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -306,6 +307,8 @@ class CardFragment : Fragment() {
                 onValueChange = {
                     viewModel.onOptionChange(CardOption.CARD_EXPIRATION_DATE, it)
                 },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                visualTransformation = ExpirationDateVisualTransformation(),
                 modifier = Modifier
                     .weight(1.5f)
                     .onFocusChanged {
@@ -317,6 +320,8 @@ class CardFragment : Fragment() {
             OutlinedTextField(
                 value = securityCode,
                 label = { Text("SEC. CODE") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                visualTransformation = PasswordVisualTransformation(),
                 onValueChange = {
                     viewModel.onOptionChange(CardOption.CARD_SECURITY_CODE, it)
                 },
