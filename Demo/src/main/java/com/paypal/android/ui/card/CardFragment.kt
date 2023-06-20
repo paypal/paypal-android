@@ -80,8 +80,6 @@ class CardFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
 
-    private var orderIntent: OrderIntent? = null
-
     @ExperimentalMaterial3Api
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -336,61 +334,6 @@ class CardFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-//        binding.run {
-//            cardNumberInput.onValueChange = ::onCardNumberChange
-//            cardExpirationInput.onValueChange = ::onCardExpirationDateChange
-//
-//            useTestCardButton.setOnClickListener {
-//                findNavController().navigate(R.id.action_cardFragment_to_testCardFragment)
-//            }
-//            submitButton.setOnClickListener {
-//                viewLifecycleOwner.lifecycleScope.launch {
-//                    createOrder()
-//                }
-//            }
-    }
-
-    //
-//        setFragmentResultListener(TestCardsFragment.REQUEST_KEY) { _, bundle ->
-//            handleTestCardSelected(bundle)
-//        }
-//    }
-//
-//    private fun handleTestCardSelected(bundle: Bundle) {
-//        val cardNumber = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_NUMBER)
-//        val securityCode = bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_SECURITY_CODE)
-//
-//        val expirationMonth =
-//            bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_MONTH)
-//        val expirationYear =
-//            bundle.getString(TestCardsFragment.RESULT_EXTRA_CARD_EXPIRATION_YEAR)
-//
-//        binding.run {
-//            cardNumberInput.setText("")
-//            val formattedCardNumber =
-//                CardFormatter.formatCardNumber(cardNumber ?: "")
-//            cardNumberInput.setText(formattedCardNumber)
-//
-//            val expirationDate = "$expirationMonth/$expirationYear"
-//            cardExpirationInput.setText(expirationDate)
-//            cardSecurityCodeInput.setText(securityCode)
-//        }
-//    }
-//
-//    private fun onCardNumberChange(oldValue: String, newValue: String) {
-//        val formattedCardNumber = CardFormatter.formatCardNumber(newValue, oldValue)
-//        binding.cardNumberInput.setText(formattedCardNumber)
-//        binding.cardNumberInput.setSelection(formattedCardNumber.length)
-//    }
-//
-//    private fun onCardExpirationDateChange(oldValue: String, newValue: String) {
-//        val formattedExpirationDate = DateFormatter.formatExpirationDate(newValue, oldValue)
-//        binding.cardExpirationInput.setText(formattedExpirationDate)
-//        binding.cardExpirationInput.setSelection(formattedExpirationDate.length)
-//    }
-//
     private suspend fun createOrder(uiState: CardViewUiState) {
         val orderIntent = when (uiState.intentOption) {
             "AUTHORIZE" -> OrderIntent.AUTHORIZE
