@@ -19,10 +19,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -71,20 +73,23 @@ class SelectCardFragment : Fragment() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+//                        .background(Color(0xFF0079C1)) // PayPal blue
                         .selectable(
                             selected = false,
                             onClick = { navigateToCardForm() }
                         )
                 ) {
                     Text(
-                        text = "ENTER CARD MANUALLY",
-                        modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
-                        style = MaterialTheme.typography.headlineSmall
+                        text = "✏️ ENTER CARD MANUALLY️",
+//                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
                     )
                 }
             }
             stickyHeader {
-                TestCardHeader("Cards without 3DS")
+                TestCardHeader("Test Cards without 3DS")
             }
             items(viewModel.nonThreeDSCards) { card ->
                 TestCardView(
@@ -97,7 +102,7 @@ class SelectCardFragment : Fragment() {
                 Divider(color = Color.Black)
             }
             stickyHeader {
-                TestCardHeader("Cards with 3DS")
+                TestCardHeader("Test Cards with 3DS")
             }
             items(viewModel.threeDSCards) { card ->
                 TestCardView(
