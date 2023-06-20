@@ -88,7 +88,7 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         args.prefillCard?.card?.let {
-            viewModel.applyCardToCardFields(it)
+            viewModel.prefillCard(it)
         }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -399,17 +399,25 @@ class CardFragment : Fragment() {
     }
 
     private fun parseCard(uiState: CardViewUiState): Card {
+        // TODO: handle invalid date string
         var expirationMonth = ""
         var expirationYear = ""
 
-        val rawExpirationDate = uiState.cardExpirationDate
-        if (rawExpirationDate.length >= 5) {
-            // at least two digits for month and four for year
-            expirationYear = rawExpirationDate.takeLast(4)
-            expirationMonth = rawExpirationDate.substring(0, rawExpirationDate.length - 4)
-        } else {
-            // TODO: handle invalid date
+        val dateString = DateString(uiState.cardNumber)
+        val dateStringComponents = dateString.formatted.split("/")
+        if (dateStringComponents.isNotEmpty()) {
+            expirationMonth = dateStringComponents[0]
+            if (dateStringComponents.size > 1) {
+                val rawYear = dateStringComponents[1]
+                expirationYear = if (rawYear.length == 2) {
+                    // pad with 20 to assume 2000's
+                    "20${rawYear}"
+                } else {
+                    rawYear
+                }
+            }
         }
+
         return Card(
             number = uiState.cardNumber,
             expirationMonth = expirationMonth,

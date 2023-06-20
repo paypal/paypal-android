@@ -57,7 +57,7 @@ class CardViewModel : ViewModel() {
         }
     }
 
-    fun applyCardToCardFields(card: Card) {
+    fun prefillCard(card: Card) {
         _uiState.update { currentState ->
             currentState.copy(
                 cardNumber = card.number,
