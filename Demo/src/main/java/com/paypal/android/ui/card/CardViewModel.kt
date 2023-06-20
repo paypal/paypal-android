@@ -11,30 +11,32 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onOptionChange(option: CardOption, value: String) {
-        when (option) {
-            CardOption.SCA -> _uiState.update { currentState -> currentState.copy(scaOption = value) }
-            CardOption.INTENT -> _uiState.update { currentState -> currentState.copy(intentOption = value) }
-            CardOption.SHOULD_VAULT -> _uiState.update { currentState ->
-                currentState.copy(shouldVaultOption = value)
-            }
+    fun updateCardNumber(value: String) {
+        _uiState.update { currentState -> currentState.copy(cardNumber = value) }
+    }
 
-            CardOption.CUSTOMER_VAULT_ID -> _uiState.update { currentState ->
-                currentState.copy(customerId = value)
-            }
+    fun updateCardExpirationDate(value: String) {
+        _uiState.update { currentState -> currentState.copy(cardExpirationDate = value) }
+    }
 
-            CardOption.CARD_NUMBER -> _uiState.update { currentState ->
-                currentState.copy(cardNumber = value)
-            }
+    fun updateCardSecurityCode(value: String) {
+        _uiState.update { currentState -> currentState.copy(cardSecurityCode = value) }
+    }
 
-            CardOption.CARD_EXPIRATION_DATE -> _uiState.update { currentState ->
-                currentState.copy(cardExpirationDate = value)
-            }
+    fun updateSCA(value: String) {
+        _uiState.update { currentState -> currentState.copy(scaOption = value) }
+    }
 
-            CardOption.CARD_SECURITY_CODE -> _uiState.update { currentState ->
-                currentState.copy(cardSecurityCode = value)
-            }
-        }
+    fun updateIntent(value: String) {
+        _uiState.update { currentState -> currentState.copy(intentOption = value) }
+    }
+
+    fun updateShouldVault(value: String) {
+        _uiState.update { currentState -> currentState.copy(shouldVaultOption = value) }
+    }
+
+    fun updateVaultCustomerId(value: String) {
+        _uiState.update { currentState -> currentState.copy(customerId = value) }
     }
 
     fun onFocusChange(option: CardOption) {
