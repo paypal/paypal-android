@@ -69,22 +69,26 @@ class SelectCardFragment : Fragment() {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
+            stickyHeader {
+                TestCardHeader("Manual Card Entry")
+            }
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .background(Color(0xFF0079C1)) // PayPal blue
+                        .background(Color(0xFF0079C1)) // PayPal blue
                         .selectable(
                             selected = false,
                             onClick = { navigateToCardForm() }
                         )
                 ) {
                     Text(
-                        text = "✏️ ENTER CARD MANUALLY️",
-//                        color = Color.White,
+                        text = "ENTER CARD MANUALLY️",
+                        color = Color.White,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier
-                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                            .align(Alignment.Center)
+                            .padding(vertical = 26.dp, horizontal = 8.dp),
                     )
                 }
             }
