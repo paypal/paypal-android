@@ -1,6 +1,7 @@
 package com.paypal.android.ui.card
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
@@ -17,7 +18,7 @@ class ExpirationDateVisualTransformation : VisualTransformation {
 
         return TransformedText(
             AnnotatedString(formatDate(text.text)),
-            offsetMapping = ExpirationDateOffsetMapping(mode)
+            offsetMapping = ExpirationDateOffsetMapping(text.text, mode)
         )
     }
 
@@ -56,5 +57,37 @@ class ExpirationDateVisualTransformation : VisualTransformation {
             }
         }
         return result
+    }
+
+    class ExpirationDateOffsetMapping(private val rawDate: String, private val mode: Mode) : OffsetMapping {
+
+        enum class Mode {
+            DEFAULT, LEADING_ZERO
+        }
+
+        override fun originalToTransformed(offset: Int): Int {
+            var transformed = offset
+            if (mode == Mode.LEADING_ZERO) {
+                transformed++
+            }
+
+            if (transformed >= 2) {
+                // increment for added slash in date
+                transformed++
+            }
+            return transformed
+        }
+
+        override fun transformedToOriginal(offset: Int): Int {
+            var transformed = offset
+            if (transformed >= 3) {
+                // decrement for added slash in date
+                transformed--
+            }
+            if (mode == Mode.LEADING_ZERO) {
+                transformed--
+            }
+            return transformed
+        }
     }
 }
