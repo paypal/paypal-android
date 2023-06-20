@@ -301,7 +301,7 @@ class CardFragment : Fragment() {
                 label = { Text("EXP. DATE") },
                 onValueChange = { value -> viewModel.updateCardExpirationDate(value) },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                visualTransformation = ExpirationDateVisualTransformation(),
+                visualTransformation = DateVisualTransformation(),
                 modifier = Modifier
                     .weight(1.5f)
                     .onFocusChanged {
