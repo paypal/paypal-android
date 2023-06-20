@@ -59,7 +59,7 @@ class CardViewModel : ViewModel() {
         _uiState.update { currentState ->
             currentState.copy(
                 cardNumber = card.number,
-                cardExpirationDate = card.run { "$expirationMonth/$expirationYear" },
+                cardExpirationDate = card.run { "$expirationMonth$expirationYear" },
                 cardSecurityCode = card.securityCode
             )
         }
