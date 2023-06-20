@@ -48,6 +48,7 @@ import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
+import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
@@ -395,7 +396,7 @@ class CardFragment : Fragment() {
         viewModel.updateStatusText("Authorizing order...")
 
         // build card request
-        val card = args.prefillCard!!.card
+        val card = parseCard(uiState)
         val sca = when (uiState.scaOption) {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
@@ -403,6 +404,26 @@ class CardFragment : Fragment() {
 
         val cardRequest = CardRequest(order.id!!, card, APP_RETURN_URL, sca)
         cardClient.approveOrder(requireActivity(), cardRequest)
+    }
+
+    private fun parseCard(uiState: CardViewUiState): Card {
+        var expirationMonth = ""
+        var expirationYear = ""
+
+        val rawExpirationDate = uiState.cardExpirationDate
+        if (rawExpirationDate.length >= 5) {
+            // at least two digits for month and four for year
+            expirationYear = rawExpirationDate.takeLast(4)
+            expirationMonth = rawExpirationDate.substring(0, rawExpirationDate.length - 4)
+        } else {
+            // TODO: handle invalid date
+        }
+        return Card(
+            number = uiState.cardNumber,
+            expirationMonth = expirationMonth,
+            expirationYear = expirationYear,
+            securityCode = uiState.cardSecurityCode
+        )
     }
 
     private suspend fun captureOrder(cardResult: CardResult) {
