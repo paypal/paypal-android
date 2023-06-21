@@ -412,7 +412,7 @@ class CardFragment : Fragment() {
                 val rawYear = dateStringComponents[1]
                 expirationYear = if (rawYear.length == 2) {
                     // pad with 20 to assume 2000's
-                    "20${rawYear}"
+                    "20$rawYear"
                 } else {
                     rawYear
                 }
