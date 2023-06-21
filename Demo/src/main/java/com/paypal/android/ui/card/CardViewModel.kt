@@ -11,32 +11,18 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun updateCardNumber(value: String) {
-        _uiState.update { currentState -> currentState.copy(cardNumber = value) }
-    }
-
-    fun updateCardExpirationDate(value: String) {
-        _uiState.update { currentState -> currentState.copy(cardExpirationDate = value) }
-    }
-
-    fun updateCardSecurityCode(value: String) {
-        _uiState.update { currentState -> currentState.copy(cardSecurityCode = value) }
-    }
-
-    fun updateSCA(value: String) {
-        _uiState.update { currentState -> currentState.copy(scaOption = value) }
-    }
-
-    fun updateIntent(value: String) {
-        _uiState.update { currentState -> currentState.copy(intentOption = value) }
-    }
-
-    fun updateShouldVault(value: String) {
-        _uiState.update { currentState -> currentState.copy(shouldVaultOption = value) }
-    }
-
-    fun updateVaultCustomerId(value: String) {
-        _uiState.update { currentState -> currentState.copy(customerId = value) }
+    fun onValueChange(option: CardOption, value: String) {
+        _uiState.update { currentState ->
+            when (option) {
+                CardOption.SCA -> currentState.copy(scaOption = value)
+                CardOption.INTENT -> currentState.copy(intentOption = value)
+                CardOption.SHOULD_VAULT -> currentState.copy(shouldVaultOption = value)
+                CardOption.VAULT_CUSTOMER_ID -> currentState.copy(customerId = value)
+                CardOption.CARD_NUMBER -> currentState.copy(cardNumber = value)
+                CardOption.CARD_EXPIRATION_DATE -> currentState.copy(cardExpirationDate = value)
+                CardOption.CARD_SECURITY_CODE -> currentState.copy(cardSecurityCode = value)
+            }
+        }
     }
 
     fun onOptionFocus(option: CardOption) {

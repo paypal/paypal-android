@@ -175,7 +175,7 @@ class CardFragment : Fragment() {
         OutlinedTextField(
             value = cardNumber,
             label = { Text("CARD NUMBER") },
-            onValueChange = { value -> viewModel.updateCardNumber(value) },
+            onValueChange = { viewModel.onValueChange(CardOption.CARD_NUMBER, it) },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             visualTransformation = CardNumberVisualTransformation(),
             modifier = Modifier
@@ -192,7 +192,7 @@ class CardFragment : Fragment() {
             OutlinedTextField(
                 value = expirationDate,
                 label = { Text("EXP. DATE") },
-                onValueChange = { value -> viewModel.updateCardExpirationDate(value) },
+                onValueChange = { viewModel.onValueChange(CardOption.CARD_EXPIRATION_DATE, it) },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = DateVisualTransformation(),
                 modifier = Modifier
@@ -208,7 +208,7 @@ class CardFragment : Fragment() {
                 label = { Text("SEC. CODE") },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = PasswordVisualTransformation(),
-                onValueChange = { value -> viewModel.updateCardSecurityCode(value) },
+                onValueChange = { viewModel.onValueChange(CardOption.CARD_SECURITY_CODE, it) },
                 modifier = Modifier
                     .weight(1.0f)
                     .onFocusChanged {
@@ -232,8 +232,8 @@ class CardFragment : Fragment() {
             onExpandedChange = { expanded ->
                 if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
             },
-            onValueChange = { value ->
-                viewModel.updateSCA(value)
+            onValueChange = {
+                viewModel.onValueChange(CardOption.SCA, it)
                 viewModel.clearFocus()
             }
         )
@@ -247,8 +247,8 @@ class CardFragment : Fragment() {
             onExpandedChange = { expanded ->
                 if (expanded) viewModel.onOptionFocus(CardOption.INTENT) else viewModel.clearFocus()
             },
-            onValueChange = { value ->
-                viewModel.updateIntent(value)
+            onValueChange = {
+                viewModel.onValueChange(CardOption.INTENT, it)
                 viewModel.clearFocus()
             }
         )
@@ -262,8 +262,8 @@ class CardFragment : Fragment() {
             onExpandedChange = { expanded ->
                 if (expanded) viewModel.onOptionFocus(CardOption.SHOULD_VAULT) else viewModel.clearFocus()
             },
-            onValueChange = { value ->
-                viewModel.updateShouldVault(value)
+            onValueChange = {
+                viewModel.onValueChange(CardOption.SHOULD_VAULT, it)
                 viewModel.clearFocus()
             }
         )
@@ -271,7 +271,7 @@ class CardFragment : Fragment() {
         OutlinedTextField(
             value = uiState.customerId,
             label = { Text("CUSTOMER ID FOR VAULT") },
-            onValueChange = { value -> viewModel.updateVaultCustomerId(value) },
+            onValueChange = { viewModel.onValueChange(CardOption.VAULT_CUSTOMER_ID, it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged {
