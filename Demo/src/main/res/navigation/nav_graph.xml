@@ -28,9 +28,6 @@
             app:argType="com.paypal.android.data.card.TestCard"
             app:nullable="true"
             android:defaultValue="@null" />
-        <action
-            android:id="@+id/action_cardFragment_to_testCardFragment"
-            app:destination="@id/testCardFragment" />
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
@@ -44,11 +41,6 @@
         android:id="@+id/payPalButtonsFragment"
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
-    <fragment
-        android:id="@+id/testCardFragment"
-        android:name="com.paypal.android.ui.testcards.TestCardsFragment"
-        android:label="Test Cards"
-        tools:layout="@layout/fragment_test_cards" />
     <fragment
         android:id="@+id/payPalNativeFragment"
         android:name="com.paypal.android.ui.paypal.PayPalNativeFragment"
