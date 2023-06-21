@@ -5,13 +5,11 @@
     <string name="payment_methods_card">Card</string>
     <string name="payment_methods_paypal">PayPal</string>
     <string name="payment_methods_paypal_native">PayPal Native</string>
-    <string name="payment_methods_menu_settings">Settings</string>
 
     <!-- Card Fields -->
-    <string name="card_field_submit">Submit</string>
-    <string name="card_field_card_number">Card Number</string>
-    <string name="card_field_expiration">Expiration</string>
-    <string name="card_field_security_code">Security Code</string>
+    <string name="card_field_card_number">CARD NUMBER</string>
+    <string name="card_field_expiration">EXP. DATE</string>
+    <string name="card_field_security_code">SEC. CODE</string>
 
     <!-- Preference Titles -->
     <string name="environment_title">Environment</string>
@@ -29,10 +27,10 @@
     <string name="getting_client_id">Getting client id…</string>
     <string name="custom_styling">Style Buttons</string>
 
-    <string name="sca_title">SCA:</string>
+    <string name="sca_title">SCA</string>
     <string name="sca_always">Always</string>
     <string name="sca_when_required">When required</string>
-    <string name="server_integration">Server Integration</string>
+
     <string name="payment_button">Payment Button</string>
     <string name="select_color">Select Color</string>
     <string name="select_funding">Select Funding</string>
@@ -40,9 +38,7 @@
     <string name="select_shape">Select Shape</string>
     <string name="select_size">Select Size</string>
 
-    <string name="use_test_card">Use a Test Card</string>
-
-    <string name="intent_title">Intent:</string>
+    <string name="intent_title">INTENT</string>
     <string name="intent_authorize">AUTHORIZE</string>
     <string name="intent_capture">CAPTURE</string>
 
@@ -59,6 +55,4 @@
     <string name="something_went_wrong">Oops! Something went wrong</string>
     <string name="order_created">Order Created</string>
     <string name="checkout_cancelled_by_user">Checkout cancelled by user</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

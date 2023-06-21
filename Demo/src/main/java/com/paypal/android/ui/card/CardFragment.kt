@@ -30,6 +30,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +40,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.paypal.android.R
 import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Payee
@@ -54,6 +56,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.ui.stringResourceListOf
 import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -174,7 +177,7 @@ class CardFragment : Fragment() {
     fun CardForm(cardNumber: String, expirationDate: String, securityCode: String) {
         OutlinedTextField(
             value = cardNumber,
-            label = { Text("CARD NUMBER") },
+            label = { Text(stringResource(id = R.string.card_field_card_number)) },
             onValueChange = { viewModel.onValueChange(CardOption.CARD_NUMBER, it) },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             visualTransformation = CardNumberVisualTransformation(),
@@ -191,7 +194,7 @@ class CardFragment : Fragment() {
         ) {
             OutlinedTextField(
                 value = expirationDate,
-                label = { Text("EXP. DATE") },
+                label = { Text(stringResource(id = R.string.card_field_expiration)) },
                 onValueChange = { viewModel.onValueChange(CardOption.CARD_EXPIRATION_DATE, it) },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = DateVisualTransformation(),
@@ -205,7 +208,7 @@ class CardFragment : Fragment() {
             )
             OutlinedTextField(
                 value = securityCode,
-                label = { Text("SEC. CODE") },
+                label = { Text(stringResource(id = R.string.card_field_security_code)) },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = PasswordVisualTransformation(),
                 onValueChange = { viewModel.onValueChange(CardOption.CARD_SECURITY_CODE, it) },
@@ -224,10 +227,10 @@ class CardFragment : Fragment() {
     @Composable
     fun ApproveOrderForm(uiState: CardViewUiState) {
         WireframeOptionDropDown(
-            hint = "SCA",
+            hint = stringResource(id = R.string.sca_title),
             value = uiState.scaOption,
             expanded = uiState.scaOptionExpanded,
-            options = listOf("ALWAYS", "WHEN REQUIRED"),
+            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
             modifier = Modifier.fillMaxWidth(),
             onExpandedChange = { expanded ->
                 if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
@@ -239,10 +242,10 @@ class CardFragment : Fragment() {
         )
         Spacer(modifier = Modifier.size(8.dp))
         WireframeOptionDropDown(
-            hint = "INTENT",
+            hint = stringResource(id = R.string.intent_title),
             value = uiState.intentOption,
             expanded = uiState.intentOptionExpanded,
-            options = listOf("AUTHORIZE", "CAPTURE"),
+            options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
             modifier = Modifier.fillMaxWidth(),
             onExpandedChange = { expanded ->
                 if (expanded) viewModel.onOptionFocus(CardOption.INTENT) else viewModel.clearFocus()
