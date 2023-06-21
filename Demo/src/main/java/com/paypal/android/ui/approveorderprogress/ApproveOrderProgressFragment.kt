@@ -5,17 +5,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -61,7 +65,8 @@ class ApproveOrderProgressFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        ApproveOrderProgressView()
+                        val events by viewModel.events.collectAsStateWithLifecycle()
+                        ApproveOrderProgressView(events)
                     }
                 }
             }
@@ -83,24 +88,25 @@ class ApproveOrderProgressFragment : Fragment() {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.publishEvent("Order ${result.orderId} approved...")
 //                    finishOrder(result, orderIntent)
                 }
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
-                viewModel.updateStatusText("CAPTURE fail: ${error.errorDescription}")
+                viewModel.publishEvent("CAPTURE fail: ${error.errorDescription}")
             }
 
             override fun onApproveOrderCanceled() {
-                viewModel.updateStatusText("USER CANCELED")
+                viewModel.publishEvent("USER CANCELED")
             }
 
             override fun onApproveOrderThreeDSecureWillLaunch() {
-                viewModel.updateStatusText("3DS launched")
+                viewModel.publishEvent("3DS launched")
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
-                viewModel.updateStatusText("3DS finished")
+                viewModel.publishEvent("3DS finished")
             }
         }
 
@@ -108,7 +114,7 @@ class ApproveOrderProgressFragment : Fragment() {
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
-        viewModel.updateStatusText("Authorizing order...")
+        viewModel.publishEvent("Authorizing order...")
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
@@ -116,8 +122,12 @@ class ApproveOrderProgressFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun ApproveOrderProgressView() {
-
+    fun ApproveOrderProgressView(events: List<String>) {
+        Column {
+            events.forEach {
+                Text(it)
+            }
+        }
     }
 
     @ExperimentalMaterial3Api
@@ -126,7 +136,7 @@ class ApproveOrderProgressFragment : Fragment() {
     fun ApproveOrderProgressPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                ApproveOrderProgressView()
+                ApproveOrderProgressView(emptyList())
             }
         }
     }
