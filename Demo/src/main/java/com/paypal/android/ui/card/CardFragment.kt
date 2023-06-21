@@ -124,7 +124,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            CardInputView(
+            CardForm(
                 cardNumber = uiState.cardNumber,
                 expirationDate = uiState.cardExpirationDate,
                 securityCode = uiState.cardSecurityCode
@@ -135,75 +135,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            WireframeOptionDropDown(
-                hint = "SCA",
-                value = uiState.scaOption,
-                expanded = uiState.scaOptionExpanded,
-                options = listOf("ALWAYS", "WHEN REQUIRED"),
-                modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { expanded ->
-                    if (expanded) {
-                        viewModel.onOptionFocus(CardOption.SCA)
-                    } else {
-                        viewModel.clearFocus()
-                    }
-                },
-                onValueChange = { value ->
-                    viewModel.updateSCA(value)
-                    viewModel.clearFocus()
-                }
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            WireframeOptionDropDown(
-                hint = "INTENT",
-                value = uiState.intentOption,
-                expanded = uiState.intentOptionExpanded,
-                options = listOf("AUTHORIZE", "CAPTURE"),
-                modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { expanded ->
-                    if (expanded) {
-                        viewModel.onOptionFocus(CardOption.INTENT)
-                    } else {
-                        viewModel.clearFocus()
-                    }
-                },
-                onValueChange = { value ->
-                    viewModel.updateIntent(value)
-                    viewModel.clearFocus()
-                }
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            WireframeOptionDropDown(
-                hint = "SHOULD VAULT",
-                value = uiState.shouldVaultOption,
-                options = listOf("YES", "NO"),
-                expanded = uiState.shouldVaultOptionExpanded,
-                modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { expanded ->
-                    if (expanded) {
-                        viewModel.onOptionFocus(CardOption.SHOULD_VAULT)
-                    } else {
-                        viewModel.clearFocus()
-                    }
-                },
-                onValueChange = { value ->
-                    viewModel.updateShouldVault(value)
-                    viewModel.clearFocus()
-                }
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            OutlinedTextField(
-                value = uiState.customerId,
-                label = { Text("CUSTOMER ID FOR VAULT") },
-                onValueChange = { value -> viewModel.updateVaultCustomerId(value) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged {
-                        if (it.isFocused) {
-                            viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
-                        }
-                    }
-            )
+            ApproveOrderForm(uiState)
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = uiState.statusText,
@@ -229,7 +161,7 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Preview
     @Composable
-    fun CardViewPreview() {
+    fun CardFormPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 CardView(uiState = CardViewUiState())
@@ -239,7 +171,7 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun CardInputView(cardNumber: String, expirationDate: String, securityCode: String) {
+    fun CardForm(cardNumber: String, expirationDate: String, securityCode: String) {
         OutlinedTextField(
             value = cardNumber,
             label = { Text("CARD NUMBER") },
@@ -288,6 +220,68 @@ class CardFragment : Fragment() {
         }
     }
 
+    @ExperimentalMaterial3Api
+    @Composable
+    fun ApproveOrderForm(uiState: CardViewUiState) {
+        WireframeOptionDropDown(
+            hint = "SCA",
+            value = uiState.scaOption,
+            expanded = uiState.scaOptionExpanded,
+            options = listOf("ALWAYS", "WHEN REQUIRED"),
+            modifier = Modifier.fillMaxWidth(),
+            onExpandedChange = { expanded ->
+                if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
+            },
+            onValueChange = { value ->
+                viewModel.updateSCA(value)
+                viewModel.clearFocus()
+            }
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        WireframeOptionDropDown(
+            hint = "INTENT",
+            value = uiState.intentOption,
+            expanded = uiState.intentOptionExpanded,
+            options = listOf("AUTHORIZE", "CAPTURE"),
+            modifier = Modifier.fillMaxWidth(),
+            onExpandedChange = { expanded ->
+                if (expanded) viewModel.onOptionFocus(CardOption.INTENT) else viewModel.clearFocus()
+            },
+            onValueChange = { value ->
+                viewModel.updateIntent(value)
+                viewModel.clearFocus()
+            }
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        WireframeOptionDropDown(
+            hint = "SHOULD VAULT",
+            value = uiState.shouldVaultOption,
+            options = listOf("YES", "NO"),
+            expanded = uiState.shouldVaultOptionExpanded,
+            modifier = Modifier.fillMaxWidth(),
+            onExpandedChange = { expanded ->
+                if (expanded) viewModel.onOptionFocus(CardOption.SHOULD_VAULT) else viewModel.clearFocus()
+            },
+            onValueChange = { value ->
+                viewModel.updateShouldVault(value)
+                viewModel.clearFocus()
+            }
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        OutlinedTextField(
+            value = uiState.customerId,
+            label = { Text("CUSTOMER ID FOR VAULT") },
+            onValueChange = { value -> viewModel.updateVaultCustomerId(value) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    if (it.isFocused) {
+                        viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
+                    }
+                }
+        )
+    }
+
     private suspend fun createOrder(uiState: CardViewUiState) {
         val orderIntent = when (uiState.intentOption) {
             "AUTHORIZE" -> OrderIntent.AUTHORIZE
@@ -301,10 +295,7 @@ class CardFragment : Fragment() {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    when (orderIntent) {
-                        OrderIntent.CAPTURE -> captureOrder(result)
-                        OrderIntent.AUTHORIZE -> authorizeOrder(result)
-                    }
+                    finishOrder(result, orderIntent)
                 }
             }
 
@@ -388,21 +379,22 @@ class CardFragment : Fragment() {
         )
     }
 
-    private suspend fun captureOrder(cardResult: CardResult) {
-        viewModel.updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
-        val result = sdkSampleServerAPI.captureOrder(cardResult.orderId)
-        updateStatusTextWithCardResult(cardResult, result.status)
-    }
+    private suspend fun finishOrder(cardResult: CardResult, orderIntent: OrderIntent) {
+        val orderId = cardResult.orderId
+        val finishResult = when (orderIntent) {
+            OrderIntent.CAPTURE -> {
+                viewModel.updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
+                sdkSampleServerAPI.captureOrder(orderId)
+            }
 
-    private suspend fun authorizeOrder(cardResult: CardResult) {
-        viewModel.updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
-        val result = sdkSampleServerAPI.authorizeOrder(cardResult.orderId)
-        updateStatusTextWithCardResult(cardResult, result.status)
-    }
+            OrderIntent.AUTHORIZE -> {
+                viewModel.updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
+                sdkSampleServerAPI.authorizeOrder(orderId)
+            }
+        }
 
-    private fun updateStatusTextWithCardResult(result: CardResult, orderStatus: String?) {
-        val statusText = "Confirmed Order: ${result.orderId} Status: $orderStatus"
-        val deepLink = result.deepLinkUrl?.toString().orEmpty()
+        val statusText = "Confirmed Order: $orderId Status: ${finishResult.status}"
+        val deepLink = cardResult.deepLinkUrl?.toString().orEmpty()
         val joinedText = listOf(statusText, deepLink).joinToString("\n")
         viewModel.updateStatusText(joinedText)
     }
