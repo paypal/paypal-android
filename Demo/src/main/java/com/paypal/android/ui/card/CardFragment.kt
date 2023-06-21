@@ -17,10 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -55,6 +52,7 @@ import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
@@ -137,7 +135,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            OptionDropDown(
+            WireframeOptionDropDown(
                 hint = "SCA",
                 value = uiState.scaOption,
                 expanded = uiState.scaOptionExpanded,
@@ -156,7 +154,7 @@ class CardFragment : Fragment() {
                 }
             )
             Spacer(modifier = Modifier.size(8.dp))
-            OptionDropDown(
+            WireframeOptionDropDown(
                 hint = "INTENT",
                 value = uiState.intentOption,
                 expanded = uiState.intentOptionExpanded,
@@ -175,7 +173,7 @@ class CardFragment : Fragment() {
                 }
             )
             Spacer(modifier = Modifier.size(8.dp))
-            OptionDropDown(
+            WireframeOptionDropDown(
                 hint = "SHOULD VAULT",
                 value = uiState.shouldVaultOption,
                 options = listOf("YES", "NO"),
@@ -235,43 +233,6 @@ class CardFragment : Fragment() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 CardView(uiState = CardViewUiState())
-            }
-        }
-    }
-
-    @ExperimentalMaterial3Api
-    @Composable
-    fun OptionDropDown(
-        hint: String,
-        value: String,
-        options: List<String>,
-        expanded: Boolean,
-        modifier: Modifier,
-        onExpandedChange: (Boolean) -> Unit,
-        onValueChange: (String) -> Unit
-    ) {
-        // Ref: https://alexzh.com/jetpack-compose-dropdownmenu/
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = onExpandedChange,
-            modifier = modifier
-        ) {
-            OutlinedTextField(
-                value = value,
-                label = { Text(hint) },
-                readOnly = true,
-                onValueChange = {},
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor()
-            )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = {}) {
-                options.forEach { item ->
-                    DropdownMenuItem(text = { Text(text = item) }, onClick = {
-                        onValueChange(item)
-                    })
-                }
             }
         }
     }
