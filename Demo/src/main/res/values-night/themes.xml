@@ -2,12 +2,12 @@
     <!-- Base application theme. -->
     <style name="Theme.AndroidSDK" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/charcoal</item>
-        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorPrimary">@color/pay_pal_blue</item>
+        <item name="colorPrimaryVariant">@color/pay_pal_light_blue</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/pay_pal_blue</item>
-        <item name="colorSecondaryVariant">@color/pay_pal_light_blue</item>
+        <item name="colorSecondary">@color/charcoal</item>
+        <item name="colorSecondaryVariant">@color/black</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
