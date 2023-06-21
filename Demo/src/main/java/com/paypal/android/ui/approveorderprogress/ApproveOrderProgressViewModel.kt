@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.update
 
 class ApproveOrderProgressViewModel: ViewModel() {
 
-    private val _events = MutableStateFlow(listOf<String>())
-    val events = _events.asStateFlow()
+    private val _eventLog = MutableStateFlow(listOf<String>())
+    val eventLog = _eventLog.asStateFlow()
 
-    fun publishEvent(message: String) {
-        _events.update {
+    fun appendEventToLog(message: String) {
+        _eventLog.update {
             val listCopy = it.toMutableList()
             listCopy.add(message)
             listCopy
