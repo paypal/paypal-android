@@ -47,7 +47,6 @@ import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
 import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -356,8 +355,11 @@ class CardFragment : Fragment() {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
+        val shouldVault = (uiState.shouldVaultOption == "YES")
+        val vaultCustomerId = uiState.customerId
 
-        val cardRequest = CardRequest(order.id!!, card, APP_RETURN_URL, sca)
+        val cardRequest =
+            CardRequest(order.id!!, card, APP_RETURN_URL, sca, shouldVault, vaultCustomerId)
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
