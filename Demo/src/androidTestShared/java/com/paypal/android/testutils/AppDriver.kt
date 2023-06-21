@@ -8,10 +8,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
-import androidx.test.uiautomator.Until
 import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import org.junit.Assert
-import java.util.regex.Pattern
 
 // Ref: https://github.com/android/testing-samples
 class AppDriver(private val appPackage: String) {
