@@ -196,7 +196,7 @@ class CardFragment : Fragment() {
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = DateVisualTransformation(),
                 modifier = Modifier
-                    .weight(1.5f)
+                    .weight(weight = 1.5f)
                     .onFocusChanged {
                         if (it.isFocused) {
                             viewModel.onOptionFocus(CardOption.CARD_EXPIRATION_DATE)

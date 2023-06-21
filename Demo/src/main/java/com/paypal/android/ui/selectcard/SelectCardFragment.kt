@@ -75,7 +75,7 @@ class SelectCardFragment : Fragment() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF0079C1)) // PayPal blue
+                        .background(Color(color = 0xFF0079C1)) // PayPal blue
                         .selectable(
                             selected = false,
                             onClick = { navigateToCardForm() }
