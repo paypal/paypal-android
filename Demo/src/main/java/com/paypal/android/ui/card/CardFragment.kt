@@ -403,7 +403,8 @@ class CardFragment : Fragment() {
         var expirationMonth = ""
         var expirationYear = ""
 
-        val dateString = DateString(uiState.cardNumber)
+        // expiration date in UI State needs to be formatted because it uses a visual transformation
+        val dateString = DateString(uiState.expirationDate)
         val dateStringComponents = dateString.formatted.split("/")
         if (dateStringComponents.isNotEmpty()) {
             expirationMonth = dateStringComponents[0]
