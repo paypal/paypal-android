@@ -39,7 +39,7 @@ class CardViewModel : ViewModel() {
         _uiState.update { currentState -> currentState.copy(customerId = value) }
     }
 
-    fun onFocusChange(option: CardOption) {
+    fun onOptionFocus(option: CardOption) {
         _uiState.update { currentState ->
             currentState.copy(focusedOption = option)
         }

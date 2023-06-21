@@ -145,7 +145,7 @@ class CardFragment : Fragment() {
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { expanded ->
                     if (expanded) {
-                        viewModel.onFocusChange(CardOption.SCA)
+                        viewModel.onOptionFocus(CardOption.SCA)
                     } else {
                         viewModel.clearFocus()
                     }
@@ -164,7 +164,7 @@ class CardFragment : Fragment() {
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { expanded ->
                     if (expanded) {
-                        viewModel.onFocusChange(CardOption.INTENT)
+                        viewModel.onOptionFocus(CardOption.INTENT)
                     } else {
                         viewModel.clearFocus()
                     }
@@ -183,7 +183,7 @@ class CardFragment : Fragment() {
                 modifier = Modifier.fillMaxWidth(),
                 onExpandedChange = { expanded ->
                     if (expanded) {
-                        viewModel.onFocusChange(CardOption.SHOULD_VAULT)
+                        viewModel.onOptionFocus(CardOption.SHOULD_VAULT)
                     } else {
                         viewModel.clearFocus()
                     }
@@ -202,7 +202,7 @@ class CardFragment : Fragment() {
                     .fillMaxWidth()
                     .onFocusChanged {
                         if (it.isFocused) {
-                            viewModel.onFocusChange(CardOption.VAULT_CUSTOMER_ID)
+                            viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
                         }
                     }
             )
@@ -289,7 +289,7 @@ class CardFragment : Fragment() {
                 .fillMaxWidth()
                 .onFocusChanged {
                     if (it.isFocused) {
-                        viewModel.onFocusChange(CardOption.CARD_NUMBER)
+                        viewModel.onOptionFocus(CardOption.CARD_NUMBER)
                     }
                 }
         )
@@ -306,7 +306,7 @@ class CardFragment : Fragment() {
                     .weight(1.5f)
                     .onFocusChanged {
                         if (it.isFocused) {
-                            viewModel.onFocusChange(CardOption.CARD_EXPIRATION_DATE)
+                            viewModel.onOptionFocus(CardOption.CARD_EXPIRATION_DATE)
                         }
                     }
             )
@@ -320,7 +320,7 @@ class CardFragment : Fragment() {
                     .weight(1.0f)
                     .onFocusChanged {
                         if (it.isFocused) {
-                            viewModel.onFocusChange(CardOption.CARD_SECURITY_CODE)
+                            viewModel.onOptionFocus(CardOption.CARD_SECURITY_CODE)
                         }
                     }
             )
