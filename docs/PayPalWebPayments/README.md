@@ -61,7 +61,7 @@ override fun onNewIntent(newIntent: Intent?) {
 
 ### 3. Initiate the Payments SDK
 
-Create a `CoreConfig` using an [client id](https://developer.paypal.com/api/rest/):
+Create a `CoreConfig` using a [client id](https://developer.paypal.com/api/rest/):
 
 ```kotlin
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
