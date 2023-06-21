@@ -43,6 +43,12 @@ class CardViewModel : ViewModel() {
         }
     }
 
+    fun updateOrderDetailsText(orderDetails: String) {
+        _uiState.update { currentState ->
+            currentState.copy(orderDetails = orderDetails)
+        }
+    }
+
     fun prefillCard(card: Card) {
         _uiState.update { currentState ->
             currentState.copy(

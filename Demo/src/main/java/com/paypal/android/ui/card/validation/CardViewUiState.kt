@@ -12,9 +12,9 @@ data class CardViewUiState(
     val customerId: String = "",
     val statusText: String = "",
     val cardNumber: String = "",
-    val expirationDate: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
+    val orderDetails: String = ""
 ) {
     val scaOptionExpanded: Boolean = focusedOption?.let { it == CardOption.SCA } ?: false
     val intentOptionExpanded: Boolean = focusedOption?.let { it == CardOption.INTENT } ?: false

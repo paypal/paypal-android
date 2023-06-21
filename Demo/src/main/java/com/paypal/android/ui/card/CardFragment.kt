@@ -25,12 +25,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -88,9 +92,7 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        args.prefillCard?.card?.let {
-            viewModel.prefillCard(it)
-        }
+        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -110,6 +112,7 @@ class CardFragment : Fragment() {
         }
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
@@ -120,6 +123,9 @@ class CardFragment : Fragment() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
+                .semantics {
+                    testTagsAsResourceId = true
+                }
         ) {
             Spacer(modifier = Modifier.size(24.dp))
             Text(
@@ -140,10 +146,12 @@ class CardFragment : Fragment() {
             Spacer(modifier = Modifier.size(2.dp))
             ApproveOrderForm(uiState)
             Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = uiState.statusText,
+            Column(
                 modifier = Modifier.weight(1.0f)
-            )
+            ) {
+                Text(text = uiState.statusText, modifier = Modifier.testTag("statusText"))
+                Text(uiState.orderDetails)
+            }
             OutlinedButton(
                 onClick = { onFormSubmit() },
                 shape = RoundedCornerShape(4.dp),
@@ -359,7 +367,7 @@ class CardFragment : Fragment() {
         var expirationYear = ""
 
         // expiration date in UI State needs to be formatted because it uses a visual transformation
-        val dateString = DateString(uiState.expirationDate)
+        val dateString = DateString(uiState.cardExpirationDate)
         val dateStringComponents = dateString.formatted.split("/")
         if (dateStringComponents.isNotEmpty()) {
             expirationMonth = dateStringComponents[0]
@@ -396,9 +404,10 @@ class CardFragment : Fragment() {
             }
         }
 
-        val statusText = "Confirmed Order: $orderId Status: ${finishResult.status}"
+        viewModel.updateStatusText("Status: ${finishResult.status}")
+        val orderDetailsText = "Confirmed Order: $orderId"
         val deepLink = cardResult.deepLinkUrl?.toString().orEmpty()
-        val joinedText = listOf(statusText, deepLink).joinToString("\n")
-        viewModel.updateStatusText(joinedText)
+        val joinedText = listOf(orderDetailsText, deepLink).joinToString("\n")
+        viewModel.updateOrderDetailsText(joinedText)
     }
 }
