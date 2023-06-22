@@ -27,15 +27,5 @@ class MessageEvent(private val message: String) : ComposableEvent {
             )
         }
     }
-
-    @Preview
-    @Composable
-    fun PreviewAsComposable() {
-        MaterialTheme {
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                AsComposable()
-            }
-        }
-    }
 }
 
