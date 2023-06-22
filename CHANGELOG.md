@@ -1,5 +1,9 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* All Modules
+  * Bump Kotlin version to `1.8.21`
+
 ## 0.0.10 (2023-06-23)
 * Breaking Changes
   * CardPayments
