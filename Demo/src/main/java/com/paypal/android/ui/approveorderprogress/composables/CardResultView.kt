@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +21,9 @@ import com.paypal.android.cardpayments.model.CardResult
 fun CardResultView(
     result: CardResult
 ) {
-    OutlinedCard(
+    Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Spacer(modifier = Modifier.size(16.dp))
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {

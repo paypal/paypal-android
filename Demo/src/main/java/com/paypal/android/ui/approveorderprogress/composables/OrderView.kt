@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,18 +15,13 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.Order
 
 @Composable
-fun GetOrderInfoView(order: Order) {
-    OutlinedCard(
+fun OrderView(order: Order) {
+    Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Spacer(modifier = Modifier.size(16.dp))
         Column(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "Get Order Info",
-                style = MaterialTheme.typography.titleLarge,
-            )
             Text(
                 text = "Order",
                 style = MaterialTheme.typography.titleMedium,
@@ -36,6 +30,17 @@ fun GetOrderInfoView(order: Order) {
             )
             Text(
                 text = order.id ?: "UNSET",
+                modifier = Modifier
+                    .padding(top = 4.dp)
+            )
+            Text(
+                text = "Intent",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+            )
+            Text(
+                text = order.intent ?: "UNSET",
                 modifier = Modifier
                     .padding(top = 4.dp)
             )
@@ -94,7 +99,6 @@ fun GetOrderInfoView(order: Order) {
                 modifier = Modifier
                     .padding(top = 4.dp)
             )
-
             Spacer(modifier = Modifier.size(24.dp))
         }
     }
@@ -102,10 +106,10 @@ fun GetOrderInfoView(order: Order) {
 
 @Preview
 @Composable
-fun GetOrderInfoPreview() {
+fun OrderPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            GetOrderInfoView(Order())
+            OrderView(Order())
         }
     }
 }

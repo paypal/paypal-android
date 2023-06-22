@@ -123,6 +123,7 @@ class SDKSampleServerAPI(baseUrl: String) {
 
         return Order(
             id = json.optString("id"),
+            intent = json.optString("intent"),
             status = json.optString("status"),
             cardLast4 = cardJSON?.optString("last_digits"),
             cardBrand = cardJSON?.optString("brand"),

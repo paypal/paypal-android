@@ -36,6 +36,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.approveorderprogress.events.CardResultSuccessEvent
 import com.paypal.android.ui.approveorderprogress.events.GetOrderInfoSuccessEvent
 import com.paypal.android.ui.approveorderprogress.events.MessageEvent
+import com.paypal.android.ui.approveorderprogress.events.OrderCompleteEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -83,11 +84,6 @@ class ApproveOrderProgressFragment : Fragment() {
 
     private suspend fun executeCardRequestFromArgs() {
         val cardRequest = args.cardRequest
-
-//        val orderIntent = when (uiState.intentOption) {
-//            "AUTHORIZE" -> OrderIntent.AUTHORIZE
-//            else -> OrderIntent.CAPTURE
-//        }
 
         viewModel.appendEventToLog(MessageEvent("Fetching Client ID..."))
         val clientId = sdkSampleServerAPI.fetchClientId()
@@ -163,26 +159,32 @@ class ApproveOrderProgressFragment : Fragment() {
     }
 
     private suspend fun finishOrder(cardResult: CardResult) {
+        viewModel.appendEventToLog(MessageEvent("Fetching Order Info..."))
+
         val orderId = cardResult.orderId
         val order = sdkSampleServerAPI.getOrder(orderId)
         viewModel.appendEventToLog(GetOrderInfoSuccessEvent(order))
 
-//        val finishResult = when (orderIntent) {
-//            OrderIntent.CAPTURE -> {
-//                viewModel.updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
-//                sdkSampleServerAPI.captureOrder(orderId)
-//            }
-//
-//            OrderIntent.AUTHORIZE -> {
-//                viewModel.updateStatusText("Authorizing order with ID: ${cardResult.orderId}...")
-//                sdkSampleServerAPI.authorizeOrder(orderId)
-//            }
-//        }
-//
-//        viewModel.updateStatusText("Status: ${finishResult.status}")
-//        val orderDetailsText = "Confirmed Order: $orderId"
-//        val deepLink = cardResult.deepLinkUrl?.toString().orEmpty()
-//        val joinedText = listOf(orderDetailsText, deepLink).joinToString("\n")
-//        viewModel.updateOrderDetailsText(joinedText)
+        val finishResult = when (order.intent) {
+            "CAPTURE" -> {
+                viewModel.appendEventToLog(MessageEvent("Capturing Order..."))
+                sdkSampleServerAPI.captureOrder(orderId)
+            }
+
+            "AUTHORIZE" -> {
+                viewModel.appendEventToLog(MessageEvent("Authorizing Order..."))
+                sdkSampleServerAPI.authorizeOrder(orderId)
+            }
+
+            else -> {
+                null
+            }
+        }
+
+        if (finishResult == null) {
+            viewModel.appendEventToLog(MessageEvent("Order Intent Could Not Be Determined"))
+        } else {
+            viewModel.appendEventToLog(OrderCompleteEvent(finishResult))
+        }
     }
 }
