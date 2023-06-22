@@ -127,7 +127,7 @@ class SDKSampleServerAPI(baseUrl: String) {
             status = optNonEmptyString(json,"status"),
             cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
             cardBrand = optNonEmptyString(cardJSON, "brand"),
-            vaultId = optNonEmptyString(vaultCustomerJSON, "id"),
+            vaultId = optNonEmptyString(vaultJSON, "id"),
             customerId = optNonEmptyString(vaultCustomerJSON, "id")
         )
     }
