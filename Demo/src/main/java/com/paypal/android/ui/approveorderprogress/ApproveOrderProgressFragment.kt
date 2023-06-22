@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,6 +29,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.ui.approveorderprogress.events.FetchingClientIdEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -83,32 +83,34 @@ class ApproveOrderProgressFragment : Fragment() {
 //            else -> OrderIntent.CAPTURE
 //        }
 
+        viewModel.appendEventToLog(FetchingClientIdEvent())
         val clientId = sdkSampleServerAPI.fetchClientId()
+
         val configuration = CoreConfig(clientId = clientId)
         cardClient = CardClient(requireActivity(), configuration)
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.appendEventToLog("Order ${result.orderId} approved...")
+//                    viewModel.appendEventToLog("Order ${result.orderId} approved...")
 //                    finishOrder(result, orderIntent)
                 }
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
-                viewModel.appendEventToLog("CAPTURE fail: ${error.errorDescription}")
+//                viewModel.appendEventToLog("CAPTURE fail: ${error.errorDescription}")
             }
 
             override fun onApproveOrderCanceled() {
-                viewModel.appendEventToLog("USER CANCELED")
+//                viewModel.appendEventToLog("USER CANCELED")
             }
 
             override fun onApproveOrderThreeDSecureWillLaunch() {
-                viewModel.appendEventToLog("3DS launched")
+//                viewModel.appendEventToLog("3DS launched")
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
-                viewModel.appendEventToLog("3DS finished")
+//                viewModel.appendEventToLog("3DS finished")
             }
         }
 
@@ -116,7 +118,7 @@ class ApproveOrderProgressFragment : Fragment() {
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
-        viewModel.appendEventToLog("Authorizing order...")
+//        viewModel.appendEventToLog("Authorizing order...")
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
@@ -124,13 +126,13 @@ class ApproveOrderProgressFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun ApproveOrderProgressView(events: List<String>) {
+    fun ApproveOrderProgressView(events: List<ApproveOrderEvent>) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(16.dp)
         ) {
             events.forEach {
-                Text(it)
+                it.AsComposable()
             }
         }
     }

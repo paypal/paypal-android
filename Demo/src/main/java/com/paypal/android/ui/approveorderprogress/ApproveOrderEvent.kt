@@ -1,3 +1,8 @@
 package com.paypal.android.ui.approveorderprogress
 
-class ApproveOrderEvent(val message: String)
+import androidx.compose.runtime.Composable
+
+interface ApproveOrderEvent {
+    @Composable
+    fun AsComposable()
+}
