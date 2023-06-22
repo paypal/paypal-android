@@ -1,6 +1,7 @@
 package com.paypal.android.ui.approveorderprogress
 
 import androidx.lifecycle.ViewModel
+import com.paypal.android.uishared.events.ComposableEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.paypal.android.ui.approveorderprogress.ComposableEvent
+import com.paypal.android.uishared.events.ComposableEvent
 
 class MessageEvent(private val message: String) : ComposableEvent {
 

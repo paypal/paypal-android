@@ -1,4 +1,4 @@
-package com.paypal.android.ui.approveorderprogress
+package com.paypal.android.uishared.events
 
 import androidx.compose.runtime.Composable
 

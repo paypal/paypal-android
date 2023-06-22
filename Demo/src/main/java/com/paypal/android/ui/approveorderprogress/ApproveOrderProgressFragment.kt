@@ -38,6 +38,7 @@ import com.paypal.android.ui.approveorderprogress.events.GetOrderInfoSuccessEven
 import com.paypal.android.ui.approveorderprogress.events.MessageEvent
 import com.paypal.android.ui.approveorderprogress.events.OrderCompleteEvent
 import com.paypal.android.ui.card.DataCollectorHandler
+import com.paypal.android.uishared.events.ComposableEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

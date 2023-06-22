@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.Order
-import com.paypal.android.ui.approveorderprogress.ComposableEvent
+import com.paypal.android.uishared.events.ComposableEvent
 import com.paypal.android.ui.approveorderprogress.composables.OrderView
 
 class GetOrderInfoSuccessEvent(private val order: Order) : ComposableEvent {
