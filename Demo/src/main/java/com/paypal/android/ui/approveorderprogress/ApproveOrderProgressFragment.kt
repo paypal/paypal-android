@@ -30,6 +30,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.ui.approveorderprogress.events.CardResultSuccessEvent
 import com.paypal.android.ui.approveorderprogress.events.MessageEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,25 +94,26 @@ class ApproveOrderProgressFragment : Fragment() {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewLifecycleOwner.lifecycleScope.launch {
-//                    viewModel.appendEventToLog("Order ${result.orderId} approved...")
+                    viewModel.appendEventToLog(MessageEvent("Order Approved"))
+                    viewModel.appendEventToLog(CardResultSuccessEvent(result))
 //                    finishOrder(result, orderIntent)
                 }
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
-//                viewModel.appendEventToLog("CAPTURE fail: ${error.errorDescription}")
+                viewModel.appendEventToLog(MessageEvent("CAPTURE fail: ${error.errorDescription}"))
             }
 
             override fun onApproveOrderCanceled() {
-//                viewModel.appendEventToLog("USER CANCELED")
+                viewModel.appendEventToLog(MessageEvent("USER CANCELED"))
             }
 
             override fun onApproveOrderThreeDSecureWillLaunch() {
-//                viewModel.appendEventToLog("3DS launched")
+                viewModel.appendEventToLog(MessageEvent("3DS Auth Requested"))
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
-//                viewModel.appendEventToLog("3DS finished")
+                viewModel.appendEventToLog(MessageEvent("3DS Success"))
             }
         }
 
@@ -119,7 +121,7 @@ class ApproveOrderProgressFragment : Fragment() {
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
-        viewModel.appendEventToLog(MessageEvent("Authorizing order..."))
+        viewModel.appendEventToLog(MessageEvent("Authorizing Order..."))
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
