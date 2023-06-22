@@ -33,10 +33,10 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.ui.approveorderprogress.events.CardResultSuccessEvent
-import com.paypal.android.ui.approveorderprogress.events.GetOrderInfoSuccessEvent
+import com.paypal.android.ui.approveorderprogress.events.ApproveOrderSuccessEvent
+import com.paypal.android.ui.approveorderprogress.events.GetOrderSuccessEvent
 import com.paypal.android.ui.approveorderprogress.events.MessageEvent
-import com.paypal.android.ui.approveorderprogress.events.OrderCompleteEvent
+import com.paypal.android.ui.approveorderprogress.events.CompleteOrderSuccessEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import com.paypal.android.uishared.events.ComposableEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,7 +95,7 @@ class ApproveOrderProgressFragment : Fragment() {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewModel.appendEventToLog(MessageEvent("Order Approved"))
-                viewModel.appendEventToLog(CardResultSuccessEvent(result))
+                viewModel.appendEventToLog(ApproveOrderSuccessEvent(result))
                 viewLifecycleOwner.lifecycleScope.launch {
                     finishOrder(result)
                 }
@@ -164,7 +164,7 @@ class ApproveOrderProgressFragment : Fragment() {
 
         val orderId = cardResult.orderId
         val order = sdkSampleServerAPI.getOrder(orderId)
-        viewModel.appendEventToLog(GetOrderInfoSuccessEvent(order))
+        viewModel.appendEventToLog(GetOrderSuccessEvent(order))
 
         val finishResult = when (order.intent) {
             "CAPTURE" -> {
@@ -185,7 +185,7 @@ class ApproveOrderProgressFragment : Fragment() {
         if (finishResult == null) {
             viewModel.appendEventToLog(MessageEvent("Order Intent Could Not Be Determined"))
         } else {
-            viewModel.appendEventToLog(OrderCompleteEvent(finishResult))
+            viewModel.appendEventToLog(CompleteOrderSuccessEvent(finishResult))
         }
     }
 }
