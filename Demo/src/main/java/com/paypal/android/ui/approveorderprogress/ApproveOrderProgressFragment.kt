@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.ui.approveorderprogress.events.FetchingClientIdEvent
+import com.paypal.android.ui.approveorderprogress.events.MessageEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -83,7 +84,7 @@ class ApproveOrderProgressFragment : Fragment() {
 //            else -> OrderIntent.CAPTURE
 //        }
 
-        viewModel.appendEventToLog(FetchingClientIdEvent())
+        viewModel.appendEventToLog(MessageEvent("Fetching Client ID..."))
         val clientId = sdkSampleServerAPI.fetchClientId()
 
         val configuration = CoreConfig(clientId = clientId)
@@ -118,7 +119,7 @@ class ApproveOrderProgressFragment : Fragment() {
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
-//        viewModel.appendEventToLog("Authorizing order...")
+        viewModel.appendEventToLog(MessageEvent("Authorizing order..."))
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
@@ -128,6 +129,7 @@ class ApproveOrderProgressFragment : Fragment() {
     @Composable
     fun ApproveOrderProgressView(events: List<ApproveOrderEvent>) {
         Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .padding(16.dp)
         ) {

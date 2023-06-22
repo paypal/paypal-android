@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.ui.approveorderprogress.ApproveOrderEvent
 
-class FetchingClientIdEvent : ApproveOrderEvent {
+class MessageEvent(private val message: String) : ApproveOrderEvent {
 
     @Composable
     override fun AsComposable() {
@@ -20,7 +20,7 @@ class FetchingClientIdEvent : ApproveOrderEvent {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Fetching Client ID...",
+                text = message,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .padding(16.dp)
