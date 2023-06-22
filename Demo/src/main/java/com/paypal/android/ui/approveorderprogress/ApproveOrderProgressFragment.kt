@@ -132,7 +132,7 @@ class ApproveOrderProgressFragment : Fragment() {
     fun ApproveOrderProgressView(events: List<ComposableEvent>) {
         val listState = rememberLazyListState()
         LaunchedEffect(events) {
-            // continuously scroll to bottom of the list
+            // continuously scroll to bottom of the list when event state is updated
             listState.animateScrollToItem(events.size)
         }
         LazyColumn(

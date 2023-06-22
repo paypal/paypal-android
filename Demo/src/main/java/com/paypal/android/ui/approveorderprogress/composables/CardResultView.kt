@@ -1,9 +1,7 @@
 package com.paypal.android.ui.approveorderprogress.composables
 
 import android.net.Uri
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -55,52 +53,7 @@ fun CardResultView(
                         .padding(top = 4.dp)
                 )
             } else {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                ) {
-                    Text("Scheme:")
-                    Text(result.deepLinkUrl?.scheme ?: "NOT SET")
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                ) {
-                    Text("Host:")
-                    Text(result.deepLinkUrl?.host ?: "NOT SET")
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                ) {
-                    Text("Path:")
-                    Text(result.deepLinkUrl?.path ?: "NOT SET")
-                }
-                if (result.deepLinkUrl?.queryParameterNames?.isNotEmpty() == true) {
-                    Text(
-                        text = "Params:",
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                    )
-                    Column(
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        result.deepLinkUrl?.queryParameterNames?.forEach { paramName ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("$paramName:")
-                                Text(
-                                    result.deepLinkUrl?.getQueryParameter(paramName)
-                                        ?: "PRESENT BUT NOT SET"
-                                )
-                            }
-                        }
-                    }
-                }
+                UriView(uri = result.deepLinkUrl!!)
             }
             Spacer(modifier = Modifier.size(24.dp))
         }
