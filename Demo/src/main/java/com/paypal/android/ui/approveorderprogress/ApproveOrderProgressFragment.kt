@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -23,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
@@ -31,6 +34,7 @@ import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.approveorderprogress.events.CardResultSuccessEvent
+import com.paypal.android.ui.approveorderprogress.events.GetOrderInfoSuccessEvent
 import com.paypal.android.ui.approveorderprogress.events.MessageEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import dagger.hilt.android.AndroidEntryPoint
@@ -93,10 +97,10 @@ class ApproveOrderProgressFragment : Fragment() {
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
+                viewModel.appendEventToLog(MessageEvent("Order Approved"))
+                viewModel.appendEventToLog(CardResultSuccessEvent(result))
                 viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.appendEventToLog(MessageEvent("Order Approved"))
-                    viewModel.appendEventToLog(CardResultSuccessEvent(result))
-//                    finishOrder(result, orderIntent)
+                    finishOrder(result)
                 }
             }
 
@@ -129,11 +133,12 @@ class ApproveOrderProgressFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun ApproveOrderProgressView(events: List<ApproveOrderEvent>) {
+    fun ApproveOrderProgressView(events: List<ComposableEvent>) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             events.forEach {
                 it.AsComposable()
@@ -152,8 +157,11 @@ class ApproveOrderProgressFragment : Fragment() {
         }
     }
 
-//    private suspend fun finishOrder(cardResult: CardResult, orderIntent: OrderIntent) {
-//        val orderId = cardResult.orderId
+    private suspend fun finishOrder(cardResult: CardResult) {
+        val orderId = cardResult.orderId
+        val order = sdkSampleServerAPI.getOrder(orderId)
+        viewModel.appendEventToLog(GetOrderInfoSuccessEvent(order))
+
 //        val finishResult = when (orderIntent) {
 //            OrderIntent.CAPTURE -> {
 //                viewModel.updateStatusText("Capturing order with ID: ${cardResult.orderId}...")
@@ -171,5 +179,5 @@ class ApproveOrderProgressFragment : Fragment() {
 //        val deepLink = cardResult.deepLinkUrl?.toString().orEmpty()
 //        val joinedText = listOf(orderDetailsText, deepLink).joinToString("\n")
 //        viewModel.updateOrderDetailsText(joinedText)
-//    }
+    }
 }

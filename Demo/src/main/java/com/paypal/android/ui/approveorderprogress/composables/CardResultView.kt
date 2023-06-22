@@ -30,7 +30,7 @@ fun CardResultView(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             Text(
-                text = "Card Result",
+                text = "Approve Order Result",
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(

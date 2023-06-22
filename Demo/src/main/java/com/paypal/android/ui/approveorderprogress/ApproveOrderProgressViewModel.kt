@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.update
 
 class ApproveOrderProgressViewModel : ViewModel() {
 
-    private val _eventLog = MutableStateFlow(listOf<ApproveOrderEvent>())
+    private val _eventLog = MutableStateFlow(listOf<ComposableEvent>())
     val eventLog = _eventLog.asStateFlow()
 
-    fun appendEventToLog(event: ApproveOrderEvent) {
+    fun appendEventToLog(event: ComposableEvent) {
         _eventLog.update {
             val listCopy = it.toMutableList()
             listCopy.add(event)

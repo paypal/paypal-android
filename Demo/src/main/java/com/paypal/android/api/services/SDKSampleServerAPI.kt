@@ -44,6 +44,9 @@ class SDKSampleServerAPI(baseUrl: String) {
         @GET("/client_id")
         suspend fun fetchClientId(): ClientId
 
+        @GET("/orders/{orderId}")
+        suspend fun getOrder(@Path("orderId") orderId: String): ResponseBody
+
         @PATCH("/orders/{orderId}")
         suspend fun patchOrder(
             @Path("orderId") orderId: String,
@@ -105,6 +108,11 @@ class SDKSampleServerAPI(baseUrl: String) {
 
     suspend fun authorizeOrder(orderId: String): Order {
         val response = service.authorizeOrder(orderId)
+        return parseOrder(JSONObject(response.string()))
+    }
+
+    suspend fun getOrder(orderId: String): Order {
+        val response = service.getOrder(orderId)
         return parseOrder(JSONObject(response.string()))
     }
 
