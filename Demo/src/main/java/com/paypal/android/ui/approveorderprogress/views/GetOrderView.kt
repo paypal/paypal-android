@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.Order
-import com.paypal.android.ui.approveorderprogress.composables.OrderView
+import com.paypal.android.uishared.components.OrderView
 
 @Composable
 fun GetOrderView(order: Order) {
