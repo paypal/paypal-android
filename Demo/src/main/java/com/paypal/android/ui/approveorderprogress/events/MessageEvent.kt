@@ -11,4 +11,3 @@ class MessageEvent(private val message: String) : ComposableEvent {
         MessageView(message = message)
     }
 }
-

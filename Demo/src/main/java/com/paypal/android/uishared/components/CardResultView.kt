@@ -1,4 +1,4 @@
-package com.paypal.android.ui.approveorderprogress.composables
+package com.paypal.android.uishared.components
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Column

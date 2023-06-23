@@ -1,4 +1,4 @@
-package com.paypal.android.ui.approveorderprogress.composables
+package com.paypal.android.uishared.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,79 +25,65 @@ fun OrderView(order: Order) {
             Text(
                 text = "Order",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.id ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = "Intent",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.intent ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = "Status",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.status ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = "Card Last 4",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.cardLast4 ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = "Card Brand",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.cardBrand ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = "Vault Id",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.vaultId ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Text(
                 text = "Customer Vault Id",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp)
             )
             Text(
                 text = order.customerId ?: "UNSET",
-                modifier = Modifier
-                    .padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
             Spacer(modifier = Modifier.size(24.dp))
         }
