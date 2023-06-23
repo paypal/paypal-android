@@ -38,7 +38,7 @@
         app:layout_constraintEnd_toEndOf="@id/progress_circular"
         app:layout_constraintStart_toStartOf="@id/progress_circular"
         app:layout_constraintTop_toBottomOf="@id/progress_circular"
-        tools:text="Fetching access token..." />
+        tools:text="Fetching client id..." />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title"

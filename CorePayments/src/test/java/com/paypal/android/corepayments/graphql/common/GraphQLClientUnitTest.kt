@@ -27,9 +27,9 @@ import java.net.URL
 @RunWith(RobolectricTestRunner::class)
 internal class GraphQLClientUnitTest {
 
-    private val sandboxConfig = CoreConfig("fake-access-token", Environment.SANDBOX)
-    private val stagingConfig = CoreConfig("fake-access-token", Environment.STAGING)
-    private val liveConfig = CoreConfig("fake-access-token", Environment.LIVE)
+    private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+    private val stagingConfig = CoreConfig("fake-client-id", Environment.STAGING)
+    private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE)
 
     private val graphQLRequestBody = JSONObject("""{"fake":"json"}""")
 

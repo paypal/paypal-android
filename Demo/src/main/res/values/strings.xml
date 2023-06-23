@@ -26,7 +26,7 @@
     <string name="order_failed">Order Failed</string>
     <string name="reason">Reason: %s</string>
     <string name="creating_order">Creating order…</string>
-    <string name="getting_token">Getting access token…</string>
+    <string name="getting_client_id">Getting client id…</string>
     <string name="custom_styling">Style Buttons</string>
 
     <string name="sca_title">SCA:</string>
