@@ -122,9 +122,9 @@ class SDKSampleServerAPI(baseUrl: String) {
         val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
 
         return Order(
-            id = optNonEmptyString(json,"id"),
+            id = optNonEmptyString(json, "id"),
             intent = optNonEmptyString(json, "intent"),
-            status = optNonEmptyString(json,"status"),
+            status = optNonEmptyString(json, "status"),
             cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
             cardBrand = optNonEmptyString(cardJSON, "brand"),
             vaultId = optNonEmptyString(vaultJSON, "id"),
