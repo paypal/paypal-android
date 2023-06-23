@@ -27,7 +27,6 @@ import com.paypal.android.text.onValueChange
 import com.paypal.android.ui.card.validation.CardFormatter
 import com.paypal.android.ui.card.validation.DateFormatter
 import com.paypal.android.ui.testcards.TestCardsFragment
-import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -40,9 +39,6 @@ class CardFragment : Fragment() {
         const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
-
-    @Inject
-    lateinit var preferenceUtil: SharedPreferenceUtil
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
