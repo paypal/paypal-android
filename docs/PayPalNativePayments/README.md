@@ -33,8 +33,8 @@ dependencies {
 
 In order to integrate PayPal native payments, you will need:
 
-1. A PayPal client ID and corresponding secret. This is to generate an access token that will allow you to create payment tokens, capture funds and authorize customers to place orders.
-2. Setting a return URL.
+1. A PayPal [client id](https://developer.paypal.com/api/rest/)
+2. A return URL
 
 A return URL is required for redirecting users back to the app after authenticating. Please reference our [developer documentation](https://developer.paypal.com/limited-release/paypal-mobile-checkout/android/#link-enablethesdk) to create said url and also to learn about how to create a new PayPal application as well.
 
@@ -180,58 +180,6 @@ curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/order
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-raw ''
 ```
-
-## Billing Agreement
-
-### 1. Create Billing Agreement
-
-**Request**
-
-```bash
-curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer <ACCESS_TOKEN>' \
---data-raw '{
-  "description": "Billing Agreement",
-  "shipping_address":
-  {
-    "line1": "1350 North First Street",
-    "city": "San Jose",
-    "state": "CA",
-    "postal_code": "95112",
-    "country_code": "US",
-    "recipient_name": "John Doe"
-  },
-  "payer":
-  {
-    "payment_method": "PAYPAL"
-  },
-  "plan":
-  {
-    "type": "MERCHANT_INITIATED_BILLING",
-  }
-}'
-```
-
-**Response**
-
-```json
-{
-   "token_id": "<BILLING_AGREEMENT_TOKEN>"
-}
-```
-
-### 2. Set Billing Agreement
-
-```kotlin
-paypalNativeClient.startCheckout(CreateOrder { createOrderActions ->
-   createOrderActions.setBillingAgreementId(BILLING_AGREEMENT_TOKEN)
-})
-```
-
-### 3. Start checkout
-
-Follow steps here to [Initiate PayPal Native Checkout](#3-initiate-paypal-native-checkout)
 
 ## Test and go live
 
