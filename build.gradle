@@ -93,7 +93,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.4.1"
+        classpath "com.android.tools.build:gradle:7.4.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.navigation}"
