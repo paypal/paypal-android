@@ -3,10 +3,12 @@ package com.paypal.android.ui.card
 import androidx.lifecycle.ViewModel
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.ui.card.validation.CardViewUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+@HiltViewModel
 class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()

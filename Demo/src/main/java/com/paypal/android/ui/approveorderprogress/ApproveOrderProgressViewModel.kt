@@ -2,10 +2,12 @@ package com.paypal.android.ui.approveorderprogress
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.uishared.events.ComposableEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+@HiltViewModel
 class ApproveOrderProgressViewModel : ViewModel() {
 
     private val _eventLog = MutableStateFlow(listOf<ComposableEvent>())
