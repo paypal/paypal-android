@@ -3,7 +3,6 @@ package com.paypal.android.ui.selectcard
 import androidx.lifecycle.ViewModel
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.models.TestCard
-import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
 
 class SelectCardViewModel : ViewModel() {
