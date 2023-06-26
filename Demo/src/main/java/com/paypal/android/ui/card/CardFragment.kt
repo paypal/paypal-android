@@ -61,7 +61,6 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
-import com.paypal.android.utils.SharedPreferenceUtil
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
