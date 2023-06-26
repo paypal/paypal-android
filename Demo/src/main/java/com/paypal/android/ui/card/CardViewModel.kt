@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-@HiltViewModel
 class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()

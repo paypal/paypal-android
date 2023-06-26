@@ -32,6 +32,7 @@ android {
 
     composeOptions {
         // Ref: https://developer.android.com/jetpack/androidx/releases/compose-kotlin#pre-release_kotlin_compatibility
+//        kotlinCompilerVersion "${versions.kotlin}"
         kotlinCompilerExtensionVersion "${versions.compose}"
     }
 
@@ -43,11 +44,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     lintOptions {
@@ -65,6 +66,7 @@ android {
 
 // Ref: https://developer.android.com/training/dependency-injection/hilt-android#setup
 kapt {
+    useBuildCache false
     // allow references to generated code
     correctErrorTypes true
 }

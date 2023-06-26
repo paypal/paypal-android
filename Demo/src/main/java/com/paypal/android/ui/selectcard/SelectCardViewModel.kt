@@ -6,7 +6,6 @@ import com.paypal.android.models.TestCard
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
 
-@HiltViewModel
 class SelectCardViewModel : ViewModel() {
     companion object {
         // 2 years into the future of the current year
