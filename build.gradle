@@ -12,7 +12,7 @@ buildscript {
     ext.versions = [
             "kotlin"    : kotlinVersion,
             "compose"   : "1.4.7",
-            "navigation": "2.6.0",
+            "navigation": "2.3.5",
             "hilt"      : "2.44"
     ]
 
@@ -95,19 +95,18 @@ buildscript {
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.4.2"
+        classpath "com.android.tools.build:gradle:7.4.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.navigation}"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"
     }
 }
 
 plugins {
     id "io.gitlab.arturbosch.detekt" version "${detektVersion}"
-    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'org.jetbrains.kotlin.android' version '1.5.30' apply false
-    id 'com.google.dagger.hilt.android' version '2.44' apply false
-    id "org.jetbrains.kotlin.kapt" version "${kotlinVersion}" apply false
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo

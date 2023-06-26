@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-kapt'
-    id 'com.google.dagger.hilt.android'
+    id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
 }
 
@@ -66,31 +66,23 @@ android {
 
 // Ref: https://developer.android.com/training/dependency-injection/hilt-android#setup
 kapt {
-    useBuildCache false
     // allow references to generated code
     correctErrorTypes true
 }
 
 dependencies {
-    implementation project(':CardPayments')
-    implementation project(':FraudProtection')
-    implementation project(':PayPalNativePayments')
-    implementation project(':PayPalWebPayments')
-    implementation project(':PaymentButtons')
-    implementation project(':Venmo')
+    debugImplementation project(':CardPayments')
+    debugImplementation project(':FraudProtection')
+    debugImplementation project(':PayPalNativePayments')
+    debugImplementation project(':PayPalWebPayments')
+    debugImplementation project(':PaymentButtons')
+    debugImplementation project(':Venmo')
 
-//    debugImplementation project(':CardPayments')
-//    debugImplementation project(':FraudProtection')
-//    debugImplementation project(':PayPalNativePayments')
-//    debugImplementation project(':PayPalWebPayments')
-//    debugImplementation project(':PaymentButtons')
-//    debugImplementation project(':Venmo')
-//
-//    releaseImplementation deps.cardPayments
-//    releaseImplementation deps.paymentButtons
-//    releaseImplementation deps.paypalWebPayments
-//    releaseImplementation deps.paypalNativePayments
-//    releaseImplementation deps.fraudProtection
+    releaseImplementation deps.cardPayments
+    releaseImplementation deps.paymentButtons
+    releaseImplementation deps.paypalWebPayments
+    releaseImplementation deps.paypalNativePayments
+    releaseImplementation deps.fraudProtection
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
