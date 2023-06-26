@@ -33,10 +33,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.ui.approveorderprogress.events.ApproveOrderSuccessEvent
-import com.paypal.android.ui.approveorderprogress.events.GetOrderSuccessEvent
-import com.paypal.android.ui.approveorderprogress.events.MessageEvent
-import com.paypal.android.ui.approveorderprogress.events.CompleteOrderSuccessEvent
+import com.paypal.android.ui.approveorderprogress.events.ApproveOrderEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import com.paypal.android.uishared.events.ComposableEvent
 import dagger.hilt.android.AndroidEntryPoint
@@ -86,7 +83,7 @@ class ApproveOrderProgressFragment : Fragment() {
     private suspend fun executeCardRequestFromArgs() {
         val cardRequest = args.cardRequest
 
-        viewModel.appendEventToLog(MessageEvent("Fetching Client ID..."))
+        viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
         val clientId = sdkSampleServerAPI.fetchClientId()
 
         val configuration = CoreConfig(clientId = clientId)
@@ -94,27 +91,27 @@ class ApproveOrderProgressFragment : Fragment() {
 
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
-                viewModel.appendEventToLog(MessageEvent("Order Approved"))
-                viewModel.appendEventToLog(ApproveOrderSuccessEvent(result))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
+                viewModel.appendEventToLog(ApproveOrderEvent.ApproveSuccess(result))
                 viewLifecycleOwner.lifecycleScope.launch {
                     finishOrder(result)
                 }
             }
 
             override fun onApproveOrderFailure(error: PayPalSDKError) {
-                viewModel.appendEventToLog(MessageEvent("CAPTURE fail: ${error.errorDescription}"))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("CAPTURE fail: ${error.errorDescription}"))
             }
 
             override fun onApproveOrderCanceled() {
-                viewModel.appendEventToLog(MessageEvent("USER CANCELED"))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("USER CANCELED"))
             }
 
             override fun onApproveOrderThreeDSecureWillLaunch() {
-                viewModel.appendEventToLog(MessageEvent("3DS Auth Requested"))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
-                viewModel.appendEventToLog(MessageEvent("3DS Success"))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
             }
         }
 
@@ -122,7 +119,7 @@ class ApproveOrderProgressFragment : Fragment() {
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
         Log.i(TAG, "MetadataId: $clientMetadataId")
 
-        viewModel.appendEventToLog(MessageEvent("Authorizing Order..."))
+        viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
@@ -160,20 +157,20 @@ class ApproveOrderProgressFragment : Fragment() {
     }
 
     private suspend fun finishOrder(cardResult: CardResult) {
-        viewModel.appendEventToLog(MessageEvent("Fetching Order Info..."))
+        viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Order Info..."))
 
         val orderId = cardResult.orderId
         val order = sdkSampleServerAPI.getOrder(orderId)
-        viewModel.appendEventToLog(GetOrderSuccessEvent(order))
+        viewModel.appendEventToLog(ApproveOrderEvent.GetOrder(order))
 
         val finishResult = when (order.intent) {
             "CAPTURE" -> {
-                viewModel.appendEventToLog(MessageEvent("Capturing Order..."))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("Capturing Order..."))
                 sdkSampleServerAPI.captureOrder(orderId)
             }
 
             "AUTHORIZE" -> {
-                viewModel.appendEventToLog(MessageEvent("Authorizing Order..."))
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
                 sdkSampleServerAPI.authorizeOrder(orderId)
             }
 
@@ -183,9 +180,9 @@ class ApproveOrderProgressFragment : Fragment() {
         }
 
         if (finishResult == null) {
-            viewModel.appendEventToLog(MessageEvent("Order Intent Could Not Be Determined"))
+            viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Intent Could Not Be Determined"))
         } else {
-            viewModel.appendEventToLog(CompleteOrderSuccessEvent(finishResult))
+            viewModel.appendEventToLog(ApproveOrderEvent.OrderComplete(finishResult))
         }
     }
 }
