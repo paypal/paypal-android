@@ -40,7 +40,7 @@ A return URL is required for redirecting users back to the app after authenticat
 
 ### 3. Initiate PayPal Native checkout
 
-Create a `CoreConfig` using an [client id](https://developer.paypal.com/api/rest/):
+Create a `CoreConfig` using a [client id](https://developer.paypal.com/api/rest/):
 
 ```kotlin
 val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
