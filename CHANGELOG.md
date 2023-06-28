@@ -5,6 +5,7 @@
   * Bump Kotlin version to `1.8.21`
 * CardPayments
   * Make `Card` implement `Parcelable`
+  * Make `CardRequest` implement `Parcelable`
 * CorePayments
   * Make `Address` implement `Parcelable`
 
