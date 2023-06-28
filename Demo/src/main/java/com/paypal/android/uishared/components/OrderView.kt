@@ -14,16 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.Order
 
-@Preview
-@Composable
-fun OrderPreview() {
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxWidth()) {
-            OrderView(Order())
-        }
-    }
-}
-
 @Composable
 fun OrderView(order: Order) {
     Column(
@@ -55,4 +45,14 @@ fun Property(name: String, value: String?) {
         text = value ?: "UNSET",
         modifier = Modifier.padding(top = 4.dp)
     )
+}
+
+@Preview
+@Composable
+fun OrderPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            OrderView(Order())
+        }
+    }
 }
