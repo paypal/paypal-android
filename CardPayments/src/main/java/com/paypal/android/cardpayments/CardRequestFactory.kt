@@ -1,6 +1,5 @@
-package com.paypal.android.cardpayments.api
+package com.paypal.android.cardpayments
 
-import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import org.json.JSONObject
