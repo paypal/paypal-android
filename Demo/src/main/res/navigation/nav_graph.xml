@@ -10,14 +10,11 @@
         android:name="com.paypal.android.ui.PaymentMethodsFragment"
         android:label="PaymentMethodsFragment">
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_cardFragment"
-            app:destination="@id/cardFragment" />
+            android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"
+            app:destination="@id/selectCardFragment" />
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalFragment"
             app:destination="@id/payPalFragment" />
-        <action
-            android:id="@+id/action_paymentMethodsFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalNativeFragment"
             app:destination="@id/payPalNativeFragment" />
@@ -25,10 +22,12 @@
     <fragment
         android:id="@+id/cardFragment"
         android:name="com.paypal.android.ui.card.CardFragment"
-        android:label="CardFragment" >
-        <action
-            android:id="@+id/action_cardFragment_to_testCardFragment"
-            app:destination="@id/testCardFragment" />
+        android:label="CardFragment">
+        <argument
+            android:name="prefillCard"
+            app:argType="com.paypal.android.data.card.TestCard"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
@@ -39,20 +38,25 @@
             app:destination="@id/payPalButtonsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.paypal.android.ui.SettingsFragment"
-        android:label="SettingsFragment" />
-    <fragment
         android:id="@+id/payPalButtonsFragment"
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
     <fragment
-        android:id="@+id/testCardFragment"
-        android:name="com.paypal.android.ui.testcards.TestCardsFragment"
-        android:label="Test Cards"
-        tools:layout="@layout/fragment_test_cards" />
-    <fragment
         android:id="@+id/payPalNativeFragment"
         android:name="com.paypal.android.ui.paypal.PayPalNativeFragment"
         android:label="PayPalNativeFragment" />
+    <fragment
+        android:id="@+id/selectCardFragment"
+        android:name="com.paypal.android.ui.selectcard.SelectCardFragment"
+        android:label="SelectCardFragment">
+        <action
+            android:id="@+id/action_selectCardFragment_to_cardFragment"
+            app:destination="@id/cardFragment">
+            <argument
+                android:name="prefillCard"
+                app:argType="com.paypal.android.data.card.TestCard"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+    </fragment>
 </navigation>

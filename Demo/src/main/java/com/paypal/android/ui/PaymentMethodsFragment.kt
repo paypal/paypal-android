@@ -2,15 +2,11 @@ package com.paypal.android.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.R
 import com.paypal.android.databinding.FragmentPaymentMethodsBinding
 
 class PaymentMethodsFragment : Fragment() {
@@ -37,34 +33,16 @@ class PaymentMethodsFragment : Fragment() {
         return binding.root
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.payment_methods_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.payment_methods_menu_settings -> {
-                launchSettingsFragment()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     private fun launchPayPalFragment() {
         navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToPayPalFragment())
     }
 
     private fun launchCardFragment() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToCardFragment())
+        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment())
     }
 
     private fun launchPayPalNativeFragment() {
         navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToPayPalNativeFragment())
-    }
-
-    private fun launchSettingsFragment() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToSettingsFragment())
     }
 
     private fun navigate(action: NavDirections) {

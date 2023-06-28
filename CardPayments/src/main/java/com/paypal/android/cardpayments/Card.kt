@@ -1,10 +1,13 @@
 package com.paypal.android.cardpayments
 
+import android.os.Parcelable
 import com.paypal.android.corepayments.Address
+import kotlinx.parcelize.Parcelize
 
 /**
  * Represents raw credit or debit card data provided by the customer.
  */
+@Parcelize
 data class Card @JvmOverloads constructor(
 
     /**
@@ -36,4 +39,4 @@ data class Card @JvmOverloads constructor(
      * Optional. The billing address
      */
     var billingAddress: Address? = null,
-)
+) : Parcelable

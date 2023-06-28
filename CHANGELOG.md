@@ -1,5 +1,13 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* All Modules
+  * Bump Kotlin version to `1.8.21`
+* CardPayments
+  * Make `Card` implement `Parcelable`
+* CorePayments
+  * Make `Address` implement `Parcelable`
+
 ## 0.0.10 (2023-06-23)
 * Breaking Changes
   * CardPayments

@@ -1,5 +1,9 @@
 package com.paypal.android.corepayments
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Address(
     /**
      * The [two-character ISO 3166-1 code], that identifies the country or region.
@@ -32,4 +36,4 @@ data class Address(
      * For a list of countries that do not have postal codes please refer to http://en.wikipedia.org/wiki/Postal_code
      */
     val postalCode: String? = null
-)
+) : Parcelable

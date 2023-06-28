@@ -5,6 +5,7 @@
 
     <!-- We add this so that we can test on API 21, because NXO doesn't support below 23 (for now)  -->
     <uses-sdk tools:overrideLibrary="com.paypal.android.paypalnativepayments"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="true"

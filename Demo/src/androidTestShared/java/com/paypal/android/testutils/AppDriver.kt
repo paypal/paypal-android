@@ -8,8 +8,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
-import androidx.test.uiautomator.Until
 import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import org.junit.Assert
 
 // Ref: https://github.com/android/testing-samples
@@ -37,12 +37,16 @@ class AppDriver(private val appPackage: String) {
         device.wait(Until.hasObject(By.pkg(appPackage).depth(0)), LAUNCH_TIMEOUT)
     }
 
+    fun findResById(id: String): UiObject {
+        return device.findObject(UiSelector().resourceId(id))
+    }
+
     fun findText(text: String): UiObject {
         return device.findObject(UiSelector().text(text))
     }
 
-    fun waitForText(text: String) {
-        device.wait(Until.hasObject(By.text(text)), LAUNCH_TIMEOUT)
+    fun waitForText(text: String, timeout: Long? = null) {
+        device.wait(Until.hasObject(By.text(text)), timeout ?: LAUNCH_TIMEOUT)
     }
 
     private fun getLauncherPackageName(): String {
@@ -50,7 +54,8 @@ class AppDriver(private val appPackage: String) {
         intent.addCategory(Intent.CATEGORY_HOME)
 
         val context: Context = ApplicationProvider.getApplicationContext()
-        val resolveInfo = context.packageManager.resolveActivity(intent,
+        val resolveInfo = context.packageManager.resolveActivity(
+            intent,
             PackageManager.MATCH_DEFAULT_ONLY
         )
         return resolveInfo!!.activityInfo.packageName
