@@ -1,6 +1,6 @@
 package com.paypal.android.cardpayments
 
-import com.paypal.android.cardpayments.api.CheckoutOrdersRequestFactory
+import com.paypal.android.cardpayments.api.CardRequestFactory
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.Address
 import org.json.JSONObject
@@ -12,17 +12,17 @@ import org.robolectric.RobolectricTestRunner
 import org.skyscreamer.jsonassert.JSONAssert
 
 @RunWith(RobolectricTestRunner::class)
-class CheckoutOrdersRequestFactoryUnitTest {
+class CardRequestFactoryUnitTest {
 
     private val orderId = "sample-order-id"
 
     private val returnUrl = "return_url"
 
-    private lateinit var sut: CheckoutOrdersRequestFactory
+    private lateinit var sut: CardRequestFactory
 
     @Before
     fun beforeEach() {
-        sut = CheckoutOrdersRequestFactory()
+        sut = CardRequestFactory()
     }
 
     @Test

@@ -5,7 +5,7 @@ import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import org.json.JSONObject
 
-internal class CheckoutOrdersRequestFactory {
+internal class CardRequestFactory {
 
     fun createConfirmPaymentSourceRequest(cardRequest: CardRequest): APIRequest {
         val card = cardRequest.card

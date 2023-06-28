@@ -1,7 +1,7 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
-import com.paypal.android.cardpayments.api.CheckoutOrdersRequestFactory
+import com.paypal.android.cardpayments.api.CardRequestFactory
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
@@ -42,7 +42,7 @@ class CheckoutOrdersAPIUnitTest {
         """
 
     private val restClient = mockk<RestClient>(relaxed = true)
-    private val requestFactory = mockk<CheckoutOrdersRequestFactory>()
+    private val requestFactory = mockk<CardRequestFactory>()
     private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24", "123")
