@@ -11,7 +11,7 @@ import com.paypal.android.uishared.events.ComposableEvent
 
 sealed class ApproveOrderEvent : ComposableEvent {
 
-    class Message(private val message: String): ApproveOrderEvent() {
+    class Message(private val message: String) : ApproveOrderEvent() {
         @Composable
         override fun AsComposable() {
             MessageView(message = message)
@@ -25,18 +25,17 @@ sealed class ApproveOrderEvent : ComposableEvent {
         }
     }
 
-    class GetOrder(private val order: Order): ApproveOrderEvent() {
+    class GetOrder(private val order: Order) : ApproveOrderEvent() {
         @Composable
         override fun AsComposable() {
             GetOrderView(order = order)
         }
     }
 
-    class OrderComplete(private val order: Order): ApproveOrderEvent() {
+    class OrderComplete(private val order: Order) : ApproveOrderEvent() {
         @Composable
         override fun AsComposable() {
             OrderCompleteView(order = order)
         }
     }
 }
-
