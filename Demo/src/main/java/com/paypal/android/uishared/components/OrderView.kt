@@ -17,20 +17,19 @@ import com.paypal.android.api.model.Order
 @Composable
 fun OrderView(order: Order) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            Property(name = "Order", value = order.id)
-            Property(name = "Intent", value = order.intent)
-            Property(name = "Status", value = order.status)
-            Property(name = "Card Last 4", value = order.cardLast4)
-            Property(name = "Card Brand", value = order.cardBrand)
-            Property(name = "Vault Id", value = order.vaultId)
-            Property(name = "Customer Vault Id", value = order.customerId)
-            Spacer(modifier = Modifier.size(24.dp))
-        }
+        Property(name = "Order", value = order.id)
+        Property(name = "Intent", value = order.intent)
+        Property(name = "Status", value = order.status)
+        Property(name = "Card Last 4", value = order.cardLast4)
+        Property(name = "Card Brand", value = order.cardBrand)
+        Property(name = "Vault Id", value = order.vaultId)
+        Property(name = "Customer Vault Id", value = order.customerId)
+        Spacer(modifier = Modifier.size(24.dp))
     }
 }
 
