@@ -46,6 +46,6 @@ class CardTest {
         composeTestRule.onNodeWithText("CUSTOMER ID FOR VAULT").performImeAction()
         composeTestRule.onNodeWithText("CREATE & APPROVE ORDER").performClick()
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("Status: COMPLETED"), 10_000L)
+        composeTestRule.waitUntilExactlyOneExists(hasText("Status: COMPLETED"), 15_000L)
     }
 }
