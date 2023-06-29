@@ -15,7 +15,7 @@ import java.util.UUID
 
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
-class ComposeCardTest {
+class CardTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<DemoActivity>()
