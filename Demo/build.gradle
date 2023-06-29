@@ -131,6 +131,10 @@ dependencies {
     androidTestImplementation deps.androidxTestRunner
     androidTestImplementation deps.androidxTestRules
     androidTestImplementation deps.androidxTestUiAutomator
+
+    // compose ui-test
+    androidTestImplementation deps.composeUiTestJUnit4
+    debugImplementation deps.composeUiTestManifest
 }
 
 /**
