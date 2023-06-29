@@ -58,6 +58,9 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
@@ -150,19 +153,11 @@ class CardFragment : Fragment() {
                 Text(text = uiState.statusText, modifier = Modifier.testTag("statusText"))
                 Text(uiState.orderDetails)
             }
-            OutlinedButton(
+            WireframeButton(
+                text = "CREATE & APPROVE ORDER",
                 onClick = { onFormSubmit() },
-                shape = RoundedCornerShape(4.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black,
-                    contentColor = Color.White
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text("CREATE & APPROVE ORDER")
-            }
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.size(24.dp))
         }
     }
