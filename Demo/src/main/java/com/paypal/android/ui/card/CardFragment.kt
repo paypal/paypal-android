@@ -283,15 +283,11 @@ class CardFragment : Fragment() {
             label = { Text("CUSTOMER ID FOR VAULT") },
             onValueChange = { viewModel.onValueChange(CardOption.VAULT_CUSTOMER_ID, it) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = { localFocusManager.clearFocus() }
-            ),
+            keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged {
-                    if (it.isFocused) {
-                        viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
-                    }
+                    if (it.isFocused) viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
                 }
         )
     }
