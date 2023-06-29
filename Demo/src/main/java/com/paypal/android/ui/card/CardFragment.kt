@@ -286,9 +286,7 @@ class CardFragment : Fragment() {
             keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
             modifier = Modifier
                 .fillMaxWidth()
-                .onFocusChanged {
-                    if (it.isFocused) viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
-                }
+                .onFocusChanged { if (it.isFocused) viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID) }
         )
     }
 
