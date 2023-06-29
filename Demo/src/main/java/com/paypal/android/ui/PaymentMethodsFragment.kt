@@ -21,11 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.databinding.FragmentPaymentMethodsBinding
 
 class PaymentMethodsFragment : Fragment() {
-
-    private lateinit var binding: FragmentPaymentMethodsBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
