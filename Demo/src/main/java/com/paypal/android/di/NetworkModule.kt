@@ -13,5 +13,5 @@ object NetworkModule {
     private const val SAMPLE_SERVER_BASE_URL = "https://sdk-sample-merchant-server.herokuapp.com/"
 
     @Provides
-    fun provideSDKSampleServerAPI(): SDKSampleServerAPI = SDKSampleServerAPI(SAMPLE_SERVER_BASE_URL)
+    fun provideSDKSampleServerAPI(): SDKSampleServerAPI = SDKSampleServerAPI()
 }

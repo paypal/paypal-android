@@ -26,7 +26,7 @@ private const val WRITE_TIMEOUT_IN_SEC = 30L
 private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
-class SDKSampleServerAPI(baseUrl: String) {
+class SDKSampleServerAPI {
 
     @JvmSuppressWildcards
     interface RetrofitService {
@@ -72,7 +72,6 @@ class SDKSampleServerAPI(baseUrl: String) {
         val okHttpClient = okHttpBuilder.build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
