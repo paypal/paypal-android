@@ -10,17 +10,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
-import com.paypal.android.api.services.Merchant
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
-import com.paypal.android.corepayments.APIClientError
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.databinding.FragmentPaymentButtonBinding
 import com.paypal.android.utils.OrderUtils
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -137,7 +136,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.getting_client_id)
-                val clientId = sdkSampleServerAPI.fetchClientId(Merchant.DEFAULT)
+                val clientId = sdkSampleServerAPI.fetchClientId()
                 val coreConfig = CoreConfig(clientId)
                 paypalClient =
                     PayPalWebCheckoutClient(
