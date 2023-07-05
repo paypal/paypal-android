@@ -120,8 +120,7 @@ class SDKSampleServerAPI {
         orderId: String,
         body: List<UpdateOrderUseCase.PatchRequestBody>,
         merchant: Merchant = SELECTED_MERCHANT
-    ) =
-        findService(merchant).patchOrder(orderId, body)
+    ) = findService(merchant).patchOrder(orderId, body)
 
     suspend fun captureOrder(orderId: String, merchant: Merchant = SELECTED_MERCHANT) =
         findService(merchant).captureOrder(orderId)
