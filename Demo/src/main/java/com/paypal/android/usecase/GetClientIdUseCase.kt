@@ -1,5 +1,6 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.api.services.Merchant
 import com.paypal.android.api.services.SDKSampleServerAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,6 +10,6 @@ class GetClientIdUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
     suspend operator fun invoke(): String = withContext(Dispatchers.IO) {
-        sdkSampleServerAPI.fetchClientId()
+        sdkSampleServerAPI.fetchClientId(Merchant.DEFAULT)
     }
 }

@@ -28,6 +28,11 @@ private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 class SDKSampleServerAPI {
 
+    companion object {
+        // UPCOMING PR: require Merchant enum to be specified via UI layer
+        val SELECTED_MERCHANT = Merchant.DEFAULT
+    }
+
     @JvmSuppressWildcards
     interface RetrofitService {
 
@@ -56,10 +61,18 @@ class SDKSampleServerAPI {
         suspend fun authorizeOrder(@Path("orderId") orderId: String): Order
     }
 
-    private val service: RetrofitService
+    private val serviceMap: Map<Merchant, RetrofitService>
 
     init {
+        val serviceMap = mutableMapOf<Merchant, RetrofitService>()
+        val allMerchants = Merchant.values()
+        for (merchant in allMerchants) {
+            serviceMap[merchant] = createService(merchant.baseUrl)
+        }
+        this.serviceMap = serviceMap
+    }
 
+    private fun createService(baseUrl: String): RetrofitService {
         val okHttpBuilder = OkHttpClient.Builder()
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -72,31 +85,47 @@ class SDKSampleServerAPI {
         val okHttpClient = okHttpBuilder.build()
 
         val retrofit = Retrofit.Builder()
+            .baseUrl(baseUrl)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
-        service = retrofit.create(RetrofitService::class.java)
+        return retrofit.create(RetrofitService::class.java)
     }
 
-    suspend fun fetchClientId() = DEFAULT_CLIENT_ID ?: service.fetchClientId().value
+    private fun findService(merchant: Merchant) = serviceMap[merchant]!!
 
-    suspend fun createOrder(orderRequest: CreateOrderRequest): Order = DEFAULT_ORDER_ID?.let {
+    suspend fun fetchClientId(merchant: Merchant = SELECTED_MERCHANT) =
+        DEFAULT_CLIENT_ID ?: findService(merchant).fetchClientId().value
+
+    suspend fun createOrder(
+        orderRequest: CreateOrderRequest,
+        merchant: Merchant = SELECTED_MERCHANT
+    ): Order = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")
-    } ?: service.createOrder(orderRequest)
+    } ?: findService(merchant).createOrder(orderRequest)
 
-    suspend fun createOrder(jsonObject: JsonObject) = DEFAULT_ORDER_ID?.let {
+    suspend fun createOrder(jsonObject: JsonObject, merchant: Merchant = SELECTED_MERCHANT) =
+        DEFAULT_ORDER_ID?.let {
+            Order(it, "CREATED")
+        } ?: findService(merchant).createOrder(jsonObject)
+
+    suspend fun createOrder(
+        orderRequest: OrderRequest,
+        merchant: Merchant = SELECTED_MERCHANT
+    ): Order = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")
-    } ?: service.createOrder(jsonObject)
+    } ?: findService(merchant).createOrder(orderRequest)
 
-    suspend fun createOrder(orderRequest: OrderRequest): Order = DEFAULT_ORDER_ID?.let {
-        Order(it, "CREATED")
-    } ?: service.createOrder(orderRequest)
+    suspend fun patchOrder(
+        orderId: String,
+        body: List<UpdateOrderUseCase.PatchRequestBody>,
+        merchant: Merchant = SELECTED_MERCHANT
+    ) =
+        findService(merchant).patchOrder(orderId, body)
 
-    suspend fun patchOrder(orderId: String, body: List<UpdateOrderUseCase.PatchRequestBody>) =
-        service.patchOrder(orderId, body)
+    suspend fun captureOrder(orderId: String, merchant: Merchant = SELECTED_MERCHANT) =
+        findService(merchant).captureOrder(orderId)
 
-    suspend fun captureOrder(orderId: String) = service.captureOrder(orderId)
-
-    suspend fun authorizeOrder(orderId: String) = service.authorizeOrder(orderId)
+    suspend fun authorizeOrder(orderId: String, merchant: Merchant = SELECTED_MERCHANT) =
+        findService(merchant).authorizeOrder(orderId)
 }

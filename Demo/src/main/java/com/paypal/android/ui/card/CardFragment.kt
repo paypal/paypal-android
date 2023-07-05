@@ -49,6 +49,7 @@ import com.paypal.android.api.model.Amount
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
+import com.paypal.android.api.services.Merchant
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
@@ -298,7 +299,7 @@ class CardFragment : Fragment() {
             else -> OrderIntent.CAPTURE
         }
 
-        val clientId = sdkSampleServerAPI.fetchClientId()
+        val clientId = sdkSampleServerAPI.fetchClientId(Merchant.DEFAULT)
         val configuration = CoreConfig(clientId = clientId)
         cardClient = CardClient(requireActivity(), configuration)
 

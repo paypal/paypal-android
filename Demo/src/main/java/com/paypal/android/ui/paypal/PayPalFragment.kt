@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
+import com.paypal.android.api.services.Merchant
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
@@ -136,7 +137,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.getting_client_id)
-                val clientId = sdkSampleServerAPI.fetchClientId()
+                val clientId = sdkSampleServerAPI.fetchClientId(Merchant.DEFAULT)
                 val coreConfig = CoreConfig(clientId)
                 paypalClient =
                     PayPalWebCheckoutClient(
