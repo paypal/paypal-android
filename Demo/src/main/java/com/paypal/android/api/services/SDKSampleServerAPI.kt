@@ -92,7 +92,8 @@ class SDKSampleServerAPI {
         return retrofit.create(RetrofitService::class.java)
     }
 
-    private fun findService(merchant: Merchant) = serviceMap[merchant]!!
+    private fun findService(merchant: Merchant) = serviceMap[merchant]
+        ?: throw AssertionError("Couldn't find retrofit service for ${merchant.name}")
 
     suspend fun fetchClientId(merchant: Merchant = SELECTED_MERCHANT) =
         DEFAULT_CLIENT_ID ?: findService(merchant).fetchClientId().value
