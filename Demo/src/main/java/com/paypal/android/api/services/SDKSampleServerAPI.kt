@@ -92,8 +92,9 @@ class SDKSampleServerAPI {
         return retrofit.create(RetrofitService::class.java)
     }
 
-    private fun findService(merchantIntegration: MerchantIntegration) = serviceMap[merchantIntegration]
-        ?: throw AssertionError("Couldn't find retrofit service for ${merchantIntegration.name}")
+    private fun findService(merchantIntegration: MerchantIntegration) =
+        serviceMap[merchantIntegration]
+            ?: throw AssertionError("Couldn't find retrofit service for ${merchantIntegration.name}")
 
     suspend fun fetchClientId(merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
@@ -105,10 +106,12 @@ class SDKSampleServerAPI {
         Order(it, "CREATED")
     } ?: findService(merchantIntegration).createOrder(orderRequest)
 
-    suspend fun createOrder(jsonObject: JsonObject, merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
-        DEFAULT_ORDER_ID?.let {
-            Order(it, "CREATED")
-        } ?: findService(merchantIntegration).createOrder(jsonObject)
+    suspend fun createOrder(
+        jsonObject: JsonObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = DEFAULT_ORDER_ID?.let {
+        Order(it, "CREATED")
+    } ?: findService(merchantIntegration).createOrder(jsonObject)
 
     suspend fun createOrder(
         orderRequest: OrderRequest,
@@ -123,9 +126,13 @@ class SDKSampleServerAPI {
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = findService(merchantIntegration).patchOrder(orderId, body)
 
-    suspend fun captureOrder(orderId: String, merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
-        findService(merchantIntegration).captureOrder(orderId)
+    suspend fun captureOrder(
+        orderId: String,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).captureOrder(orderId)
 
-    suspend fun authorizeOrder(orderId: String, merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
-        findService(merchantIntegration).authorizeOrder(orderId)
+    suspend fun authorizeOrder(
+        orderId: String,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).authorizeOrder(orderId)
 }
