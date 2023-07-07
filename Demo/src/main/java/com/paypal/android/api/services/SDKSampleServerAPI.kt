@@ -29,7 +29,7 @@ private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 class SDKSampleServerAPI {
 
     companion object {
-        // UPCOMING PR: require Merchant enum to be specified via UI layer
+        // TODO: - require Merchant enum to be specified via UI layer
         val SELECTED_MERCHANT = Merchant.DEFAULT
     }
 
