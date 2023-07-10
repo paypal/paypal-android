@@ -7,6 +7,8 @@
   * Make `Card` implement `Parcelable`
 * CorePayments
   * Make `Address` implement `Parcelable`
+* PayPalNativePayments
+  * Bump `PayPal Native Checkout` to `1.0.0`
 
 ## 0.0.10 (2023-06-23)
 * Breaking Changes
