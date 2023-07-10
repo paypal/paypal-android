@@ -26,7 +26,12 @@ private const val WRITE_TIMEOUT_IN_SEC = 30L
 private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
-class SDKSampleServerAPI(baseUrl: String) {
+class SDKSampleServerAPI {
+
+    companion object {
+        // TODO: - require Merchant enum to be specified via UI layer
+        val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
+    }
 
     @JvmSuppressWildcards
     interface RetrofitService {
@@ -56,10 +61,18 @@ class SDKSampleServerAPI(baseUrl: String) {
         suspend fun authorizeOrder(@Path("orderId") orderId: String): Order
     }
 
-    private val service: RetrofitService
+    private val serviceMap: Map<MerchantIntegration, RetrofitService>
 
     init {
+        val serviceMap = mutableMapOf<MerchantIntegration, RetrofitService>()
+        val allMerchantIntegrations = MerchantIntegration.values()
+        for (merchant in allMerchantIntegrations) {
+            serviceMap[merchant] = createService(merchant.baseUrl)
+        }
+        this.serviceMap = serviceMap
+    }
 
+    private fun createService(baseUrl: String): RetrofitService {
         val okHttpBuilder = OkHttpClient.Builder()
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -76,28 +89,50 @@ class SDKSampleServerAPI(baseUrl: String) {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
-        service = retrofit.create(RetrofitService::class.java)
+        return retrofit.create(RetrofitService::class.java)
     }
 
-    suspend fun fetchClientId() = DEFAULT_CLIENT_ID ?: service.fetchClientId().value
+    private fun findService(merchantIntegration: MerchantIntegration) =
+        serviceMap[merchantIntegration]
+            ?: throw AssertionError("Couldn't find retrofit service for ${merchantIntegration.name}")
 
-    suspend fun createOrder(orderRequest: CreateOrderRequest): Order = DEFAULT_ORDER_ID?.let {
+    suspend fun fetchClientId(merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
+        DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
+
+    suspend fun createOrder(
+        orderRequest: CreateOrderRequest,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ): Order = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")
-    } ?: service.createOrder(orderRequest)
+    } ?: findService(merchantIntegration).createOrder(orderRequest)
 
-    suspend fun createOrder(jsonObject: JsonObject) = DEFAULT_ORDER_ID?.let {
+    suspend fun createOrder(
+        jsonObject: JsonObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")
-    } ?: service.createOrder(jsonObject)
+    } ?: findService(merchantIntegration).createOrder(jsonObject)
 
-    suspend fun createOrder(orderRequest: OrderRequest): Order = DEFAULT_ORDER_ID?.let {
+    suspend fun createOrder(
+        orderRequest: OrderRequest,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ): Order = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")
-    } ?: service.createOrder(orderRequest)
+    } ?: findService(merchantIntegration).createOrder(orderRequest)
 
-    suspend fun patchOrder(orderId: String, body: List<UpdateOrderUseCase.PatchRequestBody>) =
-        service.patchOrder(orderId, body)
+    suspend fun patchOrder(
+        orderId: String,
+        body: List<UpdateOrderUseCase.PatchRequestBody>,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).patchOrder(orderId, body)
 
-    suspend fun captureOrder(orderId: String) = service.captureOrder(orderId)
+    suspend fun captureOrder(
+        orderId: String,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).captureOrder(orderId)
 
-    suspend fun authorizeOrder(orderId: String) = service.authorizeOrder(orderId)
+    suspend fun authorizeOrder(
+        orderId: String,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).authorizeOrder(orderId)
 }
