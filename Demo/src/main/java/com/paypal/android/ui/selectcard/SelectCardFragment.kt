@@ -29,7 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.models.TestCard
+import com.paypal.android.data.card.TestCard
+import com.paypal.android.ui.WireframeHeader
 
 class SelectCardFragment : Fragment() {
 
@@ -69,7 +70,7 @@ class SelectCardFragment : Fragment() {
             modifier = Modifier.fillMaxWidth()
         ) {
             stickyHeader {
-                TestCardHeader("Manual Card Entry")
+                WireframeHeader("Manual Card Entry")
             }
             item {
                 Box(
@@ -92,7 +93,7 @@ class SelectCardFragment : Fragment() {
                 }
             }
             stickyHeader {
-                TestCardHeader("Test Cards without 3DS")
+                WireframeHeader("Test Cards without 3DS")
             }
             items(viewModel.nonThreeDSCards) { card ->
                 TestCardView(
@@ -105,7 +106,7 @@ class SelectCardFragment : Fragment() {
                 Divider(color = Color.Black)
             }
             stickyHeader {
-                TestCardHeader("Test Cards with 3DS")
+                WireframeHeader("Test Cards with 3DS")
             }
             items(viewModel.threeDSCards) { card ->
                 TestCardView(
@@ -128,22 +129,6 @@ class SelectCardFragment : Fragment() {
             Surface(modifier = Modifier.fillMaxSize()) {
                 SelectCardView()
             }
-        }
-    }
-
-    @Composable
-    fun TestCardHeader(text: String) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
-                modifier = Modifier.padding(8.dp)
-            )
         }
     }
 

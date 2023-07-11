@@ -1,9 +1,12 @@
 package com.paypal.android.api.services
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
+import com.paypal.android.api.model.PaymentToken
+import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.usecase.UpdateOrderUseCase
 import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
@@ -34,7 +37,7 @@ class SDKSampleServerAPI {
 
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
-        val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
+        val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.LOCAL
 
         private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
             it.optString(key).ifEmpty {
@@ -72,6 +75,9 @@ class SDKSampleServerAPI {
 
         @POST("/orders/{orderId}/authorize")
         suspend fun authorizeOrder(@Path("orderId") orderId: String): ResponseBody
+
+        @POST("/payment_tokens")
+        suspend fun createPaymentToken(@Body jsonObject: JsonObject): ResponseBody
     }
 
     private val serviceMap: Map<MerchantIntegration, RetrofitService>
@@ -176,6 +182,29 @@ class SDKSampleServerAPI {
             cardBrand = optNonEmptyString(cardJSON, "brand"),
             vaultId = optNonEmptyString(vaultJSON, "id"),
             customerId = optNonEmptyString(vaultCustomerJSON, "id")
+        )
+    }
+
+    suspend fun createPaymentToken(
+        vaultResult: VaultResult,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ): PaymentToken {
+        // language=JSON
+        val request = """
+            {
+              "payment_source": {
+                "token": {
+                  "id": ${vaultResult.setupTokenId},
+                  "type": "SETUP_TOKEN"
+                }
+              }
+            }
+        """.trimIndent()
+        val requestJSON = JsonParser.parseString(request) as JsonObject
+        val response = findService(merchantIntegration).createPaymentToken(requestJSON)
+        val responseJSON = JSONObject(response.string())
+        return PaymentToken(
+            id = responseJSON.getString("id")
         )
     }
 }
