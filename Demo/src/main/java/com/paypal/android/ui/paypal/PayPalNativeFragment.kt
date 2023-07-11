@@ -31,6 +31,7 @@ class PayPalNativeFragment : Fragment() {
     private var selectedShippingPreference: ShippingPreferenceType? = null
 
     private val viewModel: PayPalNativeViewModel by viewModels()
+
     private val orderIntent: OrderIntent
         get() = when (binding.radioGroupIntent.checkedRadioButtonId) {
             R.id.intent_authorize -> OrderIntent.AUTHORIZE
