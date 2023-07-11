@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/paymentMethodsFragment"
-        android:name="com.paypal.android.ui.PaymentMethodsFragment"
+        android:name="com.paypal.android.ui.FeaturesFragment"
         android:label="PaymentMethodsFragment">
         <action
             android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"

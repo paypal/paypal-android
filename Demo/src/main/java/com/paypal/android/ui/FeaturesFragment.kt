@@ -22,7 +22,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 
-class PaymentMethodsFragment : Fragment() {
+class FeaturesFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
