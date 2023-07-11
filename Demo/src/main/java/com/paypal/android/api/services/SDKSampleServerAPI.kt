@@ -27,11 +27,20 @@ private const val WRITE_TIMEOUT_IN_SEC = 30L
 private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
+// TODO: consider refactoring each method into a "use case"
+// Ref: https://developer.android.com/topic/architecture/domain-layer#use-cases-kotlin
+@Suppress("TooManyFunctions")
 class SDKSampleServerAPI {
 
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
         val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
+
+        private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
+            it.optString(key).ifEmpty {
+                null
+            }
+        }
     }
 
     @JvmSuppressWildcards
@@ -168,11 +177,5 @@ class SDKSampleServerAPI {
             vaultId = optNonEmptyString(vaultJSON, "id"),
             customerId = optNonEmptyString(vaultCustomerJSON, "id")
         )
-    }
-
-    private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
-        it.optString(key).ifEmpty {
-            null
-        }
     }
 }
