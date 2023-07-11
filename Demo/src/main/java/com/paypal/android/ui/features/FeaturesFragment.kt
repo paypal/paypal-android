@@ -3,13 +3,18 @@ package com.paypal.android.ui.features
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -20,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.R
-import com.paypal.android.ui.PaymentMethodsFragmentDirections
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.WireframeHeader
 
 class FeaturesFragment : Fragment() {
+
+    private val features = Feature.values().toList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,25 +41,33 @@ class FeaturesFragment : Fragment() {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     PaymentMethodsView(
-                        onCardMethodSelected = ::launchCardFragment,
-                        onPayPalMethodSelected = ::launchPayPalFragment,
-                        onPayPalNativeSelected = ::launchPayPalNativeFragment
+                        features = features,
+                        onFeatureSelected = ::onFeatureSelected,
                     )
                 }
             }
         }
     }
 
+    private fun onFeatureSelected(feature: Feature) {
+        when (feature) {
+            Feature.CARD_VAULT_WITH_PURCHASE -> launchCardFragment()
+            Feature.CARD_VAULT_WITHOUT_PURCHASE -> launchCardFragment()
+            Feature.PAYPAL_WEB -> launchPayPalFragment()
+            Feature.PAYPAL_NATIVE -> launchPayPalNativeFragment()
+        }
+    }
+
     private fun launchPayPalFragment() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToPayPalFragment())
+        navigate(FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalFragment())
     }
 
     private fun launchCardFragment() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment())
+        navigate(FeaturesFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment())
     }
 
     private fun launchPayPalNativeFragment() {
-        navigate(PaymentMethodsFragmentDirections.actionPaymentMethodsFragmentToPayPalNativeFragment())
+        navigate(FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalNativeFragment())
     }
 
     private fun navigate(action: NavDirections) {
@@ -62,30 +75,18 @@ class FeaturesFragment : Fragment() {
     }
 
     @Composable
+    @OptIn(ExperimentalFoundationApi::class)
     fun PaymentMethodsView(
-        onCardMethodSelected: () -> Unit,
-        onPayPalMethodSelected: () -> Unit,
-        onPayPalNativeSelected: () -> Unit
+        features: List<Feature>,
+        onFeatureSelected: (Feature) -> Unit,
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(8.dp)
-        ) {
-            WireframeButton(
-                text = stringResource(id = R.string.payment_methods_card),
-                onClick = onCardMethodSelected,
-                modifier = Modifier.fillMaxWidth()
-            )
-            WireframeButton(
-                text = stringResource(id = R.string.payment_methods_paypal),
-                onClick = onPayPalMethodSelected,
-                modifier = Modifier.fillMaxWidth()
-            )
-            WireframeButton(
-                text = stringResource(id = R.string.payment_methods_paypal_native),
-                onClick = onPayPalNativeSelected,
-                modifier = Modifier.fillMaxWidth()
-            )
+        LazyColumn {
+            stickyHeader {
+                WireframeHeader("Features")
+            }
+            items(features) { feature ->
+                FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
+            }
         }
     }
 
@@ -95,11 +96,29 @@ class FeaturesFragment : Fragment() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 PaymentMethodsView(
-                    onCardMethodSelected = {},
-                    onPayPalMethodSelected = {},
-                    onPayPalNativeSelected = {}
+                    features = features,
+                    onFeatureSelected = {},
                 )
             }
+        }
+    }
+
+    @Composable
+    fun FeatureView(feature: Feature, onClick: () -> Unit) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .selectable(
+                    selected = false,
+                    onClick = onClick
+                )
+        ) {
+            Text(
+                text = stringResource(id = feature.stringRes),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)
+            )
+            Divider()
         }
     }
 }
