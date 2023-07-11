@@ -1,4 +1,4 @@
-package com.paypal.android.ui
+package com.paypal.android.ui.features
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,6 +21,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
+import com.paypal.android.ui.PaymentMethodsFragmentDirections
+import com.paypal.android.ui.WireframeButton
 
 class FeaturesFragment : Fragment() {
 
