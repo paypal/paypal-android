@@ -5,6 +5,7 @@ import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.RestClient
 import org.json.JSONObject
 
@@ -37,8 +38,15 @@ internal class VaultPaymentMethodTokensAPI(
         }
 
         val apiRequest =
-            APIRequest("/v3/vault/setup-tokens/", HttpMethod.POST, requestJSON.toString())
+            APIRequest("v3/vault/setup-tokens/", HttpMethod.POST, requestJSON.toString())
         val httpResponse = restClient.send(apiRequest)
-        return VaultResult(setupTokenId = "fake-setup-token-id")
+
+        val bodyResponse = httpResponse.body!!
+        val responseJSON = PaymentsJSON(bodyResponse)
+
+        val setupTokenId = responseJSON.getString("id")
+        val status = responseJSON.getString("status")
+        val customerId = responseJSON.getString("customer.id")
+        return VaultResult(status, setupTokenId, customerId)
     }
 }
