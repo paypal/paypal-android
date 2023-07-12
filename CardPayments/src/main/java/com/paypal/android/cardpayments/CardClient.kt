@@ -31,6 +31,7 @@ class CardClient internal constructor(
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
+    var vaultListener: VaultListener? = null
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
@@ -80,7 +81,8 @@ class CardClient internal constructor(
      */
     fun vault(vaultRequest: VaultRequest) {
         CoroutineScope(dispatcher).launch {
-            val response = vaultPaymentMethodTokensAPI.createSetupToken(vaultRequest)
+            val result = vaultPaymentMethodTokensAPI.createSetupToken(vaultRequest)
+            vaultListener?.onVaultSuccess(result)
         }
     }
 
