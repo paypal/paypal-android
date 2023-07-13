@@ -77,7 +77,9 @@ class CardClient internal constructor(
     }
 
     /**
-     * TODO: write docs
+     * Initiate vaulting for a Card payment method.
+     *
+     * NOTE: 3DS Challenge will occur when required.
      */
     fun vault(vaultRequest: VaultRequest) {
         CoroutineScope(dispatcher).launch {

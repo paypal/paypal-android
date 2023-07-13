@@ -25,6 +25,14 @@ internal class VaultPaymentMethodTokensAPI(
             .put("security_code", card.securityCode)
         card.cardholderName?.let { cardJSON.put("name", it) }
 
+        cardJSON.put("verification_method", "SCA_WHEN_REQUIRED")
+        val experienceContextJSON = JSONObject()
+
+        val returnUrl = vaultRequest.returnUrl
+        experienceContextJSON.put("return_url", returnUrl)
+        experienceContextJSON.put("cancel_url", returnUrl)
+        cardJSON.put("experience_context", experienceContextJSON)
+
         val paymentSourceJSON = JSONObject()
         paymentSourceJSON.put("card", cardJSON)
 
@@ -37,8 +45,11 @@ internal class VaultPaymentMethodTokensAPI(
             requestJSON.put("customer", customerJSON)
         }
 
+        // Ref: https://stackoverflow.com/a/19610814
+        val body = requestJSON.toString().replace("\\/", "/")
+
         val apiRequest =
-            APIRequest("v3/vault/setup-tokens/", HttpMethod.POST, requestJSON.toString())
+            APIRequest("v3/vault/setup-tokens/", HttpMethod.POST, body)
         val httpResponse = restClient.send(apiRequest)
 
         val bodyResponse = httpResponse.body!!
