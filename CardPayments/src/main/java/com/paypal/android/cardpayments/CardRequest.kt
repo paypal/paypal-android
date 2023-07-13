@@ -22,6 +22,5 @@ data class CardRequest @JvmOverloads constructor(
     val card: Card,
     val returnUrl: String,
     val sca: SCA = SCA.SCA_WHEN_REQUIRED,
-    val shouldVault: Boolean = false,
-    val vaultCustomerId: String? = null
+    val vault: Vault? = null
 ) : Parcelable

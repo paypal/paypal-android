@@ -166,7 +166,7 @@ class CardRequestFactoryUnitTest {
             securityCode = "123"
         )
 
-        val cardRequest = CardRequest(orderId, card, returnUrl, shouldVault = true)
+        val cardRequest = CardRequest(orderId, card, returnUrl, vault = Vault())
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
 
@@ -212,8 +212,7 @@ class CardRequestFactoryUnitTest {
             orderId,
             card,
             returnUrl,
-            shouldVault = true,
-            vaultCustomerId = "fake-vault-customer-id"
+            vault = Vault(customerId = "fake-vault-customer-id")
         )
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)
@@ -263,8 +262,7 @@ class CardRequestFactoryUnitTest {
             orderId,
             card,
             returnUrl,
-            shouldVault = true,
-            vaultCustomerId = ""
+            vault = Vault("")
         )
         val apiRequest = sut.createConfirmPaymentSourceRequest(cardRequest)
         assertEquals("v2/checkout/orders/sample-order-id/confirm-payment-source", apiRequest.path)

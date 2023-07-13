@@ -53,6 +53,7 @@ import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
@@ -316,9 +317,8 @@ class CardFragment : Fragment() {
             else -> SCA.SCA_WHEN_REQUIRED
         }
         val shouldVault = (uiState.shouldVaultOption == "YES")
-        val vaultCustomerId = uiState.customerId
-
-        return CardRequest(order.id!!, card, APP_RETURN_URL, sca, shouldVault, vaultCustomerId)
+        val vault = if (shouldVault) Vault(customerId = uiState.customerId) else null
+        return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
     }
 
     private fun parseCard(uiState: CardViewUiState): Card {
