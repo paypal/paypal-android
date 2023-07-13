@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.data.card.TestCard
+import com.paypal.android.models.TestCard
 
 class SelectCardFragment : Fragment() {
 

@@ -2,11 +2,10 @@ package com.paypal.android.ui.selectcard
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.cardpayments.Card
-import com.paypal.android.data.card.TestCard
+import com.paypal.android.models.TestCard
 import java.util.Calendar
 
 class SelectCardViewModel : ViewModel() {
-
     companion object {
         // 2 years into the future of the current year
         val validExpirationYear = "${Calendar.getInstance().get(Calendar.YEAR) + 2}"
