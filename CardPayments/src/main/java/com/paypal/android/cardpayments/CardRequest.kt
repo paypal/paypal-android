@@ -11,10 +11,7 @@ import kotlinx.parcelize.Parcelize
  * @property card   Card used for payment
  * @property returnUrl Url to return to app after SCA challenge finishes
  * @property sca Specify to always launch 3DS or only when required. Defaults to `SCA.SCA_WHEN_REQUIRED`.
- * @property shouldVault Set this value to true if the payment method should be vaulted on success
- * @property vaultCustomerId Optional. When [shouldVault] is set to true and this property is set, the
- * value of this property will be used to associate the vaulting of a payment method with a specific
- * customer. If [shouldVault] is set to true and this property is not set, a vault customer ID will be generated.
+ * @property vault [Vault] object with options for payment method vaulting
  */
 @Parcelize
 data class CardRequest @JvmOverloads constructor(
