@@ -6,6 +6,9 @@
 * CardPayments
   * Make `Card` implement `Parcelable`
   * Make `CardRequest` implement `Parcelable`
+  * Add the following properties to `CardRequest`:
+    * `shouldVault`
+    * `vaultCusomterId`
 * CorePayments
   * Make `Address` implement `Parcelable`
 
