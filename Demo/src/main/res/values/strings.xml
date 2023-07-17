@@ -2,6 +2,7 @@
     <string name="app_name">AndroidSDK</string>
 
     <!-- Payment Methods -->
+    <string name="feature_title">Select a Feature:</string>
     <string name="feature_approve_order">Approve Order</string>
     <string name="feature_vault_with_purchase">Vault With Purchase</string>
     <string name="feature_vault_without_purchase">Vault Without Purchase</string>
