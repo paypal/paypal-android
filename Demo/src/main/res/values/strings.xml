@@ -7,7 +7,11 @@
     <string name="payment_methods_paypal">PAYPAL</string>
     <string name="payment_methods_paypal_native">PAYPAL NATIVE</string>
 
+    <string name="feature_approve_order">Approve Order</string>
+    <string name="feature_vault_with_purchase">Vault With Purchase</string>
     <string name="feature_vault_without_purchase">Vault Without Purchase</string>
+    <string name="feature_paypal_web">PayPal Web</string>
+    <string name="feature_paypal_native">PayPal Native</string>
 
     <!-- Card Fields -->
     <string name="card_field_card_number">CARD NUMBER</string>

@@ -29,7 +29,19 @@ import com.paypal.android.ui.WireframeHeader
 
 class FeaturesFragment : Fragment() {
 
-    private val features = Feature.values().toList()
+    private val cardFeatures = listOf(
+        Feature.CARD_APPROVE_ORDER,
+        Feature.CARD_VAULT_WITH_PURCHASE,
+        Feature.CARD_VAULT_WITHOUT_PURCHASE
+    )
+
+    private val payPalWebFeatures = listOf(
+        Feature.PAYPAL_WEB
+    )
+
+    private val payPalNativeFeatures = listOf(
+        Feature.PAYPAL_NATIVE
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,7 +53,9 @@ class FeaturesFragment : Fragment() {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     PaymentMethodsView(
-                        features = features,
+                        cardFeatures = cardFeatures,
+                        payPalWebFeatures = payPalWebFeatures,
+                        payPalNativeFeatures = payPalNativeFeatures,
                         onFeatureSelected = ::onFeatureSelected,
                     )
                 }
@@ -51,6 +65,7 @@ class FeaturesFragment : Fragment() {
 
     private fun onFeatureSelected(feature: Feature) {
         when (feature) {
+            Feature.CARD_APPROVE_ORDER -> launchCardFragment()
             Feature.CARD_VAULT_WITH_PURCHASE -> launchCardFragment()
             Feature.CARD_VAULT_WITHOUT_PURCHASE -> launchCardFragment()
             Feature.PAYPAL_WEB -> launchPayPalFragment()
@@ -77,14 +92,28 @@ class FeaturesFragment : Fragment() {
     @Composable
     @OptIn(ExperimentalFoundationApi::class)
     fun PaymentMethodsView(
-        features: List<Feature>,
+        cardFeatures: List<Feature>,
+        payPalWebFeatures: List<Feature>,
+        payPalNativeFeatures: List<Feature>,
         onFeatureSelected: (Feature) -> Unit,
     ) {
         LazyColumn {
             stickyHeader {
-                WireframeHeader("Features")
+                WireframeHeader("Card")
             }
-            items(features) { feature ->
+            items(cardFeatures) { feature ->
+                FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
+            }
+            stickyHeader {
+                WireframeHeader("PayPal Web")
+            }
+            items(payPalWebFeatures) { feature ->
+                FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
+            }
+            stickyHeader {
+                WireframeHeader("PayPal Native")
+            }
+            items(payPalNativeFeatures) { feature ->
                 FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
             }
         }
@@ -96,7 +125,9 @@ class FeaturesFragment : Fragment() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 PaymentMethodsView(
-                    features = features,
+                    cardFeatures = cardFeatures,
+                    payPalWebFeatures = payPalWebFeatures,
+                    payPalNativeFeatures = payPalNativeFeatures,
                     onFeatureSelected = {},
                 )
             }
