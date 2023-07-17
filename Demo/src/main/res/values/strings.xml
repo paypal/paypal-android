@@ -2,11 +2,6 @@
     <string name="app_name">AndroidSDK</string>
 
     <!-- Payment Methods -->
-    <!-- TODO: rename payment_methods_ prefixed string resources to feature_ prefixed resources -->
-    <string name="payment_methods_card">CARD</string>
-    <string name="payment_methods_paypal">PAYPAL</string>
-    <string name="payment_methods_paypal_native">PAYPAL NATIVE</string>
-
     <string name="feature_approve_order">Approve Order</string>
     <string name="feature_vault_with_purchase">Vault With Purchase</string>
     <string name="feature_vault_without_purchase">Vault Without Purchase</string>
