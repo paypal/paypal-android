@@ -51,10 +51,7 @@ import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.VaultListener
-import com.paypal.android.cardpayments.VaultRequest
-import com.paypal.android.cardpayments.VaultResult
-import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.WireframeOptionDropDown
