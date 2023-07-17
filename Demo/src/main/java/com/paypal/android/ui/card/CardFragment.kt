@@ -6,19 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,13 +24,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,6 +53,7 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
@@ -147,19 +146,11 @@ class CardFragment : Fragment() {
                 Text(text = uiState.statusText, modifier = Modifier.testTag("statusText"))
                 Text(uiState.orderDetails)
             }
-            OutlinedButton(
+            WireframeButton(
+                text = "CREATE & APPROVE ORDER",
                 onClick = { onFormSubmit() },
-                shape = RoundedCornerShape(4.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Black,
-                    contentColor = Color.White
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text("CREATE & APPROVE ORDER")
-            }
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.size(24.dp))
         }
     }
@@ -229,6 +220,7 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun ApproveOrderForm(uiState: CardViewUiState) {
+        val localFocusManager = LocalFocusManager.current
         WireframeOptionDropDown(
             hint = stringResource(id = R.string.sca_title),
             value = uiState.scaOption,
@@ -278,13 +270,11 @@ class CardFragment : Fragment() {
             value = uiState.customerId,
             label = { Text("CUSTOMER ID FOR VAULT") },
             onValueChange = { viewModel.onValueChange(CardOption.VAULT_CUSTOMER_ID, it) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
             modifier = Modifier
                 .fillMaxWidth()
-                .onFocusChanged {
-                    if (it.isFocused) {
-                        viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID)
-                    }
-                }
+                .onFocusChanged { if (it.isFocused) viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID) }
         )
     }
 

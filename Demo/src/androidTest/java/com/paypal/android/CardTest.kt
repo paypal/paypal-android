@@ -1,40 +1,51 @@
 package com.paypal.android
 
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.paypal.android.testutils.AppDriver
-import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.UUID
 
+@OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class CardTest {
 
-    private val driver = AppDriver("com.paypal.android")
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<DemoActivity>()
 
     @Test
     fun approveOrder() {
-        with(driver) {
-            launchAppFromHomeScreen()
+        composeTestRule.onNodeWithText("CARD").performClick()
 
-            findText("CARD").click()
-            findText("New Visa").click()
+        composeTestRule.waitUntilExactlyOneExists(hasText("New Visa"))
+        composeTestRule.onNodeWithText("New Visa").performClick()
 
-            waitForText("CARD NUMBER")
+        composeTestRule.waitUntilExactlyOneExists(hasText("Card Details"))
 
-            findText("SCA").click()
-            findText("WHEN REQUIRED").click()
+        composeTestRule.onNodeWithText("SCA").performClick()
+        composeTestRule.onNodeWithText("WHEN REQUIRED").performClick()
 
-            findText("INTENT").click()
-            findText("CAPTURE").click()
+        composeTestRule.onNodeWithText("INTENT").performClick()
+        composeTestRule.onNodeWithText("AUTHORIZE").performClick()
 
-            findText("SHOULD VAULT").click()
-            findText("NO").click()
+        composeTestRule.onNodeWithText("SHOULD VAULT").performClick()
+        composeTestRule.onNodeWithText("YES").performClick()
 
-            findText("CREATE & APPROVE ORDER").click()
+        // insert random customer id for vaulting
+        val customerVaultId = UUID.randomUUID().toString()
+        composeTestRule.onNodeWithText("CUSTOMER ID FOR VAULT").performTextInput(customerVaultId)
 
-            waitForText("Status: COMPLETED")
-            val statusText = findResById("statusText")
-            assertEquals("Status: COMPLETED", statusText.text)
-        }
+        // press done button and submit form
+        composeTestRule.onNodeWithText("CUSTOMER ID FOR VAULT").performImeAction()
+        composeTestRule.onNodeWithText("CREATE & APPROVE ORDER").performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(hasText("Status: COMPLETED"), 15_000L)
     }
 }
