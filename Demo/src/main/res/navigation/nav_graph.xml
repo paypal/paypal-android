@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/paymentMethodsFragment">
 
@@ -11,7 +10,12 @@
         android:label="@string/feature_title">
         <action
             android:id="@+id/action_paymentMethodsFragment_to_createOrderFragment"
-            app:destination="@id/createOrderFragment" />
+            app:destination="@id/createOrderFragment">
+            <argument
+                android:name="feature"
+                app:argType="com.paypal.android.ui.features.Feature"
+                app:nullable="false" />
+        </action>
         <action
             android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"
             app:destination="@id/selectCardFragment" />
@@ -74,7 +78,11 @@
     <fragment
         android:id="@+id/createOrderFragment"
         android:name="com.paypal.android.ui.createorder.CreateOrderFragment"
-        android:label="CreateOrderFragment">
+        android:label="Create an Order:">
+        <argument
+            android:name="feature"
+            app:argType="com.paypal.android.ui.features.Feature"
+            app:nullable="false" />
         <action
             android:id="@+id/action_createOrderFragment_to_selectCardFragment"
             app:destination="@id/selectCardFragment" />

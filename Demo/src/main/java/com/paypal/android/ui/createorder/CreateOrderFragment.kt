@@ -3,7 +3,6 @@ package com.paypal.android.ui.createorder
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,10 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.navArgs
+import com.paypal.android.ui.features.Feature
 
 class CreateOrderFragment : Fragment() {
+
+    private val args: CreateOrderFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,7 +30,7 @@ class CreateOrderFragment : Fragment() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    CreateOrderView()
+                    CreateOrderView(feature = args.feature)
                 }
             }
         }
@@ -34,8 +38,9 @@ class CreateOrderFragment : Fragment() {
 
     @Composable
     fun CreateOrderView(
+        feature: Feature
     ) {
-        Text("Create Order")
+        Text("Create Order for ${stringResource(feature.stringRes)}")
     }
 
     @Preview
@@ -43,7 +48,7 @@ class CreateOrderFragment : Fragment() {
     fun CreateOrderViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CreateOrderView()
+                CreateOrderView(Feature.CARD_APPROVE_ORDER)
             }
         }
     }

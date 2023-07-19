@@ -74,15 +74,27 @@ class FeaturesFragment : Fragment() {
     }
 
     private fun launchPayPalFragment() {
-        navigate(FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment())
+        navigate(
+            FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(
+                Feature.PAYPAL_WEB
+            )
+        )
     }
 
     private fun launchCardFragment() {
-        navigate(FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment())
+        navigate(
+            FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(
+                Feature.CARD_APPROVE_ORDER
+            )
+        )
     }
 
     private fun launchPayPalNativeFragment() {
-        navigate(FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment())
+        navigate(
+            FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(
+                Feature.PAYPAL_NATIVE
+            )
+        )
     }
 
     private fun navigate(action: NavDirections) {
