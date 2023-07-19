@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalNativeFragment"
             app:destination="@id/payPalNativeFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_createOrderFragment"
+            app:destination="@id/createOrderFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -74,4 +77,8 @@
                 app:nullable="true" />
         </action>
     </fragment>
+    <fragment
+        android:id="@+id/createOrderFragment"
+        android:name="com.paypal.android.ui.createorder.CreateOrderFragment"
+        android:label="CreateOrderFragment" />
 </navigation>
