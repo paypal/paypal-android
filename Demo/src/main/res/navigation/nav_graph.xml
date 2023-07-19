@@ -25,6 +25,11 @@
         android:name="com.paypal.android.ui.card.CardFragment"
         android:label="CardFragment">
         <argument
+            android:name="order"
+            android:defaultValue="@null"
+            app:argType="com.paypal.android.api.model.Order"
+            app:nullable="true" />
+        <argument
             android:name="prefillCard"
             android:defaultValue="@null"
             app:argType="com.paypal.android.models.TestCard"
@@ -69,9 +74,23 @@
             android:name="feature"
             app:argType="com.paypal.android.ui.features.Feature"
             app:nullable="false" />
+        <argument
+            android:name="order"
+            android:defaultValue="@null"
+            app:argType="com.paypal.android.api.model.Order"
+            app:nullable="true" />
         <action
             android:id="@+id/action_selectCardFragment_to_cardFragment"
             app:destination="@id/cardFragment">
+            <argument
+                android:name="feature"
+                app:argType="com.paypal.android.ui.features.Feature"
+                app:nullable="false" />
+            <argument
+                android:name="order"
+                android:defaultValue="@null"
+                app:argType="com.paypal.android.api.model.Order"
+                app:nullable="true" />
             <argument
                 android:name="prefillCard"
                 android:defaultValue="@null"

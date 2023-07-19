@@ -29,10 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.WireframeHeader
 
 class SelectCardFragment : Fragment() {
+
+    private val args: SelectCardFragmentArgs by navArgs()
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -53,10 +56,15 @@ class SelectCardFragment : Fragment() {
         navigateToCardForm(card)
     }
 
-    private fun navigateToCardForm(card: TestCard? = null) {
-        findNavController().navigate(
-            SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(card)
+    private fun navigateToCardForm(testCard: TestCard? = null) {
+        val feature = args.feature
+        val order = args.order
+        val action = SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(
+            feature,
+            order,
+            testCard
         )
+        findNavController().navigate(action)
     }
 
     @OptIn(ExperimentalFoundationApi::class)
