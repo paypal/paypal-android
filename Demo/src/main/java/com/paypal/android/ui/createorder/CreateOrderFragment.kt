@@ -116,7 +116,7 @@ class CreateOrderFragment : Fragment() {
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 onExpandedChange = { expanded ->
-                    viewModel.intentOptionExpanded = !expanded
+                    viewModel.intentOptionExpanded = expanded
                 },
                 onValueChange = { value ->
                     viewModel.intentOption = value
