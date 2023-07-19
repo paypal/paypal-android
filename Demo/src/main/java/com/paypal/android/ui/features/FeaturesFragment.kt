@@ -64,40 +64,18 @@ class FeaturesFragment : Fragment() {
     }
 
     private fun onFeatureSelected(feature: Feature) {
-        when (feature) {
-            Feature.CARD_APPROVE_ORDER -> launchCardFragment()
-            Feature.CARD_VAULT_WITH_PURCHASE -> launchCardFragment()
-            Feature.CARD_VAULT_WITHOUT_PURCHASE -> launchCardFragment()
-            Feature.PAYPAL_WEB -> launchPayPalFragment()
-            Feature.PAYPAL_NATIVE -> launchPayPalNativeFragment()
+        val action = when (feature) {
+            Feature.CARD_APPROVE_ORDER,
+            Feature.CARD_VAULT_WITH_PURCHASE,
+            Feature.PAYPAL_WEB,
+            Feature.PAYPAL_NATIVE -> {
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(feature)
+            }
+
+            Feature.CARD_VAULT_WITHOUT_PURCHASE -> {
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment(feature)
+            }
         }
-    }
-
-    private fun launchPayPalFragment() {
-        navigate(
-            FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(
-                Feature.PAYPAL_WEB
-            )
-        )
-    }
-
-    private fun launchCardFragment() {
-        navigate(
-            FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(
-                Feature.CARD_APPROVE_ORDER
-            )
-        )
-    }
-
-    private fun launchPayPalNativeFragment() {
-        navigate(
-            FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(
-                Feature.PAYPAL_NATIVE
-            )
-        )
-    }
-
-    private fun navigate(action: NavDirections) {
         findNavController().navigate(action)
     }
 

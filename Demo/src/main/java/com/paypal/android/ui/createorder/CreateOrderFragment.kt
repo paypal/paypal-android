@@ -23,6 +23,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
 import com.paypal.android.api.model.Amount
@@ -91,12 +93,47 @@ class CreateOrderFragment : Fragment() {
                 payee = Payee(emailAddress = "anpelaez@paypal.com")
             )
 
+            viewModel.updateStatusText("Creating order...")
             val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
+
+            // continue on to feature
+            when (val feature = args.feature) {
+                Feature.CARD_APPROVE_ORDER,
+                Feature.CARD_VAULT_WITH_PURCHASE,
+                Feature.CARD_VAULT_WITHOUT_PURCHASE -> {
+                    navigate(
+                        CreateOrderFragmentDirections.actionCreateOrderFragmentToSelectCardFragment(
+                            feature,
+                            order
+                        )
+                    )
+                }
+
+                Feature.PAYPAL_WEB -> {
+                    navigate(
+                        CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalFragment(
+                            order
+                        )
+                    )
+                }
+
+                Feature.PAYPAL_NATIVE -> {
+                    navigate(
+                        CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalNativeFragment(
+                            order
+                        )
+                    )
+                }
+            }
         }
     }
 
-    @Composable
+    private fun navigate(action: NavDirections) {
+        findNavController().navigate(action)
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
     fun CreateOrderView(
         feature: Feature,
         uiState: CreateOrderUiState,
@@ -107,6 +144,7 @@ class CreateOrderFragment : Fragment() {
                 .padding(8.dp)
         ) {
             Text(text = "Create Order for ${stringResource(feature.stringRes)}")
+            Text(text = uiState.statusText)
             WireframeOptionDropDown(
                 hint = stringResource(id = R.string.intent_title),
                 value = uiState.intentOption,

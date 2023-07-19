@@ -65,6 +65,10 @@
         android:id="@+id/selectCardFragment"
         android:name="com.paypal.android.ui.selectcard.SelectCardFragment"
         android:label="SelectCardFragment">
+        <argument
+            android:name="feature"
+            app:argType="com.paypal.android.ui.features.Feature"
+            app:nullable="false" />
         <action
             android:id="@+id/action_selectCardFragment_to_cardFragment"
             app:destination="@id/cardFragment">
@@ -85,12 +89,31 @@
             app:nullable="false" />
         <action
             android:id="@+id/action_createOrderFragment_to_selectCardFragment"
-            app:destination="@id/selectCardFragment" />
+            app:destination="@id/selectCardFragment">
+            <argument
+                android:name="feature"
+                app:argType="com.paypal.android.ui.features.Feature"
+                app:nullable="false" />
+            <argument
+                android:name="order"
+                app:argType="com.paypal.android.api.model.Order"
+                app:nullable="false" />
+        </action>
         <action
             android:id="@+id/action_createOrderFragment_to_payPalFragment"
-            app:destination="@id/payPalFragment" />
+            app:destination="@id/payPalFragment">
+            <argument
+                android:name="order"
+                app:argType="com.paypal.android.api.model.Order"
+                app:nullable="false" />
+        </action>
         <action
             android:id="@+id/action_createOrderFragment_to_payPalNativeFragment"
-            app:destination="@id/payPalNativeFragment" />
+            app:destination="@id/payPalNativeFragment">
+            <argument
+                android:name="order"
+                app:argType="com.paypal.android.api.model.Order"
+                app:nullable="false" />
+        </action>
     </fragment>
 </navigation>
