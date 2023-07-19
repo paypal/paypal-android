@@ -10,17 +10,11 @@
         android:name="com.paypal.android.ui.features.FeaturesFragment"
         android:label="@string/feature_title">
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"
-            app:destination="@id/selectCardFragment" />
-        <action
-            android:id="@+id/action_paymentMethodsFragment_to_payPalFragment"
-            app:destination="@id/payPalFragment" />
-        <action
-            android:id="@+id/action_paymentMethodsFragment_to_payPalNativeFragment"
-            app:destination="@id/payPalNativeFragment" />
-        <action
             android:id="@+id/action_paymentMethodsFragment_to_createOrderFragment"
             app:destination="@id/createOrderFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"
+            app:destination="@id/selectCardFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -80,5 +74,15 @@
     <fragment
         android:id="@+id/createOrderFragment"
         android:name="com.paypal.android.ui.createorder.CreateOrderFragment"
-        android:label="CreateOrderFragment" />
+        android:label="CreateOrderFragment">
+        <action
+            android:id="@+id/action_createOrderFragment_to_selectCardFragment"
+            app:destination="@id/selectCardFragment" />
+        <action
+            android:id="@+id/action_createOrderFragment_to_payPalFragment"
+            app:destination="@id/payPalFragment" />
+        <action
+            android:id="@+id/action_createOrderFragment_to_payPalNativeFragment"
+            app:destination="@id/payPalNativeFragment" />
+    </fragment>
 </navigation>

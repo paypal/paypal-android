@@ -26,6 +26,7 @@ class CreateOrderFragment : Fragment() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
+                    CreateOrderView()
                 }
             }
         }
