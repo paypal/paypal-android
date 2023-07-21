@@ -15,7 +15,6 @@ class CardViewModel : ViewModel() {
         _uiState.update { currentState ->
             when (option) {
                 CardOption.SCA -> currentState.copy(scaOption = value)
-                CardOption.SHOULD_VAULT -> currentState.copy(shouldVaultOption = value)
                 CardOption.VAULT_CUSTOMER_ID -> currentState.copy(customerId = value)
                 CardOption.CARD_NUMBER -> currentState.copy(cardNumber = value)
                 CardOption.CARD_EXPIRATION_DATE -> currentState.copy(cardExpirationDate = value)
@@ -33,18 +32,6 @@ class CardViewModel : ViewModel() {
     fun clearFocus() {
         _uiState.update { currentState ->
             currentState.copy(focusedOption = null)
-        }
-    }
-
-    fun updateStatusText(statusText: String) {
-        _uiState.update { currentState ->
-            currentState.copy(statusText = statusText)
-        }
-    }
-
-    fun updateOrderDetailsText(orderDetails: String) {
-        _uiState.update { currentState ->
-            currentState.copy(orderDetails = orderDetails)
         }
     }
 

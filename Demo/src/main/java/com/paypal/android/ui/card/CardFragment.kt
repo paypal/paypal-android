@@ -27,7 +27,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -167,18 +166,12 @@ class CardFragment : Fragment() {
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
-                text = "Approve Order Options",
+                text = "${stringResource(feature.stringRes)} Options",
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
             ApproveOrderForm(feature, uiState)
-            Spacer(modifier = Modifier.size(8.dp))
-            Column(
-                modifier = Modifier.weight(1.0f)
-            ) {
-                Text(text = uiState.statusText, modifier = Modifier.testTag("statusText"))
-                Text(uiState.orderDetails)
-            }
+            Spacer(modifier = Modifier.weight(1.0f))
             WireframeButton(
                 text = "CREATE & APPROVE ORDER",
                 onClick = { onFormSubmit() },
@@ -194,7 +187,7 @@ class CardFragment : Fragment() {
     fun CardFormPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(feature = Feature.CARD_APPROVE_ORDER, uiState = CardViewUiState())
+                CardView(feature = Feature.CARD_VAULT_WITHOUT_PURCHASE, uiState = CardViewUiState())
             }
         }
     }
@@ -269,24 +262,9 @@ class CardFragment : Fragment() {
             }
         )
         Spacer(modifier = Modifier.size(8.dp))
-        WireframeOptionDropDown(
-            hint = "SHOULD VAULT",
-            value = uiState.shouldVaultOption,
-            options = listOf("YES", "NO"),
-            expanded = uiState.shouldVaultOptionExpanded,
-            modifier = Modifier.fillMaxWidth(),
-            onExpandedChange = { expanded ->
-                if (expanded) viewModel.onOptionFocus(CardOption.SHOULD_VAULT) else viewModel.clearFocus()
-            },
-            onValueChange = {
-                viewModel.onValueChange(CardOption.SHOULD_VAULT, it)
-                viewModel.clearFocus()
-            }
-        )
-        Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
             value = uiState.customerId,
-            label = { Text("CUSTOMER ID FOR VAULT") },
+            label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
             onValueChange = { viewModel.onValueChange(CardOption.VAULT_CUSTOMER_ID, it) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
@@ -302,7 +280,8 @@ class CardFragment : Fragment() {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
-        val shouldVault = (uiState.shouldVaultOption == "YES")
+
+        val shouldVault = (args.feature == Feature.CARD_VAULT_WITH_PURCHASE)
         val vault = if (shouldVault) Vault(customerId = uiState.customerId) else null
         return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
     }

@@ -7,15 +7,10 @@ import com.paypal.android.ui.card.CardOption
 data class CardViewUiState(
     val focusedOption: CardOption? = null,
     val scaOption: String = "",
-    val shouldVaultOption: String = "",
     val customerId: String = "",
-    val statusText: String = "",
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
-    val orderDetails: String = ""
 ) {
     val scaOptionExpanded: Boolean = focusedOption?.let { it == CardOption.SCA } ?: false
-    val shouldVaultOptionExpanded: Boolean =
-        focusedOption?.let { it == CardOption.SHOULD_VAULT } ?: false
 }
