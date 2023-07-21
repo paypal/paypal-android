@@ -43,11 +43,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
-import com.paypal.android.api.model.Amount
-import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.Payee
-import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
@@ -59,7 +55,6 @@ import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.features.Feature
 import com.paypal.android.ui.stringResourceListOf
-import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -91,8 +86,12 @@ class CardFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
+                        val feature = args.feature
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                        CardView(uiState = uiState, onFormSubmit = { onFormSubmit() })
+                        CardView(
+                            feature = feature,
+                            uiState = uiState,
+                            onFormSubmit = { onFormSubmit() })
                     }
                 }
             }
@@ -143,6 +142,7 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
+        feature: Feature,
         uiState: CardViewUiState,
         onFormSubmit: () -> Unit = {},
     ) {
@@ -171,7 +171,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(2.dp))
-            ApproveOrderForm(uiState)
+            ApproveOrderForm(feature, uiState)
             Spacer(modifier = Modifier.size(8.dp))
             Column(
                 modifier = Modifier.weight(1.0f)
@@ -194,7 +194,7 @@ class CardFragment : Fragment() {
     fun CardFormPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(uiState = CardViewUiState())
+                CardView(feature = Feature.CARD_APPROVE_ORDER, uiState = CardViewUiState())
             }
         }
     }
@@ -252,7 +252,7 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun ApproveOrderForm(uiState: CardViewUiState) {
+    fun ApproveOrderForm(feature: Feature, uiState: CardViewUiState) {
         val localFocusManager = LocalFocusManager.current
         WireframeOptionDropDown(
             hint = stringResource(id = R.string.sca_title),
@@ -265,21 +265,6 @@ class CardFragment : Fragment() {
             },
             onValueChange = {
                 viewModel.onValueChange(CardOption.SCA, it)
-                viewModel.clearFocus()
-            }
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        WireframeOptionDropDown(
-            hint = stringResource(id = R.string.intent_title),
-            value = uiState.intentOption,
-            expanded = uiState.intentOptionExpanded,
-            options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
-            modifier = Modifier.fillMaxWidth(),
-            onExpandedChange = { expanded ->
-                if (expanded) viewModel.onOptionFocus(CardOption.INTENT) else viewModel.clearFocus()
-            },
-            onValueChange = {
-                viewModel.onValueChange(CardOption.INTENT, it)
                 viewModel.clearFocus()
             }
         )
@@ -309,28 +294,6 @@ class CardFragment : Fragment() {
                 .fillMaxWidth()
                 .onFocusChanged { if (it.isFocused) viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID) }
         )
-    }
-
-    private suspend fun createOrder(uiState: CardViewUiState): Order {
-        val orderIntent = when (uiState.intentOption) {
-            "AUTHORIZE" -> OrderIntent.AUTHORIZE
-            else -> OrderIntent.CAPTURE
-        }
-
-        val orderRequest = CreateOrderRequest(
-            intent = orderIntent.name,
-            purchaseUnit = listOf(
-                PurchaseUnit(
-                    amount = Amount(
-                        currencyCode = "USD",
-                        value = "10.99"
-                    )
-                )
-            ),
-            payee = Payee(emailAddress = "anpelaez@paypal.com")
-        )
-        viewModel.updateStatusText("Creating order...")
-        return sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
     }
 
     private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {

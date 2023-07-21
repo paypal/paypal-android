@@ -15,7 +15,6 @@ class CardViewModel : ViewModel() {
         _uiState.update { currentState ->
             when (option) {
                 CardOption.SCA -> currentState.copy(scaOption = value)
-                CardOption.INTENT -> currentState.copy(intentOption = value)
                 CardOption.SHOULD_VAULT -> currentState.copy(shouldVaultOption = value)
                 CardOption.VAULT_CUSTOMER_ID -> currentState.copy(customerId = value)
                 CardOption.CARD_NUMBER -> currentState.copy(cardNumber = value)
