@@ -30,6 +30,10 @@ import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.VaultListener
+import com.paypal.android.cardpayments.VaultRequest
+import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -65,7 +69,19 @@ class ApproveOrderProgressFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         viewLifecycleOwner.lifecycleScope.launch {
-            executeCardRequestFromArgs()
+            viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
+            val clientId = sdkSampleServerAPI.fetchClientId()
+
+            val configuration = CoreConfig(clientId = clientId)
+            cardClient = CardClient(requireActivity(), configuration)
+
+            args.cardRequest?.let { cardRequest ->
+                executeCardRequest(cardRequest)
+            }
+
+            args.vaultRequest?.let { vaultRequest ->
+                executeVaultRequest(vaultRequest)
+            }
         }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -80,15 +96,7 @@ class ApproveOrderProgressFragment : Fragment() {
         }
     }
 
-    private suspend fun executeCardRequestFromArgs() {
-        val cardRequest = args.cardRequest
-
-        viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
-        val clientId = sdkSampleServerAPI.fetchClientId()
-
-        val configuration = CoreConfig(clientId = clientId)
-        cardClient = CardClient(requireActivity(), configuration)
-
+    private suspend fun executeCardRequest(cardRequest: CardRequest) {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
@@ -123,6 +131,15 @@ class ApproveOrderProgressFragment : Fragment() {
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
+    }
+    
+    private suspend fun executeVaultRequest(vaultRequest: VaultRequest) {
+        cardClient.vaultListener = object : VaultListener {
+            override fun onVaultSuccess(result: VaultResult) {
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("Vault Successful"))
+            }
+        }
+        cardClient.vault(vaultRequest)
     }
 
     @ExperimentalMaterial3Api
