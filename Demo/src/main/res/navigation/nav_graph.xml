@@ -25,6 +25,10 @@
         android:name="com.paypal.android.ui.card.CardFragment"
         android:label="CardFragment">
         <argument
+            android:name="feature"
+            app:argType="com.paypal.android.ui.features.Feature"
+            app:nullable="false" />
+        <argument
             android:name="order"
             android:defaultValue="@null"
             app:argType="com.paypal.android.api.model.Order"
@@ -38,8 +42,17 @@
             android:id="@+id/action_cardFragment_to_approveOrderProgressFragment"
             app:destination="@id/approveOrderProgressFragment">
             <argument
+                android:name="vaultRequest"
+                android:defaultValue="@null"
+                app:argType="com.paypal.android.cardpayments.VaultRequest"
+                app:nullable="true"
+                />
+            <argument
                 android:name="cardRequest"
-                app:argType="com.paypal.android.cardpayments.CardRequest" />
+                android:defaultValue="@null"
+                app:argType="com.paypal.android.cardpayments.CardRequest"
+                app:nullable="true"
+                />
         </action>
     </fragment>
     <fragment

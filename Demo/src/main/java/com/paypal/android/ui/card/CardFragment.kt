@@ -52,10 +52,12 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.Vault
+import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.ui.features.Feature
 import com.paypal.android.ui.stringResourceListOf
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -88,22 +90,49 @@ class CardFragment : Fragment() {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                        CardView(uiState = uiState, onFormSubmit = { approveOrder() })
+                        CardView(uiState = uiState, onFormSubmit = { onFormSubmit() })
                     }
                 }
             }
         }
     }
 
-    private fun approveOrder() {
+    private fun onFormSubmit() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val uiState = viewModel.uiState.value
-            val order = createOrder(uiState)
-            val cardRequest = createCardRequest(uiState, order)
-            findNavController().navigate(
-                CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest)
-            )
+            when (args.feature) {
+                Feature.CARD_APPROVE_ORDER, Feature.CARD_VAULT_WITH_PURCHASE -> {
+                    sendApproveOrderRequest()
+                }
+
+                Feature.CARD_VAULT_WITHOUT_PURCHASE -> {
+                    sendVaultRequest()
+                }
+
+                else -> {
+                    TODO("invalid state")
+                }
+            }
         }
+    }
+
+    private fun sendApproveOrderRequest() {
+        val order = args.order
+        if (order == null) {
+            // TODO: handle invalid state
+        }
+        val uiState = viewModel.uiState.value
+        val cardRequest = createCardRequest(uiState, order!!)
+        findNavController().navigate(
+            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest = cardRequest)
+        )
+    }
+
+    private fun sendVaultRequest() {
+        val uiState = viewModel.uiState.value
+        val card = parseCard(uiState)
+        val customerId = uiState.customerId
+        val vaultRequest = VaultRequest(card, APP_RETURN_URL, customerId)
+        CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
