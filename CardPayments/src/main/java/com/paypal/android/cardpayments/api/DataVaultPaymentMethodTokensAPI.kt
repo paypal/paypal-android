@@ -9,7 +9,7 @@ import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.RestClient
 import org.json.JSONObject
 
-internal class VaultPaymentMethodTokensAPI(
+internal class DataVaultPaymentMethodTokensAPI(
     private val restClient: RestClient
 ) {
     constructor(coreConfig: CoreConfig) : this(RestClient(coreConfig))
@@ -49,7 +49,7 @@ internal class VaultPaymentMethodTokensAPI(
         val body = requestJSON.toString().replace("\\/", "/")
 
         val apiRequest =
-            APIRequest("v3/vault/setup-tokens/", HttpMethod.POST, body)
+            APIRequest("v3/vault/setup-tokens", HttpMethod.POST, body)
         val httpResponse = restClient.send(apiRequest)
 
         val bodyResponse = httpResponse.body!!

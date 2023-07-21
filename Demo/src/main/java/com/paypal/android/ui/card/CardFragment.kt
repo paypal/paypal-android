@@ -132,7 +132,9 @@ class CardFragment : Fragment() {
         val card = parseCard(uiState)
         val customerId = uiState.customerId
         val vaultRequest = VaultRequest(card, APP_RETURN_URL, customerId)
-        CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
+        findNavController().navigate(
+            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
+        )
     }
 
     @OptIn(ExperimentalComposeUiApi::class)

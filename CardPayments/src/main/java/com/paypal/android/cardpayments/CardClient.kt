@@ -7,7 +7,7 @@ import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
-import com.paypal.android.cardpayments.api.VaultPaymentMethodTokensAPI
+import com.paypal.android.cardpayments.api.DataVaultPaymentMethodTokensAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
-    private val vaultPaymentMethodTokensAPI: VaultPaymentMethodTokensAPI,
+    private val dataVaultPaymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
@@ -51,7 +51,7 @@ class CardClient internal constructor(
             this(
                 activity,
                 CheckoutOrdersAPI(configuration),
-                VaultPaymentMethodTokensAPI(configuration),
+                DataVaultPaymentMethodTokensAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
@@ -83,7 +83,7 @@ class CardClient internal constructor(
      */
     fun vault(vaultRequest: VaultRequest) {
         CoroutineScope(dispatcher).launch {
-            val result = vaultPaymentMethodTokensAPI.createSetupToken(vaultRequest)
+            val result = dataVaultPaymentMethodTokensAPI.createSetupToken(vaultRequest)
             vaultListener?.onVaultSuccess(result)
         }
     }
