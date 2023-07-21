@@ -68,8 +68,9 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
+        // TODO: investigate why custom url-schemes don't work with this setup token endpoint
+        // const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
         const val APP_RETURN_URL = "https://example.com/returnUrl"
-//        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject

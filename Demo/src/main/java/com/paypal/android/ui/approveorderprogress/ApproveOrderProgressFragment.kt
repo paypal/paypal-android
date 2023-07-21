@@ -139,6 +139,8 @@ class ApproveOrderProgressFragment : Fragment() {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Vault Successful"))
             }
         }
+
+        viewModel.appendEventToLog(ApproveOrderEvent.Message("Vaulting Card..."))
         cardClient.vault(vaultRequest)
     }
 
