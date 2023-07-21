@@ -68,7 +68,8 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
-        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+        const val APP_RETURN_URL = "https://example.com/returnUrl"
+//        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject
