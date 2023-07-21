@@ -41,7 +41,7 @@ sealed class ApproveOrderEvent : ComposableEvent {
         }
     }
 
-    class VaultSuccess(private val result: VaultResult): ApproveOrderEvent() {
+    class VaultSuccess(private val result: VaultResult) : ApproveOrderEvent() {
         @Composable
         override fun AsComposable() {
             VaultSuccessView(result = result)

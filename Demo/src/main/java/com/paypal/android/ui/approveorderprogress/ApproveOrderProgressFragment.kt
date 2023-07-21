@@ -132,7 +132,7 @@ class ApproveOrderProgressFragment : Fragment() {
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
-    
+
     private fun executeVaultRequest(vaultRequest: VaultRequest) {
         cardClient.vaultListener = object : VaultListener {
             override fun onVaultSuccess(result: VaultResult) {

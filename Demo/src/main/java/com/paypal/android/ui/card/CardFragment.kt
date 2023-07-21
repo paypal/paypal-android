@@ -247,21 +247,23 @@ class CardFragment : Fragment() {
     @Composable
     fun ApproveOrderForm(feature: Feature, uiState: CardViewUiState) {
         val localFocusManager = LocalFocusManager.current
-        WireframeOptionDropDown(
-            hint = stringResource(id = R.string.sca_title),
-            value = uiState.scaOption,
-            expanded = uiState.scaOptionExpanded,
-            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
-            modifier = Modifier.fillMaxWidth(),
-            onExpandedChange = { expanded ->
-                if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
-            },
-            onValueChange = {
-                viewModel.onValueChange(CardOption.SCA, it)
-                viewModel.clearFocus()
-            }
-        )
-        Spacer(modifier = Modifier.size(8.dp))
+        if (feature != Feature.CARD_VAULT_WITH_PURCHASE) {
+            WireframeOptionDropDown(
+                hint = stringResource(id = R.string.sca_title),
+                value = uiState.scaOption,
+                expanded = uiState.scaOptionExpanded,
+                options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
+                modifier = Modifier.fillMaxWidth(),
+                onExpandedChange = { expanded ->
+                    if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
+                },
+                onValueChange = {
+                    viewModel.onValueChange(CardOption.SCA, it)
+                    viewModel.clearFocus()
+                }
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+        }
         OutlinedTextField(
             value = uiState.customerId,
             label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },

@@ -141,10 +141,12 @@ class CreateOrderFragment : Fragment() {
     ) {
         Column(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(16.dp)
         ) {
-            Text(text = "Create Order for ${stringResource(feature.stringRes)}")
-            Text(text = uiState.statusText)
+            Text(
+                text = "Feature: ${stringResource(feature.stringRes)}",
+                style = MaterialTheme.typography.headlineSmall
+            )
             WireframeOptionDropDown(
                 hint = stringResource(id = R.string.intent_title),
                 value = uiState.intentOption,
@@ -152,7 +154,7 @@ class CreateOrderFragment : Fragment() {
                 options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = 16.dp),
                 onExpandedChange = { expanded ->
                     viewModel.intentOptionExpanded = expanded
                 },
@@ -166,7 +168,7 @@ class CreateOrderFragment : Fragment() {
                 onClick = onCreateOrderClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .padding(top = 16.dp)
             )
         }
     }
