@@ -40,9 +40,11 @@ internal class DataVaultPaymentMethodTokensAPI(
         requestJSON.put("payment_source", paymentSourceJSON)
 
         vaultRequest.customerId?.let { customerId ->
-            val customerJSON = JSONObject()
-                .put("id", customerId)
-            requestJSON.put("customer", customerJSON)
+            if (customerId.isNotEmpty()) {
+                val customerJSON = JSONObject()
+                    .put("id", customerId)
+                requestJSON.put("customer", customerJSON)
+            }
         }
 
         // Ref: https://stackoverflow.com/a/19610814

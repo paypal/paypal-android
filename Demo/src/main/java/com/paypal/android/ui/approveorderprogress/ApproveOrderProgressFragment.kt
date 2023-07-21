@@ -137,6 +137,7 @@ class ApproveOrderProgressFragment : Fragment() {
         cardClient.vaultListener = object : VaultListener {
             override fun onVaultSuccess(result: VaultResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Vault Successful"))
+                viewModel.appendEventToLog(ApproveOrderEvent.VaultSuccess(result))
             }
         }
 
