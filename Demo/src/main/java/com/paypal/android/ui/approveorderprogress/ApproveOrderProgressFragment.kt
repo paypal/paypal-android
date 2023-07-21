@@ -96,7 +96,7 @@ class ApproveOrderProgressFragment : Fragment() {
         }
     }
 
-    private suspend fun executeCardRequest(cardRequest: CardRequest) {
+    private fun executeCardRequest(cardRequest: CardRequest) {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
@@ -133,7 +133,7 @@ class ApproveOrderProgressFragment : Fragment() {
         cardClient.approveOrder(requireActivity(), cardRequest)
     }
     
-    private suspend fun executeVaultRequest(vaultRequest: VaultRequest) {
+    private fun executeVaultRequest(vaultRequest: VaultRequest) {
         cardClient.vaultListener = object : VaultListener {
             override fun onVaultSuccess(result: VaultResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Vault Successful"))
