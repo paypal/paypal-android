@@ -1,6 +1,5 @@
 package com.paypal.android.ui.features
 
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.paypal.android.R
