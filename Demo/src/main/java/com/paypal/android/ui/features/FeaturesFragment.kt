@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -106,7 +107,7 @@ class FeaturesFragment : Fragment() {
         LazyColumn(
             modifier = Modifier
                 .background(backgroundColor)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
             stickyHeader {
                 FeatureGroupHeader(text = "Card")
@@ -174,10 +175,7 @@ class FeaturesFragment : Fragment() {
             modifier = Modifier
                 .background(Color.White)
                 .fillMaxWidth()
-                .selectable(
-                    selected = false,
-                    onClick = onClick
-                )
+                .clickable(onClick = onClick)
         ) {
             Row {
                 Text(
