@@ -15,9 +15,9 @@ class CreateOrderViewModel : ViewModel() {
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    fun updateStatusText(statusText: String) {
-        _uiState.update { currentState ->
-            currentState.copy(statusText = statusText)
+    var isLoading: Boolean
+        get() = _uiState.value.isLoading
+        set(value) {
+            _uiState.update { it.copy(isLoading = value) }
         }
-    }
 }

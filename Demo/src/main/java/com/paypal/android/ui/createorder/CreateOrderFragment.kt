@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -93,8 +95,9 @@ class CreateOrderFragment : Fragment() {
                 payee = Payee(emailAddress = "anpelaez@paypal.com")
             )
 
-            viewModel.updateStatusText("Creating order...")
+            viewModel.isLoading = true
             val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
+            viewModel.isLoading = false
 
             // continue on to feature
             when (val feature = args.feature) {
@@ -147,7 +150,7 @@ class CreateOrderFragment : Fragment() {
                 text = "The ${stringResource(feature.stringRes)} payment method requires an order to proceed.",
                 style = MaterialTheme.typography.titleLarge
             )
-            Text(text = uiState.statusText)
+            Spacer(modifier = Modifier.size(16.dp))
             OptionList(
                 title = stringResource(id = R.string.intent_title),
                 options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
@@ -158,6 +161,7 @@ class CreateOrderFragment : Fragment() {
             )
             WireframeButton(
                 text = "Create Order & Continue",
+                isLoading = uiState.isLoading,
                 onClick = onCreateOrderClick,
                 modifier = Modifier
                     .fillMaxWidth()
