@@ -204,7 +204,7 @@ class SDKSampleServerAPI {
         val response = findService(merchantIntegration).createPaymentToken(requestJSON)
         val responseJSON = JSONObject(response.string())
 
-        val customerJSON = responseJSON.getJSONObject("Creating a Payment Token...")
+        val customerJSON = responseJSON.getJSONObject("customer")
         val cardJSON = responseJSON.getJSONObject("payment_source").getJSONObject("card")
 
         return PaymentToken(
