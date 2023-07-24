@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Property(name: String, value: String?) {
+fun PropertyView(name: String, value: String?) {
     Text(
         text = name,
         style = MaterialTheme.typography.titleMedium,

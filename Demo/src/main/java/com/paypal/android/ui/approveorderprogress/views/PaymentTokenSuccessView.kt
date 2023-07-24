@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.PaymentToken
-import com.paypal.android.uishared.components.Property
+import com.paypal.android.uishared.components.PropertyView
 
 @Composable
 fun PaymentTokenSuccessView(paymentToken: PaymentToken) {
@@ -31,10 +31,10 @@ fun PaymentTokenSuccessView(paymentToken: PaymentToken) {
                 text = "Payment Token Result",
                 style = MaterialTheme.typography.titleLarge,
             )
-            Property(name = "Payment Token", value = paymentToken.id)
-            Property(name = "Customer ID", value = paymentToken.customerId)
-            Property(name = "Card Last 4", value = paymentToken.cardLast4)
-            Property(name = "Card Brand", value = paymentToken.cardBrand)
+            PropertyView(name = "Payment Token", value = paymentToken.id)
+            PropertyView(name = "Customer ID", value = paymentToken.customerId)
+            PropertyView(name = "Card Last 4", value = paymentToken.cardLast4)
+            PropertyView(name = "Card Brand", value = paymentToken.cardBrand)
         }
         Spacer(modifier = Modifier.size(16.dp))
     }

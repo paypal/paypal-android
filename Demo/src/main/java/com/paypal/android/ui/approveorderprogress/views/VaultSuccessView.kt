@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.cardpayments.VaultResult
-import com.paypal.android.uishared.components.Property
+import com.paypal.android.uishared.components.PropertyView
 
 @Composable
 fun VaultSuccessView(vaultResult: VaultResult) {
@@ -31,9 +31,9 @@ fun VaultSuccessView(vaultResult: VaultResult) {
                 text = "Vault Result",
                 style = MaterialTheme.typography.titleLarge,
             )
-            Property(name = "Status", value = vaultResult.status)
-            Property(name = "Setup Token ID", value = vaultResult.setupTokenId)
-            Property(name = "Customer ID", value = vaultResult.customerId)
+            PropertyView(name = "Status", value = vaultResult.status)
+            PropertyView(name = "Setup Token ID", value = vaultResult.setupTokenId)
+            PropertyView(name = "Customer ID", value = vaultResult.customerId)
         }
         Spacer(modifier = Modifier.size(16.dp))
     }

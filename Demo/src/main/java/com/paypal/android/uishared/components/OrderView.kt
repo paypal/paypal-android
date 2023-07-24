@@ -20,13 +20,13 @@ fun OrderView(order: Order) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        Property(name = "Order", value = order.id)
-        Property(name = "Intent", value = order.intent)
-        Property(name = "Status", value = order.status)
-        Property(name = "Card Last 4", value = order.cardLast4)
-        Property(name = "Card Brand", value = order.cardBrand)
-        Property(name = "Vault Id", value = order.vaultId)
-        Property(name = "Customer Vault Id", value = order.customerId)
+        PropertyView(name = "Order", value = order.id)
+        PropertyView(name = "Intent", value = order.intent)
+        PropertyView(name = "Status", value = order.status)
+        PropertyView(name = "Card Last 4", value = order.cardLast4)
+        PropertyView(name = "Card Brand", value = order.cardBrand)
+        PropertyView(name = "Vault Id", value = order.vaultId)
+        PropertyView(name = "Customer Vault Id", value = order.customerId)
         Spacer(modifier = Modifier.size(24.dp))
     }
 }
