@@ -47,8 +47,7 @@ class FeaturesFragment : Fragment() {
 
     private val cardFeatures = listOf(
         Feature.CARD_APPROVE_ORDER,
-        Feature.CARD_VAULT_WITH_PURCHASE,
-        Feature.CARD_VAULT_WITHOUT_PURCHASE
+        Feature.CARD_VAULT
     )
 
     private val payPalWebFeatures = listOf(
@@ -84,13 +83,12 @@ class FeaturesFragment : Fragment() {
     private fun onFeatureSelected(feature: Feature) {
         val action = when (feature) {
             Feature.CARD_APPROVE_ORDER,
-            Feature.CARD_VAULT_WITH_PURCHASE,
             Feature.PAYPAL_WEB,
             Feature.PAYPAL_NATIVE -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(feature)
             }
 
-            Feature.CARD_VAULT_WITHOUT_PURCHASE -> {
+            Feature.CARD_VAULT -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment(feature)
             }
         }

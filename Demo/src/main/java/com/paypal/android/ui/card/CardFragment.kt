@@ -100,11 +100,11 @@ class CardFragment : Fragment() {
     private fun onFormSubmit() {
         viewLifecycleOwner.lifecycleScope.launch {
             when (args.feature) {
-                Feature.CARD_APPROVE_ORDER, Feature.CARD_VAULT_WITH_PURCHASE -> {
+                Feature.CARD_APPROVE_ORDER -> {
                     sendApproveOrderRequest()
                 }
 
-                Feature.CARD_VAULT_WITHOUT_PURCHASE -> {
+                Feature.CARD_VAULT -> {
                     sendVaultRequest()
                 }
 
@@ -187,7 +187,7 @@ class CardFragment : Fragment() {
     fun CardFormPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(feature = Feature.CARD_VAULT_WITHOUT_PURCHASE, uiState = CardViewUiState())
+                CardView(feature = Feature.CARD_VAULT, uiState = CardViewUiState())
             }
         }
     }
@@ -247,23 +247,21 @@ class CardFragment : Fragment() {
     @Composable
     fun ApproveOrderForm(feature: Feature, uiState: CardViewUiState) {
         val localFocusManager = LocalFocusManager.current
-        if (feature != Feature.CARD_VAULT_WITH_PURCHASE) {
-            WireframeOptionDropDown(
-                hint = stringResource(id = R.string.sca_title),
-                value = uiState.scaOption,
-                expanded = uiState.scaOptionExpanded,
-                options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
-                modifier = Modifier.fillMaxWidth(),
-                onExpandedChange = { expanded ->
-                    if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
-                },
-                onValueChange = {
-                    viewModel.onValueChange(CardOption.SCA, it)
-                    viewModel.clearFocus()
-                }
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-        }
+        WireframeOptionDropDown(
+            hint = stringResource(id = R.string.sca_title),
+            value = uiState.scaOption,
+            expanded = uiState.scaOptionExpanded,
+            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
+            modifier = Modifier.fillMaxWidth(),
+            onExpandedChange = { expanded ->
+                if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
+            },
+            onValueChange = {
+                viewModel.onValueChange(CardOption.SCA, it)
+                viewModel.clearFocus()
+            }
+        )
+        Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
             value = uiState.customerId,
             label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
@@ -283,7 +281,8 @@ class CardFragment : Fragment() {
             else -> SCA.SCA_WHEN_REQUIRED
         }
 
-        val shouldVault = (args.feature == Feature.CARD_VAULT_WITH_PURCHASE)
+        val shouldVault = true
+//        val shouldVault = (args.feature == Feature.CARD_VAULT_WITH_PURCHASE)
         val vault = if (shouldVault) Vault(customerId = uiState.customerId) else null
         return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
     }

@@ -102,8 +102,7 @@ class CreateOrderFragment : Fragment() {
             // continue on to feature
             when (val feature = args.feature) {
                 Feature.CARD_APPROVE_ORDER,
-                Feature.CARD_VAULT_WITH_PURCHASE,
-                Feature.CARD_VAULT_WITHOUT_PURCHASE -> {
+                Feature.CARD_VAULT -> {
                     navigate(
                         CreateOrderFragmentDirections.actionCreateOrderFragmentToSelectCardFragment(
                             feature,

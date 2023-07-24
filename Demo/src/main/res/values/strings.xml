@@ -4,8 +4,7 @@
     <!-- Payment Methods -->
     <string name="feature_title">Select a Feature:</string>
     <string name="feature_approve_order">Approve Order</string>
-    <string name="feature_vault_with_purchase">Vault With Purchase</string>
-    <string name="feature_vault_without_purchase">Vault Without Purchase</string>
+    <string name="feature_vault">Vault</string>
     <string name="feature_paypal_web">PayPal Web</string>
     <string name="feature_paypal_native">PayPal Native</string>
 
