@@ -9,6 +9,7 @@ import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
+import com.paypal.android.cardpayments.api.DataVaultPaymentMethodTokensAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.OrderStatus
@@ -42,6 +43,7 @@ class CardClientUnitTest {
     private val cardRequest = CardRequest(orderId, card, "return_url")
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
+    private val dataVaultPaymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED)
@@ -173,6 +175,7 @@ class CardClientUnitTest {
         val sut = CardClient(
             activity,
             checkoutOrdersAPI,
+            dataVaultPaymentMethodTokensAPI,
             analyticsService,
             browserSwitchClient,
             dispatcher
