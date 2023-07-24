@@ -267,9 +267,7 @@ class CardFragment : Fragment() {
             else -> SCA.SCA_WHEN_REQUIRED
         }
 
-        val shouldVault = true
-//        val shouldVault = (args.feature == Feature.CARD_VAULT_WITH_PURCHASE)
-        val vault = if (shouldVault) Vault(customerId = uiState.customerId) else null
+        val vault = if (uiState.shouldVault) Vault(customerId = uiState.customerId) else null
         return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
     }
 
