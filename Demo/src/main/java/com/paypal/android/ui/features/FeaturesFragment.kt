@@ -36,12 +36,14 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
 
-// TODO: look into theming
-val backgroundColor = Color(248, 249, 243)
-val featureTitleColor = Color(20, 29, 47)
-val chevronTint = Color(138, 137, 142)
-
 class FeaturesFragment : Fragment() {
+
+    companion object {
+        // TODO: use a color scheme to keep UI consistent
+        val backgroundColor = Color(248, 249, 243)
+        val featureTitleColor = Color(20, 29, 47)
+        val chevronTint = Color(138, 137, 142)
+    }
 
     private val cardFeatures = listOf(
         Feature.CARD_APPROVE_ORDER,
