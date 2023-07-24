@@ -4,27 +4,42 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.paypal.android.ui.WireframeHeader
+import com.paypal.android.R
+
+// TODO: look into theming
+val backgroundColor = Color(248, 249, 243)
+val featureTitleColor = Color(20, 29, 47)
+val chevronTint = Color(138, 137, 142)
 
 class FeaturesFragment : Fragment() {
 
@@ -50,7 +65,9 @@ class FeaturesFragment : Fragment() {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     PaymentMethodsView(
                         cardFeatures = cardFeatures,
                         payPalWebFeatures = payPalWebFeatures,
@@ -86,24 +103,28 @@ class FeaturesFragment : Fragment() {
         payPalNativeFeatures: List<Feature>,
         onFeatureSelected: (Feature) -> Unit,
     ) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .background(backgroundColor)
+                .padding(16.dp)
+        ) {
             stickyHeader {
-                WireframeHeader("Card")
+                FeatureGroupHeader(text = "Card")
             }
-            items(cardFeatures) { feature ->
-                FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
-            }
-            stickyHeader {
-                WireframeHeader("PayPal Web")
-            }
-            items(payPalWebFeatures) { feature ->
-                FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
+            item {
+                FeatureOptions(cardFeatures, onFeatureSelected = onFeatureSelected)
             }
             stickyHeader {
-                WireframeHeader("PayPal Native")
+                FeatureGroupHeader("PayPal Web")
             }
-            items(payPalNativeFeatures) { feature ->
-                FeatureView(feature = feature, onClick = { onFeatureSelected(feature) })
+            item {
+                FeatureOptions(payPalWebFeatures, onFeatureSelected = onFeatureSelected)
+            }
+            stickyHeader {
+                FeatureGroupHeader("PayPal Native")
+            }
+            item {
+                FeatureOptions(payPalNativeFeatures, onFeatureSelected = onFeatureSelected)
             }
         }
     }
@@ -124,21 +145,77 @@ class FeaturesFragment : Fragment() {
     }
 
     @Composable
-    fun FeatureView(feature: Feature, onClick: () -> Unit) {
+    fun FeatureOptions(
+        features: List<Feature>,
+        onFeatureSelected: (Feature) -> Unit,
+    ) {
+        Card(
+            shape = CardDefaults.elevatedShape,
+            elevation = CardDefaults.elevatedCardElevation()
+        ) {
+            features.forEachIndexed { index, feature ->
+                FeatureView(
+                    feature = feature,
+                    isLast = (index == features.lastIndex),
+                    onClick = { onFeatureSelected(feature) }
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun FeatureView(
+        feature: Feature,
+        isLast: Boolean,
+        onClick: () -> Unit
+    ) {
+        val chevronPainter = painterResource(id = R.drawable.chevron)
         Column(
             modifier = Modifier
+                .background(Color.White)
                 .fillMaxWidth()
                 .selectable(
                     selected = false,
                     onClick = onClick
                 )
         ) {
-            Text(
-                text = stringResource(id = feature.stringRes),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)
-            )
-            Divider()
+            Row {
+                Text(
+                    text = stringResource(id = feature.stringRes),
+                    color = Color.Black,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .weight(1.0f)
+                        .padding(vertical = 16.dp, horizontal = 20.dp)
+                )
+                Icon(
+                    painter = chevronPainter,
+                    contentDescription = null,
+                    tint = chevronTint,
+                    modifier = Modifier
+                        .size(14.dp)
+                        .align(Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.size(20.dp))
+            }
+            if (!isLast) {
+                Divider(
+                    color = backgroundColor,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
+    }
+
+    @Composable
+    fun FeatureGroupHeader(text: String) {
+        Spacer(modifier = Modifier.size(24.dp))
+        Text(
+            text = text,
+            color = featureTitleColor,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(modifier = Modifier.size(12.dp))
     }
 }
