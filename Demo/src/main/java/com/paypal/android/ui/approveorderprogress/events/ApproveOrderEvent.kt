@@ -50,7 +50,7 @@ sealed class ApproveOrderEvent : ComposableEvent {
         }
     }
 
-    class PaymentTokenSuccess(private val paymentToken: PaymentToken): ApproveOrderEvent() {
+    class PaymentTokenSuccess(private val paymentToken: PaymentToken) : ApproveOrderEvent() {
         @Composable
         override fun AsComposable() {
             PaymentTokenSuccessView(paymentToken = paymentToken)

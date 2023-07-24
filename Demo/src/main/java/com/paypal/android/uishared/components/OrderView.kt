@@ -31,7 +31,6 @@ fun OrderView(order: Order) {
     }
 }
 
-
 @Preview
 @Composable
 fun OrderPreview() {
