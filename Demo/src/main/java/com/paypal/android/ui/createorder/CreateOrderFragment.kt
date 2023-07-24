@@ -33,8 +33,8 @@ import com.paypal.android.api.model.Payee
 import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.features.Feature
 import com.paypal.android.ui.stringResourceListOf
 import dagger.hilt.android.AndroidEntryPoint
@@ -144,24 +144,16 @@ class CreateOrderFragment : Fragment() {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Feature: ${stringResource(feature.stringRes)}",
-                style = MaterialTheme.typography.headlineSmall
+                text = "The ${stringResource(feature.stringRes)} payment method requires an order to proceed.",
+                style = MaterialTheme.typography.titleLarge
             )
             Text(text = uiState.statusText)
-            WireframeOptionDropDown(
-                hint = stringResource(id = R.string.intent_title),
-                value = uiState.intentOption,
-                expanded = uiState.intentOptionExpanded,
+            OptionList(
+                title = stringResource(id = R.string.intent_title),
                 options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                onExpandedChange = { expanded ->
-                    viewModel.intentOptionExpanded = expanded
-                },
-                onValueChange = { value ->
-                    viewModel.intentOption = value
-                    viewModel.intentOptionExpanded = false
+                selectedOption = uiState.intentOption,
+                onOptionSelected = { option ->
+                    viewModel.intentOption = option
                 }
             )
             WireframeButton(

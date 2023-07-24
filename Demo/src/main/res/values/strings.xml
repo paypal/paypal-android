@@ -41,7 +41,7 @@
     <string name="select_shape">Select Shape</string>
     <string name="select_size">Select Size</string>
 
-    <string name="intent_title">INTENT</string>
+    <string name="intent_title">Intent</string>
     <string name="intent_authorize">AUTHORIZE</string>
     <string name="intent_capture">CAPTURE</string>
 

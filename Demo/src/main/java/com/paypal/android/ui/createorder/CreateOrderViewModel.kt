@@ -15,12 +15,6 @@ class CreateOrderViewModel : ViewModel() {
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    var intentOptionExpanded: Boolean
-        get() = _uiState.value.intentOptionExpanded
-        set(value) {
-            _uiState.update { it.copy(intentOptionExpanded = value) }
-        }
-
     fun updateStatusText(statusText: String) {
         _uiState.update { currentState ->
             currentState.copy(statusText = statusText)
