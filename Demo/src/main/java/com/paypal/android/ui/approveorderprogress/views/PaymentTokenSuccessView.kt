@@ -13,11 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.paypal.android.cardpayments.VaultResult
+import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.uishared.components.Property
 
 @Composable
-fun VaultSuccessView(vaultResult: VaultResult) {
+fun PaymentTokenSuccessView(paymentToken: PaymentToken) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -28,12 +28,13 @@ fun VaultSuccessView(vaultResult: VaultResult) {
                 .padding(horizontal = 16.dp)
         ) {
             Text(
-                text = "Vault Result",
+                text = "Payment Token Result",
                 style = MaterialTheme.typography.titleLarge,
             )
-            Property(name = "Status", value = vaultResult.status)
-            Property(name = "Setup Token ID", value = vaultResult.setupTokenId)
-            Property(name = "Customer ID", value = vaultResult.customerId)
+            Property(name = "Payment Token", value = paymentToken.id)
+            Property(name = "Customer ID", value = paymentToken.customerId)
+            Property(name = "Card Last 4", value = paymentToken.cardLast4)
+            Property(name = "Card Brand", value = paymentToken.cardBrand)
         }
         Spacer(modifier = Modifier.size(16.dp))
     }
@@ -41,11 +42,11 @@ fun VaultSuccessView(vaultResult: VaultResult) {
 
 @Preview
 @Composable
-fun VaultSuccessViewPreview() {
-    val vaultResult = VaultResult("fake-status", "fake-setup-token-id", "fake-customer-id")
+fun PaymentTokenSuccessViewPreview() {
+    val paymentToken = PaymentToken("fake-id", "fake-customer-id", "1234", "fake-brand")
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            VaultSuccessView(vaultResult)
+            PaymentTokenSuccessView(paymentToken)
         }
     }
 }

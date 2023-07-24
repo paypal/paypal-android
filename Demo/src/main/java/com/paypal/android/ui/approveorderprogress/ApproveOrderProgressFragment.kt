@@ -135,9 +135,15 @@ class ApproveOrderProgressFragment : Fragment() {
 
     private fun executeVaultRequest(vaultRequest: VaultRequest) {
         cardClient.vaultListener = object : VaultListener {
-            override fun onVaultSuccess(result: VaultResult) {
+            override fun onVaultSuccess(vaultResult: VaultResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Vault Successful"))
-                viewModel.appendEventToLog(ApproveOrderEvent.VaultSuccess(result))
+                viewModel.appendEventToLog(ApproveOrderEvent.VaultSuccess(vaultResult))
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.appendEventToLog(ApproveOrderEvent.Message("Creating a Payment Token..."))
+                    val paymentToken = sdkSampleServerAPI.createPaymentToken(vaultResult)
+                    viewModel.appendEventToLog(ApproveOrderEvent.PaymentTokenSuccess(paymentToken))
+                }
             }
         }
 
