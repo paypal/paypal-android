@@ -36,8 +36,8 @@ The proposed GraphQL refactor will make the code less DRY in some ways, but the 
 
 We will also gain more flexibility by removing abstraction through generics, since the API layer will now have access to the full `HttpRequest` object.
 
-[1]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/test/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQueryTest.kt#L12
-[2]: https://github.com/paypal/Android-SDK/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/main/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQuery.kt#L10
+[1]: https://github.com/paypal/paypal-android/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/test/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQueryTest.kt#L12
+[2]: https://github.com/paypal/paypal-android/blob/1fa0b256c00dc0b95872c21cc4865e6f58d4dd88/CorePayments/src/main/java/com/paypal/android/corepayments/graphql/fundingEligibility/FundingEligibilityQuery.kt#L10
 [3]: https://www.baeldung.com/cs/layered-architecture
 [4]: https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/
 [5]: https://www.apollographql.com/docs/react/data/operation-best-practices/#use-graphql-variables-to-provide-arguments
@@ -46,4 +46,4 @@ We will also gain more flexibility by removing abstraction through generics, sin
 [8]: https://refactoring.guru/design-patterns/strategy
 [9]: https://www.swiftbysundell.com/basics/codable/
 [10]: https://martinfowler.com/bliki/ValueObject.html
-[11]: https://github.com/paypal/Android-SDK/blob/71dcb84d08fd9be88d1df9c404b812d636678891/CorePayments/src/main/java/com/paypal/android/corepayments/api/EligibilityAPI.kt#L21
+[11]: https://github.com/paypal/paypal-android/blob/71dcb84d08fd9be88d1df9c404b812d636678891/CorePayments/src/main/java/com/paypal/android/corepayments/api/EligibilityAPI.kt#L21

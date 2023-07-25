@@ -1,6 +1,6 @@
 # PayPal Mobile Checkout SDK: Migration Guide
 
-This guide outlines how to update your integration from using the soon-to-be-deprecated [PayPal Mobile Checkout SDK](https://developer.paypal.com/limited-release/paypal-mobile-checkout/) to the new PayPal Mobile [Android SDK](https://github.com/paypal/Android-SDK/).
+This guide outlines how to update your integration from using the soon-to-be-deprecated [PayPal Mobile Checkout SDK](https://developer.paypal.com/limited-release/paypal-mobile-checkout/) to the new PayPal Mobile [Android SDK](https://github.com/paypal/paypal-android/).
 
 ## Pre-Requisites
 In order to use this migration guide, you must:
@@ -17,7 +17,7 @@ In order to use this migration guide, you must:
 
 1. Add the new SDK to your app
 
-    Add the PayPal SDK to your app-level build.gradle file. See the [CHANGELOG](https://github.com/paypal/Android-SDK/blob/main/CHANGELOG.md) for the most recent version.
+    Add the PayPal SDK to your app-level build.gradle file. See the [CHANGELOG](https://github.com/paypal/paypal-android/blob/main/CHANGELOG.md) for the most recent version.
 
     ```
     dependencies {

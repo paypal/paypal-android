@@ -49,5 +49,5 @@ Feature Clients will have a dependency on each microservice they use. A side eff
 1. A decrease in code coverage until we pick a suitable dependency injection framework
 
 [1]: https://nakabonne.dev/posts/depth-of-module/
-[2]: https://github.com/paypal/Android-SDK/blob/da0f20c22b0c958f6f5b97a78e4d0814484d5ff2/CorePayments/src/main/java/com/paypal/android/corepayments/HttpRequestFactory.kt#L7
+[2]: https://github.com/paypal/paypal-android/blob/da0f20c22b0c958f6f5b97a78e4d0814484d5ff2/CorePayments/src/main/java/com/paypal/android/corepayments/HttpRequestFactory.kt#L7
 
