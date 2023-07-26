@@ -11,7 +11,6 @@ import kotlinx.parcelize.Parcelize
  * @property card   Card used for payment
  * @property returnUrl Url to return to app after SCA challenge finishes
  * @property sca Specify to always launch 3DS or only when required. Defaults to `SCA.SCA_WHEN_REQUIRED`.
- * @property vault [Vault] object with options for payment method vaulting
  */
 @Parcelize
 data class CardRequest @JvmOverloads constructor(
@@ -19,5 +18,4 @@ data class CardRequest @JvmOverloads constructor(
     val card: Card,
     val returnUrl: String,
     val sca: SCA = SCA.SCA_WHEN_REQUIRED,
-    val vault: Vault? = null
 ) : Parcelable
