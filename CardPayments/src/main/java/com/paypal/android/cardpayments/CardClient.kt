@@ -49,16 +49,16 @@ class CardClient internal constructor(
      * @param activity [FragmentActivity] activity used to start 3DS flow (if requested)
      * @param cardRequest [CardRequest] for requesting an order approval
      */
-    fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
+    fun approveOrder(cardRequest: CardRequest) {
         orderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
-            confirmPaymentSource(activity, cardRequest)
+            confirmPaymentSource(cardRequest)
         }
     }
 
-    private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
+    private suspend fun confirmPaymentSource(cardRequest: CardRequest) {
         try {
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
             analyticsService.sendAnalyticsEvent(

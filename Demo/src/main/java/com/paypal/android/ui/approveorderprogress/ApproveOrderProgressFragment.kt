@@ -147,7 +147,7 @@ class ApproveOrderProgressFragment : Fragment() {
         viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
 
         // approve order using card request
-        cardClient.approveOrder(requireActivity(), cardRequest)
+        cardClient.approveOrder(cardRequest)
     }
 
     @ExperimentalMaterial3Api
