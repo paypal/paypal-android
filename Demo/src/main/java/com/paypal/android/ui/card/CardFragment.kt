@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +47,7 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.Vault
+import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
@@ -138,12 +137,13 @@ class CardFragment : Fragment() {
     }
 
     private fun sendVaultRequest() {
-        // TODO: implement vault without purchase
-        AlertDialog.Builder(requireContext())
-            .setTitle("TODO")
-            .setMessage("Implement Vault Without Purchase")
-            .setPositiveButton("OK") { _, _ -> }
-            .show()
+        val uiState = viewModel.uiState.value
+        val card = parseCard(uiState)
+        val customerId = uiState.customerId
+        val vaultRequest = VaultRequest(card, APP_RETURN_URL, customerId)
+        findNavController().navigate(
+            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
+        )
     }
 
     @OptIn(ExperimentalComposeUiApi::class)

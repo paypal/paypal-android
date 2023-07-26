@@ -1,6 +1,7 @@
 package com.paypal.android.api.services
 
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
@@ -120,11 +121,16 @@ class SDKSampleServerAPI {
     } ?: findService(merchantIntegration).createOrder(orderRequest)
 
     suspend fun createOrder(
-        jsonObject: JsonObject,
+        orderRequest: JSONObject,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ) = DEFAULT_ORDER_ID?.let {
-        Order(it, "CREATED")
-    } ?: findService(merchantIntegration).createOrder(jsonObject)
+    ): Order {
+        if (DEFAULT_CLIENT_ID == null) {
+            return Order(DEFAULT_CLIENT_ID, "CREATED")
+        }
+
+        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
+        return findService(merchantIntegration).createOrder(body)
+    }
 
     suspend fun createOrder(
         orderRequest: OrderRequest,
