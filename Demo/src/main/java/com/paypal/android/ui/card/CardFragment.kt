@@ -47,7 +47,6 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.OptionList
