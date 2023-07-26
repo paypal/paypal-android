@@ -94,6 +94,7 @@ class ApproveOrderProgressFragment : Fragment() {
                     val cardClient = getCardClient()
                     cardClient.continueApproveOrder(authChallengeResult)
                 }
+                cardAuthChallengeLauncher.clearResult(requireContext())
             }
     }
 

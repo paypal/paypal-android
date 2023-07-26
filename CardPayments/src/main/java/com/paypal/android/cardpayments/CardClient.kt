@@ -28,8 +28,6 @@ class CardClient internal constructor(
         notifyApproveOrderFailure(it)
     }
 
-    private var orderId: String? = null
-
     /**
      *  CardClient constructor
      *
@@ -49,7 +47,7 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(cardRequest: CardRequest) {
-        orderId = cardRequest.orderId
+        val orderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
@@ -71,7 +69,7 @@ class CardClient internal constructor(
             } else {
                 analyticsService.sendAnalyticsEvent(
                     "card-payments:3ds:confirm-payment-source:challenge-required",
-                    orderId
+                    response.orderId
                 )
 
                 // TODO: throw error if parsing fails
@@ -94,12 +92,12 @@ class CardClient internal constructor(
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", result.orderId)
         approveOrderListener?.onApproveOrderSuccess(result)
     }
 
     private fun notifyApproveOrderFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", null)
         approveOrderListener?.onApproveOrderFailure(error)
     }
 
@@ -127,7 +125,7 @@ class CardClient internal constructor(
             // or when cancelled
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:challenge:user-canceled",
-                orderId
+                authChallengeResult.orderId
             )
             approveOrderListener?.onApproveOrderCanceled()
         }
