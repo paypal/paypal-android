@@ -1,7 +1,6 @@
 package com.paypal.android.api.services
 
 import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
@@ -185,33 +184,18 @@ class SDKSampleServerAPI {
         )
     }
 
+    // TODO: remove suppress statement when implementation is done
+    @Suppress("UnusedPrivateMember")
     suspend fun createPaymentToken(
         vaultResult: VaultResult,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): PaymentToken {
-        // language=JSON
-        val request = """
-            {
-              "payment_source": {
-                "token": {
-                  "id": ${vaultResult.setupTokenId},
-                  "type": "SETUP_TOKEN"
-                }
-              }
-            }
-        """.trimIndent()
-        val requestJSON = JsonParser.parseString(request) as JsonObject
-        val response = findService(merchantIntegration).createPaymentToken(requestJSON)
-        val responseJSON = JSONObject(response.string())
-
-        val customerJSON = responseJSON.getJSONObject("customer")
-        val cardJSON = responseJSON.getJSONObject("payment_source").getJSONObject("card")
 
         return PaymentToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            cardLast4 = cardJSON.getString("last_digits"),
-            cardBrand = cardJSON.getString("brand")
+            id = "fake-id",
+            customerId = "fake-customer-id",
+            cardLast4 = "fake-card-last-4",
+            cardBrand = "fake-card-brand"
         )
     }
 }
