@@ -101,7 +101,7 @@ class CreateOrderFragment : Fragment() {
 
             val orderRequest = JSONObject()
                 .put("intent", orderIntent)
-                .put("purchase_units", JSONArray(purchaseUnitJSON))
+                .put("purchase_units", JSONArray().put(purchaseUnitJSON))
 
             if (uiState.shouldVault) {
                 val vaultJSON = JSONObject()

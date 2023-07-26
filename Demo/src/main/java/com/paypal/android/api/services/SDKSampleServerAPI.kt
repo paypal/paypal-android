@@ -129,8 +129,8 @@ class SDKSampleServerAPI {
         orderRequest: JSONObject,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order {
-        if (DEFAULT_CLIENT_ID == null) {
-            return Order(DEFAULT_CLIENT_ID, "CREATED")
+        if (DEFAULT_ORDER_ID != null) {
+            return Order(DEFAULT_ORDER_ID, "CREATED")
         }
 
         val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
