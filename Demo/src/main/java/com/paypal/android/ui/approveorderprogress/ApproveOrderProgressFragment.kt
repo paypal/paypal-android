@@ -61,7 +61,7 @@ class ApproveOrderProgressFragment : Fragment() {
     private val args: ApproveOrderProgressFragmentArgs by navArgs()
     private val viewModel by viewModels<ApproveOrderProgressViewModel>()
 
-    private var _cardClient: CardClient? = null
+    lateinit private var cardClient: CardClient
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -69,9 +69,40 @@ class ApproveOrderProgressFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            executeCardRequestFromArgs()
+
+        // setup card client
+        val configuration = CoreConfig(clientId = sdkSampleServerAPI.clientId)
+        cardClient = CardClient(requireActivity(), configuration)
+        cardClient.approveOrderListener = object : ApproveOrderListener {
+            override fun onApproveOrderSuccess(result: CardResult) {
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
+                viewModel.appendEventToLog(ApproveOrderEvent.ApproveSuccess(result))
+                viewLifecycleOwner.lifecycleScope.launch {
+                    finishOrder(result)
+                }
+            }
+
+            override fun onApproveOrderFailure(error: PayPalSDKError) {
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("CAPTURE fail: ${error.errorDescription}"))
+            }
+
+            override fun onApproveOrderCanceled() {
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("USER CANCELED"))
+            }
+
+            override fun didReceiveAuthChallenge(authChallenge: CardAuthChallenge) {
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
+                cardAuthChallengeLauncher.launch(requireActivity(), authChallenge)
+            }
+
+            override fun onApproveOrderThreeDSecureDidFinish() {
+                viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
+            }
         }
+
+        // kick off request
+        executeCardRequestFromArgs()
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -91,55 +122,15 @@ class ApproveOrderProgressFragment : Fragment() {
         cardAuthChallengeLauncher.parseResult(requireContext(), intent)
             ?.let { authChallengeResult ->
                 viewLifecycleOwner.lifecycleScope.launch {
-                    val cardClient = getCardClient()
                     cardClient.continueApproveOrder(authChallengeResult)
                 }
                 cardAuthChallengeLauncher.clearResult(requireContext())
             }
     }
 
-    private suspend fun getCardClient(): CardClient {
-        if (_cardClient == null) {
-            val clientId = sdkSampleServerAPI.fetchClientId()
-
-            val configuration = CoreConfig(clientId = clientId)
-            _cardClient = CardClient(requireActivity(), configuration)
-
-            _cardClient!!.approveOrderListener = object : ApproveOrderListener {
-                override fun onApproveOrderSuccess(result: CardResult) {
-                    viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
-                    viewModel.appendEventToLog(ApproveOrderEvent.ApproveSuccess(result))
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        finishOrder(result)
-                    }
-                }
-
-                override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    viewModel.appendEventToLog(ApproveOrderEvent.Message("CAPTURE fail: ${error.errorDescription}"))
-                }
-
-                override fun onApproveOrderCanceled() {
-                    viewModel.appendEventToLog(ApproveOrderEvent.Message("USER CANCELED"))
-                }
-
-                override fun didReceiveAuthChallenge(authChallenge: CardAuthChallenge) {
-                    viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
-                    cardAuthChallengeLauncher.launch(requireActivity(), authChallenge)
-                }
-
-                override fun onApproveOrderThreeDSecureDidFinish() {
-                    viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
-                }
-            }
-        }
-        return _cardClient!!
-    }
-
-    private suspend fun executeCardRequestFromArgs() {
+    private fun executeCardRequestFromArgs() {
         val cardRequest = args.cardRequest
-
         viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
-        val cardClient = getCardClient()
 
         dataCollectorHandler.setLogging(true)
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)

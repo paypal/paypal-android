@@ -136,8 +136,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         lifecycleScope.launch {
             try {
                 binding.statusText.setText(R.string.getting_client_id)
-                val clientId = sdkSampleServerAPI.fetchClientId()
-                val coreConfig = CoreConfig(clientId)
+                val coreConfig = CoreConfig(sdkSampleServerAPI.clientId)
                 paypalClient =
                     PayPalWebCheckoutClient(
                         requireActivity(),
