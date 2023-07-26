@@ -280,9 +280,7 @@ class CardFragment : Fragment() {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
-
-        val vault = if (uiState.shouldVault) Vault(customerId = uiState.customerId) else null
-        return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
+        return CardRequest(order.id!!, card, APP_RETURN_URL, sca)
     }
 
     private fun parseCard(uiState: CardViewUiState): Card {

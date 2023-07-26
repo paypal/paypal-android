@@ -35,20 +35,6 @@ internal class CardRequestFactory {
         val attributesJSON = JSONObject()
             .put("verification", verificationJSON)
 
-        cardRequest.vault?.let { vault ->
-            val vaultJSON = JSONObject()
-                .put("store_in_vault", "ON_SUCCESS")
-            attributesJSON.put("vault", vaultJSON)
-
-            vault.customerId?.let { customerId ->
-                if (customerId.isNotEmpty()) {
-                    val customerJSON = JSONObject()
-                        .put("id", customerId)
-                    attributesJSON.put("customer", customerJSON)
-                }
-            }
-        }
-
         cardJSON.put("attributes", attributesJSON)
 
         val returnUrl = cardRequest.returnUrl
