@@ -81,6 +81,16 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         args.prefillCard?.card?.let { viewModel.prefillCard(it) }
+
+        val feature = args.feature
+        if (feature == Feature.CARD_VAULT) {
+            // the vault api only has the 'when required' option
+            viewModel.shouldVault = true
+            viewModel.scaOption = "WHEN REQUIRED"
+        } else {
+            viewModel.scaOption = "ALWAYS"
+        }
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -171,7 +181,7 @@ class CardFragment : Fragment() {
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(8.dp))
-            ApproveOrderForm(uiState)
+            OptionsForm(uiState)
             Spacer(modifier = Modifier.weight(1.0f))
             WireframeButton(
                 text = "CREATE & APPROVE ORDER",
@@ -228,26 +238,33 @@ class CardFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun ApproveOrderForm(uiState: CardViewUiState) {
+    fun OptionsForm(uiState: CardViewUiState) {
         val localFocusManager = LocalFocusManager.current
+        val scaOptions = if (args.feature == Feature.CARD_VAULT) {
+            stringResourceListOf(R.string.sca_when_required)
+        } else {
+            stringResourceListOf(R.string.sca_always, R.string.sca_when_required)
+        }
         OptionList(
             title = stringResource(id = R.string.sca_title),
-            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
+            options = scaOptions,
             selectedOption = uiState.scaOption,
             onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
         )
         Spacer(modifier = Modifier.size(16.dp))
-        Row {
-            Text(
-                text = "Should Vault",
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(1.0f)
-            )
-            Switch(
-                checked = uiState.shouldVault,
-                onCheckedChange = { shouldVault -> viewModel.shouldVault = shouldVault }
-            )
+        if (args.feature != Feature.CARD_VAULT) {
+            Row {
+                Text(
+                    text = "Should Vault",
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1.0f)
+                )
+                Switch(
+                    checked = uiState.shouldVault,
+                    onCheckedChange = { shouldVault -> viewModel.shouldVault = shouldVault }
+                )
+            }
         }
         OutlinedTextField(
             value = uiState.customerId,
