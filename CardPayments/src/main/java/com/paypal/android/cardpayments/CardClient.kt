@@ -1,7 +1,7 @@
 package com.paypal.android.cardpayments
 
+import android.content.Context
 import android.net.Uri
-import androidx.fragment.app.FragmentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
@@ -33,13 +33,13 @@ class CardClient internal constructor(
     /**
      *  CardClient constructor
      *
-     *  @param [activity] Activity that launches the card client
+     *  @param [context] Android context
      *  @param [configuration] Configuration parameters for client
      */
-    constructor(activity: FragmentActivity, configuration: CoreConfig) :
+    constructor(context: Context, configuration: CoreConfig) :
             this(
                 CheckoutOrdersAPI(configuration),
-                AnalyticsService(activity.applicationContext, configuration),
+                AnalyticsService(context.applicationContext, configuration),
                 Dispatchers.Main
             )
 
