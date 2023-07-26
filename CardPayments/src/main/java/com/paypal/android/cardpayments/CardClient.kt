@@ -46,7 +46,6 @@ class CardClient internal constructor(
     /**
      * Confirm [Card] payment source for an order.
      *
-     * @param activity [FragmentActivity] activity used to start 3DS flow (if requested)
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(cardRequest: CardRequest) {
