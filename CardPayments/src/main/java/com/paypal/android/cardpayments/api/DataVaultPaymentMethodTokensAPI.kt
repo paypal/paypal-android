@@ -2,13 +2,11 @@ package com.paypal.android.cardpayments.api
 
 import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
-import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.HttpMethod
-import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.RestClient
-import org.json.JSONObject
 
+// TODO: remove suppress statement when implementation is done
+@Suppress("UnusedPrivateMember")
 internal class DataVaultPaymentMethodTokensAPI(
     private val restClient: RestClient
 ) {
