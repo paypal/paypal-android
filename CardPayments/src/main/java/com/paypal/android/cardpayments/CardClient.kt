@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
  * Use this client to approve an order with a [Card].
  */
 class CardClient internal constructor(
-    activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
@@ -28,8 +27,6 @@ class CardClient internal constructor(
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
-
-    private val lifeCycleObserver = CardLifeCycleObserver(this)
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         notifyApproveOrderFailure(it)
@@ -45,16 +42,11 @@ class CardClient internal constructor(
      */
     constructor(activity: FragmentActivity, configuration: CoreConfig) :
             this(
-                activity,
                 CheckoutOrdersAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
             )
-
-    init {
-        activity.lifecycle.addObserver(lifeCycleObserver)
-    }
 
     /**
      * Confirm [Card] payment source for an order.
@@ -105,44 +97,6 @@ class CardClient internal constructor(
             )
             throw error
         }
-    }
-
-    internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        val browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        if (browserSwitchResult != null && approveOrderListener != null) {
-            approveOrderListener?.onApproveOrderThreeDSecureDidFinish()
-            when (browserSwitchResult.status) {
-                BrowserSwitchStatus.SUCCESS -> handleBrowserSwitchSuccess(browserSwitchResult)
-                BrowserSwitchStatus.CANCELED -> notifyApproveOrderCanceled()
-            }
-        }
-    }
-
-    private fun handleBrowserSwitchSuccess(browserSwitchResult: BrowserSwitchResult) {
-        ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
-            CoroutineScope(dispatcher).launch(exceptionHandler) {
-                try {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:get-order-info:succeeded",
-                        metadata.orderId
-                    )
-                    val deepLinkUrl = browserSwitchResult.deepLinkUrl
-                    val result = CardResult(metadata.orderId, deepLinkUrl)
-                    notifyApproveOrderSuccess(result)
-                } catch (error: PayPalSDKError) {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:get-order-info:failed",
-                        metadata.orderId
-                    )
-                    throw error
-                }
-            }
-        }
-    }
-
-    private fun notifyApproveOrderCanceled() {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
-        approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {

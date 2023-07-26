@@ -171,7 +171,6 @@ class CardClientUnitTest {
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(
-            activity,
             checkoutOrdersAPI,
             analyticsService,
             browserSwitchClient,
