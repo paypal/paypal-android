@@ -173,7 +173,6 @@ class CardClientUnitTest {
         val sut = CardClient(
             checkoutOrdersAPI,
             analyticsService,
-            browserSwitchClient,
             dispatcher
         )
         sut.approveOrderListener = approveOrderListener

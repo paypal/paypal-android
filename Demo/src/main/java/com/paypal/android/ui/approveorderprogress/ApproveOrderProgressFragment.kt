@@ -123,6 +123,7 @@ class ApproveOrderProgressFragment : Fragment() {
 
                 override fun didReceiveAuthChallenge(authChallenge: CardAuthChallenge) {
                     viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
+                    cardAuthChallengeLauncher.launch(requireActivity(), authChallenge)
                 }
 
                 override fun onApproveOrderThreeDSecureDidFinish() {

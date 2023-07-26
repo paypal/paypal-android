@@ -2,9 +2,6 @@ package com.paypal.android.cardpayments
 
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchResult
-import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
@@ -22,7 +19,6 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val analyticsService: AnalyticsService,
-    private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -44,7 +40,6 @@ class CardClient internal constructor(
             this(
                 CheckoutOrdersAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
-                BrowserSwitchClient(),
                 Dispatchers.Main
             )
 
