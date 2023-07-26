@@ -82,7 +82,6 @@ class CardFragment : Fragment() {
         val feature = args.feature
         if (feature == Feature.CARD_VAULT) {
             // the vault api only has the 'when required' option
-            viewModel.shouldVault = true
             viewModel.scaOption = "WHEN REQUIRED"
         } else {
             viewModel.scaOption = "ALWAYS"
@@ -139,8 +138,7 @@ class CardFragment : Fragment() {
     private fun sendVaultRequest() {
         val uiState = viewModel.uiState.value
         val card = parseCard(uiState)
-        val customerId = uiState.customerId
-        val vaultRequest = VaultRequest(card, APP_RETURN_URL, customerId)
+        val vaultRequest = VaultRequest(card, APP_RETURN_URL)
         findNavController().navigate(
             CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
         )
@@ -248,29 +246,6 @@ class CardFragment : Fragment() {
             options = scaOptions,
             selectedOption = uiState.scaOption,
             onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        if (args.feature != Feature.CARD_VAULT) {
-            Row {
-                Text(
-                    text = "Should Vault",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1.0f)
-                )
-                Switch(
-                    checked = uiState.shouldVault,
-                    onCheckedChange = { shouldVault -> viewModel.shouldVault = shouldVault }
-                )
-            }
-        }
-        OutlinedTextField(
-            value = uiState.customerId,
-            label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
-            onValueChange = { value -> viewModel.customerId = value },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
-            modifier = Modifier.fillMaxWidth()
         )
     }
 
