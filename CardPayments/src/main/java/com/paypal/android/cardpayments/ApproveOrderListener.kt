@@ -33,7 +33,7 @@ interface ApproveOrderListener {
      * Called when the 3DS challenge will launch.
      */
     @MainThread
-    fun onApproveOrderThreeDSecureWillLaunch()
+    fun didReceiveAuthChallenge(authChallenge: CardAuthChallenge)
 
     /**
      * Called when the 3DS challenge has finished.

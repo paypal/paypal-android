@@ -88,18 +88,16 @@ class CardClient internal constructor(
                     "card-payments:3ds:confirm-payment-source:challenge-required",
                     orderId
                 )
-                approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
-                // launch the 3DS flow
-                val urlScheme = cardRequest.run { Uri.parse(returnUrl).scheme }
+                // TODO: throw error if parsing fails
                 val approveOrderMetadata =
                     ApproveOrderMetadata(cardRequest.orderId, response.paymentSource)
-                val options = BrowserSwitchOptions()
-                    .url(Uri.parse(response.payerActionHref))
-                    .returnUrlScheme(urlScheme)
-                    .metadata(approveOrderMetadata.toJSON())
-
-                browserSwitchClient.start(activity, options)
+                val authChallenge = CardAuthChallenge(
+                    Uri.parse(response.payerActionHref),
+                    Uri.parse(cardRequest.returnUrl),
+                    approveOrderMetadata
+                )
+                approveOrderListener?.didReceiveAuthChallenge(authChallenge)
             }
         } catch (error: PayPalSDKError) {
             analyticsService.sendAnalyticsEvent(
@@ -156,5 +154,35 @@ class CardClient internal constructor(
     private fun notifyApproveOrderFailure(error: PayPalSDKError) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
         approveOrderListener?.onApproveOrderFailure(error)
+    }
+
+    fun continueApproveOrder(authChallengeResult: CardAuthChallengeResult2) {
+        if (authChallengeResult is CardAuthChallengeSuccess) {
+            val metadata = authChallengeResult.approveOrderMetadata
+            CoroutineScope(dispatcher).launch(exceptionHandler) {
+                try {
+                    analyticsService.sendAnalyticsEvent(
+                        "card-payments:3ds:get-order-info:succeeded",
+                        metadata.orderId
+                    )
+                    val deepLinkUrl = authChallengeResult.deepLinkUrl
+                    val result = CardResult(metadata.orderId, deepLinkUrl)
+                    notifyApproveOrderSuccess(result)
+                } catch (error: PayPalSDKError) {
+                    analyticsService.sendAnalyticsEvent(
+                        "card-payments:3ds:get-order-info:failed",
+                        metadata.orderId
+                    )
+                    throw error
+                }
+            }
+        } else if (authChallengeResult is CardAuthChallengeError) {
+            // or when cancelled
+            analyticsService.sendAnalyticsEvent(
+                "card-payments:3ds:challenge:user-canceled",
+                orderId
+            )
+            approveOrderListener?.onApproveOrderCanceled()
+        }
     }
 }
