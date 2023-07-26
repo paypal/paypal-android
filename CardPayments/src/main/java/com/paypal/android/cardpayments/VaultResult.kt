@@ -1,3 +1,3 @@
 package com.paypal.android.cardpayments
 
-data class VaultResult(val status: String, val setupTokenId: String, val customerId: String)
+data class VaultResult(val status: String, val setupTokenId: String)

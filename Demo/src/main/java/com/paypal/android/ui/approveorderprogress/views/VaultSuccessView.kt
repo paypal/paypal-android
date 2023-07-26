@@ -33,7 +33,6 @@ fun VaultSuccessView(vaultResult: VaultResult) {
             )
             PropertyView(name = "Status", value = vaultResult.status)
             PropertyView(name = "Setup Token ID", value = vaultResult.setupTokenId)
-            PropertyView(name = "Customer ID", value = vaultResult.customerId)
         }
         Spacer(modifier = Modifier.size(16.dp))
     }
@@ -42,7 +41,7 @@ fun VaultSuccessView(vaultResult: VaultResult) {
 @Preview
 @Composable
 fun VaultSuccessViewPreview() {
-    val vaultResult = VaultResult("fake-status", "fake-setup-token-id", "fake-customer-id")
+    val vaultResult = VaultResult("fake-status", "fake-setup-token-id")
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
             VaultSuccessView(vaultResult)
