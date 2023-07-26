@@ -1,4 +1,4 @@
 package com.paypal.android.cardpayments
 
-interface CardAuthChallengeResult2 {
+interface CardAuthChallengeResult {
 }

@@ -3,7 +3,6 @@ package com.paypal.android.cardpayments
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
@@ -156,7 +155,7 @@ class CardClient internal constructor(
         approveOrderListener?.onApproveOrderFailure(error)
     }
 
-    fun continueApproveOrder(authChallengeResult: CardAuthChallengeResult2) {
+    fun continueApproveOrder(authChallengeResult: CardAuthChallengeResult) {
         if (authChallengeResult is CardAuthChallengeSuccess) {
             val metadata = authChallengeResult.approveOrderMetadata
             CoroutineScope(dispatcher).launch(exceptionHandler) {

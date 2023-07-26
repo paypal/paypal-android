@@ -9,7 +9,7 @@ class CardAuthChallengeLauncher internal constructor(
 ) {
     constructor() : this(BrowserSwitchClient())
 
-    fun getResult(activity: FragmentActivity): CardAuthChallengeResult2? {
+    fun getResult(activity: FragmentActivity): CardAuthChallengeResult? {
         return null
 //        val browserSwitchResult = browserSwitchClient.deliverResult(activity)
 //        if (browserSwitchResult != null) {
