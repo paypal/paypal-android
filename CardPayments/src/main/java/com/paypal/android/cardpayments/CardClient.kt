@@ -7,7 +7,6 @@ import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
-import com.paypal.android.cardpayments.api.DataVaultPaymentMethodTokensAPI
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
@@ -24,14 +23,12 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
-    private val dataVaultPaymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
-    var vaultListener: VaultListener? = null
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
@@ -51,7 +48,6 @@ class CardClient internal constructor(
             this(
                 activity,
                 CheckoutOrdersAPI(configuration),
-                DataVaultPaymentMethodTokensAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
@@ -73,18 +69,6 @@ class CardClient internal constructor(
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
-        }
-    }
-
-    /**
-     * Initiate vaulting for a Card payment method.
-     *
-     * NOTE: 3DS Challenge will occur when required.
-     */
-    fun vault(vaultRequest: VaultRequest) {
-        CoroutineScope(dispatcher).launch {
-            val result = dataVaultPaymentMethodTokensAPI.createSetupToken(vaultRequest)
-            vaultListener?.onVaultSuccess(result)
         }
     }
 

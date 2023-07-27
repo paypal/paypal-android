@@ -48,7 +48,6 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.Vault
-import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
@@ -63,9 +62,7 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
-        // TODO: investigate why custom url-schemes don't work with the setup token endpoint
          const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
-//        const val APP_RETURN_URL = "https://example.com/returnUrl"
     }
 
     @Inject
@@ -139,13 +136,7 @@ class CardFragment : Fragment() {
     }
 
     private fun sendVaultRequest() {
-        val uiState = viewModel.uiState.value
-        val card = parseCard(uiState)
-        val customerId = uiState.customerId
-        val vaultRequest = VaultRequest(card, APP_RETURN_URL, customerId)
-        findNavController().navigate(
-            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
-        )
+        // TODO: send vault request
     }
 
     @OptIn(ExperimentalComposeUiApi::class)

@@ -31,9 +31,6 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.VaultListener
-import com.paypal.android.cardpayments.VaultRequest
-import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -77,10 +74,6 @@ class ApproveOrderProgressFragment : Fragment() {
 
             args.cardRequest?.let { cardRequest ->
                 executeCardRequest(cardRequest)
-            }
-
-            args.vaultRequest?.let { vaultRequest ->
-                executeVaultRequest(vaultRequest)
             }
         }
         return ComposeView(requireContext()).apply {
@@ -131,24 +124,6 @@ class ApproveOrderProgressFragment : Fragment() {
 
         // approve order using card request
         cardClient.approveOrder(requireActivity(), cardRequest)
-    }
-
-    private fun executeVaultRequest(vaultRequest: VaultRequest) {
-        cardClient.vaultListener = object : VaultListener {
-            override fun onVaultSuccess(vaultResult: VaultResult) {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("Vault Successful"))
-                viewModel.appendEventToLog(ApproveOrderEvent.VaultSuccess(vaultResult))
-
-                viewLifecycleOwner.lifecycleScope.launch {
-                    viewModel.appendEventToLog(ApproveOrderEvent.Message("Creating a Payment Token..."))
-                    val paymentToken = sdkSampleServerAPI.createPaymentToken(vaultResult)
-                    viewModel.appendEventToLog(ApproveOrderEvent.PaymentTokenSuccess(paymentToken))
-                }
-            }
-        }
-
-        viewModel.appendEventToLog(ApproveOrderEvent.Message("Vaulting Card..."))
-        cardClient.vault(vaultRequest)
     }
 
     @ExperimentalMaterial3Api

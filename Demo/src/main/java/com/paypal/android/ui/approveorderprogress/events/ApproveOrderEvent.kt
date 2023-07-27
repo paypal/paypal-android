@@ -2,15 +2,11 @@ package com.paypal.android.ui.approveorderprogress.events
 
 import androidx.compose.runtime.Composable
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.PaymentToken
-import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.ui.approveorderprogress.views.ApproveOrderSuccessView
 import com.paypal.android.ui.approveorderprogress.views.GetOrderView
 import com.paypal.android.ui.approveorderprogress.views.MessageView
 import com.paypal.android.ui.approveorderprogress.views.OrderCompleteView
-import com.paypal.android.ui.approveorderprogress.views.PaymentTokenSuccessView
-import com.paypal.android.ui.approveorderprogress.views.VaultSuccessView
 import com.paypal.android.uishared.events.ComposableEvent
 
 sealed class ApproveOrderEvent : ComposableEvent {
@@ -40,20 +36,6 @@ sealed class ApproveOrderEvent : ComposableEvent {
         @Composable
         override fun AsComposable() {
             OrderCompleteView(order = order)
-        }
-    }
-
-    class VaultSuccess(private val vaultResult: VaultResult) : ApproveOrderEvent() {
-        @Composable
-        override fun AsComposable() {
-            VaultSuccessView(vaultResult = vaultResult)
-        }
-    }
-
-    class PaymentTokenSuccess(private val paymentToken: PaymentToken) : ApproveOrderEvent() {
-        @Composable
-        override fun AsComposable() {
-            PaymentTokenSuccessView(paymentToken = paymentToken)
         }
     }
 }
