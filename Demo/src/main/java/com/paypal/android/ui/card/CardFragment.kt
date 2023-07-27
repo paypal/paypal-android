@@ -99,7 +99,8 @@ class CardFragment : Fragment() {
                         CardView(
                             feature = feature,
                             uiState = uiState,
-                            onFormSubmit = { onFormSubmit() })
+                            onFormSubmit = { onFormSubmit() }
+                        )
                     }
                 }
             }
