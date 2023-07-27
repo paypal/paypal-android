@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -136,7 +137,12 @@ class CardFragment : Fragment() {
     }
 
     private fun sendVaultRequest() {
-        // TODO: send vault request
+        // TODO: implement vault without purchase
+        AlertDialog.Builder(requireContext())
+            .setTitle("TODO")
+            .setMessage("Implement Vault Without Purchase")
+            .setPositiveButton("OK") { _, _ -> }
+            .show()
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
