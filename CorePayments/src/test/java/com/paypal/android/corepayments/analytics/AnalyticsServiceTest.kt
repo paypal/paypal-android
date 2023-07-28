@@ -107,7 +107,7 @@ class AnalyticsServiceTest {
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
-        assertEquals("live", analyticsEventData.environment)
+        assertEquals("production", analyticsEventData.environment)
     }
 
     private fun createAnalyticsService(

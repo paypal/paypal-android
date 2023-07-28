@@ -43,7 +43,7 @@ class AnalyticsService internal constructor(
             try {
                 val deviceData = deviceInspector.inspect()
                 val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
+                    if (environment == Environment.SANDBOX) "sandbox" else "production",
                     name,
                     timestamp,
                     orderId

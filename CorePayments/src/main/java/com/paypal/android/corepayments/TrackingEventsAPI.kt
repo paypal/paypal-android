@@ -65,7 +65,7 @@ class TrackingEventsAPI internal constructor(
         const val KEY_COMPONENT = "comp"
         const val KEY_DEVICE_MANUFACTURER = "device_manufacturer"
         const val KEY_DEVICE_MODEL = "mobile_device_model"
-        const val KEY_ENVIRONMENT = "merchant_app_environment"
+        const val KEY_ENVIRONMENT = "merchant_sdk_env"
         const val KEY_EVENT_NAME = "event_name"
         const val KEY_EVENT_SOURCE = "event_source"
         const val KEY_IS_SIMULATOR = "is_simulator"
