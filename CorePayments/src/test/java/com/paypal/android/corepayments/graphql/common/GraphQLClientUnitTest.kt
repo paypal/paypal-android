@@ -28,7 +28,6 @@ import java.net.URL
 internal class GraphQLClientUnitTest {
 
     private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
-    private val stagingConfig = CoreConfig("fake-client-id", Environment.STAGING)
     private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE)
 
     private val graphQLRequestBody = JSONObject("""{"fake":"json"}""")

@@ -41,24 +41,6 @@ class PayPalDataCollectorUnitTest {
     }
 
     @Test
-    fun `when environment is STAGING, magnes settings environment is STAGE`() {
-        val appGUID = UUID.randomUUID().toString()
-        val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
-        val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
-        val magnesSettingsSlot = slot<MagnesSettings>()
-
-        every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
-
-        val sut = PayPalDataCollector(PayPalDataCollectorEnvironment.STAGING, mockMagnesSDK, mockUUIDHelper)
-        sut.getClientMetadataId(mockk(relaxed = true))
-
-        verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
-
-        val magnesSettings = magnesSettingsSlot.captured
-        assertEquals(magnesSettings.environment, Environment.STAGE)
-    }
-
-    @Test
     fun `when environment is LIVE, magnes settings environment is LIVE`() {
         val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
