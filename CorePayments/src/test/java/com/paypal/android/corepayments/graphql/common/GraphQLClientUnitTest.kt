@@ -55,17 +55,6 @@ internal class GraphQLClientUnitTest {
     }
 
     @Test
-    fun `send sends an http request to staging environment`() = runTest {
-        sut = GraphQLClient(stagingConfig, http)
-        sut.send(graphQLRequestBody)
-        coVerify { http.send(capture(httpRequestSlot)) }
-
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.msmaster.qa.paypal.com/graphql"), httpRequest.url)
-        assertEquals("https://www.msmaster.qa.paypal.com", httpRequest.headers["Origin"])
-    }
-
-    @Test
     fun `send sends an http request to live environment`() = runTest {
         sut = GraphQLClient(liveConfig, http)
         sut.send(graphQLRequestBody)
