@@ -34,7 +34,7 @@ class CardAuthLauncher internal constructor(
             }
         }
 
-    fun clearResult(context: Context) {
+    fun clearPendingRequests(context: Context) {
         browserSwitchClient.clearActiveRequests(context)
     }
 

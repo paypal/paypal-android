@@ -1,6 +1,5 @@
 package com.paypal.android.ui.approveorderprogress
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -33,6 +32,7 @@ import com.paypal.android.DemoViewModel
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.CardAuthChallenge
+import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
@@ -105,14 +105,6 @@ class ApproveOrderProgressFragment : Fragment() {
             }
         }
 
-        activityViewModel.newIntent.observe(viewLifecycleOwner) { newIntent ->
-            // handle onNewIntent
-            checkForCardAuthResult(newIntent)
-        }
-
-        // kick off request
-        executeCardRequestFromArgs()
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -128,17 +120,20 @@ class ApproveOrderProgressFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        checkForCardAuthResult(activity?.intent)
+
+        val cardAuthResult = checkForCardAuthResult()
+        if (cardAuthResult != null) {
+            cardAuthLauncher.clearPendingRequests(requireContext())
+            cardClient.continueApproveOrder(cardAuthResult)
+        } else {
+            executeCardRequestFromArgs()
+        }
     }
 
-    private fun checkForCardAuthResult(intent: Intent?) {
-        cardAuthLauncher.parseResult(requireContext(), intent)
-            ?.let { authChallengeResult ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    cardClient.continueApproveOrder(authChallengeResult)
-                }
-                cardAuthLauncher.clearResult(requireContext())
-            }
+    private fun checkForCardAuthResult(): CardAuthChallengeResult? {
+        val context = requireContext()
+        return cardAuthLauncher.parseResult(context, activity?.intent)
+            ?: cardAuthLauncher.parseResult(context, activityViewModel.newIntent.value)
     }
 
     private fun executeCardRequestFromArgs() {
