@@ -1,5 +1,6 @@
 package com.paypal.android.ui.approveorderprogress
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,14 +24,16 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.paypal.android.DemoViewModel
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.CardAuthChallenge
-import com.paypal.android.cardpayments.CardAuthChallengeLauncher
+import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
@@ -56,10 +59,12 @@ class ApproveOrderProgressFragment : Fragment() {
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
 
-    private val cardAuthChallengeLauncher = CardAuthChallengeLauncher()
+    private val cardAuthLauncher = CardAuthLauncher()
 
     private val args: ApproveOrderProgressFragmentArgs by navArgs()
     private val viewModel by viewModels<ApproveOrderProgressViewModel>()
+
+    private val activityViewModel by activityViewModels<DemoViewModel>()
 
     lateinit private var cardClient: CardClient
 
@@ -92,12 +97,17 @@ class ApproveOrderProgressFragment : Fragment() {
 
             override fun didReceiveAuthChallenge(authChallenge: CardAuthChallenge) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
-                cardAuthChallengeLauncher.launch(requireActivity(), authChallenge)
+                cardAuthLauncher.launch(requireActivity(), authChallenge)
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
             }
+        }
+
+        activityViewModel.newIntent.observe(viewLifecycleOwner) { newIntent ->
+            // handle onNewIntent
+            checkForCardAuthResult(newIntent)
         }
 
         // kick off request
@@ -118,18 +128,21 @@ class ApproveOrderProgressFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        val intent = activity?.intent
-        cardAuthChallengeLauncher.parseResult(requireContext(), intent)
+        checkForCardAuthResult(activity?.intent)
+    }
+
+    private fun checkForCardAuthResult(intent: Intent?) {
+        cardAuthLauncher.parseResult(requireContext(), intent)
             ?.let { authChallengeResult ->
                 viewLifecycleOwner.lifecycleScope.launch {
                     cardClient.continueApproveOrder(authChallengeResult)
                 }
-                cardAuthChallengeLauncher.clearResult(requireContext())
+                cardAuthLauncher.clearResult(requireContext())
             }
     }
 
     private fun executeCardRequestFromArgs() {
-        val cardRequest = args.cardRequest
+        val cardRequest = args.cardRequest!!
         viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
 
         dataCollectorHandler.setLogging(true)

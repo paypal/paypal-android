@@ -3,6 +3,7 @@ package com.paypal.android
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -16,6 +17,8 @@ class DemoActivity : AppCompatActivity() {
 
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
+
+    val viewModel by viewModels<DemoViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +40,7 @@ class DemoActivity : AppCompatActivity() {
 
     override fun onNewIntent(newIntent: Intent?) {
         super.onNewIntent(newIntent)
-        intent = newIntent
+        viewModel.setNewIntent(newIntent)
         Log.e("DEMO ACTIVITY", "ON NEW INTENT")
     }
 

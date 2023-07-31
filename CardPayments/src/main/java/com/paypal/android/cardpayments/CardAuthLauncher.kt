@@ -7,7 +7,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStatus
 
-class CardAuthChallengeLauncher internal constructor(
+class CardAuthLauncher internal constructor(
     private val browserSwitchClient: BrowserSwitchClient
 ) {
     constructor() : this(BrowserSwitchClient())
