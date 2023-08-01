@@ -15,9 +15,16 @@ internal object PayPalWebCheckoutError {
         code = Code.MALFORMED_RESULT.ordinal,
         errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
     )
+
+    // 2. User canceled
+    val userCanceledError = PayPalSDKError(
+        code = Code.MALFORMED_RESULT.ordinal,
+        errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
+    )
 }
 
 internal enum class Code {
     UNKNOWN,
-    MALFORMED_RESULT
+    MALFORMED_RESULT,
+    USER_CANCELED_ERROR
 }

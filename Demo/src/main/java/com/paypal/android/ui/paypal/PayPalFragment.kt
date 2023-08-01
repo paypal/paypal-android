@@ -7,8 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.paypal.android.DemoViewModel
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
@@ -20,6 +22,8 @@ import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
+import com.paypal.android.paypalwebpayments.PayPalWebAuthChallengeResult
+import com.paypal.android.paypalwebpayments.PayPalWebAuthLauncher
 import com.paypal.android.utils.OrderUtils
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,6 +38,9 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
     companion object {
         private val TAG = PayPalFragment::class.qualifiedName
     }
+
+    private val payPalWebAuthLauncher = PayPalWebAuthLauncher()
+    private val activityViewModel by activityViewModels<DemoViewModel>()
 
     private lateinit var binding: FragmentPaymentButtonBinding
     private val orderIntent: OrderIntent
@@ -65,6 +72,22 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         }
 
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val payPalAuthResult = checkForPayPalAuthResult()
+        if (payPalAuthResult != null) {
+            payPalWebAuthLauncher.clearPendingRequests(requireContext())
+            paypalClient.continueStart(payPalAuthResult)
+        }
+    }
+
+    private fun checkForPayPalAuthResult(): PayPalWebAuthChallengeResult? {
+        val context = requireContext()
+        return payPalWebAuthLauncher.parseResult(context, activity?.intent)
+            ?: payPalWebAuthLauncher.parseResult(context, activityViewModel.newIntent.value)
     }
 
     @SuppressLint("SetTextI18n")
@@ -150,7 +173,8 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                     OrderUtils.createOrderBuilder("5.0", orderIntent = orderIntent)
                 val order = sdkSampleServerAPI.createOrder(orderRequest)
                 order.id?.let { orderId ->
-                    paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
+                    val authChallenge = paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
+                    payPalWebAuthLauncher.launch(requireActivity(), authChallenge)
                 }
             } catch (e: UnknownHostException) {
                 Log.e(TAG, e.message!!)

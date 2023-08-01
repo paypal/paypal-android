@@ -40,6 +40,7 @@ class DemoActivity : AppCompatActivity() {
 
     override fun onNewIntent(newIntent: Intent?) {
         super.onNewIntent(newIntent)
+        // propagate new intent into fragment
         viewModel.setNewIntent(newIntent)
         Log.e("DEMO ACTIVITY", "ON NEW INTENT")
     }
