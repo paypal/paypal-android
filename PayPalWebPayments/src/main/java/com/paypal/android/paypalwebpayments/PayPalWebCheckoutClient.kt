@@ -1,24 +1,18 @@
 package com.paypal.android.paypalwebpayments
 
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
-    private val activity: FragmentActivity,
+    activity: FragmentActivity,
     private val coreConfig: CoreConfig,
     private val analyticsService: AnalyticsService,
-    private val browserSwitchClient: BrowserSwitchClient,
-    private val browserSwitchHelper: BrowserSwitchHelper,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val browserSwitchHelper: BrowserSwitchHelper
 ) {
 
     /**
@@ -36,7 +30,6 @@ class PayPalWebCheckoutClient internal constructor(
         activity,
         configuration,
         AnalyticsService(activity.applicationContext, configuration),
-        BrowserSwitchClient(),
         BrowserSwitchHelper(urlScheme)
     )
 

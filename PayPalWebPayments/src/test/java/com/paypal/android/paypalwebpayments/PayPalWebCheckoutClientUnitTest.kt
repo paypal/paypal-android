@@ -285,15 +285,12 @@ class PayPalWebCheckoutClientUnitTest {
                 activity,
                 coreConfig,
                 analyticsService,
-                browserSwitchClient,
-                browserSwitchHelper,
-                dispatcher
+                browserSwitchHelper
             )
         } ?: PayPalWebCheckoutClient(
             activity,
             coreConfig,
             analyticsService,
-            browserSwitchClient,
             browserSwitchHelper
         ))
     }
