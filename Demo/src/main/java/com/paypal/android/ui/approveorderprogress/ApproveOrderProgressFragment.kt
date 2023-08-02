@@ -30,6 +30,7 @@ import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -65,7 +66,15 @@ class ApproveOrderProgressFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         viewLifecycleOwner.lifecycleScope.launch {
-            executeCardRequestFromArgs()
+            viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
+            val clientId = sdkSampleServerAPI.fetchClientId()
+
+            val configuration = CoreConfig(clientId = clientId)
+            cardClient = CardClient(requireActivity(), configuration)
+
+            args.cardRequest?.let { cardRequest ->
+                executeCardRequest(cardRequest)
+            }
         }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -80,15 +89,7 @@ class ApproveOrderProgressFragment : Fragment() {
         }
     }
 
-    private suspend fun executeCardRequestFromArgs() {
-        val cardRequest = args.cardRequest
-
-        viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
-        val clientId = sdkSampleServerAPI.fetchClientId()
-
-        val configuration = CoreConfig(clientId = clientId)
-        cardClient = CardClient(requireActivity(), configuration)
-
+    private fun executeCardRequest(cardRequest: CardRequest) {
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))

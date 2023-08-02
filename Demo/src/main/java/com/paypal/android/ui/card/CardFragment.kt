@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,16 +19,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -43,21 +44,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.R
-import com.paypal.android.api.model.Amount
-import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.Payee
-import com.paypal.android.api.model.PurchaseUnit
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.WireframeOptionDropDown
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.ui.features.Feature
 import com.paypal.android.ui.stringResourceListOf
-import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,7 +63,7 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
-        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject
@@ -82,34 +79,78 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         args.prefillCard?.card?.let { viewModel.prefillCard(it) }
+
+        val feature = args.feature
+        if (feature == Feature.CARD_VAULT) {
+            // the vault api only has the 'when required' option
+            viewModel.shouldVault = true
+            viewModel.scaOption = "WHEN REQUIRED"
+        } else {
+            viewModel.scaOption = "ALWAYS"
+        }
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
+                        val feature = args.feature
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                        CardView(uiState = uiState, onFormSubmit = { approveOrder() })
+                        CardView(
+                            feature = feature,
+                            uiState = uiState,
+                            onFormSubmit = { onFormSubmit() }
+                        )
                     }
                 }
             }
         }
     }
 
-    private fun approveOrder() {
+    private fun onFormSubmit() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val uiState = viewModel.uiState.value
-            val order = createOrder(uiState)
-            val cardRequest = createCardRequest(uiState, order)
-            findNavController().navigate(
-                CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest)
-            )
+            when (args.feature) {
+                Feature.CARD_APPROVE_ORDER -> {
+                    sendApproveOrderRequest()
+                }
+
+                Feature.CARD_VAULT -> {
+                    sendVaultRequest()
+                }
+
+                else -> {
+                    TODO("invalid state")
+                }
+            }
         }
+    }
+
+    private fun sendApproveOrderRequest() {
+        val order = args.order
+        if (order == null) {
+            // TODO: handle invalid state
+        }
+        val uiState = viewModel.uiState.value
+        val cardRequest = createCardRequest(uiState, order!!)
+        findNavController().navigate(
+            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest = cardRequest)
+        )
+    }
+
+    private fun sendVaultRequest() {
+        // TODO: implement vault without purchase
+        AlertDialog.Builder(requireContext())
+            .setTitle("TODO")
+            .setMessage("Implement Vault Without Purchase")
+            .setPositiveButton("OK") { _, _ -> }
+            .show()
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
+        feature: Feature,
         uiState: CardViewUiState,
         onFormSubmit: () -> Unit = {},
     ) {
@@ -134,18 +175,12 @@ class CardFragment : Fragment() {
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
-                text = "Approve Order Options",
+                text = "${stringResource(feature.stringRes)} Options",
                 style = MaterialTheme.typography.headlineSmall
             )
-            Spacer(modifier = Modifier.size(2.dp))
-            ApproveOrderForm(uiState)
             Spacer(modifier = Modifier.size(8.dp))
-            Column(
-                modifier = Modifier.weight(1.0f)
-            ) {
-                Text(text = uiState.statusText, modifier = Modifier.testTag("statusText"))
-                Text(uiState.orderDetails)
-            }
+            OptionsForm(uiState)
+            Spacer(modifier = Modifier.weight(1.0f))
             WireframeButton(
                 text = "CREATE & APPROVE ORDER",
                 onClick = { onFormSubmit() },
@@ -161,7 +196,7 @@ class CardFragment : Fragment() {
     fun CardFormPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(uiState = CardViewUiState())
+                CardView(feature = Feature.CARD_APPROVE_ORDER, uiState = CardViewUiState())
             }
         }
     }
@@ -172,16 +207,10 @@ class CardFragment : Fragment() {
         OutlinedTextField(
             value = cardNumber,
             label = { Text(stringResource(id = R.string.card_field_card_number)) },
-            onValueChange = { viewModel.onValueChange(CardOption.CARD_NUMBER, it) },
+            onValueChange = { value -> viewModel.cardNumber = value },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             visualTransformation = CardNumberVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged {
-                    if (it.isFocused) {
-                        viewModel.onOptionFocus(CardOption.CARD_NUMBER)
-                    }
-                }
+            modifier = Modifier.fillMaxWidth()
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -189,115 +218,60 @@ class CardFragment : Fragment() {
             OutlinedTextField(
                 value = expirationDate,
                 label = { Text(stringResource(id = R.string.card_field_expiration)) },
-                onValueChange = { viewModel.onValueChange(CardOption.CARD_EXPIRATION_DATE, it) },
+                onValueChange = { value -> viewModel.cardExpirationDate = value },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = DateVisualTransformation(),
-                modifier = Modifier
-                    .weight(weight = 1.5f)
-                    .onFocusChanged {
-                        if (it.isFocused) {
-                            viewModel.onOptionFocus(CardOption.CARD_EXPIRATION_DATE)
-                        }
-                    }
+                modifier = Modifier.weight(weight = 1.5f)
             )
             OutlinedTextField(
                 value = securityCode,
                 label = { Text(stringResource(id = R.string.card_field_security_code)) },
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 visualTransformation = PasswordVisualTransformation(),
-                onValueChange = { viewModel.onValueChange(CardOption.CARD_SECURITY_CODE, it) },
-                modifier = Modifier
-                    .weight(1.0f)
-                    .onFocusChanged {
-                        if (it.isFocused) {
-                            viewModel.onOptionFocus(CardOption.CARD_SECURITY_CODE)
-                        }
-                    }
+                onValueChange = { value -> viewModel.cardSecurityCode = value },
+                modifier = Modifier.weight(1.0f)
             )
         }
     }
 
     @ExperimentalMaterial3Api
     @Composable
-    fun ApproveOrderForm(uiState: CardViewUiState) {
+    fun OptionsForm(uiState: CardViewUiState) {
         val localFocusManager = LocalFocusManager.current
-        WireframeOptionDropDown(
-            hint = stringResource(id = R.string.sca_title),
-            value = uiState.scaOption,
-            expanded = uiState.scaOptionExpanded,
-            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
-            modifier = Modifier.fillMaxWidth(),
-            onExpandedChange = { expanded ->
-                if (expanded) viewModel.onOptionFocus(CardOption.SCA) else viewModel.clearFocus()
-            },
-            onValueChange = {
-                viewModel.onValueChange(CardOption.SCA, it)
-                viewModel.clearFocus()
-            }
+        val scaOptions = if (args.feature == Feature.CARD_VAULT) {
+            stringResourceListOf(R.string.sca_when_required)
+        } else {
+            stringResourceListOf(R.string.sca_always, R.string.sca_when_required)
+        }
+        OptionList(
+            title = stringResource(id = R.string.sca_title),
+            options = scaOptions,
+            selectedOption = uiState.scaOption,
+            onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
         )
-        Spacer(modifier = Modifier.size(8.dp))
-        WireframeOptionDropDown(
-            hint = stringResource(id = R.string.intent_title),
-            value = uiState.intentOption,
-            expanded = uiState.intentOptionExpanded,
-            options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
-            modifier = Modifier.fillMaxWidth(),
-            onExpandedChange = { expanded ->
-                if (expanded) viewModel.onOptionFocus(CardOption.INTENT) else viewModel.clearFocus()
-            },
-            onValueChange = {
-                viewModel.onValueChange(CardOption.INTENT, it)
-                viewModel.clearFocus()
+        Spacer(modifier = Modifier.size(16.dp))
+        if (args.feature != Feature.CARD_VAULT) {
+            Row {
+                Text(
+                    text = "Should Vault",
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1.0f)
+                )
+                Switch(
+                    checked = uiState.shouldVault,
+                    onCheckedChange = { shouldVault -> viewModel.shouldVault = shouldVault }
+                )
             }
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        WireframeOptionDropDown(
-            hint = "SHOULD VAULT",
-            value = uiState.shouldVaultOption,
-            options = listOf("YES", "NO"),
-            expanded = uiState.shouldVaultOptionExpanded,
-            modifier = Modifier.fillMaxWidth(),
-            onExpandedChange = { expanded ->
-                if (expanded) viewModel.onOptionFocus(CardOption.SHOULD_VAULT) else viewModel.clearFocus()
-            },
-            onValueChange = {
-                viewModel.onValueChange(CardOption.SHOULD_VAULT, it)
-                viewModel.clearFocus()
-            }
-        )
-        Spacer(modifier = Modifier.size(8.dp))
+        }
         OutlinedTextField(
             value = uiState.customerId,
-            label = { Text("CUSTOMER ID FOR VAULT") },
-            onValueChange = { viewModel.onValueChange(CardOption.VAULT_CUSTOMER_ID, it) },
+            label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
+            onValueChange = { value -> viewModel.customerId = value },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { if (it.isFocused) viewModel.onOptionFocus(CardOption.VAULT_CUSTOMER_ID) }
+            modifier = Modifier.fillMaxWidth()
         )
-    }
-
-    private suspend fun createOrder(uiState: CardViewUiState): Order {
-        val orderIntent = when (uiState.intentOption) {
-            "AUTHORIZE" -> OrderIntent.AUTHORIZE
-            else -> OrderIntent.CAPTURE
-        }
-
-        val orderRequest = CreateOrderRequest(
-            intent = orderIntent.name,
-            purchaseUnit = listOf(
-                PurchaseUnit(
-                    amount = Amount(
-                        currencyCode = "USD",
-                        value = "10.99"
-                    )
-                )
-            ),
-            payee = Payee(emailAddress = "anpelaez@paypal.com")
-        )
-        viewModel.updateStatusText("Creating order...")
-        return sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
     }
 
     private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {
@@ -306,8 +280,8 @@ class CardFragment : Fragment() {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
-        val shouldVault = (uiState.shouldVaultOption == "YES")
-        val vault = if (shouldVault) Vault(customerId = uiState.customerId) else null
+
+        val vault = if (uiState.shouldVault) Vault(customerId = uiState.customerId) else null
         return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
     }
 

@@ -2,9 +2,11 @@
     <string name="app_name">AndroidSDK</string>
 
     <!-- Payment Methods -->
-    <string name="payment_methods_card">CARD</string>
-    <string name="payment_methods_paypal">PAYPAL</string>
-    <string name="payment_methods_paypal_native">PAYPAL NATIVE</string>
+    <string name="feature_title">Select a Feature:</string>
+    <string name="feature_approve_order">Approve Order</string>
+    <string name="feature_vault">Vault</string>
+    <string name="feature_paypal_web">PayPal Web</string>
+    <string name="feature_paypal_native">PayPal Native</string>
 
     <!-- Card Fields -->
     <string name="card_field_card_number">CARD NUMBER</string>
@@ -38,7 +40,7 @@
     <string name="select_shape">Select Shape</string>
     <string name="select_size">Select Size</string>
 
-    <string name="intent_title">INTENT</string>
+    <string name="intent_title">Intent</string>
     <string name="intent_authorize">AUTHORIZE</string>
     <string name="intent_capture">CAPTURE</string>
 

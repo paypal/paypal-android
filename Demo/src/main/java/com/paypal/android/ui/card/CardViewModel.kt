@@ -11,43 +11,41 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onValueChange(option: CardOption, value: String) {
-        _uiState.update { currentState ->
-            when (option) {
-                CardOption.SCA -> currentState.copy(scaOption = value)
-                CardOption.INTENT -> currentState.copy(intentOption = value)
-                CardOption.SHOULD_VAULT -> currentState.copy(shouldVaultOption = value)
-                CardOption.VAULT_CUSTOMER_ID -> currentState.copy(customerId = value)
-                CardOption.CARD_NUMBER -> currentState.copy(cardNumber = value)
-                CardOption.CARD_EXPIRATION_DATE -> currentState.copy(cardExpirationDate = value)
-                CardOption.CARD_SECURITY_CODE -> currentState.copy(cardSecurityCode = value)
-            }
+    var scaOption: String
+        get() = _uiState.value.scaOption
+        set(value) {
+            _uiState.update { it.copy(scaOption = value) }
         }
-    }
 
-    fun onOptionFocus(option: CardOption) {
-        _uiState.update { currentState ->
-            currentState.copy(focusedOption = option)
+    var shouldVault: Boolean
+        get() = _uiState.value.shouldVault
+        set(value) {
+            _uiState.update { it.copy(shouldVault = value) }
         }
-    }
 
-    fun clearFocus() {
-        _uiState.update { currentState ->
-            currentState.copy(focusedOption = null)
+    var customerId: String
+        get() = _uiState.value.customerId
+        set(value) {
+            _uiState.update { it.copy(customerId = value) }
         }
-    }
 
-    fun updateStatusText(statusText: String) {
-        _uiState.update { currentState ->
-            currentState.copy(statusText = statusText)
+    var cardNumber: String
+        get() = _uiState.value.cardNumber
+        set(value) {
+            _uiState.update { it.copy(cardNumber = value) }
         }
-    }
 
-    fun updateOrderDetailsText(orderDetails: String) {
-        _uiState.update { currentState ->
-            currentState.copy(orderDetails = orderDetails)
+    var cardExpirationDate: String
+        get() = _uiState.value.cardExpirationDate
+        set(value) {
+            _uiState.update { it.copy(cardExpirationDate = value) }
         }
-    }
+
+    var cardSecurityCode: String
+        get() = _uiState.value.cardSecurityCode
+        set(value) {
+            _uiState.update { it.copy(cardSecurityCode = value) }
+        }
 
     fun prefillCard(card: Card) {
         _uiState.update { currentState ->

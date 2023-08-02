@@ -29,9 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.paypal.android.models.TestCard
+import com.paypal.android.ui.WireframeHeader
 
 class SelectCardFragment : Fragment() {
+
+    private val args: SelectCardFragmentArgs by navArgs()
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -52,10 +56,15 @@ class SelectCardFragment : Fragment() {
         navigateToCardForm(card)
     }
 
-    private fun navigateToCardForm(card: TestCard? = null) {
-        findNavController().navigate(
-            SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(card)
+    private fun navigateToCardForm(testCard: TestCard? = null) {
+        val feature = args.feature
+        val order = args.order
+        val action = SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(
+            feature,
+            order,
+            testCard
         )
+        findNavController().navigate(action)
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -69,7 +78,7 @@ class SelectCardFragment : Fragment() {
             modifier = Modifier.fillMaxWidth()
         ) {
             stickyHeader {
-                TestCardHeader("Manual Card Entry")
+                WireframeHeader("Manual Card Entry")
             }
             item {
                 Box(
@@ -92,7 +101,7 @@ class SelectCardFragment : Fragment() {
                 }
             }
             stickyHeader {
-                TestCardHeader("Test Cards without 3DS")
+                WireframeHeader("Test Cards without 3DS")
             }
             items(viewModel.nonThreeDSCards) { card ->
                 TestCardView(
@@ -105,7 +114,7 @@ class SelectCardFragment : Fragment() {
                 Divider(color = Color.Black)
             }
             stickyHeader {
-                TestCardHeader("Test Cards with 3DS")
+                WireframeHeader("Test Cards with 3DS")
             }
             items(viewModel.threeDSCards) { card ->
                 TestCardView(
@@ -128,22 +137,6 @@ class SelectCardFragment : Fragment() {
             Surface(modifier = Modifier.fillMaxSize()) {
                 SelectCardView()
             }
-        }
-    }
-
-    @Composable
-    fun TestCardHeader(text: String) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
-                modifier = Modifier.padding(8.dp)
-            )
         }
     }
 
