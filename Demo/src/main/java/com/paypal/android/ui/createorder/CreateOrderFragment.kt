@@ -212,6 +212,7 @@ class CreateOrderFragment : Fragment() {
                 keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(
                 text = "Create Order & Continue",
                 isLoading = uiState.isLoading,
