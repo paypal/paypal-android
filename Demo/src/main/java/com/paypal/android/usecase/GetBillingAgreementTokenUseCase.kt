@@ -1,7 +1,5 @@
 package com.paypal.android.usecase
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import kotlinx.coroutines.Dispatchers

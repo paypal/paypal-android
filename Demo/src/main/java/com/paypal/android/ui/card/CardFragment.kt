@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -231,7 +230,6 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun OptionsForm(uiState: CardViewUiState) {
-        val localFocusManager = LocalFocusManager.current
         val scaOptions = if (args.feature == Feature.CARD_VAULT) {
             stringResourceListOf(R.string.sca_when_required)
         } else {
