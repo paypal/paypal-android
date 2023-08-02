@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,17 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -31,7 +29,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,7 +44,6 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
@@ -62,7 +58,7 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
-         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject
@@ -136,12 +132,12 @@ class CardFragment : Fragment() {
     }
 
     private fun sendVaultRequest() {
-        val uiState = viewModel.uiState.value
-        val card = parseCard(uiState)
-        val vaultRequest = VaultRequest(card, APP_RETURN_URL)
-        findNavController().navigate(
-            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(vaultRequest = vaultRequest)
-        )
+        // TODO: implement vault without purchase
+        AlertDialog.Builder(requireContext())
+            .setTitle("TODO")
+            .setMessage("Implement Vault Without Purchase")
+            .setPositiveButton("OK") { _, _ -> }
+            .show()
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
