@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,8 +27,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -49,6 +47,7 @@ import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.features.Feature
 import com.paypal.android.ui.stringResourceListOf
+import com.paypal.android.uishared.components.CardForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -166,7 +165,10 @@ class CardFragment : Fragment() {
             CardForm(
                 cardNumber = uiState.cardNumber,
                 expirationDate = uiState.cardExpirationDate,
-                securityCode = uiState.cardSecurityCode
+                securityCode = uiState.cardSecurityCode,
+                onCardNumberChange = { viewModel.cardNumber = it },
+                onExpirationDateChange = { viewModel.cardExpirationDate = it },
+                onSecurityCodeChange = { viewModel.cardSecurityCode = it },
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
@@ -188,44 +190,11 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Preview
     @Composable
-    fun CardFormPreview() {
+    fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 CardView(feature = Feature.CARD_APPROVE_ORDER, uiState = CardViewUiState())
             }
-        }
-    }
-
-    @ExperimentalMaterial3Api
-    @Composable
-    fun CardForm(cardNumber: String, expirationDate: String, securityCode: String) {
-        OutlinedTextField(
-            value = cardNumber,
-            label = { Text(stringResource(id = R.string.card_field_card_number)) },
-            onValueChange = { value -> viewModel.cardNumber = value },
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            visualTransformation = CardNumberVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = expirationDate,
-                label = { Text(stringResource(id = R.string.card_field_expiration)) },
-                onValueChange = { value -> viewModel.cardExpirationDate = value },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                visualTransformation = DateVisualTransformation(),
-                modifier = Modifier.weight(weight = 1.5f)
-            )
-            OutlinedTextField(
-                value = securityCode,
-                label = { Text(stringResource(id = R.string.card_field_security_code)) },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                visualTransformation = PasswordVisualTransformation(),
-                onValueChange = { value -> viewModel.cardSecurityCode = value },
-                modifier = Modifier.weight(1.0f)
-            )
         }
     }
 
