@@ -36,6 +36,7 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.VaultRequest
+import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.WireframeButton
@@ -77,7 +78,8 @@ class VaultFragment : Fragment() {
                         VaultView(
                             uiState = uiState,
                             onCreateSetupTokenSubmit = { createSetupToken() },
-                            onUpdateSetupTokenSubmit = { updateSetupToken() }
+                            onUpdateSetupTokenSubmit = { updateSetupToken() },
+                            onCreatePaymentTokenSubmit = { createPaymentToken() },
                         )
                     }
                 }
@@ -109,6 +111,14 @@ class VaultFragment : Fragment() {
                 // TODO: handle error
             }
             viewModel.isUpdateSetupTokenLoading = false
+        }
+    }
+
+    private fun createPaymentToken() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCreatePaymentTokenLoading = true
+
+            viewModel.isCreatePaymentTokenLoading = false
         }
     }
 
@@ -146,7 +156,8 @@ class VaultFragment : Fragment() {
     fun VaultView(
         uiState: VaultUiState,
         onCreateSetupTokenSubmit: () -> Unit,
-        onUpdateSetupTokenSubmit: () -> Unit
+        onUpdateSetupTokenSubmit: () -> Unit,
+        onCreatePaymentTokenSubmit: () -> Unit
     ) {
         Column(
             modifier = Modifier
@@ -168,7 +179,10 @@ class VaultFragment : Fragment() {
                 )
             }
             uiState.vaultResult?.let { vaultResult ->
-                Text("Vault successful.")
+                CreatePaymentTokenView(
+                    uiState = uiState,
+                    onSubmit = { onCreatePaymentTokenSubmit() }
+                )
             }
         }
     }
@@ -247,6 +261,32 @@ class VaultFragment : Fragment() {
         }
     }
 
+    @Composable
+    fun CreatePaymentTokenView(
+        uiState: VaultUiState,
+        onSubmit: () -> Unit
+    ) {
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Create a Permanent Payment Method Token",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                WireframeButton(
+                    text = "Create Payment Token",
+                    isLoading = uiState.isCreatePaymentTokenLoading,
+                    onClick = { onSubmit() },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
     @ExperimentalMaterial3Api
     @Preview
     @Composable
@@ -254,9 +294,13 @@ class VaultFragment : Fragment() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 VaultView(
-                    uiState = VaultUiState(setupToken = "123"),
+                    uiState = VaultUiState(
+                        setupToken = "123",
+                        vaultResult = VaultResult("456", "fake-status")
+                    ),
                     onCreateSetupTokenSubmit = {},
                     onUpdateSetupTokenSubmit = {},
+                    onCreatePaymentTokenSubmit = {},
                 )
             }
         }
