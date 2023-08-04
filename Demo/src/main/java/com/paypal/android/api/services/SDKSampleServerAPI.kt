@@ -180,6 +180,11 @@ class SDKSampleServerAPI {
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = findService(merchantIntegration).createSetupToken(jsonObject)
 
+    suspend fun createPaymentToken(
+        jsonObject: JsonObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).createPaymentToken(jsonObject)
+
     private fun parseOrder(json: JSONObject): Order {
         val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
         val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
