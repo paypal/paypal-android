@@ -1,5 +1,7 @@
 package com.paypal.android.ui.vault
 
+import com.paypal.android.cardpayments.VaultResult
+
 data class VaultUiState(
     val setupToken: String = "",
     val isCreateSetupTokenLoading: Boolean = false,
@@ -8,4 +10,5 @@ data class VaultUiState(
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
+    val vaultResult: VaultResult? = null
 )

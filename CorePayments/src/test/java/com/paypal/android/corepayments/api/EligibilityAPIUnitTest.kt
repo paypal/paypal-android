@@ -1,7 +1,5 @@
 package com.paypal.android.corepayments.api
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.R
@@ -34,7 +32,7 @@ class EligibilityAPIUnitTest {
 
     // Ref: https://stackoverflow.com/a/58617596
     private val resourceLoader =
-        ResourceLoader(ApplicationProvider.getApplicationContext<Application>())
+        ResourceLoader()
 
     @Before
     fun beforeEach() {
@@ -50,7 +48,7 @@ class EligibilityAPIUnitTest {
         coVerify { graphQLClient.send(capture(requestBodySlot)) }
         val actualRequestBody = requestBodySlot.captured
 
-        val expectedQuery = resourceLoader.loadRawResource(R.raw.graphql_query_funding_eligibility)
+        val expectedQuery = resourceLoader.loadRawResource(, R.raw.graphql_query_funding_eligibility)
         // language=JSON
         val expectedRequestBody = """
         {

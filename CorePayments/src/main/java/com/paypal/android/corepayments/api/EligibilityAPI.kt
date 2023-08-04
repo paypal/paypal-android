@@ -31,19 +31,18 @@ internal class EligibilityAPI internal constructor(
 
     /**
      *  EligibilityAPI constructor.
-     *  @param context Android context
      *  @param config configuration parameters for eligibility API
      */
-    constructor(context: Context, config: CoreConfig) :
-            this(config, GraphQLClient(config), ResourceLoader(context))
+    constructor(config: CoreConfig) :
+            this(config, GraphQLClient(config), ResourceLoader())
 
     /**
      *  Checks if merchant is eligible for a set of payment methods
      *  @return [Eligibility] for payment methods
      *  @throws PayPalSDKError if something went wrong in the API call
      */
-    suspend fun checkEligibility(): Eligibility {
-        val query = resourceLoader.loadRawResource(R.raw.graphql_query_funding_eligibility)
+    suspend fun checkEligibility(context: Context): Eligibility {
+        val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
         val enableFundingMethods = listOf(SupportedPaymentMethodsType.VENMO.name)
         val variables = JSONObject()
             .put(VARIABLE_CLIENT_ID, config.clientId)

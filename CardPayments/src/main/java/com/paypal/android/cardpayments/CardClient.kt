@@ -1,5 +1,6 @@
 package com.paypal.android.cardpayments
 
+import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
+    private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
@@ -48,6 +50,7 @@ class CardClient internal constructor(
             this(
                 activity,
                 CheckoutOrdersAPI(configuration),
+                DataVaultPaymentMethodTokensAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
@@ -72,8 +75,12 @@ class CardClient internal constructor(
         }
     }
 
-    fun vaultRequest(activity: FragmentActivity, vaultRequest: VaultRequest) {
-
+    suspend fun vault(context: Context, vaultRequest: VaultRequest): VaultResult {
+        val applicationContext = context.applicationContext
+        val result = vaultRequest.run {
+            paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+        }
+        return result
     }
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {

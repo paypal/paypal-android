@@ -31,7 +31,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
+import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.VaultRequest
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,6 +52,12 @@ class VaultFragment : Fragment() {
     @Inject
     lateinit var createSetupTokenUseCase: CreateSetupTokenUseCase
 
+    @Inject
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
+
+    private lateinit var cardClient: CardClient
+
+    private val args: VaultFragmentArgs by navArgs()
     private val viewModel by viewModels<VaultViewModel>()
 
     @ExperimentalMaterial3Api
@@ -52,6 +66,8 @@ class VaultFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -80,9 +96,49 @@ class VaultFragment : Fragment() {
     private fun updateSetupToken() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isUpdateSetupTokenLoading = true
-            // TODO: call SDK vault method
+            val clientId = sdkSampleServerAPI.fetchClientId()
+
+            val configuration = CoreConfig(clientId = clientId)
+            cardClient = CardClient(requireActivity(), configuration)
+
+            val card = parseCard(viewModel.uiState.value)
+            val vaultRequest = VaultRequest(viewModel.setupToken, card)
+            try {
+                viewModel.vaultResult = cardClient.vault(requireContext(), vaultRequest)
+            } catch (e: PayPalSDKError) {
+                // TODO: handle error
+            }
             viewModel.isUpdateSetupTokenLoading = false
         }
+    }
+
+    private fun parseCard(uiState: VaultUiState): Card {
+        // TODO: handle invalid date string
+        var expirationMonth = ""
+        var expirationYear = ""
+
+        // expiration date in UI State needs to be formatted because it uses a visual transformation
+        val dateString = DateString(uiState.cardExpirationDate)
+        val dateStringComponents = dateString.formatted.split("/")
+        if (dateStringComponents.isNotEmpty()) {
+            expirationMonth = dateStringComponents[0]
+            if (dateStringComponents.size > 1) {
+                val rawYear = dateStringComponents[1]
+                expirationYear = if (rawYear.length == 2) {
+                    // pad with 20 to assume 2000's
+                    "20$rawYear"
+                } else {
+                    rawYear
+                }
+            }
+        }
+
+        return Card(
+            number = uiState.cardNumber,
+            expirationMonth = expirationMonth,
+            expirationYear = expirationYear,
+            securityCode = uiState.cardSecurityCode
+        )
     }
 
     @ExperimentalMaterial3Api
@@ -110,6 +166,9 @@ class VaultFragment : Fragment() {
                     onSecurityCodeChange = { viewModel.cardSecurityCode = it },
                     onSubmit = { onUpdateSetupTokenSubmit() }
                 )
+            }
+            uiState.vaultResult?.let { vaultResult ->
+                Text("Vault successful.")
             }
         }
     }

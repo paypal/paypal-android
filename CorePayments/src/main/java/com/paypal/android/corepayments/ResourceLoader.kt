@@ -10,18 +10,16 @@ import java.io.IOException
 /**
  * Convenience class to simplify interaction with Android resource APIs.
  */
-internal class ResourceLoader(context: Context) {
-
-    private val applicationContext = context.applicationContext
+class ResourceLoader {
 
     /**
      * Load an Android raw resource as a String using a background IO thread.
      *
      * @param resId ID of the resource that will be loaded
      */
-    suspend fun loadRawResource(@RawRes resId: Int): String = withContext(Dispatchers.IO) {
+    suspend fun loadRawResource(context: Context, @RawRes resId: Int): String = withContext(Dispatchers.IO) {
         try {
-            val resInputStream = applicationContext.resources.openRawResource(resId)
+            val resInputStream = context.resources.openRawResource(resId)
             val resAsBytes = ByteArray(resInputStream.available())
             resInputStream.read(resAsBytes)
             resInputStream.close()

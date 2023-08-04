@@ -9,7 +9,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal class GraphQLClient(
+class GraphQLClient internal constructor(
     coreConfig: CoreConfig,
     private val http: Http = Http(),
 ) {
@@ -17,6 +17,8 @@ internal class GraphQLClient(
     companion object {
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
+
+    constructor(coreConfig: CoreConfig) : this(coreConfig, Http())
 
     private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
     private val graphQLURL = URL("$graphQLEndpoint/graphql")

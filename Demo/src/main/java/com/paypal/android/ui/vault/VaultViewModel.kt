@@ -1,6 +1,8 @@
 package com.paypal.android.ui.vault
 
 import androidx.lifecycle.ViewModel
+import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.VaultResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,9 +24,9 @@ class VaultViewModel : ViewModel() {
         }
 
     var isUpdateSetupTokenLoading: Boolean
-        get() = _uiState.value.isCreateSetupTokenLoading
+        get() = _uiState.value.isUpdateSetupTokenLoading
         set(value) {
-            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
+            _uiState.update { it.copy(isUpdateSetupTokenLoading = value) }
         }
 
     var customerId: String
@@ -50,4 +52,20 @@ class VaultViewModel : ViewModel() {
         set(value) {
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
+
+    var vaultResult: VaultResult?
+        get() = _uiState.value.vaultResult
+        set(value) {
+            _uiState.update { it.copy(vaultResult = value) }
+        }
+
+    fun prefillCard(card: Card) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                cardNumber = card.number,
+                cardExpirationDate = card.run { "$expirationMonth$expirationYear" },
+                cardSecurityCode = card.securityCode
+            )
+        }
+    }
 }
