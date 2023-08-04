@@ -42,6 +42,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
+import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -49,6 +50,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class VaultFragment : Fragment() {
+
+    @Inject
+    lateinit var createPaymentTokenUseCase: CreatePaymentTokenUseCase
 
     @Inject
     lateinit var createSetupTokenUseCase: CreateSetupTokenUseCase
@@ -117,7 +121,7 @@ class VaultFragment : Fragment() {
     private fun createPaymentToken() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isCreatePaymentTokenLoading = true
-
+            viewModel.paymentToken = createPaymentTokenUseCase(viewModel.setupToken)
             viewModel.isCreatePaymentTokenLoading = false
         }
     }
@@ -179,10 +183,15 @@ class VaultFragment : Fragment() {
                 )
             }
             uiState.vaultResult?.let { vaultResult ->
+                Spacer(modifier = Modifier.size(8.dp))
                 CreatePaymentTokenView(
                     uiState = uiState,
                     onSubmit = { onCreatePaymentTokenSubmit() }
                 )
+            }
+            if (uiState.paymentToken.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(8.dp))
+                Text("Create Payment Token Success: ${uiState.paymentToken}")
             }
         }
     }

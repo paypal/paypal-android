@@ -17,6 +17,12 @@ class VaultViewModel : ViewModel() {
             _uiState.update { it.copy(setupToken = value) }
         }
 
+    var paymentToken: String
+        get() = _uiState.value.paymentToken
+        set(value) {
+            _uiState.update { it.copy(paymentToken = value) }
+        }
+
     var isCreateSetupTokenLoading: Boolean
         get() = _uiState.value.isCreateSetupTokenLoading
         set(value) {

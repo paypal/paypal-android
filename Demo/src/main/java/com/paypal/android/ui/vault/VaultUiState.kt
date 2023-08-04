@@ -4,6 +4,7 @@ import com.paypal.android.cardpayments.VaultResult
 
 data class VaultUiState(
     val setupToken: String = "",
+    val paymentToken: String = "",
     val isCreateSetupTokenLoading: Boolean = false,
     val isUpdateSetupTokenLoading: Boolean = false,
     val isCreatePaymentTokenLoading: Boolean = false,
