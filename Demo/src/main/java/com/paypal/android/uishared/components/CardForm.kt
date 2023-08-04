@@ -30,9 +30,10 @@ fun CardForm(
     securityCode: String,
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
-    onSecurityCodeChange: (String) -> Unit
+    onSecurityCodeChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column {
+    Column(modifier = modifier) {
         OutlinedTextField(
             value = cardNumber,
             label = { Text(stringResource(id = R.string.card_field_card_number)) },

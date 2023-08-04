@@ -2,7 +2,6 @@ package com.paypal.android.ui.vault
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.compose.runtime.getValue
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
@@ -28,16 +27,18 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.usecase.CreateSetupTokenUseCase
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class VaultFragment : Fragment() {
 
     @Inject
@@ -59,7 +60,8 @@ class VaultFragment : Fragment() {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         VaultView(
                             uiState = uiState,
-                            onCreateSetupTokenSubmit = { createSetupToken() }
+                            onCreateSetupTokenSubmit = { createSetupToken() },
+                            onUpdateSetupTokenSubmit = { updateSetupToken() }
                         )
                     }
                 }
@@ -69,43 +71,51 @@ class VaultFragment : Fragment() {
 
     private fun createSetupToken() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isSetupTokenLoading = true
+            viewModel.isCreateSetupTokenLoading = true
             viewModel.setupToken = createSetupTokenUseCase(viewModel.customerId)
-            viewModel.isSetupTokenLoading = false
+            viewModel.isCreateSetupTokenLoading = false
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
+    private fun updateSetupToken() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isUpdateSetupTokenLoading = true
+            // TODO: call SDK vault method
+            viewModel.isUpdateSetupTokenLoading = false
+        }
+    }
+
     @ExperimentalMaterial3Api
     @Composable
     fun VaultView(
         uiState: VaultUiState,
-        onCreateSetupTokenSubmit: () -> Unit
+        onCreateSetupTokenSubmit: () -> Unit,
+        onUpdateSetupTokenSubmit: () -> Unit
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            SetupTokenRequestView(
+            CreateSetupTokenView(
                 uiState = uiState,
                 onSubmit = { onCreateSetupTokenSubmit() }
             )
             if (uiState.setupToken.isNotEmpty()) {
-                CardForm(
-                    cardNumber = "",
-                    expirationDate = "",
-                    securityCode = "",
-                    onCardNumberChange = {},
-                    onExpirationDateChange = {},
-                    onSecurityCodeChange = {}
+                Spacer(modifier = Modifier.size(8.dp))
+                UpdateSetupTokenView(
+                    uiState = uiState,
+                    onCardNumberChange = { viewModel.cardNumber = it },
+                    onExpirationDateChange = { viewModel.cardExpirationDate = it },
+                    onSecurityCodeChange = { viewModel.cardSecurityCode = it },
+                    onSubmit = { onUpdateSetupTokenSubmit() }
                 )
             }
         }
     }
 
     @Composable
-    fun SetupTokenRequestView(
+    fun CreateSetupTokenView(
         uiState: VaultUiState,
         onSubmit: () -> Unit
     ) {
@@ -132,7 +142,45 @@ class VaultFragment : Fragment() {
                 Spacer(modifier = Modifier.size(8.dp))
                 WireframeButton(
                     text = "Create Setup Token",
-                    isLoading = uiState.isSetupTokenLoading,
+                    isLoading = uiState.isCreateSetupTokenLoading,
+                    onClick = { onSubmit() },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun UpdateSetupTokenView(
+        uiState: VaultUiState,
+        onCardNumberChange: (String) -> Unit,
+        onExpirationDateChange: (String) -> Unit,
+        onSecurityCodeChange: (String) -> Unit,
+        onSubmit: () -> Unit
+    ) {
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Vault Card",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                CardForm(
+                    cardNumber = uiState.cardNumber,
+                    expirationDate = uiState.cardExpirationDate,
+                    securityCode = uiState.cardSecurityCode,
+                    onCardNumberChange = { onCardNumberChange(it) },
+                    onExpirationDateChange = { onExpirationDateChange(it) },
+                    onSecurityCodeChange = { onSecurityCodeChange(it) },
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                WireframeButton(
+                    text = "Vault Card",
+                    isLoading = uiState.isUpdateSetupTokenLoading,
                     onClick = { onSubmit() },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -147,8 +195,9 @@ class VaultFragment : Fragment() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 VaultView(
-                    uiState = VaultUiState(),
-                    onCreateSetupTokenSubmit = {}
+                    uiState = VaultUiState(setupToken = "123"),
+                    onCreateSetupTokenSubmit = {},
+                    onUpdateSetupTokenSubmit = {},
                 )
             }
         }

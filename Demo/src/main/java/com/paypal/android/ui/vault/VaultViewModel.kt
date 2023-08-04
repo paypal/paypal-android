@@ -15,14 +15,39 @@ class VaultViewModel : ViewModel() {
             _uiState.update { it.copy(setupToken = value) }
         }
 
-    var isSetupTokenLoading: Boolean
-        get() = _uiState.value.isSetupTokenLoading
+    var isCreateSetupTokenLoading: Boolean
+        get() = _uiState.value.isCreateSetupTokenLoading
         set(value) {
-            _uiState.update { it.copy(isSetupTokenLoading = value) }
+            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
         }
+
+    var isUpdateSetupTokenLoading: Boolean
+        get() = _uiState.value.isCreateSetupTokenLoading
+        set(value) {
+            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
+        }
+
     var customerId: String
         get() = _uiState.value.customerId
         set(value) {
             _uiState.update { it.copy(customerId = value) }
+        }
+
+    var cardNumber: String
+        get() = _uiState.value.cardNumber
+        set(value) {
+            _uiState.update { it.copy(cardNumber = value) }
+        }
+
+    var cardExpirationDate: String
+        get() = _uiState.value.cardExpirationDate
+        set(value) {
+            _uiState.update { it.copy(cardExpirationDate = value) }
+        }
+
+    var cardSecurityCode: String
+        get() = _uiState.value.cardSecurityCode
+        set(value) {
+            _uiState.update { it.copy(cardSecurityCode = value) }
         }
 }
