@@ -32,6 +32,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.WireframeHeader
+import com.paypal.android.ui.features.Feature
 
 class SelectCardFragment : Fragment() {
 
@@ -58,13 +59,20 @@ class SelectCardFragment : Fragment() {
 
     private fun navigateToCardForm(testCard: TestCard? = null) {
         val feature = args.feature
-        val order = args.order
-        val action = SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(
-            feature,
-            order,
-            testCard
-        )
-        findNavController().navigate(action)
+        if (feature == Feature.CARD_VAULT) {
+            val action = SelectCardFragmentDirections.actionSelectCardFragmentToVaultFragment(
+                feature, testCard
+            )
+            findNavController().navigate(action)
+        } else {
+            val order = args.order
+            val action = SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(
+                feature,
+                order,
+                testCard
+            )
+            findNavController().navigate(action)
+        }
     }
 
     @OptIn(ExperimentalFoundationApi::class)

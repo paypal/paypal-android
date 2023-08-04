@@ -50,6 +50,26 @@
         </action>
     </fragment>
     <fragment
+        android:id="@+id/vaultFragment"
+        android:name="com.paypal.android.ui.vault.VaultFragment"
+        android:label="VaultFragment">
+        <argument
+            android:name="prefillCard"
+            android:defaultValue="@null"
+            app:argType="com.paypal.android.models.TestCard"
+            app:nullable="true" />
+<!--        <action-->
+<!--            android:id="@+id/action_cardFragment_to_approveOrderProgressFragment"-->
+<!--            app:destination="@id/approveOrderProgressFragment">-->
+<!--            <argument-->
+<!--                android:name="cardRequest"-->
+<!--                android:defaultValue="@null"-->
+<!--                app:argType="com.paypal.android.cardpayments.CardRequest"-->
+<!--                app:nullable="true"-->
+<!--                />-->
+<!--        </action>-->
+    </fragment>
+    <fragment
         android:id="@+id/payPalFragment"
         android:name="com.paypal.android.ui.paypal.PayPalFragment"
         android:label="PayPalFragment">
@@ -101,6 +121,19 @@
                 android:defaultValue="@null"
                 app:argType="com.paypal.android.api.model.Order"
                 app:nullable="true" />
+            <argument
+                android:name="prefillCard"
+                android:defaultValue="@null"
+                app:argType="com.paypal.android.models.TestCard"
+                app:nullable="true" />
+        </action>
+        <action
+            android:id="@+id/action_selectCardFragment_to_vaultFragment"
+            app:destination="@id/vaultFragment">
+            <argument
+                android:name="feature"
+                app:argType="com.paypal.android.ui.features.Feature"
+                app:nullable="false" />
             <argument
                 android:name="prefillCard"
                 android:defaultValue="@null"
