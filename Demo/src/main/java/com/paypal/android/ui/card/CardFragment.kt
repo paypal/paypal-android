@@ -131,6 +131,8 @@ class CardFragment : Fragment() {
     }
 
     private fun sendVaultRequest() {
+        val card = parseCard(viewModel.uiState.value)
+
         // TODO: implement vault without purchase
         AlertDialog.Builder(requireContext())
             .setTitle("TODO")

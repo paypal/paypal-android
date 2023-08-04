@@ -72,6 +72,10 @@ class CardClient internal constructor(
         }
     }
 
+    fun vaultRequest(activity: FragmentActivity, vaultRequest: VaultRequest) {
+
+    }
+
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         try {
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
