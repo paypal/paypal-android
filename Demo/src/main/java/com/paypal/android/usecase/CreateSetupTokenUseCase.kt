@@ -11,23 +11,10 @@ class CreateSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(card: Card, returnUrl: String, customerId: String?): String {
-        val cardNumber = card.number.replace("\\s".toRegex(), "")
-        val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
-
+    suspend operator fun invoke(customerId: String?): String {
+        // create a payment token with an empty card attribute; the merchant app will provide
+        // the card's details through the SDK
         val cardJSON = JSONObject()
-            .put("number", cardNumber)
-            .put("expiry", cardExpiry)
-            .put("security_code", card.securityCode)
-        card.cardholderName?.let { cardJSON.put("name", it) }
-
-        cardJSON.put("verification_method", "SCA_WHEN_REQUIRED")
-        val experienceContextJSON = JSONObject()
-
-        experienceContextJSON.put("return_url", returnUrl)
-        experienceContextJSON.put("cancel_url", returnUrl)
-        cardJSON.put("experience_context", experienceContextJSON)
-
         val paymentSourceJSON = JSONObject()
         paymentSourceJSON.put("card", cardJSON)
 
