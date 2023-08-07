@@ -44,12 +44,10 @@ import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.PaymentTokenView
-import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
@@ -189,6 +187,8 @@ class VaultFragment : Fragment() {
                 onSubmit = { onCreateSetupTokenSubmit() }
             )
             uiState.setupToken?.let { setupToken ->
+                Spacer(modifier = Modifier.size(8.dp))
+                SetupTokenView(setupToken = setupToken)
                 Spacer(modifier = Modifier.size(8.dp))
                 UpdateSetupTokenView(
                     uiState = uiState,
