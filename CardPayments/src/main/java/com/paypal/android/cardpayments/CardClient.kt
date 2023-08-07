@@ -31,11 +31,16 @@ class CardClient internal constructor(
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
+    var vaultListener: VaultListener? = null
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
-    private val exceptionHandler = CoreCoroutineExceptionHandler {
+    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler {
         notifyApproveOrderFailure(it)
+    }
+
+    private val vaultExceptionHandler = CoreCoroutineExceptionHandler {
+        notifyVaultFailure(it)
     }
 
     private var orderId: String? = null
@@ -70,17 +75,20 @@ class CardClient internal constructor(
         orderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
 
-        CoroutineScope(dispatcher).launch(exceptionHandler) {
+        CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
         }
     }
 
-    suspend fun vault(context: Context, vaultRequest: VaultRequest): VaultResult {
+    suspend fun vault(context: Context, vaultRequest: VaultRequest) {
         val applicationContext = context.applicationContext
-        val result = vaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+
+        CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
+            val result = vaultRequest.run {
+                paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+            }
+            notifyVaultSuccess(result)
         }
-        return result
     }
 
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
@@ -134,7 +142,7 @@ class CardClient internal constructor(
 
     private fun handleBrowserSwitchSuccess(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
-            CoroutineScope(dispatcher).launch(exceptionHandler) {
+            CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
                 try {
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:get-order-info:succeeded",
@@ -167,5 +175,12 @@ class CardClient internal constructor(
     private fun notifyApproveOrderFailure(error: PayPalSDKError) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
         approveOrderListener?.onApproveOrderFailure(error)
+    }
+
+    private fun notifyVaultSuccess(result: VaultResult) {
+        vaultListener?.onVaultSuccess(result)
+    }
+    private fun notifyVaultFailure(error: PayPalSDKError) {
+        vaultListener?.onVaultFailure(error)
     }
 }

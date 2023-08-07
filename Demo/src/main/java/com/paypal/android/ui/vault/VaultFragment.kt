@@ -38,6 +38,7 @@ import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.VaultListener
 import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
@@ -46,6 +47,7 @@ import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
+import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
@@ -111,15 +113,21 @@ class VaultFragment : Fragment() {
 
             val configuration = CoreConfig(clientId = clientId)
             cardClient = CardClient(requireActivity(), configuration)
+            cardClient.vaultListener = object : VaultListener {
+                override fun onVaultSuccess(result: VaultResult) {
+                    viewModel.isUpdateSetupTokenLoading = false
+                    viewModel.vaultResult = result
+                }
+
+                override fun onVaultFailure(error: PayPalSDKError) {
+                    viewModel.isUpdateSetupTokenLoading = false
+                    // TODO: handle error
+                }
+            }
 
             val card = parseCard(viewModel.uiState.value)
             val vaultRequest = VaultRequest(viewModel.setupToken, card)
-            try {
-                viewModel.vaultResult = cardClient.vault(requireContext(), vaultRequest)
-            } catch (e: PayPalSDKError) {
-                // TODO: handle error
-            }
-            viewModel.isUpdateSetupTokenLoading = false
+            cardClient.vault(requireContext(), vaultRequest)
         }
     }
 
@@ -197,7 +205,7 @@ class VaultFragment : Fragment() {
             }
             uiState.paymentToken?.let { paymentToken ->
                 Spacer(modifier = Modifier.size(8.dp))
-                PaymentTokenSuccessView(paymentToken = paymentToken)
+                PaymentTokenView(paymentToken = paymentToken)
             }
         }
     }
@@ -298,26 +306,6 @@ class VaultFragment : Fragment() {
                     onClick = { onSubmit() },
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
-        }
-    }
-
-    @Composable
-    fun PaymentTokenSuccessView(paymentToken: PaymentToken) {
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "Payment Token",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                PropertyView(name = "ID", value = paymentToken.id)
-                PropertyView(name = "Customer ID", value = paymentToken.customerId)
-                PropertyView(name = "Card Brand", value = paymentToken.cardBrand)
-                PropertyView(name = "Card Last 4", value = paymentToken.cardLast4)
             }
         }
     }

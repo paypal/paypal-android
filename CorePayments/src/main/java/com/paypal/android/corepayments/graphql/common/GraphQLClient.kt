@@ -30,7 +30,7 @@ class GraphQLClient internal constructor(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject): GraphQLResponse {
+    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
         val body = graphQLRequestBody.toString()
         val httpRequest = HttpRequest(graphQLURL, HttpMethod.POST, body, httpRequestHeaders)
         val httpResponse = http.send(httpRequest)
