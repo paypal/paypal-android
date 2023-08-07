@@ -21,7 +21,7 @@ class GraphQLClient internal constructor(
     constructor(coreConfig: CoreConfig) : this(coreConfig, Http())
 
     private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
-    private val graphQLURL = URL("$graphQLEndpoint/graphql")
+    private val graphQLURL = "$graphQLEndpoint/graphql"
 
     private val httpRequestHeaders = mutableMapOf(
         "Content-Type" to "application/json",
@@ -32,7 +32,9 @@ class GraphQLClient internal constructor(
 
     suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
         val body = graphQLRequestBody.toString()
-        val httpRequest = HttpRequest(graphQLURL, HttpMethod.POST, body, httpRequestHeaders)
+        val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
+        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
+
         val httpResponse = http.send(httpRequest)
         val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
         val status = httpResponse.status
