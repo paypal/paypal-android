@@ -1,5 +1,7 @@
 package com.paypal.android.corepayments.api
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.R
@@ -31,24 +33,27 @@ class EligibilityAPIUnitTest {
     private lateinit var sut: EligibilityAPI
 
     // Ref: https://stackoverflow.com/a/58617596
-    private val resourceLoader =
-        ResourceLoader()
+    private val resourceLoader = ResourceLoader()
+
+    private lateinit var context: Context
 
     @Before
     fun beforeEach() {
+        context = ApplicationProvider.getApplicationContext()
         graphQLClient = mockk(relaxed = true)
     }
 
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        sut.checkEligibility()
+        sut.checkEligibility(context)
 
         val requestBodySlot = slot<JSONObject>()
         coVerify { graphQLClient.send(capture(requestBodySlot)) }
         val actualRequestBody = requestBodySlot.captured
 
-        val expectedQuery = resourceLoader.loadRawResource(, R.raw.graphql_query_funding_eligibility)
+        val expectedQuery =
+            resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
         // language=JSON
         val expectedRequestBody = """
         {
@@ -83,7 +88,7 @@ class EligibilityAPIUnitTest {
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.checkEligibility()
+        val result = sut.checkEligibility(context)
 
         assertTrue(result.isCreditCardEligible)
         assertTrue(result.isVenmoEligible)

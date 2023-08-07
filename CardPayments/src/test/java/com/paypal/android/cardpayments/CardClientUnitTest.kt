@@ -42,6 +42,8 @@ class CardClientUnitTest {
     private val cardRequest = CardRequest(orderId, card, "return_url")
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
+    private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
+
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED)
@@ -173,6 +175,7 @@ class CardClientUnitTest {
         val sut = CardClient(
             activity,
             checkoutOrdersAPI,
+            paymentMethodTokensAPI,
             analyticsService,
             browserSwitchClient,
             dispatcher
