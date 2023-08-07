@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -32,6 +34,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -39,9 +42,11 @@ import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
+import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -167,6 +172,7 @@ class VaultFragment : Fragment() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             CreateSetupTokenView(
                 uiState = uiState,
@@ -189,9 +195,9 @@ class VaultFragment : Fragment() {
                     onSubmit = { onCreatePaymentTokenSubmit() }
                 )
             }
-            if (uiState.paymentToken.isNotEmpty()) {
+            uiState.paymentToken?.let { paymentToken ->
                 Spacer(modifier = Modifier.size(8.dp))
-                Text("Create Payment Token Success: ${uiState.paymentToken}")
+                PaymentTokenSuccessView(paymentToken = paymentToken)
             }
         }
     }
@@ -296,6 +302,26 @@ class VaultFragment : Fragment() {
         }
     }
 
+    @Composable
+    fun PaymentTokenSuccessView(paymentToken: PaymentToken) {
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Payment Token",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                PropertyView(name = "ID", value = paymentToken.id)
+                PropertyView(name = "Customer ID", value = paymentToken.customerId)
+                PropertyView(name = "Card Brand", value = paymentToken.cardBrand)
+                PropertyView(name = "Card Last 4", value = paymentToken.cardLast4)
+            }
+        }
+    }
+
     @ExperimentalMaterial3Api
     @Preview
     @Composable
@@ -305,6 +331,12 @@ class VaultFragment : Fragment() {
                 VaultView(
                     uiState = VaultUiState(
                         setupToken = "123",
+                        paymentToken = PaymentToken(
+                            "fake-id",
+                            "fake-customer-id",
+                            "1234",
+                            "fake-card-brand"
+                        ),
                         vaultResult = VaultResult("456", "fake-status")
                     ),
                     onCreateSetupTokenSubmit = {},

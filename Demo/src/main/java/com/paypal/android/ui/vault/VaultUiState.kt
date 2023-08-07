@@ -1,10 +1,11 @@
 package com.paypal.android.ui.vault
 
+import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.cardpayments.VaultResult
 
 data class VaultUiState(
     val setupToken: String = "",
-    val paymentToken: String = "",
+    val paymentToken: PaymentToken? = null,
     val isCreateSetupTokenLoading: Boolean = false,
     val isUpdateSetupTokenLoading: Boolean = false,
     val isCreatePaymentTokenLoading: Boolean = false,

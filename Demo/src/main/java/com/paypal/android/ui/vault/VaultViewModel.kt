@@ -1,6 +1,7 @@
 package com.paypal.android.ui.vault
 
 import androidx.lifecycle.ViewModel
+import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.VaultResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ class VaultViewModel : ViewModel() {
             _uiState.update { it.copy(setupToken = value) }
         }
 
-    var paymentToken: String
+    var paymentToken: PaymentToken?
         get() = _uiState.value.paymentToken
         set(value) {
             _uiState.update { it.copy(paymentToken = value) }
