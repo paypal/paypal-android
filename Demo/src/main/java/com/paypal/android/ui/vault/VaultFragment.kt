@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -177,11 +178,16 @@ class VaultFragment : Fragment() {
         onUpdateSetupTokenSubmit: () -> Unit,
         onCreatePaymentTokenSubmit: () -> Unit
     ) {
+        val scrollState = rememberScrollState()
+        LaunchedEffect(uiState) {
+            // continuously scroll to bottom of the list when event state is updated
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             CreateSetupTokenView(
                 uiState = uiState,
