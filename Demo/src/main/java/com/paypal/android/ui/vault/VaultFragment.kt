@@ -48,6 +48,7 @@ import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.PaymentTokenView
+import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
@@ -200,6 +201,8 @@ class VaultFragment : Fragment() {
             }
             uiState.vaultResult?.let { vaultResult ->
                 Spacer(modifier = Modifier.size(8.dp))
+                VaultSuccessView(vaultResult = vaultResult)
+                Spacer(modifier = Modifier.size(8.dp))
                 CreatePaymentTokenView(
                     uiState = uiState,
                     onSubmit = { onCreatePaymentTokenSubmit() }
@@ -308,6 +311,24 @@ class VaultFragment : Fragment() {
                     onClick = { onSubmit() },
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+        }
+    }
+
+    @Composable
+    fun VaultSuccessView(vaultResult: VaultResult) {
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Vault Success",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                PropertyView(name = "Setup Token Id", value = vaultResult.setupTokenId)
+                PropertyView(name = "Status", value = vaultResult.status)
             }
         }
     }
