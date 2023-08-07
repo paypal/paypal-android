@@ -7,4 +7,4 @@ import kotlinx.parcelize.Parcelize
 data class VaultResult(
     val setupTokenId: String,
     val status: String
-): Parcelable
+) : Parcelable

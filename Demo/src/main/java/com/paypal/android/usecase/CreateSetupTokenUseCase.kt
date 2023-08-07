@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.cardpayments.Card
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -31,7 +30,7 @@ class CreateSetupTokenUseCase @Inject constructor(
         // Ref: https://stackoverflow.com/a/19610814
         val body = requestJSON.toString().replace("\\/", "/")
 
-        val jsonOrder = JsonParser.parseString(body.toString()) as JsonObject
+        val jsonOrder = JsonParser.parseString(body) as JsonObject
         val response = sdkSampleServerAPI.createSetupToken(jsonOrder)
         val responseJSON = JSONObject(response.string())
 
