@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.model.PaymentToken
+import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -49,6 +50,7 @@ import com.paypal.android.ui.card.DateString
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
+import com.paypal.android.uishared.components.SetupTokenView
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
@@ -126,7 +128,7 @@ class VaultFragment : Fragment() {
             }
 
             val card = parseCard(viewModel.uiState.value)
-            val vaultRequest = VaultRequest(viewModel.setupToken, card)
+            val vaultRequest = VaultRequest(viewModel.setupToken!!.id, card)
             cardClient.vault(requireContext(), vaultRequest)
         }
     }
@@ -134,7 +136,7 @@ class VaultFragment : Fragment() {
     private fun createPaymentToken() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isCreatePaymentTokenLoading = true
-            viewModel.paymentToken = createPaymentTokenUseCase(viewModel.setupToken)
+            viewModel.paymentToken = createPaymentTokenUseCase(viewModel.setupToken!!)
             viewModel.isCreatePaymentTokenLoading = false
         }
     }
@@ -186,7 +188,7 @@ class VaultFragment : Fragment() {
                 uiState = uiState,
                 onSubmit = { onCreateSetupTokenSubmit() }
             )
-            if (uiState.setupToken.isNotEmpty()) {
+            uiState.setupToken?.let { setupToken ->
                 Spacer(modifier = Modifier.size(8.dp))
                 UpdateSetupTokenView(
                     uiState = uiState,
@@ -318,9 +320,13 @@ class VaultFragment : Fragment() {
             Surface(modifier = Modifier.fillMaxSize()) {
                 VaultView(
                     uiState = VaultUiState(
-                        setupToken = "123",
+                        setupToken = SetupToken(
+                            id = "fake-setup-token-id",
+                            customerId = "fake-customer-id",
+                            status = "fake-setup-token-status"
+                        ),
                         paymentToken = PaymentToken(
-                            "fake-id",
+                            "fake-payment-token-id",
                             "fake-customer-id",
                             "1234",
                             "fake-card-brand"

@@ -2,6 +2,7 @@ package com.paypal.android.ui.vault
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.PaymentToken
+import com.paypal.android.api.model.SetupToken
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.VaultResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +13,7 @@ class VaultViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(VaultUiState())
     val uiState = _uiState.asStateFlow()
 
-    var setupToken: String
+    var setupToken: SetupToken?
         get() = _uiState.value.setupToken
         set(value) {
             _uiState.update { it.copy(setupToken = value) }
