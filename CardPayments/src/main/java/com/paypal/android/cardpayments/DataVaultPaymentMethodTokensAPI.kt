@@ -54,12 +54,14 @@ class DataVaultPaymentMethodTokensAPI internal constructor(
         val graphQLRequest = JSONObject()
             .put("query", query)
             .put("variables", variables)
-        val graphQLResponse = graphQLClient.send(graphQLRequest)
+        val graphQLResponse =
+            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->
             val setupToken = responseJSON.getJSONObject("updateVaultSetupToken")
-            val setupTokenId = setupToken.getString("id")
-            val setupTokenStatus = setupToken.getString("status")
-            return VaultResult(setupTokenId, setupTokenStatus)
+            return VaultResult(
+                setupTokenId = setupToken.getString("id"),
+                status = setupToken.getString("status")
+            )
         }
         // TODO: add vault api specific error handling
         throw PayPalSDKError(
