@@ -37,6 +37,8 @@ android {
         abortOnError true
         warningsAsErrors true
     }
+
+    testOptions.unitTests.includeAndroidResources true
 }
 
 dependencies {
@@ -53,6 +55,7 @@ dependencies {
     testImplementation deps.jsonAssert
     testImplementation deps.robolectric
     testImplementation deps.kotlinxAndroidCoroutinesTest
+    testImplementation deps.androidxTestCore
     testImplementation deps.striktCore
     testImplementation deps.striktMockk
 

@@ -1,6 +1,6 @@
 package com.paypal.android.corepayments.api
 
-import android.content.Context
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -28,18 +28,14 @@ class EligibilityAPIUnitTest {
 
     private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
 
-    private lateinit var graphQLClient: GraphQLClient
-
-    private lateinit var sut: EligibilityAPI
-
-    // Ref: https://stackoverflow.com/a/58617596
     private val resourceLoader = ResourceLoader()
+    private val context = ApplicationProvider.getApplicationContext<Application>()
 
-    private lateinit var context: Context
+    private lateinit var graphQLClient: GraphQLClient
+    private lateinit var sut: EligibilityAPI
 
     @Before
     fun beforeEach() {
-        context = ApplicationProvider.getApplicationContext()
         graphQLClient = mockk(relaxed = true)
     }
 
