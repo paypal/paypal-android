@@ -84,7 +84,7 @@ class VaultFragment : Fragment() {
                         VaultView(
                             uiState = uiState,
                             onCreateSetupTokenSubmit = { createSetupToken() },
-                            onUpdateSetupTokenSubmit = { updateSetupToken() },
+                            onAttachCardToSetupTokenSubmit = { attachCardToSetupToken() },
                             onCreatePaymentTokenSubmit = { createPaymentToken() },
                         )
                     }
@@ -101,7 +101,7 @@ class VaultFragment : Fragment() {
         }
     }
 
-    private fun updateSetupToken() {
+    private fun attachCardToSetupToken() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isUpdateSetupTokenLoading = true
             val clientId = sdkSampleServerAPI.fetchClientId()
@@ -168,7 +168,7 @@ class VaultFragment : Fragment() {
     fun VaultView(
         uiState: VaultUiState,
         onCreateSetupTokenSubmit: () -> Unit,
-        onUpdateSetupTokenSubmit: () -> Unit,
+        onAttachCardToSetupTokenSubmit: () -> Unit,
         onCreatePaymentTokenSubmit: () -> Unit
     ) {
         val scrollState = rememberScrollState()
@@ -182,7 +182,7 @@ class VaultFragment : Fragment() {
                 .padding(8.dp)
                 .verticalScroll(scrollState)
         ) {
-            SetupTokenCreateForm(
+            CreateSetupTokenForm(
                 uiState = uiState,
                 onCustomerIdValueChange = { value -> viewModel.customerId = value },
                 onSubmit = { onCreateSetupTokenSubmit() }
@@ -191,19 +191,19 @@ class VaultFragment : Fragment() {
                 Spacer(modifier = Modifier.size(8.dp))
                 SetupTokenView(setupToken = setupToken)
                 Spacer(modifier = Modifier.size(8.dp))
-                SetupTokenAddCardForm(
+                AttachCardToSetupTokenForm(
                     uiState = uiState,
                     onCardNumberChange = { viewModel.cardNumber = it },
                     onExpirationDateChange = { viewModel.cardExpirationDate = it },
                     onSecurityCodeChange = { viewModel.cardSecurityCode = it },
-                    onSubmit = { onUpdateSetupTokenSubmit() }
+                    onSubmit = { onAttachCardToSetupTokenSubmit() }
                 )
             }
             uiState.vaultResult?.let { vaultResult ->
                 Spacer(modifier = Modifier.size(8.dp))
                 VaultSuccessView(vaultResult = vaultResult)
                 Spacer(modifier = Modifier.size(8.dp))
-                PaymentTokenCreateForm(
+                CreatePaymentTokenForm(
                     uiState = uiState,
                     onSubmit = { onCreatePaymentTokenSubmit() }
                 )
@@ -255,7 +255,7 @@ class VaultFragment : Fragment() {
                         vaultResult = VaultResult("456", "fake-status")
                     ),
                     onCreateSetupTokenSubmit = {},
-                    onUpdateSetupTokenSubmit = {},
+                    onAttachCardToSetupTokenSubmit = {},
                     onCreatePaymentTokenSubmit = {},
                 )
             }
