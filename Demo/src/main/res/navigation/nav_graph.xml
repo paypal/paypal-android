@@ -58,16 +58,6 @@
             android:defaultValue="@null"
             app:argType="com.paypal.android.models.TestCard"
             app:nullable="true" />
-<!--        <action-->
-<!--            android:id="@+id/action_cardFragment_to_approveOrderProgressFragment"-->
-<!--            app:destination="@id/approveOrderProgressFragment">-->
-<!--            <argument-->
-<!--                android:name="cardRequest"-->
-<!--                android:defaultValue="@null"-->
-<!--                app:argType="com.paypal.android.cardpayments.CardRequest"-->
-<!--                app:nullable="true"-->
-<!--                />-->
-<!--        </action>-->
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
