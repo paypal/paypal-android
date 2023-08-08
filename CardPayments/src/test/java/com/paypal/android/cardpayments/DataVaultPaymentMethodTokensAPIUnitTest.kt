@@ -7,12 +7,15 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
+import com.paypal.android.corepayments.graphql.common.GraphQLResponse
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -131,5 +134,32 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         """
 
         JSONAssert.assertEquals(JSONObject(expectedRequestBody), actualRequestBody, true)
+    }
+
+    @Test
+    fun updateSetupToken_returnsVaultResult() = runTest {
+        // language=JSON
+        val json = """
+            {
+              "updateVaultSetupToken": {
+                "id": "fake-setup-token-id-from-result",
+                "status": "fake-status"
+              }
+            }
+        """.trimIndent()
+        val graphQLResponse = GraphQLResponse(JSONObject(json))
+        coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResponse
+
+        val card = Card(
+            number = "4111111111111111",
+            expirationMonth = "01",
+            expirationYear = "24",
+            securityCode = "123"
+        )
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
+        val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+
+        assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
+        assertEquals("fake-status", result.status)
     }
 }
