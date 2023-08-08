@@ -80,7 +80,7 @@ class CardClient internal constructor(
         }
     }
 
-    suspend fun vault(context: Context, vaultRequest: VaultRequest) {
+    fun vault(context: Context, vaultRequest: VaultRequest) {
         val applicationContext = context.applicationContext
 
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
