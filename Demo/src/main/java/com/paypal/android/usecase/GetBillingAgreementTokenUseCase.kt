@@ -1,19 +1,17 @@
 package com.paypal.android.usecase
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import javax.inject.Inject
 
 class GetBillingAgreementTokenUseCase
     @Inject constructor(private val sdkSampleServerAPI: SDKSampleServerAPI) {
 
     suspend operator fun invoke(): Order = withContext(Dispatchers.IO) {
-        val jsonOrder = JsonParser.parseString(BA_TOKEN_BODY) as JsonObject
-        sdkSampleServerAPI.createOrder(jsonOrder)
+        sdkSampleServerAPI.createOrder(JSONObject(BA_TOKEN_BODY))
     }
 
     companion object {

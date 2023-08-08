@@ -13,26 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +43,6 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.Vault
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
@@ -63,7 +57,7 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
-         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject
@@ -83,7 +77,6 @@ class CardFragment : Fragment() {
         val feature = args.feature
         if (feature == Feature.CARD_VAULT) {
             // the vault api only has the 'when required' option
-            viewModel.shouldVault = true
             viewModel.scaOption = "WHEN REQUIRED"
         } else {
             viewModel.scaOption = "ALWAYS"
@@ -237,7 +230,6 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun OptionsForm(uiState: CardViewUiState) {
-        val localFocusManager = LocalFocusManager.current
         val scaOptions = if (args.feature == Feature.CARD_VAULT) {
             stringResourceListOf(R.string.sca_when_required)
         } else {
@@ -249,29 +241,6 @@ class CardFragment : Fragment() {
             selectedOption = uiState.scaOption,
             onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
         )
-        Spacer(modifier = Modifier.size(16.dp))
-        if (args.feature != Feature.CARD_VAULT) {
-            Row {
-                Text(
-                    text = "Should Vault",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1.0f)
-                )
-                Switch(
-                    checked = uiState.shouldVault,
-                    onCheckedChange = { shouldVault -> viewModel.shouldVault = shouldVault }
-                )
-            }
-        }
-        OutlinedTextField(
-            value = uiState.customerId,
-            label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
-            onValueChange = { value -> viewModel.customerId = value },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 
     private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {
@@ -280,9 +249,7 @@ class CardFragment : Fragment() {
             "ALWAYS" -> SCA.SCA_ALWAYS
             else -> SCA.SCA_WHEN_REQUIRED
         }
-
-        val vault = if (uiState.shouldVault) Vault(customerId = uiState.customerId) else null
-        return CardRequest(order.id!!, card, APP_RETURN_URL, sca, vault)
+        return CardRequest(order.id!!, card, APP_RETURN_URL, sca)
     }
 
     private fun parseCard(uiState: CardViewUiState): Card {
