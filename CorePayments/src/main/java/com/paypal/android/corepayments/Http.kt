@@ -54,5 +54,4 @@ internal class Http(
                 HttpResponse(status = status, error = it)
             }.getOrNull()!!
         }
-
 }
