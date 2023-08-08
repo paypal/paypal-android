@@ -63,7 +63,6 @@ class DataVaultPaymentMethodTokensAPI internal constructor(
                 status = setupToken.getString("status")
             )
         }
-        // TODO: add vault api specific error handling
         throw PayPalSDKError(
             0,
             "Error in checking eligibility: ${graphQLResponse.errors}",
