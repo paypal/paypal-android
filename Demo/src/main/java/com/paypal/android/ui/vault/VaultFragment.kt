@@ -184,7 +184,7 @@ class VaultFragment : Fragment() {
                 .padding(8.dp)
                 .verticalScroll(scrollState)
         ) {
-            CreateSetupTokenForm(
+            SetupTokenCreateForm(
                 uiState = uiState,
                 onCustomerIdValueChange = { value -> viewModel.customerId = value },
                 onSubmit = { onCreateSetupTokenSubmit() }
@@ -193,7 +193,7 @@ class VaultFragment : Fragment() {
                 Spacer(modifier = Modifier.size(8.dp))
                 SetupTokenView(setupToken = setupToken)
                 Spacer(modifier = Modifier.size(8.dp))
-                UpdateSetupTokenView(
+                SetupTokenUpdateForm(
                     uiState = uiState,
                     onCardNumberChange = { viewModel.cardNumber = it },
                     onExpirationDateChange = { viewModel.cardExpirationDate = it },
@@ -213,44 +213,6 @@ class VaultFragment : Fragment() {
             uiState.paymentToken?.let { paymentToken ->
                 Spacer(modifier = Modifier.size(8.dp))
                 PaymentTokenView(paymentToken = paymentToken)
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun UpdateSetupTokenView(
-        uiState: VaultUiState,
-        onCardNumberChange: (String) -> Unit,
-        onExpirationDateChange: (String) -> Unit,
-        onSecurityCodeChange: (String) -> Unit,
-        onSubmit: () -> Unit
-    ) {
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "Vault Card",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                CardForm(
-                    cardNumber = uiState.cardNumber,
-                    expirationDate = uiState.cardExpirationDate,
-                    securityCode = uiState.cardSecurityCode,
-                    onCardNumberChange = { onCardNumberChange(it) },
-                    onExpirationDateChange = { onExpirationDateChange(it) },
-                    onSecurityCodeChange = { onSecurityCodeChange(it) },
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                WireframeButton(
-                    text = "Vault Card",
-                    isLoading = uiState.isUpdateSetupTokenLoading,
-                    onClick = { onSubmit() },
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }

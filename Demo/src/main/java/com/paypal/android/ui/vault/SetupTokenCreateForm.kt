@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.ui.WireframeButton
 
 @Composable
-fun CreateSetupTokenForm(
+fun SetupTokenCreateForm(
     uiState: VaultUiState,
     onCustomerIdValueChange: (String) -> Unit,
     onSubmit: () -> Unit
