@@ -7,7 +7,7 @@ import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.common.GraphQLClient
 import org.json.JSONObject
 
-class DataVaultPaymentMethodTokensAPI internal constructor(
+internal class DataVaultPaymentMethodTokensAPI internal constructor(
     private val coreConfig: CoreConfig,
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader

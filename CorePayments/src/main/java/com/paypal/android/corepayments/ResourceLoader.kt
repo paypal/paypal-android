@@ -3,6 +3,7 @@ package com.paypal.android.corepayments
 import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.RawRes
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -10,6 +11,7 @@ import java.io.IOException
 /**
  * Convenience class to simplify interaction with Android resource APIs.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class ResourceLoader {
 
     /**
