@@ -4,18 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +23,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -86,7 +81,6 @@ class CardFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        val feature = args.feature
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         CardView(
                             feature = feature,
@@ -101,19 +95,7 @@ class CardFragment : Fragment() {
 
     private fun onFormSubmit() {
         viewLifecycleOwner.lifecycleScope.launch {
-            when (args.feature) {
-                Feature.CARD_APPROVE_ORDER -> {
-                    sendApproveOrderRequest()
-                }
-
-                Feature.CARD_VAULT -> {
-                    sendVaultRequest()
-                }
-
-                else -> {
-                    TODO("invalid state")
-                }
-            }
+            sendApproveOrderRequest()
         }
     }
 
@@ -127,17 +109,6 @@ class CardFragment : Fragment() {
         findNavController().navigate(
             CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest = cardRequest)
         )
-    }
-
-    private fun sendVaultRequest() {
-        val card = parseCard(viewModel.uiState.value)
-
-        // TODO: implement vault without purchase
-        AlertDialog.Builder(requireContext())
-            .setTitle("TODO")
-            .setMessage("Implement Vault Without Purchase")
-            .setPositiveButton("OK") { _, _ -> }
-            .show()
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
