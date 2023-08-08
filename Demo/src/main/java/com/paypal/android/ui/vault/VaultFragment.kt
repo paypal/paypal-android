@@ -40,9 +40,7 @@ import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.DateString
-import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
@@ -193,7 +191,7 @@ class VaultFragment : Fragment() {
                 Spacer(modifier = Modifier.size(8.dp))
                 SetupTokenView(setupToken = setupToken)
                 Spacer(modifier = Modifier.size(8.dp))
-                SetupTokenUpdateForm(
+                SetupTokenAddCardForm(
                     uiState = uiState,
                     onCardNumberChange = { viewModel.cardNumber = it },
                     onExpirationDateChange = { viewModel.cardExpirationDate = it },
@@ -205,7 +203,7 @@ class VaultFragment : Fragment() {
                 Spacer(modifier = Modifier.size(8.dp))
                 VaultSuccessView(vaultResult = vaultResult)
                 Spacer(modifier = Modifier.size(8.dp))
-                CreatePaymentTokenView(
+                PaymentTokenCreateForm(
                     uiState = uiState,
                     onSubmit = { onCreatePaymentTokenSubmit() }
                 )
@@ -213,32 +211,6 @@ class VaultFragment : Fragment() {
             uiState.paymentToken?.let { paymentToken ->
                 Spacer(modifier = Modifier.size(8.dp))
                 PaymentTokenView(paymentToken = paymentToken)
-            }
-        }
-    }
-
-    @Composable
-    fun CreatePaymentTokenView(
-        uiState: VaultUiState,
-        onSubmit: () -> Unit
-    ) {
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "Create a Permanent Payment Method Token",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                WireframeButton(
-                    text = "Create Payment Token",
-                    isLoading = uiState.isCreatePaymentTokenLoading,
-                    onClick = { onSubmit() },
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }

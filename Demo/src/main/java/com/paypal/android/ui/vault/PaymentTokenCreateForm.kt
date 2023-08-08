@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -13,15 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.uishared.components.CardForm
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetupTokenUpdateForm(
+fun PaymentTokenCreateForm(
     uiState: VaultUiState,
-    onCardNumberChange: (String) -> Unit,
-    onExpirationDateChange: (String) -> Unit,
-    onSecurityCodeChange: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
     OutlinedCard(
@@ -31,21 +25,13 @@ fun SetupTokenUpdateForm(
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = "Vault Card",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            CardForm(
-                cardNumber = uiState.cardNumber,
-                expirationDate = uiState.cardExpirationDate,
-                securityCode = uiState.cardSecurityCode,
-                onCardNumberChange = { onCardNumberChange(it) },
-                onExpirationDateChange = { onExpirationDateChange(it) },
-                onSecurityCodeChange = { onSecurityCodeChange(it) },
+                text = "Create a Permanent Payment Method Token",
+                style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(
-                text = "Vault Card",
-                isLoading = uiState.isUpdateSetupTokenLoading,
+                text = "Create Payment Token",
+                isLoading = uiState.isCreatePaymentTokenLoading,
                 onClick = { onSubmit() },
                 modifier = Modifier.fillMaxWidth()
             )
