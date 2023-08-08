@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.corepayments.Address
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ResourceLoader
@@ -39,7 +40,12 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
     fun updateSetupToken_forCardWithRequiredFieldsSet_sendsGraphQLRequest() = runTest {
         sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
 
-        val card = Card("4111111111111111", "01", "24", "123")
+        val card = Card(
+            number = "4111111111111111",
+            expirationMonth = "01",
+            expirationYear = "24",
+            securityCode = "123"
+        )
         sut.updateSetupToken(context, "fake-setup-token-id", card)
 
         val requestBodySlot = slot<JSONObject>()
@@ -60,6 +66,64 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
                         "number": "4111111111111111",
                         "expiry": "24-01",
                         "securityCode": "123"
+                    }
+                }
+            }
+        }
+        """
+
+        JSONAssert.assertEquals(JSONObject(expectedRequestBody), actualRequestBody, true)
+    }
+
+    @Test
+    fun updateSetupToken_forCardWithRequiredAndOptionalFieldsSet_sendsGraphQLRequest() = runTest {
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
+
+        val card = Card(
+            number = "4111111111111111",
+            expirationMonth = "01",
+            expirationYear = "24",
+            securityCode = "123",
+            cardholderName = "Jane Doe",
+            billingAddress = Address(
+                streetAddress = "2211 N 1st St.",
+                extendedAddress = "Apt. 1A",
+                locality = "San Jose",
+                region = "CA",
+                postalCode = "95131",
+                countryCode = "US"
+            )
+        )
+
+        sut.updateSetupToken(context, "fake-setup-token-id", card)
+
+        val requestBodySlot = slot<JSONObject>()
+        coVerify { graphQLClient.send(capture(requestBodySlot), "UpdateVaultSetupToken") }
+        val actualRequestBody = requestBodySlot.captured
+
+        val expectedQuery =
+            resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
+        // language=JSON
+        val expectedRequestBody = """
+        {
+            "query": "$expectedQuery",
+            "variables": {
+                "clientId": "fake-client-id",
+                "vaultSetupToken": "fake-setup-token-id",
+                "paymentSource": {
+                    "card": {
+                        "number": "4111111111111111",
+                        "expiry": "24-01",
+                        "name": "Jane Doe",
+                        "securityCode": "123",
+                        "billingAddress": {
+                            "addressLine1": "2211 N 1st St.",
+                            "addressLine2": "Apt. 1A",
+                            "adminArea1": "CA",
+                            "adminArea2": "San Jose",
+                            "postalCode": "95131",
+                            "countryCode": "US"
+                        }
                     }
                 }
             }
