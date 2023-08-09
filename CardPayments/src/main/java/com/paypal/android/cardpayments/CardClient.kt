@@ -38,12 +38,13 @@ class CardClient internal constructor(
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
-    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler {
-        notifyApproveOrderFailure(it)
+    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+        approveOrderListener?.onApproveOrderFailure(error)
     }
 
-    private val vaultExceptionHandler = CoreCoroutineExceptionHandler {
-        notifyVaultFailure(it)
+    private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
+        vaultListener?.onVaultFailure(error)
     }
 
     private var orderId: String? = null
@@ -138,7 +139,7 @@ class CardClient internal constructor(
         val result = vaultRequest.run {
             paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
         }
-        notifyVaultSuccess(result)
+        vaultListener?.onVaultSuccess(result)
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
@@ -182,18 +183,5 @@ class CardClient internal constructor(
     private fun notifyApproveOrderSuccess(result: CardResult) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
         approveOrderListener?.onApproveOrderSuccess(result)
-    }
-
-    private fun notifyApproveOrderFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
-        approveOrderListener?.onApproveOrderFailure(error)
-    }
-
-    private fun notifyVaultSuccess(result: VaultResult) {
-        vaultListener?.onVaultSuccess(result)
-    }
-
-    private fun notifyVaultFailure(error: PayPalSDKError) {
-        vaultListener?.onVaultFailure(error)
     }
 }
