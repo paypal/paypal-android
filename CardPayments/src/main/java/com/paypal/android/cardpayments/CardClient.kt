@@ -20,6 +20,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Use this client to approve an order with a [Card].
+ *
+ * @property approveOrderListener listener to receive callbacks from [CardClient.approveOrder].
+ * @property vaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
     activity: FragmentActivity,
@@ -80,6 +83,12 @@ class CardClient internal constructor(
         }
     }
 
+    /**
+     * Call this method to attach a payment source to a setup token.
+     *
+     * @param context [Context] Android context
+     * @param vaultRequest [VaultRequest] request containing details about the setup token and card to use for vaulting.
+     */
     fun vault(context: Context, vaultRequest: VaultRequest) {
         val applicationContext = context.applicationContext
 
