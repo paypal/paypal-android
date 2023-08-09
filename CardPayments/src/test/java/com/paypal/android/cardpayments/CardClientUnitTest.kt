@@ -1,8 +1,10 @@
 package com.paypal.android.cardpayments
 
+import android.app.Application
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ApplicationProvider
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
@@ -27,6 +29,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +43,7 @@ class CardClientUnitTest {
     private val orderId = "sample-order-id"
 
     private val cardRequest = CardRequest(orderId, card, "return_url")
+    private val vaultRequest = VaultRequest(setupTokenId = "fake-setup-token-id", card = card)
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
@@ -57,6 +61,9 @@ class CardClientUnitTest {
     private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
 
     private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
+    private val vaultListener = mockk<VaultListener>(relaxed = true)
+
+    private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
     // Ref: https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test#dispatchersmain-delegation
     private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
@@ -66,6 +73,7 @@ class CardClientUnitTest {
         mainThreadSurrogate = newSingleThreadContext("UI thread")
         Dispatchers.setMain(mainThreadSurrogate)
 
+        every { activity.applicationContext } returns applicationContext
         every { activity.lifecycle } returns activityLifecycle
     }
 
@@ -170,6 +178,25 @@ class CardClientUnitTest {
         verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
     }
 
+    @Test
+    fun `vault notifies listener of update setup token success`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        val vaultResult = VaultResult("fake-setup-token-id-from-result", "fake-status")
+        coEvery {
+            paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
+        } returns vaultResult
+
+        sut.vault(activity, vaultRequest)
+        advanceUntilIdle()
+
+        val resultSlot = slot<VaultResult>()
+        verify(exactly = 1) { vaultListener.onVaultSuccess(capture(resultSlot)) }
+
+        val actual = resultSlot.captured
+        assertEquals(vaultResult, actual)
+    }
+
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(
@@ -181,6 +208,7 @@ class CardClientUnitTest {
             dispatcher
         )
         sut.approveOrderListener = approveOrderListener
+        sut.vaultListener = vaultListener
         return sut
     }
 

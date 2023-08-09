@@ -83,23 +83,6 @@ class CardClient internal constructor(
         }
     }
 
-    /**
-     * Call this method to attach a payment source to a setup token.
-     *
-     * @param context [Context] Android context
-     * @param vaultRequest [VaultRequest] request containing details about the setup token and card to use for vaulting.
-     */
-    fun vault(context: Context, vaultRequest: VaultRequest) {
-        val applicationContext = context.applicationContext
-
-        CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            val result = vaultRequest.run {
-                paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
-            }
-            notifyVaultSuccess(result)
-        }
-    }
-
     private suspend fun confirmPaymentSource(activity: FragmentActivity, cardRequest: CardRequest) {
         try {
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
@@ -136,6 +119,26 @@ class CardClient internal constructor(
             )
             throw error
         }
+    }
+
+    /**
+     * Call this method to attach a payment source to a setup token.
+     *
+     * @param context [Context] Android context
+     * @param vaultRequest [VaultRequest] request containing details about the setup token and card to use for vaulting.
+     */
+    fun vault(context: Context, vaultRequest: VaultRequest) {
+        val applicationContext = context.applicationContext
+        CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
+            updateSetupToken(applicationContext, vaultRequest)
+        }
+    }
+
+    private suspend fun updateSetupToken(context: Context, vaultRequest: VaultRequest) {
+        val result = vaultRequest.run {
+            paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
+        }
+        notifyVaultSuccess(result)
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
@@ -189,6 +192,7 @@ class CardClient internal constructor(
     private fun notifyVaultSuccess(result: VaultResult) {
         vaultListener?.onVaultSuccess(result)
     }
+
     private fun notifyVaultFailure(error: PayPalSDKError) {
         vaultListener?.onVaultFailure(error)
     }
