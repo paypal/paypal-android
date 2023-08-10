@@ -15,6 +15,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -69,10 +70,16 @@ class SDKSampleServerAPI {
         ): ResponseBody
 
         @POST("/orders/{orderId}/capture")
-        suspend fun captureOrder(@Path("orderId") orderId: String): ResponseBody
+        suspend fun captureOrder(
+            @Path("orderId") orderId: String,
+            @Header("PayPal-Client-Metadata-Id") payPalClientMetadataId: String?
+        ): ResponseBody
 
         @POST("/orders/{orderId}/authorize")
-        suspend fun authorizeOrder(@Path("orderId") orderId: String): ResponseBody
+        suspend fun authorizeOrder(
+            @Path("orderId") orderId: String,
+            @Header("PayPal-Client-Metadata-Id") payPalClientMetadataId: String?
+        ): ResponseBody
 
         @POST("/setup_tokens")
         suspend fun createSetupToken(@Body jsonObject: JsonObject): ResponseBody
@@ -156,7 +163,8 @@ class SDKSampleServerAPI {
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order {
-        val response = findService(merchantIntegration).captureOrder(orderId)
+        val response =
+            findService(merchantIntegration).captureOrder(orderId, payPalClientMetadataId)
         return parseOrder(JSONObject(response.string()))
     }
 
@@ -165,7 +173,8 @@ class SDKSampleServerAPI {
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order {
-        val response = findService(merchantIntegration).authorizeOrder(orderId)
+        val response =
+            findService(merchantIntegration).authorizeOrder(orderId, payPalClientMetadataId)
         return parseOrder(JSONObject(response.string()))
     }
 
