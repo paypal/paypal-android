@@ -38,6 +38,7 @@ internal class EligibilityAPI internal constructor(
 
     /**
      *  Checks if merchant is eligible for a set of payment methods
+     *  @param context Android context
      *  @return [Eligibility] for payment methods
      *  @throws PayPalSDKError if something went wrong in the API call
      */
