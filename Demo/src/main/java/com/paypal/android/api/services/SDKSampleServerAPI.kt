@@ -153,6 +153,7 @@ class SDKSampleServerAPI {
 
     suspend fun captureOrder(
         orderId: String,
+        payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order {
         val response = findService(merchantIntegration).captureOrder(orderId)
@@ -161,6 +162,7 @@ class SDKSampleServerAPI {
 
     suspend fun authorizeOrder(
         orderId: String,
+        payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order {
         val response = findService(merchantIntegration).authorizeOrder(orderId)
