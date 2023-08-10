@@ -2,6 +2,8 @@ package com.paypal.android.fraudprotection
 
 import android.content.Context
 import android.util.Log
+import com.paypal.android.corepayments.CoreConfig
+import lib.android.paypal.com.magnessdk.Environment
 import lib.android.paypal.com.magnessdk.InvalidInputException
 import lib.android.paypal.com.magnessdk.MagnesSDK
 import lib.android.paypal.com.magnessdk.MagnesSettings
@@ -11,18 +13,23 @@ import lib.android.paypal.com.magnessdk.MagnesSource
  * Enables you to collect data about a customer's device and correlate it with a session identifier on your server.
  */
 class PayPalDataCollector internal constructor(
-    environment: PayPalDataCollectorEnvironment,
+    config: CoreConfig,
     private val magnesSDK: MagnesSDK,
     private val uuidHelper: UUIDHelper
 ) {
 
-    private val environment = getMagnesEnvironment(environment)
+    companion object {
+        fun getMagnesEnvironment(config: CoreConfig): Environment =
+            when (config.environment) {
+                com.paypal.android.corepayments.Environment.LIVE -> Environment.LIVE
+                com.paypal.android.corepayments.Environment.SANDBOX -> Environment.SANDBOX
+                com.paypal.android.corepayments.Environment.STAGING -> Environment.STAGE
+            }
+    }
 
-    constructor(environment: PayPalDataCollectorEnvironment) : this(
-        environment,
-        MagnesSDK.getInstance(),
-        UUIDHelper()
-    )
+    private val environment = getMagnesEnvironment(config)
+
+    constructor(config: CoreConfig) : this(config, MagnesSDK.getInstance(), UUIDHelper())
 
     /**
      * Gets a Client Metadata ID at the time of payment activity. Once a user initiates a payment
