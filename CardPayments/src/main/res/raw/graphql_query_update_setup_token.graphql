@@ -11,7 +11,8 @@ mutation UpdateVaultSetupToken(
         id,
         status,
         links {
-            rel, href
+            rel, 
+            href
         }
     }
 }
