@@ -65,7 +65,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         }
         throw PayPalSDKError(
             0,
-            "Error in checking eligibility: ${graphQLResponse.errors}",
+            "Error updating setup token: ${graphQLResponse.errors}",
             graphQLResponse.correlationId
         )
     }
