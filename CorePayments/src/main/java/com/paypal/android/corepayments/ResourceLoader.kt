@@ -17,6 +17,7 @@ class ResourceLoader {
     /**
      * Load an Android raw resource as a String using a background IO thread.
      *
+     * @param context Android context
      * @param resId ID of the resource that will be loaded
      */
     suspend fun loadRawResource(context: Context, @RawRes resId: Int): String = withContext(Dispatchers.IO) {
