@@ -7,7 +7,7 @@ mutation UpdateVaultSetupToken(
         clientId: $clientId
         vaultSetupToken: $vaultSetupToken
         paymentSource: $paymentSource
-        ) {
+    ) {
         id,
         status,
         links {
