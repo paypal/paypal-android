@@ -34,6 +34,7 @@ import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.ui.approveorderprogress.events.ApproveOrderEvent
 import com.paypal.android.ui.card.DataCollectorHandler
 import com.paypal.android.uishared.events.ComposableEvent
@@ -52,6 +53,7 @@ class ApproveOrderProgressFragment : Fragment() {
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private lateinit var cardClient: CardClient
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
@@ -71,6 +73,7 @@ class ApproveOrderProgressFragment : Fragment() {
 
             val configuration = CoreConfig(clientId = clientId)
             cardClient = CardClient(requireActivity(), configuration)
+            payPalDataCollector = PayPalDataCollector(configuration)
 
             args.cardRequest?.let { cardRequest ->
                 executeCardRequest(cardRequest)
@@ -164,15 +167,17 @@ class ApproveOrderProgressFragment : Fragment() {
         val order = sdkSampleServerAPI.getOrder(orderId)
         viewModel.appendEventToLog(ApproveOrderEvent.GetOrder(order))
 
+        val payPalClientMetadataId = payPalDataCollector.getClientMetadataId(requireContext())
+
         val finishResult = when (order.intent) {
             "CAPTURE" -> {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Capturing Order..."))
-                sdkSampleServerAPI.captureOrder(orderId)
+                sdkSampleServerAPI.captureOrder(orderId, payPalClientMetadataId)
             }
 
             "AUTHORIZE" -> {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
-                sdkSampleServerAPI.authorizeOrder(orderId)
+                sdkSampleServerAPI.authorizeOrder(orderId, payPalClientMetadataId)
             }
 
             else -> {
