@@ -1,7 +1,6 @@
 package com.paypal.android.ui.approveorderprogress
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,10 +42,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ApproveOrderProgressFragment : Fragment() {
-
-    companion object {
-        const val TAG = "CardFragment"
-    }
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
