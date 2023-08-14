@@ -43,8 +43,7 @@ class CardClient internal constructor(
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
-        approveOrderListener?.onApproveOrderFailure(error)
+        notifyApproveOrderFailure(error)
     }
 
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
@@ -189,5 +188,10 @@ class CardClient internal constructor(
     private fun notifyApproveOrderSuccess(result: CardResult) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
         approveOrderListener?.onApproveOrderSuccess(result)
+    }
+
+    private fun notifyApproveOrderFailure(error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+        approveOrderListener?.onApproveOrderFailure(error)
     }
 }
