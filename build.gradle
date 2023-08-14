@@ -61,7 +61,7 @@ buildscript {
             "hiltKapt"                    : "com.google.dagger:hilt-compiler:${versions.hilt}",
 
             // Browser Switch
-            "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.3.1",
+            "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.5.0",
 
             // Testing
             "junit"                       : "junit:junit:4.13.2",

@@ -23,12 +23,17 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import com.paypal.android.DemoViewModel
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
+import com.paypal.android.cardpayments.CardAuthChallenge
+import com.paypal.android.cardpayments.CardAuthChallengeResult
+import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
@@ -51,13 +56,17 @@ class ApproveOrderProgressFragment : Fragment() {
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
-    private lateinit var cardClient: CardClient
-
     @Inject
     lateinit var dataCollectorHandler: DataCollectorHandler
 
+    private val cardAuthLauncher = CardAuthLauncher()
+
     private val args: ApproveOrderProgressFragmentArgs by navArgs()
     private val viewModel by viewModels<ApproveOrderProgressViewModel>()
+
+    private val activityViewModel by activityViewModels<DemoViewModel>()
+
+    lateinit private var cardClient: CardClient
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -65,31 +74,10 @@ class ApproveOrderProgressFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
-            val clientId = sdkSampleServerAPI.fetchClientId()
 
-            val configuration = CoreConfig(clientId = clientId)
-            cardClient = CardClient(requireActivity(), configuration)
-
-            args.cardRequest?.let { cardRequest ->
-                executeCardRequest(cardRequest)
-            }
-        }
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MaterialTheme {
-                    Surface(modifier = Modifier.fillMaxSize()) {
-                        val events by viewModel.eventLog.collectAsStateWithLifecycle()
-                        ApproveOrderProgressView(events)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun executeCardRequest(cardRequest: CardRequest) {
+        // setup card client
+        val configuration = CoreConfig(clientId = sdkSampleServerAPI.clientId)
+        cardClient = CardClient(requireActivity(), configuration)
         cardClient.approveOrderListener = object : ApproveOrderListener {
             override fun onApproveOrderSuccess(result: CardResult) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
@@ -107,14 +95,50 @@ class ApproveOrderProgressFragment : Fragment() {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("USER CANCELED"))
             }
 
-            override fun onApproveOrderThreeDSecureWillLaunch() {
+            override fun didReceiveAuthChallenge(authChallenge: CardAuthChallenge) {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
+                cardAuthLauncher.launch(requireActivity(), authChallenge)
             }
 
             override fun onApproveOrderThreeDSecureDidFinish() {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
             }
         }
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        val events by viewModel.eventLog.collectAsStateWithLifecycle()
+                        ApproveOrderProgressView(events)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val cardAuthResult = checkForCardAuthResult()
+        if (cardAuthResult != null) {
+            cardAuthLauncher.clearPendingRequests(requireContext())
+            cardClient.continueApproveOrder(cardAuthResult)
+        } else {
+            executeCardRequestFromArgs()
+        }
+    }
+
+    private fun checkForCardAuthResult(): CardAuthChallengeResult? {
+        val context = requireContext()
+        return cardAuthLauncher.parseResult(context, activity?.intent)
+            ?: cardAuthLauncher.parseResult(context, activityViewModel.newIntent.value)
+    }
+
+    private fun executeCardRequestFromArgs() {
+        val cardRequest = args.cardRequest!!
+        viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
 
         dataCollectorHandler.setLogging(true)
         val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
@@ -123,7 +147,7 @@ class ApproveOrderProgressFragment : Fragment() {
         viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
 
         // approve order using card request
-        cardClient.approveOrder(requireActivity(), cardRequest)
+        cardClient.approveOrder(cardRequest)
     }
 
     @ExperimentalMaterial3Api
