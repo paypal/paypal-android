@@ -4,6 +4,8 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
+ * @suppress
+ *
  * A result returned by [CardClient] when an a successful vault occurs.
  *
  * @param setupTokenId the id for the setup token that was recently updated

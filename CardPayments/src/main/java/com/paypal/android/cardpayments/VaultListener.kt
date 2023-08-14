@@ -4,6 +4,8 @@ import androidx.annotation.MainThread
 import com.paypal.android.corepayments.PayPalSDKError
 
 /**
+ * @suppress
+ *
  * Listener to receive callbacks form [CardClient.vault].
  */
 interface VaultListener {

@@ -34,6 +34,10 @@ class CardClient internal constructor(
 ) {
 
     var approveOrderListener: ApproveOrderListener? = null
+
+    /**
+     * @suppress
+     */
     var vaultListener: VaultListener? = null
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
@@ -123,6 +127,8 @@ class CardClient internal constructor(
     }
 
     /**
+     * @suppress
+     *
      * Call this method to attach a payment source to a setup token.
      *
      * @param context [Context] Android context

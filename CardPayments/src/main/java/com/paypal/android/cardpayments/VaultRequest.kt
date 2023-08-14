@@ -4,6 +4,8 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
+ * @suppress
+ *
  * A vault request to attach a payment method to a setup token.
  *
  * @property setupTokenId id for the setup token to update.
