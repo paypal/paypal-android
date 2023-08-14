@@ -36,7 +36,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.ui.approveorderprogress.events.ApproveOrderEvent
-import com.paypal.android.ui.card.DataCollectorHandler
 import com.paypal.android.uishared.events.ComposableEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -54,9 +53,6 @@ class ApproveOrderProgressFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
-
-    @Inject
-    lateinit var dataCollectorHandler: DataCollectorHandler
 
     private val args: ApproveOrderProgressFragmentArgs by navArgs()
     private val viewModel by viewModels<ApproveOrderProgressViewModel>()
@@ -118,10 +114,6 @@ class ApproveOrderProgressFragment : Fragment() {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
             }
         }
-
-        dataCollectorHandler.setLogging(true)
-        val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
-        Log.i(TAG, "MetadataId: $clientMetadataId")
 
         viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
 
