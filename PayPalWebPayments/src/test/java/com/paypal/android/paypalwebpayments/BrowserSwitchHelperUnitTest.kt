@@ -45,34 +45,6 @@ class BrowserSwitchHelperUnitTest {
     }
 
     @Test
-    fun `when configurePayPalBrowserSwitchOptions is executed with STAGING, the correct url is returned`() {
-        val mockOrderId = "fake_order_id"
-        val mockCoreConfig = mockk<CoreConfig>(relaxed = true)
-        val mockFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-
-        val urlScheme = "com.android.test.scheme"
-        val finalUrl = "https://www.msmaster.qa.paypal.com/checkoutnow?" +
-                "token=$mockOrderId" +
-                "&redirect_uri=$urlScheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=${mockFundingSource.value}"
-        val uri = Uri.parse(finalUrl)
-
-        every { mockCoreConfig.environment } returns Environment.STAGING
-
-        val browserSwitchHelper = BrowserSwitchHelper(urlScheme)
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-            mockOrderId,
-            mockCoreConfig,
-            mockFundingSource
-        )
-
-        expectThat(browserSwitchOptions) {
-            get { url?.host }.isEqualTo(uri.host)
-        }
-    }
-
-    @Test
     fun `when configurePayPalBrowserSwitchOptions is executed with LIVE, the correct url is returned`() {
         val mockOrderId = "fake_order_id"
         val mockCoreConfig = mockk<CoreConfig>(relaxed = true)

@@ -159,31 +159,6 @@ class PayPalNativeCheckoutClientTest {
         }
 
     @Test
-    fun `when checkout is invoked with STAGING env, PayPalCheckout config is set with STAGE`() =
-        runTest {
-            val configSlot = slot<CheckoutConfig>()
-            every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
-
-            every {
-                PayPalCheckout.startCheckout(any())
-            } just runs
-
-            val config = CoreConfig("fake-client-id", Environment.STAGING)
-            sut = getPayPalCheckoutClient(config, testScheduler)
-            sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
-            advanceUntilIdle()
-
-            verify {
-                PayPalCheckout.setConfig(any())
-            }
-            expectThat(configSlot.captured) {
-                get { clientId }.isEqualTo("fake-client-id")
-                get { application }.isEqualTo(mockApplication)
-                get { environment }.isEqualTo(com.paypal.checkout.config.Environment.STAGE)
-            }
-        }
-
-    @Test
     fun `when startCheckout is invoked, PayPalCheckout startCheckout is called`() = runTest {
         val request = PayPalNativeCheckoutRequest("mock_order_id")
         every { PayPalCheckout.startCheckout(any()) } just runs

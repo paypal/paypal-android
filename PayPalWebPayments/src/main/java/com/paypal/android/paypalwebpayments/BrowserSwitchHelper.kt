@@ -18,7 +18,6 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
-            Environment.STAGING -> "https://www.msmaster.qa.paypal.com"
         }
         return Uri.parse(baseURL)
             .buildUpon()

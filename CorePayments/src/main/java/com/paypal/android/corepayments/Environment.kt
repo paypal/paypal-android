@@ -9,8 +9,4 @@ enum class Environment(val url: String, val graphQLEndpoint: String) {
         "https://api.sandbox.paypal.com",
         "https://www.sandbox.paypal.com"
     ),
-    STAGING(
-        "https://api.msmaster.qa.paypal.com",
-        "https://www.msmaster.qa.paypal.com"
-    )
 }

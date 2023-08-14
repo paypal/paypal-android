@@ -14,9 +14,4 @@ class EnvironmentUnitTest {
     fun `it should return the correct url for the SANDBOX environment`() {
         assertEquals("https://api.sandbox.paypal.com", Environment.SANDBOX.url)
     }
-
-    @Test
-    fun `it should return the correct url for the STAGING environment`() {
-        assertEquals("https://api.msmaster.qa.paypal.com", Environment.STAGING.url)
-    }
 }

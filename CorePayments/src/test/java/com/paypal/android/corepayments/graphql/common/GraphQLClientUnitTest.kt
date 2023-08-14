@@ -28,7 +28,6 @@ import java.net.URL
 internal class GraphQLClientUnitTest {
 
     private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
-    private val stagingConfig = CoreConfig("fake-client-id", Environment.STAGING)
     private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE)
 
     private val graphQLRequestBody = JSONObject("""{"fake":"json"}""")
@@ -64,28 +63,6 @@ internal class GraphQLClientUnitTest {
         val httpRequest = httpRequestSlot.captured
         assertEquals(URL("https://www.sandbox.paypal.com/graphql?QueryName"), httpRequest.url)
         assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
-    }
-
-    @Test
-    fun `send sends an http request to staging environment`() = runTest {
-        sut = GraphQLClient(stagingConfig, http)
-        sut.send(graphQLRequestBody)
-        coVerify { http.send(capture(httpRequestSlot)) }
-
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.msmaster.qa.paypal.com/graphql"), httpRequest.url)
-        assertEquals("https://www.msmaster.qa.paypal.com", httpRequest.headers["Origin"])
-    }
-
-    @Test
-    fun `send sends an http request to staging environment with query name appended`() = runTest {
-        sut = GraphQLClient(stagingConfig, http)
-        sut.send(graphQLRequestBody, "QueryName")
-        coVerify { http.send(capture(httpRequestSlot)) }
-
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.msmaster.qa.paypal.com/graphql?QueryName"), httpRequest.url)
-        assertEquals("https://www.msmaster.qa.paypal.com", httpRequest.headers["Origin"])
     }
 
     @Test
