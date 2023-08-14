@@ -3,8 +3,6 @@
 ## unreleased
 
 * CardPayments
-  * Make `Card` implement `Parcelable`
-  * Make `CardRequest` implement `Parcelable`
   * Add `CardClient#vault()` method
   * Add `VaultRequest` and `VaultResult` types for interacting with the `CardClient#vault()` method
   * Add `VaultListener` interface to receive `CardClient#vault()` success and failure results
