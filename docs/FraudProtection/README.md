@@ -45,7 +45,7 @@ val payPalDataCollector = PayPalDataCollector(config)
 val cmid = payPalDataCollector.getClientMetadataId(androidContext)
 ```
 
-### 3. Send **PayPal-Client-Metadata-Id** Header on Capture / Authorize
+### 3. Send PayPal-Client-Metadata-Id Header on Capture / Authorize
 
 To enable fraud protection, add a `PayPal-Client-Metadata-Id` HTTP header to your call to Capture (or Authorize), and set its value to the `cmid` value obtained in the previous step:
 
