@@ -15,6 +15,7 @@
   * FraudDetection
     * Update `PayPalDataCollector` constructor to require a configuration instead of an environment
     * Remove `PayPalDataCollectorEnvironment` enum
+    * Rename `PayPalDataCollector` `getClientMetadataId()` method to `collectDeviceData()`
 * PayPalNativePayments
   * Bump `PayPal Native Checkout` to `1.1.0`
 
@@ -28,7 +29,6 @@
   * Make `Address` implement `Parcelable`
 * PayPalNativePayments
   * Bump `PayPal Native Checkout` to `1.0.0`
-
 
 ## 0.0.10 (2023-06-23)
 * Breaking Changes

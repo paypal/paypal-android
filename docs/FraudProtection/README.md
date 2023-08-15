@@ -42,7 +42,7 @@ Create a `PayPalDataCollector` to retrieve a PayPal Client Metadata ID (CMID). Y
 
 ```kotlin
 val payPalDataCollector = PayPalDataCollector(config)
-val cmid = payPalDataCollector.getClientMetadataId(androidContext)
+val cmid = payPalDataCollector.collectDeviceData(androidContext)
 ```
 
 ### 3. Send PayPal-Client-Metadata-Id Header on Capture / Authorize

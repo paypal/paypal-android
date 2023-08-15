@@ -154,7 +154,7 @@ class ApproveOrderProgressFragment : Fragment() {
         val order = sdkSampleServerAPI.getOrder(orderId)
         viewModel.appendEventToLog(ApproveOrderEvent.GetOrder(order))
 
-        val payPalClientMetadataId = payPalDataCollector.getClientMetadataId(requireContext())
+        val payPalClientMetadataId = payPalDataCollector.collectDeviceData(requireContext())
 
         val finishResult = when (order.intent) {
             "CAPTURE" -> {

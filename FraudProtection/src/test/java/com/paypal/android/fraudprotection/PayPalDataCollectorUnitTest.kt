@@ -33,7 +33,7 @@ class PayPalDataCollectorUnitTest {
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        sut.getClientMetadataId(mockk(relaxed = true))
+        sut.collectDeviceData(mockk(relaxed = true))
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
         val magnesSettings = magnesSettingsSlot.captured
@@ -53,7 +53,7 @@ class PayPalDataCollectorUnitTest {
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
         val sut = PayPalDataCollector(liveConfig, mockMagnesSDK, mockUUIDHelper)
-        sut.getClientMetadataId(mockk(relaxed = true))
+        sut.collectDeviceData(mockk(relaxed = true))
 
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
@@ -80,7 +80,7 @@ class PayPalDataCollectorUnitTest {
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        val result = sut.getClientMetadataId(mockk(relaxed = true))
+        val result = sut.collectDeviceData(mockk(relaxed = true))
 
         verify { Log.e(any(), any(), capture(exceptionSlot)) }
 
@@ -89,7 +89,7 @@ class PayPalDataCollectorUnitTest {
     }
 
     @Test
-    fun `when getClientMetadataId is called with correct values, it returns client metadata`() {
+    fun `when collectDeviceData is called with correct values, it returns client metadata`() {
         mockkStatic(Log::class)
         val appGUID = UUID.randomUUID().toString()
         val clientMetadataId = "client_metadata_id"
@@ -103,7 +103,7 @@ class PayPalDataCollectorUnitTest {
         every { mockMagnesSDK.collectAndSubmit(any(), any(), any()) } returns magnesResult
 
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        val result = sut.getClientMetadataId(mockContext, clientMetadataId, HashMap())
+        val result = sut.collectDeviceData(mockContext, clientMetadataId, HashMap())
         assertEquals(result, clientMetadataId)
     }
 
