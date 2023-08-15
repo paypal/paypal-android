@@ -18,5 +18,54 @@ For initial setup, the `curl` commands below can be used in place of a server SD
 
 ## Add FraudProtection Module
 
+### 1. Add the Payments SDK FraudProtection module to your app
+
+![Maven Central](https://img.shields.io/maven-central/v/com.paypal.android/fraud-protection?style=for-the-badge) ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.paypal.android/fraud-protection?server=https%3A%2F%2Foss.sonatype.org&style=for-the-badge)
+
+In your app's `build.gradle` file, add the following dependency:
+
+```groovy
+dependencies {
+   implementation "com.paypal.android:fraud-protection:<CURRENT-VERSION>"
+}
+```
+
+### 2. Initiate the Payments SDK
+
+Create a `CoreConfig` using a [client id](https://developer.paypal.com/api/rest/):
+
+```kotlin
+val config = CoreConfig("<CLIENT_ID>", environment = Environment.SANDBOX)
+```
+
+Create a `PayPalDataCollector` to retrieve a PayPal Client Metadata ID (CMID). You can use a CMID when calling Authorize or Capture to add fraud protection to your transactions.
+
+```kotlin
+val payPalDataCollector = PayPalDataCollector(config)
+val cmid = payPalDataCollector.getClientMetadataId(androidContext)
+```
+
+### 3. Send **PayPal-Client-Metadata-Id** Header on Capture / Authorize
+
+To enable fraud protection, add a `PayPal-Client-Metadata-Id` HTTP header to your call to Capture (or Authorize), and set its value to the `cmid` value obtained in the previous step:
+
+```bash
+# for capture
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/capture' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--header 'PayPal-Client-Metadata-Id: <CMID>' \
+--data-raw ''
+
+# for authorize
+curl --location --request POST 'https://api.sandbox.paypal.com/v2/checkout/orders/<ORDER_ID>/authorize' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--header 'PayPal-Client-Metadata-Id: <CMID>' \
+--data-raw ''
+```
+
 ## Go Live
+
+Follow [these instructions](https://developer.paypal.com/api/rest/production/) to prepare your integration to go live.
 
