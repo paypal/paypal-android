@@ -28,13 +28,11 @@ class EligibilityAPIUnitTest {
 
     private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
 
+    private val resourceLoader = ResourceLoader()
+    private val context = ApplicationProvider.getApplicationContext<Application>()
+
     private lateinit var graphQLClient: GraphQLClient
-
     private lateinit var sut: EligibilityAPI
-
-    // Ref: https://stackoverflow.com/a/58617596
-    private val resourceLoader =
-        ResourceLoader(ApplicationProvider.getApplicationContext<Application>())
 
     @Before
     fun beforeEach() {
@@ -44,13 +42,14 @@ class EligibilityAPIUnitTest {
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        sut.checkEligibility()
+        sut.checkEligibility(context)
 
         val requestBodySlot = slot<JSONObject>()
         coVerify { graphQLClient.send(capture(requestBodySlot)) }
         val actualRequestBody = requestBodySlot.captured
 
-        val expectedQuery = resourceLoader.loadRawResource(R.raw.graphql_query_funding_eligibility)
+        val expectedQuery =
+            resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
         // language=JSON
         val expectedRequestBody = """
         {
@@ -85,7 +84,7 @@ class EligibilityAPIUnitTest {
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.checkEligibility()
+        val result = sut.checkEligibility(context)
 
         assertTrue(result.isCreditCardEligible)
         assertTrue(result.isVenmoEligible)

@@ -73,6 +73,12 @@ class SDKSampleServerAPI {
 
         @POST("/orders/{orderId}/authorize")
         suspend fun authorizeOrder(@Path("orderId") orderId: String): ResponseBody
+
+        @POST("/setup_tokens")
+        suspend fun createSetupToken(@Body jsonObject: JsonObject): ResponseBody
+
+        @POST("/payment_tokens")
+        suspend fun createPaymentToken(@Body jsonObject: JsonObject): ResponseBody
     }
 
     private val serviceMap: Map<MerchantIntegration, RetrofitService>
@@ -168,6 +174,16 @@ class SDKSampleServerAPI {
         val response = findService(merchantIntegration).getOrder(orderId)
         return parseOrder(JSONObject(response.string()))
     }
+
+    suspend fun createSetupToken(
+        jsonObject: JsonObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).createSetupToken(jsonObject)
+
+    suspend fun createPaymentToken(
+        jsonObject: JsonObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = findService(merchantIntegration).createPaymentToken(jsonObject)
 
     private fun parseOrder(json: JSONObject): Order {
         val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")

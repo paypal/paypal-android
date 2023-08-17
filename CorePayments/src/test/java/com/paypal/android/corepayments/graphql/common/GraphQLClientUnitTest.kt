@@ -56,6 +56,17 @@ internal class GraphQLClientUnitTest {
     }
 
     @Test
+    fun `send sends an http request to sandbox environment with query name appended`() = runTest {
+        sut = GraphQLClient(sandboxConfig, http)
+        sut.send(graphQLRequestBody, "QueryName")
+        coVerify { http.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.sandbox.paypal.com/graphql?QueryName"), httpRequest.url)
+        assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
     fun `send sends an http request to staging environment`() = runTest {
         sut = GraphQLClient(stagingConfig, http)
         sut.send(graphQLRequestBody)
@@ -67,6 +78,17 @@ internal class GraphQLClientUnitTest {
     }
 
     @Test
+    fun `send sends an http request to staging environment with query name appended`() = runTest {
+        sut = GraphQLClient(stagingConfig, http)
+        sut.send(graphQLRequestBody, "QueryName")
+        coVerify { http.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.msmaster.qa.paypal.com/graphql?QueryName"), httpRequest.url)
+        assertEquals("https://www.msmaster.qa.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
     fun `send sends an http request to live environment`() = runTest {
         sut = GraphQLClient(liveConfig, http)
         sut.send(graphQLRequestBody)
@@ -74,6 +96,17 @@ internal class GraphQLClientUnitTest {
 
         val httpRequest = httpRequestSlot.captured
         assertEquals(URL("https://www.paypal.com/graphql"), httpRequest.url)
+        assertEquals("https://www.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
+    fun `send sends an http request to live environment with query name appended`() = runTest {
+        sut = GraphQLClient(liveConfig, http)
+        sut.send(graphQLRequestBody, "QueryName")
+        coVerify { http.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.paypal.com/graphql?QueryName"), httpRequest.url)
         assertEquals("https://www.paypal.com", httpRequest.headers["Origin"])
     }
 

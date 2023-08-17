@@ -1,5 +1,6 @@
 package com.paypal.android.corepayments.graphql.common
 
+import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Http
@@ -9,7 +10,8 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal class GraphQLClient(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+class GraphQLClient internal constructor(
     coreConfig: CoreConfig,
     private val http: Http = Http(),
 ) {
@@ -18,8 +20,10 @@ internal class GraphQLClient(
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 
+    constructor(coreConfig: CoreConfig) : this(coreConfig, Http())
+
     private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
-    private val graphQLURL = URL("$graphQLEndpoint/graphql")
+    private val graphQLURL = "$graphQLEndpoint/graphql"
 
     private val httpRequestHeaders = mutableMapOf(
         "Content-Type" to "application/json",
@@ -28,9 +32,11 @@ internal class GraphQLClient(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject): GraphQLResponse {
+    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
         val body = graphQLRequestBody.toString()
-        val httpRequest = HttpRequest(graphQLURL, HttpMethod.POST, body, httpRequestHeaders)
+        val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
+        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
+
         val httpResponse = http.send(httpRequest)
         val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
         val status = httpResponse.status

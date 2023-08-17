@@ -1,5 +1,16 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* CardPayments
+  * Add `CardClient#vault()` method
+  * Add `VaultRequest` and `VaultResult` types for interacting with the `CardClient#vault()` method
+  * Add `VaultListener` interface to receive `CardClient#vault()` success and failure results
+  * Add `vaultListener` property to `CardClient`
+* Breaking Changes
+  * CardPayments
+    * Remove `Vault` data class originally meant for Vault with Purchase flows (it's no longer needed)
+
 ## 0.0.11 (2023-08-14)
 * All Modules
   * Bump Kotlin version to `1.8.21`

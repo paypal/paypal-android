@@ -71,7 +71,7 @@ buildscript {
             "androidxTestRunner"          : "androidx.test:runner:1.5.2",
             "androidxTestRules"           : "androidx.test:rules:1.5.0",
             "androidxTestUiAutomator"     : "androidx.test.uiautomator:uiautomator:2.2.0",
-            "mockk"                       : "io.mockk:mockk:1.12.0",
+            "mockk"                       : "io.mockk:mockk:1.13.5",
             "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1",
             "robolectric"                 : "org.robolectric:robolectric:4.10.3",
             "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",

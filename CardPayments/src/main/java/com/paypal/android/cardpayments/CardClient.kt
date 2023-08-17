@@ -1,5 +1,6 @@
 package com.paypal.android.cardpayments
 
+import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
@@ -19,10 +20,14 @@ import kotlinx.coroutines.launch
 
 /**
  * Use this client to approve an order with a [Card].
+ *
+ * @property approveOrderListener listener to receive callbacks from [CardClient.approveOrder].
+ * @property vaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
     activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
+    private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val dispatcher: CoroutineDispatcher
@@ -30,10 +35,19 @@ class CardClient internal constructor(
 
     var approveOrderListener: ApproveOrderListener? = null
 
+    /**
+     * @suppress
+     */
+    var vaultListener: VaultListener? = null
+
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
-    private val exceptionHandler = CoreCoroutineExceptionHandler {
-        notifyApproveOrderFailure(it)
+    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
+        notifyApproveOrderFailure(error)
+    }
+
+    private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
+        vaultListener?.onVaultFailure(error)
     }
 
     private var orderId: String? = null
@@ -48,6 +62,7 @@ class CardClient internal constructor(
             this(
                 activity,
                 CheckoutOrdersAPI(configuration),
+                DataVaultPaymentMethodTokensAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
                 Dispatchers.Main
@@ -67,7 +82,7 @@ class CardClient internal constructor(
         orderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
 
-        CoroutineScope(dispatcher).launch(exceptionHandler) {
+        CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
         }
     }
@@ -110,6 +125,28 @@ class CardClient internal constructor(
         }
     }
 
+    /**
+     * @suppress
+     *
+     * Call this method to attach a payment source to a setup token.
+     *
+     * @param context [Context] Android context
+     * @param vaultRequest [VaultRequest] request containing details about the setup token and card to use for vaulting.
+     */
+    fun vault(context: Context, vaultRequest: VaultRequest) {
+        val applicationContext = context.applicationContext
+        CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
+            updateSetupToken(applicationContext, vaultRequest)
+        }
+    }
+
+    private suspend fun updateSetupToken(context: Context, vaultRequest: VaultRequest) {
+        val result = vaultRequest.run {
+            paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
+        }
+        vaultListener?.onVaultSuccess(result)
+    }
+
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
         if (browserSwitchResult != null && approveOrderListener != null) {
@@ -123,7 +160,7 @@ class CardClient internal constructor(
 
     private fun handleBrowserSwitchSuccess(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
-            CoroutineScope(dispatcher).launch(exceptionHandler) {
+            CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
                 try {
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:get-order-info:succeeded",
