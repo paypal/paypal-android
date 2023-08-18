@@ -4,29 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -36,13 +27,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.cardpayments.OrderIntent
-import com.paypal.android.ui.OptionList
-import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.features.Feature
-import com.paypal.android.ui.stringResourceListOf
+import com.paypal.android.uishared.components.CreateOrderForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -121,11 +108,6 @@ class CreateOrderFragment : Fragment() {
     }
 
     private fun parseOrderRequestJSON(uiState: CreateOrderUiState): JSONObject {
-        val orderIntent = when (uiState.intentOption) {
-            "AUTHORIZE" -> OrderIntent.AUTHORIZE
-            else -> OrderIntent.CAPTURE
-        }
-
         val amountJSON = JSONObject()
             .put("currency_code", "USD")
             .put("value", "10.99")
@@ -133,6 +115,7 @@ class CreateOrderFragment : Fragment() {
         val purchaseUnitJSON = JSONObject()
             .put("amount", amountJSON)
 
+        val orderIntent = uiState.intentOption
         val orderRequest = JSONObject()
             .put("intent", orderIntent)
             .put("purchase_units", JSONArray().put(purchaseUnitJSON))
@@ -173,7 +156,6 @@ class CreateOrderFragment : Fragment() {
         uiState: CreateOrderUiState,
         onCreateOrderClick: () -> Unit
     ) {
-        val localFocusManager = LocalFocusManager.current
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -183,43 +165,15 @@ class CreateOrderFragment : Fragment() {
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.size(16.dp))
-            OptionList(
-                title = stringResource(id = R.string.intent_title),
-                options = stringResourceListOf(R.string.intent_authorize, R.string.intent_capture),
-                selectedOption = uiState.intentOption,
-                onOptionSelected = { option ->
-                    viewModel.intentOption = option
-                }
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Row {
-                Text(
-                    text = "Should Vault",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1.0f)
-                )
-                Switch(
-                    checked = uiState.shouldVault,
-                    onCheckedChange = { shouldVault -> viewModel.shouldVault = shouldVault }
-                )
-            }
-            OutlinedTextField(
-                value = uiState.customerId,
-                label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
-                onValueChange = { value -> viewModel.customerId = value },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            WireframeButton(
-                text = "Create Order & Continue",
+            CreateOrderForm(
+                orderIntent = uiState.intentOption,
+                shouldVault = uiState.shouldVault,
+                vaultCustomerId = uiState.customerId,
                 isLoading = uiState.isLoading,
-                onClick = onCreateOrderClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
+                onIntentOptionSelected = { value -> viewModel.intentOption = value },
+                onShouldVaultChanged = { value -> viewModel.shouldVault = value },
+                onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
+                onSubmit = { onCreateOrderClick() }
             )
         }
     }

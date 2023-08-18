@@ -36,7 +36,7 @@ fun CreateOrderForm(
     isLoading: Boolean = false,
     onShouldVaultChanged: (Boolean) -> Unit = {},
     onVaultCustomerIdChanged: (String) -> Unit = {},
-    onIntentSelected: (OrderIntent) -> Unit = {},
+    onIntentOptionSelected: (OrderIntent) -> Unit = {},
     onSubmit: () -> Unit = {}
 ) {
     val localFocusManager = LocalFocusManager.current
@@ -58,7 +58,7 @@ fun CreateOrderForm(
                     authorizeValue -> OrderIntent.CAPTURE
                     else -> null
                 }
-                newOrderIntent?.let { onIntentSelected(it) }
+                newOrderIntent?.let { onIntentOptionSelected(it) }
             }
         )
         Spacer(modifier = Modifier.size(16.dp))
