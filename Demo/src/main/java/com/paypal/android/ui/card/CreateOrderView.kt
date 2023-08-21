@@ -32,7 +32,7 @@ fun CreateOrderView(order: Order) {
 
 @Preview
 @Composable
-fun GetOrderViewPreview() {
+fun CreateOrderPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
             CreateOrderView(order = Order())
