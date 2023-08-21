@@ -15,4 +15,5 @@ data class CardViewUiState(
     val isCreateOrderLoading: Boolean = false,
     val shouldVault: Boolean = false,
     val customerId: String = "",
+    val isApproveOrderLoading: Boolean = false
 )

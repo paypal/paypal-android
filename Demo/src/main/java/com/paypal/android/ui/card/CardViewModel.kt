@@ -66,6 +66,11 @@ class CardViewModel : ViewModel() {
         set(value) {
             _uiState.update { it.copy(isCreateOrderLoading = value) }
         }
+    var isApproveOrderLoading: Boolean
+        get() = _uiState.value.isApproveOrderLoading
+        set(value) {
+            _uiState.update { it.copy(isApproveOrderLoading = value) }
+        }
 
     fun prefillCard(card: Card) {
         _uiState.update { currentState ->

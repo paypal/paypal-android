@@ -78,7 +78,7 @@ class CardFragment : Fragment() {
                         CardView(
                             uiState = uiState,
                             onCreateOrderSubmit = { createOrder() },
-                            onFormSubmit = { onFormSubmit() }
+                            onApproveOrderSubmit = { approveOrder() }
                         )
                     }
                 }
@@ -102,7 +102,7 @@ class CardFragment : Fragment() {
         }
     }
 
-    private fun onFormSubmit() {
+    private fun approveOrder() {
         viewLifecycleOwner.lifecycleScope.launch {
             sendApproveOrderRequest()
         }
@@ -126,7 +126,7 @@ class CardFragment : Fragment() {
     fun CardView(
         uiState: CardViewUiState,
         onCreateOrderSubmit: () -> Unit = {},
-        onFormSubmit: () -> Unit = {},
+        onApproveOrderSubmit: () -> Unit = {},
     ) {
         val scrollState = rememberScrollState()
         Column(
@@ -151,31 +151,13 @@ class CardFragment : Fragment() {
             )
             uiState.order?.let { order ->
                 Spacer(modifier = Modifier.size(24.dp))
-                Text(
-                    text = "Card Details",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(modifier = Modifier.size(2.dp))
-                CardForm(
-                    cardNumber = uiState.cardNumber,
-                    expirationDate = uiState.cardExpirationDate,
-                    securityCode = uiState.cardSecurityCode,
-                    onCardNumberChange = { viewModel.cardNumber = it },
-                    onExpirationDateChange = { viewModel.cardExpirationDate = it },
-                    onSecurityCodeChange = { viewModel.cardSecurityCode = it },
-                )
-                Spacer(modifier = Modifier.size(24.dp))
-                Text(
-                    text = "Approve Order Options",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                OptionsForm(uiState)
-                Spacer(modifier = Modifier.weight(1.0f))
-                WireframeButton(
-                    text = "CREATE & APPROVE ORDER",
-                    onClick = { onFormSubmit() },
-                    modifier = Modifier.fillMaxWidth()
+                ApproveOrderForm(
+                    uiState = uiState,
+                    onCardNumberChange = { value -> viewModel.cardNumber = value },
+                    onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
+                    onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
+                    onSCAOptionSelected = { value -> viewModel.scaOption = value },
+                    onSubmit = { onApproveOrderSubmit() }
                 )
                 Spacer(modifier = Modifier.size(24.dp))
             }
@@ -188,20 +170,13 @@ class CardFragment : Fragment() {
     fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(uiState = CardViewUiState())
+                CardView(
+                    uiState = CardViewUiState(
+                        order = Order("sample-id")
+                    )
+                )
             }
         }
-    }
-
-    @ExperimentalMaterial3Api
-    @Composable
-    fun OptionsForm(uiState: CardViewUiState) {
-        OptionList(
-            title = stringResource(id = R.string.sca_title),
-            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
-            selectedOption = uiState.scaOption,
-            onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
-        )
     }
 
     private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {
