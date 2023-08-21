@@ -1,6 +1,7 @@
 package com.paypal.android.ui.card
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,6 +56,7 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
+        const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
@@ -132,11 +134,11 @@ class CardFragment : Fragment() {
                 }
 
                 override fun onApproveOrderThreeDSecureWillLaunch() {
-//                    viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
+                    Log.d(TAG, "3DS Auth Requested")
                 }
 
                 override fun onApproveOrderThreeDSecureDidFinish() {
-//                    viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
+                    Log.d(TAG, "3DS Success")
                     viewModel.isApproveOrderLoading = false
                 }
             }
