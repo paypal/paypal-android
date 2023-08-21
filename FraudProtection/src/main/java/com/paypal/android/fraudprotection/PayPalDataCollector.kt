@@ -13,22 +13,13 @@ import lib.android.paypal.com.magnessdk.MagnesSource
  * Enables you to collect data about a customer's device and correlate it with a session identifier on your server.
  */
 class PayPalDataCollector internal constructor(
-    config: CoreConfig,
+    private val environment: Environment,
     private val magnesSDK: MagnesSDK,
     private val uuidHelper: UUIDHelper
 ) {
 
-    companion object {
-        fun getMagnesEnvironment(config: CoreConfig): Environment =
-            when (config.environment) {
-                com.paypal.android.corepayments.Environment.LIVE -> Environment.LIVE
-                com.paypal.android.corepayments.Environment.SANDBOX -> Environment.SANDBOX
-            }
-    }
-
-    private val environment = getMagnesEnvironment(config)
-
-    constructor(config: CoreConfig) : this(config, MagnesSDK.getInstance(), UUIDHelper())
+    constructor(config: CoreConfig) :
+            this(config.magnesEnvironment, MagnesSDK.getInstance(), UUIDHelper())
 
     /**
      * Collects device data at the time of payment activity. Once a user initiates a payment
