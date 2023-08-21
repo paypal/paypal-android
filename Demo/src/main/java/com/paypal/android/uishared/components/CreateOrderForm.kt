@@ -30,6 +30,7 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreateOrderForm(
+    title: String,
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
     shouldVault: Boolean = false,
     vaultCustomerId: String = "",
@@ -53,6 +54,11 @@ fun CreateOrderForm(
         Column(
             modifier = Modifier.padding(8.dp)
         ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.size(16.dp))
             OptionList(
                 title = stringResource(id = R.string.intent_title),
                 options = listOf(authorizeValue, captureValue),
@@ -105,7 +111,7 @@ fun CreateOrderForm(
 fun CreateOrderFormPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            CreateOrderForm()
+            CreateOrderForm(title = "Sample Title")
         }
     }
 }

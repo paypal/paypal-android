@@ -123,12 +123,8 @@ class CreateOrderFragment : Fragment() {
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            Text(
-                text = "The ${stringResource(feature.stringRes)} payment method requires an order to proceed.",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(modifier = Modifier.size(16.dp))
             CreateOrderForm(
+                title = "Create an order to proceed with ${stringResource(feature.stringRes)}:",
                 orderIntent = uiState.intentOption,
                 shouldVault = uiState.shouldVault,
                 vaultCustomerId = uiState.customerId,

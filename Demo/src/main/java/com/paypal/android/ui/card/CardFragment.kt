@@ -139,6 +139,7 @@ class CardFragment : Fragment() {
                 }
         ) {
             CreateOrderForm(
+                title = "Create an Order to proceed:",
                 orderIntent = uiState.intentOption,
                 shouldVault = uiState.shouldVault,
                 vaultCustomerId = uiState.customerId,
