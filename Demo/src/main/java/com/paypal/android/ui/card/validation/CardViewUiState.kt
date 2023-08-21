@@ -21,5 +21,4 @@ data class CardViewUiState(
     val customerId: String = "",
     val isApproveOrderLoading: Boolean = false,
     val isCompleteOrderLoading: Boolean = false,
-) {
-}
+)
