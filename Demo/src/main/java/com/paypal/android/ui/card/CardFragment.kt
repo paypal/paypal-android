@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -172,6 +173,10 @@ class CardFragment : Fragment() {
         onCompleteOrderSubmit: () -> Unit = {},
     ) {
         val scrollState = rememberScrollState()
+        LaunchedEffect(uiState) {
+            // continuously scroll to bottom of the list when event state is updated
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -208,6 +213,7 @@ class CardFragment : Fragment() {
             uiState.approveOrderResult?.let { cardResult ->
                 Spacer(modifier = Modifier.size(24.dp))
                 ApproveOrderSuccessView(cardResult = cardResult)
+                Spacer(modifier = Modifier.size(24.dp))
                 CompleteOrderForm(
                     isLoading = uiState.isCompleteOrderLoading,
                     orderIntent = uiState.intentOption,
