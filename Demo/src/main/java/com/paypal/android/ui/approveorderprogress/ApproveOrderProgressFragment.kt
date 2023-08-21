@@ -49,7 +49,6 @@ class ApproveOrderProgressFragment : Fragment() {
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
-    private val args: ApproveOrderProgressFragmentArgs by navArgs()
     private val viewModel by viewModels<ApproveOrderProgressViewModel>()
 
     @ExperimentalMaterial3Api
@@ -60,15 +59,6 @@ class ApproveOrderProgressFragment : Fragment() {
     ): View {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Client ID..."))
-            val clientId = sdkSampleServerAPI.fetchClientId()
-
-            val configuration = CoreConfig(clientId = clientId)
-            cardClient = CardClient(requireActivity(), configuration)
-            payPalDataCollector = PayPalDataCollector(configuration)
-
-            args.cardRequest?.let { cardRequest ->
-                executeCardRequest(cardRequest)
-            }
         }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -81,39 +71,6 @@ class ApproveOrderProgressFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun executeCardRequest(cardRequest: CardRequest) {
-        cardClient.approveOrderListener = object : ApproveOrderListener {
-            override fun onApproveOrderSuccess(result: CardResult) {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Approved"))
-                viewModel.appendEventToLog(ApproveOrderEvent.ApproveSuccess(result))
-                viewLifecycleOwner.lifecycleScope.launch {
-                    finishOrder(result)
-                }
-            }
-
-            override fun onApproveOrderFailure(error: PayPalSDKError) {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("CAPTURE fail: ${error.errorDescription}"))
-            }
-
-            override fun onApproveOrderCanceled() {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("USER CANCELED"))
-            }
-
-            override fun onApproveOrderThreeDSecureWillLaunch() {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Auth Requested"))
-            }
-
-            override fun onApproveOrderThreeDSecureDidFinish() {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("3DS Success"))
-            }
-        }
-
-        viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
-
-        // approve order using card request
-        cardClient.approveOrder(requireActivity(), cardRequest)
     }
 
     @ExperimentalMaterial3Api
@@ -144,38 +101,6 @@ class ApproveOrderProgressFragment : Fragment() {
             Surface(modifier = Modifier.fillMaxSize()) {
                 ApproveOrderProgressView(emptyList())
             }
-        }
-    }
-
-    private suspend fun finishOrder(cardResult: CardResult) {
-        viewModel.appendEventToLog(ApproveOrderEvent.Message("Fetching Order Info..."))
-
-        val orderId = cardResult.orderId
-        val order = sdkSampleServerAPI.getOrder(orderId)
-        viewModel.appendEventToLog(ApproveOrderEvent.GetOrder(order))
-
-        val payPalClientMetadataId = payPalDataCollector.collectDeviceData(requireContext())
-
-        val finishResult = when (order.intent) {
-            "CAPTURE" -> {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("Capturing Order..."))
-                sdkSampleServerAPI.captureOrder(orderId, payPalClientMetadataId)
-            }
-
-            "AUTHORIZE" -> {
-                viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
-                sdkSampleServerAPI.authorizeOrder(orderId, payPalClientMetadataId)
-            }
-
-            else -> {
-                null
-            }
-        }
-
-        if (finishResult == null) {
-            viewModel.appendEventToLog(ApproveOrderEvent.Message("Order Intent Could Not Be Determined"))
-        } else {
-            viewModel.appendEventToLog(ApproveOrderEvent.OrderComplete(finishResult))
         }
     }
 }
