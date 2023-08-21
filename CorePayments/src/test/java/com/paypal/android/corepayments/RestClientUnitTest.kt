@@ -27,7 +27,6 @@ class RestClientUnitTest {
     private val httpSuccessResponse = HttpResponse(200)
 
     private val sandboxConfig = CoreConfig("fake-sandbox-client-id", Environment.SANDBOX)
-    private val stagingConfig = CoreConfig("fake-staging-client-id", Environment.STAGING)
     private val liveConfig = CoreConfig("fake-live-client-id", Environment.LIVE)
 
     private lateinit var http: Http
@@ -50,17 +49,6 @@ class RestClientUnitTest {
 
         val httpRequest = httpRequestSlot.captured
         assertEquals(URL("https://api.sandbox.paypal.com/sample/path"), httpRequest.url)
-    }
-
-    @Test
-    fun `send() should properly format the url for the staging environment`() = runTest {
-        coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
-
-        sut = RestClient(stagingConfig, http, "en_US")
-        sut.send(apiGETRequest)
-
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://api.msmaster.qa.paypal.com/sample/path"), httpRequest.url)
     }
 
     @Test
