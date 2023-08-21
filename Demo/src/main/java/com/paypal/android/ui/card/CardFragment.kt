@@ -29,7 +29,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -37,12 +36,15 @@ import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.approveorderprogress.views.ApproveOrderSuccessView
+import com.paypal.android.ui.approveorderprogress.views.OrderCompleteView
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -79,7 +81,8 @@ class CardFragment : Fragment() {
                         CardView(
                             uiState = uiState,
                             onCreateOrderSubmit = { createOrder() },
-                            onApproveOrderSubmit = { approveOrder() }
+                            onApproveOrderSubmit = { approveOrder() },
+                            onCompleteOrderSubmit = { completeOrder() }
                         )
                     }
                 }
@@ -92,7 +95,7 @@ class CardFragment : Fragment() {
             viewModel.isCreateOrderLoading = true
 
             val uiState = viewModel.uiState.value
-            viewModel.order = uiState.run {
+            viewModel.createdOrder = uiState.run {
                 sdkSampleServerAPI.createOrder(
                     orderIntent = intentOption,
                     shouldVault = shouldVault,
@@ -138,23 +141,25 @@ class CardFragment : Fragment() {
             }
 
             val uiState = viewModel.uiState.value
-            val order = viewModel.order
+            val order = viewModel.createdOrder
             val cardRequest = createCardRequest(uiState, order!!)
 
             cardClient.approveOrder(requireActivity(), cardRequest)
         }
     }
 
-    private fun sendApproveOrderRequest() {
-        val order = args.order
-        if (order == null) {
-            // TODO: handle invalid state
+    private fun completeOrder() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCompleteOrderLoading = true
+
+            val orderId = viewModel.createdOrder!!.id!!
+            val orderIntent = viewModel.intentOption
+            viewModel.completedOrder = when (orderIntent) {
+                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId)
+                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId)
+            }
+            viewModel.isCompleteOrderLoading = false
         }
-        val uiState = viewModel.uiState.value
-        val cardRequest = createCardRequest(uiState, order!!)
-        findNavController().navigate(
-            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest = cardRequest)
-        )
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -164,6 +169,7 @@ class CardFragment : Fragment() {
         uiState: CardViewUiState,
         onCreateOrderSubmit: () -> Unit = {},
         onApproveOrderSubmit: () -> Unit = {},
+        onCompleteOrderSubmit: () -> Unit = {},
     ) {
         val scrollState = rememberScrollState()
         Column(
@@ -186,9 +192,9 @@ class CardFragment : Fragment() {
                 onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
                 onSubmit = { onCreateOrderSubmit() }
             )
-            uiState.order?.let { order ->
+            uiState.createdOrder?.let { createdOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
-                CreateOrderView(order = order)
+                CreateOrderView(order = createdOrder)
                 Spacer(modifier = Modifier.size(24.dp))
                 ApproveOrderForm(
                     uiState = uiState,
@@ -202,6 +208,15 @@ class CardFragment : Fragment() {
             uiState.approveOrderResult?.let { cardResult ->
                 Spacer(modifier = Modifier.size(24.dp))
                 ApproveOrderSuccessView(cardResult = cardResult)
+                CompleteOrderForm(
+                    isLoading = uiState.isCompleteOrderLoading,
+                    orderIntent = uiState.intentOption,
+                    onSubmit = { onCompleteOrderSubmit() }
+                )
+            }
+            uiState.completedOrder?.let { completedOrder ->
+                Spacer(modifier = Modifier.size(24.dp))
+                OrderCompleteView(order = completedOrder)
             }
             Spacer(modifier = Modifier.size(24.dp))
         }
@@ -214,9 +229,7 @@ class CardFragment : Fragment() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 CardView(
-                    uiState = CardViewUiState(
-                        order = Order("sample-id")
-                    )
+                    uiState = CardViewUiState(createdOrder = Order("sample-id"))
                 )
             }
         }

@@ -7,7 +7,8 @@ import com.paypal.android.cardpayments.model.CardResult
 
 @Immutable
 data class CardViewUiState(
-    val order: Order? = null,
+    val createdOrder: Order? = null,
+    val completedOrder: Order? = null,
     val approveOrderResult: CardResult? = null,
     val scaOption: String = "ALWAYS",
     val cardNumber: String = "",
@@ -17,5 +18,6 @@ data class CardViewUiState(
     val isCreateOrderLoading: Boolean = false,
     val shouldVault: Boolean = false,
     val customerId: String = "",
-    val isApproveOrderLoading: Boolean = false
+    val isApproveOrderLoading: Boolean = false,
+    val isCompleteOrderLoading: Boolean = false,
 )

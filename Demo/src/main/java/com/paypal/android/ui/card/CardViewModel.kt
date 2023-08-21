@@ -14,10 +14,10 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(CardViewUiState())
     val uiState = _uiState.asStateFlow()
 
-    var order: Order?
-        get() = _uiState.value.order
+    var createdOrder: Order?
+        get() = _uiState.value.createdOrder
         set(value) {
-            _uiState.update { it.copy(order = value) }
+            _uiState.update { it.copy(createdOrder = value) }
         }
 
     var approveOrderResult: CardResult?
@@ -26,6 +26,11 @@ class CardViewModel : ViewModel() {
             _uiState.update { it.copy(approveOrderResult = value) }
         }
 
+    var completedOrder: Order?
+        get() = _uiState.value.completedOrder
+        set(value) {
+            _uiState.update { it.copy(completedOrder = value) }
+        }
     var scaOption: String
         get() = _uiState.value.scaOption
         set(value) {
@@ -77,6 +82,12 @@ class CardViewModel : ViewModel() {
         get() = _uiState.value.isApproveOrderLoading
         set(value) {
             _uiState.update { it.copy(isApproveOrderLoading = value) }
+        }
+
+    var isCompleteOrderLoading: Boolean
+        get() = _uiState.value.isCompleteOrderLoading
+        set(value) {
+            _uiState.update { it.copy(isCompleteOrderLoading = value) }
         }
 
     fun prefillCard(card: Card) {
