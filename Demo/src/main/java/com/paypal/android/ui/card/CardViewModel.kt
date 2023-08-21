@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.Order
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.ui.card.validation.CardViewUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,12 @@ class CardViewModel : ViewModel() {
         get() = _uiState.value.order
         set(value) {
             _uiState.update { it.copy(order = value) }
+        }
+
+    var approveOrderResult: CardResult?
+        get() = _uiState.value.approveOrderResult
+        set(value) {
+            _uiState.update { it.copy(approveOrderResult = value) }
         }
 
     var scaOption: String
