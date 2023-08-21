@@ -40,7 +40,6 @@ import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.validation.CardViewUiState
-import com.paypal.android.ui.features.Feature
 import com.paypal.android.ui.stringResourceListOf
 import com.paypal.android.uishared.components.CardForm
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,15 +66,6 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         args.prefillCard?.card?.let { viewModel.prefillCard(it) }
-
-        val feature = args.feature
-        if (feature == Feature.CARD_VAULT) {
-            // the vault api only has the 'when required' option
-            viewModel.scaOption = "WHEN REQUIRED"
-        } else {
-            viewModel.scaOption = "ALWAYS"
-        }
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -83,7 +73,6 @@ class CardFragment : Fragment() {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         CardView(
-                            feature = feature,
                             uiState = uiState,
                             onFormSubmit = { onFormSubmit() }
                         )
@@ -115,7 +104,6 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
-        feature: Feature,
         uiState: CardViewUiState,
         onFormSubmit: () -> Unit = {},
     ) {
@@ -143,7 +131,7 @@ class CardFragment : Fragment() {
             )
             Spacer(modifier = Modifier.size(24.dp))
             Text(
-                text = "${stringResource(feature.stringRes)} Options",
+                text = "Approve Order Options",
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.size(8.dp))
@@ -164,7 +152,7 @@ class CardFragment : Fragment() {
     fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(feature = Feature.CARD_APPROVE_ORDER, uiState = CardViewUiState())
+                CardView(uiState = CardViewUiState())
             }
         }
     }
@@ -172,14 +160,9 @@ class CardFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun OptionsForm(uiState: CardViewUiState) {
-        val scaOptions = if (args.feature == Feature.CARD_VAULT) {
-            stringResourceListOf(R.string.sca_when_required)
-        } else {
-            stringResourceListOf(R.string.sca_always, R.string.sca_when_required)
-        }
         OptionList(
             title = stringResource(id = R.string.sca_title),
-            options = scaOptions,
+            options = stringResourceListOf(R.string.sca_always, R.string.sca_when_required),
             selectedOption = uiState.scaOption,
             onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
         )
