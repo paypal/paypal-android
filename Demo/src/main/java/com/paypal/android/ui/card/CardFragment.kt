@@ -44,6 +44,7 @@ import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.ui.approveorderprogress.views.ApproveOrderSuccessView
+import com.paypal.android.ui.approveorderprogress.views.MessageView
 import com.paypal.android.ui.approveorderprogress.views.OrderCompleteView
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.uishared.components.CompleteOrderForm
@@ -124,12 +125,12 @@ class CardFragment : Fragment() {
                 }
 
                 override fun onApproveOrderFailure(error: PayPalSDKError) {
-//                    viewModel.appendEventToLog(ApproveOrderEvent.Message("CAPTURE fail: ${error.errorDescription}"))
+                    viewModel.approveOrderErrorMessage = "CAPTURE fail: ${error.errorDescription}"
                     viewModel.isApproveOrderLoading = false
                 }
 
                 override fun onApproveOrderCanceled() {
-//                    viewModel.appendEventToLog(ApproveOrderEvent.Message("USER CANCELED"))
+                    viewModel.approveOrderErrorMessage = "USER CANCELED"
                     viewModel.isApproveOrderLoading = false
                 }
 
@@ -221,6 +222,10 @@ class CardFragment : Fragment() {
                     orderIntent = uiState.intentOption,
                     onSubmit = { onCompleteOrderSubmit() }
                 )
+            }
+            uiState.approveOrderErrorMessage?.let { errorMessage ->
+                Spacer(modifier = Modifier.size(24.dp))
+                MessageView(message = errorMessage)
             }
             uiState.completedOrder?.let { completedOrder ->
                 Spacer(modifier = Modifier.size(24.dp))

@@ -26,6 +26,12 @@ class CardViewModel : ViewModel() {
             _uiState.update { it.copy(approveOrderResult = value) }
         }
 
+    var approveOrderErrorMessage: String?
+        get() = _uiState.value.approveOrderErrorMessage
+        set(value) {
+            _uiState.update { it.copy(approveOrderErrorMessage = value) }
+        }
+
     var completedOrder: Order?
         get() = _uiState.value.completedOrder
         set(value) {

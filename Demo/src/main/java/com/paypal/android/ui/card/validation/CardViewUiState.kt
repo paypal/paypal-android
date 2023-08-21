@@ -10,6 +10,7 @@ data class CardViewUiState(
     val createdOrder: Order? = null,
     val completedOrder: Order? = null,
     val approveOrderResult: CardResult? = null,
+    val approveOrderErrorMessage: String? = null,
     val scaOption: String = "ALWAYS",
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
@@ -20,4 +21,5 @@ data class CardViewUiState(
     val customerId: String = "",
     val isApproveOrderLoading: Boolean = false,
     val isCompleteOrderLoading: Boolean = false,
-)
+) {
+}
