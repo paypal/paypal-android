@@ -48,16 +48,9 @@ fun CreateOrderForm(
         OrderIntent.CAPTURE -> captureValue
         OrderIntent.AUTHORIZE -> authorizeValue
     }
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge
-            )
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(text = title, style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.size(16.dp))
             OptionList(
                 title = stringResource(id = R.string.intent_title),
