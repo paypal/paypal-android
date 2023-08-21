@@ -3,7 +3,6 @@ package com.paypal.android.fraudprotection
 import android.content.Context
 import android.util.Log
 import com.paypal.android.corepayments.CoreConfig
-import lib.android.paypal.com.magnessdk.Environment
 import lib.android.paypal.com.magnessdk.InvalidInputException
 import lib.android.paypal.com.magnessdk.MagnesSDK
 import lib.android.paypal.com.magnessdk.MagnesSettings
