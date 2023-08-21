@@ -23,7 +23,6 @@ class PayPalDataCollector internal constructor(
             when (config.environment) {
                 com.paypal.android.corepayments.Environment.LIVE -> Environment.LIVE
                 com.paypal.android.corepayments.Environment.SANDBOX -> Environment.SANDBOX
-                com.paypal.android.corepayments.Environment.STAGING -> Environment.STAGE
             }
     }
 
