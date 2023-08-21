@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,6 +44,7 @@ import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
 import com.paypal.android.uishared.components.CardForm
+import com.paypal.android.uishared.components.CreateOrderForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,11 +77,28 @@ class CardFragment : Fragment() {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         CardView(
                             uiState = uiState,
+                            onCreateOrderSubmit = { createOrder() },
                             onFormSubmit = { onFormSubmit() }
                         )
                     }
                 }
             }
+        }
+    }
+
+    private fun createOrder() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCreateOrderLoading = true
+
+            val uiState = viewModel.uiState.value
+            viewModel.order = uiState.run {
+                sdkSampleServerAPI.createOrder(
+                    orderIntent = intentOption,
+                    shouldVault = shouldVault,
+                    vaultCustomerId = customerId
+                )
+            }
+            viewModel.isCreateOrderLoading = false
         }
     }
 
@@ -105,44 +125,59 @@ class CardFragment : Fragment() {
     @Composable
     fun CardView(
         uiState: CardViewUiState,
+        onCreateOrderSubmit: () -> Unit = {},
         onFormSubmit: () -> Unit = {},
     ) {
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(16.dp)
+                .verticalScroll(scrollState)
                 .semantics {
                     testTagsAsResourceId = true
                 }
         ) {
-            Spacer(modifier = Modifier.size(24.dp))
-            Text(
-                text = "Card Details",
-                style = MaterialTheme.typography.headlineSmall
+            CreateOrderForm(
+                orderIntent = uiState.intentOption,
+                shouldVault = uiState.shouldVault,
+                vaultCustomerId = uiState.customerId,
+                isLoading = uiState.isCreateOrderLoading,
+                onIntentOptionSelected = { value -> viewModel.intentOption = value },
+                onShouldVaultChanged = { value -> viewModel.shouldVault = value },
+                onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
+                onSubmit = { onCreateOrderSubmit() }
             )
-            Spacer(modifier = Modifier.size(2.dp))
-            CardForm(
-                cardNumber = uiState.cardNumber,
-                expirationDate = uiState.cardExpirationDate,
-                securityCode = uiState.cardSecurityCode,
-                onCardNumberChange = { viewModel.cardNumber = it },
-                onExpirationDateChange = { viewModel.cardExpirationDate = it },
-                onSecurityCodeChange = { viewModel.cardSecurityCode = it },
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-            Text(
-                text = "Approve Order Options",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            OptionsForm(uiState)
-            Spacer(modifier = Modifier.weight(1.0f))
-            WireframeButton(
-                text = "CREATE & APPROVE ORDER",
-                onClick = { onFormSubmit() },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.size(24.dp))
+            uiState.order?.let { order ->
+                Spacer(modifier = Modifier.size(24.dp))
+                Text(
+                    text = "Card Details",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.size(2.dp))
+                CardForm(
+                    cardNumber = uiState.cardNumber,
+                    expirationDate = uiState.cardExpirationDate,
+                    securityCode = uiState.cardSecurityCode,
+                    onCardNumberChange = { viewModel.cardNumber = it },
+                    onExpirationDateChange = { viewModel.cardExpirationDate = it },
+                    onSecurityCodeChange = { viewModel.cardSecurityCode = it },
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+                Text(
+                    text = "Approve Order Options",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                OptionsForm(uiState)
+                Spacer(modifier = Modifier.weight(1.0f))
+                WireframeButton(
+                    text = "CREATE & APPROVE ORDER",
+                    onClick = { onFormSubmit() },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+            }
         }
     }
 

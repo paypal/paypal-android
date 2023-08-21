@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -29,7 +30,6 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreateOrderForm(
-    modifier: Modifier = Modifier,
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
     shouldVault: Boolean = false,
     vaultCustomerId: String = "",
@@ -47,50 +47,56 @@ fun CreateOrderForm(
         OrderIntent.CAPTURE -> captureValue
         OrderIntent.AUTHORIZE -> authorizeValue
     }
-    Column(modifier = modifier) {
-        OptionList(
-            title = stringResource(id = R.string.intent_title),
-            options = listOf(authorizeValue, captureValue),
-            selectedOption = selectedOrderIntent,
-            onOptionSelected = { option ->
-                val newOrderIntent = when (option) {
-                    captureValue -> OrderIntent.CAPTURE
-                    authorizeValue -> OrderIntent.CAPTURE
-                    else -> null
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            OptionList(
+                title = stringResource(id = R.string.intent_title),
+                options = listOf(authorizeValue, captureValue),
+                selectedOption = selectedOrderIntent,
+                onOptionSelected = { option ->
+                    val newOrderIntent = when (option) {
+                        captureValue -> OrderIntent.CAPTURE
+                        authorizeValue -> OrderIntent.CAPTURE
+                        else -> null
+                    }
+                    newOrderIntent?.let { onIntentOptionSelected(it) }
                 }
-                newOrderIntent?.let { onIntentOptionSelected(it) }
-            }
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Row {
-            Text(
-                text = "Should Vault",
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .weight(1.0f)
             )
-            Switch(
-                checked = shouldVault,
-                onCheckedChange = { onShouldVaultChanged(it) }
+            Spacer(modifier = Modifier.size(16.dp))
+            Row {
+                Text(
+                    text = "Should Vault",
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .weight(1.0f)
+                )
+                Switch(
+                    checked = shouldVault,
+                    onCheckedChange = { onShouldVaultChanged(it) }
+                )
+            }
+            OutlinedTextField(
+                value = vaultCustomerId,
+                label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
+                onValueChange = { onVaultCustomerIdChanged(it) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            WireframeButton(
+                text = "Create Order",
+                isLoading = isLoading,
+                onClick = { onSubmit() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             )
         }
-        OutlinedTextField(
-            value = vaultCustomerId,
-            label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
-            onValueChange = { onVaultCustomerIdChanged(it) },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        WireframeButton(
-            text = "Create Order",
-            isLoading = isLoading,
-            onClick = { onSubmit() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        )
     }
 }
 

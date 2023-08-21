@@ -31,8 +31,6 @@ import com.paypal.android.ui.features.Feature
 import com.paypal.android.uishared.components.CreateOrderForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,11 +66,16 @@ class CreateOrderFragment : Fragment() {
 
     private fun createOrder() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val uiState = viewModel.uiState.value
-            val orderRequest = parseOrderRequestJSON(uiState)
-
             viewModel.isLoading = true
-            val order = sdkSampleServerAPI.createOrder(orderRequest = orderRequest)
+
+            val uiState = viewModel.uiState.value
+            val order = uiState.run {
+                sdkSampleServerAPI.createOrder(
+                    orderIntent = intentOption,
+                    shouldVault = shouldVault,
+                    vaultCustomerId = customerId
+                )
+            }
             viewModel.isLoading = false
 
             // continue on to feature
@@ -104,44 +107,6 @@ class CreateOrderFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun parseOrderRequestJSON(uiState: CreateOrderUiState): JSONObject {
-        val amountJSON = JSONObject()
-            .put("currency_code", "USD")
-            .put("value", "10.99")
-
-        val purchaseUnitJSON = JSONObject()
-            .put("amount", amountJSON)
-
-        val orderIntent = uiState.intentOption
-        val orderRequest = JSONObject()
-            .put("intent", orderIntent)
-            .put("purchase_units", JSONArray().put(purchaseUnitJSON))
-
-        if (uiState.shouldVault) {
-            val vaultJSON = JSONObject()
-                .put("store_in_vault", "ON_SUCCESS")
-
-            val cardAttributesJSON = JSONObject()
-                .put("vault", vaultJSON)
-
-            val customerId = uiState.customerId
-            if (customerId.isNotEmpty()) {
-                val customerJSON = JSONObject()
-                    .put("id", customerId)
-                cardAttributesJSON.put("customer", customerJSON)
-            }
-
-            val cardJSON = JSONObject()
-                .put("attributes", cardAttributesJSON)
-
-            val paymentSourceJSON = JSONObject()
-                .put("card", cardJSON)
-
-            orderRequest.put("payment_source", paymentSourceJSON)
-        }
-        return orderRequest
     }
 
     private fun navigate(action: NavDirections) {
