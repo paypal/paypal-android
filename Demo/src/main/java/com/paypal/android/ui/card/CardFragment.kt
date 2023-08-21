@@ -43,9 +43,7 @@ import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.ui.approveorderprogress.views.ApproveOrderSuccessView
-import com.paypal.android.ui.approveorderprogress.views.MessageView
-import com.paypal.android.ui.approveorderprogress.views.OrderCompleteView
+import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
