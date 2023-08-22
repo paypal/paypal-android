@@ -2,6 +2,7 @@ package com.paypal.android.fraudprotection
 
 import android.content.Context
 import android.util.Log
+import com.paypal.android.corepayments.CoreConfig
 import lib.android.paypal.com.magnessdk.InvalidInputException
 import lib.android.paypal.com.magnessdk.MagnesSDK
 import lib.android.paypal.com.magnessdk.MagnesSettings
@@ -11,21 +12,17 @@ import lib.android.paypal.com.magnessdk.MagnesSource
  * Enables you to collect data about a customer's device and correlate it with a session identifier on your server.
  */
 class PayPalDataCollector internal constructor(
-    environment: PayPalDataCollectorEnvironment,
+    coreConfig: CoreConfig,
     private val magnesSDK: MagnesSDK,
     private val uuidHelper: UUIDHelper
 ) {
 
-    private val environment = getMagnesEnvironment(environment)
+    private val environment = coreConfig.magnesEnvironment
 
-    constructor(environment: PayPalDataCollectorEnvironment) : this(
-        environment,
-        MagnesSDK.getInstance(),
-        UUIDHelper()
-    )
+    constructor(config: CoreConfig) : this(config, MagnesSDK.getInstance(), UUIDHelper())
 
     /**
-     * Gets a Client Metadata ID at the time of payment activity. Once a user initiates a payment
+     * Collects device data at the time of payment activity. Once a user initiates a payment
      * from their device, PayPal uses the Client Metadata ID to verify that the payment is
      * originating from a valid, user-consented device and application. This helps reduce fraud and
      * decrease declines. This method MUST be called prior to initiating a pre-consented payment (a
@@ -39,7 +36,7 @@ class PayPalDataCollector internal constructor(
      * @return clientMetadataId Your server will send this to PayPal
      */
     @JvmOverloads
-    fun getClientMetadataId(
+    fun collectDeviceData(
         context: Context,
         clientMetadataId: String? = null,
         additionalData: HashMap<String, String>? = null

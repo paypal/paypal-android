@@ -7,11 +7,17 @@
   * Add `VaultRequest` and `VaultResult` types for interacting with the `CardClient#vault()` method
   * Add `VaultListener` interface to receive `CardClient#vault()` success and failure results
   * Add `vaultListener` property to `CardClient`
+* PayPalNativePayments
+  * Bump `PayPal Native Checkout` to `1.1.0`
 * Breaking Changes
   * CardPayments
     * Remove `Vault` data class originally meant for Vault with Purchase flows (it's no longer needed)
-* PayPalNativePayments
-  * Bump `PayPal Native Checkout` to `1.1.0`
+  * CorePayments
+    * Remove `STAGING` constant from `Environment` enum
+  * FraudDetection
+    * Update `PayPalDataCollector` constructor to require a configuration instead of an environment
+    * Remove `PayPalDataCollectorEnvironment` enum
+    * Rename `PayPalDataCollector` `getClientMetadataId()` method to `collectDeviceData()`
 
 ## 0.0.11 (2023-08-14)
 * All Modules
@@ -23,9 +29,6 @@
   * Make `Address` implement `Parcelable`
 * PayPalNativePayments
   * Bump `PayPal Native Checkout` to `1.0.0`
-* Breaking Changes
-  * CorePayments
-    * Remove `STAGING` constant from `Environment` enum
 
 ## 0.0.10 (2023-06-23)
 * Breaking Changes

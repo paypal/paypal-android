@@ -1,7 +1,6 @@
 package com.paypal.android.ui.approveorderprogress
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,8 +33,8 @@ import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.ui.approveorderprogress.events.ApproveOrderEvent
-import com.paypal.android.ui.card.DataCollectorHandler
 import com.paypal.android.uishared.events.ComposableEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -44,17 +43,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ApproveOrderProgressFragment : Fragment() {
 
-    companion object {
-        const val TAG = "CardFragment"
-    }
-
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private lateinit var cardClient: CardClient
-
-    @Inject
-    lateinit var dataCollectorHandler: DataCollectorHandler
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val args: ApproveOrderProgressFragmentArgs by navArgs()
     private val viewModel by viewModels<ApproveOrderProgressViewModel>()
@@ -71,6 +64,7 @@ class ApproveOrderProgressFragment : Fragment() {
 
             val configuration = CoreConfig(clientId = clientId)
             cardClient = CardClient(requireActivity(), configuration)
+            payPalDataCollector = PayPalDataCollector(configuration)
 
             args.cardRequest?.let { cardRequest ->
                 executeCardRequest(cardRequest)
@@ -116,10 +110,6 @@ class ApproveOrderProgressFragment : Fragment() {
             }
         }
 
-        dataCollectorHandler.setLogging(true)
-        val clientMetadataId = dataCollectorHandler.getClientMetadataId(cardRequest.orderId)
-        Log.i(TAG, "MetadataId: $clientMetadataId")
-
         viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
 
         // approve order using card request
@@ -164,15 +154,17 @@ class ApproveOrderProgressFragment : Fragment() {
         val order = sdkSampleServerAPI.getOrder(orderId)
         viewModel.appendEventToLog(ApproveOrderEvent.GetOrder(order))
 
+        val payPalClientMetadataId = payPalDataCollector.collectDeviceData(requireContext())
+
         val finishResult = when (order.intent) {
             "CAPTURE" -> {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Capturing Order..."))
-                sdkSampleServerAPI.captureOrder(orderId)
+                sdkSampleServerAPI.captureOrder(orderId, payPalClientMetadataId)
             }
 
             "AUTHORIZE" -> {
                 viewModel.appendEventToLog(ApproveOrderEvent.Message("Authorizing Order..."))
-                sdkSampleServerAPI.authorizeOrder(orderId)
+                sdkSampleServerAPI.authorizeOrder(orderId, payPalClientMetadataId)
             }
 
             else -> {

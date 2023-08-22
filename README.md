@@ -58,6 +58,7 @@ Each feature module has its own onboarding guide:
 - [PaymentButtons](docs/PaymentButtons)
 - [PayPal Web Payments](docs/PayPalWebPayments)
 - [PayPal Native Payments](docs/PayPalNativePayments)
+- [FraudProtection](docs/FraudProtection)
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.
