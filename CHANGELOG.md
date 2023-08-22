@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 0.0.13 (2023-08-22)
 
 * FraudDetection
   * Update `PayPalDataCollector` constructor to require a configuration instead of an environment
