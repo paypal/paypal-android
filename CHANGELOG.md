@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 0.0.12 (2023-08-22)
 
 * CardPayments
   * Add `CardClient#vault()` method
