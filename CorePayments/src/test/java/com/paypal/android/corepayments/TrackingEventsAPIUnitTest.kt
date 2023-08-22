@@ -75,7 +75,7 @@ class TrackingEventsAPIUnitTest {
                         "client_os": "fake client OS",
                         "comp": "ppcpmobilesdk",
                         "device_manufacturer": "fake-manufacturer",
-                        "merchant_app_environment": "fake-environment",
+                        "merchant_sdk_env": "fake-environment",
                         "event_name": "fake-event",
                         "event_source": "mobile-native",
                         "is_simulator": true,
