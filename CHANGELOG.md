@@ -10,6 +10,8 @@
 * Breaking Changes
   * CardPayments
     * Remove `Vault` data class originally meant for Vault with Purchase flows (it's no longer needed)
+* PayPalNativePayments
+  * Bump `PayPal Native Checkout` to `1.1.0`
 
 ## 0.0.11 (2023-08-14)
 * All Modules
