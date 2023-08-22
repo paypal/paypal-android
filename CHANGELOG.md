@@ -1,5 +1,12 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* FraudDetection
+  * Update `PayPalDataCollector` constructor to require a configuration instead of an environment
+  * Remove `PayPalDataCollectorEnvironment` enum
+  * Rename `PayPalDataCollector` `getClientMetadataId()` method to `collectDeviceData()`
+
 ## 0.0.12 (2023-08-22)
 
 * CardPayments
@@ -14,10 +21,6 @@
     * Remove `Vault` data class originally meant for Vault with Purchase flows (it's no longer needed)
   * CorePayments
     * Remove `STAGING` constant from `Environment` enum
-  * FraudDetection
-    * Update `PayPalDataCollector` constructor to require a configuration instead of an environment
-    * Remove `PayPalDataCollectorEnvironment` enum
-    * Rename `PayPalDataCollector` `getClientMetadataId()` method to `collectDeviceData()`
 
 ## 0.0.11 (2023-08-14)
 * All Modules
