@@ -7,6 +7,8 @@
   * Add `VaultRequest` and `VaultResult` types for interacting with the `CardClient#vault()` method
   * Add `VaultListener` interface to receive `CardClient#vault()` success and failure results
   * Add `vaultListener` property to `CardClient`
+* PayPalNativePayments
+  * Bump `PayPal Native Checkout` to `1.1.0`
 * Breaking Changes
   * CardPayments
     * Remove `Vault` data class originally meant for Vault with Purchase flows (it's no longer needed)
@@ -16,8 +18,6 @@
     * Update `PayPalDataCollector` constructor to require a configuration instead of an environment
     * Remove `PayPalDataCollectorEnvironment` enum
     * Rename `PayPalDataCollector` `getClientMetadataId()` method to `collectDeviceData()`
-* PayPalNativePayments
-  * Bump `PayPal Native Checkout` to `1.1.0`
 
 ## 0.0.11 (2023-08-14)
 * All Modules
