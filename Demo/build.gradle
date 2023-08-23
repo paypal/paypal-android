@@ -131,6 +131,8 @@ dependencies {
     androidTestImplementation deps.androidxTestRunner
     androidTestImplementation deps.androidxTestRules
     androidTestImplementation deps.androidxTestUiAutomator
+    androidTestImplementation deps.androidxTestCoreKtx
+    androidTestImplementation deps.androidxLifecycleRuntimeKtx
 
     // compose ui-test
     androidTestImplementation deps.composeUiTestJUnit4

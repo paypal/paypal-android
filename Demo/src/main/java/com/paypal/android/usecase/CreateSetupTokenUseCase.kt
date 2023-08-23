@@ -15,6 +15,14 @@ class CreateSetupTokenUseCase @Inject constructor(
         // create a payment token with an empty card attribute; the merchant app will provide
         // the card's details through the SDK
         val cardJSON = JSONObject()
+        cardJSON.put("verification_method", "SCA_WHEN_REQUIRED")
+
+        val experienceContextJSON = JSONObject()
+        experienceContextJSON.put("return_url", "https://example.com/returnUrl")
+        experienceContextJSON.put("cancel_url", "https://example.com/cancelUrl")
+        cardJSON.put("experience_context", experienceContextJSON)
+
+
         val paymentSourceJSON = JSONObject()
         paymentSourceJSON.put("card", cardJSON)
 

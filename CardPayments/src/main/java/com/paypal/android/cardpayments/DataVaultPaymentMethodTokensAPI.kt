@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.content.Context
+import android.util.Log
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
@@ -58,6 +59,10 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->
             val setupToken = responseJSON.getJSONObject("updateVaultSetupToken")
+            val links = setupToken.getString("links")
+            Log.d("HACK", "Card Number: $cardNumber")
+            Log.d("HACK", links)
+            Log.d("HACK", "------------")
             return VaultResult(
                 setupTokenId = setupToken.getString("id"),
                 status = setupToken.getString("status")

@@ -69,7 +69,7 @@ class CardClient internal constructor(
             )
 
     init {
-        activity.lifecycle.addObserver(lifeCycleObserver)
+//        activity.lifecycle.addObserver(lifeCycleObserver)
     }
 
     /**

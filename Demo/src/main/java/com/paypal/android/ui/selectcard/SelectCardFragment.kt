@@ -134,6 +134,19 @@ class SelectCardFragment : Fragment() {
                 )
                 Divider(color = Color.Black)
             }
+            stickyHeader {
+                WireframeHeader("Vault Cards")
+            }
+            items(viewModel.vaultVisaCards) { card ->
+                TestCardView(
+                    testCard = card,
+                    selected = false,
+                    onClick = {
+                        onTestCardSelected(card)
+                    }
+                )
+                Divider(color = Color.Black)
+            }
         }
     }
 
