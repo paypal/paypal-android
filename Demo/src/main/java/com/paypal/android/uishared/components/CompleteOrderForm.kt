@@ -32,7 +32,7 @@ fun CompleteOrderForm(
             )
             Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(
-                text = orderIntent.name,
+                text = "${orderIntent.name} ORDER",
                 isLoading = isLoading,
                 onClick = { onSubmit() },
                 modifier = Modifier.fillMaxWidth()

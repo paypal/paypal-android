@@ -22,30 +22,29 @@ class CardTest {
 
     @Test
     fun approveOrder() {
-        composeTestRule.onNodeWithText("CARD").performClick()
+        val waitTimeoutMs = 15_000L
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("New Visa"))
+        composeTestRule.onNodeWithText("Approve Order").performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(hasText("New Visa"), waitTimeoutMs)
         composeTestRule.onNodeWithText("New Visa").performClick()
 
-        composeTestRule.waitUntilExactlyOneExists(hasText("Card Details"))
+        composeTestRule.waitUntilExactlyOneExists(hasText("Create Order"), waitTimeoutMs)
+        composeTestRule.onNodeWithText("Create Order").performClick()
 
+        // wait for approve order form
+        composeTestRule.waitUntilExactlyOneExists(hasText("APPROVE ORDER"), waitTimeoutMs)
+
+        // skip 3DS for this test
         composeTestRule.onNodeWithText("SCA").performClick()
         composeTestRule.onNodeWithText("WHEN REQUIRED").performClick()
 
-        composeTestRule.onNodeWithText("INTENT").performClick()
-        composeTestRule.onNodeWithText("AUTHORIZE").performClick()
+        // approve the order
+        composeTestRule.onNodeWithText("APPROVE ORDER").performClick()
 
-        composeTestRule.onNodeWithText("SHOULD VAULT").performClick()
-        composeTestRule.onNodeWithText("YES").performClick()
+        composeTestRule.waitUntilExactlyOneExists(hasText("Complete Order"), waitTimeoutMs)
+        composeTestRule.onNodeWithText("AUTHORIZE ORDER").performClick()
 
-        // insert random customer id for vaulting
-        val customerVaultId = UUID.randomUUID().toString()
-        composeTestRule.onNodeWithText("CUSTOMER ID FOR VAULT").performTextInput(customerVaultId)
-
-        // press done button and submit form
-        composeTestRule.onNodeWithText("CUSTOMER ID FOR VAULT").performImeAction()
-        composeTestRule.onNodeWithText("CREATE & APPROVE ORDER").performClick()
-
-        composeTestRule.waitUntilExactlyOneExists(hasText("Status: COMPLETED"), 15_000L)
+        composeTestRule.waitUntilExactlyOneExists(hasText("Order Complete"), waitTimeoutMs)
     }
 }
