@@ -43,6 +43,7 @@ import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.uishared.components.CompleteOrderForm
@@ -63,6 +64,7 @@ class CardFragment : Fragment() {
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private lateinit var cardClient: CardClient
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val args: CardFragmentArgs by navArgs()
     private val viewModel by viewModels<CardViewModel>()
@@ -113,9 +115,10 @@ class CardFragment : Fragment() {
             viewModel.isApproveOrderLoading = true
 
             val clientId = sdkSampleServerAPI.fetchClientId()
-            val configuration = CoreConfig(clientId = clientId)
+            val coreConfig = CoreConfig(clientId = clientId)
+            payPalDataCollector = PayPalDataCollector(coreConfig)
 
-            cardClient = CardClient(requireActivity(), configuration)
+            cardClient = CardClient(requireActivity(), coreConfig)
             cardClient.approveOrderListener = object : ApproveOrderListener {
                 override fun onApproveOrderSuccess(result: CardResult) {
                     viewModel.approveOrderResult = result
@@ -154,11 +157,12 @@ class CardFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isCompleteOrderLoading = true
 
+            val cmid = payPalDataCollector.collectDeviceData(requireContext())
             val orderId = viewModel.createdOrder!!.id!!
             val orderIntent = viewModel.intentOption
             viewModel.completedOrder = when (orderIntent) {
-                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId)
-                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId)
+                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId, cmid)
+                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId, cmid)
             }
             viewModel.isCompleteOrderLoading = false
         }
