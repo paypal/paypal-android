@@ -1,36 +1,34 @@
-package com.paypal.android.ui.approveorderprogress.views
+package com.paypal.android.ui.card
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.uishared.components.CardResultView
 
 @Composable
-fun MessageView(message: String) {
+fun ApproveOrderSuccessView(cardResult: CardResult) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier
-                .padding(16.dp)
-        )
+        Spacer(modifier = Modifier.size(16.dp))
+        CardResultView(cardResult)
     }
 }
 
 @Preview
 @Composable
-fun MessageViewPreview() {
+fun ApproveOrderSuccessViewPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            MessageView(message = "This is a message.")
+            ApproveOrderSuccessView(cardResult = CardResult("fake-order-id"))
         }
     }
 }

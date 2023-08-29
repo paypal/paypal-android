@@ -1,6 +1,7 @@
 package com.paypal.android.ui.card
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,17 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,20 +31,23 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.paypal.android.R
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
-import com.paypal.android.ui.OptionList
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.ui.card.validation.CardViewUiState
-import com.paypal.android.ui.features.Feature
-import com.paypal.android.ui.stringResourceListOf
-import com.paypal.android.uishared.components.CardForm
+import com.paypal.android.uishared.components.CompleteOrderForm
+import com.paypal.android.uishared.components.CreateOrderForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,11 +56,15 @@ import javax.inject.Inject
 class CardFragment : Fragment() {
 
     companion object {
+        const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
+
+    private lateinit var cardClient: CardClient
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val args: CardFragmentArgs by navArgs()
     private val viewModel by viewModels<CardViewModel>()
@@ -67,15 +76,6 @@ class CardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         args.prefillCard?.card?.let { viewModel.prefillCard(it) }
-
-        val feature = args.feature
-        if (feature == Feature.CARD_VAULT) {
-            // the vault api only has the 'when required' option
-            viewModel.scaOption = "WHEN REQUIRED"
-        } else {
-            viewModel.scaOption = "ALWAYS"
-        }
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -83,9 +83,10 @@ class CardFragment : Fragment() {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         CardView(
-                            feature = feature,
                             uiState = uiState,
-                            onFormSubmit = { onFormSubmit() }
+                            onCreateOrderSubmit = { createOrder() },
+                            onApproveOrderSubmit = { approveOrder() },
+                            onCompleteOrderSubmit = { completeOrder() }
                         )
                     }
                 }
@@ -93,67 +94,145 @@ class CardFragment : Fragment() {
         }
     }
 
-    private fun onFormSubmit() {
+    private fun createOrder() {
         viewLifecycleOwner.lifecycleScope.launch {
-            sendApproveOrderRequest()
+            viewModel.isCreateOrderLoading = true
+
+            val uiState = viewModel.uiState.value
+            viewModel.createdOrder = uiState.run {
+                sdkSampleServerAPI.createOrder(
+                    orderIntent = intentOption,
+                    shouldVault = shouldVault,
+                    vaultCustomerId = customerId
+                )
+            }
+            viewModel.isCreateOrderLoading = false
         }
     }
 
-    private fun sendApproveOrderRequest() {
-        val order = args.order
-        if (order == null) {
-            // TODO: handle invalid state
+    private fun approveOrder() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isApproveOrderLoading = true
+
+            val clientId = sdkSampleServerAPI.fetchClientId()
+            val coreConfig = CoreConfig(clientId = clientId)
+            payPalDataCollector = PayPalDataCollector(coreConfig)
+
+            cardClient = CardClient(requireActivity(), coreConfig)
+            cardClient.approveOrderListener = object : ApproveOrderListener {
+                override fun onApproveOrderSuccess(result: CardResult) {
+                    viewModel.approveOrderResult = result
+                    viewModel.isApproveOrderLoading = false
+                }
+
+                override fun onApproveOrderFailure(error: PayPalSDKError) {
+                    viewModel.approveOrderErrorMessage = "CAPTURE fail: ${error.errorDescription}"
+                    viewModel.isApproveOrderLoading = false
+                }
+
+                override fun onApproveOrderCanceled() {
+                    viewModel.approveOrderErrorMessage = "USER CANCELED"
+                    viewModel.isApproveOrderLoading = false
+                }
+
+                override fun onApproveOrderThreeDSecureWillLaunch() {
+                    Log.d(TAG, "3DS Auth Requested")
+                }
+
+                override fun onApproveOrderThreeDSecureDidFinish() {
+                    Log.d(TAG, "3DS Success")
+                    viewModel.isApproveOrderLoading = false
+                }
+            }
+
+            val uiState = viewModel.uiState.value
+            val order = viewModel.createdOrder
+            val cardRequest = createCardRequest(uiState, order!!)
+
+            cardClient.approveOrder(requireActivity(), cardRequest)
         }
-        val uiState = viewModel.uiState.value
-        val cardRequest = createCardRequest(uiState, order!!)
-        findNavController().navigate(
-            CardFragmentDirections.actionCardFragmentToApproveOrderProgressFragment(cardRequest = cardRequest)
-        )
+    }
+
+    private fun completeOrder() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCompleteOrderLoading = true
+
+            val cmid = payPalDataCollector.collectDeviceData(requireContext())
+            val orderId = viewModel.createdOrder!!.id!!
+            val orderIntent = viewModel.intentOption
+            viewModel.completedOrder = when (orderIntent) {
+                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId, cmid)
+                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId, cmid)
+            }
+            viewModel.isCompleteOrderLoading = false
+        }
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
     @ExperimentalMaterial3Api
     @Composable
     fun CardView(
-        feature: Feature,
         uiState: CardViewUiState,
-        onFormSubmit: () -> Unit = {},
+        onCreateOrderSubmit: () -> Unit = {},
+        onApproveOrderSubmit: () -> Unit = {},
+        onCompleteOrderSubmit: () -> Unit = {},
     ) {
+        val scrollState = rememberScrollState()
+        LaunchedEffect(uiState) {
+            // continuously scroll to bottom of the list when event state is updated
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(16.dp)
+                .verticalScroll(scrollState)
                 .semantics {
                     testTagsAsResourceId = true
                 }
         ) {
-            Spacer(modifier = Modifier.size(24.dp))
-            Text(
-                text = "Card Details",
-                style = MaterialTheme.typography.headlineSmall
+            CreateOrderForm(
+                title = "Create an Order to proceed:",
+                orderIntent = uiState.intentOption,
+                shouldVault = uiState.shouldVault,
+                vaultCustomerId = uiState.customerId,
+                isLoading = uiState.isCreateOrderLoading,
+                onIntentOptionSelected = { value -> viewModel.intentOption = value },
+                onShouldVaultChanged = { value -> viewModel.shouldVault = value },
+                onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
+                onSubmit = { onCreateOrderSubmit() }
             )
-            Spacer(modifier = Modifier.size(2.dp))
-            CardForm(
-                cardNumber = uiState.cardNumber,
-                expirationDate = uiState.cardExpirationDate,
-                securityCode = uiState.cardSecurityCode,
-                onCardNumberChange = { viewModel.cardNumber = it },
-                onExpirationDateChange = { viewModel.cardExpirationDate = it },
-                onSecurityCodeChange = { viewModel.cardSecurityCode = it },
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-            Text(
-                text = "${stringResource(feature.stringRes)} Options",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            OptionsForm(uiState)
-            Spacer(modifier = Modifier.weight(1.0f))
-            WireframeButton(
-                text = "CREATE & APPROVE ORDER",
-                onClick = { onFormSubmit() },
-                modifier = Modifier.fillMaxWidth()
-            )
+            uiState.createdOrder?.let { createdOrder ->
+                Spacer(modifier = Modifier.size(24.dp))
+                CreateOrderView(order = createdOrder)
+                Spacer(modifier = Modifier.size(24.dp))
+                ApproveOrderForm(
+                    uiState = uiState,
+                    onCardNumberChange = { value -> viewModel.cardNumber = value },
+                    onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
+                    onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
+                    onSCAOptionSelected = { value -> viewModel.scaOption = value },
+                    onSubmit = { onApproveOrderSubmit() }
+                )
+            }
+            uiState.approveOrderResult?.let { cardResult ->
+                Spacer(modifier = Modifier.size(24.dp))
+                ApproveOrderSuccessView(cardResult = cardResult)
+                Spacer(modifier = Modifier.size(24.dp))
+                CompleteOrderForm(
+                    isLoading = uiState.isCompleteOrderLoading,
+                    orderIntent = uiState.intentOption,
+                    onSubmit = { onCompleteOrderSubmit() }
+                )
+            }
+            uiState.approveOrderErrorMessage?.let { errorMessage ->
+                Spacer(modifier = Modifier.size(24.dp))
+                MessageView(message = errorMessage)
+            }
+            uiState.completedOrder?.let { completedOrder ->
+                Spacer(modifier = Modifier.size(24.dp))
+                OrderCompleteView(order = completedOrder)
+            }
             Spacer(modifier = Modifier.size(24.dp))
         }
     }
@@ -164,25 +243,11 @@ class CardFragment : Fragment() {
     fun CardViewPreview() {
         MaterialTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
-                CardView(feature = Feature.CARD_APPROVE_ORDER, uiState = CardViewUiState())
+                CardView(
+                    uiState = CardViewUiState(createdOrder = Order("sample-id"))
+                )
             }
         }
-    }
-
-    @ExperimentalMaterial3Api
-    @Composable
-    fun OptionsForm(uiState: CardViewUiState) {
-        val scaOptions = if (args.feature == Feature.CARD_VAULT) {
-            stringResourceListOf(R.string.sca_when_required)
-        } else {
-            stringResourceListOf(R.string.sca_always, R.string.sca_when_required)
-        }
-        OptionList(
-            title = stringResource(id = R.string.sca_title),
-            options = scaOptions,
-            selectedOption = uiState.scaOption,
-            onOptionSelected = { scaOption -> viewModel.scaOption = scaOption }
-        )
     }
 
     private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {

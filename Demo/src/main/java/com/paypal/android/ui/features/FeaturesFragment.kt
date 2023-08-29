@@ -82,12 +82,12 @@ class FeaturesFragment : Fragment() {
 
     private fun onFeatureSelected(feature: Feature) {
         val action = when (feature) {
-            Feature.CARD_APPROVE_ORDER,
             Feature.PAYPAL_WEB,
             Feature.PAYPAL_NATIVE -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(feature)
             }
 
+            Feature.CARD_APPROVE_ORDER,
             Feature.CARD_VAULT -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment(feature)
             }
