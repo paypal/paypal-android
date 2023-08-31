@@ -86,7 +86,8 @@ class CardFragment : Fragment() {
                             uiState = uiState,
                             onCreateOrderSubmit = { createOrder() },
                             onApproveOrderSubmit = { approveOrder() },
-                            onCompleteOrderSubmit = { completeOrder() }
+                            onCompleteOrderSubmit = { completeOrder() },
+                            onUseTestCardClick = { showTestCards() }
                         )
                     }
                 }
@@ -168,6 +169,10 @@ class CardFragment : Fragment() {
         }
     }
 
+    private fun showTestCards() {
+
+    }
+
     @OptIn(ExperimentalComposeUiApi::class)
     @ExperimentalMaterial3Api
     @Composable
@@ -176,6 +181,7 @@ class CardFragment : Fragment() {
         onCreateOrderSubmit: () -> Unit = {},
         onApproveOrderSubmit: () -> Unit = {},
         onCompleteOrderSubmit: () -> Unit = {},
+        onUseTestCardClick: () -> Unit = {}
     ) {
         val scrollState = rememberScrollState()
         LaunchedEffect(uiState) {
@@ -212,6 +218,7 @@ class CardFragment : Fragment() {
                     onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
                     onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
                     onSCAOptionSelected = { value -> viewModel.scaOption = value },
+                    onUseTestCardClick = { onUseTestCardClick() },
                     onSubmit = { onApproveOrderSubmit() }
                 )
             }

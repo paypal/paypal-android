@@ -86,6 +86,7 @@ class VaultFragment : Fragment() {
                             onCreateSetupTokenSubmit = { createSetupToken() },
                             onAttachCardToSetupTokenSubmit = { attachCardToSetupToken() },
                             onCreatePaymentTokenSubmit = { createPaymentToken() },
+                            onUseTestCardClick = { showTestCards() }
                         )
                     }
                 }
@@ -134,6 +135,10 @@ class VaultFragment : Fragment() {
         }
     }
 
+    private fun showTestCards() {
+
+    }
+
     private fun parseCard(uiState: VaultUiState): Card {
         // TODO: handle invalid date string
         var expirationMonth = ""
@@ -169,6 +174,7 @@ class VaultFragment : Fragment() {
         uiState: VaultUiState,
         onCreateSetupTokenSubmit: () -> Unit,
         onAttachCardToSetupTokenSubmit: () -> Unit,
+        onUseTestCardClick: () -> Unit,
         onCreatePaymentTokenSubmit: () -> Unit
     ) {
         val scrollState = rememberScrollState()
@@ -196,6 +202,7 @@ class VaultFragment : Fragment() {
                     onCardNumberChange = { viewModel.cardNumber = it },
                     onExpirationDateChange = { viewModel.cardExpirationDate = it },
                     onSecurityCodeChange = { viewModel.cardSecurityCode = it },
+                    onUseTestCardClick = { onUseTestCardClick() },
                     onSubmit = { onAttachCardToSetupTokenSubmit() }
                 )
             }
@@ -257,6 +264,7 @@ class VaultFragment : Fragment() {
                     onCreateSetupTokenSubmit = {},
                     onAttachCardToSetupTokenSubmit = {},
                     onCreatePaymentTokenSubmit = {},
+                    onUseTestCardClick = {}
                 )
             }
         }

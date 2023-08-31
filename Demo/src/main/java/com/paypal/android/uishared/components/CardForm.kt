@@ -3,15 +3,19 @@ package com.paypal.android.uishared.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,9 +35,18 @@ fun CardForm(
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
+    onUseTestCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
+        Button(
+            onClick = { onUseTestCardClick() },
+            modifier = Modifier
+                .align(Alignment.End)
+                .defaultMinSize(minHeight = 50.dp)
+        ) {
+            Text(text = "Use Test Card")
+        }
         OutlinedTextField(
             value = cardNumber,
             label = { Text(stringResource(id = R.string.card_field_card_number)) },
@@ -77,7 +90,8 @@ fun CardFormPreview() {
                 securityCode = "",
                 onCardNumberChange = {},
                 onExpirationDateChange = {},
-                onSecurityCodeChange = {}
+                onSecurityCodeChange = {},
+                onUseTestCardClick = {},
             )
         }
     }

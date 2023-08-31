@@ -27,6 +27,7 @@ import com.paypal.android.uishared.components.CardForm
 @Composable
 fun ApproveOrderForm(
     uiState: CardViewUiState,
+    onUseTestCardClick: () -> Unit,
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
@@ -51,6 +52,7 @@ fun ApproveOrderForm(
                 onCardNumberChange = { onCardNumberChange(it) },
                 onExpirationDateChange = { onExpirationDateChange(it) },
                 onSecurityCodeChange = { onSecurityCodeChange(it) },
+                onUseTestCardClick = { onUseTestCardClick() }
             )
             Spacer(modifier = Modifier.size(16.dp))
             OptionList(
@@ -81,6 +83,7 @@ fun ApproveOrderFormPreview() {
                 onExpirationDateChange = {},
                 onSecurityCodeChange = {},
                 onSCAOptionSelected = {},
+                onUseTestCardClick = {},
                 onSubmit = {}
             )
         }
