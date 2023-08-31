@@ -23,8 +23,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.WireframeHeader
 
@@ -50,8 +53,12 @@ class SelectCardFragment : Fragment() {
         }
     }
 
-    private fun onTestCardSelected(card: TestCard) {
-        // TODO: return test card as a result
+    private fun onTestCardSelected(testCard: TestCard) {
+        val bundle = bundleOf(DATA_KEY_TEST_CARD to testCard)
+        setFragmentResult(REQUEST_KEY_TEST_CARD, bundle)
+
+        // go back to previous fragment with test card as a result
+        findNavController().navigateUp()
     }
 
     @OptIn(ExperimentalFoundationApi::class)

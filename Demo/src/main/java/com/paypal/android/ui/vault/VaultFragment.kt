@@ -31,6 +31,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -76,12 +77,7 @@ class VaultFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
-            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
-                viewModel.prefillCard(testCard)
-            }
-        }
-
+        registerPrefillCardListener()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -97,6 +93,14 @@ class VaultFragment : Fragment() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerPrefillCardListener() {
+        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
+            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
+                viewModel.prefillCard(testCard)
             }
         }
     }
@@ -143,7 +147,8 @@ class VaultFragment : Fragment() {
     }
 
     private fun showTestCards() {
-        // TODO: update card data when a prefill card has been selected
+        val action = VaultFragmentDirections.actionVaultFragmentToSelectCardFragment()
+        findNavController().navigate(action)
     }
 
     private fun parseCard(uiState: VaultUiState): Card {

@@ -32,6 +32,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -78,11 +79,7 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
-            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
-                viewModel.prefillCard(testCard)
-            }
-        }
+        registerPrefillCardListener()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -98,6 +95,14 @@ class CardFragment : Fragment() {
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerPrefillCardListener() {
+        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
+            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
+                viewModel.prefillCard(testCard)
             }
         }
     }
@@ -177,7 +182,8 @@ class CardFragment : Fragment() {
     }
 
     private fun showTestCards() {
-
+        val action = CardFragmentDirections.actionCardFragmentToSelectCardFragment()
+        findNavController().navigate(action)
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
