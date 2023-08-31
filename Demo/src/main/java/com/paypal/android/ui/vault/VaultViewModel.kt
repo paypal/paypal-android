@@ -3,7 +3,6 @@ package com.paypal.android.ui.vault
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
-import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.models.TestCard
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -185,6 +185,8 @@ class CardFragment : Fragment() {
         findNavController().navigate(action)
     }
 
+    // TODO: Investigate the best way to break this composable up into smaller individual units
+    @Suppress("LongMethod")
     @OptIn(ExperimentalComposeUiApi::class)
     @ExperimentalMaterial3Api
     @Composable
