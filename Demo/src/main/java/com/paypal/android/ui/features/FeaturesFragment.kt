@@ -87,9 +87,11 @@ class FeaturesFragment : Fragment() {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(feature)
             }
 
-            Feature.CARD_APPROVE_ORDER,
+            Feature.CARD_APPROVE_ORDER -> {
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToCardFragment()
+            }
             Feature.CARD_VAULT -> {
-                FeaturesFragmentDirections.actionPaymentMethodsFragmentToSelectCardFragment(feature)
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToVaultFragment()
             }
         }
         findNavController().navigate(action)

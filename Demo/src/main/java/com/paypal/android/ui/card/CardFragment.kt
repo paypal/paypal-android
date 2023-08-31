@@ -66,7 +66,6 @@ class CardFragment : Fragment() {
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
-    private val args: CardFragmentArgs by navArgs()
     private val viewModel by viewModels<CardViewModel>()
 
     @ExperimentalMaterial3Api
@@ -75,7 +74,6 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -170,7 +168,8 @@ class CardFragment : Fragment() {
     }
 
     private fun showTestCards() {
-
+        // TODO: update card data when a prefill card has been selected
+//        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
     }
 
     @OptIn(ExperimentalComposeUiApi::class)

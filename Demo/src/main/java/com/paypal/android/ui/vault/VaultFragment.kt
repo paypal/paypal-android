@@ -64,7 +64,6 @@ class VaultFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
 
-    private val args: VaultFragmentArgs by navArgs()
     private val viewModel by viewModels<VaultViewModel>()
 
     @ExperimentalMaterial3Api
@@ -73,8 +72,6 @@ class VaultFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
-
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -136,7 +133,8 @@ class VaultFragment : Fragment() {
     }
 
     private fun showTestCards() {
-
+        // TODO: update card data when a prefill card has been selected
+//        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
     }
 
     private fun parseCard(uiState: VaultUiState): Card {
