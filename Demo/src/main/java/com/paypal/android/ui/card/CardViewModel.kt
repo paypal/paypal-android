@@ -2,7 +2,6 @@ package com.paypal.android.ui.card
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.Order
-import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.cardpayments.model.CardResult
 import com.paypal.android.models.TestCard

@@ -33,7 +33,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
@@ -47,11 +46,11 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.TestCard
-import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
