@@ -25,13 +25,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.fragment.navArgs
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.WireframeHeader
 
 class SelectCardFragment : Fragment() {
 
-    private val args: SelectCardFragmentArgs by navArgs()
+    companion object {
+        const val REQUEST_KEY_TEST_CARD = "SELECT_CARD_REQUEST_KEY_TEST_CARD"
+        const val DATA_KEY_TEST_CARD = "SELECT_CARD_DATA_KEY_TEST_CARD"
+    }
 
     @ExperimentalMaterial3Api
     override fun onCreateView(

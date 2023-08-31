@@ -5,6 +5,7 @@ import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.VaultResult
+import com.paypal.android.models.TestCard
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -73,7 +74,8 @@ class VaultViewModel : ViewModel() {
             _uiState.update { it.copy(vaultResult = value) }
         }
 
-    fun prefillCard(card: Card) {
+    fun prefillCard(testCard: TestCard) {
+        val card = testCard.card
         _uiState.update { currentState ->
             currentState.copy(
                 cardNumber = card.number,

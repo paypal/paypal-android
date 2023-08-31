@@ -58,17 +58,7 @@
     <fragment
         android:id="@+id/selectCardFragment"
         android:name="com.paypal.android.ui.selectcard.SelectCardFragment"
-        android:label="SelectCardFragment">
-        <argument
-            android:name="feature"
-            app:argType="com.paypal.android.ui.features.Feature"
-            app:nullable="false" />
-        <argument
-            android:name="order"
-            android:defaultValue="@null"
-            app:argType="com.paypal.android.api.model.Order"
-            app:nullable="true" />
-    </fragment>
+        android:label="SelectCardFragment" />
     <fragment
         android:id="@+id/createOrderFragment"
         android:name="com.paypal.android.ui.createorder.CreateOrderFragment"

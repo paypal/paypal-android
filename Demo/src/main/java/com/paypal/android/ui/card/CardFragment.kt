@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -44,10 +45,13 @@ import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.models.TestCard
 import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,6 +78,11 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
+            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
+                viewModel.prefillCard(testCard)
+            }
+        }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -168,8 +177,7 @@ class CardFragment : Fragment() {
     }
 
     private fun showTestCards() {
-        // TODO: update card data when a prefill card has been selected
-//        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
+
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
