@@ -77,16 +77,6 @@ class CreateOrderFragment : Fragment() {
 
             // continue on to feature
             when (val feature = args.feature) {
-                Feature.CARD_APPROVE_ORDER,
-                Feature.CARD_VAULT -> {
-                    navigate(
-                        CreateOrderFragmentDirections.actionCreateOrderFragmentToSelectCardFragment(
-                            feature,
-                            order
-                        )
-                    )
-                }
-
                 Feature.PAYPAL_WEB -> {
                     navigate(
                         CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalFragment(
@@ -101,6 +91,10 @@ class CreateOrderFragment : Fragment() {
                             order
                         )
                     )
+                }
+
+                else -> {
+                    // TODO: remove once Feature enum is removed
                 }
             }
         }

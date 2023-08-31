@@ -119,18 +119,6 @@
             app:argType="com.paypal.android.ui.features.Feature"
             app:nullable="false" />
         <action
-            android:id="@+id/action_createOrderFragment_to_selectCardFragment"
-            app:destination="@id/selectCardFragment">
-            <argument
-                android:name="feature"
-                app:argType="com.paypal.android.ui.features.Feature"
-                app:nullable="false" />
-            <argument
-                android:name="order"
-                app:argType="com.paypal.android.api.model.Order"
-                app:nullable="false" />
-        </action>
-        <action
             android:id="@+id/action_createOrderFragment_to_payPalFragment"
             app:destination="@id/payPalFragment">
             <argument
