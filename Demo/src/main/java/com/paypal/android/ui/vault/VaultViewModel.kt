@@ -1,9 +1,11 @@
 package com.paypal.android.ui.vault
 
 import androidx.lifecycle.ViewModel
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.cardpayments.VaultResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +45,12 @@ class VaultViewModel : ViewModel() {
             _uiState.update { it.copy(isCreatePaymentTokenLoading = value) }
         }
 
+    var isCreateOrderLoading: Boolean
+        get() = _uiState.value.isCreateOrderLoading
+        set(value) {
+            _uiState.update { it.copy(isCreateOrderLoading = value) }
+        }
+
     var customerId: String
         get() = _uiState.value.customerId
         set(value) {
@@ -71,6 +79,18 @@ class VaultViewModel : ViewModel() {
         get() = _uiState.value.vaultResult
         set(value) {
             _uiState.update { it.copy(vaultResult = value) }
+        }
+
+    var orderIntent: OrderIntent
+        get() = _uiState.value.orderIntent
+        set(value) {
+            _uiState.update { it.copy(orderIntent = value) }
+        }
+
+    var createdOrder: Order?
+        get() = _uiState.value.createdOrder
+        set(value) {
+            _uiState.update { it.copy(createdOrder = value) }
         }
 
     fun prefillCard(card: Card) {

@@ -40,7 +40,9 @@ import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.ui.card.CreateOrderView
 import com.paypal.android.ui.card.DateString
+import com.paypal.android.uishared.components.CreateOrderWithoutVaultForm
 import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
@@ -48,6 +50,8 @@ import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -86,6 +90,7 @@ class VaultFragment : Fragment() {
                             onCreateSetupTokenSubmit = { createSetupToken() },
                             onAttachCardToSetupTokenSubmit = { attachCardToSetupToken() },
                             onCreatePaymentTokenSubmit = { createPaymentToken() },
+                            onCreateOrderSubmit = { createOrder() }
                         )
                     }
                 }
@@ -134,6 +139,40 @@ class VaultFragment : Fragment() {
         }
     }
 
+    private fun createOrder() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCreateOrderLoading = true
+            val uiState = viewModel.uiState.value
+            val jsonBody = buildCreateOrderWithPaymentTokenBody(uiState)
+            viewModel.createdOrder = sdkSampleServerAPI.createOrder(jsonBody)
+            viewModel.isCreateOrderLoading = false
+        }
+    }
+
+    private fun buildCreateOrderWithPaymentTokenBody(uiState: VaultUiState): JSONObject {
+        val amountJSON = JSONObject()
+            .put("currency_code", "USD")
+            .put("value", "10.99")
+
+        val purchaseUnitJSON = JSONObject()
+            .put("amount", amountJSON)
+
+        val orderIntent = uiState.orderIntent
+        val orderRequest = JSONObject()
+            .put("intent", orderIntent)
+            .put("purchase_units", JSONArray().put(purchaseUnitJSON))
+
+        val tokenJSON = JSONObject()
+            .put("id", uiState.paymentToken!!.id)
+            .put("type", "PAYMENT_METHOD_TOKEN")
+
+        val paymentSourceJSON = JSONObject()
+            .put("token", tokenJSON)
+
+        orderRequest.put("payment_source", paymentSourceJSON)
+        return orderRequest
+    }
+
     private fun parseCard(uiState: VaultUiState): Card {
         // TODO: handle invalid date string
         var expirationMonth = ""
@@ -169,7 +208,8 @@ class VaultFragment : Fragment() {
         uiState: VaultUiState,
         onCreateSetupTokenSubmit: () -> Unit,
         onAttachCardToSetupTokenSubmit: () -> Unit,
-        onCreatePaymentTokenSubmit: () -> Unit
+        onCreatePaymentTokenSubmit: () -> Unit,
+        onCreateOrderSubmit: () -> Unit
     ) {
         val scrollState = rememberScrollState()
         LaunchedEffect(uiState) {
@@ -211,7 +251,20 @@ class VaultFragment : Fragment() {
             uiState.paymentToken?.let { paymentToken ->
                 Spacer(modifier = Modifier.size(8.dp))
                 PaymentTokenView(paymentToken = paymentToken)
+                Spacer(modifier = Modifier.size(8.dp))
+                CreateOrderWithoutVaultForm(
+                    title = "Create Order",
+                    orderIntent = uiState.orderIntent,
+                    isLoading = uiState.isCreateOrderLoading,
+                    onIntentOptionSelected = { value -> viewModel.orderIntent = value },
+                    onSubmit = { onCreateOrderSubmit() }
+                )
             }
+            uiState.createdOrder?.let { createdOrder ->
+                Spacer(modifier = Modifier.size(8.dp))
+                CreateOrderView(order = createdOrder)
+            }
+            Spacer(modifier = Modifier.size(24.dp))
         }
     }
 
@@ -257,6 +310,7 @@ class VaultFragment : Fragment() {
                     onCreateSetupTokenSubmit = {},
                     onAttachCardToSetupTokenSubmit = {},
                     onCreatePaymentTokenSubmit = {},
+                    onCreateOrderSubmit = {}
                 )
             }
         }
