@@ -3,6 +3,8 @@ package com.paypal.android.ui.paypalweb
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.Order
 import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -44,5 +46,23 @@ class PayPalWebViewModel : ViewModel() {
         get() = _uiState.value.createdOrder
         set(value) {
             _uiState.update { it.copy(createdOrder = value) }
+        }
+
+    var payPalWebCheckoutResult: PayPalWebCheckoutResult?
+        get() = _uiState.value.payPalWebCheckoutResult
+        set(value) {
+            _uiState.update { it.copy(payPalWebCheckoutResult = value) }
+        }
+
+    var payPalWebCheckoutError: PayPalSDKError?
+        get() = _uiState.value.payPalWebCheckoutError
+        set(value) {
+            _uiState.update { it.copy(payPalWebCheckoutError = value) }
+        }
+
+    var isCheckoutCanceled: Boolean
+        get() = _uiState.value.isCheckoutCanceled
+        set(value) {
+            _uiState.update { it.copy(isCheckoutCanceled = value) }
         }
 }

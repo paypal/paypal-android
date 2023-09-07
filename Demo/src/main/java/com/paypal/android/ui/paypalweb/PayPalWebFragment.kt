@@ -2,6 +2,7 @@ package com.paypal.android.ui.paypalweb
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,8 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.CreateOrderView
 import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.PayPalSDKErrorView
+import com.paypal.android.uishared.components.PropertyView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -50,6 +53,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
+    companion object {
+        private val TAG = PayPalWebFragment::class.qualifiedName
+    }
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
@@ -112,21 +118,22 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
 
             } catch (e: UnknownHostException) {
-//                Log.e(TAG, e.message!!)
-                val error = APIClientError.payPalCheckoutError(e.message!!)
-                onPayPalWebFailure(error)
+                viewModel.payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
+                viewModel.isStartCheckoutLoading = false
             } catch (e: HttpException) {
-//                Log.e(TAG, e.message!!)
-                val error = APIClientError.payPalCheckoutError(e.message!!)
-                onPayPalWebFailure(error)
+                viewModel.payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
+                viewModel.isStartCheckoutLoading = false
             }
         }
     }
 
     @SuppressLint("SetTextI18n")
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-//        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
-//
+        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
+
+        viewModel.payPalWebCheckoutResult = result
+        viewModel.isStartCheckoutLoading = false
+
 //        when (orderIntent) {
 //            OrderIntent.CAPTURE -> captureOrder(result)
 //            OrderIntent.AUTHORIZE -> authorizeOrder(result)
@@ -142,24 +149,16 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
 
     @SuppressLint("SetTextI18n")
     override fun onPayPalWebFailure(error: PayPalSDKError) {
-//        Log.i(TAG, "Checkout Error: ${error.errorDescription}")
-//
-//        val title = getString(R.string.order_failed)
-//        val statusText = getString(R.string.reason, error.errorDescription)
-//
-//        binding.statusText.text = "$title\n$statusText"
-//        hideLoader()
+        Log.i(TAG, "Checkout Error: ${error.errorDescription}")
+        viewModel.payPalWebCheckoutError = error
+        viewModel.isStartCheckoutLoading = false
     }
 
     @SuppressLint("SetTextI18n")
     override fun onPayPalWebCanceled() {
-//        Log.i(TAG, "User cancelled")
-//
-//        val title = getString(R.string.checkout_cancelled)
-//        val statusText = getString(R.string.user_cancelled)
-//
-//        binding.statusText.text = "$title\n$statusText"
-//        hideLoader()
+        Log.i(TAG, "User cancelled")
+        viewModel.isCheckoutCanceled = true
+        viewModel.isStartCheckoutLoading = false
     }
 
     @Composable
@@ -198,15 +197,45 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                     onSubmit = { onStartCheckoutClick() }
                 )
             }
+            uiState.payPalWebCheckoutResult?.let { result ->
+                Spacer(modifier = Modifier.size(24.dp))
+                PayPalWebCheckoutResultView(result = result)
+            }
+            uiState.payPalWebCheckoutError?.let { error ->
+                Spacer(modifier = Modifier.size(24.dp))
+                PayPalSDKErrorView(error = error)
+            }
+            if (uiState.isCheckoutCanceled) {
+                Spacer(modifier = Modifier.size(24.dp))
+                PayPalWebCheckoutCanceledView()
+            }
             Spacer(modifier = Modifier.size(24.dp))
         }
     }
 
     @Composable
-    fun StartPayPalWebCheckoutForm(
-        uiState: PayPalWebUiState,
-        onSubmit: () -> Unit
-    ) {
+    fun PayPalWebCheckoutResultView(result: PayPalWebCheckoutResult) {
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(stringResource(id = R.string.order_approved))
+                PropertyView(name = "Order ID", value = result.orderId)
+                PropertyView(name = "Payer ID", value = result.payerId)
+            }
+        }
+    }
+
+    @Composable
+    fun PayPalWebCheckoutCanceledView() {
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(stringResource(id = R.string.checkout_cancelled))
+                Text(stringResource(id = R.string.user_cancelled))
+            }
+        }
+    }
+
+    @Composable
+    fun StartPayPalWebCheckoutForm(uiState: PayPalWebUiState, onSubmit: () -> Unit) {
         OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
