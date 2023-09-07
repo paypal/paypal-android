@@ -22,9 +22,6 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_vaultFragment"
             app:destination="@id/vaultFragment" />
-        <action
-            android:id="@+id/action_paymentMethodsFragment_to_payPalWebFragment"
-            app:destination="@id/payPalWebFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -87,8 +84,4 @@
                 app:nullable="false" />
         </action>
     </fragment>
-    <fragment
-        android:id="@+id/payPalWebFragment"
-        android:name="com.paypal.android.ui.paypalweb.PayPalWebFragment"
-        android:label="PayPalWebFragment" />
 </navigation>
