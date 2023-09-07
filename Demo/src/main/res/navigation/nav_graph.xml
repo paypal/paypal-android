@@ -17,37 +17,27 @@
                 app:nullable="false" />
         </action>
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_selectCardFragment"
-            app:destination="@id/selectCardFragment" />
+            android:id="@+id/action_paymentMethodsFragment_to_cardFragment"
+            app:destination="@id/cardFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_vaultFragment"
+            app:destination="@id/vaultFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
         android:name="com.paypal.android.ui.card.CardFragment"
         android:label="CardFragment">
-        <argument
-            android:name="feature"
-            app:argType="com.paypal.android.ui.features.Feature"
-            app:nullable="false" />
-        <argument
-            android:name="order"
-            android:defaultValue="@null"
-            app:argType="com.paypal.android.api.model.Order"
-            app:nullable="true" />
-        <argument
-            android:name="prefillCard"
-            android:defaultValue="@null"
-            app:argType="com.paypal.android.models.TestCard"
-            app:nullable="true" />
+        <action
+            android:id="@+id/action_cardFragment_to_selectCardFragment"
+            app:destination="@id/selectCardFragment" />
     </fragment>
     <fragment
         android:id="@+id/vaultFragment"
         android:name="com.paypal.android.ui.vault.VaultFragment"
         android:label="VaultFragment">
-        <argument
-            android:name="prefillCard"
-            android:defaultValue="@null"
-            app:argType="com.paypal.android.models.TestCard"
-            app:nullable="true" />
+        <action
+            android:id="@+id/action_vaultFragment_to_selectCardFragment"
+            app:destination="@id/selectCardFragment" />
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
@@ -68,48 +58,7 @@
     <fragment
         android:id="@+id/selectCardFragment"
         android:name="com.paypal.android.ui.selectcard.SelectCardFragment"
-        android:label="SelectCardFragment">
-        <argument
-            android:name="feature"
-            app:argType="com.paypal.android.ui.features.Feature"
-            app:nullable="false" />
-        <argument
-            android:name="order"
-            android:defaultValue="@null"
-            app:argType="com.paypal.android.api.model.Order"
-            app:nullable="true" />
-        <action
-            android:id="@+id/action_selectCardFragment_to_cardFragment"
-            app:destination="@id/cardFragment">
-            <argument
-                android:name="feature"
-                app:argType="com.paypal.android.ui.features.Feature"
-                app:nullable="false" />
-            <argument
-                android:name="order"
-                android:defaultValue="@null"
-                app:argType="com.paypal.android.api.model.Order"
-                app:nullable="true" />
-            <argument
-                android:name="prefillCard"
-                android:defaultValue="@null"
-                app:argType="com.paypal.android.models.TestCard"
-                app:nullable="true" />
-        </action>
-        <action
-            android:id="@+id/action_selectCardFragment_to_vaultFragment"
-            app:destination="@id/vaultFragment">
-            <argument
-                android:name="feature"
-                app:argType="com.paypal.android.ui.features.Feature"
-                app:nullable="false" />
-            <argument
-                android:name="prefillCard"
-                android:defaultValue="@null"
-                app:argType="com.paypal.android.models.TestCard"
-                app:nullable="true" />
-        </action>
-    </fragment>
+        android:label="SelectCardFragment" />
     <fragment
         android:id="@+id/createOrderFragment"
         android:name="com.paypal.android.ui.createorder.CreateOrderFragment"
@@ -118,18 +67,6 @@
             android:name="feature"
             app:argType="com.paypal.android.ui.features.Feature"
             app:nullable="false" />
-        <action
-            android:id="@+id/action_createOrderFragment_to_selectCardFragment"
-            app:destination="@id/selectCardFragment">
-            <argument
-                android:name="feature"
-                app:argType="com.paypal.android.ui.features.Feature"
-                app:nullable="false" />
-            <argument
-                android:name="order"
-                app:argType="com.paypal.android.api.model.Order"
-                app:nullable="false" />
-        </action>
         <action
             android:id="@+id/action_createOrderFragment_to_payPalFragment"
             app:destination="@id/payPalFragment">

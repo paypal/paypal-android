@@ -28,10 +28,11 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.ApproveOrderListener
@@ -44,10 +45,13 @@ import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
-import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.models.TestCard
 import com.paypal.android.ui.card.validation.CardViewUiState
+import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,7 +70,6 @@ class CardFragment : Fragment() {
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
-    private val args: CardFragmentArgs by navArgs()
     private val viewModel by viewModels<CardViewModel>()
 
     @ExperimentalMaterial3Api
@@ -75,7 +78,7 @@ class CardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
+        registerPrefillCardListener()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -86,10 +89,19 @@ class CardFragment : Fragment() {
                             uiState = uiState,
                             onCreateOrderSubmit = { createOrder() },
                             onApproveOrderSubmit = { approveOrder() },
-                            onCompleteOrderSubmit = { completeOrder() }
+                            onCompleteOrderSubmit = { completeOrder() },
+                            onUseTestCardClick = { showTestCards() }
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerPrefillCardListener() {
+        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
+            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
+                viewModel.prefillCard(testCard)
             }
         }
     }
@@ -168,6 +180,13 @@ class CardFragment : Fragment() {
         }
     }
 
+    private fun showTestCards() {
+        val action = CardFragmentDirections.actionCardFragmentToSelectCardFragment()
+        findNavController().navigate(action)
+    }
+
+    // TODO: Investigate the best way to break this composable up into smaller individual units
+    @Suppress("LongMethod")
     @OptIn(ExperimentalComposeUiApi::class)
     @ExperimentalMaterial3Api
     @Composable
@@ -176,6 +195,7 @@ class CardFragment : Fragment() {
         onCreateOrderSubmit: () -> Unit = {},
         onApproveOrderSubmit: () -> Unit = {},
         onCompleteOrderSubmit: () -> Unit = {},
+        onUseTestCardClick: () -> Unit = {}
     ) {
         val scrollState = rememberScrollState()
         LaunchedEffect(uiState) {
@@ -212,6 +232,7 @@ class CardFragment : Fragment() {
                     onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
                     onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
                     onSCAOptionSelected = { value -> viewModel.scaOption = value },
+                    onUseTestCardClick = { onUseTestCardClick() },
                     onSubmit = { onApproveOrderSubmit() }
                 )
             }

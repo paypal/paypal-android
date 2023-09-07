@@ -22,6 +22,7 @@ fun AttachCardToSetupTokenForm(
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
+    onUseTestCardClick: () -> Unit,
     onSubmit: () -> Unit
 ) {
     OutlinedCard(
@@ -41,6 +42,7 @@ fun AttachCardToSetupTokenForm(
                 onCardNumberChange = { onCardNumberChange(it) },
                 onExpirationDateChange = { onExpirationDateChange(it) },
                 onSecurityCodeChange = { onSecurityCodeChange(it) },
+                onUseTestCardClick = { onUseTestCardClick() }
             )
             Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(

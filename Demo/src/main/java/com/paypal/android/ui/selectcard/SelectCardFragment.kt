@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,24 +17,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.WireframeHeader
-import com.paypal.android.ui.features.Feature
 
 class SelectCardFragment : Fragment() {
 
-    private val args: SelectCardFragmentArgs by navArgs()
+    companion object {
+        const val REQUEST_KEY_TEST_CARD = "SELECT_CARD_REQUEST_KEY_TEST_CARD"
+        const val DATA_KEY_TEST_CARD = "SELECT_CARD_DATA_KEY_TEST_CARD"
+    }
 
     @ExperimentalMaterial3Api
     override fun onCreateView(
@@ -53,26 +53,12 @@ class SelectCardFragment : Fragment() {
         }
     }
 
-    private fun onTestCardSelected(card: TestCard) {
-        navigateToCardForm(card)
-    }
+    private fun onTestCardSelected(testCard: TestCard) {
+        val bundle = bundleOf(DATA_KEY_TEST_CARD to testCard)
+        setFragmentResult(REQUEST_KEY_TEST_CARD, bundle)
 
-    private fun navigateToCardForm(testCard: TestCard? = null) {
-        val feature = args.feature
-        if (feature == Feature.CARD_VAULT) {
-            val action = SelectCardFragmentDirections.actionSelectCardFragmentToVaultFragment(
-                feature, testCard
-            )
-            findNavController().navigate(action)
-        } else {
-            val order = args.order
-            val action = SelectCardFragmentDirections.actionSelectCardFragmentToCardFragment(
-                feature,
-                order,
-                testCard
-            )
-            findNavController().navigate(action)
-        }
+        // go back to previous fragment with test card as a result
+        findNavController().navigateUp()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -85,29 +71,6 @@ class SelectCardFragment : Fragment() {
         LazyColumn(
             modifier = Modifier.fillMaxWidth()
         ) {
-            stickyHeader {
-                WireframeHeader("Manual Card Entry")
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(color = 0xFF0079C1)) // PayPal blue
-                        .selectable(
-                            selected = false,
-                            onClick = { navigateToCardForm() }
-                        )
-                ) {
-                    Text(
-                        text = "ENTER CARD MANUALLY️",
-                        color = Color.White,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(vertical = 26.dp, horizontal = 8.dp),
-                    )
-                }
-            }
             stickyHeader {
                 WireframeHeader("Test Cards without 3DS")
             }

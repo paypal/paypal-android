@@ -26,10 +26,11 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -40,12 +41,15 @@ import com.paypal.android.cardpayments.VaultRequest
 import com.paypal.android.cardpayments.VaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.models.TestCard
 import com.paypal.android.ui.card.DateString
+import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
+import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -64,7 +68,6 @@ class VaultFragment : Fragment() {
 
     private lateinit var cardClient: CardClient
 
-    private val args: VaultFragmentArgs by navArgs()
     private val viewModel by viewModels<VaultViewModel>()
 
     @ExperimentalMaterial3Api
@@ -73,8 +76,7 @@ class VaultFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        args.prefillCard?.card?.let { viewModel.prefillCard(it) }
-
+        registerPrefillCardListener()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -86,9 +88,18 @@ class VaultFragment : Fragment() {
                             onCreateSetupTokenSubmit = { createSetupToken() },
                             onAttachCardToSetupTokenSubmit = { attachCardToSetupToken() },
                             onCreatePaymentTokenSubmit = { createPaymentToken() },
+                            onUseTestCardClick = { showTestCards() }
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerPrefillCardListener() {
+        setFragmentResultListener(SelectCardFragment.REQUEST_KEY_TEST_CARD) { _, bundle ->
+            bundle.parcelable<TestCard>(SelectCardFragment.DATA_KEY_TEST_CARD)?.let { testCard ->
+                viewModel.prefillCard(testCard)
             }
         }
     }
@@ -134,6 +145,11 @@ class VaultFragment : Fragment() {
         }
     }
 
+    private fun showTestCards() {
+        val action = VaultFragmentDirections.actionVaultFragmentToSelectCardFragment()
+        findNavController().navigate(action)
+    }
+
     private fun parseCard(uiState: VaultUiState): Card {
         // TODO: handle invalid date string
         var expirationMonth = ""
@@ -169,6 +185,7 @@ class VaultFragment : Fragment() {
         uiState: VaultUiState,
         onCreateSetupTokenSubmit: () -> Unit,
         onAttachCardToSetupTokenSubmit: () -> Unit,
+        onUseTestCardClick: () -> Unit,
         onCreatePaymentTokenSubmit: () -> Unit
     ) {
         val scrollState = rememberScrollState()
@@ -196,6 +213,7 @@ class VaultFragment : Fragment() {
                     onCardNumberChange = { viewModel.cardNumber = it },
                     onExpirationDateChange = { viewModel.cardExpirationDate = it },
                     onSecurityCodeChange = { viewModel.cardSecurityCode = it },
+                    onUseTestCardClick = { onUseTestCardClick() },
                     onSubmit = { onAttachCardToSetupTokenSubmit() }
                 )
             }
@@ -257,6 +275,7 @@ class VaultFragment : Fragment() {
                     onCreateSetupTokenSubmit = {},
                     onAttachCardToSetupTokenSubmit = {},
                     onCreatePaymentTokenSubmit = {},
+                    onUseTestCardClick = {}
                 )
             }
         }

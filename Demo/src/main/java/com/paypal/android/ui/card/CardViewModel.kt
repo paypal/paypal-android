@@ -2,9 +2,9 @@ package com.paypal.android.ui.card
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.Order
-import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.models.TestCard
 import com.paypal.android.ui.card.validation.CardViewUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,7 +96,8 @@ class CardViewModel : ViewModel() {
             _uiState.update { it.copy(isCompleteOrderLoading = value) }
         }
 
-    fun prefillCard(card: Card) {
+    fun prefillCard(testCard: TestCard) {
+        val card = testCard.card
         _uiState.update { currentState ->
             currentState.copy(
                 cardNumber = card.number,
