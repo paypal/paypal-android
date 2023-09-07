@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypalweb
 
 import androidx.lifecycle.ViewModel
+import com.paypal.android.api.model.Order
 import com.paypal.android.cardpayments.OrderIntent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,5 +33,10 @@ class PayPalWebViewModel : ViewModel() {
         get() = _uiState.value.isLoading
         set(value) {
             _uiState.update { it.copy(isLoading = value) }
+        }
+    var createdOrder: Order?
+        get() = _uiState.value.createdOrder
+        set(value) {
+            _uiState.update { it.copy(createdOrder = value) }
         }
 }

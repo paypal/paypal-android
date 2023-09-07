@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -22,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.ui.card.CreateOrderView
 import com.paypal.android.uishared.components.CreateOrderForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -61,7 +64,7 @@ class PayPalWebFragment : Fragment() {
             viewModel.isLoading = true
 
             val uiState = viewModel.uiState.value
-            val order = uiState.run {
+            viewModel.createdOrder = uiState.run {
                 sdkSampleServerAPI.createOrder(
                     orderIntent = intentOption,
                     shouldVault = shouldVault,
@@ -89,6 +92,12 @@ class PayPalWebFragment : Fragment() {
                 onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
                 onSubmit = { onCreateOrderClick() }
             )
+            uiState.createdOrder?.let { createdOrder ->
+                Spacer(modifier = Modifier.size(24.dp))
+                CreateOrderView(order = createdOrder)
+                Spacer(modifier = Modifier.size(24.dp))
+                // TODO: render launch web view button
+            }
         }
     }
 
