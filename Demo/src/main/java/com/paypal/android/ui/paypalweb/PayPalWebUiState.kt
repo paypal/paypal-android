@@ -5,7 +5,8 @@ import com.paypal.android.cardpayments.OrderIntent
 
 data class PayPalWebUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val isLoading: Boolean = false,
+    val isCreateOrderLoading: Boolean = false,
+    val isStartCheckoutLoading: Boolean = false,
     val shouldVault: Boolean = false,
     val customerId: String = "",
     val createdOrder: Order? = null,
