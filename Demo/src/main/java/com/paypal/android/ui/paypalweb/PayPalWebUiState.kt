@@ -12,7 +12,9 @@ data class PayPalWebUiState(
     val shouldVault: Boolean = false,
     val customerId: String = "",
     val createdOrder: Order? = null,
+    val completedOrder: Order? = null,
     val payPalWebCheckoutResult: PayPalWebCheckoutResult? = null,
     val payPalWebCheckoutError: PayPalSDKError? = null,
-    val isCheckoutCanceled: Boolean = false
+    val isCheckoutCanceled: Boolean = false,
+    val isCompleteOrderLoading: Boolean = false,
 )

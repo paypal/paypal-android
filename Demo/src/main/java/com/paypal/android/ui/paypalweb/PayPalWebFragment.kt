@@ -32,9 +32,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
@@ -42,6 +44,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.card.CreateOrderView
+import com.paypal.android.ui.card.OrderCompleteView
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.PropertyView
@@ -61,6 +64,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val viewModel by viewModels<PayPalWebViewModel>()
 
@@ -107,6 +111,8 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             try {
                 val clientId = sdkSampleServerAPI.fetchClientId()
                 val coreConfig = CoreConfig(clientId)
+                payPalDataCollector = PayPalDataCollector(coreConfig)
+
                 paypalClient = PayPalWebCheckoutClient(
                     requireActivity(),
                     coreConfig,
@@ -133,18 +139,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
 
         viewModel.payPalWebCheckoutResult = result
         viewModel.isStartCheckoutLoading = false
-
-//        when (orderIntent) {
-//            OrderIntent.CAPTURE -> captureOrder(result)
-//            OrderIntent.AUTHORIZE -> authorizeOrder(result)
-//        }
-//        val title = getString(R.string.order_approved)
-//
-//        val payerId = getString(R.string.payer_id, result.payerId)
-//        val orderId = getString(R.string.order_id, result.orderId)
-//        val statusText = "$payerId\n$orderId"
-//
-//        updateStatusText("$title\n$statusText")
+        completeOrder()
     }
 
     @SuppressLint("SetTextI18n")
@@ -159,6 +154,21 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
         Log.i(TAG, "User cancelled")
         viewModel.isCheckoutCanceled = true
         viewModel.isStartCheckoutLoading = false
+    }
+
+    private fun completeOrder() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCompleteOrderLoading = true
+
+            val cmid = payPalDataCollector.collectDeviceData(requireContext())
+            val orderId = viewModel.createdOrder!!.id!!
+            val orderIntent = viewModel.intentOption
+            viewModel.completedOrder = when (orderIntent) {
+                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId, cmid)
+                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId, cmid)
+            }
+            viewModel.isCompleteOrderLoading = false
+        }
     }
 
     @Composable
@@ -208,6 +218,10 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             if (uiState.isCheckoutCanceled) {
                 Spacer(modifier = Modifier.size(24.dp))
                 PayPalWebCheckoutCanceledView()
+            }
+            uiState.completedOrder?.let { completedOrder ->
+                Spacer(modifier = Modifier.size(24.dp))
+                OrderCompleteView(order = completedOrder)
             }
             Spacer(modifier = Modifier.size(24.dp))
         }

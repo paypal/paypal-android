@@ -48,6 +48,12 @@ class PayPalWebViewModel : ViewModel() {
             _uiState.update { it.copy(createdOrder = value) }
         }
 
+    var completedOrder: Order?
+        get() = _uiState.value.completedOrder
+        set(value) {
+            _uiState.update { it.copy(completedOrder = value) }
+        }
+
     var payPalWebCheckoutResult: PayPalWebCheckoutResult?
         get() = _uiState.value.payPalWebCheckoutResult
         set(value) {
@@ -64,5 +70,11 @@ class PayPalWebViewModel : ViewModel() {
         get() = _uiState.value.isCheckoutCanceled
         set(value) {
             _uiState.update { it.copy(isCheckoutCanceled = value) }
+        }
+
+    var isCompleteOrderLoading: Boolean
+        get() = _uiState.value.isCompleteOrderLoading
+        set(value) {
+            _uiState.update { it.copy(isCompleteOrderLoading = value) }
         }
 }
