@@ -43,9 +43,8 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.card.CreateOrderView
-import com.paypal.android.ui.card.OrderCompleteView
 import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.PropertyView
 import dagger.hilt.android.AndroidEntryPoint
@@ -200,7 +199,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             )
             uiState.createdOrder?.let { createdOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
-                CreateOrderView(order = createdOrder)
+                OrderView(order = createdOrder, title = "Order Created")
                 Spacer(modifier = Modifier.size(24.dp))
                 StartPayPalWebCheckoutForm(
                     uiState = uiState,
@@ -221,7 +220,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             }
             uiState.completedOrder?.let { completedOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
-                OrderCompleteView(order = completedOrder)
+                OrderView(order = completedOrder, title = "Order Completed")
             }
             Spacer(modifier = Modifier.size(24.dp))
         }
