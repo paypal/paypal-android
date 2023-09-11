@@ -44,7 +44,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.PropertyView
@@ -190,7 +190,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-            CreateOrderForm(
+            CreateOrderWithVaultOptionForm(
                 title = "Create an order to proceed with ${stringResource(R.string.feature_paypal_web)}:",
                 orderIntent = uiState.intentOption,
                 shouldVault = uiState.shouldVault,

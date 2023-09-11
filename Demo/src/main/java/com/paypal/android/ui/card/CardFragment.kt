@@ -49,7 +49,7 @@ import com.paypal.android.models.TestCard
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
-import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.utils.parcelable
@@ -212,7 +212,7 @@ class CardFragment : Fragment() {
                     testTagsAsResourceId = true
                 }
         ) {
-            CreateOrderForm(
+            CreateOrderWithVaultOptionForm(
                 title = "Create an Order to proceed:",
                 orderIntent = uiState.intentOption,
                 shouldVault = uiState.shouldVault,
