@@ -75,16 +75,9 @@ class CreateOrderFragment : Fragment() {
             }
             viewModel.isLoading = false
 
+            // TODO: remove once Feature enum is converted to an inner class of FeaturesFragment
             // continue on to feature
             when (val feature = args.feature) {
-                Feature.PAYPAL_WEB -> {
-                    navigate(
-                        CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalFragment(
-                            order
-                        )
-                    )
-                }
-
                 Feature.PAYPAL_NATIVE -> {
                     navigate(
                         CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalNativeFragment(
@@ -92,10 +85,7 @@ class CreateOrderFragment : Fragment() {
                         )
                     )
                 }
-
-                else -> {
-                    // TODO: remove once Feature enum is removed
-                }
+                else -> {}
             }
         }
     }
