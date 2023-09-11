@@ -44,6 +44,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
+import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
@@ -81,6 +82,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                     PayPalWebView(
                         uiState = uiState,
                         onCreateOrderClick = { createOrder() },
+                        onCompleteOrderClick = { completeOrder() },
                         onStartCheckoutClick = { launchWebCheckout() }
                     )
                 }
@@ -140,9 +142,6 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
 
         viewModel.payPalWebCheckoutResult = result
         viewModel.isStartCheckoutLoading = false
-
-        // TODO: make this a button in PayPalWebCheckoutResultView
-        completeOrder()
     }
 
     @SuppressLint("SetTextI18n")
@@ -178,6 +177,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
     fun PayPalWebView(
         uiState: PayPalWebUiState,
         onCreateOrderClick: () -> Unit,
+        onCompleteOrderClick: () -> Unit,
         onStartCheckoutClick: () -> Unit
     ) {
         val scrollState = rememberScrollState()
@@ -211,6 +211,12 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             uiState.payPalWebCheckoutResult?.let { result ->
                 Spacer(modifier = Modifier.size(24.dp))
                 PayPalWebCheckoutResultView(result = result)
+                Spacer(modifier = Modifier.size(24.dp))
+                CompleteOrderForm(
+                    isLoading = uiState.isCompleteOrderLoading,
+                    orderIntent = uiState.intentOption,
+                    onSubmit = { onCompleteOrderClick() }
+                )
             }
             uiState.payPalWebCheckoutError?.let { error ->
                 Spacer(modifier = Modifier.size(24.dp))
@@ -234,8 +240,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = stringResource(id = R.string.order_approved),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    style = MaterialTheme.typography.titleLarge
                 )
                 PropertyView(name = "Order ID", value = result.orderId)
                 PropertyView(name = "Payer ID", value = result.payerId)
@@ -311,6 +316,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 PayPalWebView(
                     uiState = PayPalWebUiState(),
                     onCreateOrderClick = {},
+                    onCompleteOrderClick = {},
                     onStartCheckoutClick = {}
                 )
             }
