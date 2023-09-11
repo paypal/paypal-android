@@ -230,7 +230,11 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
     fun PayPalWebCheckoutResultView(result: PayPalWebCheckoutResult) {
         OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(8.dp)) {
-                Text(stringResource(id = R.string.order_approved))
+                Text(
+                    text = stringResource(id = R.string.order_approved),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
                 PropertyView(name = "Order ID", value = result.orderId)
                 PropertyView(name = "Payer ID", value = result.payerId)
             }
