@@ -10,8 +10,6 @@ data class PayPalWebUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val isCreateOrderLoading: Boolean = false,
     val isStartCheckoutLoading: Boolean = false,
-    val shouldVault: Boolean = false,
-    val customerId: String = "",
     val createdOrder: Order? = null,
     val completedOrder: Order? = null,
     val payPalWebCheckoutResult: PayPalWebCheckoutResult? = null,

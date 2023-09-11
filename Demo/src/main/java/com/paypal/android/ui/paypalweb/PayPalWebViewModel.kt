@@ -20,18 +20,6 @@ class PayPalWebViewModel : ViewModel() {
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    var shouldVault: Boolean
-        get() = _uiState.value.shouldVault
-        set(value) {
-            _uiState.update { it.copy(shouldVault = value) }
-        }
-
-    var customerId: String
-        get() = _uiState.value.customerId
-        set(value) {
-            _uiState.update { it.copy(customerId = value) }
-        }
-
     var isCreateOrderLoading: Boolean
         get() = _uiState.value.isCreateOrderLoading
         set(value) {

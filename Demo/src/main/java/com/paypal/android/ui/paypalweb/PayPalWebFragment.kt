@@ -44,7 +44,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
+import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.PropertyView
@@ -96,8 +96,8 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             viewModel.createdOrder = uiState.run {
                 sdkSampleServerAPI.createOrder(
                     orderIntent = intentOption,
-                    shouldVault = shouldVault,
-                    vaultCustomerId = customerId
+                    shouldVault = false,
+                    vaultCustomerId = ""
                 )
             }
             viewModel.isCreateOrderLoading = false
@@ -190,20 +190,17 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-            CreateOrderWithVaultOptionForm(
+            CreateOrderForm(
                 title = "Create an order to proceed with ${stringResource(R.string.feature_paypal_web)}:",
                 orderIntent = uiState.intentOption,
-                shouldVault = uiState.shouldVault,
-                vaultCustomerId = uiState.customerId,
                 isLoading = uiState.isCreateOrderLoading,
                 onIntentOptionSelected = { value -> viewModel.intentOption = value },
-                onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-                onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
                 onSubmit = { onCreateOrderClick() }
             )
             uiState.createdOrder?.let { createdOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
                 OrderView(order = createdOrder, title = "Order Created")
+                Spacer(modifier = Modifier.size(24.dp))
                 StartPayPalWebCheckoutForm(
                     fundingSource = uiState.fundingSource,
                     isLoading = uiState.isStartCheckoutLoading,
