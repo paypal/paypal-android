@@ -140,6 +140,8 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
 
         viewModel.payPalWebCheckoutResult = result
         viewModel.isStartCheckoutLoading = false
+
+        // TODO: make this a button in PayPalWebCheckoutResultView
         completeOrder()
     }
 
@@ -202,7 +204,6 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             uiState.createdOrder?.let { createdOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
                 OrderView(order = createdOrder, title = "Order Created")
-                Spacer(modifier = Modifier.size(24.dp))
                 StartPayPalWebCheckoutForm(
                     fundingSource = uiState.fundingSource,
                     isLoading = uiState.isStartCheckoutLoading,
