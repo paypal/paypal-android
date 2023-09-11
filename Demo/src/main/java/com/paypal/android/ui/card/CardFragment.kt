@@ -51,6 +51,7 @@ import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -224,7 +225,7 @@ class CardFragment : Fragment() {
             )
             uiState.createdOrder?.let { createdOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
-                CreateOrderView(order = createdOrder)
+                OrderView(order = createdOrder, title = "Order Created")
                 Spacer(modifier = Modifier.size(24.dp))
                 ApproveOrderForm(
                     uiState = uiState,
@@ -252,7 +253,7 @@ class CardFragment : Fragment() {
             }
             uiState.completedOrder?.let { completedOrder ->
                 Spacer(modifier = Modifier.size(24.dp))
-                OrderCompleteView(order = completedOrder)
+                OrderView(order = completedOrder, title = "Order Complete")
             }
             Spacer(modifier = Modifier.size(24.dp))
         }
