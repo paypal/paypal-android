@@ -8,15 +8,12 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,17 +35,13 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
-import com.paypal.android.ui.OptionList
-import com.paypal.android.ui.WireframeButton
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
-import com.paypal.android.uishared.components.PropertyView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -125,7 +118,6 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 val orderId = viewModel.createdOrder!!.id!!
                 val fundingSource = viewModel.fundingSource
                 paypalClient.start(PayPalWebCheckoutRequest(orderId, fundingSource))
-
             } catch (e: UnknownHostException) {
                 viewModel.payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
                 viewModel.isStartCheckoutLoading = false
@@ -231,80 +223,6 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 OrderView(order = completedOrder, title = "Order Completed")
             }
             Spacer(modifier = Modifier.size(24.dp))
-        }
-    }
-
-    @Composable
-    fun PayPalWebCheckoutResultView(result: PayPalWebCheckoutResult) {
-        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(
-                    text = stringResource(id = R.string.order_approved),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                PropertyView(name = "Order ID", value = result.orderId)
-                PropertyView(name = "Payer ID", value = result.payerId)
-            }
-        }
-    }
-
-    @Composable
-    fun PayPalWebCheckoutCanceledView() {
-        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(stringResource(id = R.string.checkout_cancelled))
-                Text(stringResource(id = R.string.user_cancelled))
-            }
-        }
-    }
-
-    @Composable
-    fun StartPayPalWebCheckoutForm(
-        fundingSource: PayPalWebCheckoutFundingSource,
-        isLoading: Boolean,
-        onFundingSourceSelected: (PayPalWebCheckoutFundingSource) -> Unit,
-        onSubmit: () -> Unit
-    ) {
-        val oneTimeCheckoutValue = stringResource(R.string.funding_source_one_time_checkout)
-        val payPalCreditValue = stringResource(R.string.funding_source_pay_pal_credit)
-        val payPalPayLaterValue = stringResource(R.string.funding_source_pay_pal_pay_later)
-        val selectedValue = when (fundingSource) {
-            PayPalWebCheckoutFundingSource.PAYPAL -> oneTimeCheckoutValue
-            PayPalWebCheckoutFundingSource.PAYPAL_CREDIT -> payPalCreditValue
-            PayPalWebCheckoutFundingSource.PAY_LATER -> payPalPayLaterValue
-        }
-
-        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text(
-                    text = "Launch PayPal Web Checkout",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-                OptionList(
-                    title = stringResource(id = R.string.select_funding),
-                    options = listOf(oneTimeCheckoutValue, payPalCreditValue, payPalPayLaterValue),
-                    selectedOption = selectedValue,
-                    onOptionSelected = { option ->
-                        val newFundingValue = when (option) {
-                            oneTimeCheckoutValue -> PayPalWebCheckoutFundingSource.PAYPAL
-                            payPalCreditValue -> PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
-                            payPalPayLaterValue -> PayPalWebCheckoutFundingSource.PAY_LATER
-                            else -> null
-                        }
-                        newFundingValue?.let { onFundingSourceSelected(it) }
-                    }
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-                WireframeButton(
-                    text = "Start Checkout",
-                    isLoading = isLoading,
-                    onClick = { onSubmit() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
-                )
-            }
         }
     }
 
