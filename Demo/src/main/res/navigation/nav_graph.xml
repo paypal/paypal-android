@@ -44,7 +44,7 @@
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
-        android:name="com.paypal.android.ui.paypal.PayPalFragment"
+        android:name="com.paypal.android.ui.paypalbuttons.PayPalFragment"
         android:label="PayPalFragment">
         <action
             android:id="@+id/action_payPalFragment_to_payPalButtonsFragment"

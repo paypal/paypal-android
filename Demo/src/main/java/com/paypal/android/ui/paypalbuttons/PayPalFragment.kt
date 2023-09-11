@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.ui.paypalbuttons
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -20,6 +20,7 @@ import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
+import com.paypal.android.ui.paypal.PayPalFragmentDirections
 import com.paypal.android.utils.OrderUtils
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
