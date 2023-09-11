@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalWebFragment"
             app:destination="@id/payPalWebFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalButtonsFragment"
+            app:destination="@id/payPalButtonsFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -44,12 +47,8 @@
     </fragment>
     <fragment
         android:id="@+id/payPalFragment"
-        android:name="com.paypal.android.ui.paypalbuttons.PayPalFragment"
-        android:label="PayPalFragment">
-        <action
-            android:id="@+id/action_payPalFragment_to_payPalButtonsFragment"
-            app:destination="@id/payPalButtonsFragment" />
-    </fragment>
+        android:name="com.paypal.android.ui.paypalbuttons.PayPalButtonsFragment"
+        android:label="PayPalFragment"/>
     <fragment
         android:id="@+id/payPalButtonsFragment"
         android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"

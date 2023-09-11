@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.Order
 import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -76,5 +77,11 @@ class PayPalWebViewModel : ViewModel() {
         get() = _uiState.value.isCompleteOrderLoading
         set(value) {
             _uiState.update { it.copy(isCompleteOrderLoading = value) }
+        }
+
+    var fundingSource: PayPalWebCheckoutFundingSource
+        get() = _uiState.value.fundingSource
+        set(value) {
+            _uiState.update { it.copy(fundingSource = value) }
         }
 }

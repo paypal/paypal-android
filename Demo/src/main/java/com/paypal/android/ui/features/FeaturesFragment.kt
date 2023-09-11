@@ -51,7 +51,8 @@ class FeaturesFragment : Fragment() {
     )
 
     private val payPalWebFeatures = listOf(
-        Feature.PAYPAL_WEB
+        Feature.PAYPAL_WEB,
+        Feature.PAYPAL_BUTTONS
     )
 
     private val payPalNativeFeatures = listOf(
@@ -82,6 +83,9 @@ class FeaturesFragment : Fragment() {
 
     private fun onFeatureSelected(feature: Feature) {
         val action = when (feature) {
+            Feature.PAYPAL_BUTTONS -> {
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalButtonsFragment()
+            }
             Feature.PAYPAL_WEB -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalWebFragment()
             }

@@ -7,6 +7,7 @@
     <string name="feature_vault">Vault</string>
     <string name="feature_paypal_web">PayPal Web</string>
     <string name="feature_paypal_native">PayPal Native</string>
+    <string name="feature_paypal_buttons">PayPal Buttons</string>
 
     <!-- Card Fields -->
     <string name="card_field_card_number">CARD NUMBER</string>
@@ -39,6 +40,10 @@
     <string name="select_label">Select Label</string>
     <string name="select_shape">Select Shape</string>
     <string name="select_size">Select Size</string>
+
+    <string name="funding_source_one_time_checkout">One Time Checkout</string>
+    <string name="funding_source_pay_pal_credit">Pay Pal Credit</string>
+    <string name="funding_source_pay_pal_pay_later">Pay Pal Pay Later</string>
 
     <string name="intent_title">Intent</string>
     <string name="intent_authorize">AUTHORIZE</string>

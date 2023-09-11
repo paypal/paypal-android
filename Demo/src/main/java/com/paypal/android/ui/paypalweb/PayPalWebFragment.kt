@@ -42,6 +42,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
+import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.OrderView
@@ -103,7 +104,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
         }
     }
 
-    private fun launchWebCheckout(funding: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL) {
+    private fun launchWebCheckout() {
         viewModel.isStartCheckoutLoading = true
 
         lifecycleScope.launch {
@@ -120,7 +121,8 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 paypalClient.listener = this@PayPalWebFragment
 
                 val orderId = viewModel.createdOrder!!.id!!
-                paypalClient.start(PayPalWebCheckoutRequest(orderId, funding))
+                val fundingSource = viewModel.fundingSource
+                paypalClient.start(PayPalWebCheckoutRequest(orderId, fundingSource))
 
             } catch (e: UnknownHostException) {
                 viewModel.payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
@@ -202,7 +204,9 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 OrderView(order = createdOrder, title = "Order Created")
                 Spacer(modifier = Modifier.size(24.dp))
                 StartPayPalWebCheckoutForm(
-                    uiState = uiState,
+                    fundingSource = uiState.fundingSource,
+                    isLoading = uiState.isStartCheckoutLoading,
+                    onFundingSourceSelected = { value -> viewModel.fundingSource = value },
                     onSubmit = { onStartCheckoutClick() }
                 )
             }
@@ -252,16 +256,46 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
     }
 
     @Composable
-    fun StartPayPalWebCheckoutForm(uiState: PayPalWebUiState, onSubmit: () -> Unit) {
+    fun StartPayPalWebCheckoutForm(
+        fundingSource: PayPalWebCheckoutFundingSource,
+        isLoading: Boolean,
+        onFundingSourceSelected: (PayPalWebCheckoutFundingSource) -> Unit,
+        onSubmit: () -> Unit
+    ) {
+        val oneTimeCheckoutValue = stringResource(R.string.funding_source_one_time_checkout)
+        val payPalCreditValue = stringResource(R.string.funding_source_pay_pal_credit)
+        val payPalPayLaterValue = stringResource(R.string.funding_source_pay_pal_pay_later)
+        val selectedValue = when (fundingSource) {
+            PayPalWebCheckoutFundingSource.PAYPAL -> oneTimeCheckoutValue
+            PayPalWebCheckoutFundingSource.PAYPAL_CREDIT -> payPalCreditValue
+            PayPalWebCheckoutFundingSource.PAY_LATER -> payPalPayLaterValue
+        }
+
         OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = "Launch PayPal Web Checkout",
                     style = MaterialTheme.typography.titleLarge
                 )
+                Spacer(modifier = Modifier.size(16.dp))
+                OptionList(
+                    title = stringResource(id = R.string.select_funding),
+                    options = listOf(oneTimeCheckoutValue, payPalCreditValue, payPalPayLaterValue),
+                    selectedOption = selectedValue,
+                    onOptionSelected = { option ->
+                        val newFundingValue = when (option) {
+                            oneTimeCheckoutValue -> PayPalWebCheckoutFundingSource.PAYPAL
+                            payPalCreditValue -> PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
+                            payPalPayLaterValue -> PayPalWebCheckoutFundingSource.PAY_LATER
+                            else -> null
+                        }
+                        newFundingValue?.let { onFundingSourceSelected(it) }
+                    }
+                )
+                Spacer(modifier = Modifier.size(16.dp))
                 WireframeButton(
                     text = "Start Checkout",
-                    isLoading = uiState.isStartCheckoutLoading,
+                    isLoading = isLoading,
                     onClick = { onSubmit() },
                     modifier = Modifier
                         .fillMaxWidth()

@@ -20,7 +20,6 @@ import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.databinding.FragmentPaymentButtonBinding
-import com.paypal.android.ui.paypal.PayPalFragmentDirections
 import com.paypal.android.utils.OrderUtils
 import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,10 +29,10 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
+class PayPalButtonsFragment : Fragment(), PayPalWebCheckoutListener {
 
     companion object {
-        private val TAG = PayPalFragment::class.qualifiedName
+        private val TAG = PayPalButtonsFragment::class.qualifiedName
     }
 
     private lateinit var binding: FragmentPaymentButtonBinding
@@ -62,7 +61,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
         }
         binding.payPalPayLater.setOnClickListener { launchWebCheckout(PayPalWebCheckoutFundingSource.PAY_LATER) }
         binding.customizeButton.setOnClickListener {
-            findNavController().navigate(PayPalFragmentDirections.actionPayPalFragmentToPayPalButtonsFragment())
+//            findNavController().navigate(PayPalFragmentDirections.actionPayPalFragmentToPayPalButtonsFragment())
         }
 
         return binding.root
@@ -145,7 +144,7 @@ class PayPalFragment : Fragment(), PayPalWebCheckoutListener {
                         coreConfig,
                         "com.paypal.android.demo"
                     )
-                paypalClient.listener = this@PayPalFragment
+                paypalClient.listener = this@PayPalButtonsFragment
                 binding.statusText.setText(R.string.creating_order)
 
                 val orderRequest =
