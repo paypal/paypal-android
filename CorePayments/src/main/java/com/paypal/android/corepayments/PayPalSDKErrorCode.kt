@@ -1,6 +1,12 @@
 package com.paypal.android.corepayments
 
-internal enum class PayPalSDKErrorCode {
+import androidx.annotation.RestrictTo
+
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class PayPalSDKErrorCode {
     UNKNOWN,
     DATA_PARSING_ERROR,
     UNKNOWN_HOST,

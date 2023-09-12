@@ -1,7 +1,7 @@
 package com.paypal.android.cardpayments
 
-import com.paypal.android.corepayments.Code
 import com.paypal.android.corepayments.HttpResponse
+import com.paypal.android.corepayments.PayPalSDKErrorCode
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
@@ -44,7 +44,7 @@ class CardRequestParserUnitTest {
         private val status: Int,
         private val body: String,
         private val message: String,
-        private val resultCode: Code
+        private val resultCode: PayPalSDKErrorCode
     ) {
 
         companion object {
@@ -56,19 +56,22 @@ class CardRequestParserUnitTest {
                     HttpResponse.STATUS_UNKNOWN_HOST,
                     "json_body",
                     "An error occurred due to an invalid HTTP response. Contact developer.paypal.com/support.",
-                    Code.UNKNOWN_HOST),
+                    PayPalSDKErrorCode.UNKNOWN_HOST
+                ),
                 arrayOf(
                     false,
                     HttpResponse.STATUS_UNDETERMINED,
                     "json_body",
                     "An unknown error occurred. Contact developer.paypal.com/support.",
-                    Code.UNKNOWN),
+                    PayPalSDKErrorCode.UNKNOWN
+                ),
                 arrayOf(
                     false,
                     HttpResponse.SERVER_ERROR,
                     "json_body",
                     "A server error occurred. Contact developer.paypal.com/support.",
-                    Code.SERVER_RESPONSE_ERROR),
+                    PayPalSDKErrorCode.SERVER_RESPONSE_ERROR
+                ),
                 arrayOf(
                     false,
                     HttpURLConnection.HTTP_OK,
@@ -86,7 +89,8 @@ class CardRequestParserUnitTest {
                     """.trimIndent(),
                     "error message -> [Issue: ISSUE_KEY_TITLE.\n" +
                             "Error description: issue description message]",
-                    Code.CHECKOUT_ERROR)
+                    PayPalSDKErrorCode.CHECKOUT_ERROR
+                )
             )
         }
 
@@ -107,7 +111,10 @@ class CardRequestParserUnitTest {
             val sut = CardResponseParser()
             val error = sut.parseError(httpResponse)
 
-            if (status != HttpURLConnection.HTTP_OK) Assert.assertEquals(resultCode.ordinal, error?.code)
+            if (status != HttpURLConnection.HTTP_OK) Assert.assertEquals(
+                resultCode.ordinal,
+                error?.code
+            )
             Assert.assertEquals(correlationId, error?.correlationId)
             Assert.assertEquals(message, error?.errorDescription)
         }
