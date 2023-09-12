@@ -3,7 +3,7 @@ package com.paypal.android.ui.card.validation
 import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.cardpayments.CardResult
 
 @Immutable
 data class CardViewUiState(

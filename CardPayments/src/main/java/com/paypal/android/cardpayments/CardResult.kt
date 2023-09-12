@@ -1,4 +1,4 @@
-package com.paypal.android.cardpayments.model
+package com.paypal.android.cardpayments
 
 import android.net.Uri
 

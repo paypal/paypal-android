@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.cardpayments.CardResult
 
 @Composable
 fun CardResultView(
