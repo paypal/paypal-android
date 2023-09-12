@@ -7,7 +7,7 @@ import androidx.annotation.VisibleForTesting
 import com.paypal.android.corepayments.BuildConfig
 
 @Suppress("LongParameterList")
-class DeviceInspector @VisibleForTesting internal constructor(
+internal class DeviceInspector @VisibleForTesting constructor(
     private val clientSDKVersion: String,
     private val sdkInt: Int,
     private val deviceManufacturer: String,
