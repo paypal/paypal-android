@@ -3,7 +3,7 @@ package com.paypal.android.cardpayments.model
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
-data class PaymentSource(
+internal data class PaymentSource(
     val lastDigits: String,
     val brand: String,
     val type: String? = null,
