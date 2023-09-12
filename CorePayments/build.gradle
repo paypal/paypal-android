@@ -50,6 +50,7 @@ android {
             all {
                 // workaround for spying on java.net.URL in Http module
                 // Ref: https://mockk.io/doc/md/jdk16-access-exceptions.html
+                jvmArgs("--add-opens", "java.base/java.io=ALL-UNNAMED")
                 jvmArgs("--add-opens", "java.base/java.net=ALL-UNNAMED")
             }
         }
