@@ -4,7 +4,7 @@ import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.graphql.common.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLClient
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(

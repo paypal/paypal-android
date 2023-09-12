@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.graphql.common
+package com.paypal.android.corepayments.graphql
 
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError

@@ -6,8 +6,8 @@ import com.paypal.android.corepayments.Address
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.graphql.common.GraphQLClient
-import com.paypal.android.corepayments.graphql.common.GraphQLResponse
+import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLResponse
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

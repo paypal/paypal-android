@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.graphql.common
+package com.paypal.android.corepayments.graphql
 
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
