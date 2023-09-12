@@ -4,7 +4,7 @@ import com.paypal.android.cardpayments.threedsecure.ThreeDSecureResult
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
-data class AuthenticationResult(
+internal data class AuthenticationResult(
     val liabilityShift: String?,
     val threeDSecure: ThreeDSecureResult? = null
 ) {
