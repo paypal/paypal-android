@@ -67,7 +67,7 @@ class SecureTokenServiceAPIUnitTest {
         } catch (e: PayPalSDKError) {
             capturedError = e
         }
-        assertEquals(Code.NO_RESPONSE_DATA.ordinal, capturedError?.code)
+        assertEquals(PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal, capturedError?.code)
         assertEquals("sample-correlation-id", capturedError?.correlationId)
     }
 
@@ -83,7 +83,7 @@ class SecureTokenServiceAPIUnitTest {
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
-            assertEquals(Code.DATA_PARSING_ERROR.ordinal, capturedError?.code)
+            assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, capturedError?.code)
             assertEquals("sample-correlation-id", capturedError?.correlationId)
         }
 
@@ -99,7 +99,7 @@ class SecureTokenServiceAPIUnitTest {
             } catch (e: PayPalSDKError) {
                 capturedError = e
             }
-            assertEquals(Code.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
+            assertEquals(PayPalSDKErrorCode.SERVER_RESPONSE_ERROR.ordinal, capturedError?.code)
             assertEquals("sample-correlation-id", capturedError?.correlationId)
         }
 }

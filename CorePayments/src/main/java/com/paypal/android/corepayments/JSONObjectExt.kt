@@ -2,7 +2,7 @@ package com.paypal.android.corepayments
 
 import org.json.JSONObject
 
-fun JSONObject.optBooleanAtKeyPath(keyPath: String, fallback: Boolean = false): Boolean {
+internal fun JSONObject.optBooleanAtKeyPath(keyPath: String, fallback: Boolean = false): Boolean {
     val keys = keyPath.split(".").toMutableList()
     if (keys.isNotEmpty()) {
         var targetObject: JSONObject = this

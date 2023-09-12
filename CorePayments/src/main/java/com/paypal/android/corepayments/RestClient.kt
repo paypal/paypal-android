@@ -1,8 +1,13 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
 import java.net.URL
 import java.util.Locale
 
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RestClient internal constructor(
     private val configuration: CoreConfig,
     private val http: Http = Http(),

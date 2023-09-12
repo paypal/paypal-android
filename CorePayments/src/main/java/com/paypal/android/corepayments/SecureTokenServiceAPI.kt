@@ -1,5 +1,6 @@
 package com.paypal.android.corepayments
 
+// TODO: remove since we no longer support access token integration
 class SecureTokenServiceAPI internal constructor(
     private val restClient: RestClient,
 ) {
