@@ -7,6 +7,6 @@ import org.json.JSONObject
 data class GraphQLResponse(
     val data: JSONObject? = null,
     val extensions: List<Extension>? = null,
-    val errors: List<Error>? = null,
+    val errors: List<GraphQLError>? = null,
     val correlationId: String? = null
 )
