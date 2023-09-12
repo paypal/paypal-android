@@ -16,4 +16,3 @@ internal object PayPalWebCheckoutError {
         errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
     )
 }
-
