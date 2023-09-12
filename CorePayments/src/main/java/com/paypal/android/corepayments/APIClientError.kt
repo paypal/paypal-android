@@ -1,17 +1,20 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object APIClientError {
 
     // 0. An unknown error occurred.
     fun unknownError(correlationId: String?) = PayPalSDKError(
-        code = Code.UNKNOWN.ordinal,
+        code = PayPalSDKErrorCode.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
 
     // 1. Error parsing HTTP response data.
     fun dataParsingError(correlationId: String?) = PayPalSDKError(
-        code = Code.DATA_PARSING_ERROR.ordinal,
+        code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
         errorDescription = "An error occurred parsing HTTP response data." +
                 " Contact developer.paypal.com/support.",
         correlationId = correlationId
@@ -19,27 +22,27 @@ object APIClientError {
 
     // 2. Unknown Host from network.
     fun unknownHost(correlationId: String?) = PayPalSDKError(
-        code = Code.UNKNOWN_HOST.ordinal,
+        code = PayPalSDKErrorCode.UNKNOWN_HOST.ordinal,
         errorDescription = "An error occurred due to an invalid HTTP response. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
 
     // 3. Missing HTTP response data.
     fun noResponseData(correlationId: String?) = PayPalSDKError(
-        code = Code.NO_RESPONSE_DATA.ordinal,
+        code = PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal,
         errorDescription = "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
 
     // 4. There was an error constructing the URLRequest.
     val invalidUrlRequest = PayPalSDKError(
-        code = Code.INVALID_URL_REQUEST.ordinal,
+        code = PayPalSDKErrorCode.INVALID_URL_REQUEST.ordinal,
         errorDescription = "An error occurred constructing an HTTP request. Contact developer.paypal.com/support."
     )
 
     // 5. The server's response body returned an error message.
     fun serverResponseError(correlationId: String?) = PayPalSDKError(
-        code = Code.SERVER_RESPONSE_ERROR.ordinal,
+        code = PayPalSDKErrorCode.SERVER_RESPONSE_ERROR.ordinal,
         errorDescription = "A server error occurred. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
@@ -54,7 +57,7 @@ object APIClientError {
 
     val payPalCheckoutError: (description: String) -> PayPalSDKError = { description ->
         PayPalSDKError(
-            code = Code.CHECKOUT_ERROR.ordinal,
+            code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
             errorDescription = description
         )
     }
@@ -64,14 +67,4 @@ object APIClientError {
         errorDescription = "Error fetching clientId. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
-}
-
-enum class Code {
-    UNKNOWN,
-    DATA_PARSING_ERROR,
-    UNKNOWN_HOST,
-    NO_RESPONSE_DATA,
-    INVALID_URL_REQUEST,
-    SERVER_RESPONSE_ERROR,
-    CHECKOUT_ERROR
 }
