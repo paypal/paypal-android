@@ -1,6 +1,6 @@
 package com.paypal.android.corepayments.graphql.common
 
-data class Extension(
+data class GraphQLExtension(
     val correlationId: String,
     val code: String? = null
 )
