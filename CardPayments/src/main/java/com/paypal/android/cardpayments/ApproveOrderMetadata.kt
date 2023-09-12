@@ -4,7 +4,7 @@ import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
-data class ApproveOrderMetadata(val orderId: String, val paymentSource: PaymentSource?) {
+internal data class ApproveOrderMetadata(val orderId: String, val paymentSource: PaymentSource?) {
 
     companion object {
 
