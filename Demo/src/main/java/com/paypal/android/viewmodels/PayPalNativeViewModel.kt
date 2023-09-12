@@ -59,17 +59,21 @@ class PayPalNativeViewModel @Inject constructor(
 
         override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
             result.apply {
-                internalState.postValue(NativeCheckoutViewState.CheckoutComplete(
-                    payerId,
-                    orderId
-                ))
+                internalState.postValue(
+                    NativeCheckoutViewState.CheckoutComplete(
+                        payerId,
+                        orderId
+                    )
+                )
             }
         }
 
         override fun onPayPalCheckoutFailure(error: PayPalSDKError) {
-            val errorState = when (error) {
-                is PayPalNativeCheckoutError -> NativeCheckoutViewState.CheckoutError(error = error.errorInfo)
-                else -> NativeCheckoutViewState.CheckoutError(message = error.errorDescription)
+            val nxoError = error.cause as? PayPalNativeCheckoutError
+            val errorState = if (nxoError != null) {
+                NativeCheckoutViewState.CheckoutError(error = nxoError.errorInfo)
+            } else {
+                NativeCheckoutViewState.CheckoutError(message = error.errorDescription)
             }
             internalState.postValue(errorState)
         }
