@@ -1,7 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
 import android.net.Uri
-import androidx.annotation.NonNull
 import org.json.JSONObject
 
 internal class PayPalDeepLinkUrlResult constructor(uri: Uri, metadata: JSONObject) {

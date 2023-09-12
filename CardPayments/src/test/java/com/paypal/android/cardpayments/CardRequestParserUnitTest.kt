@@ -111,10 +111,12 @@ class CardRequestParserUnitTest {
             val sut = CardResponseParser()
             val error = sut.parseError(httpResponse)
 
-            if (status != HttpURLConnection.HTTP_OK) Assert.assertEquals(
-                resultCode.ordinal,
-                error?.code
-            )
+            if (status != HttpURLConnection.HTTP_OK) {
+                Assert.assertEquals(
+                    resultCode.ordinal,
+                    error?.code
+                )
+            }
             Assert.assertEquals(correlationId, error?.correlationId)
             Assert.assertEquals(message, error?.errorDescription)
         }
