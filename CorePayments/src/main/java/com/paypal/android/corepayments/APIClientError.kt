@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments
 
 import androidx.annotation.RestrictTo
+import java.lang.Exception
 
 /**
  * @suppress
@@ -64,6 +65,15 @@ object APIClientError {
             errorDescription = description
         )
     }
+
+    val payPalNativeCheckoutError: (description: String, reason: Exception) -> PayPalSDKError =
+        { description, reason ->
+            PayPalSDKError(
+                code = PayPalSDKErrorCode.NATIVE_CHECKOUT_ERROR.ordinal,
+                errorDescription = description,
+                reason = reason
+            )
+        }
 
     fun clientIDNotFoundError(code: Int, correlationId: String?) = PayPalSDKError(
         code = code,
