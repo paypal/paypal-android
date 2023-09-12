@@ -11,7 +11,7 @@ import java.io.IOException
 /**
  * Convenience class to simplify interaction with Android resource APIs.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ResourceLoader {
 
     /**
