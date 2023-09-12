@@ -3,6 +3,9 @@ package com.paypal.android.corepayments.graphql.common
 import androidx.annotation.RestrictTo
 import org.json.JSONObject
 
+/**
+ * @suppress
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class GraphQLResponse(
     val data: JSONObject? = null,

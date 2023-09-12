@@ -1,9 +1,14 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CoreCoroutineExceptionHandler(private val handler: (PayPalSDKError) -> Unit) :
     AbstractCoroutineContextElement(CoroutineExceptionHandler), CoroutineExceptionHandler {
 

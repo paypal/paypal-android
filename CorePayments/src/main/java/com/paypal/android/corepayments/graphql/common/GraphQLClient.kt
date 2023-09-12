@@ -10,6 +10,9 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * @suppress
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GraphQLClient internal constructor(
     coreConfig: CoreConfig,
