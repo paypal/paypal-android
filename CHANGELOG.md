@@ -1,5 +1,21 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* Breaking Changes
+  * CardPayments
+    * Make `Amount` class internal
+    * Make `ApproveOrderMetadata` class internal
+    * Make `AuthenticationResult` class internal
+    * Make `Payee` class internal
+    * Make `PaymentSource` class internal
+    * Make `PurchaseUnit` class internal
+    * Make `ThreeDSecureResult` class internal
+    * Make `Environment` enum associated values internal
+    * Remove `OrderRequest` class
+  * CorePayments
+    * Remove `open` modifier on `PayPalSDKError`
+
 ## 0.0.13 (2023-08-22)
 
 * FraudDetection
