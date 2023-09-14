@@ -45,12 +45,14 @@ import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,6 +66,9 @@ class CardFragment : Fragment() {
         const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
+
+    @Inject
+    lateinit var createOrderUseCase: CreateOrderUseCase
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
@@ -112,13 +117,8 @@ class CardFragment : Fragment() {
             viewModel.isCreateOrderLoading = true
 
             val uiState = viewModel.uiState.value
-            viewModel.createdOrder = uiState.run {
-                sdkSampleServerAPI.createOrder(
-                    orderIntent = intentOption,
-                    shouldVault = shouldVault,
-                    vaultCustomerId = customerId
-                )
-            }
+            val orderRequest = uiState.run { OrderRequest(intentOption, shouldVault, customerId) }
+            viewModel.createdOrder = createOrderUseCase(orderRequest)
             viewModel.isCreateOrderLoading = false
         }
     }
