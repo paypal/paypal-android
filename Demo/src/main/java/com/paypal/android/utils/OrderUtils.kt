@@ -1,8 +1,8 @@
 package com.paypal.android.utils
 
+import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.checkout.createorder.CurrencyCode
 import com.paypal.checkout.createorder.ItemCategory
-import com.paypal.checkout.createorder.OrderIntent
 import com.paypal.checkout.createorder.ProcessingInstruction
 import com.paypal.checkout.createorder.ShippingPreference
 import com.paypal.checkout.createorder.ShippingType
@@ -30,8 +30,12 @@ object OrderUtils {
         processingInstruction: ProcessingInstruction? = null
     ): OrderRequest {
 
+        val mappedOrderIntent = when (orderIntent) {
+            OrderIntent.CAPTURE -> com.paypal.checkout.createorder.OrderIntent.CAPTURE
+            OrderIntent.AUTHORIZE -> com.paypal.checkout.createorder.OrderIntent.AUTHORIZE
+        }
         return OrderRequest.Builder()
-            .intent(orderIntent)
+            .intent(mappedOrderIntent)
             .processingInstruction(processingInstruction)
             .appContext(
                 AppContext.Builder()
