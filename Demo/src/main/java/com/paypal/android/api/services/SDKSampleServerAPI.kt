@@ -3,7 +3,6 @@ package com.paypal.android.api.services
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.ClientId
-import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.usecase.UpdateOrderUseCase
@@ -49,9 +48,6 @@ class SDKSampleServerAPI {
 
     @JvmSuppressWildcards
     interface RetrofitService {
-
-        @POST("/orders")
-        suspend fun createOrder(@Body orderRequest: CreateOrderRequest): Order
 
         @POST("/orders")
         suspend fun createOrder(@Body jsonObject: JsonObject): Order
@@ -127,6 +123,18 @@ class SDKSampleServerAPI {
 
     suspend fun fetchClientId(merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
+
+    suspend fun createOrder(
+        orderRequest: JSONObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ): Order {
+        if (DEFAULT_ORDER_ID != null) {
+            return Order(DEFAULT_ORDER_ID, "CREATED")
+        }
+
+        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
+        return findService(merchantIntegration).createOrder(body)
+    }
 
     suspend fun createOrder(
         orderRequest: OrderRequest,
