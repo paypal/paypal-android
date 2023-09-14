@@ -6,20 +6,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
 import com.paypal.android.paypalnativepayments.PayPalNativePaysheetActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
-import com.paypal.android.usecase.AuthorizeOrderUseCase
-import com.paypal.android.usecase.CaptureOrderUseCase
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
@@ -44,12 +42,6 @@ class PayPalNativeViewModel @Inject constructor(
 
     @Inject
     lateinit var completeOrderUseCase: CompleteOrderUseCase
-
-    @Inject
-    lateinit var captureOrderUseCase: CaptureOrderUseCase
-
-    @Inject
-    lateinit var authorizeOrderUseCase: AuthorizeOrderUseCase
 
     @Inject
     lateinit var updateOrderUseCase: UpdateOrderUseCase
