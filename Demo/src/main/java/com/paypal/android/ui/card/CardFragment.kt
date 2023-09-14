@@ -52,6 +52,7 @@ import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.utils.parcelable
@@ -72,6 +73,9 @@ class CardFragment : Fragment() {
 
     @Inject
     lateinit var createOrderUseCase: CreateOrderUseCase
+
+    @Inject
+    lateinit var completeOrderUseCase: CompleteOrderUseCase
 
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
@@ -173,10 +177,8 @@ class CardFragment : Fragment() {
             val cmid = payPalDataCollector.collectDeviceData(requireContext())
             val orderId = viewModel.createdOrder!!.id!!
             val orderIntent = viewModel.intentOption
-            viewModel.completedOrder = when (orderIntent) {
-                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId, cmid)
-                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId, cmid)
-            }
+
+            viewModel.completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
             viewModel.isCompleteOrderLoading = false
         }
     }

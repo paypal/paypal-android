@@ -20,6 +20,7 @@ import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 import com.paypal.android.usecase.AuthorizeOrderUseCase
 import com.paypal.android.usecase.CaptureOrderUseCase
+import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
@@ -40,6 +41,9 @@ class PayPalNativeViewModel @Inject constructor(
 
     @Inject
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
+
+    @Inject
+    lateinit var completeOrderUseCase: CompleteOrderUseCase
 
     @Inject
     lateinit var captureOrderUseCase: CaptureOrderUseCase
@@ -162,12 +166,16 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun captureOrder(orderId: String) = viewModelScope.launch {
-        val order = captureOrderUseCase(orderId)
+        // TODO: capture client metadata ID
+        val order =
+            completeOrderUseCase(orderId, com.paypal.android.cardpayments.OrderIntent.CAPTURE, "")
         internalState.postValue(NativeCheckoutViewState.OrderCaptured(order))
     }
 
     fun authorizeOrder(orderId: String) = viewModelScope.launch {
-        val order = authorizeOrderUseCase(orderId)
+        // TODO: capture client metadata ID
+        val order =
+            completeOrderUseCase(orderId, com.paypal.android.cardpayments.OrderIntent.AUTHORIZE, "")
         internalState.postValue(NativeCheckoutViewState.OrderAuthorized(order))
     }
 }

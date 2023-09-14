@@ -148,20 +148,20 @@ class SDKSampleServerAPI {
         orderId: String,
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
+    ): JSONObject {
         val response =
             findService(merchantIntegration).captureOrder(orderId, payPalClientMetadataId)
-        return parseOrder(JSONObject(response.string()))
+        return JSONObject(response.string())
     }
 
     suspend fun authorizeOrder(
         orderId: String,
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
+    ): JSONObject {
         val response =
             findService(merchantIntegration).authorizeOrder(orderId, payPalClientMetadataId)
-        return parseOrder(JSONObject(response.string()))
+        return JSONObject(response.string())
     }
 
     suspend fun createSetupToken(
@@ -173,20 +173,4 @@ class SDKSampleServerAPI {
         jsonObject: JsonObject,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = findService(merchantIntegration).createPaymentToken(jsonObject)
-
-    private fun parseOrder(json: JSONObject): Order {
-        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
-        val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
-        val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
-
-        return Order(
-            id = optNonEmptyString(json, "id"),
-            intent = optNonEmptyString(json, "intent"),
-            status = optNonEmptyString(json, "status"),
-            cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
-            cardBrand = optNonEmptyString(cardJSON, "brand"),
-            vaultId = optNonEmptyString(vaultJSON, "id"),
-            customerId = optNonEmptyString(vaultCustomerJSON, "id")
-        )
-    }
 }
