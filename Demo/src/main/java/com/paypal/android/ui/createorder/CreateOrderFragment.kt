@@ -23,9 +23,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.models.OrderRequest
 import com.paypal.android.ui.features.Feature
-import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
+import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,7 +35,7 @@ import javax.inject.Inject
 class CreateOrderFragment : Fragment() {
 
     @Inject
-    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
+    lateinit var createOrderUseCase: CreateOrderUseCase
 
     private val args: CreateOrderFragmentArgs by navArgs()
     private val viewModel by viewModels<CreateOrderViewModel>()
@@ -66,13 +67,9 @@ class CreateOrderFragment : Fragment() {
             viewModel.isLoading = true
 
             val uiState = viewModel.uiState.value
-            val order = uiState.run {
-                sdkSampleServerAPI.createOrder(
-                    orderIntent = intentOption,
-                    shouldVault = shouldVault,
-                    vaultCustomerId = customerId
-                )
-            }
+            val orderRequest = uiState.run { OrderRequest(intentOption, shouldVault, customerId) }
+            val order = createOrderUseCase(orderRequest)
+
             viewModel.isLoading = false
 
             // TODO: remove once Feature enum is converted to an inner class of FeaturesFragment

@@ -68,10 +68,10 @@ class CardFragment : Fragment() {
     }
 
     @Inject
-    lateinit var createOrderUseCase: CreateOrderUseCase
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     @Inject
-    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
+    lateinit var createOrderUseCase: CreateOrderUseCase
 
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
