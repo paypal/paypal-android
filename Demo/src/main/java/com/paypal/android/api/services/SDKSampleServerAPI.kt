@@ -143,17 +143,6 @@ class SDKSampleServerAPI {
         Order(it, "CREATED")
     } ?: findService(merchantIntegration).createOrder(orderRequest)
 
-    suspend fun createOrder(
-        orderIntent: OrderIntent,
-        shouldVault: Boolean,
-        vaultCustomerId: String,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
-        val orderRequest = parseOrderRequestJSON(orderIntent, shouldVault, vaultCustomerId)
-        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
-        return findService(merchantIntegration).createOrder(body)
-    }
-
     suspend fun patchOrder(
         orderId: String,
         body: List<UpdateOrderUseCase.PatchRequestBody>,
@@ -204,45 +193,5 @@ class SDKSampleServerAPI {
             vaultId = optNonEmptyString(vaultJSON, "id"),
             customerId = optNonEmptyString(vaultCustomerJSON, "id")
         )
-    }
-
-    private fun parseOrderRequestJSON(
-        orderIntent: OrderIntent,
-        shouldVault: Boolean,
-        vaultCustomerId: String
-    ): JSONObject {
-        val amountJSON = JSONObject()
-            .put("currency_code", "USD")
-            .put("value", "10.99")
-
-        val purchaseUnitJSON = JSONObject()
-            .put("amount", amountJSON)
-
-        val orderRequest = JSONObject()
-            .put("intent", orderIntent)
-            .put("purchase_units", JSONArray().put(purchaseUnitJSON))
-
-        if (shouldVault) {
-            val vaultJSON = JSONObject()
-                .put("store_in_vault", "ON_SUCCESS")
-
-            val cardAttributesJSON = JSONObject()
-                .put("vault", vaultJSON)
-
-            if (vaultCustomerId.isNotEmpty()) {
-                val customerJSON = JSONObject()
-                    .put("id", vaultCustomerId)
-                cardAttributesJSON.put("customer", customerJSON)
-            }
-
-            val cardJSON = JSONObject()
-                .put("attributes", cardAttributesJSON)
-
-            val paymentSourceJSON = JSONObject()
-                .put("card", cardJSON)
-
-            orderRequest.put("payment_source", paymentSourceJSON)
-        }
-        return orderRequest
     }
 }
