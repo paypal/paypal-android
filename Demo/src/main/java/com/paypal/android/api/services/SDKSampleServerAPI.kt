@@ -58,9 +58,6 @@ class SDKSampleServerAPI {
         @GET("/client_id")
         suspend fun fetchClientId(): ClientId
 
-        @GET("/orders/{orderId}")
-        suspend fun getOrder(@Path("orderId") orderId: String): ResponseBody
-
         @PATCH("/orders/{orderId}")
         suspend fun patchOrder(
             @Path("orderId") orderId: String,
