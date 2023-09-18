@@ -25,7 +25,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.ui.features.Feature
-import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -75,16 +75,9 @@ class CreateOrderFragment : Fragment() {
             }
             viewModel.isLoading = false
 
+            // TODO: remove once Feature enum is converted to an inner class of FeaturesFragment
             // continue on to feature
             when (val feature = args.feature) {
-                Feature.PAYPAL_WEB -> {
-                    navigate(
-                        CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalFragment(
-                            order
-                        )
-                    )
-                }
-
                 Feature.PAYPAL_NATIVE -> {
                     navigate(
                         CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalNativeFragment(
@@ -92,10 +85,7 @@ class CreateOrderFragment : Fragment() {
                         )
                     )
                 }
-
-                else -> {
-                    // TODO: remove once Feature enum is removed
-                }
+                else -> {}
             }
         }
     }
@@ -114,7 +104,7 @@ class CreateOrderFragment : Fragment() {
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            CreateOrderForm(
+            CreateOrderWithVaultOptionForm(
                 title = "Create an order to proceed with ${stringResource(feature.stringRes)}:",
                 orderIntent = uiState.intentOption,
                 shouldVault = uiState.shouldVault,

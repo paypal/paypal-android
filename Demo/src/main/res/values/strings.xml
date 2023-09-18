@@ -7,6 +7,7 @@
     <string name="feature_vault">Vault</string>
     <string name="feature_paypal_web">PayPal Web</string>
     <string name="feature_paypal_native">PayPal Native</string>
+    <string name="feature_paypal_buttons">PayPal Buttons</string>
 
     <!-- Card Fields -->
     <string name="card_field_card_number">CARD NUMBER</string>
@@ -19,15 +20,8 @@
     <!-- PayPal Native-->
     <string name="start_checkout">Start Checkout</string>
     <string name="order_approved">Order Approved</string>
-    <string name="order_id">Order Id: %s</string>
-    <string name="payer_id">Payer Id: %S</string>
     <string name="checkout_cancelled">Checkout Cancelled</string>
     <string name="user_cancelled">User cancelled the checkout</string>
-    <string name="order_failed">Order Failed</string>
-    <string name="reason">Reason: %s</string>
-    <string name="creating_order">Creating order…</string>
-    <string name="getting_client_id">Getting client id…</string>
-    <string name="custom_styling">Style Buttons</string>
 
     <string name="sca_title">SCA</string>
     <string name="sca_always">ALWAYS</string>
@@ -39,6 +33,10 @@
     <string name="select_label">Select Label</string>
     <string name="select_shape">Select Shape</string>
     <string name="select_size">Select Size</string>
+
+    <string name="funding_source_one_time_checkout">One Time Checkout</string>
+    <string name="funding_source_pay_pal_credit">Pay Pal Credit</string>
+    <string name="funding_source_pay_pal_pay_later">Pay Pal Pay Later</string>
 
     <string name="intent_title">Intent</string>
     <string name="intent_authorize">AUTHORIZE</string>

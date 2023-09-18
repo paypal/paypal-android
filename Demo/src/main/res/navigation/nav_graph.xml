@@ -22,6 +22,12 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_vaultFragment"
             app:destination="@id/vaultFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalWebFragment"
+            app:destination="@id/payPalWebFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalButtonsFragment"
+            app:destination="@id/payPalButtonsFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -40,16 +46,8 @@
             app:destination="@id/selectCardFragment" />
     </fragment>
     <fragment
-        android:id="@+id/payPalFragment"
-        android:name="com.paypal.android.ui.paypal.PayPalFragment"
-        android:label="PayPalFragment">
-        <action
-            android:id="@+id/action_payPalFragment_to_payPalButtonsFragment"
-            app:destination="@id/payPalButtonsFragment" />
-    </fragment>
-    <fragment
         android:id="@+id/payPalButtonsFragment"
-        android:name="com.paypal.android.ui.paypal.PayPalButtonsFragment"
+        android:name="com.paypal.android.ui.paypalbuttons.PayPalButtonsFragment"
         android:label="PayPalButtonsFragment" />
     <fragment
         android:id="@+id/payPalNativeFragment"
@@ -68,14 +66,6 @@
             app:argType="com.paypal.android.ui.features.Feature"
             app:nullable="false" />
         <action
-            android:id="@+id/action_createOrderFragment_to_payPalFragment"
-            app:destination="@id/payPalFragment">
-            <argument
-                android:name="order"
-                app:argType="com.paypal.android.api.model.Order"
-                app:nullable="false" />
-        </action>
-        <action
             android:id="@+id/action_createOrderFragment_to_payPalNativeFragment"
             app:destination="@id/payPalNativeFragment">
             <argument
@@ -84,4 +74,8 @@
                 app:nullable="false" />
         </action>
     </fragment>
+    <fragment
+        android:id="@+id/payPalWebFragment"
+        android:name="com.paypal.android.ui.paypalweb.PayPalWebFragment"
+        android:label="PayPalWebFragment" />
 </navigation>
