@@ -36,12 +36,6 @@ class SDKSampleServerAPI {
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
         val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
-
-        private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
-            it.optString(key).ifEmpty {
-                null
-            }
-        }
     }
 
     @JvmSuppressWildcards

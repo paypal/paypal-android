@@ -25,7 +25,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.ui.features.Feature
-import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
