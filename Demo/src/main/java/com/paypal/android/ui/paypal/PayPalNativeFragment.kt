@@ -7,6 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -39,20 +47,36 @@ class PayPalNativeFragment : Fragment() {
         }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentPayPalNativeBinding.inflate(inflater, container, false)
-        viewModel.state.observe(viewLifecycleOwner) { viewState ->
-            checkViewState(viewState)
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ) = ComposeView(requireContext()).apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+//            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    PayPalNativeView()
+                }
+            }
         }
-        with(binding) {
-            startNativeCheckout.setOnClickListener { startCheckout() }
-            fetchClientIdButton.setOnClickListener { viewModel.fetchClientId() }
-            tryAgainButton.setOnClickListener { viewModel.reset() }
-        }
-        initShippingOptions()
-        return binding.root
     }
+
+//    override fun onCreateView(
+//        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+//    ): View {
+//        binding = FragmentPayPalNativeBinding.inflate(inflater, container, false)
+//        viewModel.state.observe(viewLifecycleOwner) { viewState ->
+//            checkViewState(viewState)
+//        }
+//        with(binding) {
+//            startNativeCheckout.setOnClickListener { startCheckout() }
+//            fetchClientIdButton.setOnClickListener { viewModel.fetchClientId() }
+//            tryAgainButton.setOnClickListener { viewModel.reset() }
+//        }
+//        initShippingOptions()
+//        return binding.root
+//    }
 
     private fun startCheckout() {
         selectedShippingPreference?.let {
@@ -220,5 +244,10 @@ class PayPalNativeFragment : Fragment() {
 
     companion object {
         private val TAG = PayPalNativeFragment::class.java.simpleName
+    }
+
+    @Composable
+    fun PayPalNativeView() {
+        Text("Hello Native Fragment")
     }
 }
