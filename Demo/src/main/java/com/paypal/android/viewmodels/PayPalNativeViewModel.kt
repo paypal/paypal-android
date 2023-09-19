@@ -1,10 +1,6 @@
 package com.paypal.android.viewmodels
 
-import android.app.AlertDialog
 import android.app.Application
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig

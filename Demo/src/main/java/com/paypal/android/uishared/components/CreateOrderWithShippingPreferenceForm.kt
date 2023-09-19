@@ -21,6 +21,7 @@ import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.paypal.ShippingPreferenceType
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 fun CreateOrderWithShippingPreferenceForm(
     title: String,

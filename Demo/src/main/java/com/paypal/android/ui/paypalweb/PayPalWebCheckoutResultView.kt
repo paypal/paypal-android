@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.uishared.components.PropertyView
 
 @Composable
