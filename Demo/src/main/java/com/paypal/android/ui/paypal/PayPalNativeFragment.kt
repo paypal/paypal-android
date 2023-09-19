@@ -34,7 +34,6 @@ import com.paypal.android.uishared.components.CreateOrderWithShippingPreferenceF
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.usecase.GetOrderUseCase
-import com.paypal.android.viewmodels.PayPalNativeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

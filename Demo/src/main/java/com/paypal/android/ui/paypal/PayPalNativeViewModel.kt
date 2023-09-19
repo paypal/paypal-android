@@ -1,4 +1,4 @@
-package com.paypal.android.viewmodels
+package com.paypal.android.ui.paypal
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -18,9 +18,8 @@ import com.paypal.android.paypalnativepayments.PayPalNativePaysheetActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
-import com.paypal.android.ui.paypal.PayPalNativeUiState
-import com.paypal.android.ui.paypal.ShippingPreferenceType
-import com.paypal.android.usecase.CompleteOrderUseCase
+import com.paypal.android.usecase.AuthorizeOrderUseCase
+import com.paypal.android.usecase.CaptureOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
