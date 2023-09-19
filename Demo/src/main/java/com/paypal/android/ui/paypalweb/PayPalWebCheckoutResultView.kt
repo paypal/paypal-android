@@ -15,15 +15,15 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.uishared.components.PropertyView
 
 @Composable
-fun PayPalWebCheckoutResultView(result: PayPalWebCheckoutResult) {
+fun PayPalWebCheckoutResultView(orderId: String?, payerId: String?) {
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = stringResource(id = R.string.order_approved),
                 style = MaterialTheme.typography.titleLarge
             )
-            PropertyView(name = "Order ID", value = result.orderId)
-            PropertyView(name = "Payer ID", value = result.payerId)
+            PropertyView(name = "Order ID", value = orderId)
+            PropertyView(name = "Payer ID", value = payerId)
         }
     }
 }
