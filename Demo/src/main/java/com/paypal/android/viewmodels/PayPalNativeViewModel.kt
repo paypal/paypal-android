@@ -6,6 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -28,6 +32,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
 import javax.inject.Inject
@@ -53,6 +58,12 @@ class PayPalNativeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PayPalNativeUiState())
     val uiState = _uiState.asStateFlow()
+
+    var intentOption: OrderIntent
+        get() = _uiState.value.intentOption
+        set(value) {
+            _uiState.update { it.copy(intentOption = value) }
+        }
 
     private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {

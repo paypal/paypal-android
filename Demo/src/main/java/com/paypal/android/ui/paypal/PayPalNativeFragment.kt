@@ -67,7 +67,10 @@ class PayPalNativeFragment : Fragment() {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    PayPalNativeView(uiState)
+                    PayPalNativeView(
+                        uiState,
+                        onCreateOrderClick = {}
+                    )
                 }
             }
         }
@@ -90,11 +93,11 @@ class PayPalNativeFragment : Fragment() {
 //    }
 
     private fun startCheckout() {
-        selectedShippingPreference?.let {
-            viewModel.orderIdCheckout(it, orderIntent)
-        }
-        binding.checkoutOptionsRadioGroup.isVisible = false
-        binding.radioGroupIntent.isVisible = false
+//        selectedShippingPreference?.let {
+//            viewModel.orderIdCheckout(it, orderIntent)
+//        }
+//        binding.checkoutOptionsRadioGroup.isVisible = false
+//        binding.radioGroupIntent.isVisible = false
     }
 
     private fun initShippingOptions() {
