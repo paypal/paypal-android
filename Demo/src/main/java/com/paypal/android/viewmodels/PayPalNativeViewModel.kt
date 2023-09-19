@@ -1,8 +1,10 @@
 package com.paypal.android.viewmodels
 
+import android.app.AlertDialog
 import android.app.Application
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
@@ -177,11 +179,7 @@ class PayPalNativeViewModel @Inject constructor(
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val exceptionHandler = CoroutineExceptionHandler { _, e ->
-        AlertDialog.Builder(getApplication())
-            .setTitle("Unknown Error")
-            .setMessage(e.message)
-            .setPositiveButton("") { _, _ -> }
-            .show()
+        // TODO: propagate error to UI
     }
 
     suspend fun startNativeCheckout() {
