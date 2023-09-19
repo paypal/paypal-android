@@ -33,8 +33,9 @@ import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
-import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.CreateOrderWithShippingPreferenceForm
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.viewmodels.NativeCheckoutViewState
 import com.paypal.android.viewmodels.PayPalNativeViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +50,9 @@ class PayPalNativeFragment : Fragment() {
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
+
+    @Inject
+    lateinit var getOrderUseCase: GetOrderUseCase
 
     private var selectedShippingPreference: ShippingPreferenceType? = null
 
@@ -83,14 +87,10 @@ class PayPalNativeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isCreateOrderLoading = true
 
-            val uiState = viewModel.uiState.value
-            viewModel.createdOrder = uiState.run {
-                sdkSampleServerAPI.createOrder(
-                    orderIntent = intentOption,
-                    shouldVault = false,
-                    vaultCustomerId = ""
-                )
-            }
+            val shippingPreference = viewModel.shippingPreference
+            val orderIntent = viewModel.intentOption
+            viewModel.createdOrder = getOrderUseCase(shippingPreference, orderIntent)
+
             viewModel.isCreateOrderLoading = false
         }
     }
@@ -112,10 +112,8 @@ class PayPalNativeFragment : Fragment() {
 //    }
 
     private fun startCheckout() {
-        val orderIntent = viewModel.intentOption
-        val selectedShippingPreference = viewModel.shippingPreference
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.startNativeCheckout(selectedShippingPreference, orderIntent)
+            viewModel.startNativeCheckout()
         }
 //        binding.checkoutOptionsRadioGroup.isVisible = false
 //        binding.radioGroupIntent.isVisible = false
@@ -296,11 +294,13 @@ class PayPalNativeFragment : Fragment() {
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
-            CreateOrderForm(
+            CreateOrderWithShippingPreferenceForm(
                 title = "Create an order to proceed with ${stringResource(R.string.feature_paypal_native)}:",
                 orderIntent = uiState.intentOption,
+                shippingPreference = uiState.shippingPreference,
                 isLoading = uiState.isCreateOrderLoading,
                 onIntentOptionSelected = { value -> viewModel.intentOption = value },
+                onShippingPreferenceSelected = { value -> viewModel.shippingPreference = value },
                 onSubmit = { onCreateOrderClick() }
             )
             uiState.createdOrder?.let { createdOrder ->
@@ -308,11 +308,7 @@ class PayPalNativeFragment : Fragment() {
                 OrderView(order = createdOrder, title = "Order Created")
                 Spacer(modifier = Modifier.size(24.dp))
                 StartPayPalNativeCheckoutForm(
-                    shippingPreference = uiState.shippingPreference,
                     isLoading = uiState.isStartCheckoutLoading,
-                    onShippingPreferenceSelected = { value ->
-                        viewModel.shippingPreference = value
-                    },
                     onSubmit = { startCheckout() }
                 )
             }
