@@ -22,11 +22,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import com.paypal.android.models.OrderRequest
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.ui.features.Feature
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
-import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -35,9 +33,9 @@ import javax.inject.Inject
 class CreateOrderFragment : Fragment() {
 
     @Inject
-    lateinit var createOrderUseCase: CreateOrderUseCase
+    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
-    private val args: CreateOrderFragmentArgs by navArgs()
+    //    private val args: CreateOrderFragmentArgs by navArgs()
     private val viewModel by viewModels<CreateOrderViewModel>()
 
     override fun onCreateView(
@@ -51,7 +49,7 @@ class CreateOrderFragment : Fragment() {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     CreateOrderView(
-                        feature = args.feature,
+                        feature = Feature.PAYPAL_BUTTONS,
                         uiState = uiState,
                         onCreateOrderClick = {
                             createOrder()
@@ -67,24 +65,28 @@ class CreateOrderFragment : Fragment() {
             viewModel.isLoading = true
 
             val uiState = viewModel.uiState.value
-            val orderRequest = uiState.run { OrderRequest(intentOption, shouldVault, customerId) }
-            val order = createOrderUseCase(orderRequest)
-
+            val order = uiState.run {
+                sdkSampleServerAPI.createOrder(
+                    orderIntent = intentOption,
+                    shouldVault = shouldVault,
+                    vaultCustomerId = customerId
+                )
+            }
             viewModel.isLoading = false
 
             // TODO: remove once Feature enum is converted to an inner class of FeaturesFragment
             // continue on to feature
-            when (args.feature) {
-                Feature.PAYPAL_NATIVE -> {
-                    navigate(
-                        CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalNativeFragment(
-                            order
-                        )
-                    )
-                }
-
-                else -> {}
-            }
+//            when (val feature = args.feature) {
+//                Feature.PAYPAL_NATIVE -> {
+//                    navigate(
+//                        CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalNativeFragment(
+//                            order
+//                        )
+//                    )
+//                }
+//
+//                else -> {}
+//            }
         }
     }
 

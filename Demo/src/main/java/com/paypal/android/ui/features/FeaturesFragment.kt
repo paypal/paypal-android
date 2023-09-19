@@ -86,16 +86,19 @@ class FeaturesFragment : Fragment() {
             Feature.PAYPAL_BUTTONS -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalButtonsFragment()
             }
+
             Feature.PAYPAL_WEB -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalWebFragment()
             }
+
             Feature.PAYPAL_NATIVE -> {
-                FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(feature)
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalNativeFragment()
             }
 
             Feature.CARD_APPROVE_ORDER -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToCardFragment()
             }
+
             Feature.CARD_VAULT -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToVaultFragment()
             }
