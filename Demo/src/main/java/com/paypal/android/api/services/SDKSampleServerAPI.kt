@@ -129,13 +129,6 @@ class SDKSampleServerAPI {
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
 
     suspend fun createOrder(
-        orderRequest: CreateOrderRequest,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order = DEFAULT_ORDER_ID?.let {
-        Order(it, "CREATED")
-    } ?: findService(merchantIntegration).createOrder(orderRequest)
-
-    suspend fun createOrder(
         orderRequest: JSONObject,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order {
@@ -188,14 +181,6 @@ class SDKSampleServerAPI {
     ): Order {
         val response =
             findService(merchantIntegration).authorizeOrder(orderId, payPalClientMetadataId)
-        return parseOrder(JSONObject(response.string()))
-    }
-
-    suspend fun getOrder(
-        orderId: String,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
-        val response = findService(merchantIntegration).getOrder(orderId)
         return parseOrder(JSONObject(response.string()))
     }
 
