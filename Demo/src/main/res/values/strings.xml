@@ -23,6 +23,11 @@
     <string name="checkout_cancelled">Checkout Cancelled</string>
     <string name="user_cancelled">User cancelled the checkout</string>
 
+    <string name="shipping_preference">Shipping Preference</string>
+    <string name="shipping_preference_get_from_file">Get From File</string>
+    <string name="shipping_preference_no_shipping">No Shipping</string>
+    <string name="shipping_preference_set_provided_address">Set Provided Address</string>
+
     <string name="sca_title">SCA</string>
     <string name="sca_always">ALWAYS</string>
     <string name="sca_when_required">WHEN REQUIRED</string>

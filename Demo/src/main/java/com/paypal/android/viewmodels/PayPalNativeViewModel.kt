@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
+import com.paypal.android.api.model.Order
+import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
@@ -63,6 +65,24 @@ class PayPalNativeViewModel @Inject constructor(
         get() = _uiState.value.intentOption
         set(value) {
             _uiState.update { it.copy(intentOption = value) }
+        }
+
+    var isCreateOrderLoading: Boolean
+        get() = _uiState.value.isCreateOrderLoading
+        set(value) {
+            _uiState.update { it.copy(isCreateOrderLoading = value) }
+        }
+
+    var createdOrder: Order?
+        get() = _uiState.value.createdOrder
+        set(value) {
+            _uiState.update { it.copy(createdOrder = value) }
+        }
+
+    var shippingPreference: ShippingPreferenceType
+        get() = _uiState.value.shippingPreference
+        set(value) {
+            _uiState.update { it.copy(shippingPreference = value) }
         }
 
     private val payPalListener = object : PayPalNativeCheckoutListener {
@@ -140,12 +160,18 @@ class PayPalNativeViewModel @Inject constructor(
         internalState.postValue(NativeCheckoutViewState.CheckoutError(message = e.message))
     }
 
-    fun fetchClientId() {
+    private suspend fun fetchClientId() {
         internalState.postValue(NativeCheckoutViewState.FetchingClientId)
-        viewModelScope.launch(exceptionHandler) {
-            clientId = getClientIdUseCase()
-            initPayPalClient()
-            internalState.postValue(NativeCheckoutViewState.ClientIdFetched(clientId))
+        clientId = getClientIdUseCase()
+        initPayPalClient()
+        internalState.postValue(NativeCheckoutViewState.ClientIdFetched(clientId))
+    }
+
+    suspend fun startNativeCheckout(shippingPreferenceType: ShippingPreferenceType, orderIntent: OrderIntent) {
+        fetchClientId()
+        orderId = getOrderIdUseCase(shippingPreferenceType, orderIntent)
+        orderId?.also {
+            payPalClient.startCheckout(PayPalNativeCheckoutRequest(it))
         }
     }
 
