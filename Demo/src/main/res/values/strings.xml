@@ -46,18 +46,4 @@
     <string name="intent_title">Intent</string>
     <string name="intent_authorize">AUTHORIZE</string>
     <string name="intent_capture">CAPTURE</string>
-
-    <!-- NXO -->
-    <string name="get_client_id">Get Client ID</string>
-    <string name="try_again">Try Again</string>
-    <string name="fetching_client_id">Fetching Client ID…</string>
-    <string name="approved">Approved</string>
-    <string name="error">Error</string>
-    <string name="cancelled">Cancelled</string>
-    <string name="client_id_fetched">Client ID Fetched</string>
-    <string name="init_checkout">Initializing Checkout…</string>
-    <string name="starting_paypal">Starting PayPal…</string>
-    <string name="something_went_wrong">Oops! Something went wrong</string>
-    <string name="order_created">Order Created</string>
-    <string name="checkout_cancelled_by_user">Checkout cancelled by user</string>
 </resources>

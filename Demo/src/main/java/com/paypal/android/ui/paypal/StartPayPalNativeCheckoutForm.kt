@@ -10,7 +10,9 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.paypal.android.R
 import com.paypal.android.ui.WireframeButton
 
 @Composable
@@ -27,7 +29,7 @@ fun StartPayPalNativeCheckoutForm(
             )
             Spacer(modifier = Modifier.size(16.dp))
             WireframeButton(
-                text = "Start Checkout",
+                text = stringResource(R.string.start_checkout),
                 isLoading = isLoading,
                 onClick = { onSubmit() },
                 modifier = Modifier
