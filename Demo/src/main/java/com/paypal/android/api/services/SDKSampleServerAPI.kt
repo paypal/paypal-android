@@ -129,18 +129,6 @@ class SDKSampleServerAPI {
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
 
     suspend fun createOrder(
-        orderRequest: JSONObject,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
-        if (DEFAULT_ORDER_ID != null) {
-            return Order(DEFAULT_ORDER_ID, "CREATED")
-        }
-
-        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
-        return findService(merchantIntegration).createOrder(body)
-    }
-
-    suspend fun createOrder(
         orderRequest: OrderRequest,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order = DEFAULT_ORDER_ID?.let {

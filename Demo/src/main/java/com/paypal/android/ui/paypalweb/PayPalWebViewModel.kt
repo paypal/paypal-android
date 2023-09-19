@@ -2,7 +2,7 @@ package com.paypal.android.ui.paypalweb
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.Order
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult

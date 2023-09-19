@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
 
