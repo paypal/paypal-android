@@ -1,6 +1,6 @@
 package com.paypal.android.paymentbuttons
 
-import com.paypal.android.paypalnativepayments.paymentbutton.error.createFormattedIllegalArgumentException
+import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 
 /**
  * Defines the shapes available for payment buttons. If no shape is provided then the default

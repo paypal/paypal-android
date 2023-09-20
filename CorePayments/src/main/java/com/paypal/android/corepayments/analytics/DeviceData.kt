@@ -1,6 +1,6 @@
 package com.paypal.android.corepayments.analytics
 
-data class DeviceData(
+internal data class DeviceData(
     val appId: String,
     val appName: String,
     val clientOS: String,

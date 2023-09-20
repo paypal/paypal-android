@@ -77,7 +77,7 @@ class CreateOrderFragment : Fragment() {
 
             // TODO: remove once Feature enum is converted to an inner class of FeaturesFragment
             // continue on to feature
-            when (val feature = args.feature) {
+            when (args.feature) {
                 Feature.PAYPAL_NATIVE -> {
                     navigate(
                         CreateOrderFragmentDirections.actionCreateOrderFragmentToPayPalNativeFragment(
@@ -85,6 +85,7 @@ class CreateOrderFragment : Fragment() {
                         )
                     )
                 }
+
                 else -> {}
             }
         }

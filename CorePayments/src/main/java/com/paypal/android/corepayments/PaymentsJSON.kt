@@ -1,9 +1,14 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentsJSON(val json: JSONObject) {
 
     @Throws(JSONException::class)

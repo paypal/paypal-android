@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.graphql.common
+package com.paypal.android.corepayments.graphql
 
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
@@ -10,7 +10,10 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GraphQLClient internal constructor(
     coreConfig: CoreConfig,
     private val http: Http = Http(),

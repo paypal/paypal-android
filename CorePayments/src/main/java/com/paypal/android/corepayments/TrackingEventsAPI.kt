@@ -4,7 +4,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.DeviceData
 import org.json.JSONObject
 
-class TrackingEventsAPI internal constructor(
+internal class TrackingEventsAPI constructor(
     private val coreConfig: CoreConfig,
     private val restClient: RestClient
 ) {

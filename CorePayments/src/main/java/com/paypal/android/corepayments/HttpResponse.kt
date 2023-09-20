@@ -1,7 +1,12 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
 import java.net.HttpURLConnection
 
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class HttpResponse(
     val status: Int,
     val headers: Map<String, String> = emptyMap(),

@@ -39,8 +39,8 @@ import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.OrderIntent
-import com.paypal.android.cardpayments.model.CardResult
+import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError

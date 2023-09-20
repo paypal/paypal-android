@@ -120,13 +120,9 @@ class PayPalNativeCheckoutClient internal constructor(
                 notifyOnCancel()
             },
             onError = OnError { errorInfo ->
-                notifyOnFailure(
-                    PayPalNativeCheckoutError(
-                        0,
-                        errorInfo.reason,
-                        errorInfo = errorInfo
-                    )
-                )
+                val description = errorInfo.reason
+                val reason = PayPalNativeCheckoutError(errorInfo)
+                notifyOnFailure(APIClientError.payPalNativeCheckoutError(description, reason))
             },
             onShippingChange = OnShippingChange { shippingChangeData, shippingChangeActions ->
                 notifyOnShippingChange(shippingChangeData, shippingChangeActions)

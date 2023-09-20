@@ -3,7 +3,7 @@ package com.paypal.android.cardpayments.threedsecure
 import com.paypal.android.corepayments.PaymentsJSON
 import org.json.JSONObject
 
-data class ThreeDSecureResult(
+internal data class ThreeDSecureResult(
     val enrollmentStatus: String? = null,
     val authenticationStatus: String? = null
 ) {

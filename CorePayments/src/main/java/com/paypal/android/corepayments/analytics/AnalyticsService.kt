@@ -2,6 +2,7 @@ package com.paypal.android.corepayments.analytics
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -12,6 +13,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
     private val environment: Environment,

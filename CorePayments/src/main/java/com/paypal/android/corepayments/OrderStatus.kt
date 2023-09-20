@@ -1,8 +1,12 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
+
 /**
  * The status of an order.
+ * @suppress
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class OrderStatus {
 
     /**

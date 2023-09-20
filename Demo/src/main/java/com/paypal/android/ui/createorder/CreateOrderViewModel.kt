@@ -1,7 +1,7 @@
 package com.paypal.android.ui.createorder
 
 import androidx.lifecycle.ViewModel
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

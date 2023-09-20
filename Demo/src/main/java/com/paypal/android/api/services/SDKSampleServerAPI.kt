@@ -5,7 +5,7 @@ import com.google.gson.JsonParser
 import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.usecase.UpdateOrderUseCase
 import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
@@ -129,25 +129,6 @@ class SDKSampleServerAPI {
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
 
     suspend fun createOrder(
-        orderRequest: CreateOrderRequest,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order = DEFAULT_ORDER_ID?.let {
-        Order(it, "CREATED")
-    } ?: findService(merchantIntegration).createOrder(orderRequest)
-
-    suspend fun createOrder(
-        orderRequest: JSONObject,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
-        if (DEFAULT_ORDER_ID != null) {
-            return Order(DEFAULT_ORDER_ID, "CREATED")
-        }
-
-        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
-        return findService(merchantIntegration).createOrder(body)
-    }
-
-    suspend fun createOrder(
         orderRequest: OrderRequest,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order = DEFAULT_ORDER_ID?.let {
@@ -188,14 +169,6 @@ class SDKSampleServerAPI {
     ): Order {
         val response =
             findService(merchantIntegration).authorizeOrder(orderId, payPalClientMetadataId)
-        return parseOrder(JSONObject(response.string()))
-    }
-
-    suspend fun getOrder(
-        orderId: String,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
-        val response = findService(merchantIntegration).getOrder(orderId)
         return parseOrder(JSONObject(response.string()))
     }
 

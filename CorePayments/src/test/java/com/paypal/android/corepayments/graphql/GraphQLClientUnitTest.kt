@@ -1,6 +1,5 @@
-package com.paypal.android.corepayments.graphql.common
+package com.paypal.android.corepayments.graphql
 
-import com.paypal.android.corepayments.Code
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
@@ -8,6 +7,7 @@ import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKErrorCode
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -146,7 +146,7 @@ internal class GraphQLClientUnitTest {
         try {
             sut.send(graphQLRequestBody)
         } catch (e: PayPalSDKError) {
-            assertEquals(Code.NO_RESPONSE_DATA.ordinal, e.code)
+            assertEquals(PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal, e.code)
             val expectedErrorMessage =
                 "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support."
             assertEquals(expectedErrorMessage, e.errorDescription)

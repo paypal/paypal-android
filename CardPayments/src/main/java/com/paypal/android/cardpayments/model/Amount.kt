@@ -2,7 +2,7 @@ package com.paypal.android.cardpayments.model
 
 import com.paypal.android.corepayments.PaymentsJSON
 
-data class Amount(
+internal data class Amount(
     val currencyCode: String?,
     val value: String?
 ) {
