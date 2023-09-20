@@ -1,6 +1,6 @@
 package com.paypal.android.models
 
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 
 data class OrderRequest(
     val orderIntent: OrderIntent,

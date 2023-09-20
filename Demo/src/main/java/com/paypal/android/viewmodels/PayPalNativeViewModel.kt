@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
@@ -159,15 +159,13 @@ class PayPalNativeViewModel @Inject constructor(
 
     fun captureOrder(orderId: String) = viewModelScope.launch {
         // TODO: capture client metadata ID
-        val order =
-            completeOrderUseCase(orderId, com.paypal.android.cardpayments.OrderIntent.CAPTURE, "")
+        val order = completeOrderUseCase(orderId, OrderIntent.CAPTURE, "")
         internalState.postValue(NativeCheckoutViewState.OrderCaptured(order))
     }
 
     fun authorizeOrder(orderId: String) = viewModelScope.launch {
         // TODO: capture client metadata ID
-        val order =
-            completeOrderUseCase(orderId, com.paypal.android.cardpayments.OrderIntent.AUTHORIZE, "")
+        val order = completeOrderUseCase(orderId, OrderIntent.AUTHORIZE, "")
         internalState.postValue(NativeCheckoutViewState.OrderAuthorized(order))
     }
 }

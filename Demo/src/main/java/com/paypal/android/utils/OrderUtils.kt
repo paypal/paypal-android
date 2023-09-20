@@ -1,6 +1,6 @@
 package com.paypal.android.utils
 
-import com.paypal.android.cardpayments.OrderIntent
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.checkout.createorder.CurrencyCode
 import com.paypal.checkout.createorder.ItemCategory
 import com.paypal.checkout.createorder.ProcessingInstruction

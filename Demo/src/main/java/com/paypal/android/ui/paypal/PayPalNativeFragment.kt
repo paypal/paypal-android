@@ -11,8 +11,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.paypal.android.R
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.databinding.FragmentPayPalNativeBinding
 import com.paypal.android.viewmodels.NativeCheckoutViewState
 import com.paypal.android.viewmodels.PayPalNativeViewModel
