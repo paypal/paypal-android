@@ -1,7 +1,6 @@
 package com.paypal.android.ui.features
 
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
@@ -37,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
-import kotlinx.parcelize.Parcelize
 
 class FeaturesFragment : Fragment() {
 
