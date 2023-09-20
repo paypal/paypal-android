@@ -1,8 +1,10 @@
 package com.paypal.android.ui.features
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.paypal.android.R
+import kotlinx.parcelize.Parcelize
 
 class FeaturesFragment : Fragment() {
 
@@ -43,6 +46,14 @@ class FeaturesFragment : Fragment() {
         val backgroundColor = Color(248, 249, 243)
         val featureTitleColor = Color(20, 29, 47)
         val chevronTint = Color(138, 137, 142)
+    }
+
+    enum class Feature(@StringRes val stringRes: Int) {
+        CARD_APPROVE_ORDER(R.string.feature_approve_order),
+        CARD_VAULT(R.string.feature_vault),
+        PAYPAL_WEB(R.string.feature_paypal_web),
+        PAYPAL_BUTTONS(R.string.feature_paypal_buttons),
+        PAYPAL_NATIVE(R.string.feature_paypal_native)
     }
 
     private val cardFeatures = listOf(
