@@ -6,24 +6,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
-import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutError
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
+import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
 import com.paypal.android.paypalnativepayments.PayPalNativePaysheetActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.ui.paypal.ShippingPreferenceType
-import com.paypal.android.usecase.AuthorizeOrderUseCase
-import com.paypal.android.usecase.CaptureOrderUseCase
+import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderIdUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
-import com.paypal.checkout.createorder.OrderIntent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -42,10 +41,7 @@ class PayPalNativeViewModel @Inject constructor(
     lateinit var getOrderIdUseCase: GetOrderIdUseCase
 
     @Inject
-    lateinit var captureOrderUseCase: CaptureOrderUseCase
-
-    @Inject
-    lateinit var authorizeOrderUseCase: AuthorizeOrderUseCase
+    lateinit var completeOrderUseCase: CompleteOrderUseCase
 
     @Inject
     lateinit var updateOrderUseCase: UpdateOrderUseCase
@@ -162,12 +158,14 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun captureOrder(orderId: String) = viewModelScope.launch {
-        val order = captureOrderUseCase(orderId)
+        // TODO: capture client metadata ID
+        val order = completeOrderUseCase(orderId, OrderIntent.CAPTURE, "")
         internalState.postValue(NativeCheckoutViewState.OrderCaptured(order))
     }
 
     fun authorizeOrder(orderId: String) = viewModelScope.launch {
-        val order = authorizeOrderUseCase(orderId)
+        // TODO: capture client metadata ID
+        val order = completeOrderUseCase(orderId, OrderIntent.AUTHORIZE, "")
         internalState.postValue(NativeCheckoutViewState.OrderAuthorized(order))
     }
 }

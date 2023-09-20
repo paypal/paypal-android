@@ -3,15 +3,12 @@ package com.paypal.android.api.services
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.ClientId
-import com.paypal.android.api.model.CreateOrderRequest
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.usecase.UpdateOrderUseCase
 import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
-import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -39,19 +36,10 @@ class SDKSampleServerAPI {
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
         val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
-
-        private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
-            it.optString(key).ifEmpty {
-                null
-            }
-        }
     }
 
     @JvmSuppressWildcards
     interface RetrofitService {
-
-        @POST("/orders")
-        suspend fun createOrder(@Body orderRequest: CreateOrderRequest): Order
 
         @POST("/orders")
         suspend fun createOrder(@Body jsonObject: JsonObject): Order
@@ -61,9 +49,6 @@ class SDKSampleServerAPI {
 
         @GET("/client_id")
         suspend fun fetchClientId(): ClientId
-
-        @GET("/orders/{orderId}")
-        suspend fun getOrder(@Path("orderId") orderId: String): ResponseBody
 
         @PATCH("/orders/{orderId}")
         suspend fun patchOrder(
@@ -129,22 +114,23 @@ class SDKSampleServerAPI {
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
 
     suspend fun createOrder(
+        orderRequest: JSONObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ): Order {
+        if (DEFAULT_ORDER_ID != null) {
+            return Order(DEFAULT_ORDER_ID, "CREATED")
+        }
+
+        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
+        return findService(merchantIntegration).createOrder(body)
+    }
+
+    suspend fun createOrder(
         orderRequest: OrderRequest,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ): Order = DEFAULT_ORDER_ID?.let {
         Order(it, "CREATED")
     } ?: findService(merchantIntegration).createOrder(orderRequest)
-
-    suspend fun createOrder(
-        orderIntent: OrderIntent,
-        shouldVault: Boolean,
-        vaultCustomerId: String,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
-        val orderRequest = parseOrderRequestJSON(orderIntent, shouldVault, vaultCustomerId)
-        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
-        return findService(merchantIntegration).createOrder(body)
-    }
 
     suspend fun patchOrder(
         orderId: String,
@@ -156,20 +142,20 @@ class SDKSampleServerAPI {
         orderId: String,
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
+    ): JSONObject {
         val response =
             findService(merchantIntegration).captureOrder(orderId, payPalClientMetadataId)
-        return parseOrder(JSONObject(response.string()))
+        return JSONObject(response.string())
     }
 
     suspend fun authorizeOrder(
         orderId: String,
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ): Order {
+    ): JSONObject {
         val response =
             findService(merchantIntegration).authorizeOrder(orderId, payPalClientMetadataId)
-        return parseOrder(JSONObject(response.string()))
+        return JSONObject(response.string())
     }
 
     suspend fun createSetupToken(
@@ -181,60 +167,4 @@ class SDKSampleServerAPI {
         jsonObject: JsonObject,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = findService(merchantIntegration).createPaymentToken(jsonObject)
-
-    private fun parseOrder(json: JSONObject): Order {
-        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
-        val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
-        val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
-
-        return Order(
-            id = optNonEmptyString(json, "id"),
-            intent = optNonEmptyString(json, "intent"),
-            status = optNonEmptyString(json, "status"),
-            cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
-            cardBrand = optNonEmptyString(cardJSON, "brand"),
-            vaultId = optNonEmptyString(vaultJSON, "id"),
-            customerId = optNonEmptyString(vaultCustomerJSON, "id")
-        )
-    }
-
-    private fun parseOrderRequestJSON(
-        orderIntent: OrderIntent,
-        shouldVault: Boolean,
-        vaultCustomerId: String
-    ): JSONObject {
-        val amountJSON = JSONObject()
-            .put("currency_code", "USD")
-            .put("value", "10.99")
-
-        val purchaseUnitJSON = JSONObject()
-            .put("amount", amountJSON)
-
-        val orderRequest = JSONObject()
-            .put("intent", orderIntent)
-            .put("purchase_units", JSONArray().put(purchaseUnitJSON))
-
-        if (shouldVault) {
-            val vaultJSON = JSONObject()
-                .put("store_in_vault", "ON_SUCCESS")
-
-            val cardAttributesJSON = JSONObject()
-                .put("vault", vaultJSON)
-
-            if (vaultCustomerId.isNotEmpty()) {
-                val customerJSON = JSONObject()
-                    .put("id", vaultCustomerId)
-                cardAttributesJSON.put("customer", customerJSON)
-            }
-
-            val cardJSON = JSONObject()
-                .put("attributes", cardAttributesJSON)
-
-            val paymentSourceJSON = JSONObject()
-                .put("card", cardJSON)
-
-            orderRequest.put("payment_source", paymentSourceJSON)
-        }
-        return orderRequest
-    }
 }

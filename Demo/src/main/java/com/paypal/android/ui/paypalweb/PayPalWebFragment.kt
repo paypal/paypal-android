@@ -28,12 +28,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.R
-import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
@@ -42,6 +42,8 @@ import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
+import com.paypal.android.usecase.CompleteOrderUseCase
+import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -56,6 +58,12 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
 
     @Inject
     lateinit var sdkSampleServerAPI: SDKSampleServerAPI
+
+    @Inject
+    lateinit var createOrderUseCase: CreateOrderUseCase
+
+    @Inject
+    lateinit var completeOrderUseCase: CompleteOrderUseCase
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
     private lateinit var payPalDataCollector: PayPalDataCollector
@@ -88,13 +96,10 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             viewModel.isCreateOrderLoading = true
 
             val uiState = viewModel.uiState.value
-            viewModel.createdOrder = uiState.run {
-                sdkSampleServerAPI.createOrder(
-                    orderIntent = intentOption,
-                    shouldVault = false,
-                    vaultCustomerId = ""
-                )
+            val orderRequest = uiState.run {
+                OrderRequest(orderIntent = intentOption, shouldVault = false, vaultCustomerId = "")
             }
+            viewModel.createdOrder = createOrderUseCase(orderRequest)
             viewModel.isCreateOrderLoading = false
         }
     }
@@ -157,10 +162,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             val cmid = payPalDataCollector.collectDeviceData(requireContext())
             val orderId = viewModel.createdOrder!!.id!!
             val orderIntent = viewModel.intentOption
-            viewModel.completedOrder = when (orderIntent) {
-                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId, cmid)
-                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId, cmid)
-            }
+            viewModel.completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
             viewModel.isCompleteOrderLoading = false
         }
     }
