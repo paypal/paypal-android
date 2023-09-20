@@ -5,8 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.Order
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.cardpayments.OrderIntent
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -18,8 +18,7 @@ import com.paypal.android.paypalnativepayments.PayPalNativePaysheetActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
-import com.paypal.android.usecase.AuthorizeOrderUseCase
-import com.paypal.android.usecase.CaptureOrderUseCase
+import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
@@ -200,10 +199,8 @@ class PayPalNativeViewModel @Inject constructor(
             val cmid = payPalDataCollector.collectDeviceData(getApplication())
             val orderId = createdOrder!!.id!!
             val orderIntent = intentOption
-            completedOrder = when (orderIntent) {
-                OrderIntent.CAPTURE -> sdkSampleServerAPI.captureOrder(orderId, cmid)
-                OrderIntent.AUTHORIZE -> sdkSampleServerAPI.authorizeOrder(orderId, cmid)
-            }
+
+            completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
             isCompleteOrderLoading = false
         }
     }
