@@ -25,7 +25,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.paypal.android.R
-import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutCanceledView
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutResultView
