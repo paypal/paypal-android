@@ -51,7 +51,8 @@ class FeaturesFragment : Fragment() {
         CARD_VAULT(R.string.feature_vault),
         PAYPAL_WEB(R.string.feature_paypal_web),
         PAYPAL_BUTTONS(R.string.feature_paypal_buttons),
-        PAYPAL_NATIVE(R.string.feature_paypal_native)
+        PAYPAL_NATIVE(R.string.feature_paypal_native),
+        PAYPAL_MESSAGING(R.string.feature_paypal_messaging)
     }
 
     private val cardFeatures = listOf(
@@ -66,6 +67,10 @@ class FeaturesFragment : Fragment() {
 
     private val payPalNativeFeatures = listOf(
         Feature.PAYPAL_NATIVE
+    )
+
+    private val payPalMessagingFeatures = listOf(
+        Feature.PAYPAL_MESSAGING
     )
 
     override fun onCreateView(
@@ -111,6 +116,10 @@ class FeaturesFragment : Fragment() {
             Feature.CARD_VAULT -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToVaultFragment()
             }
+
+            Feature.PAYPAL_MESSAGING -> {
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalMessagingFragment()
+            }
         }
         findNavController().navigate(action)
     }
@@ -145,6 +154,12 @@ class FeaturesFragment : Fragment() {
             }
             item {
                 FeatureOptions(payPalNativeFeatures, onFeatureSelected = onFeatureSelected)
+            }
+            stickyHeader {
+                FeatureGroupHeader("PayPal Messaging")
+            }
+            item {
+                FeatureOptions(payPalMessagingFeatures, onFeatureSelected = onFeatureSelected)
             }
         }
     }

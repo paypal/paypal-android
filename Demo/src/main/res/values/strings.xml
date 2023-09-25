@@ -8,6 +8,7 @@
     <string name="feature_paypal_web">PayPal Web</string>
     <string name="feature_paypal_native">PayPal Native</string>
     <string name="feature_paypal_buttons">PayPal Buttons</string>
+    <string name="feature_paypal_messaging">PayPal Messaging</string>
 
     <!-- Card Fields -->
     <string name="card_field_card_number">CARD NUMBER</string>
@@ -46,4 +47,6 @@
     <string name="intent_title">Intent</string>
     <string name="intent_authorize">AUTHORIZE</string>
     <string name="intent_capture">CAPTURE</string>
+
+    <string name="pay_pal_message_text">Hello from TextView</string>
 </resources>
