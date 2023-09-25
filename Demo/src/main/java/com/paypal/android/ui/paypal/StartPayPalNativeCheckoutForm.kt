@@ -24,7 +24,7 @@ fun StartPayPalNativeCheckoutForm(
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = "Launch PayPal Web Checkout",
+                text = "Launch PayPal Native Checkout",
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.size(16.dp))
