@@ -21,6 +21,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.messages.PayPalMessageView
+import com.paypal.messages.config.message.PayPalMessageConfig
+import com.paypal.messages.config.message.PayPalMessageData
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -56,18 +59,26 @@ class PayPalMessagingFragment : Fragment() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (clientId.isNotEmpty()) {
-//                    val config = PayPalMessageConfig()
-//                    config.setGlobalAnalytics("", "")
-//                    config.data = PayPalMessageData(clientId = clientId)
+                    val config = PayPalMessageConfig()
+                    config.setGlobalAnalytics("", "")
+                    config.data = PayPalMessageData(clientId = clientId)
 
                     // Ref: https://developer.android.com/jetpack/compose/migrate/interoperability-apis/views-in-compose#androidview_in_lazy_lists
                     AndroidView(
                         factory = { context ->
-                            val messageView = PayPalMessagingPlaceholderView(context)
-//                            messageView.layoutParams = ViewGroup.LayoutParams(
-//                                ViewGroup.LayoutParams.MATCH_PARENT,
-//                                ViewGroup.LayoutParams.WRAP_CONTENT
-//                            )
+                            // Demo: Intrinsic Height
+                            // val messageView = PayPalMessagingPlaceholderView(context)
+                            // messageView
+                            // End: Intrinsic Height
+
+                            // Demo: PayPal Messaging Integration
+                            val messageView = PayPalMessageView(context, config = config)
+                            messageView.layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            messageView
+                            // End: PayPal Messaging Integration
 
 //                            // NOTE: Kotlin getters / setters would be preferable to Java style getters / setters
 //                            messageView.setLogoType(PayPalMessageLogoType.ALTERNATIVE)
@@ -85,7 +96,6 @@ class PayPalMessagingFragment : Fragment() {
 //                                    }
 //                                )
 //                            )
-                            messageView
                         }
                     )
                 }
