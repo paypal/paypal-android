@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypal
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
@@ -173,7 +174,8 @@ class PayPalNativeViewModel @Inject constructor(
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val exceptionHandler = CoroutineExceptionHandler { _, e ->
-        // TODO: propagate error to UI
+        // TODO: show error in UI using a Compose UI Alert Dialog to improve error messaging UX
+        Toast.makeText(getApplication(), e.message, Toast.LENGTH_LONG).show()
     }
 
     suspend fun startNativeCheckout() {
