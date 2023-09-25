@@ -44,12 +44,12 @@ class PayPalNativeCheckoutClient internal constructor(
      * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
      */
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
-            this(
-                application,
-                coreConfig,
-                returnUrl,
-                AnalyticsService(application, coreConfig),
-            )
+        this(
+            application,
+            coreConfig,
+            returnUrl,
+            AnalyticsService(application, coreConfig),
+        )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
@@ -90,7 +90,8 @@ class PayPalNativeCheckoutClient internal constructor(
                     uiConfig = UIConfig(
                         showExitSurveyDialog = false
                     ),
-                    returnUrl = returnUrl
+                    returnUrl = returnUrl,
+                    authConfig = request.authConfig
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
