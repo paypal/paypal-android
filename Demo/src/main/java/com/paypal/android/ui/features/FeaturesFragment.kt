@@ -3,6 +3,7 @@ package com.paypal.android.ui.features
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +44,14 @@ class FeaturesFragment : Fragment() {
         val backgroundColor = Color(248, 249, 243)
         val featureTitleColor = Color(20, 29, 47)
         val chevronTint = Color(138, 137, 142)
+    }
+
+    enum class Feature(@StringRes val stringRes: Int) {
+        CARD_APPROVE_ORDER(R.string.feature_approve_order),
+        CARD_VAULT(R.string.feature_vault),
+        PAYPAL_WEB(R.string.feature_paypal_web),
+        PAYPAL_BUTTONS(R.string.feature_paypal_buttons),
+        PAYPAL_NATIVE(R.string.feature_paypal_native)
     }
 
     private val cardFeatures = listOf(
@@ -86,16 +95,19 @@ class FeaturesFragment : Fragment() {
             Feature.PAYPAL_BUTTONS -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalButtonsFragment()
             }
+
             Feature.PAYPAL_WEB -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalWebFragment()
             }
+
             Feature.PAYPAL_NATIVE -> {
-                FeaturesFragmentDirections.actionPaymentMethodsFragmentToCreateOrderFragment(feature)
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalNativeFragment()
             }
 
             Feature.CARD_APPROVE_ORDER -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToCardFragment()
             }
+
             Feature.CARD_VAULT -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToVaultFragment()
             }

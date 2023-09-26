@@ -204,7 +204,7 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
             }
             uiState.payPalWebCheckoutResult?.let { result ->
                 Spacer(modifier = Modifier.size(24.dp))
-                PayPalWebCheckoutResultView(result = result)
+                PayPalWebCheckoutResultView(result.orderId, result.payerId)
                 Spacer(modifier = Modifier.size(24.dp))
                 CompleteOrderForm(
                     isLoading = uiState.isCompleteOrderLoading,

@@ -9,14 +9,6 @@
         android:name="com.paypal.android.ui.features.FeaturesFragment"
         android:label="@string/feature_title">
         <action
-            android:id="@+id/action_paymentMethodsFragment_to_createOrderFragment"
-            app:destination="@id/createOrderFragment">
-            <argument
-                android:name="feature"
-                app:argType="com.paypal.android.ui.features.Feature"
-                app:nullable="false" />
-        </action>
-        <action
             android:id="@+id/action_paymentMethodsFragment_to_cardFragment"
             app:destination="@id/cardFragment" />
         <action
@@ -28,6 +20,9 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalButtonsFragment"
             app:destination="@id/payPalButtonsFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalNativeFragment"
+            app:destination="@id/payPalNativeFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -57,23 +52,6 @@
         android:id="@+id/selectCardFragment"
         android:name="com.paypal.android.ui.selectcard.SelectCardFragment"
         android:label="SelectCardFragment" />
-    <fragment
-        android:id="@+id/createOrderFragment"
-        android:name="com.paypal.android.ui.createorder.CreateOrderFragment"
-        android:label="Create an Order:">
-        <argument
-            android:name="feature"
-            app:argType="com.paypal.android.ui.features.Feature"
-            app:nullable="false" />
-        <action
-            android:id="@+id/action_createOrderFragment_to_payPalNativeFragment"
-            app:destination="@id/payPalNativeFragment">
-            <argument
-                android:name="order"
-                app:argType="com.paypal.android.api.model.Order"
-                app:nullable="false" />
-        </action>
-    </fragment>
     <fragment
         android:id="@+id/payPalWebFragment"
         android:name="com.paypal.android.ui.paypalweb.PayPalWebFragment"

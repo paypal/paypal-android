@@ -1,8 +1,10 @@
-package com.paypal.android.ui.paypalweb
+package com.paypal.android.ui.paypal
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -11,18 +13,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.uishared.components.PropertyView
+import com.paypal.android.ui.WireframeButton
 
 @Composable
-fun PayPalWebCheckoutResultView(orderId: String?, payerId: String?) {
+fun StartPayPalNativeCheckoutForm(
+    isLoading: Boolean,
+    onSubmit: () -> Unit
+) {
+
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = stringResource(id = R.string.order_approved),
+                text = "Launch PayPal Native Checkout",
                 style = MaterialTheme.typography.titleLarge
             )
-            PropertyView(name = "Order ID", value = orderId)
-            PropertyView(name = "Payer ID", value = payerId)
+            Spacer(modifier = Modifier.size(16.dp))
+            WireframeButton(
+                text = stringResource(R.string.start_checkout),
+                isLoading = isLoading,
+                onClick = { onSubmit() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
         }
     }
 }
