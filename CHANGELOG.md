@@ -13,6 +13,9 @@
     * Make `ThreeDSecureResult` class internal
     * Make `Environment` enum associated values internal
     * Remove `OrderRequest` class
+    * Rename `VaultRequest` to `CardVaultRequest`
+    * Rename `VaultResult` to `CardVaultResult`
+    * Rename `VaultListener` to `CardVaultListener`
   * CorePayments
     * Remove `open` modifier on `PayPalSDKError`
 
