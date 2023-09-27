@@ -130,7 +130,8 @@ class CardClient internal constructor(
      * Call this method to attach a payment source to a setup token.
      *
      * @param context [Context] Android context
-     * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token and card to use for vaulting.
+     * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
+     * and card to use for vaulting.
      */
     fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
         val applicationContext = context.applicationContext
