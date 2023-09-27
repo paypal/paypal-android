@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
  * @param status the status of the updated setup token
  */
 @Parcelize
-data class VaultResult(
+data class CardVaultResult(
     val setupTokenId: String,
     val status: String
 ) : Parcelable

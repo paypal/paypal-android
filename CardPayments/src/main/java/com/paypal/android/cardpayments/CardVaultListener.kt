@@ -8,13 +8,13 @@ import com.paypal.android.corepayments.PayPalSDKError
  *
  * Listener to receive callbacks form [CardClient.vault].
  */
-interface VaultListener {
+interface CardVaultListener {
 
     /**
      * Called when a successful vault has occurred.
      */
     @MainThread
-    fun onVaultSuccess(result: VaultResult)
+    fun onVaultSuccess(result: CardVaultResult)
 
     /**
      * Called when a vault failure has occurred.

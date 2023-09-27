@@ -3,7 +3,7 @@ package com.paypal.android.ui.vault
 import androidx.lifecycle.ViewModel
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
-import com.paypal.android.cardpayments.VaultResult
+import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.models.TestCard
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -67,10 +67,10 @@ class VaultViewModel : ViewModel() {
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
 
-    var vaultResult: VaultResult?
-        get() = _uiState.value.vaultResult
+    var cardVaultResult: CardVaultResult?
+        get() = _uiState.value.cardVaultResult
         set(value) {
-            _uiState.update { it.copy(vaultResult = value) }
+            _uiState.update { it.copy(cardVaultResult = value) }
         }
 
     fun prefillCard(testCard: TestCard) {
