@@ -11,6 +11,18 @@ class SelectCardViewModel : ViewModel() {
         val validExpirationYear = "${Calendar.getInstance().get(Calendar.YEAR) + 2}"
     }
 
+    val verifiedTestCards = listOf(
+        TestCard(
+            name = "🇺🇸 Vault with Purchase (no 3DS)",
+            card = Card(
+                number = "4000000000000002",
+                expirationMonth = "01",
+                expirationYear = validExpirationYear,
+                securityCode = "123"
+            ),
+        ),
+    )
+
     val nonThreeDSCards = listOf(
         TestCard(
             name = "Visa",

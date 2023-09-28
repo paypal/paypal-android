@@ -72,6 +72,19 @@ class SelectCardFragment : Fragment() {
             modifier = Modifier.fillMaxWidth()
         ) {
             stickyHeader {
+                WireframeHeader("Verified Test Cards")
+            }
+            items(viewModel.verifiedTestCards) { card ->
+                TestCardView(
+                    testCard = card,
+                    selected = false,
+                    onClick = {
+                        onTestCardSelected(card)
+                    }
+                )
+                Divider(color = Color.Black)
+            }
+            stickyHeader {
                 WireframeHeader("Test Cards without 3DS")
             }
             items(viewModel.nonThreeDSCards) { card ->
