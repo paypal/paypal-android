@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
  * @property card card payment source to attach to the setup token.
  */
 @Parcelize
-data class VaultRequest(
+data class CardVaultRequest(
     val setupTokenId: String,
     val card: Card,
 ) : Parcelable

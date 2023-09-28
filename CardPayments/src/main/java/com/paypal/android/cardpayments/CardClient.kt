@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
  * Use this client to approve an order with a [Card].
  *
  * @property approveOrderListener listener to receive callbacks from [CardClient.approveOrder].
- * @property vaultListener listener to receive callbacks form [CardClient.vault].
+ * @property cardVaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
     activity: FragmentActivity,
@@ -37,7 +37,7 @@ class CardClient internal constructor(
     /**
      * @suppress
      */
-    var vaultListener: VaultListener? = null
+    var cardVaultListener: CardVaultListener? = null
 
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
@@ -46,7 +46,7 @@ class CardClient internal constructor(
     }
 
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        vaultListener?.onVaultFailure(error)
+        cardVaultListener?.onVaultFailure(error)
     }
 
     private var orderId: String? = null
@@ -130,20 +130,21 @@ class CardClient internal constructor(
      * Call this method to attach a payment source to a setup token.
      *
      * @param context [Context] Android context
-     * @param vaultRequest [VaultRequest] request containing details about the setup token and card to use for vaulting.
+     * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
+     * and card to use for vaulting.
      */
-    fun vault(context: Context, vaultRequest: VaultRequest) {
+    fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
         val applicationContext = context.applicationContext
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            updateSetupToken(applicationContext, vaultRequest)
+            updateSetupToken(applicationContext, cardVaultRequest)
         }
     }
 
-    private suspend fun updateSetupToken(context: Context, vaultRequest: VaultRequest) {
-        val result = vaultRequest.run {
+    private suspend fun updateSetupToken(context: Context, cardVaultRequest: CardVaultRequest) {
+        val result = cardVaultRequest.run {
             paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
         }
-        vaultListener?.onVaultSuccess(result)
+        cardVaultListener?.onVaultSuccess(result)
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {

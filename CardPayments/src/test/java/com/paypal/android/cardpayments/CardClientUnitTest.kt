@@ -41,7 +41,7 @@ class CardClientUnitTest {
     private val orderId = "sample-order-id"
 
     private val cardRequest = CardRequest(orderId, card, "return_url")
-    private val vaultRequest = VaultRequest(setupTokenId = "fake-setup-token-id", card = card)
+    private val cardVaultRequest = CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
@@ -59,7 +59,7 @@ class CardClientUnitTest {
     private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
 
     private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
-    private val vaultListener = mockk<VaultListener>(relaxed = true)
+    private val cardVaultListener = mockk<CardVaultListener>(relaxed = true)
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
@@ -180,19 +180,19 @@ class CardClientUnitTest {
     fun `vault notifies listener of update setup token success`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val vaultResult = VaultResult("fake-setup-token-id-from-result", "fake-status")
+        val cardVaultResult = CardVaultResult("fake-setup-token-id-from-result", "fake-status")
         coEvery {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
-        } returns vaultResult
+        } returns cardVaultResult
 
-        sut.vault(activity, vaultRequest)
+        sut.vault(activity, cardVaultRequest)
         advanceUntilIdle()
 
-        val resultSlot = slot<VaultResult>()
-        verify(exactly = 1) { vaultListener.onVaultSuccess(capture(resultSlot)) }
+        val resultSlot = slot<CardVaultResult>()
+        verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
-        assertEquals(vaultResult, actual)
+        assertEquals(cardVaultResult, actual)
     }
 
     @Test
@@ -204,11 +204,11 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
         } throws error
 
-        sut.vault(activity, vaultRequest)
+        sut.vault(activity, cardVaultRequest)
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()
-        verify(exactly = 1) { vaultListener.onVaultFailure(capture(errorSlot)) }
+        verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(errorSlot)) }
 
         val capturedError = errorSlot.captured
         assertEquals("mock_error_message", capturedError.errorDescription)
@@ -225,7 +225,7 @@ class CardClientUnitTest {
             dispatcher
         )
         sut.approveOrderListener = approveOrderListener
-        sut.vaultListener = vaultListener
+        sut.cardVaultListener = cardVaultListener
         return sut
     }
 

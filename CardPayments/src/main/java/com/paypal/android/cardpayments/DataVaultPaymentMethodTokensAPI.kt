@@ -19,7 +19,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): VaultResult {
+    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): CardVaultResult {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
@@ -58,7 +58,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->
             val setupToken = responseJSON.getJSONObject("updateVaultSetupToken")
-            return VaultResult(
+            return CardVaultResult(
                 setupTokenId = setupToken.getString("id"),
                 status = setupToken.getString("status")
             )
