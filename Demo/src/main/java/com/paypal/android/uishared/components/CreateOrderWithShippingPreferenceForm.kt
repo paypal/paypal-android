@@ -59,7 +59,7 @@ fun CreateOrderWithShippingPreferenceForm(
                 onOptionSelected = { option ->
                     val newOrderIntent = when (option) {
                         captureValue -> OrderIntent.CAPTURE
-                        authorizeValue -> OrderIntent.CAPTURE
+                        authorizeValue -> OrderIntent.AUTHORIZE
                         else -> null
                     }
                     newOrderIntent?.let { onIntentOptionSelected(it) }

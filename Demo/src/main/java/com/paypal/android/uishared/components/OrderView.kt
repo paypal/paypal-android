@@ -36,7 +36,7 @@ fun OrderView(order: Order, title: String) {
             PropertyView(name = "Status", value = order.status)
             PropertyView(name = "Card Last 4", value = order.cardLast4)
             PropertyView(name = "Card Brand", value = order.cardBrand)
-            PropertyView(name = "Vault Id", value = order.vaultId)
+            PropertyView(name = "Vault Id / Payment Token", value = order.vaultId)
             PropertyView(name = "Customer Vault Id", value = order.customerId)
             Spacer(modifier = Modifier.size(24.dp))
         }
