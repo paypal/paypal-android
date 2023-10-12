@@ -21,11 +21,27 @@ The order created on your server will be used to authorize or capture funds. For
 
 ### 1. Add the PayPal Native Payments module to your app
 
-In your `build.gradle` file, add the following dependency:
+In your app's `build.gradle` file, add the following dependency:
 
 ```groovy
 dependencies {
    implementation "com.paypal.android:paypal-native-payments:<CURRENT-VERSION>"
+}
+```
+
+Also, add the following to your project's top-level build.gradle file:
+
+```groovy
+allprojects {
+  repositories {
+    maven {
+      url  "https://cardinalcommerceprod.jfrog.io/artifactory/android"
+      credentials {
+        username "paypal_sgerritz"
+        password "AKCp8jQ8tAahqpT5JjZ4FRP2mW7GMoFZ674kGqHmupTesKeAY2G8NcmPKLuTxTGkKjDLRzDUQ"
+      }
+    }
+  }
 }
 ```
 
