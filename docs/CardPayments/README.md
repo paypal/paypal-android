@@ -85,7 +85,7 @@ Create a `Card` object containing the user's card details.
 val card = Card(
     number = "4111111111111111",
     expirationMonth = "01",
-    expirationYear = "25",
+    expirationYear = "2025",
     securityCode = "123",
     billingAddress = Address(
         streetAddress = "123 Main St.",
