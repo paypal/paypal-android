@@ -29,7 +29,7 @@ dependencies {
 }
 ```
 
-Also, add the following to your project's top-level build.gradle file:
+Also, add the following to your project's top-level `build.gradle` file:
 
 ```groovy
 allprojects {
