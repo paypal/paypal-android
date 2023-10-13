@@ -21,7 +21,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
-        signingConfig signingConfigs.debug
     }
 
     buildFeatures {
@@ -59,6 +58,27 @@ android {
     sourceSets {
         androidTest {
             java.srcDirs += "src/androidTestShared/java"
+        }
+    }
+
+    // https://developer.android.com/build/build-variants#groovy
+    signingConfigs {
+        release {
+            // You need to specify either an absolute path or include the
+            // keystore file in the same directory as the build.gradle file.
+            storeFile file(System.getenv('DEMO_KEYSTORE_FILE'))
+            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD')
+            keyAlias System.getenv('DEMO_KEYSTORE_ALIAS')
+            keyPassword System.getenv('DEMO_KEYSTORE_PASSWORD')
+        }
+    }
+    buildTypes {
+        release {
+            debuggable false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            debuggable true
         }
     }
 }
