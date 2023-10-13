@@ -74,7 +74,7 @@ class PayPalNativeCheckoutClient internal constructor(
     var shippingListener: PayPalNativeShippingListener? = null
 
     /**
-     * Present a Paypal Payseet and start a PayPal transaction.
+     * Present a Paypal Paysheet and start a PayPal transaction.
      *
      * @param request the PayPalNativeCheckoutRequest for the transaction
      */
@@ -91,7 +91,7 @@ class PayPalNativeCheckoutClient internal constructor(
                         showExitSurveyDialog = false
                     ),
                     returnUrl = returnUrl,
-                    authConfig = request.authConfig
+                    authConfig = AuthConfig(request.authConfig?.userEmail)
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
