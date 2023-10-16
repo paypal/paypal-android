@@ -20,6 +20,7 @@ jobs:
           echo "${{ secrets.DEMO_KEYSTORE_BASE64_ENCODED }}" > ~/demo_keystore.keystore.b64
           base64 -d ~/demo_keystore.keystore.b64 > "${DEMO_KEYSTORE_FILE}"
       - name: Decode Demo GCP Service Account Credentials
+        run: |
           echo "${{ secrets.DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_BASE64_ENCODED }}" > ~/gcp_service_account_credentials.json.b64
           base64 -d ~/gcp_service_account_credentials.json.b64 > "${DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_FILE}"
       - name: Publish Release Bundle
