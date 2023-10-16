@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
+    id 'com.github.triplet.play' version '3.8.4'
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
@@ -16,7 +17,7 @@ android {
         applicationId "com.paypal.android"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 1
+        versionCode 2
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -66,10 +67,10 @@ android {
         release {
             // You need to specify either an absolute path or include the
             // keystore file in the same directory as the build.gradle file.
-            storeFile file(System.getenv('DEMO_KEYSTORE_FILE'))
-            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD')
-            keyAlias System.getenv('DEMO_KEYSTORE_ALIAS')
-            keyPassword System.getenv('DEMO_KEYSTORE_PASSWORD')
+            storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'debug.keystore')
+            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'android'
+            keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'androiddebugkey'
+            keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'android'
         }
     }
     buildTypes {
@@ -81,6 +82,12 @@ android {
             debuggable true
         }
     }
+}
+
+play {
+    // Ref: https://github.com/Triple-T/gradle-play-publisher/issues/979#issuecomment-884763388
+    releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.DRAFT)
+    serviceAccountCredentials.set(file(System.getenv("DEMO_SERVICE_ACCOUNT_CREDENTIALS")))
 }
 
 // Ref: https://developer.android.com/training/dependency-injection/hilt-android#setup
