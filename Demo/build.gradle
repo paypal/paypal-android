@@ -87,7 +87,7 @@ android {
 play {
     // Ref: https://github.com/Triple-T/gradle-play-publisher/issues/979#issuecomment-884763388
     releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.DRAFT)
-    serviceAccountCredentials.set(file(System.getenv("DEMO_SERVICE_ACCOUNT_CREDENTIALS")))
+    serviceAccountCredentials.set(file(System.getenv("DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_FILE")))
 }
 
 // Ref: https://developer.android.com/training/dependency-injection/hilt-android#setup
