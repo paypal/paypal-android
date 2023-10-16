@@ -65,8 +65,6 @@ android {
     // https://developer.android.com/build/build-variants#groovy
     signingConfigs {
         release {
-            // You need to specify either an absolute path or include the
-            // keystore file in the same directory as the build.gradle file.
             storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'debug.keystore')
             storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'android'
             keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'androiddebugkey'
