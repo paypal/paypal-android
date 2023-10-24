@@ -219,15 +219,24 @@ task changeReleaseVersion {
     }
 }
 
-task incrementDemoAppVersionCode {
+task getDemoAppVersionCode {
     doLast {
         def topLevelGradleFile = file('./build.gradle')
         def topLevelGradleFileText = topLevelGradleFile.getText('UTF-8')
 
         def matcher = topLevelGradleFileText =~ /"demoAppVersionCode"\s*: ([0-9]*),/
-        def versionCode = matcher[0][1].toInteger() + 1
+        def versionCode = matcher[0][1].toInteger()
+        println(versionCode)
+    }
+}
+
+//./gradlew -PdemoAppVersionCodeParam=0.0.1 changeReleaseVersion
+task setDemoAppVersionCode {
+    doLast {
+        def topLevelGradleFile = file('./build.gradle')
+        def topLevelGradleFileText = topLevelGradleFile.getText('UTF-8')
         def updatedScript =
-            topLevelGradleFileText.replaceFirst(/("demoAppVersionCode"\s*: )[0-9]*,/, '$1' + versionCode + ',')
+            topLevelGradleFileText.replaceFirst(/("demoAppVersionCode"\s*: )[0-9]*,/, '$1' + demoAppVersionCodeParam + ',')
         topLevelGradleFile.write(updatedScript, 'UTF-8')
     }
 }
