@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
+    id 'com.github.triplet.play' version '3.8.4'
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
@@ -16,12 +17,11 @@ android {
         applicationId "com.paypal.android"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 1
-        versionName "1.0"
+        versionCode modules.demoAppVersionCode
+        versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
-        signingConfig signingConfigs.debug
     }
 
     buildFeatures {
@@ -61,6 +61,31 @@ android {
             java.srcDirs += "src/androidTestShared/java"
         }
     }
+
+    // https://developer.android.com/build/build-variants#groovy
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'debug.keystore')
+            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'android'
+            keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'androiddebugkey'
+            keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'android'
+        }
+    }
+    buildTypes {
+        release {
+            debuggable false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
+
+play {
+    // Ref: https://github.com/Triple-T/gradle-play-publisher/issues/979#issuecomment-884763388
+    releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.DRAFT)
+    serviceAccountCredentials.set(file(System.getenv("DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_FILE") ?: '/path/to/credential_file.json'))
 }
 
 // Ref: https://developer.android.com/training/dependency-injection/hilt-android#setup

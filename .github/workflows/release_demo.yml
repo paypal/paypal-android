@@ -1,0 +1,50 @@
+name: Release Demo
+on: workflow_dispatch
+env:
+  DEMO_KEYSTORE_FILE: /home/runner/demo_keystore.keystore
+  DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_FILE: /home/runner/demo_gcp_service_account_credentials.json
+jobs:
+  bump_demo_app_version_code:
+    name: Bump Demo App Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Update Version
+        run: |
+          VERSION_CODE=$(./gradlew -q getDemoAppVersionCode)
+          UPDATED_VERSION_CODE=$((${VERSION_CODE} + 1))
+
+          ./gradlew -PdemoAppVersionCodeParam=${UPDATED_VERSION_CODE} setDemoAppVersionCode
+
+          git add .
+          git commit -m 'Bump demo app version code to ${UPDATED_VERSION_CODE}'
+          git push origin HEAD
+  publish_demo_app:
+    needs: [ bump_demo_app_version_code ]
+    name: Publish Demo App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'microsoft'
+      - name: Decode Demo Keystore
+        run: |
+          echo "${{ secrets.DEMO_KEYSTORE_BASE64_ENCODED }}" > ~/demo_keystore.keystore.b64
+          base64 -d ~/demo_keystore.keystore.b64 > "${DEMO_KEYSTORE_FILE}"
+      - name: Decode Demo GCP Service Account Credentials
+        run: |
+          echo "${{ secrets.DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_BASE64_ENCODED }}" > ~/gcp_service_account_credentials.json.b64
+          base64 -d ~/gcp_service_account_credentials.json.b64 > "${DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_FILE}"
+      - name: Publish Release Bundle
+        run: ./gradlew publishReleaseBundle
+        env:
+          DEMO_KEYSTORE_PASSWORD: ${{ secrets.DEMO_KEYSTORE_PASSWORD }}
+          DEMO_KEY_ALIAS: ${{ secrets.DEMO_KEY_ALIAS }}
+          DEMO_KEY_PASSWORD: ${{ secrets.DEMO_KEY_PASSWORD }}
