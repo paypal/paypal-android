@@ -62,6 +62,7 @@ dependencies {
 }
 
 project.ext.name = "paypal-native-payments"
+project.ext.version = rootProject.version
 project.ext.pom_name = "PayPal SDK - Native Payments"
 project.ext.pom_desc = "Library for PayPal native payments"
 

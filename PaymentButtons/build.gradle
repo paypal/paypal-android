@@ -35,6 +35,7 @@ dependencies {
 }
 
 project.ext.name = "payment-buttons"
+project.ext.version = rootProject.version
 project.ext.pom_name = "PayPal SDK - Payment Buttons"
 project.ext.pom_desc = "Library for PayPal's payment buttons and UI components"
 

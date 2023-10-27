@@ -55,6 +55,7 @@ dependencies {
 
 
 project.ext.name = "fraud-protection"
+project.ext.version = rootProject.version
 project.ext.pom_name = "PayPal SDK - Fraud Protection"
 project.ext.pom_desc = "Library for PayPal's fraud protection"
 
