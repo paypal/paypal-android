@@ -76,6 +76,7 @@ dependencies {
 }
 
 project.ext.name = "core-payments"
+project.ext.version = rootProject.version
 project.ext.pom_name = "PayPal SDK - CorePayments"
 project.ext.pom_desc = "CorePayments library for PayPal payment methods"
 
