@@ -11,7 +11,7 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 groupId group
-                version project.version
+                version project.ext.version
                 artifactId project.ext.name
                 from components.release
                 artifact androidSourcesJar //TODO: add javadocs
