@@ -45,6 +45,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.models.PaymentMethod
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.selectcard.SelectCardFragment
@@ -120,7 +121,12 @@ class CardFragment : Fragment() {
             viewModel.isCreateOrderLoading = true
 
             val uiState = viewModel.uiState.value
-            val orderRequest = uiState.run { OrderRequest(intentOption, shouldVault, customerId) }
+            val orderRequest = uiState.run { OrderRequest(
+                PaymentMethod.CARD,
+                intentOption,
+                shouldVault,
+                customerId
+            ) }
             viewModel.createdOrder = createOrderUseCase(orderRequest)
             viewModel.isCreateOrderLoading = false
         }

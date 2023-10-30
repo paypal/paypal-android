@@ -42,6 +42,9 @@ class SDKSampleServerAPI {
     interface RetrofitService {
 
         @POST("/orders")
+        suspend fun createOrderJSON(@Body jsonObject: JsonObject): ResponseBody
+
+        @POST("/orders")
         suspend fun createOrder(@Body jsonObject: JsonObject): Order
 
         @POST("/orders")
@@ -112,6 +115,18 @@ class SDKSampleServerAPI {
 
     suspend fun fetchClientId(merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
         DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
+
+    suspend fun createOrderJSON(
+        orderRequest: JSONObject,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ): ResponseBody {
+//        if (DEFAULT_ORDER_ID != null) {
+//            return Order(DEFAULT_ORDER_ID, "CREATED")
+//        }
+//
+        val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
+        return findService(merchantIntegration).createOrderJSON(body)
+    }
 
     suspend fun createOrder(
         orderRequest: JSONObject,

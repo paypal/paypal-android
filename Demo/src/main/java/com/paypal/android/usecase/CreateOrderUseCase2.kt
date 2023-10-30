@@ -10,11 +10,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
-class CreateOrderUseCase @Inject constructor(
+class CreateOrderUseCase2 @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(request: OrderRequest): Order = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(request: OrderRequest): Pair<String, String> = withContext(Dispatchers.IO) {
         val amountJSON = JSONObject()
             .put("currency_code", "USD")
             .put("value", "10.99")
@@ -38,7 +38,39 @@ class CreateOrderUseCase @Inject constructor(
             .put("application_context", applicationContextJSON)
 
         orderRequest.putOpt("payment_source", createPaymentSourceJSON(request))
-        sdkSampleServerAPI.createOrder(orderRequest)
+        val response = sdkSampleServerAPI.createOrderJSON(orderRequest)
+        val responseJSON = JSONObject(response.string())
+        val links = responseJSON.getJSONArray("links")
+
+        var payerActionHref: String? = null
+        for (i in 0 until links.length()) {
+            val link = links.getJSONObject(i)
+            if (link.getString("rel") == "payer-action") {
+                payerActionHref = link.getString("href")
+                break
+            }
+        }
+        Pair(payerActionHref!!, responseJSON.getString("id"))
+
+//        {
+//            "id": "5UM28916LG5328135",
+//            "status": "PAYER_ACTION_REQUIRED",
+//            "payment_source": {
+//            "paypal": {}
+//        },
+//            "links": [
+//            {
+//                "href": "https://api.sandbox.paypal.com/v2/checkout/orders/5UM28916LG5328135",
+//                "rel": "self",
+//                "method": "GET"
+//            },
+//            {
+//                "href": "https://www.sandbox.paypal.com/checkoutnow?token=5UM28916LG5328135",
+//                "rel": "payer-action",
+//                "method": "GET"
+//            }
+//            ]
+//        }
     }
 
     private fun createPaymentSourceJSON(request: OrderRequest): JSONObject? {

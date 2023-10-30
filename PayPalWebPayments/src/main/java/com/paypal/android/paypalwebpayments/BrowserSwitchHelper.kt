@@ -5,6 +5,7 @@ import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import org.json.JSONObject
+import java.net.URL
 
 internal class BrowserSwitchHelper(private val urlScheme: String) {
 
@@ -27,6 +28,17 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
             .build()
+    }
+
+    fun configurePayPalBrowserSwitchOptions(
+        href: String,
+        config: CoreConfig,
+    ): BrowserSwitchOptions {
+//        val metadata = JSONObject().put("order_id", orderId)
+        return BrowserSwitchOptions()
+            .url(Uri.parse(href))
+            .returnUrlScheme(urlScheme)
+//            .metadata(metadata)
     }
 
     fun configurePayPalBrowserSwitchOptions(
