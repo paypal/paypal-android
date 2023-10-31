@@ -2,6 +2,7 @@ package com.paypal.android.ui.paypalbuttons
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.paymentbuttons.PayPalButtonColor
+import com.paypal.android.paymentbuttons.PayPalButtonLabel
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,5 +28,11 @@ class PayPalButtonsViewModel : ViewModel() {
         get() = _uiState.value.payPalCreditButtonColor
         set(value) {
             _uiState.update { it.copy(payPalCreditButtonColor = value) }
+        }
+
+    var payPalButtonLabel: PayPalButtonLabel
+        get() = _uiState.value.payPalButtonLabel
+        set(value) {
+            _uiState.update { it.copy(payPalButtonLabel = value) }
         }
 }

@@ -8,10 +8,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
@@ -118,6 +119,8 @@ class PayPalButtonsFragment : Fragment() {
     fun PayPalButtonsView(
         uiState: PayPalButtonsUiState
     ) {
+        val scrollState = rememberScrollState()
+
         Column(modifier = Modifier.fillMaxSize()) {
             Text("Preview: ")
             PayPalButtonFactory(uiState = uiState)
@@ -126,6 +129,7 @@ class PayPalButtonsFragment : Fragment() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1.0f)
+                    .verticalScroll(scrollState)
             ) {
                 PayPalButtonFundingTypeOptionList(
                     selectedOption = uiState.fundingType,
@@ -134,6 +138,14 @@ class PayPalButtonsFragment : Fragment() {
                     }
                 )
                 PayPalButtonColorOptionListFactory(uiState = uiState)
+                if (uiState.fundingType == ButtonFundingType.PAYPAL) {
+                    PayPalButtonLabelOptionList(
+                        selectedOption = uiState.payPalButtonLabel,
+                        onSelection = { value ->
+                            viewModel.payPalButtonLabel = value
+                        }
+                    )
+                }
             }
         }
     }
@@ -146,10 +158,12 @@ class PayPalButtonsFragment : Fragment() {
                     factory = { context ->
                         val button = PayPalButton(context)
                         button.color = uiState.payPalButtonColor
+                        button.label = uiState.payPalButtonLabel
                         button
                     },
                     update = { button ->
                         button.color = uiState.payPalButtonColor
+                        button.label = uiState.payPalButtonLabel
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
