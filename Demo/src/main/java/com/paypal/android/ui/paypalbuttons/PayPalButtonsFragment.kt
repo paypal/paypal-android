@@ -17,12 +17,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.databinding.FragmentPaypalButtonsStylingBinding
 import com.paypal.android.paymentbuttons.PayLaterButton
 import com.paypal.android.paymentbuttons.PayPalButton
@@ -37,6 +40,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PayPalButtonsFragment : Fragment() {
+
+    private val viewModel by viewModels<PayPalButtonsViewModel>()
 
     private val selectedButtonFundingType: ButtonFundingType
         get() {
@@ -100,7 +105,8 @@ class PayPalButtonsFragment : Fragment() {
             setContent {
                 MaterialTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        PayPalButtonsView()
+                        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                        PayPalButtonsView(uiState)
                     }
                 }
             }
@@ -110,23 +116,53 @@ class PayPalButtonsFragment : Fragment() {
     @ExperimentalMaterial3Api
     @Composable
     fun PayPalButtonsView(
+        uiState: PayPalButtonsUiState
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Text("Preview: ")
-            AndroidView(
-                factory = { context ->
-                    PayPalButton(context)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+            PayPalButtonFactory(uiState = uiState)
             Text("Options: ")
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1.0f)
-                    .background(Color.Green)
             ) {
+                PayPalButtonFundingTypeOptionList(
+                    selectedOption = uiState.fundingType,
+                    onSelection = { value ->
+                        viewModel.selectedFundingType = value
+                    }
+                )
+            }
+        }
+    }
 
+    @Composable
+    fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
+        when (uiState.fundingType) {
+            ButtonFundingType.PAYPAL -> {
+                AndroidView(
+                    factory = { context ->
+                        PayPalButton(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            ButtonFundingType.PAY_LATER -> {
+                AndroidView(
+                    factory = { context ->
+                        PayLaterButton(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            ButtonFundingType.PAYPAL_CREDIT -> {
+                AndroidView(
+                    factory = { context ->
+                        PayPalCreditButton(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
