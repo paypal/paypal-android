@@ -131,9 +131,7 @@ class PayPalButtonsFragment : Fragment() {
             ButtonFundingType.PAYPAL -> {
                 AndroidView(
                     factory = { context ->
-                        val button = PayPalButton(context)
-                        configureButton(button, uiState)
-                        button
+                        PayPalButton(context)
                     },
                     update = { button ->
                         configureButton(button, uiState)
@@ -145,9 +143,7 @@ class PayPalButtonsFragment : Fragment() {
             ButtonFundingType.PAY_LATER -> {
                 AndroidView(
                     factory = { context ->
-                        val button = PayLaterButton(context)
-                        configureButton(button, uiState)
-                        button
+                        PayLaterButton(context)
                     },
                     update = { button ->
                         configureButton(button, uiState)
@@ -159,9 +155,7 @@ class PayPalButtonsFragment : Fragment() {
             ButtonFundingType.PAYPAL_CREDIT -> {
                 AndroidView(
                     factory = { context ->
-                        val button = PayPalCreditButton(context)
-                        configureButton(button, uiState)
-                        button
+                        PayPalCreditButton(context)
                     },
                     update = { button ->
                         configureButton(button, uiState)
