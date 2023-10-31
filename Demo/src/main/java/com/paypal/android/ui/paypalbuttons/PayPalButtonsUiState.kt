@@ -1,3 +1,10 @@
 package com.paypal.android.ui.paypalbuttons
 
-data class PayPalButtonsUiState(val fundingType: ButtonFundingType = ButtonFundingType.PAYPAL)
+import com.paypal.android.paymentbuttons.PayPalButtonColor
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
+
+data class PayPalButtonsUiState(
+    val fundingType: ButtonFundingType = ButtonFundingType.PAYPAL,
+    val payPalCreditButtonColor: PayPalCreditButtonColor = PayPalCreditButtonColor.DARK_BLUE,
+    val payPalButtonColor: PayPalButtonColor = PayPalButtonColor.GOLD
+)

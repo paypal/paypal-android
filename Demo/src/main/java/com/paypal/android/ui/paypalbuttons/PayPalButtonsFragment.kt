@@ -133,6 +133,7 @@ class PayPalButtonsFragment : Fragment() {
                         viewModel.selectedFundingType = value
                     }
                 )
+                PayPalButtonColorOptionListFactory(uiState = uiState)
             }
         }
     }
@@ -143,25 +144,66 @@ class PayPalButtonsFragment : Fragment() {
             ButtonFundingType.PAYPAL -> {
                 AndroidView(
                     factory = { context ->
-                        PayPalButton(context)
+                        val button = PayPalButton(context)
+                        button.color = uiState.payPalButtonColor
+                        button
+                    },
+                    update = { button ->
+                        button.color = uiState.payPalButtonColor
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
             ButtonFundingType.PAY_LATER -> {
                 AndroidView(
                     factory = { context ->
-                        PayLaterButton(context)
+                        val button = PayLaterButton(context)
+                        button.color = uiState.payPalButtonColor
+                        button
+                    },
+                    update = { button ->
+                        button.color = uiState.payPalButtonColor
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
             ButtonFundingType.PAYPAL_CREDIT -> {
                 AndroidView(
                     factory = { context ->
-                        PayPalCreditButton(context)
+                        val button = PayPalCreditButton(context)
+                        button.color = uiState.payPalCreditButtonColor
+                        button
+                    },
+                    update = { button ->
+                        button.color = uiState.payPalCreditButtonColor
                     },
                     modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun PayPalButtonColorOptionListFactory(uiState: PayPalButtonsUiState) {
+        when (uiState.fundingType) {
+            ButtonFundingType.PAYPAL,
+            ButtonFundingType.PAY_LATER -> {
+                PayPalButtonColorOptionList(
+                    selectedOption = uiState.payPalButtonColor,
+                    onSelection = { value ->
+                        viewModel.payPalButtonColor = value
+                    }
+                )
+            }
+
+            ButtonFundingType.PAYPAL_CREDIT -> {
+                PayPalCreditButtonColorOptionList(
+                    selectedOption = uiState.payPalCreditButtonColor,
+                    onSelection = { value ->
+                        viewModel.payPalCreditButtonColor = value
+                    }
                 )
             }
         }
