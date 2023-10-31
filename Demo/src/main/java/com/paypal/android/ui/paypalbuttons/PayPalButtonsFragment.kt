@@ -8,6 +8,15 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.paypal.android.databinding.FragmentPaypalButtonsStylingBinding
 import com.paypal.android.paymentbuttons.PayLaterButton
@@ -35,6 +44,7 @@ class PayPalButtonsFragment : Fragment() {
         get() = when (selectedButtonFundingType) {
             ButtonFundingType.PAYPAL_CREDIT ->
                 binding.paymentButtonColorSpinner.selectedItem as? PayPalCreditButtonColor
+
             else ->
                 binding.paymentButtonColorSpinner.selectedItem as? PayPalButtonColor
         }
@@ -44,6 +54,7 @@ class PayPalButtonsFragment : Fragment() {
             ButtonFundingType.PAYPAL -> PayPalButtonLabel.valueOf(
                 binding.paymentButtonLabelSpinner.selectedItem.toString()
             )
+
             else -> null
         }
 
@@ -73,12 +84,29 @@ class PayPalButtonsFragment : Fragment() {
         override fun onNothingSelected(p0: AdapterView<*>?) = Unit
     }
 
+    @ExperimentalMaterial3Api
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return binding.root
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        PayPalButtonsView()
+                    }
+                }
+            }
+        }
+    }
+
+    @ExperimentalMaterial3Api
+    @Composable
+    fun PayPalButtonsView(
+    ) {
+        Text("Hello World")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -124,6 +152,7 @@ class PayPalButtonsFragment : Fragment() {
             ButtonFundingType.PAYPAL, ButtonFundingType.PAY_LATER -> simpleArrayAdapter(
                 PayPalButtonColor.values()
             )
+
             ButtonFundingType.PAYPAL_CREDIT -> simpleArrayAdapter(PayPalCreditButtonColor.values())
         }
         binding.paymentButtonColorSpinner.onItemSelectedListener = itemSelectionListener
@@ -150,6 +179,7 @@ class PayPalButtonsFragment : Fragment() {
                     label = it
                 }
             }
+
             ButtonFundingType.PAY_LATER -> PayLaterButton(requireContext(), null).apply {
                 selectedColor?.let {
                     color = it
@@ -157,6 +187,7 @@ class PayPalButtonsFragment : Fragment() {
                 shape = selectedShape
                 size = selectedSize
             }
+
             ButtonFundingType.PAYPAL_CREDIT -> PayPalCreditButton(requireContext(), null).apply {
                 selectedColor?.let {
                     color = it
