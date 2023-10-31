@@ -22,11 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.R
 import com.paypal.android.paymentbuttons.PayLaterButton
 import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalCreditButton
@@ -69,7 +71,7 @@ class PayPalButtonsFragment : Fragment() {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Button Preview",
+                text = stringResource(id = R.string.pay_pal_button_preview),
                 color = Color.Black,
                 style = MaterialTheme.typography.titleLarge,
             )
@@ -77,7 +79,7 @@ class PayPalButtonsFragment : Fragment() {
             PayPalButtonFactory(uiState = uiState)
             Spacer(modifier = Modifier.size(16.dp))
             Text(
-                text = "Button Options",
+                text = stringResource(id = R.string.pay_pal_button_options),
                 color = Color.Black,
                 style = MaterialTheme.typography.titleLarge,
             )
