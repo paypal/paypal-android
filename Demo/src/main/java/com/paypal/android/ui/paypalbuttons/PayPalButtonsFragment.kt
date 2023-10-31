@@ -8,15 +8,20 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import com.paypal.android.databinding.FragmentPaypalButtonsStylingBinding
 import com.paypal.android.paymentbuttons.PayLaterButton
@@ -106,7 +111,24 @@ class PayPalButtonsFragment : Fragment() {
     @Composable
     fun PayPalButtonsView(
     ) {
-        Text("Hello World")
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text("Preview: ")
+            AndroidView(
+                factory = { context ->
+                    PayPalButton(context)
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text("Options: ")
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1.0f)
+                    .background(Color.Green)
+            ) {
+
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
