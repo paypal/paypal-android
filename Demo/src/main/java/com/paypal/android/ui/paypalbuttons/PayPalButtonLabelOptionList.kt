@@ -10,7 +10,7 @@ fun PayPalButtonLabelOptionList(
     onSelection: (PayPalButtonLabel) -> Unit
 ) {
     OptionList(
-        title = "Pay Pal Button Label",
+        title = "Button Label",
         options = PayPalButtonLabel.values().map { it.name },
         selectedOption = selectedOption.name,
         onOptionSelected = { option ->

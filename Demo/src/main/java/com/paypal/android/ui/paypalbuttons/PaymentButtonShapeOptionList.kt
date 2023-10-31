@@ -10,7 +10,7 @@ fun PaymentButtonShapeOptionList(
     onSelection: (PaymentButtonShape) -> Unit
 ) {
     OptionList(
-        title = "Payment Button Shape",
+        title = "Button Shape",
         options = PaymentButtonShape.values().map { it.name },
         selectedOption = selectedOption.name,
         onOptionSelected = { option ->

@@ -9,7 +9,7 @@ fun PayPalButtonFundingTypeOptionList(
     onSelection: (ButtonFundingType) -> Unit
 ) {
     OptionList(
-        title = "Button Funding Type Option",
+        title = "Funding Type",
         options = ButtonFundingType.values().map { it.name },
         selectedOption = selectedOption.name,
         onOptionSelected = { option ->

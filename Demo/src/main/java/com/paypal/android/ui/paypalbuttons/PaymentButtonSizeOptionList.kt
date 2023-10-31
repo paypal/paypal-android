@@ -10,7 +10,7 @@ fun PaymentButtonSizeOptionList(
     onSelection: (PaymentButtonSize) -> Unit
 ) {
     OptionList(
-        title = "Payment Button Size",
+        title = "Button Size",
         options = PaymentButtonSize.values().map { it.name },
         selectedOption = selectedOption.name,
         onOptionSelected = { option ->

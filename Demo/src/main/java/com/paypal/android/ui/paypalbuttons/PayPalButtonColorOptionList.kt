@@ -10,7 +10,7 @@ fun PayPalButtonColorOptionList(
     onSelection: (PayPalButtonColor) -> Unit
 ) {
     OptionList(
-        title = "Pay Pal Button Color",
+        title = "Button Color",
         options = PayPalButtonColor.values().map { it.name },
         selectedOption = selectedOption.name,
         onOptionSelected = { option ->
