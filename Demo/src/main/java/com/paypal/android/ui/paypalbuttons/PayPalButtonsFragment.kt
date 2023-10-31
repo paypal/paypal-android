@@ -60,9 +60,7 @@ class PayPalButtonsFragment : Fragment() {
 
     @ExperimentalMaterial3Api
     @Composable
-    fun PayPalButtonsView(
-        uiState: PayPalButtonsUiState
-    ) {
+    fun PayPalButtonsView(uiState: PayPalButtonsUiState) {
         val scrollState = rememberScrollState()
 
         Column(
@@ -92,9 +90,7 @@ class PayPalButtonsFragment : Fragment() {
             ) {
                 PayPalButtonFundingTypeOptionList(
                     selectedOption = uiState.fundingType,
-                    onSelection = { value ->
-                        viewModel.selectedFundingType = value
-                    }
+                    onSelection = { value -> viewModel.selectedFundingType = value }
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 PayPalButtonColorOptionListFactory(uiState = uiState)
@@ -102,24 +98,18 @@ class PayPalButtonsFragment : Fragment() {
                     Spacer(modifier = Modifier.size(8.dp))
                     PayPalButtonLabelOptionList(
                         selectedOption = uiState.payPalButtonLabel,
-                        onSelection = { value ->
-                            viewModel.payPalButtonLabel = value
-                        }
+                        onSelection = { value -> viewModel.payPalButtonLabel = value }
                     )
                 }
                 Spacer(modifier = Modifier.size(8.dp))
                 PaymentButtonShapeOptionList(
                     selectedOption = uiState.paymentButtonShape,
-                    onSelection = { value ->
-                        viewModel.paymentButtonShape = value
-                    }
+                    onSelection = { value -> viewModel.paymentButtonShape = value }
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 PaymentButtonSizeOptionList(
                     selectedOption = uiState.paymentButtonSize,
-                    onSelection = { value ->
-                        viewModel.paymentButtonSize = value
-                    }
+                    onSelection = { value -> viewModel.paymentButtonSize = value }
                 )
             }
         }
