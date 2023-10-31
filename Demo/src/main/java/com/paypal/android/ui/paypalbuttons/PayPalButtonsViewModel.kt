@@ -5,6 +5,7 @@ import com.paypal.android.paymentbuttons.PayPalButtonColor
 import com.paypal.android.paymentbuttons.PayPalButtonLabel
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButtonShape
+import com.paypal.android.paymentbuttons.PaymentButtonSize
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -41,5 +42,11 @@ class PayPalButtonsViewModel : ViewModel() {
         get() = _uiState.value.paymentButtonShape
         set(value) {
             _uiState.update { it.copy(paymentButtonShape = value) }
+        }
+
+    var paymentButtonSize: PaymentButtonSize
+        get() = _uiState.value.paymentButtonSize
+        set(value) {
+            _uiState.update { it.copy(paymentButtonSize = value) }
         }
 }

@@ -152,6 +152,12 @@ class PayPalButtonsFragment : Fragment() {
                         viewModel.paymentButtonShape = value
                     }
                 )
+                PaymentButtonSizeOptionList(
+                    selectedOption = uiState.paymentButtonSize,
+                    onSelection = { value ->
+                        viewModel.paymentButtonSize = value
+                    }
+                )
             }
         }
     }
@@ -166,12 +172,14 @@ class PayPalButtonsFragment : Fragment() {
                         button.color = uiState.payPalButtonColor
                         button.label = uiState.payPalButtonLabel
                         button.shape = uiState.paymentButtonShape
+                        button.size = uiState.paymentButtonSize
                         button
                     },
                     update = { button ->
                         button.color = uiState.payPalButtonColor
                         button.label = uiState.payPalButtonLabel
                         button.shape = uiState.paymentButtonShape
+                        button.size = uiState.paymentButtonSize
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -183,11 +191,13 @@ class PayPalButtonsFragment : Fragment() {
                         val button = PayLaterButton(context)
                         button.color = uiState.payPalButtonColor
                         button.shape = uiState.paymentButtonShape
+                        button.size = uiState.paymentButtonSize
                         button
                     },
                     update = { button ->
                         button.color = uiState.payPalButtonColor
                         button.shape = uiState.paymentButtonShape
+                        button.size = uiState.paymentButtonSize
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -199,11 +209,13 @@ class PayPalButtonsFragment : Fragment() {
                         val button = PayPalCreditButton(context)
                         button.color = uiState.payPalCreditButtonColor
                         button.shape = uiState.paymentButtonShape
+                        button.size = uiState.paymentButtonSize
                         button
                     },
                     update = { button ->
                         button.color = uiState.payPalCreditButtonColor
                         button.shape = uiState.paymentButtonShape
+                        button.size = uiState.paymentButtonSize
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
