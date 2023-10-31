@@ -30,6 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.paymentbuttons.PayLaterButton
 import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalCreditButton
+import com.paypal.android.paymentbuttons.PaymentButton
+import com.paypal.android.paymentbuttons.PaymentButtonColor
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -130,17 +132,11 @@ class PayPalButtonsFragment : Fragment() {
                 AndroidView(
                     factory = { context ->
                         val button = PayPalButton(context)
-                        button.color = uiState.payPalButtonColor
-                        button.label = uiState.payPalButtonLabel
-                        button.shape = uiState.paymentButtonShape
-                        button.size = uiState.paymentButtonSize
+                        configureButton(button, uiState)
                         button
                     },
                     update = { button ->
-                        button.color = uiState.payPalButtonColor
-                        button.label = uiState.payPalButtonLabel
-                        button.shape = uiState.paymentButtonShape
-                        button.size = uiState.paymentButtonSize
+                        configureButton(button, uiState)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -150,15 +146,11 @@ class PayPalButtonsFragment : Fragment() {
                 AndroidView(
                     factory = { context ->
                         val button = PayLaterButton(context)
-                        button.color = uiState.payPalButtonColor
-                        button.shape = uiState.paymentButtonShape
-                        button.size = uiState.paymentButtonSize
+                        configureButton(button, uiState)
                         button
                     },
                     update = { button ->
-                        button.color = uiState.payPalButtonColor
-                        button.shape = uiState.paymentButtonShape
-                        button.size = uiState.paymentButtonSize
+                        configureButton(button, uiState)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -168,19 +160,33 @@ class PayPalButtonsFragment : Fragment() {
                 AndroidView(
                     factory = { context ->
                         val button = PayPalCreditButton(context)
-                        button.color = uiState.payPalCreditButtonColor
-                        button.shape = uiState.paymentButtonShape
-                        button.size = uiState.paymentButtonSize
+                        configureButton(button, uiState)
                         button
                     },
                     update = { button ->
-                        button.color = uiState.payPalCreditButtonColor
-                        button.shape = uiState.paymentButtonShape
-                        button.size = uiState.paymentButtonSize
+                        configureButton(button, uiState)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+        }
+    }
+
+    private fun configureButton(
+        button: PaymentButton<out PaymentButtonColor>,
+        uiState: PayPalButtonsUiState
+    ) {
+        button.shape = uiState.paymentButtonShape
+        button.size = uiState.paymentButtonSize
+
+        if (button is PayPalButton) {
+            button.label = uiState.payPalButtonLabel
+        }
+
+        if (button is PayPalCreditButton) {
+            button.color = uiState.payPalCreditButtonColor
+        } else {
+            button.color = uiState.payPalButtonColor
         }
     }
 
