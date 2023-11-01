@@ -32,12 +32,15 @@
     <string name="sca_always">ALWAYS</string>
     <string name="sca_when_required">WHEN REQUIRED</string>
 
-    <string name="payment_button">Payment Button</string>
-    <string name="select_color">Select Color</string>
+    <string name="pay_pal_button_preview">Button Preview</string>
+    <string name="pay_pal_button_options">Button Options</string>
+    <string name="pay_pal_button_type">Button Type</string>
+    <string name="pay_pal_button_color">Button Color</string>
+    <string name="pay_pal_button_label">Button Label</string>
+    <string name="pay_pal_button_shape">Button Shape</string>
+    <string name="pay_pal_button_size">Button Size</string>
+
     <string name="select_funding">Select Funding</string>
-    <string name="select_label">Select Label</string>
-    <string name="select_shape">Select Shape</string>
-    <string name="select_size">Select Size</string>
 
     <string name="funding_source_one_time_checkout">One Time Checkout</string>
     <string name="funding_source_pay_pal_credit">Pay Pal Credit</string>
