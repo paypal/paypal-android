@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 class CardTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<DemoActivity>()
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
     fun approveOrder() {
