@@ -46,28 +46,6 @@ class FeaturesFragment : Fragment() {
         val chevronTint = Color(138, 137, 142)
     }
 
-    enum class Feature(@StringRes val stringRes: Int) {
-        CARD_APPROVE_ORDER(R.string.feature_approve_order),
-        CARD_VAULT(R.string.feature_vault),
-        PAYPAL_WEB(R.string.feature_paypal_web),
-        PAYPAL_BUTTONS(R.string.feature_paypal_buttons),
-        PAYPAL_NATIVE(R.string.feature_paypal_native)
-    }
-
-    private val cardFeatures = listOf(
-        Feature.CARD_APPROVE_ORDER,
-        Feature.CARD_VAULT
-    )
-
-    private val payPalWebFeatures = listOf(
-        Feature.PAYPAL_WEB,
-        Feature.PAYPAL_BUTTONS
-    )
-
-    private val payPalNativeFeatures = listOf(
-        Feature.PAYPAL_NATIVE
-    )
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
