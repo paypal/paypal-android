@@ -182,7 +182,7 @@ class ApproveOrderFragment : Fragment() {
     }
 
     private fun showTestCards() {
-        val action = CardFragmentDirections.actionCardFragmentToSelectCardFragment()
+        val action = ApproveOrderFragmentDirections.actionCardFragmentToSelectCardFragment()
         findNavController().navigate(action)
     }
 
