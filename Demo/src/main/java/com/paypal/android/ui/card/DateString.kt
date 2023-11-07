@@ -11,6 +11,8 @@ data class DateString(private val rawDate: String) {
     private val didAddSlash: Boolean
 
     val formatted: String
+    val formattedMonth: String
+    val formattedYear: String
 
     companion object {
         private const val maxMonthLength = 2
@@ -58,6 +60,24 @@ data class DateString(private val rawDate: String) {
         this.didPadZero = padZero
         this.didAddSlash = addSlash
         this.formatted = formatted
+
+        // TODO: handle invalid date string
+        var formattedMonth = ""
+        var formattedYear = ""
+
+        val dateStringComponents = formatted.split("/")
+        if (dateStringComponents.isNotEmpty()) {
+            formattedMonth = dateStringComponents[0]
+            if (dateStringComponents.size > 1) {
+                val rawYear = dateStringComponents[1]
+
+                // assume date in 2000's and pad with "20" (if necessary)
+                formattedYear = if (rawYear.length == 2) "20$rawYear" else rawYear
+            }
+        }
+
+        this.formattedMonth = formattedMonth
+        this.formattedYear = formattedYear
     }
 
     fun mapRawOffsetToFormatted(rawOffset: Int): Int {
