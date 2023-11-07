@@ -1,6 +1,5 @@
 package com.paypal.android.ui.card
 
-import okhttp3.internal.format
 import java.lang.Integer.min
 
 data class DateString(private val rawDate: String) {
