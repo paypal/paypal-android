@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CardViewModel @Inject constructor(
+class ApproveOrderViewModel @Inject constructor(
     val createOrderUseCase: CreateOrderUseCase,
     val sdkSampleServerAPI: SDKSampleServerAPI,
     val completeOrderUseCase: CompleteOrderUseCase,
@@ -40,7 +40,7 @@ class CardViewModel @Inject constructor(
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
-    private val _uiState = MutableStateFlow(CardViewUiState())
+    private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
 
     private lateinit var cardClient: CardClient
@@ -109,7 +109,7 @@ class CardViewModel @Inject constructor(
         }
     }
 
-    private fun createCardRequest(uiState: CardViewUiState, order: Order): CardRequest {
+    private fun createCardRequest(uiState: ApproveOrderUiState, order: Order): CardRequest {
         val card = parseCard(uiState)
         val sca = when (uiState.scaOption) {
             "ALWAYS" -> SCA.SCA_ALWAYS
@@ -118,7 +118,7 @@ class CardViewModel @Inject constructor(
         return CardRequest(order.id!!, card, APP_RETURN_URL, sca)
     }
 
-    private fun parseCard(uiState: CardViewUiState): Card {
+    private fun parseCard(uiState: ApproveOrderUiState): Card {
         // expiration date in UI State needs to be formatted because it uses a visual transformation
         val dateString = DateString(uiState.cardExpirationDate)
         return Card(

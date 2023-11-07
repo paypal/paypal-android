@@ -25,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ApproveOrderFragment : Fragment() {
 
-    private val viewModel by viewModels<CardViewModel>()
+    private val viewModel by viewModels<ApproveOrderViewModel>()
 
     @ExperimentalMaterial3Api
     override fun onCreateView(

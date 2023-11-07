@@ -6,7 +6,7 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
 
 @Immutable
-data class CardViewUiState(
+data class ApproveOrderUiState(
     val createdOrder: Order? = null,
     val completedOrder: Order? = null,
     val approveOrderResult: CardResult? = null,

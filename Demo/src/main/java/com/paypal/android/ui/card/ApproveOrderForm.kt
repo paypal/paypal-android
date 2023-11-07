@@ -25,7 +25,7 @@ import com.paypal.android.uishared.components.CardForm
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApproveOrderForm(
-    uiState: CardViewUiState,
+    uiState: ApproveOrderUiState,
     onUseTestCardClick: () -> Unit,
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
@@ -77,7 +77,7 @@ fun ApproveOrderFormPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             ApproveOrderForm(
-                uiState = CardViewUiState(),
+                uiState = ApproveOrderUiState(),
                 onCardNumberChange = {},
                 onExpirationDateChange = {},
                 onSecurityCodeChange = {},
