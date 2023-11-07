@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CardFragment : Fragment() {
+class ApproveOrderFragment : Fragment() {
 
     companion object {
         const val TAG = "CardFragment"

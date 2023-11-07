@@ -26,7 +26,7 @@
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
-        android:name="com.paypal.android.ui.card.CardFragment"
+        android:name="com.paypal.android.ui.card.ApproveOrderFragment"
         android:label="CardFragment">
         <action
             android:id="@+id/action_cardFragment_to_selectCardFragment"
