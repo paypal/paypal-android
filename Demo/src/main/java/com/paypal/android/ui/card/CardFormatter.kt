@@ -1,4 +1,6 @@
-package com.paypal.android.ui.card.validation
+package com.paypal.android.ui.card
+
+import com.paypal.android.ui.card.validation.getCardType
 
 object CardFormatter {
 
