@@ -46,7 +46,6 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
-import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm

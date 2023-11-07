@@ -5,7 +5,6 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.models.TestCard
-import com.paypal.android.ui.card.validation.CardViewUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

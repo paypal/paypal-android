@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
 import com.paypal.android.uishared.components.CardForm
 

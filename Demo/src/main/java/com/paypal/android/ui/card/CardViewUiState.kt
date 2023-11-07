@@ -1,4 +1,4 @@
-package com.paypal.android.ui.card.validation
+package com.paypal.android.ui.card
 
 import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
