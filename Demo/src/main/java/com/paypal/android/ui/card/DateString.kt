@@ -1,5 +1,6 @@
 package com.paypal.android.ui.card
 
+import okhttp3.internal.format
 import java.lang.Integer.min
 
 data class DateString(private val rawDate: String) {
@@ -11,6 +12,8 @@ data class DateString(private val rawDate: String) {
     private val didAddSlash: Boolean
 
     val formatted: String
+    val formattedMonth: String
+    val formattedYear: String
 
     companion object {
         private const val maxMonthLength = 2
@@ -58,6 +61,27 @@ data class DateString(private val rawDate: String) {
         this.didPadZero = padZero
         this.didAddSlash = addSlash
         this.formatted = formatted
+
+        // TODO: handle invalid date string
+        var formattedMonth = ""
+        var formattedYear = ""
+
+        val dateStringComponents = formatted.split("/")
+        if (dateStringComponents.isNotEmpty()) {
+            formattedMonth = dateStringComponents[0]
+            if (dateStringComponents.size > 1) {
+                val rawYear = dateStringComponents[1]
+                formattedYear = if (rawYear.length == 2) {
+                    // pad with 20 to assume 2000's
+                    "20$rawYear"
+                } else {
+                    rawYear
+                }
+            }
+        }
+
+        this.formattedMonth = formattedMonth
+        this.formattedYear = formattedYear
     }
 
     fun mapRawOffsetToFormatted(rawOffset: Int): Int {

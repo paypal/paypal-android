@@ -151,30 +151,12 @@ class VaultFragment : Fragment() {
     }
 
     private fun parseCard(uiState: VaultUiState): Card {
-        // TODO: handle invalid date string
-        var expirationMonth = ""
-        var expirationYear = ""
-
         // expiration date in UI State needs to be formatted because it uses a visual transformation
         val dateString = DateString(uiState.cardExpirationDate)
-        val dateStringComponents = dateString.formatted.split("/")
-        if (dateStringComponents.isNotEmpty()) {
-            expirationMonth = dateStringComponents[0]
-            if (dateStringComponents.size > 1) {
-                val rawYear = dateStringComponents[1]
-                expirationYear = if (rawYear.length == 2) {
-                    // pad with 20 to assume 2000's
-                    "20$rawYear"
-                } else {
-                    rawYear
-                }
-            }
-        }
-
         return Card(
             number = uiState.cardNumber,
-            expirationMonth = expirationMonth,
-            expirationYear = expirationYear,
+            expirationMonth = dateString.formattedMonth,
+            expirationYear = dateString.formattedYear,
             securityCode = uiState.cardSecurityCode
         )
     }
