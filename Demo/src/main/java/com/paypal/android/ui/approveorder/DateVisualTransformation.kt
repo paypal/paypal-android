@@ -1,4 +1,4 @@
-package com.paypal.android.ui.card
+package com.paypal.android.ui.approveorder
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping

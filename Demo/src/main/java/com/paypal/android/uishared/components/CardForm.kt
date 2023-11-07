@@ -22,8 +22,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.ui.card.CardNumberVisualTransformation
-import com.paypal.android.ui.card.DateVisualTransformation
+import com.paypal.android.ui.approveorder.CardNumberVisualTransformation
+import com.paypal.android.ui.approveorder.DateVisualTransformation
 
 @ExperimentalMaterial3Api
 @Composable

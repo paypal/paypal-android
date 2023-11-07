@@ -2,7 +2,7 @@ package com.paypal.android.models
 
 import android.os.Parcelable
 import com.paypal.android.cardpayments.Card
-import com.paypal.android.ui.card.CardFormatter
+import com.paypal.android.ui.approveorder.CardFormatter
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
