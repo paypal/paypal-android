@@ -70,12 +70,9 @@ data class DateString(private val rawDate: String) {
             formattedMonth = dateStringComponents[0]
             if (dateStringComponents.size > 1) {
                 val rawYear = dateStringComponents[1]
-                formattedYear = if (rawYear.length == 2) {
-                    // pad with 20 to assume 2000's
-                    "20$rawYear"
-                } else {
-                    rawYear
-                }
+
+                // assume date in 2000's and pad with "20" (if necessary)
+                formattedYear = if (rawYear.length == 2) "20$rawYear" else rawYear
             }
         }
 
