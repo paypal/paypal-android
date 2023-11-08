@@ -46,5 +46,5 @@ jobs:
           ./gradlew -PdemoAppVersionCodeParam=${UPDATED_VERSION_CODE} setDemoAppVersionCode
 
           git add .
-          git commit -m "Bump demo app version code to ${UPDATED_VERSION_CODE}"
+          git commit -m "Bump demo app version code to ${UPDATED_VERSION_CODE}."
           git push origin HEAD
