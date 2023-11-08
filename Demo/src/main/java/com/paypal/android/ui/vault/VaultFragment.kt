@@ -31,6 +31,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.paypal.android.PaymentMethod
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -107,7 +108,7 @@ class VaultFragment : Fragment() {
     private fun createSetupToken() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isCreateSetupTokenLoading = true
-            viewModel.setupToken = createSetupTokenUseCase(viewModel.customerId)
+            viewModel.setupToken = createSetupTokenUseCase(PaymentMethod.CARD, viewModel.customerId)
             viewModel.isCreateSetupTokenLoading = false
         }
     }
