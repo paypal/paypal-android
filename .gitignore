@@ -4,6 +4,8 @@
 *.ap_
 *.aab
 
+!Demo/static-libs/*.aar
+
 # Files for the ART/Dalvik VM
 *.dex
 

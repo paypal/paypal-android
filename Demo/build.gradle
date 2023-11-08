@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "com.paypal.android"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 33
         versionCode modules.demoAppVersionCode
         versionName modules.sdkVersionName
@@ -115,6 +115,9 @@ dependencies {
     implementation deps.constraintLayout
     implementation deps.androidxLifecycleRuntimeKtx
     implementation deps.fragmentKtx
+
+    // Ref: https://stackoverflow.com/a/49663101
+    implementation fileTree(include: ['*.aar'], dir: 'static-libs')
 
     // TODO: remove dependency when we don't relay on nxo models anymore
     implementation (deps.nativeCheckout) {

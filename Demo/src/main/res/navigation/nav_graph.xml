@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_paymentMethodsFragment_to_payPalNativeFragment"
             app:destination="@id/payPalNativeFragment" />
+        <action
+            android:id="@+id/action_paymentMethodsFragment_to_payPalMessagingFragment"
+            app:destination="@id/payPalMessagingFragment" />
     </fragment>
     <fragment
         android:id="@+id/cardFragment"
@@ -56,4 +59,8 @@
         android:id="@+id/payPalWebFragment"
         android:name="com.paypal.android.ui.paypalweb.PayPalWebFragment"
         android:label="PayPalWebFragment" />
+    <fragment
+        android:id="@+id/payPalMessagingFragment"
+        android:name="com.paypal.android.ui.paypalmessaging.PayPalMessagingFragment"
+        android:label="PayPalMessagingFragment" />
 </navigation>
