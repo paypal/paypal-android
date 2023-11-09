@@ -42,7 +42,7 @@ import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
-import com.paypal.android.ui.card.DateString
+import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.ui.selectcard.SelectCardFragment
 import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView

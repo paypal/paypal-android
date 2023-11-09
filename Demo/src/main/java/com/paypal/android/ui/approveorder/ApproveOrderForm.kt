@@ -1,4 +1,4 @@
-package com.paypal.android.ui.card
+package com.paypal.android.ui.approveorder
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,14 +19,13 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.card.validation.CardViewUiState
 import com.paypal.android.ui.stringResourceListOf
 import com.paypal.android.uishared.components.CardForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApproveOrderForm(
-    uiState: CardViewUiState,
+    uiState: ApproveOrderUiState,
     onUseTestCardClick: () -> Unit,
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
@@ -78,7 +77,7 @@ fun ApproveOrderFormPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             ApproveOrderForm(
-                uiState = CardViewUiState(),
+                uiState = ApproveOrderUiState(),
                 onCardNumberChange = {},
                 onExpirationDateChange = {},
                 onSecurityCodeChange = {},

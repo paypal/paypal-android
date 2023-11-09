@@ -1,4 +1,4 @@
-package com.paypal.android.ui.card.validation
+package com.paypal.android.ui.approveorder
 
 object CardFormatter {
 

@@ -1,4 +1,4 @@
-package com.paypal.android.ui.card
+package com.paypal.android.ui.approveorder
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth

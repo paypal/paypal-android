@@ -1,4 +1,4 @@
-package com.paypal.android.ui.card.validation
+package com.paypal.android.ui.approveorder
 
 import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
@@ -6,7 +6,7 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
 
 @Immutable
-data class CardViewUiState(
+data class ApproveOrderUiState(
     val createdOrder: Order? = null,
     val completedOrder: Order? = null,
     val approveOrderResult: CardResult? = null,
