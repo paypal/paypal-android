@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.paypal.android.PaymentMethod
 import com.paypal.android.R
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.APIClientError
@@ -44,6 +45,7 @@ import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -65,6 +67,9 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
     @Inject
     lateinit var completeOrderUseCase: CompleteOrderUseCase
 
+    @Inject
+    lateinit var createSetupTokenUseCase: CreateSetupTokenUseCase
+
     private lateinit var paypalClient: PayPalWebCheckoutClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
@@ -82,12 +87,21 @@ class PayPalWebFragment : Fragment(), PayPalWebCheckoutListener {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     PayPalWebView(
                         uiState = uiState,
-                        onCreateOrderClick = { createOrder() },
+                        onCreateOrderClick = { createSetupToken() },
                         onCompleteOrderClick = { completeOrder() },
                         onStartCheckoutClick = { launchWebCheckout() }
                     )
                 }
             }
+        }
+    }
+
+    private fun createSetupToken() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isCreateOrderLoading = true
+            val setupToken = createSetupTokenUseCase(PaymentMethod.PAY_PAL)
+            print(setupToken)
+            viewModel.isCreateOrderLoading = false
         }
     }
 

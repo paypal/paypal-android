@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
+import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
@@ -7,6 +8,7 @@ import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.DataVaultPaymentMethodTokensAPI
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
@@ -24,6 +26,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val browserSwitchHelper: BrowserSwitchHelper,
+    private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -43,7 +46,8 @@ class PayPalWebCheckoutClient internal constructor(
         configuration,
         AnalyticsService(activity.applicationContext, configuration),
         BrowserSwitchClient(),
-        BrowserSwitchHelper(urlScheme)
+        BrowserSwitchHelper(urlScheme),
+        DataVaultPaymentMethodTokensAPI(configuration)
     )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
@@ -92,6 +96,10 @@ class PayPalWebCheckoutClient internal constructor(
                 deliverFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationId))
             }
         }
+    }
+
+    suspend fun vault(context: Context, setupTokenId: String) {
+       paymentMethodTokensAPI.updateSetupTokenForPayPal(context, setupTokenId)
     }
 
     internal fun handleBrowserSwitchResult() {

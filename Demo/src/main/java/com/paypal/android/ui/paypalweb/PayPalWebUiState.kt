@@ -16,5 +16,5 @@ data class PayPalWebUiState(
     val payPalWebCheckoutError: PayPalSDKError? = null,
     val isCheckoutCanceled: Boolean = false,
     val isCompleteOrderLoading: Boolean = false,
-    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
+    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
 )

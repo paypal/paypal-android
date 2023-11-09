@@ -183,7 +183,8 @@ class VaultFragment : Fragment() {
                 .verticalScroll(scrollState)
         ) {
             CreateSetupTokenForm(
-                uiState = uiState,
+                isLoading = uiState.isCreateSetupTokenLoading,
+                customerId = uiState.customerId,
                 onCustomerIdValueChange = { value -> viewModel.customerId = value },
                 onSubmit = { onCreateSetupTokenSubmit() }
             )

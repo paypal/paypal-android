@@ -3,6 +3,7 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import org.json.JSONObject
@@ -19,7 +20,11 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): CardVaultResult {
+    suspend fun updateSetupToken(
+        context: Context,
+        setupTokenId: String,
+        card: Card
+    ): CardVaultResult {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")

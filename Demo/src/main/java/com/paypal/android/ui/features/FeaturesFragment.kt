@@ -50,6 +50,7 @@ class FeaturesFragment : Fragment() {
         CARD_APPROVE_ORDER(R.string.feature_approve_order),
         CARD_VAULT(R.string.feature_vault),
         PAYPAL_WEB(R.string.feature_paypal_web),
+        PAYPAL_WEB_VAULT(R.string.feature_paypal_web_vault),
         PAYPAL_BUTTONS(R.string.feature_paypal_buttons),
         PAYPAL_NATIVE(R.string.feature_paypal_native)
     }
@@ -61,6 +62,7 @@ class FeaturesFragment : Fragment() {
 
     private val payPalWebFeatures = listOf(
         Feature.PAYPAL_WEB,
+        Feature.PAYPAL_WEB_VAULT,
         Feature.PAYPAL_BUTTONS
     )
 
@@ -98,6 +100,10 @@ class FeaturesFragment : Fragment() {
 
             Feature.PAYPAL_WEB -> {
                 FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalWebFragment()
+            }
+
+            Feature.PAYPAL_WEB_VAULT -> {
+                FeaturesFragmentDirections.actionPaymentMethodsFragmentToPayPalWebVaultFragment()
             }
 
             Feature.PAYPAL_NATIVE -> {

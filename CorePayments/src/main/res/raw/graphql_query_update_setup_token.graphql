@@ -1,0 +1,18 @@
+mutation UpdateVaultSetupToken(
+    $clientId: String!
+    $vaultSetupToken: String!
+    $paymentSource: PaymentSource
+) {
+    updateVaultSetupToken(
+        clientId: $clientId
+        vaultSetupToken: $vaultSetupToken
+        paymentSource: $paymentSource
+    ) {
+        id,
+        status,
+        links {
+            rel, 
+            href
+        }
+    }
+}

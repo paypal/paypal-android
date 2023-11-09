@@ -12,7 +12,7 @@ class CreateSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(paymentMethod: PaymentMethod, customerId: String?): SetupToken {
+    suspend operator fun invoke(paymentMethod: PaymentMethod, customerId: String? = null): SetupToken {
 
         when (paymentMethod) {
             PaymentMethod.CARD -> {
