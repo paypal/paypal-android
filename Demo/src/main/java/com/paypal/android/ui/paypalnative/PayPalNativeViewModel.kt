@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -34,23 +33,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalNativeViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val getClientIdUseCase: GetClientIdUseCase,
+    private val getOrderUseCase: GetOrderUseCase,
+    private val completeOrderUseCase: CompleteOrderUseCase,
+    private val updateOrderUseCase: UpdateOrderUseCase,
 ) : AndroidViewModel(application) {
-
-    @Inject
-    lateinit var getClientIdUseCase: GetClientIdUseCase
-
-    @Inject
-    lateinit var getOrderUseCase: GetOrderUseCase
-
-    @Inject
-    lateinit var completeOrderUseCase: CompleteOrderUseCase
-
-    @Inject
-    lateinit var updateOrderUseCase: UpdateOrderUseCase
-
-    @Inject
-    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private var orderId: String? = null
 
