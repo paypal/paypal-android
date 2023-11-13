@@ -25,11 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-
-// TODO: use a color scheme to keep UI consistent
-private val backgroundColor = Color(248, 249, 243)
-private val featureTitleColor = Color(20, 29, 47)
-private val chevronTint = Color(138, 137, 142)
+import com.paypal.android.uishared.theme.DemoColors
 
 private val cardFeatures = listOf(
     Feature.CARD_APPROVE_ORDER,
@@ -52,7 +48,7 @@ fun FeaturesView(
 ) {
     LazyColumn(
         modifier = Modifier
-            .background(backgroundColor)
+            .background(DemoColors.white)
             .padding(horizontal = 16.dp)
     ) {
         stickyHeader {
@@ -100,7 +96,7 @@ fun FeatureGroupHeader(text: String) {
     Spacer(modifier = Modifier.size(24.dp))
     Text(
         text = text,
-        color = featureTitleColor,
+        color = DemoColors.black,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.titleLarge,
     )
@@ -132,7 +128,7 @@ fun FeatureView(
             Icon(
                 painter = chevronPainter,
                 contentDescription = null,
-                tint = chevronTint,
+                tint = DemoColors.gray,
                 modifier = Modifier
                     .size(14.dp)
                     .align(Alignment.CenterVertically)
@@ -141,7 +137,7 @@ fun FeatureView(
         }
         if (!isLast) {
             Divider(
-                color = backgroundColor,
+                color = DemoColors.white,
                 modifier = Modifier.padding(start = 16.dp)
             )
         }
