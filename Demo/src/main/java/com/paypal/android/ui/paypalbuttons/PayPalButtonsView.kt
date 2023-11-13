@@ -29,6 +29,7 @@ import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
 
+@Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @Composable
 fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
@@ -69,9 +70,7 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 fundingType = uiState.fundingType,
                 payPalButtonColor = uiState.payPalButtonColor,
                 payPalCreditButtonColor = uiState.payPalCreditButtonColor,
-                onPayPalButtonColorChange = { value ->
-                    viewModel.payPalButtonColor = value
-                },
+                onPayPalButtonColorChange = { value -> viewModel.payPalButtonColor = value },
                 onPayPalCreditButtonColorChange = { value ->
                     viewModel.payPalCreditButtonColor = value
                 }
