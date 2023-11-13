@@ -5,6 +5,7 @@ import com.google.gson.JsonParser
 import com.paypal.android.PaymentMethod
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -43,7 +44,7 @@ class CreateSetupTokenUseCase @Inject constructor(
                 return SetupToken(
                     id = responseJSON.getString("id"),
                     customerId = customerJSON.getString("id"),
-                    status = responseJSON.getString("status")
+                    status = responseJSON.getString("status"),
                 )
             }
 
@@ -72,10 +73,21 @@ class CreateSetupTokenUseCase @Inject constructor(
                 val responseJSON = JSONObject(response.string())
 
                 val customerJSON = responseJSON.getJSONObject("customer")
+
+                val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
+                var approveVaultHref: String? = null
+                for (i in 0 until linksJSON.length()) {
+                    val link = linksJSON.getJSONObject(i)
+                    if (link.getString("rel") == "approve") {
+                        approveVaultHref = link.getString("href")
+                        break
+                    }
+                }
                 return SetupToken(
                     id = responseJSON.getString("id"),
                     customerId = customerJSON.getString("id"),
-                    status = responseJSON.getString("status")
+                    status = responseJSON.getString("status"),
+                    approveVaultHref = approveVaultHref
                 )
             }
         }

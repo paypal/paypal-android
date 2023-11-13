@@ -19,12 +19,21 @@ class DataVaultPaymentMethodTokensAPI internal constructor(
     suspend fun updateSetupTokenForPayPal(context: Context, setupTokenId: String) {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
+//        billing_agreement_id: string,
+//        description: string,
+//        usage_pattern: string,
+//        shipping: Object,
+//        permit_multiple_payment_tokens: boolean,
+//        usage_type: string,
+//        customer_type: string,
+//        experience_context: Object,
+
         val experienceContextJSON = JSONObject()
-        experienceContextJSON.put("returnUrl", "com.paypal.android.demo://example.com/returnUrl")
-        experienceContextJSON.put("cancelUrl", "com.paypal.android.demo://example.com/returnUrl")
+        experienceContextJSON.put("return_url", "com.paypal.android.demo://example.com/returnUrl")
+        experienceContextJSON.put("cancel_url", "com.paypal.android.demo://example.com/returnUrl")
 
         val payPalJSON = JSONObject()
-        payPalJSON.put("experienceContext", payPalJSON)
+        payPalJSON.put("experience_context", experienceContextJSON)
 
         val paymentSourceJSON = JSONObject()
         paymentSourceJSON.put("paypal", payPalJSON)
@@ -37,6 +46,7 @@ class DataVaultPaymentMethodTokensAPI internal constructor(
         val graphQLRequest = JSONObject()
             .put("query", query)
             .put("variables", variables)
+
         val graphQLResponse =
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->

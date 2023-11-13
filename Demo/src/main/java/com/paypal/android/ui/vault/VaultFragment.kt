@@ -246,7 +246,7 @@ class VaultFragment : Fragment() {
                         setupToken = SetupToken(
                             id = "fake-setup-token-id",
                             customerId = "fake-customer-id",
-                            status = "fake-setup-token-status"
+                            status = "fake-setup-token-status",
                         ),
                         paymentToken = PaymentToken(
                             "fake-payment-token-id",

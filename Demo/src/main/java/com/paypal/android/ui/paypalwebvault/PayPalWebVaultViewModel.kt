@@ -32,16 +32,16 @@ class PayPalWebVaultViewModel @Inject constructor(
     private lateinit var paypalClient: PayPalWebCheckoutClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
-    var isCreateSetupTokenLoading: Boolean
+    private var isCreateSetupTokenLoading: Boolean
         get() = _uiState.value.isCreateSetupTokenLoading
         set(value) {
             _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
         }
 
-    var isUpdateSetupTokenLoading: Boolean
+    private var isUpdateSetupTokenLoading: Boolean
         get() = _uiState.value.isUpdateSetupTokenLoading
         set(value) {
-            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
+            _uiState.update { it.copy(isUpdateSetupTokenLoading = value) }
         }
 
     var vaultCustomerId: String
@@ -90,7 +90,7 @@ class PayPalWebVaultViewModel @Inject constructor(
                 }
 
             }
-            setupToken = createSetupTokenUseCase(PaymentMethod.PAY_PAL, vaultCustomerId)
+            paypalClient.approveVault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
             isUpdateSetupTokenLoading = false
         }
     }

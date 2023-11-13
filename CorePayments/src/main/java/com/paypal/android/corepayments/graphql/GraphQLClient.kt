@@ -36,7 +36,9 @@ class GraphQLClient internal constructor(
     )
 
     suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
-        val body = graphQLRequestBody.toString()
+        // Ref: https://stackoverflow.com/a/19610814
+        val body = graphQLRequestBody.toString().replace("\\/", "/")
+
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
         val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
 

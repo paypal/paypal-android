@@ -14,15 +14,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.ui.vault.CreateSetupTokenForm
 import com.paypal.android.uishared.components.SetupTokenView
 
 @Composable
 fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = viewModel()) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
@@ -48,7 +51,11 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = viewModel()) {
             Spacer(modifier = Modifier.size(8.dp))
             AttachPayPalAccountToSetupToken(
                 uiState = uiState,
-                onSubmit = {}
+                onSubmit = {
+                    context.getActivity()?.let { activity ->
+                        viewModel.updateSetupToken(activity)
+                    }
+                }
             )
         }
     }

@@ -1,8 +1,10 @@
 package com.paypal.android.paypalwebpayments
 
 import android.content.Context
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
+import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.APIClientError
@@ -16,6 +18,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
@@ -99,7 +102,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     suspend fun vault(context: Context, setupTokenId: String) {
-       paymentMethodTokensAPI.updateSetupTokenForPayPal(context, setupTokenId)
+        paymentMethodTokensAPI.updateSetupTokenForPayPal(context, setupTokenId)
     }
 
     internal fun handleBrowserSwitchResult() {
@@ -150,5 +153,13 @@ class PayPalWebCheckoutClient internal constructor(
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", orderId)
         listener?.onPayPalWebSuccess(result)
+    }
+
+    fun approveVault(activity: FragmentActivity, orderId: String, approveVaultHref: String) {
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalVaultApproveSwitchOptions(
+            orderId,
+            approveVaultHref
+        )
+        browserSwitchClient.start(activity, browserSwitchOptions)
     }
 }
