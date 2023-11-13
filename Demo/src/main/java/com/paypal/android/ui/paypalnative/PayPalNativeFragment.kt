@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-@Suppress("TooManyFunctions")
 class PayPalNativeFragment : Fragment() {
 
     override fun onCreateView(
