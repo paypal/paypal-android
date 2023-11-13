@@ -178,7 +178,7 @@ class PayPalNativeViewModel @Inject constructor(
         Toast.makeText(getApplication(), e.message, Toast.LENGTH_LONG).show()
     }
 
-    fun startCheckout() {
+    fun startNativeCheckout() {
         viewModelScope.launch {
             val clientId = getClientIdUseCase()
 

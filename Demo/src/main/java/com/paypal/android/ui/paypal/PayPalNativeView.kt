@@ -52,7 +52,7 @@ fun PayPalNativeView(
             Spacer(modifier = Modifier.size(24.dp))
             StartPayPalNativeCheckoutForm(
                 isLoading = uiState.isStartCheckoutLoading,
-                onSubmit = { viewModel.startCheckout() }
+                onSubmit = { viewModel.startNativeCheckout() }
             )
         }
         uiState.payPalNativeCheckoutResult?.let { result ->
