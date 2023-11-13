@@ -3,7 +3,7 @@ package com.paypal.android.usecase
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.ui.paypal.ShippingPreferenceType
+import com.paypal.android.ui.paypalnative.ShippingPreferenceType
 import com.paypal.android.utils.OrderUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

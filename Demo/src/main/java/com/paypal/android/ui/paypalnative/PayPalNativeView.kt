@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.ui.paypalnative
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -62,7 +62,7 @@ fun PayPalNativeView(
             CompleteOrderForm(
                 isLoading = uiState.isCompleteOrderLoading,
                 orderIntent = uiState.intentOption,
-                onSubmit = { viewModel.createOrder() }
+                onSubmit = { viewModel.completeOrder() }
             )
         }
         uiState.payPalNativeCheckoutError?.let { error ->

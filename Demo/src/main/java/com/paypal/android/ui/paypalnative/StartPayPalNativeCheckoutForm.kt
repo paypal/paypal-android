@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.ui.paypalnative
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
