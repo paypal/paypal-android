@@ -21,9 +21,9 @@ import com.paypal.android.utils.parcelable
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class VaultFragment : Fragment() {
+class VaultCardFragment : Fragment() {
 
-    private val viewModel by viewModels<VaultViewModel>()
+    private val viewModel by viewModels<VaultCardViewModel>()
 
     @ExperimentalMaterial3Api
     override fun onCreateView(

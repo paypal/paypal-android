@@ -20,7 +20,7 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreateSetupTokenForm(
-    uiState: VaultUiState,
+    uiState: VaultCardUiState,
     onCustomerIdValueChange: (String) -> Unit,
     onSubmit: () -> Unit
 ) {

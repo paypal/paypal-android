@@ -15,7 +15,7 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreatePaymentTokenForm(
-    uiState: VaultUiState,
+    uiState: VaultCardUiState,
     onSubmit: () -> Unit
 ) {
     OutlinedCard(

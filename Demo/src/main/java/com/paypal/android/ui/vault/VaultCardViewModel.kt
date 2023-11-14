@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class VaultViewModel @Inject constructor(
+class VaultCardViewModel @Inject constructor(
     val sdkSampleServerAPI: SDKSampleServerAPI,
     val createSetupTokenUseCase: CreateSetupTokenUseCase,
     val createPaymentTokenUseCase: CreatePaymentTokenUseCase
@@ -33,7 +33,7 @@ class VaultViewModel @Inject constructor(
 
     private lateinit var cardClient: CardClient
 
-    private val _uiState = MutableStateFlow(VaultUiState())
+    private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
 
     var setupToken: SetupToken?
@@ -148,7 +148,7 @@ class VaultViewModel @Inject constructor(
         }
     }
 
-    private fun parseCard(uiState: VaultUiState): Card {
+    private fun parseCard(uiState: VaultCardUiState): Card {
         // expiration date in UI State needs to be formatted because it uses a visual transformation
         val dateString = DateString(uiState.cardExpirationDate)
         return Card(

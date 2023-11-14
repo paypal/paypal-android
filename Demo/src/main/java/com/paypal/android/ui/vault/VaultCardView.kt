@@ -31,7 +31,7 @@ import com.paypal.android.uishared.components.SetupTokenView
 @ExperimentalMaterial3Api
 @Composable
 fun VaultCardView(
-    viewModel: VaultViewModel,
+    viewModel: VaultCardViewModel,
     onUseTestCardClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -56,7 +56,7 @@ fun VaultCardView(
             Spacer(modifier = Modifier.size(8.dp))
             SetupTokenView(setupToken = setupToken)
             Spacer(modifier = Modifier.size(8.dp))
-            AttachCardToSetupTokenForm(
+            UpdateSetupTokenWithCardForm(
                 uiState = uiState,
                 onCardNumberChange = { viewModel.cardNumber = it },
                 onExpirationDateChange = { viewModel.cardExpirationDate = it },
