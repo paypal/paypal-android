@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel

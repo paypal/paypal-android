@@ -34,7 +34,7 @@
     </fragment>
     <fragment
         android:id="@+id/vaultFragment"
-        android:name="com.paypal.android.ui.vault.VaultCardFragment"
+        android:name="com.paypal.android.ui.vaultcard.VaultCardFragment"
         android:label="VaultFragment">
         <action
             android:id="@+id/action_vaultFragment_to_selectCardFragment"

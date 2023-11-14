@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -56,7 +56,7 @@ class VaultCardFragment : Fragment() {
     }
 
     private fun showTestCards() {
-        val action = VaultFragmentDirections.actionVaultFragmentToSelectCardFragment()
+        val action = VaultCardFragmentDirections.actionVaultFragmentToSelectCardFragment()
         findNavController().navigate(action)
     }
 }

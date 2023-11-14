@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

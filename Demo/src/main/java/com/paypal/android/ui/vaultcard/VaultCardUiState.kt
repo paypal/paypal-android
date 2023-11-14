@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
