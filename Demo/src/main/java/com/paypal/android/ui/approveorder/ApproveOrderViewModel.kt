@@ -30,9 +30,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApproveOrderViewModel @Inject constructor(
-    val createOrderUseCase: CreateOrderUseCase,
-    val sdkSampleServerAPI: SDKSampleServerAPI,
-    val completeOrderUseCase: CompleteOrderUseCase,
+    private val createOrderUseCase: CreateOrderUseCase,
+    private val sdkSampleServerAPI: SDKSampleServerAPI,
+    private val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
     companion object {

@@ -19,7 +19,7 @@ import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.paypal.ShippingPreferenceType
+import com.paypal.android.ui.paypalnative.ShippingPreferenceType
 
 @Suppress("CyclomaticComplexMethod")
 @Composable

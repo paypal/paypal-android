@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.ui.paypalnative
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent

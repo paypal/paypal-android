@@ -46,7 +46,7 @@
         android:label="PayPalButtonsFragment" />
     <fragment
         android:id="@+id/payPalNativeFragment"
-        android:name="com.paypal.android.ui.paypal.PayPalNativeFragment"
+        android:name="com.paypal.android.ui.paypalnative.PayPalNativeFragment"
         android:label="PayPalNativeFragment" />
     <fragment
         android:id="@+id/selectCardFragment"

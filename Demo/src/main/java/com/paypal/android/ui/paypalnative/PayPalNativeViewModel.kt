@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.ui.paypalnative
 
 import android.app.Application
 import android.widget.Toast
@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -34,23 +33,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalNativeViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val getClientIdUseCase: GetClientIdUseCase,
+    private val getOrderUseCase: GetOrderUseCase,
+    private val completeOrderUseCase: CompleteOrderUseCase,
+    private val updateOrderUseCase: UpdateOrderUseCase,
 ) : AndroidViewModel(application) {
-
-    @Inject
-    lateinit var getClientIdUseCase: GetClientIdUseCase
-
-    @Inject
-    lateinit var getOrderUseCase: GetOrderUseCase
-
-    @Inject
-    lateinit var completeOrderUseCase: CompleteOrderUseCase
-
-    @Inject
-    lateinit var updateOrderUseCase: UpdateOrderUseCase
-
-    @Inject
-    lateinit var sdkSampleServerAPI: SDKSampleServerAPI
 
     private var orderId: String? = null
 
@@ -178,19 +166,21 @@ class PayPalNativeViewModel @Inject constructor(
         Toast.makeText(getApplication(), e.message, Toast.LENGTH_LONG).show()
     }
 
-    suspend fun startNativeCheckout() {
-        val clientId = getClientIdUseCase()
+    fun startNativeCheckout() {
+        viewModelScope.launch {
+            val clientId = getClientIdUseCase()
 
-        val coreConfig = CoreConfig(clientId)
-        val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
-        payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)
-        payPalClient.listener = payPalListener
-        payPalClient.shippingListener = shippingListener
+            val coreConfig = CoreConfig(clientId)
+            val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
+            payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)
+            payPalClient.listener = payPalListener
+            payPalClient.shippingListener = shippingListener
 
-        payPalDataCollector = PayPalDataCollector(coreConfig)
+            payPalDataCollector = PayPalDataCollector(coreConfig)
 
-        createdOrder?.id?.also { orderId ->
-            payPalClient.startCheckout(PayPalNativeCheckoutRequest(orderId))
+            createdOrder?.id?.also { orderId ->
+                payPalClient.startCheckout(PayPalNativeCheckoutRequest(orderId))
+            }
         }
     }
 
@@ -204,6 +194,18 @@ class PayPalNativeViewModel @Inject constructor(
 
             completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
             isCompleteOrderLoading = false
+        }
+    }
+
+    fun createOrder() {
+        viewModelScope.launch {
+            isCreateOrderLoading = true
+
+            val shippingPreference = shippingPreference
+            val orderIntent = intentOption
+            createdOrder = getOrderUseCase(shippingPreference, orderIntent)
+
+            isCreateOrderLoading = false
         }
     }
 }
