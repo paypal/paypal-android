@@ -83,7 +83,7 @@ class PayPalNativeCheckoutClientTest {
         }
         expectThat(configSlot.captured) {
             get { clientId }.isEqualTo("fake-client-id")
-            get { authConfig.userEmail }.isEqualTo("test@test.com")
+            get { authConfig?.userEmail }.isEqualTo("test@test.com")
             get { application }.isEqualTo(mockApplication)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
         }
