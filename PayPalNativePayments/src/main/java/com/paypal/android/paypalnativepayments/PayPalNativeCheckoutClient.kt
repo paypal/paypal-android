@@ -84,12 +84,7 @@ class PayPalNativeCheckoutClient internal constructor(
         orderId = request.orderId
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
-                val userEmail = request.authConfig?.userEmail
-                val authConfig: AuthConfig? = if (userEmail.isNullOrEmpty()) {
-                    null
-                } else {
-                    AuthConfig(userEmail)
-                }
+                val authConfig: AuthConfig? = request.email?.let { AuthConfig(it) }
                 val config = CheckoutConfig(
                     application = application,
                     clientId = coreConfig.clientId,

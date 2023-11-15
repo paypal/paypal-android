@@ -10,17 +10,7 @@ data class PayPalNativeCheckoutRequest(
     val orderId: String,
 
     /**
-     * Optional: The setup configuration for authentication
+     * Optional: The email for preloading authentication
      */
-    val authConfig: AuthConfig? = null
-)
-
-/**
- * Used for setting up authentication configurations
- */
-data class AuthConfig(
-    /**
-     * The email for preloading authentication
-     */
-    val userEmail: String? = null
+    val email: String? = null
 )
