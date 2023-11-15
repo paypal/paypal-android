@@ -67,7 +67,6 @@ class PayPalNativeCheckoutClientTest {
     @Test
     fun `when startCheckout is invoked, PayPalCheckout config is set`() = runTest {
         val configSlot = slot<CheckoutConfig>()
-        val testAuthConfig = AuthConfig("test@test.com")
         every { PayPalCheckout.setConfig(capture(configSlot)) } answers { configSlot.captured }
 
         every {
@@ -75,7 +74,7 @@ class PayPalNativeCheckoutClientTest {
         } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.startCheckout(PayPalNativeCheckoutRequest("order_id", testAuthConfig))
+        sut.startCheckout(PayPalNativeCheckoutRequest("order_id", "test@test.com"))
         advanceUntilIdle()
 
         verify {
