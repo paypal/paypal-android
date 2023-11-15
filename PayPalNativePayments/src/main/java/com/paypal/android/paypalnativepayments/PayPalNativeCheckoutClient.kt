@@ -9,6 +9,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
+import com.paypal.checkout.config.AuthConfig
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.config.UIConfig
 import com.paypal.checkout.createorder.CreateOrder
@@ -83,6 +84,12 @@ class PayPalNativeCheckoutClient internal constructor(
         orderId = request.orderId
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
+                val userEmail = request.authConfig?.userEmail
+                val authConfig: AuthConfig? = if (userEmail.isNullOrEmpty()) {
+                    null
+                } else {
+                    AuthConfig(userEmail)
+                }
                 val config = CheckoutConfig(
                     application = application,
                     clientId = coreConfig.clientId,
@@ -91,7 +98,7 @@ class PayPalNativeCheckoutClient internal constructor(
                         showExitSurveyDialog = false
                     ),
                     returnUrl = returnUrl,
-                    authConfig = AuthConfig(request.authConfig?.userEmail)
+                    authConfig = authConfig
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
