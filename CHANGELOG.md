@@ -4,7 +4,7 @@
 
 * PayPalNativeCheckout
   * Bump native-checkout version to release `1.2.0`
-  * Adding in support for the merchant passed email feature (opt in only)
+  * Add `email` to `PayPalNativeCheckoutRequest`
 
 ## 1.0.0 (2023-10-02)
 
