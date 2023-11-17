@@ -1,5 +1,11 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* PayPalNativeCheckout
+  * Bump native-checkout version to release `1.2.0`
+  * Add `userAuthenticationEmail` to `PayPalNativeCheckoutRequest`
+
 ## 1.0.0 (2023-10-02)
 
 * Breaking Changes

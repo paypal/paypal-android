@@ -74,7 +74,7 @@ class PayPalNativeCheckoutClientTest {
         } just runs
 
         sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        sut.startCheckout(PayPalNativeCheckoutRequest("order_id"))
+        sut.startCheckout(PayPalNativeCheckoutRequest("order_id", "test@test.com"))
         advanceUntilIdle()
 
         verify {
@@ -82,6 +82,7 @@ class PayPalNativeCheckoutClientTest {
         }
         expectThat(configSlot.captured) {
             get { clientId }.isEqualTo("fake-client-id")
+            get { authConfig?.userEmail }.isEqualTo("test@test.com")
             get { application }.isEqualTo(mockApplication)
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
         }
