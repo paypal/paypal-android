@@ -4,7 +4,7 @@
 
 * PayPalNativeCheckout
   * Bump native-checkout version to release `1.2.0`
-  * Add `email` to `PayPalNativeCheckoutRequest`
+  * Add `userAuthenticationEmail` to `PayPalNativeCheckoutRequest`
 
 ## 1.0.0 (2023-10-02)
 

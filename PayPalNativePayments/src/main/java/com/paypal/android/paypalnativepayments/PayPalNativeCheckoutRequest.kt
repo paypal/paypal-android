@@ -10,7 +10,7 @@ data class PayPalNativeCheckoutRequest(
     val orderId: String,
 
     /**
-     * Optional: The email for preloading authentication
+     * Optional: User email to initiate a quicker authentication flow in cases where the user has a PayPal Account with the same email.
      */
-    val email: String? = null
+    val userAuthenticationEmail: String? = null
 )
