@@ -1,5 +1,6 @@
 # PayPal Android SDK Release Notes
 
+
 ## 1.0.0 (2023-10-02)
 
 * Breaking Changes
