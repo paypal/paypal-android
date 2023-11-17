@@ -73,7 +73,7 @@ class TrackingEventsAPIUnitTest {
                         "partner_client_id": "fake-client-id",
                         "c_sdk_ver": "fake-sdk-version",
                         "client_os": "fake client OS",
-                        "comp": "ppcpmobilesdk",
+                        "comp": "ppcpclientsdk",
                         "device_manufacturer": "fake-manufacturer",
                         "merchant_sdk_env": "fake-environment",
                         "event_name": "fake-event",

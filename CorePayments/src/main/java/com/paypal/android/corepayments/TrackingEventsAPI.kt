@@ -36,7 +36,7 @@ internal class TrackingEventsAPI constructor(
             .put(KEY_CLIENT_ID, coreConfig.clientId)
             .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
             .put(KEY_CLIENT_OS, clientOS)
-            .put(KEY_COMPONENT, "ppcpmobilesdk")
+            .put(KEY_COMPONENT, "ppcpclientsdk")
             .put(KEY_DEVICE_MANUFACTURER, deviceManufacturer)
             .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_ENVIRONMENT, event.environment)
