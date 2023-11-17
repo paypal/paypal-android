@@ -9,6 +9,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.checkout.PayPalCheckout
 import com.paypal.checkout.approve.OnApprove
 import com.paypal.checkout.cancel.OnCancel
+import com.paypal.checkout.config.AuthConfig
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.config.UIConfig
 import com.paypal.checkout.createorder.CreateOrder
@@ -44,12 +45,12 @@ class PayPalNativeCheckoutClient internal constructor(
      * See Also: [Developer Portal](https://developer.paypal.com/developer/applications/)
      */
     constructor(application: Application, coreConfig: CoreConfig, returnUrl: String) :
-            this(
-                application,
-                coreConfig,
-                returnUrl,
-                AnalyticsService(application, coreConfig),
-            )
+        this(
+            application,
+            coreConfig,
+            returnUrl,
+            AnalyticsService(application, coreConfig),
+        )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
@@ -74,7 +75,7 @@ class PayPalNativeCheckoutClient internal constructor(
     var shippingListener: PayPalNativeShippingListener? = null
 
     /**
-     * Present a Paypal Payseet and start a PayPal transaction.
+     * Present a Paypal Paysheet and start a PayPal transaction.
      *
      * @param request the PayPalNativeCheckoutRequest for the transaction
      */
@@ -83,6 +84,7 @@ class PayPalNativeCheckoutClient internal constructor(
         orderId = request.orderId
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
+                val authConfig: AuthConfig? = request.userAuthenticationEmail?.let { AuthConfig(it) }
                 val config = CheckoutConfig(
                     application = application,
                     clientId = coreConfig.clientId,
@@ -90,7 +92,8 @@ class PayPalNativeCheckoutClient internal constructor(
                     uiConfig = UIConfig(
                         showExitSurveyDialog = false
                     ),
-                    returnUrl = returnUrl
+                    returnUrl = returnUrl,
+                    authConfig = authConfig
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
