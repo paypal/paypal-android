@@ -10,7 +10,8 @@ data class PayPalNativeCheckoutRequest(
     val orderId: String,
 
     /**
-     * Optional: User email to initiate a quicker authentication flow in cases where the user has a PayPal Account with the same email.
+     * Optional: User email to initiate a quicker authentication flow
+     * in cases where the user has a PayPal Account with the same email.
      */
     val userAuthenticationEmail: String? = null
 )
