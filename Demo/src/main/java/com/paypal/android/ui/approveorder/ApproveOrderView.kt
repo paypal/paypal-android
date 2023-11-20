@@ -20,8 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
@@ -33,7 +33,7 @@ import com.paypal.android.uishared.components.OrderView
 @ExperimentalMaterial3Api
 @Composable
 fun ApproveOrderView(
-    viewModel: ApproveOrderViewModel = viewModel(),
+    viewModel: ApproveOrderViewModel = hiltViewModel(),
     onUseTestCardClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
