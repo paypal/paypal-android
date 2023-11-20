@@ -12,7 +12,7 @@ import androidx.preference.PreferenceManager
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DemoActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var navHostFragment: NavHostFragment
     private lateinit var navController: NavController
