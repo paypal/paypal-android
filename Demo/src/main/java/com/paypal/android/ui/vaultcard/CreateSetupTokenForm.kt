@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +20,7 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreateSetupTokenForm(
-    uiState: VaultUiState,
+    uiState: VaultCardUiState,
     onCustomerIdValueChange: (String) -> Unit,
     onSubmit: () -> Unit
 ) {

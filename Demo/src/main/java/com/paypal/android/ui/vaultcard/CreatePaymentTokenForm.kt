@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +15,7 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreatePaymentTokenForm(
-    uiState: VaultUiState,
+    uiState: VaultCardUiState,
     onSubmit: () -> Unit
 ) {
     OutlinedCard(

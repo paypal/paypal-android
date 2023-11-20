@@ -1,4 +1,4 @@
-package com.paypal.android.ui.vault
+package com.paypal.android.ui.vaultcard
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +17,8 @@ import com.paypal.android.uishared.components.CardForm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AttachCardToSetupTokenForm(
-    uiState: VaultUiState,
+fun UpdateSetupTokenWithCardForm(
+    uiState: VaultCardUiState,
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
