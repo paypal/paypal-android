@@ -11,12 +11,12 @@ plugins {
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.paypal.android"
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode modules.demoAppVersionCode
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -148,6 +148,9 @@ dependencies {
 
     implementation deps.hilt
     kapt deps.hiltKapt
+
+    def nav_version = "2.7.5"
+    implementation "androidx.navigation:navigation-compose:$nav_version"
 
     testImplementation deps.junit
 
