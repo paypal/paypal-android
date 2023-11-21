@@ -4,7 +4,7 @@ buildscript {
             "sdkVersionName"      : "1.0.1-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 21,
-            "androidTargetVersion": 34
+            "androidTargetVersion": 30
     ]
 
     ext.versions = [
