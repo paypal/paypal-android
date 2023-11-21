@@ -15,6 +15,7 @@ import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
 import com.paypal.android.ui.features.FeaturesView
+import com.paypal.android.ui.paypalweb.PayPalWebView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
@@ -62,6 +63,9 @@ fun DemoApp() {
                         viewModel = viewModel,
                         onUseTestCardClick = { navController.navigate(DemoAppDestinations.SELECT_TEST_CARD) }
                     )
+                }
+                composable(DemoAppDestinations.PAYPAL_WEB) {
+                    PayPalWebView()
                 }
                 composable(DemoAppDestinations.SELECT_TEST_CARD) {
                     SelectCardView(onTestCardSelected = { testCardId ->
