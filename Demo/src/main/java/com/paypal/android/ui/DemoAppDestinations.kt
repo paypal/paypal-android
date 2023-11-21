@@ -8,4 +8,15 @@ object DemoAppDestinations {
     const val PAYPAL_BUTTONS = "paypal_buttons"
     const val PAYPAL_NATIVE = "paypal_native"
     const val SELECT_TEST_CARD = "select_test_card"
+
+    fun titleForDestination(destination: String?): String = when (destination) {
+        CARD_APPROVE_ORDER -> "Card Approve Order"
+        FEATURES_ROUTE -> "Features"
+        CARD_VAULT -> "Vault Card"
+        PAYPAL_WEB -> "PayPal Web"
+        PAYPAL_BUTTONS -> "PayPal Buttons"
+        PAYPAL_NATIVE -> "PayPal Native"
+        SELECT_TEST_CARD -> "Select a Test Card"
+        else -> "Demo"
+    }
 }

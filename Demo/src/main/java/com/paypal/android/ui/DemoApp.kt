@@ -8,10 +8,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
@@ -30,12 +32,15 @@ import com.paypal.android.ui.vaultcard.VaultCardViewModel
 @Composable
 fun DemoApp() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     MaterialTheme {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
-                        Text("Hello")
+                        val route = navBackStackEntry?.destination?.route
+                        val titleText = DemoAppDestinations.titleForDestination(route)
+                        Text(text = titleText)
                     }
                 )
             }
