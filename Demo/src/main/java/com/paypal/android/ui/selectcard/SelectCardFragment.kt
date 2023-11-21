@@ -34,7 +34,7 @@ class SelectCardFragment : Fragment() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    SelectCardView(onTestCardSelected = { onTestCardSelected(it) })
+                    SelectCardView(onTestCardSelected = {})
                 }
             }
         }

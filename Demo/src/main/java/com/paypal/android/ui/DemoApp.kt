@@ -7,10 +7,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
+import com.paypal.android.ui.approveorder.ApproveOrderViewModel
 import com.paypal.android.ui.features.FeaturesView
 import com.paypal.android.ui.selectcard.SelectCardView
 
@@ -27,14 +31,28 @@ fun DemoApp() {
                         navController.navigate(feature.routeName)
                     })
                 }
-                composable(DemoAppDestinations.CARD_APPROVE_ORDER) {
-                    ApproveOrderView(onUseTestCardClick = {
+                composable(DemoAppDestinations.CARD_APPROVE_ORDER) { entry ->
+                    // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
+                    val viewModel: ApproveOrderViewModel = hiltViewModel()
+
+                    // prefill test card (if necessary)
+                    entry.savedStateHandle.get<String>("test_card_id")?.let { testCardId ->
+                        TestCard.byId(testCardId)?.let { testCard ->
+                            viewModel.prefillCard(testCard)
+                        }
+                    }
+
+                    // Ref: https://youtu.be/NhoV78E6yWo?si=zZR2kFKHtthJ93tG
+                    ApproveOrderView(viewModel, onUseTestCardClick = {
                         navController.navigate(DemoAppDestinations.SELECT_TEST_CARD)
                     })
                 }
                 composable(DemoAppDestinations.SELECT_TEST_CARD) {
-                    SelectCardView(onTestCardSelected = { testCard ->
-
+                    SelectCardView(onTestCardSelected = { testCardId ->
+                        val savedStateHandle =
+                            navController.previousBackStackEntry?.savedStateHandle
+                        savedStateHandle?.set("test_card_id", testCardId)
+                        navController.popBackStack()
                     })
                 }
             }

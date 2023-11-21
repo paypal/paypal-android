@@ -28,7 +28,7 @@ import com.paypal.android.models.TestCard
 @Composable
 fun SelectCardView(
     viewModel: SelectCardViewModel = viewModel(),
-    onTestCardSelected: (TestCard) -> Unit = {}
+    onTestCardSelected: (String) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -43,7 +43,7 @@ fun SelectCardView(
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card)
+                onTestCardSelected(card.id)
             }
         }
         stickyHeader {
@@ -54,7 +54,7 @@ fun SelectCardView(
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card)
+                onTestCardSelected(card.id)
             }
         }
         stickyHeader {
@@ -65,7 +65,7 @@ fun SelectCardView(
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card)
+                onTestCardSelected(card.id)
             }
         }
     }

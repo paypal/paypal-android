@@ -12,8 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.R
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutCanceledView
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutResultView
@@ -24,7 +24,7 @@ import com.paypal.android.uishared.components.PayPalSDKErrorView
 
 @Composable
 fun PayPalNativeView(
-    viewModel: PayPalNativeViewModel = viewModel()
+    viewModel: PayPalNativeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
