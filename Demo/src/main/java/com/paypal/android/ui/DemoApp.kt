@@ -16,6 +16,7 @@ import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
 import com.paypal.android.ui.features.FeaturesView
 import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
+import com.paypal.android.ui.paypalnative.PayPalNativeView
 import com.paypal.android.ui.paypalweb.PayPalWebView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
@@ -70,6 +71,9 @@ fun DemoApp() {
                 }
                 composable(DemoAppDestinations.PAYPAL_BUTTONS) {
                     PayPalButtonsView()
+                }
+                composable(DemoAppDestinations.PAYPAL_NATIVE) {
+                    PayPalNativeView()
                 }
                 composable(DemoAppDestinations.SELECT_TEST_CARD) {
                     SelectCardView(onTestCardSelected = { testCardId ->
