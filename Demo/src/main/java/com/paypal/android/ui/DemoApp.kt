@@ -2,15 +2,24 @@ package com.paypal.android.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -33,6 +42,20 @@ import com.paypal.android.ui.vaultcard.VaultCardViewModel
 fun DemoApp() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    var shouldDisplayBackButton by remember { mutableStateOf(false) }
+
+    // Ref: https://stackoverflow.com/a/68700967
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { controller, _, _ ->
+            shouldDisplayBackButton = controller.previousBackStackEntry != null
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
+    }
+
     MaterialTheme {
         Scaffold(
             topBar = {
@@ -41,9 +64,27 @@ fun DemoApp() {
                         val route = navBackStackEntry?.destination?.route
                         val titleText = DemoAppDestinations.titleForDestination(route)
                         Text(text = titleText)
+                    },
+                    navigationIcon = {
+                        // Ref: https://stackoverflow.com/a/70409412
+                        if (shouldDisplayBackButton) {
+                            IconButton(onClick = {
+                                navController.popBackStack(
+                                    navController.graph.startDestinationId,
+                                    false
+                                )
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        } else {
+                            null
+                        }
                     }
                 )
-            }
+            },
         ) { innerPadding ->
             NavHost(
                 navController = navController,
