@@ -1,10 +1,12 @@
 package com.paypal.android.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,8 +31,20 @@ import com.paypal.android.ui.vaultcard.VaultCardViewModel
 fun DemoApp() {
     val navController = rememberNavController()
     MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            NavHost(navController = navController, startDestination = "features") {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text("Hello")
+                    }
+                )
+            }
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = "features",
+                modifier = Modifier.padding(innerPadding)
+            ) {
                 composable(DemoAppDestinations.FEATURES_ROUTE) {
                     FeaturesView(onFeatureSelected = { feature ->
                         navController.navigate(feature.routeName)

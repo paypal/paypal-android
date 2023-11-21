@@ -32,7 +32,7 @@ fun SelectCardView(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
         stickyHeader {
