@@ -30,7 +30,10 @@ import com.paypal.android.ui.vaultcard.VaultCardViewModel
 import com.paypal.android.uishared.components.DemoAppTopBar
 import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
 
-// Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
+// The architecture of the Demo app is heavily influenced by Google sample apps written
+// entirely in compose, most specifically the Jetsnack app
+// Ref: https://github.com/android/compose-samples/tree/main
+
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
@@ -64,6 +67,7 @@ fun DemoApp() {
                 startDestination = "features",
                 modifier = Modifier.padding(innerPadding)
             ) {
+                // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
                 composable(DemoAppDestinations.FEATURES_ROUTE) {
                     FeaturesView(onFeatureSelected = { feature ->
                         navController.navigate(feature.routeName)
