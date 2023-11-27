@@ -1,4 +1,4 @@
-package com.paypal.android.uishared.components
+package com.paypal.android.uishared.effects
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

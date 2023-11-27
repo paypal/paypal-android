@@ -28,7 +28,7 @@ import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
 import com.paypal.android.uishared.components.DemoAppTopBar
-import com.paypal.android.uishared.components.NavDestinationChangeDisposableEffect
+import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
 
 // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
 @Suppress("LongMethod")
