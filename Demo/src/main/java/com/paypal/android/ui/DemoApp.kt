@@ -2,24 +2,17 @@ package com.paypal.android.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -34,6 +27,8 @@ import com.paypal.android.ui.paypalweb.PayPalWebView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
+import com.paypal.android.uishared.components.DemoAppTopBar
+import com.paypal.android.uishared.components.NavDestinationChangeDisposableEffect
 
 // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
 @Suppress("LongMethod")
@@ -43,46 +38,23 @@ import com.paypal.android.ui.vaultcard.VaultCardViewModel
 fun DemoApp() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-
     var shouldDisplayBackButton by remember { mutableStateOf(false) }
 
-    // Ref: https://stackoverflow.com/a/68700967
-    DisposableEffect(navController) {
-        val listener = NavController.OnDestinationChangedListener { controller, _, _ ->
-            shouldDisplayBackButton = controller.previousBackStackEntry != null
-        }
-        navController.addOnDestinationChangedListener(listener)
-        onDispose {
-            navController.removeOnDestinationChangedListener(listener)
-        }
+    NavDestinationChangeDisposableEffect(navController) { controller ->
+        shouldDisplayBackButton = controller.previousBackStackEntry != null
     }
 
     MaterialTheme {
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        val route = navBackStackEntry?.destination?.route
-                        val titleText = DemoAppDestinations.titleForDestination(route)
-                        Text(text = titleText)
-                    },
-                    navigationIcon = {
-                        // Ref: https://stackoverflow.com/a/70409412
-                        if (shouldDisplayBackButton) {
-                            IconButton(onClick = {
-                                navController.popBackStack(
-                                    navController.graph.startDestinationId,
-                                    false
-                                )
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        } else {
-                            null
-                        }
+                val route = navBackStackEntry?.destination?.route
+                val titleText = DemoAppDestinations.titleForDestination(route)
+                DemoAppTopBar(
+                    title = titleText,
+                    shouldDisplayBackButton = shouldDisplayBackButton,
+                    onBackButtonClick = {
+                        val destinationId = navController.graph.startDestinationId
+                        navController.popBackStack(destinationId, false)
                     }
                 )
             },
@@ -98,29 +70,21 @@ fun DemoApp() {
                     })
                 }
                 composable(DemoAppDestinations.CARD_APPROVE_ORDER) { entry ->
-                    val viewModel: ApproveOrderViewModel = hiltViewModel()
-
                     // prefill test card (if necessary)
-                    entry.savedStateHandle.get<String>("test_card_id")?.let { testCardId ->
-                        TestCard.byId(testCardId)?.let { testCard ->
-                            viewModel.prefillCard(testCard)
-                        }
+                    val viewModel: ApproveOrderViewModel = hiltViewModel()
+                    parseTestCardFromSavedState(entry.savedStateHandle)?.let { testCard ->
+                        viewModel.prefillCard(testCard)
                     }
-
-                    // Ref: https://youtu.be/NhoV78E6yWo?si=zZR2kFKHtthJ93tG
                     ApproveOrderView(
                         viewModel = viewModel,
                         onUseTestCardClick = { navController.navigate(DemoAppDestinations.SELECT_TEST_CARD) }
                     )
                 }
                 composable(DemoAppDestinations.CARD_VAULT) { entry ->
-                    val viewModel: VaultCardViewModel = hiltViewModel()
-
                     // prefill test card (if necessary)
-                    entry.savedStateHandle.get<String>("test_card_id")?.let { testCardId ->
-                        TestCard.byId(testCardId)?.let { testCard ->
-                            viewModel.prefillCard(testCard)
-                        }
+                    val viewModel: VaultCardViewModel = hiltViewModel()
+                    parseTestCardFromSavedState(entry.savedStateHandle)?.let { testCard ->
+                        viewModel.prefillCard(testCard)
                     }
                     VaultCardView(
                         viewModel = viewModel,
@@ -138,9 +102,8 @@ fun DemoApp() {
                 }
                 composable(DemoAppDestinations.SELECT_TEST_CARD) {
                     SelectCardView(onTestCardSelected = { testCardId ->
-                        val savedStateHandle =
-                            navController.previousBackStackEntry?.savedStateHandle
-                        savedStateHandle?.set("test_card_id", testCardId)
+                        val prevBackStackEntry = navController.previousBackStackEntry
+                        prevBackStackEntry?.savedStateHandle?.set("test_card_id", testCardId)
                         navController.popBackStack()
                     })
                 }
@@ -148,3 +111,7 @@ fun DemoApp() {
         }
     }
 }
+
+// Ref: https://youtu.be/NhoV78E6yWo?si=zZR2kFKHtthJ93tG
+private fun parseTestCardFromSavedState(savedStateHandle: SavedStateHandle): TestCard? =
+    savedStateHandle.get<String>("test_card_id")?.let { TestCard.byId(it) }
