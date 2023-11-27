@@ -25,6 +25,5 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(newIntent: Intent) {
         super.onNewIntent(newIntent)
         intent = newIntent
-        Log.e("DEMO ACTIVITY", "ON NEW INTENT")
     }
 }
