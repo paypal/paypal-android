@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
@@ -117,7 +116,7 @@ dependencies {
     implementation deps.fragmentKtx
 
     // TODO: remove dependency when we don't relay on nxo models anymore
-    implementation (deps.nativeCheckout) {
+    implementation(deps.nativeCheckout) {
         exclude module: 'data-collector'
     }
 
@@ -138,8 +137,6 @@ dependencies {
     implementation deps.lifecycleViewModelCompose
     implementation deps.lifecycleRuntimeCompose
 
-    implementation deps.navigationFragment
-    implementation deps.navigationUI
     implementation deps.preference
 
     implementation deps.retrofit
@@ -149,9 +146,8 @@ dependencies {
     implementation deps.hilt
     kapt deps.hiltKapt
 
-    def nav_version = "2.7.5"
-    implementation "androidx.navigation:navigation-compose:$nav_version"
-    implementation "androidx.hilt:hilt-navigation-compose:1.1.0"
+    implementation deps.navigationCompose
+    implementation deps.hiltNavigationCompose
 
     testImplementation deps.junit
 
@@ -175,6 +171,7 @@ def loadPropertiesFromFile(filePath) {
     def result = new Properties()
     try {
         result.load(new FileInputStream(rootProject.file(filePath)))
-    } catch (e) { /* ignored */ }
+    } catch (e) { /* ignored */
+    }
     return result
 }
