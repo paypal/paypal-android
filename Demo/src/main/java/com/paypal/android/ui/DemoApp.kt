@@ -36,6 +36,7 @@ import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
 
 // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
+@Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @Composable
