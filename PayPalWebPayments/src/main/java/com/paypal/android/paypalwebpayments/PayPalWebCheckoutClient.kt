@@ -76,7 +76,7 @@ class PayPalWebCheckoutClient internal constructor(
         set(value) {
             field = value
             browserSwitchResult?.also {
-                handleBrowserSwitchVaultResult()
+                handleBrowserSwitchResult()
             }
         }
 
@@ -108,23 +108,25 @@ class PayPalWebCheckoutClient internal constructor(
 
     internal fun handleBrowserSwitchResult() {
         browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        listener?.also {
-            browserSwitchResult?.also { result ->
-                when (result.status) {
-                    BrowserSwitchStatus.SUCCESS -> deliverSuccess()
-                    BrowserSwitchStatus.CANCELED -> deliverCancellation()
-                }
-            }
-        }
-    }
-
-    private fun handleBrowserSwitchVaultResult() {
-        browserSwitchResult = browserSwitchClient.deliverResult(activity)
         vaultListener?.also {
             browserSwitchResult?.also { result ->
+                val isVaultResult = result.deepLinkUrl?.host?.contains("vault_result") ?: false
                 when (result.status) {
-                    BrowserSwitchStatus.SUCCESS -> deliverVaultSuccess()
-                    BrowserSwitchStatus.CANCELED -> deliverVaultCancellation()
+                    BrowserSwitchStatus.SUCCESS -> {
+                        if (isVaultResult) {
+                            deliverVaultSuccess()
+                        } else {
+                            deliverSuccess()
+                        }
+                    }
+
+                    BrowserSwitchStatus.CANCELED -> {
+                        if (isVaultResult) {
+                            deliverVaultCancellation()
+                        } else {
+                            deliverCancellation()
+                        }
+                    }
                 }
             }
         }
