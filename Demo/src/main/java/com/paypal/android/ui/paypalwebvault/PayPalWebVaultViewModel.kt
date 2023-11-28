@@ -93,7 +93,7 @@ class PayPalWebVaultViewModel @Inject constructor(
 
             }
             // TODO: implement
-//            paypalClient.approveVault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
+            paypalClient.vault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
             isUpdateSetupTokenLoading = false
         }
     }

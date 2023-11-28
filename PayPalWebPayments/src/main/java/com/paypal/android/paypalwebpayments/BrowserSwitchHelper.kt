@@ -40,4 +40,15 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
     }
+
+    fun configurePayPalVaultApproveSwitchOptions(
+        orderId: String?,
+        approveOrderHref: String
+    ): BrowserSwitchOptions {
+        val metadata = JSONObject().put("order_id", orderId)
+        return BrowserSwitchOptions()
+            .url(Uri.parse(approveOrderHref))
+            .returnUrlScheme(urlScheme)
+            .metadata(metadata)
+    }
 }

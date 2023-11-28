@@ -5,6 +5,7 @@ import com.google.gson.JsonParser
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.models.PaymentMethod
+import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -33,13 +34,16 @@ class CreateSetupTokenUseCase @Inject constructor(
 
             PaymentMethod.PAYPAL -> {
                 val payPalJSON = JSONObject()
+                payPalJSON.put("usage_type", "MERCHANT")
+
                 val experienceContextJSON = JSONObject()
+                experienceContextJSON.put("vault_instruction", "ON_PAYER_APPROVAL")
                 experienceContextJSON.put("return_url", "https://www.example.com/success")
                 experienceContextJSON.put("cancel_url", "https://www.example.com/cancel")
                 payPalJSON.put("experience_context", experienceContextJSON)
 
                 val paymentSourceJSON = JSONObject()
-                paymentSourceJSON.put("pay_pal", payPalJSON)
+                paymentSourceJSON.put("paypal", payPalJSON)
                 requestJSON.put("payment_source", paymentSourceJSON)
             }
         }
@@ -52,10 +56,22 @@ class CreateSetupTokenUseCase @Inject constructor(
         val responseJSON = JSONObject(response.string())
 
         val customerJSON = responseJSON.getJSONObject("customer")
+
+        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
+        var approveVaultHref: String? = null
+        for (i in 0 until linksJSON.length()) {
+            val link = linksJSON.getJSONObject(i)
+            if (link.getString("rel") == "approve") {
+                approveVaultHref = link.getString("href")
+                break
+            }
+        }
+
         return SetupToken(
             id = responseJSON.getString("id"),
             customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status")
+            status = responseJSON.getString("status"),
+            approveVaultHref = approveVaultHref
         )
     }
 }

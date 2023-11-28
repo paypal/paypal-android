@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchResult
@@ -142,5 +143,13 @@ class PayPalWebCheckoutClient internal constructor(
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", orderId)
         listener?.onPayPalWebSuccess(result)
+    }
+
+    fun vault(activity: AppCompatActivity, id: String, approveVaultHref: String) {
+        val browserSwitchOptions = browserSwitchHelper.configurePayPalVaultApproveSwitchOptions(
+            orderId,
+            approveVaultHref
+        )
+        browserSwitchClient.start(activity, browserSwitchOptions)
     }
 }
