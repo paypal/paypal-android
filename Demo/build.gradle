@@ -10,11 +10,10 @@ plugins {
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
-    compileSdkVersion 34
-
     defaultConfig {
         applicationId "com.paypal.android"
         minSdkVersion 21
+        compileSdk 34
         targetSdkVersion 34
         versionCode modules.demoAppVersionCode
         versionName modules.sdkVersionName

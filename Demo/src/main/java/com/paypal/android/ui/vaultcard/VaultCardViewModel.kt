@@ -13,6 +13,7 @@ import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.models.PaymentMethod
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.usecase.CreatePaymentTokenUseCase
@@ -110,7 +111,7 @@ class VaultCardViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             isCreateSetupTokenLoading = true
-            setupToken = createSetupTokenUseCase(customerId)
+            setupToken = createSetupTokenUseCase(PaymentMethod.CARD, customerId)
             isCreateSetupTokenLoading = false
         }
     }

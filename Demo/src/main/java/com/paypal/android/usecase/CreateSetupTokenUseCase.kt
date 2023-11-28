@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.models.PaymentMethod
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -11,7 +12,7 @@ class CreateSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(customerId: String?): SetupToken {
+    suspend operator fun invoke(paymentMethod: PaymentMethod, customerId: String?): SetupToken {
         // create a payment token with an empty card attribute; the merchant app will provide
         // the card's details through the SDK
         val cardJSON = JSONObject()

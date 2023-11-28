@@ -112,7 +112,7 @@ class PayPalWebViewModel @Inject constructor(
             isCreateOrderLoading = true
             val orderRequest = _uiState.value.run {
                 OrderRequest(
-                    PaymentMethod.PAYPAL_WEB,
+                    PaymentMethod.PAYPAL,
                     intentOption,
                     false,
                     ""
