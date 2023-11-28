@@ -20,7 +20,8 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreateSetupTokenForm(
-    uiState: VaultCardUiState,
+    isLoading: Boolean,
+    customerId: String,
     onCustomerIdValueChange: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
@@ -37,7 +38,7 @@ fun CreateSetupTokenForm(
             )
             Spacer(modifier = Modifier.size(16.dp))
             OutlinedTextField(
-                value = uiState.customerId,
+                value = customerId,
                 label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
                 onValueChange = { onCustomerIdValueChange(it) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -47,7 +48,7 @@ fun CreateSetupTokenForm(
             Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(
                 text = "Create Setup Token",
-                isLoading = uiState.isCreateSetupTokenLoading,
+                isLoading = isLoading,
                 onClick = { onSubmit() },
                 modifier = Modifier.fillMaxWidth()
             )
