@@ -69,6 +69,17 @@ class PayPalWebCheckoutClient internal constructor(
             }
         }
 
+    var vaultListener: PayPalWebCheckoutVaultListener? = null
+        /**
+         * @param value a [PayPalWebCheckoutListener] to receive results from the PayPal flow
+         */
+        set(value) {
+            field = value
+            browserSwitchResult?.also {
+                handleBrowserSwitchVaultResult()
+            }
+        }
+
     init {
         activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
     }
@@ -107,6 +118,18 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
+    private fun handleBrowserSwitchVaultResult() {
+        browserSwitchResult = browserSwitchClient.deliverResult(activity)
+        vaultListener?.also {
+            browserSwitchResult?.also { result ->
+                when (result.status) {
+                    BrowserSwitchStatus.SUCCESS -> deliverVaultSuccess()
+                    BrowserSwitchStatus.CANCELED -> deliverVaultCancellation()
+                }
+            }
+        }
+    }
+
     private fun deliverSuccess() {
         if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
             val webResult = PayPalDeepLinkUrlResult(
@@ -135,6 +158,28 @@ class PayPalWebCheckoutClient internal constructor(
         listener?.onPayPalWebCanceled()
     }
 
+    private fun deliverVaultSuccess() {
+        val deepLinkUrlResult = browserSwitchResult?.deepLinkUrl
+        val requestMetadata = browserSwitchResult?.requestMetadata
+
+        // Setup Token Approval URL: com.paypal.android.demo://example.com/return_url?approval_token_id=1JH795071P291053A&approval_session_id=1JH795071P291053A
+        if (deepLinkUrlResult != null && requestMetadata != null) {
+            val approvalTokenId = deepLinkUrlResult.getQueryParameter("approval_token_id")
+            val approvalSessionId = deepLinkUrlResult.getQueryParameter("approval_session_id")
+            val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
+            vaultListener?.onPayPalWebVaultSuccess(result)
+        } else {
+            // TODO: deliver failure
+        }
+        browserSwitchResult = null
+    }
+
+    private fun deliverVaultCancellation() {
+        browserSwitchResult = null
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
+        listener?.onPayPalWebCanceled()
+    }
+
     private fun deliverFailure(error: PayPalSDKError) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
         listener?.onPayPalWebFailure(error)
@@ -145,9 +190,9 @@ class PayPalWebCheckoutClient internal constructor(
         listener?.onPayPalWebSuccess(result)
     }
 
-    fun vault(activity: AppCompatActivity, id: String, approveVaultHref: String) {
+    fun vault(activity: AppCompatActivity, setupTokenId: String, approveVaultHref: String) {
         val browserSwitchOptions = browserSwitchHelper.configurePayPalVaultApproveSwitchOptions(
-            orderId,
+            setupTokenId,
             approveVaultHref
         )
         browserSwitchClient.start(activity, browserSwitchOptions)
