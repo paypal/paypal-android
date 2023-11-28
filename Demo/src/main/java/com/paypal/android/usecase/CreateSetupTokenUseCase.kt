@@ -38,8 +38,8 @@ class CreateSetupTokenUseCase @Inject constructor(
 
                 val experienceContextJSON = JSONObject()
                 experienceContextJSON.put("vault_instruction", "ON_PAYER_APPROVAL")
-                experienceContextJSON.put("return_url", "https://www.example.com/success")
-                experienceContextJSON.put("cancel_url", "https://www.example.com/cancel")
+                experienceContextJSON.put("return_url", "com.paypal.android.demo://example.com/return_url")
+                experienceContextJSON.put("cancel_url", "com.paypal.android.demo://example.com/cancel_url")
                 payPalJSON.put("experience_context", experienceContextJSON)
 
                 val paymentSourceJSON = JSONObject()
