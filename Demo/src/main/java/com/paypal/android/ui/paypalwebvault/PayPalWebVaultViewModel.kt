@@ -1,7 +1,6 @@
 package com.paypal.android.ui.paypalwebvault
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.SetupToken
@@ -13,6 +12,8 @@ import com.paypal.android.models.PaymentMethod
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultListener
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,6 +59,12 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(setupToken = value) }
         }
 
+    var payPalWebCheckoutVaultResult: PayPalWebCheckoutVaultResult?
+        get() = _uiState.value.payPalWebCheckoutVaultResult
+        set(value) {
+            _uiState.update { it.copy(payPalWebCheckoutVaultResult = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             isCreateSetupTokenLoading = true
@@ -78,23 +85,25 @@ class PayPalWebVaultViewModel @Inject constructor(
                 coreConfig,
                 "com.paypal.android.demo"
             )
-            paypalClient.listener = object : PayPalWebCheckoutListener {
-                override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-                    TODO("Not yet implemented")
+            paypalClient.vaultListener = object : PayPalWebCheckoutVaultListener {
+                override fun onPayPalWebVaultSuccess(result: PayPalWebCheckoutVaultResult) {
+                    payPalWebCheckoutVaultResult = result
+                    isUpdateSetupTokenLoading = false
                 }
 
-                override fun onPayPalWebFailure(error: PayPalSDKError) {
+                override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
                     TODO("Not yet implemented")
+                    isUpdateSetupTokenLoading = false
                 }
 
-                override fun onPayPalWebCanceled() {
+                override fun onPayPalWebVaultCanceled() {
                     TODO("Not yet implemented")
+                    isUpdateSetupTokenLoading = false
                 }
 
             }
-            // TODO: implement
+
             paypalClient.vault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
-            isUpdateSetupTokenLoading = false
         }
     }
 }
