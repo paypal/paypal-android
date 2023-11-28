@@ -18,9 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.ui.vaultcard.CreateSetupTokenForm
+import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 
 @Composable
@@ -58,6 +60,11 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
                 }
             )
         }
+        uiState.payPalWebCheckoutVaultResult?.let { vaultResult ->
+            Spacer(modifier = Modifier.size(8.dp))
+            PayPalWebCheckoutVaultResultView(vaultResult)
+            Spacer(modifier = Modifier.size(8.dp))
+        }
     }
 }
 
@@ -83,6 +90,24 @@ fun AttachPayPalAccountToSetupToken(
                 onClick = { onSubmit() },
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+    }
+}
+
+@Composable
+fun PayPalWebCheckoutVaultResultView(result: PayPalWebCheckoutVaultResult) {
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(
+                text = "PayPal Web Vault Result",
+                style = MaterialTheme.typography.titleLarge
+            )
+            PropertyView(name = "Approval Token ID", value = result.approvalTokenId)
+            PropertyView(name = "Approval Session ID", value = result.approvalSessionId)
         }
     }
 }
