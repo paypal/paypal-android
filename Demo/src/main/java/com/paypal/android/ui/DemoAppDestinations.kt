@@ -5,6 +5,7 @@ object DemoAppDestinations {
     const val FEATURES_ROUTE = "features"
     const val CARD_VAULT = "card_vault"
     const val PAYPAL_WEB = "paypal_web"
+    const val PAYPAL_WEB_VAULT = "paypal_web_vault"
     const val PAYPAL_BUTTONS = "paypal_buttons"
     const val PAYPAL_NATIVE = "paypal_native"
     const val SELECT_TEST_CARD = "select_test_card"
@@ -17,6 +18,7 @@ object DemoAppDestinations {
         PAYPAL_BUTTONS -> "PayPal Buttons"
         PAYPAL_NATIVE -> "PayPal Native"
         SELECT_TEST_CARD -> "Select a Test Card"
+        PAYPAL_WEB_VAULT -> "PayPal Web Vault"
         else -> "Demo"
     }
 }

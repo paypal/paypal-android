@@ -24,6 +24,7 @@ import com.paypal.android.ui.features.FeaturesView
 import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
 import com.paypal.android.ui.paypalnative.PayPalNativeView
 import com.paypal.android.ui.paypalweb.PayPalWebView
+import com.paypal.android.ui.paypalwebvault.PayPalWebVaultView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
@@ -97,6 +98,9 @@ fun DemoApp() {
                 }
                 composable(DemoAppDestinations.PAYPAL_WEB) {
                     PayPalWebView()
+                }
+                composable(DemoAppDestinations.PAYPAL_WEB_VAULT) {
+                    PayPalWebVaultView()
                 }
                 composable(DemoAppDestinations.PAYPAL_BUTTONS) {
                     PayPalButtonsView()
