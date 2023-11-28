@@ -13,19 +13,35 @@ class CreateSetupTokenUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(paymentMethod: PaymentMethod, customerId: String?): SetupToken {
-        // create a payment token with an empty card attribute; the merchant app will provide
-        // the card's details through the SDK
-        val cardJSON = JSONObject()
-        val paymentSourceJSON = JSONObject()
-        paymentSourceJSON.put("card", cardJSON)
-
         val requestJSON = JSONObject()
-        requestJSON.put("payment_source", paymentSourceJSON)
+        when (paymentMethod) {
+            PaymentMethod.CARD -> {
+                // create a payment token with an empty card attribute; the merchant app will
+                // provide the card's details through the SDK
+                val cardJSON = JSONObject()
+                val paymentSourceJSON = JSONObject()
+                paymentSourceJSON.put("card", cardJSON)
 
-        if (!customerId.isNullOrEmpty()) {
-            val customerJSON = JSONObject()
-                .put("id", customerId)
-            requestJSON.put("customer", customerJSON)
+                requestJSON.put("payment_source", paymentSourceJSON)
+
+                if (!customerId.isNullOrEmpty()) {
+                    val customerJSON = JSONObject()
+                        .put("id", customerId)
+                    requestJSON.put("customer", customerJSON)
+                }
+            }
+
+            PaymentMethod.PAYPAL -> {
+                val payPalJSON = JSONObject()
+                val experienceContextJSON = JSONObject()
+                experienceContextJSON.put("return_url", "https://www.example.com/success")
+                experienceContextJSON.put("cancel_url", "https://www.example.com/cancel")
+                payPalJSON.put("experience_context", experienceContextJSON)
+
+                val paymentSourceJSON = JSONObject()
+                paymentSourceJSON.put("pay_pal", payPalJSON)
+                requestJSON.put("payment_source", paymentSourceJSON)
+            }
         }
 
         // Ref: https://stackoverflow.com/a/19610814
