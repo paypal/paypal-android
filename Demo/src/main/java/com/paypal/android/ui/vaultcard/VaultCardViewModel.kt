@@ -3,7 +3,7 @@ package com.paypal.android.ui.vaultcard
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.PaymentToken
+import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
@@ -43,7 +43,7 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(setupToken = value) }
         }
 
-    var paymentToken: PaymentToken?
+    var paymentToken: CardPaymentToken?
         get() = _uiState.value.paymentToken
         set(value) {
             _uiState.update { it.copy(paymentToken = value) }

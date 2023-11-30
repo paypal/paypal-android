@@ -71,7 +71,7 @@ fun VaultCardView(
             VaultSuccessView(cardVaultResult = vaultResult)
             Spacer(modifier = Modifier.size(8.dp))
             CreatePaymentTokenForm(
-                uiState = uiState,
+                isLoading = uiState.isCreatePaymentTokenLoading,
                 onSubmit = { viewModel.createPaymentToken() }
             )
         }

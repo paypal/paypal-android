@@ -15,7 +15,7 @@ import com.paypal.android.ui.WireframeButton
 
 @Composable
 fun CreatePaymentTokenForm(
-    uiState: VaultCardUiState,
+    isLoading: Boolean,
     onSubmit: () -> Unit
 ) {
     OutlinedCard(
@@ -31,7 +31,7 @@ fun CreatePaymentTokenForm(
             Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(
                 text = "Create Payment Token",
-                isLoading = uiState.isCreatePaymentTokenLoading,
+                isLoading = isLoading,
                 onClick = { onSubmit() },
                 modifier = Modifier.fillMaxWidth()
             )

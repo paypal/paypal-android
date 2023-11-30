@@ -21,7 +21,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.approveorder.getActivity
+import com.paypal.android.ui.vaultcard.CreatePaymentTokenForm
 import com.paypal.android.ui.vaultcard.CreateSetupTokenForm
+import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 
@@ -64,6 +66,14 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
             Spacer(modifier = Modifier.size(8.dp))
             PayPalWebCheckoutVaultResultView(vaultResult)
             Spacer(modifier = Modifier.size(8.dp))
+            CreatePaymentTokenForm(
+                isLoading = uiState.isCreatePaymentTokenLoading,
+                onSubmit = { viewModel.createPaymentToken() }
+            )
+        }
+        uiState.paymentToken?.let { paymentToken ->
+            Spacer(modifier = Modifier.size(8.dp))
+            PaymentTokenView(paymentToken = paymentToken)
         }
     }
 }
