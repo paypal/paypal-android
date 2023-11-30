@@ -18,7 +18,7 @@ object CardFormatter {
         return if (previousCardNumber.length == cardType.maxCardLength + cardType.cardNumberIndices.size) {
             previousCardNumber
         } else {
-            cardType.cardNumberIndices.forEach { index ->
+            for (index in cardType.cardNumberIndices) {
                 if (index <= cardString.length) {
                     cardString = cardString.insertChar(index, ' ')
                 }

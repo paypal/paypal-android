@@ -36,7 +36,8 @@ fun UriView(uri: Uri) {
         Text("Path:")
         Text(uri.path ?: "NOT SET")
     }
-    if (uri.queryParameterNames?.isNotEmpty() == true) {
+    val queryParameterNames = uri.queryParameterNames ?: emptySet()
+    if (queryParameterNames.isNotEmpty()) {
         Text(
             text = "Params:",
             modifier = Modifier
@@ -45,7 +46,7 @@ fun UriView(uri: Uri) {
         Column(
             modifier = Modifier.padding(start = 8.dp)
         ) {
-            uri.queryParameterNames?.forEach { paramName ->
+            for (paramName in queryParameterNames) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {

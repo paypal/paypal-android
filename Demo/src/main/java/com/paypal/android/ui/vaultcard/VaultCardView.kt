@@ -43,7 +43,7 @@ fun VaultCardView(
     }
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(8.dp)
             .verticalScroll(scrollState)
     ) {

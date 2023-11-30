@@ -17,8 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.R
 import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.uishared.components.CompleteOrderForm
@@ -28,7 +28,7 @@ import com.paypal.android.uishared.components.PayPalSDKErrorView
 
 @Composable
 fun PayPalWebView(
-    viewModel: PayPalWebViewModel = viewModel()
+    viewModel: PayPalWebViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -39,6 +39,7 @@ fun PayPalWebView(
     }
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(scrollState)
     ) {

@@ -2,11 +2,12 @@ package com.paypal.android.ui.features
 
 import androidx.annotation.StringRes
 import com.paypal.android.R
+import com.paypal.android.ui.DemoAppDestinations
 
-enum class Feature(@StringRes val stringRes: Int) {
-    CARD_APPROVE_ORDER(R.string.feature_approve_order),
-    CARD_VAULT(R.string.feature_vault),
-    PAYPAL_WEB(R.string.feature_paypal_web),
-    PAYPAL_BUTTONS(R.string.feature_paypal_buttons),
-    PAYPAL_NATIVE(R.string.feature_paypal_native)
+enum class Feature(@StringRes val stringRes: Int, val routeName: String) {
+    CARD_APPROVE_ORDER(R.string.feature_approve_order, DemoAppDestinations.CARD_APPROVE_ORDER),
+    CARD_VAULT(R.string.feature_vault, DemoAppDestinations.CARD_VAULT),
+    PAYPAL_WEB(R.string.feature_paypal_web, DemoAppDestinations.PAYPAL_WEB),
+    PAYPAL_BUTTONS(R.string.feature_paypal_buttons, DemoAppDestinations.PAYPAL_BUTTONS),
+    PAYPAL_NATIVE(R.string.feature_paypal_native, DemoAppDestinations.PAYPAL_NATIVE)
 }
