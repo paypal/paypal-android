@@ -1,6 +1,6 @@
 package com.paypal.android.ui.paypalwebvault
 
-import com.paypal.android.api.model.CardPaymentToken
+import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 
@@ -11,5 +11,5 @@ data class PayPalWebVaultUiState(
     val isUpdateSetupTokenLoading: Boolean = false,
     val payPalWebCheckoutVaultResult: PayPalWebCheckoutVaultResult? = null,
     val isCreatePaymentTokenLoading: Boolean = false,
-    val paymentToken: CardPaymentToken? = null,
+    val paymentToken: PayPalPaymentToken? = null,
 )

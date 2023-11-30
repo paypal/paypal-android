@@ -3,7 +3,7 @@ package com.paypal.android.ui.paypalwebvault
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.CardPaymentToken
+import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -13,7 +13,7 @@ import com.paypal.android.models.PaymentMethod
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
-import com.paypal.android.usecase.CreatePaymentTokenUseCase
+import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PayPalWebVaultViewModel @Inject constructor(
     val createSetupTokenUseCase: CreateSetupTokenUseCase,
-    val createPaymentTokenUseCase: CreatePaymentTokenUseCase,
+    val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
     val sdkSampleServerAPI: SDKSampleServerAPI
 ) : ViewModel() {
 
@@ -66,7 +66,7 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(setupToken = value) }
         }
 
-    private var paymentToken: CardPaymentToken?
+    private var paymentToken: PayPalPaymentToken?
         get() = _uiState.value.paymentToken
         set(value) {
             _uiState.update { it.copy(paymentToken = value) }
@@ -123,7 +123,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun createPaymentToken() {
         viewModelScope.launch {
             isCreatePaymentTokenLoading = true
-            paymentToken = createPaymentTokenUseCase(setupToken!!)
+            paymentToken = createPayPalPaymentTokenUseCase(setupToken!!)
             isCreatePaymentTokenLoading = false
         }
     }

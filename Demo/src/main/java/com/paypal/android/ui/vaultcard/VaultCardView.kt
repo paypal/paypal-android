@@ -24,7 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.ui.approveorder.getActivity
-import com.paypal.android.uishared.components.PaymentTokenView
+import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 
@@ -77,7 +77,7 @@ fun VaultCardView(
         }
         uiState.paymentToken?.let { paymentToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            PaymentTokenView(paymentToken = paymentToken)
+            CardPaymentTokenView(paymentToken = paymentToken)
         }
     }
 }

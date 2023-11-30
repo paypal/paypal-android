@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.CardPaymentToken
 
 @Composable
-fun PaymentTokenView(paymentToken: CardPaymentToken) {
+fun CardPaymentTokenView(paymentToken: CardPaymentToken) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {

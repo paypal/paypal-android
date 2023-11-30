@@ -23,7 +23,7 @@ import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.ui.vaultcard.CreatePaymentTokenForm
 import com.paypal.android.ui.vaultcard.CreateSetupTokenForm
-import com.paypal.android.uishared.components.PaymentTokenView
+import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 
@@ -73,7 +73,7 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
         }
         uiState.paymentToken?.let { paymentToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            PaymentTokenView(paymentToken = paymentToken)
+            PayPalPaymentTokenView(paymentToken = paymentToken)
         }
     }
 }

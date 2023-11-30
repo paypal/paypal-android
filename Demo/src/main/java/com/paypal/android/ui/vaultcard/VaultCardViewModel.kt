@@ -16,7 +16,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.PaymentMethod
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
-import com.paypal.android.usecase.CreatePaymentTokenUseCase
+import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class VaultCardViewModel @Inject constructor(
     val sdkSampleServerAPI: SDKSampleServerAPI,
     val createSetupTokenUseCase: CreateSetupTokenUseCase,
-    val createPaymentTokenUseCase: CreatePaymentTokenUseCase
+    val createCardPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
     private lateinit var cardClient: CardClient
@@ -144,7 +144,7 @@ class VaultCardViewModel @Inject constructor(
     fun createPaymentToken() {
         viewModelScope.launch {
             isCreatePaymentTokenLoading = true
-            paymentToken = createPaymentTokenUseCase(setupToken!!)
+            paymentToken = createCardPaymentTokenUseCase(setupToken!!)
             isCreatePaymentTokenLoading = false
         }
     }
