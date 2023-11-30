@@ -164,7 +164,8 @@ class PayPalWebCheckoutClient internal constructor(
         val deepLinkUrlResult = browserSwitchResult?.deepLinkUrl
         val requestMetadata = browserSwitchResult?.requestMetadata
 
-        // Setup Token Approval URL: com.paypal.android.demo://example.com/return_url?approval_token_id=1JH795071P291053A&approval_session_id=1JH795071P291053A
+        // Setup Token Approval URL:
+        // {custom_url_scheme}://vault_paypal/success?approval_token_id={value}&approval_session_id={value}
         if (deepLinkUrlResult != null && requestMetadata != null) {
             val approvalTokenId = deepLinkUrlResult.getQueryParameter("approval_token_id")
             val approvalSessionId = deepLinkUrlResult.getQueryParameter("approval_session_id")

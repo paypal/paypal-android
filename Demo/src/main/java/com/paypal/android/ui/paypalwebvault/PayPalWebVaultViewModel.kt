@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class PayPalWebVaultViewModel @Inject constructor(
     val createSetupTokenUseCase: CreateSetupTokenUseCase,
@@ -113,7 +112,6 @@ class PayPalWebVaultViewModel @Inject constructor(
                     TODO("Not yet implemented")
                     isUpdateSetupTokenLoading = false
                 }
-
             }
 
             paypalClient.vault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
