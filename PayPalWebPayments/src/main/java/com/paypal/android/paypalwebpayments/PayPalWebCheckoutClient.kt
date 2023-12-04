@@ -167,10 +167,15 @@ class PayPalWebCheckoutClient internal constructor(
         // Setup Token Approval URL:
         // {custom_url_scheme}://vault_paypal/success?approval_token_id={value}&approval_session_id={value}
         if (deepLinkUrlResult != null && requestMetadata != null) {
-            val approvalTokenId = deepLinkUrlResult.getQueryParameter("approval_token_id")
-            val approvalSessionId = deepLinkUrlResult.getQueryParameter("approval_session_id")
-            val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
-            vaultListener?.onPayPalWebVaultSuccess(result)
+            val isFailure = deepLinkUrlResult.path?.contains("cancel_url") ?: false
+            if (isFailure) {
+                vaultListener?.onPayPalWebVaultFailure(PayPalWebCheckoutError.malformedResultError)
+            } else {
+                val approvalTokenId = deepLinkUrlResult.getQueryParameter("approval_token_id")
+                val approvalSessionId = deepLinkUrlResult.getQueryParameter("approval_session_id")
+                val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
+                vaultListener?.onPayPalWebVaultSuccess(result)
+            }
         } else {
             vaultListener?.onPayPalWebVaultFailure(PayPalWebCheckoutError.malformedResultError)
         }
