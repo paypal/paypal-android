@@ -172,7 +172,7 @@ class PayPalWebCheckoutClient internal constructor(
             val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
             vaultListener?.onPayPalWebVaultSuccess(result)
         } else {
-            // TODO: deliver failure
+            vaultListener?.onPayPalWebVaultFailure(PayPalWebCheckoutError.malformedResultError)
         }
         browserSwitchResult = null
     }
@@ -180,7 +180,7 @@ class PayPalWebCheckoutClient internal constructor(
     private fun deliverVaultCancellation() {
         browserSwitchResult = null
         analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
-        listener?.onPayPalWebCanceled()
+        vaultListener?.onPayPalWebVaultCanceled()
     }
 
     private fun deliverFailure(error: PayPalSDKError) {
