@@ -8,6 +8,10 @@ import org.json.JSONObject
 
 internal class BrowserSwitchHelper(private val urlScheme: String) {
 
+    companion object {
+        const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
+    }
+
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
     private fun buildPayPalCheckoutUri(

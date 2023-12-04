@@ -16,6 +16,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+// NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
+// it now offers both checkout and vaulting
+
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
@@ -25,6 +28,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
     private val browserSwitchHelper: BrowserSwitchHelper,
+    val experienceContext: PayPalWebCheckoutVaultExperienceContext,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -44,7 +48,13 @@ class PayPalWebCheckoutClient internal constructor(
         configuration,
         AnalyticsService(activity.applicationContext, configuration),
         BrowserSwitchClient(),
-        BrowserSwitchHelper(urlScheme)
+        BrowserSwitchHelper(urlScheme),
+        PayPalWebCheckoutVaultExperienceContext(
+            urlScheme,
+            domain = "vault_paypal",
+            returnUrlPath = "success",
+            cancelUrlPath = "user_canceled"
+        )
     )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {

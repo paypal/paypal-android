@@ -9,12 +9,11 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
-import com.paypal.android.models.PaymentMethod
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
-import com.paypal.android.usecase.CreateSetupTokenUseCase
+import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalWebVaultViewModel @Inject constructor(
-    val createSetupTokenUseCase: CreateSetupTokenUseCase,
+    val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
     val sdkSampleServerAPI: SDKSampleServerAPI
 ) : ViewModel() {
@@ -92,7 +91,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             isCreateSetupTokenLoading = true
-            setupToken = createSetupTokenUseCase(PaymentMethod.PAYPAL, vaultCustomerId)
+            setupToken = createPayPalSetupTokenUseCase()
             isCreateSetupTokenLoading = false
         }
     }
