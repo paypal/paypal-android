@@ -88,17 +88,10 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(isVaultingCanceled = value) }
         }
 
-    fun createSetupToken() {
+    fun createSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
             isCreateSetupTokenLoading = true
-            setupToken = createPayPalSetupTokenUseCase()
-            isCreateSetupTokenLoading = false
-        }
-    }
 
-    fun updateSetupToken(activity: AppCompatActivity) {
-        viewModelScope.launch {
-            isUpdateSetupTokenLoading = true
             val clientId = sdkSampleServerAPI.fetchClientId()
             val coreConfig = CoreConfig(clientId)
             payPalDataCollector = PayPalDataCollector(coreConfig)
@@ -125,6 +118,14 @@ class PayPalWebVaultViewModel @Inject constructor(
                 }
             }
 
+            setupToken = createPayPalSetupTokenUseCase(paypalClient.experienceContext)
+            isCreateSetupTokenLoading = false
+        }
+    }
+
+    fun updateSetupToken(activity: AppCompatActivity) {
+        viewModelScope.launch {
+            isUpdateSetupTokenLoading = true
             paypalClient.vault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
         }
     }

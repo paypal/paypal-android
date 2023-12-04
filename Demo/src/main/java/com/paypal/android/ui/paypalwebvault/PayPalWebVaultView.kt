@@ -49,7 +49,11 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
             isLoading = uiState.isCreateSetupTokenLoading,
             customerId = uiState.vaultCustomerId,
             onCustomerIdValueChange = { value -> viewModel.vaultCustomerId = value },
-            onSubmit = { viewModel.createSetupToken() }
+            onSubmit = {
+                context.getActivity()?.let { activity ->
+                    viewModel.createSetupToken(activity)
+                }
+            }
         )
         uiState.setupToken?.let { setupToken ->
             Spacer(modifier = Modifier.size(8.dp))
