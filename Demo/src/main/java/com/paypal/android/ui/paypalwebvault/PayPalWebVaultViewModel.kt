@@ -77,6 +77,18 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(payPalWebCheckoutVaultResult = value) }
         }
 
+    var payPalWebCheckoutVaultError: PayPalSDKError?
+        get() = _uiState.value.payPalWebCheckoutVaultError
+        set(value) {
+            _uiState.update { it.copy(payPalWebCheckoutVaultError = value) }
+        }
+
+    var isVaultingCanceled: Boolean
+        get() = _uiState.value.isVaultingCanceled
+        set(value) {
+            _uiState.update { it.copy(isVaultingCanceled = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             isCreateSetupTokenLoading = true
@@ -104,12 +116,12 @@ class PayPalWebVaultViewModel @Inject constructor(
                 }
 
                 override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-                    TODO("Not yet implemented")
+                    payPalWebCheckoutVaultError = error
                     isUpdateSetupTokenLoading = false
                 }
 
                 override fun onPayPalWebVaultCanceled() {
-                    TODO("Not yet implemented")
+                    isVaultingCanceled = true
                     isUpdateSetupTokenLoading = false
                 }
             }
