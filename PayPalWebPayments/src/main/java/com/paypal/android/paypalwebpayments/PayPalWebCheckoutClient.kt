@@ -32,6 +32,15 @@ class PayPalWebCheckoutClient internal constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
+    companion object {
+        private const val VAULT_DOMAIN = "vault_paypal"
+        private const val VAULT_RETURN_URL_PATH = "success"
+        private const val VAULT_CANCEL_URL_PATH = "user_canceled"
+
+        private const val DEEP_LINK_PARAM_APPROVAL_TOKEN_ID = "approval_token_id"
+        private const val DEEP_LINK_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
+    }
+
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
      *
@@ -51,9 +60,9 @@ class PayPalWebCheckoutClient internal constructor(
         BrowserSwitchHelper(urlScheme),
         PayPalWebCheckoutVaultExperienceContext(
             urlScheme,
-            domain = "vault_paypal",
-            returnUrlPath = "success",
-            cancelUrlPath = "user_canceled"
+            domain = VAULT_DOMAIN,
+            returnUrlPath = VAULT_RETURN_URL_PATH,
+            cancelUrlPath = VAULT_CANCEL_URL_PATH
         )
     )
 
@@ -120,7 +129,7 @@ class PayPalWebCheckoutClient internal constructor(
         browserSwitchResult = browserSwitchClient.deliverResult(activity)
         vaultListener?.also {
             browserSwitchResult?.also { result ->
-                val isVaultResult = result.requestMetadata?.has("setup_token_id") ?: false
+                val isVaultResult = result.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
                 when (result.status) {
                     BrowserSwitchStatus.SUCCESS -> {
                         if (isVaultResult) {
@@ -174,15 +183,15 @@ class PayPalWebCheckoutClient internal constructor(
         val deepLinkUrlResult = browserSwitchResult?.deepLinkUrl
         val requestMetadata = browserSwitchResult?.requestMetadata
 
-        // Setup Token Approval URL:
-        // {custom_url_scheme}://vault_paypal/success?approval_token_id={value}&approval_session_id={value}
         if (deepLinkUrlResult != null && requestMetadata != null) {
-            val isFailure = deepLinkUrlResult.path?.contains("cancel_url") ?: false
+            val isFailure = deepLinkUrlResult.path?.contains(VAULT_CANCEL_URL_PATH) ?: false
             if (isFailure) {
                 vaultListener?.onPayPalWebVaultFailure(PayPalWebCheckoutError.malformedResultError)
             } else {
-                val approvalTokenId = deepLinkUrlResult.getQueryParameter("approval_token_id")
-                val approvalSessionId = deepLinkUrlResult.getQueryParameter("approval_session_id")
+                val approvalTokenId =
+                    deepLinkUrlResult.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_TOKEN_ID)
+                val approvalSessionId =
+                    deepLinkUrlResult.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_SESSION_ID)
                 val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
                 vaultListener?.onPayPalWebVaultSuccess(result)
             }
