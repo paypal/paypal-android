@@ -49,7 +49,8 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
         setupTokenId: String?,
         approveOrderHref: String
     ): BrowserSwitchOptions {
-        val metadata = JSONObject().put("setup_token_id", setupTokenId)
+        val metadata = JSONObject()
+            .put(METADATA_KEY_SETUP_TOKEN_ID, setupTokenId)
         return BrowserSwitchOptions()
             .url(Uri.parse(approveOrderHref))
             .returnUrlScheme(urlScheme)

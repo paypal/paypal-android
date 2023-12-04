@@ -9,6 +9,13 @@
 * PayPalNativeCheckout
   * Bump native-checkout version to release `1.2.0`
   * Add `userAuthenticationEmail` to `PayPalNativeCheckoutRequest`
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutVaultExperienceContext` data class
+  * Add `PayPalWebCheckoutVaultListener` interface
+  * Add `PayPalWebCheckoutVaultResult` data class
+  * Add `experienceContext` property to `PayPalWebCheckoutClient`
+  * Add `vaultListener` property to `PayPalWebCheckoutClient`
+  * Add `vault()` method to `PayPalWebCheckoutClient`
 
 ## 1.0.0 (2023-10-02)
 
