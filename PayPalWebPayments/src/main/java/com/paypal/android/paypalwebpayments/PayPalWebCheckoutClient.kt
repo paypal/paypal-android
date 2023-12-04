@@ -127,24 +127,27 @@ class PayPalWebCheckoutClient internal constructor(
 
     internal fun handleBrowserSwitchResult() {
         browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        vaultListener?.also {
-            browserSwitchResult?.also { result ->
-                val isVaultResult = result.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
-                when (result.status) {
-                    BrowserSwitchStatus.SUCCESS -> {
-                        if (isVaultResult) {
-                            deliverVaultSuccess()
-                        } else {
-                            deliverSuccess()
-                        }
-                    }
+        if (listener == null && vaultListener == null) {
+            // guard against deliver being called when there are no listeners available
+            return
+        }
 
-                    BrowserSwitchStatus.CANCELED -> {
-                        if (isVaultResult) {
-                            deliverVaultCancellation()
-                        } else {
-                            deliverCancellation()
-                        }
+        browserSwitchResult?.also { result ->
+            val isVaultResult = result.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
+            when (result.status) {
+                BrowserSwitchStatus.SUCCESS -> {
+                    if (isVaultResult) {
+                        deliverVaultSuccess()
+                    } else {
+                        deliverSuccess()
+                    }
+                }
+
+                BrowserSwitchStatus.CANCELED -> {
+                    if (isVaultResult) {
+                        deliverVaultCancellation()
+                    } else {
+                        deliverCancellation()
                     }
                 }
             }

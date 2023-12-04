@@ -25,6 +25,11 @@ import java.lang.reflect.Field
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
 
+    companion object {
+        const val MOCK_RETURN_URL = "com.example.app://vault/success"
+        const val MOCK_CANCEL_URL = "com.example.app://vault/success"
+    }
+
     private val browserSwitchClient: BrowserSwitchClient = mockk(relaxed = true)
     private val browserSwitchHelper: BrowserSwitchHelper = mockk(relaxed = true)
     private val activity: FragmentActivity = mockk(relaxed = true)
@@ -174,7 +179,7 @@ class PayPalWebCheckoutClientUnitTest {
         val browserSwitchResult = mockk<BrowserSwitchResult>()
 
         every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-        every { browserSwitchResult.deepLinkUrl } returns mockk()
+        every { browserSwitchResult.deepLinkUrl } returns Uri.parse("example.com://paypal/success")
         every { browserSwitchResult.requestMetadata } returns null
 
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
@@ -198,6 +203,7 @@ class PayPalWebCheckoutClientUnitTest {
         val browserSwitchResult = mockk<BrowserSwitchResult>()
 
         every { browserSwitchResult.status } returns BrowserSwitchStatus.CANCELED
+        every { browserSwitchResult.deepLinkUrl } returns null
 
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
@@ -287,6 +293,7 @@ class PayPalWebCheckoutClientUnitTest {
                 analyticsService,
                 browserSwitchClient,
                 browserSwitchHelper,
+                PayPalWebCheckoutVaultExperienceContext(MOCK_RETURN_URL, MOCK_CANCEL_URL),
                 dispatcher
             )
         } ?: PayPalWebCheckoutClient(
@@ -294,7 +301,8 @@ class PayPalWebCheckoutClientUnitTest {
             coreConfig,
             analyticsService,
             browserSwitchClient,
-            browserSwitchHelper
+            browserSwitchHelper,
+            PayPalWebCheckoutVaultExperienceContext(MOCK_RETURN_URL, MOCK_CANCEL_URL),
         ))
     }
 }
