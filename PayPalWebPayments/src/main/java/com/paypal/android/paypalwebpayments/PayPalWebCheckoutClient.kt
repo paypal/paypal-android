@@ -110,7 +110,7 @@ class PayPalWebCheckoutClient internal constructor(
         browserSwitchResult = browserSwitchClient.deliverResult(activity)
         vaultListener?.also {
             browserSwitchResult?.also { result ->
-                val isVaultResult = result.deepLinkUrl?.host?.contains("vault_result") ?: false
+                val isVaultResult = result.requestMetadata?.has("setup_token_id") ?: false
                 when (result.status) {
                     BrowserSwitchStatus.SUCCESS -> {
                         if (isVaultResult) {

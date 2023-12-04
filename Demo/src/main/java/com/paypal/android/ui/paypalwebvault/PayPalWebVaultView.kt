@@ -21,9 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.approveorder.getActivity
+import com.paypal.android.ui.paypalweb.PayPalWebCheckoutCanceledView
 import com.paypal.android.ui.vaultcard.CreatePaymentTokenForm
 import com.paypal.android.ui.vaultcard.CreateSetupTokenForm
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
+import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
 
@@ -70,6 +72,14 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
                 isLoading = uiState.isCreatePaymentTokenLoading,
                 onSubmit = { viewModel.createPaymentToken() }
             )
+        }
+        uiState.payPalWebCheckoutVaultError?.let { error ->
+            Spacer(modifier = Modifier.size(24.dp))
+            PayPalSDKErrorView(error = error)
+        }
+        if (uiState.isVaultingCanceled) {
+            Spacer(modifier = Modifier.size(24.dp))
+            PayPalWebCheckoutCanceledView()
         }
         uiState.paymentToken?.let { paymentToken ->
             Spacer(modifier = Modifier.size(8.dp))
