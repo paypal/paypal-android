@@ -27,7 +27,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     companion object {
         const val MOCK_RETURN_URL = "com.example.app://vault/success"
-        const val MOCK_CANCEL_URL = "com.example.app://vault/success"
+        const val MOCK_CANCEL_URL = "com.example.app://vault/cancel"
     }
 
     private val browserSwitchClient: BrowserSwitchClient = mockk(relaxed = true)
