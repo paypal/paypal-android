@@ -14,7 +14,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
-import com.paypal.android.models.PaymentMethod
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
@@ -111,12 +110,7 @@ class PayPalWebViewModel @Inject constructor(
         viewModelScope.launch {
             isCreateOrderLoading = true
             val orderRequest = _uiState.value.run {
-                OrderRequest(
-                    PaymentMethod.PAYPAL,
-                    intentOption,
-                    false,
-                    ""
-                )
+                OrderRequest(intentOption, false, "")
             }
             createdOrder = createOrderUseCase(orderRequest)
             isCreateOrderLoading = false

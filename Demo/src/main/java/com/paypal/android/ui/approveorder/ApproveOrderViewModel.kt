@@ -18,7 +18,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
-import com.paypal.android.models.PaymentMethod
 import com.paypal.android.models.TestCard
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
@@ -52,14 +51,7 @@ class ApproveOrderViewModel @Inject constructor(
             isCreateOrderLoading = true
 
             val uiState = uiState.value
-            val orderRequest = uiState.run {
-                OrderRequest(
-                    PaymentMethod.CARD,
-                    intentOption,
-                    shouldVault,
-                    customerId
-                )
-            }
+            val orderRequest = uiState.run { OrderRequest(intentOption, shouldVault, customerId) }
             createdOrder = createOrderUseCase(orderRequest)
             isCreateOrderLoading = false
         }
