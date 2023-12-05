@@ -110,7 +110,7 @@ class PayPalWebViewModel @Inject constructor(
         viewModelScope.launch {
             isCreateOrderLoading = true
             val orderRequest = _uiState.value.run {
-                OrderRequest(intentOption, false, "")
+                OrderRequest(orderIntent = intentOption, shouldVault = false, vaultCustomerId = "")
             }
             createdOrder = createOrderUseCase(orderRequest)
             isCreateOrderLoading = false
