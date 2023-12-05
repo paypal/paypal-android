@@ -26,8 +26,8 @@ import com.paypal.android.ui.vaultcard.CreatePaymentTokenForm
 import com.paypal.android.ui.vaultcard.CreateSetupTokenForm
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSDKErrorView
+import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
-import com.paypal.android.uishared.components.SetupTokenView
 
 @Composable
 fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
@@ -57,7 +57,7 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
         )
         uiState.setupToken?.let { setupToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            SetupTokenView(setupToken = setupToken)
+            PayPalSetupTokenView(setupToken = setupToken)
             Spacer(modifier = Modifier.size(8.dp))
             AttachPayPalAccountToSetupToken(
                 uiState = uiState,

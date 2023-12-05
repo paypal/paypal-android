@@ -3,7 +3,7 @@ package com.paypal.android.usecase
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.PayPalPaymentToken
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import org.json.JSONObject
 import javax.inject.Inject
@@ -12,7 +12,7 @@ class CreatePayPalPaymentTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(setupToken: SetupToken): PayPalPaymentToken {
+    suspend operator fun invoke(setupToken: PayPalSetupToken): PayPalPaymentToken {
         // language=JSON
         val request = """
             {

@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardPaymentToken
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -36,7 +36,7 @@ class VaultCardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
 
-    var setupToken: SetupToken?
+    var setupToken: CardSetupToken?
         get() = _uiState.value.setupToken
         set(value) {
             _uiState.update { it.copy(setupToken = value) }

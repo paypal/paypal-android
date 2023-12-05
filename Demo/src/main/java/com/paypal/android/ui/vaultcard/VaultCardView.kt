@@ -26,7 +26,7 @@ import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
-import com.paypal.android.uishared.components.SetupTokenView
+import com.paypal.android.uishared.components.CardSetupTokenView
 
 @ExperimentalMaterial3Api
 @Composable
@@ -55,7 +55,7 @@ fun VaultCardView(
         )
         uiState.setupToken?.let { setupToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            SetupTokenView(setupToken = setupToken)
+            CardSetupTokenView(setupToken = setupToken)
             Spacer(modifier = Modifier.size(8.dp))
             UpdateSetupTokenWithCardForm(
                 uiState = uiState,

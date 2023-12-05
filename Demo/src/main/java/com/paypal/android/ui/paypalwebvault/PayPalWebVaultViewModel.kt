@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalPaymentToken
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -58,7 +58,7 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(vaultCustomerId = value) }
         }
 
-    private var setupToken: SetupToken?
+    private var setupToken: PayPalSetupToken?
         get() = _uiState.value.setupToken
         set(value) {
             _uiState.update { it.copy(setupToken = value) }

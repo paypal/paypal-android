@@ -2,7 +2,7 @@ package com.paypal.android.usecase
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultExperienceContext
 import org.json.JSONArray
@@ -15,7 +15,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 
     suspend operator fun invoke(
         experienceContext: PayPalWebCheckoutVaultExperienceContext
-    ): SetupToken {
+    ): PayPalSetupToken {
         val requestJSON = JSONObject()
         val payPalJSON = JSONObject()
         payPalJSON.put("usage_type", "MERCHANT")
@@ -49,7 +49,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             }
         }
 
-        return SetupToken(
+        return PayPalSetupToken(
             id = responseJSON.getString("id"),
             customerId = customerJSON.getString("id"),
             status = responseJSON.getString("status"),
