@@ -3,8 +3,15 @@ package com.paypal.android.usecase
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.api.requests.PayPalPaymentSource
+import com.paypal.android.api.requests.PaymentSource
+import com.paypal.android.api.requests.SetupTokenRequest
+import com.paypal.android.api.requests.UsageType
+import com.paypal.android.api.requests.VaultInstruction
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultExperienceContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
@@ -14,24 +21,22 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        experienceContext: PayPalWebCheckoutVaultExperienceContext
+        vaultExperienceContext: PayPalWebCheckoutVaultExperienceContext
     ): PayPalSetupToken {
-        val requestJSON = JSONObject()
-        val payPalJSON = JSONObject()
-        payPalJSON.put("usage_type", "MERCHANT")
 
-        val experienceContextJSON = JSONObject()
-        experienceContextJSON.put("vault_instruction", "ON_PAYER_APPROVAL")
-        experienceContextJSON.put("return_url", experienceContext.returnUrl)
-        experienceContextJSON.put("cancel_url", experienceContext.cancelUrl)
-        payPalJSON.put("experience_context", experienceContextJSON)
-
-        val paymentSourceJSON = JSONObject()
-        paymentSourceJSON.put("paypal", payPalJSON)
-        requestJSON.put("payment_source", paymentSourceJSON)
+        val request = SetupTokenRequest().apply {
+            paymentSource[PaymentSource.PayPal] = PayPalPaymentSource().apply {
+                usageType = UsageType.Merchant
+                experienceContext.apply {
+                    vaultInstruction = VaultInstruction.OnPayerApproval
+                    returnUrl = vaultExperienceContext.returnUrl
+                    cancelUrl = vaultExperienceContext.cancelUrl
+                }
+            }
+        }
 
         // Ref: https://stackoverflow.com/a/19610814
-        val body = requestJSON.toString().replace("\\/", "/")
+        val body = Json.encodeToString(request).replace("\\/", "/")
 
         val jsonOrder = JsonParser.parseString(body) as JsonObject
         val response = sdkSampleServerAPI.createSetupToken(jsonOrder)

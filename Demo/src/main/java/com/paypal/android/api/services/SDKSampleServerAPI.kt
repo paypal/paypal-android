@@ -20,6 +20,10 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 
+// Ref: https://github.com/Kotlin/kotlinx.serialization
+// Migrate away from GSON + Retrofit to Kotlin + Retrofit
+// Ref: https://github.com/JakeWharton/retrofit2-kotlinx-serialization-converter
+
 private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
