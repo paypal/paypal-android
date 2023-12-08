@@ -40,19 +40,10 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 
         val jsonOrder = JsonParser.parseString(body) as JsonObject
         val response = sdkSampleServerAPI.createSetupToken(jsonOrder)
+
         val responseJSON = JSONObject(response.string())
-
         val customerJSON = responseJSON.getJSONObject("customer")
-
-        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
-        var approveVaultHref: String? = null
-        for (i in 0 until linksJSON.length()) {
-            val link = linksJSON.getJSONObject(i)
-            if (link.getString("rel") == "approve") {
-                approveVaultHref = link.getString("href")
-                break
-            }
-        }
+        val approveVaultHref = findApprovalHref(responseJSON)
 
         return PayPalSetupToken(
             id = responseJSON.getString("id"),
@@ -60,5 +51,16 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             status = responseJSON.getString("status"),
             approveVaultHref = approveVaultHref
         )
+    }
+
+    private fun findApprovalHref(responseJSON: JSONObject): String? {
+        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
+        for (i in 0 until linksJSON.length()) {
+            val link = linksJSON.getJSONObject(i)
+            if (link.getString("rel") == "approve") {
+                return link.getString("href")
+            }
+        }
+        return null
     }
 }
