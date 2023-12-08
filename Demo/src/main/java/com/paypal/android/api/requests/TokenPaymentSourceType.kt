@@ -4,13 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class PaymentSource {
-    @SerialName("paypal")
-    PayPal,
-
-    @SerialName("card")
-    Card,
-
-    @SerialName("token")
-    Token
+enum class TokenPaymentSourceType {
+    @SerialName("SETUP_TOKEN")
+    SetupToken
 }
