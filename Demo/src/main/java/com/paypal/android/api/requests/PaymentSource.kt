@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class PaymentSource {
     @SerialName("paypal")
-    PayPal
+    PayPal,
+    @SerialName("card")
+    Card
 }
