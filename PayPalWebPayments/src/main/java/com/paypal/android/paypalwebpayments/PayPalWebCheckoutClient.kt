@@ -72,8 +72,6 @@ class PayPalWebCheckoutClient internal constructor(
 
     private var browserSwitchResult: BrowserSwitchResult? = null
 
-    private var orderId: String? = null
-
     /**
      * Sets a listener to receive notifications when a PayPal event occurs.
      */
@@ -109,7 +107,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", orderId)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
 
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
@@ -147,7 +145,9 @@ class PayPalWebCheckoutClient internal constructor(
                     if (isVaultResult) {
                         deliverVaultCancellation()
                     } else {
-                        deliverCancellation()
+                        val orderId =
+                            result.requestMetadata?.getString(BrowserSwitchHelper.METADATA_KEY_ORDER_ID)
+                        deliverCancellation(orderId)
                     }
                 }
             }
@@ -176,7 +176,7 @@ class PayPalWebCheckoutClient internal constructor(
         browserSwitchResult = null
     }
 
-    private fun deliverCancellation() {
+    private fun deliverCancellation(orderId: String?) {
         browserSwitchResult = null
         analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
         listener?.onPayPalWebCanceled()
@@ -206,17 +206,17 @@ class PayPalWebCheckoutClient internal constructor(
 
     private fun deliverVaultCancellation() {
         browserSwitchResult = null
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
         vaultListener?.onPayPalWebVaultCanceled()
     }
 
     private fun deliverFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", null)
         listener?.onPayPalWebFailure(error)
     }
 
     private fun deliverSuccess(result: PayPalWebCheckoutResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", orderId)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", null)
         listener?.onPayPalWebSuccess(result)
     }
 

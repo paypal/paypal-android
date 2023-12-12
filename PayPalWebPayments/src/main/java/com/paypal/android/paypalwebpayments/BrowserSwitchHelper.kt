@@ -9,6 +9,7 @@ import org.json.JSONObject
 internal class BrowserSwitchHelper(private val urlScheme: String) {
 
     companion object {
+        const val METADATA_KEY_ORDER_ID = "order_id"
         const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
 
@@ -38,7 +39,7 @@ internal class BrowserSwitchHelper(private val urlScheme: String) {
         config: CoreConfig,
         funding: PayPalWebCheckoutFundingSource
     ): BrowserSwitchOptions {
-        val metadata = JSONObject().put("order_id", orderId)
+        val metadata = JSONObject().put(METADATA_KEY_ORDER_ID, orderId)
         return BrowserSwitchOptions()
             .url(buildPayPalCheckoutUri(orderId, config, funding))
             .returnUrlScheme(urlScheme)
