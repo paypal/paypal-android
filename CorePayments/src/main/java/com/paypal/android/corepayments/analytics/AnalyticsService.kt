@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 /**
  * @suppress
@@ -43,7 +44,7 @@ class AnalyticsService internal constructor(
     fun sendAnalyticsEvent(name: String, orderId: String?) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
-        scope.async {
+        scope.launch {
             val timestamp = System.currentTimeMillis()
             try {
                 val deviceData = deviceInspector.inspect()

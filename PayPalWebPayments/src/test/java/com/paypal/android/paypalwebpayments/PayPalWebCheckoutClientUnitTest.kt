@@ -61,6 +61,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         val payerId = "fake_payer_id"
         val orderId = "fake_order_id"
+
         val browserSwitchResult = mockk<BrowserSwitchResult>()
         val url = "http://testurl.com/checkout?PayerID=$payerId"
         val metadata = JSONObject()
