@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
+    // NEXT MAJOR VERSION: remove hardcoded activity reference
     private val activity: FragmentActivity,
     private val coreConfig: CoreConfig,
     private val analyticsService: AnalyticsService,
@@ -67,38 +68,22 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     private val exceptionHandler = CoreCoroutineExceptionHandler {
-        deliverFailure(it)
+        notifyWebCheckoutFailure(it)
     }
 
-    private var browserSwitchResult: BrowserSwitchResult? = null
-
     /**
-     * Sets a listener to receive notifications when a PayPal event occurs.
+     * Sets a listener to receive notifications when a PayPal Checkout event occurs.
      */
     var listener: PayPalWebCheckoutListener? = null
-        /**
-         * @param value a [PayPalWebCheckoutListener] to receive results from the PayPal flow
-         */
-        set(value) {
-            field = value
-            browserSwitchResult?.also {
-                handleBrowserSwitchResult()
-            }
-        }
 
+    /**
+     * Sets a listener to receive notificatioins when a Paypal Vault event occurs.
+     */
     var vaultListener: PayPalWebCheckoutVaultListener? = null
-        /**
-         * @param value a [PayPalWebCheckoutListener] to receive results from the PayPal flow
-         */
-        set(value) {
-            field = value
-            browserSwitchResult?.also {
-                handleBrowserSwitchResult()
-            }
-        }
 
     init {
         activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
+        // NEXT MAJOR VERSION: remove hardcoded activity reference
     }
 
     /**
@@ -118,113 +103,119 @@ class PayPalWebCheckoutClient internal constructor(
                 )
                 browserSwitchClient.start(activity, browserSwitchOptions)
             } catch (e: PayPalSDKError) {
-                deliverFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationId))
+                notifyWebCheckoutFailure(
+                    APIClientError.clientIDNotFoundError(
+                        e.code,
+                        e.correlationId
+                    )
+                )
             }
         }
     }
 
     internal fun handleBrowserSwitchResult() {
-        browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        if (listener == null && vaultListener == null) {
-            // guard against deliver being called when there are no listeners available
-            return
-        }
-
-        browserSwitchResult?.also { result ->
-            val isVaultResult = result.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
-            when (result.status) {
-                BrowserSwitchStatus.SUCCESS -> {
-                    if (isVaultResult) {
-                        deliverVaultSuccess()
-                    } else {
-                        deliverSuccess()
-                    }
-                }
-
-                BrowserSwitchStatus.CANCELED -> {
-                    if (isVaultResult) {
-                        deliverVaultCancellation()
-                    } else {
-                        val orderId =
-                            result.requestMetadata?.getString(BrowserSwitchHelper.METADATA_KEY_ORDER_ID)
-                        deliverCancellation(orderId)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun deliverSuccess() {
-        if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
-            val webResult = PayPalDeepLinkUrlResult(
-                browserSwitchResult?.deepLinkUrl!!,
-                browserSwitchResult?.requestMetadata!!
-            )
-            if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
-                deliverSuccess(
-                    PayPalWebCheckoutResult(
-                        webResult.orderId,
-                        webResult.payerId
-                    )
-                )
+        browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
+            val isVaultResult =
+                browserSwitchResult.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
+            if (isVaultResult) {
+                handleVaultBrowserSwitchResult(browserSwitchResult)
             } else {
-                deliverFailure(PayPalWebCheckoutError.malformedResultError)
+                handleWebCheckoutBrowserSwitchResult(browserSwitchResult)
             }
-        } else {
-            deliverFailure(PayPalWebCheckoutError.unknownError)
+
         }
-        browserSwitchResult = null
     }
 
-    private fun deliverCancellation(orderId: String?) {
-        browserSwitchResult = null
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
-        listener?.onPayPalWebCanceled()
-    }
-
-    private fun deliverVaultSuccess() {
-        val deepLinkUrlResult = browserSwitchResult?.deepLinkUrl
-        val requestMetadata = browserSwitchResult?.requestMetadata
-
-        if (deepLinkUrlResult != null && requestMetadata != null) {
-            val isFailure = deepLinkUrlResult.path?.contains(VAULT_CANCEL_URL_PATH) ?: false
-            if (isFailure) {
-                vaultListener?.onPayPalWebVaultFailure(PayPalWebCheckoutError.malformedResultError)
-            } else {
-                val approvalTokenId =
-                    deepLinkUrlResult.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_TOKEN_ID)
-                val approvalSessionId =
-                    deepLinkUrlResult.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_SESSION_ID)
-                val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
-                vaultListener?.onPayPalWebVaultSuccess(result)
+    private fun handleWebCheckoutBrowserSwitchResult(browserSwitchResult: BrowserSwitchResult) {
+        when (browserSwitchResult.status) {
+            BrowserSwitchStatus.SUCCESS -> {
+                val deepLinkUrl = browserSwitchResult.deepLinkUrl
+                val requestMetadata = browserSwitchResult.requestMetadata
+                if (deepLinkUrl != null && requestMetadata != null) {
+                    val deepLink = PayPalWebCheckoutDeepLink(deepLinkUrl, requestMetadata)
+                    if (deepLink.isValid) {
+                        val webCheckoutResult =
+                            deepLink.run { PayPalWebCheckoutResult(orderId, payerId) }
+                        notifyWebCheckoutSuccess(webCheckoutResult)
+                    } else {
+                        notifyWebCheckoutFailure(PayPalWebCheckoutError.malformedResultError)
+                    }
+                } else {
+                    notifyWebCheckoutFailure(PayPalWebCheckoutError.unknownError)
+                }
             }
-        } else {
-            vaultListener?.onPayPalWebVaultFailure(PayPalWebCheckoutError.malformedResultError)
+
+            BrowserSwitchStatus.CANCELED -> {
+                val orderId =
+                    browserSwitchResult.requestMetadata?.getString(BrowserSwitchHelper.METADATA_KEY_ORDER_ID)
+                notifyWebCheckoutCancelation(orderId)
+            }
         }
-        browserSwitchResult = null
     }
 
-    private fun deliverVaultCancellation() {
-        browserSwitchResult = null
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
-        vaultListener?.onPayPalWebVaultCanceled()
+    private fun handleVaultBrowserSwitchResult(browserSwitchResult: BrowserSwitchResult) {
+        when (browserSwitchResult.status) {
+            BrowserSwitchStatus.SUCCESS -> {
+                val deepLinkUrlResult = browserSwitchResult.deepLinkUrl
+                val requestMetadata = browserSwitchResult.requestMetadata
+
+                if (deepLinkUrlResult != null && requestMetadata != null) {
+                    val isFailure = deepLinkUrlResult.path?.contains(VAULT_CANCEL_URL_PATH) ?: false
+                    if (isFailure) {
+                        notifyVaultFailure(PayPalWebCheckoutError.malformedResultError)
+                    } else {
+                        val approvalTokenId =
+                            deepLinkUrlResult.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_TOKEN_ID)
+                        val approvalSessionId =
+                            deepLinkUrlResult.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_SESSION_ID)
+                        val result =
+                            PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
+                        notifyVaultSuccess(result)
+                    }
+                } else {
+                    notifyVaultFailure(PayPalWebCheckoutError.malformedResultError)
+                }
+            }
+
+            BrowserSwitchStatus.CANCELED -> {
+                notifyVaultCancelation()
+            }
+        }
     }
 
-    private fun deliverFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", null)
-        listener?.onPayPalWebFailure(error)
-    }
-
-    private fun deliverSuccess(result: PayPalWebCheckoutResult) {
+    private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", null)
         listener?.onPayPalWebSuccess(result)
     }
 
+    private fun notifyWebCheckoutFailure(error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", null)
+        listener?.onPayPalWebFailure(error)
+    }
+
+    private fun notifyWebCheckoutCancelation(orderId: String?) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
+        listener?.onPayPalWebCanceled()
+    }
+
+    private fun notifyVaultSuccess(result: PayPalWebCheckoutVaultResult) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
+        vaultListener?.onPayPalWebVaultSuccess(result)
+    }
+
+    private fun notifyVaultFailure(error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", null)
+        vaultListener?.onPayPalWebVaultFailure(error)
+    }
+
+    private fun notifyVaultCancelation() {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
+        vaultListener?.onPayPalWebVaultCanceled()
+    }
+
     fun vault(activity: AppCompatActivity, setupTokenId: String, approveVaultHref: String) {
-        val browserSwitchOptions = browserSwitchHelper.configurePayPalVaultApproveSwitchOptions(
-            setupTokenId,
-            approveVaultHref
-        )
+        val browserSwitchOptions = browserSwitchHelper
+            .configurePayPalVaultApproveSwitchOptions(setupTokenId, approveVaultHref)
         browserSwitchClient.start(activity, browserSwitchOptions)
     }
 }
