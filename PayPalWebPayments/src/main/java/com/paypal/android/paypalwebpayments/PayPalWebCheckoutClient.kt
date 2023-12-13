@@ -60,7 +60,7 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Sets a listener to receive notificatioins when a Paypal Vault event occurs.
      */
-    var vaultListener: PayPalWebCheckoutVaultListener? = null
+    var vaultListener: PayPalWebVaultListener? = null
 
     init {
         activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))

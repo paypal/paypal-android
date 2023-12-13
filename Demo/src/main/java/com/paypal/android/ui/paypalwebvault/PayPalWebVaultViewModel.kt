@@ -10,7 +10,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultListener
+import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
@@ -27,7 +27,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
     val sdkSampleServerAPI: SDKSampleServerAPI
-) : ViewModel(), PayPalWebCheckoutVaultListener {
+) : ViewModel(), PayPalWebVaultListener {
 
     companion object {
         const val URL_SCHEME = "com.paypal.android.demo"
