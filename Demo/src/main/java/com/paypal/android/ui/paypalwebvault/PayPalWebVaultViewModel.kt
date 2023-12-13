@@ -12,6 +12,7 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
+import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -126,7 +127,8 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun updateSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
             isUpdateSetupTokenLoading = true
-            paypalClient.vault(activity, setupToken!!.id, setupToken!!.approveVaultHref!!)
+            val request = setupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
+            paypalClient.vault(activity, request)
         }
     }
 
