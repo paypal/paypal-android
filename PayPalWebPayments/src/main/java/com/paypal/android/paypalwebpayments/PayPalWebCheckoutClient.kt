@@ -2,16 +2,9 @@ package com.paypal.android.paypalwebpayments
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -23,7 +16,7 @@ class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
     private val activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
-    private val browserSwitchClient: PayPalWebBrowserSwitchClient,
+    private val payPalWebLauncher: PayPalWebLauncher,
     val experienceContext: PayPalWebCheckoutVaultExperienceContext,
 ) {
 
@@ -50,7 +43,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) : this(
         activity,
         AnalyticsService(activity.applicationContext, configuration),
-        PayPalWebBrowserSwitchClient(urlScheme, configuration),
+        PayPalWebLauncher(urlScheme, configuration),
         PayPalWebCheckoutVaultExperienceContext(
             urlScheme,
             domain = VAULT_DOMAIN,
@@ -81,17 +74,17 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun start(request: PayPalWebCheckoutRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-        browserSwitchClient.launchPayPalWebCheckout(activity, request)?.let { launchError ->
+        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
             notifyWebCheckoutFailure(launchError)
         }
     }
 
     fun vault(activity: AppCompatActivity, request: PayPalWebVaultRequest) {
-        browserSwitchClient.launchPayPalWebVault(activity, request)
+        payPalWebLauncher.launchPayPalWebVault(activity, request)
     }
 
     internal fun handleBrowserSwitchResult() {
-        browserSwitchClient.deliverResult(activity)?.let { status ->
+        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
             when (status) {
                 is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
                 is PayPalWebStatus.CheckoutError -> notifyWebCheckoutFailure(status.error)

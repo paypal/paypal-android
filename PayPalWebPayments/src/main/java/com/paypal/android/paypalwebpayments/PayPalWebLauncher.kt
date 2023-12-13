@@ -15,7 +15,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.VA
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
-internal class PayPalWebBrowserSwitchClient(
+internal class PayPalWebLauncher(
     private val urlScheme: String,
     private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
@@ -69,7 +69,7 @@ internal class PayPalWebBrowserSwitchClient(
             .build()
     }
 
-    fun configurePayPalBrowserSwitchOptions(
+    private fun configurePayPalBrowserSwitchOptions(
         orderId: String?,
         config: CoreConfig,
         funding: PayPalWebCheckoutFundingSource
@@ -81,7 +81,7 @@ internal class PayPalWebBrowserSwitchClient(
             .metadata(metadata)
     }
 
-    fun configurePayPalVaultApproveSwitchOptions(
+    private fun configurePayPalVaultApproveSwitchOptions(
         setupTokenId: String?,
         approveOrderHref: String
     ): BrowserSwitchOptions {
@@ -93,19 +93,10 @@ internal class PayPalWebBrowserSwitchClient(
             .metadata(metadata)
     }
 
-    fun deliverResult(activity: FragmentActivity) =
+    fun deliverBrowserSwitchResult(activity: FragmentActivity) =
         browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
             val isVaultResult =
                 browserSwitchResult.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
-            if (isVaultResult) {
-                parseWebCheckoutResult(browserSwitchResult)
-            }
-            parseVaultResult(browserSwitchResult)
-        }
-
-    internal fun parsePayPalWebStatus(browserSwitchResult: BrowserSwitchResult?) =
-        browserSwitchResult?.let { result ->
-            val isVaultResult = result.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
             if (isVaultResult) {
                 parseWebCheckoutResult(browserSwitchResult)
             }
