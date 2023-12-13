@@ -105,23 +105,7 @@ internal class PayPalWebLauncher(
 
     private fun parseWebCheckoutResult(browserSwitchResult: BrowserSwitchResult) =
         when (browserSwitchResult.status) {
-            BrowserSwitchStatus.SUCCESS -> {
-                val deepLinkUrl = browserSwitchResult.deepLinkUrl
-                val requestMetadata = browserSwitchResult.requestMetadata
-                if (deepLinkUrl != null && requestMetadata != null) {
-                    val deepLink = PayPalWebCheckoutDeepLink(deepLinkUrl, requestMetadata)
-                    if (deepLink.isValid) {
-                        val result =
-                            deepLink.run { PayPalWebCheckoutResult(orderId, payerId) }
-                        PayPalWebStatus.CheckoutSuccess(result)
-                    } else {
-                        PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError)
-                    }
-                } else {
-                    PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.unknownError)
-                }
-            }
-
+            BrowserSwitchStatus.SUCCESS -> parseWebCheckoutSuccessResult(browserSwitchResult)
             BrowserSwitchStatus.CANCELED -> {
                 val orderId =
                     browserSwitchResult.requestMetadata?.getString(METADATA_KEY_ORDER_ID)
@@ -130,6 +114,23 @@ internal class PayPalWebLauncher(
 
             else -> null
         }
+
+    private fun parseWebCheckoutSuccessResult(browserSwitchResult: BrowserSwitchResult): PayPalWebStatus {
+        val deepLinkUrl = browserSwitchResult.deepLinkUrl
+        val metadata = browserSwitchResult.requestMetadata
+
+        return if (deepLinkUrl == null || metadata == null) {
+            PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.unknownError)
+        } else {
+            val payerId = deepLinkUrl.getQueryParameter("PayerID")
+            val orderId = metadata.getString(METADATA_KEY_ORDER_ID)
+            if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
+                PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError)
+            } else {
+                PayPalWebStatus.CheckoutSuccess(PayPalWebCheckoutResult(orderId, payerId))
+            }
+        }
+    }
 
     private fun parseVaultResult(browserSwitchResult: BrowserSwitchResult) =
         when (browserSwitchResult.status) {
