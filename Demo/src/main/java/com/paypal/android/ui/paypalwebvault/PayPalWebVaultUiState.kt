@@ -9,7 +9,7 @@ data class PayPalWebVaultUiState(
     val isCreateSetupTokenLoading: Boolean = false,
     val vaultCustomerId: String = "",
     val setupToken: PayPalSetupToken? = null,
-    val isUpdateSetupTokenLoading: Boolean = false,
+    val isVaultPayPalLoading: Boolean = false,
     val payPalWebCheckoutVaultResult: PayPalWebCheckoutVaultResult? = null,
     val payPalWebCheckoutVaultError: PayPalSDKError? = null,
     val isCreatePaymentTokenLoading: Boolean = false,

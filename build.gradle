@@ -103,7 +103,6 @@ plugins {
     id "io.gitlab.arturbosch.detekt" version "${detektVersion}"
     id 'org.jetbrains.kotlin.android' version '1.5.30' apply false
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.7.10' apply false
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo

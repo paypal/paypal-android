@@ -3,15 +3,8 @@ package com.paypal.android.usecase
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.PayPalSetupToken
-import com.paypal.android.api.requests.PayPalPaymentSource
-import com.paypal.android.api.requests.PaymentSource
-import com.paypal.android.api.requests.SetupTokenRequest
-import com.paypal.android.api.requests.UsageType
-import com.paypal.android.api.requests.VaultInstruction
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultExperienceContext
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject

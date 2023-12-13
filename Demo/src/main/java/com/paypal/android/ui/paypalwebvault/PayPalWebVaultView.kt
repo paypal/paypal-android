@@ -59,8 +59,8 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
             Spacer(modifier = Modifier.size(8.dp))
             PayPalSetupTokenView(setupToken = setupToken)
             Spacer(modifier = Modifier.size(8.dp))
-            AttachPayPalAccountToSetupToken(
-                uiState = uiState,
+            VaultPayPal(
+                isLoading = uiState.isVaultPayPalLoading,
                 onSubmit = {
                     context.getActivity()?.let { activity ->
                         viewModel.updateSetupToken(activity)
@@ -93,8 +93,8 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun AttachPayPalAccountToSetupToken(
-    uiState: PayPalWebVaultUiState,
+fun VaultPayPal(
+    isLoading: Boolean,
     onSubmit: () -> Unit
 ) {
     OutlinedCard(
@@ -110,7 +110,7 @@ fun AttachPayPalAccountToSetupToken(
             Spacer(modifier = Modifier.size(8.dp))
             WireframeButton(
                 text = "Vault PayPal",
-                isLoading = uiState.isUpdateSetupTokenLoading,
+                isLoading = isLoading,
                 onClick = { onSubmit() },
                 modifier = Modifier.fillMaxWidth()
             )
