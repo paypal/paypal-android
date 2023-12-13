@@ -12,7 +12,7 @@ import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.DEEP_LINK_PARAM_APPROVAL_SESSION_ID
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.DEEP_LINK_PARAM_APPROVAL_TOKEN_ID
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.VAULT_DOMAIN
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.VAULT_HOST
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -97,11 +97,12 @@ internal class PayPalWebLauncher(
     fun deliverBrowserSwitchResult(activity: FragmentActivity) =
         browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
             val isVaultResult =
-                browserSwitchResult.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
+                browserSwitchResult.deepLinkUrl?.host?.contains(VAULT_HOST) ?: false
             if (isVaultResult) {
                 parseVaultResult(browserSwitchResult)
+            } else {
+                parseWebCheckoutResult(browserSwitchResult)
             }
-            parseWebCheckoutResult(browserSwitchResult)
         }
 
     private fun parseWebCheckoutResult(browserSwitchResult: BrowserSwitchResult) =
@@ -109,7 +110,7 @@ internal class PayPalWebLauncher(
             BrowserSwitchStatus.SUCCESS -> parseWebCheckoutSuccessResult(browserSwitchResult)
             BrowserSwitchStatus.CANCELED -> {
                 val orderId =
-                    browserSwitchResult.requestMetadata?.getString(METADATA_KEY_ORDER_ID)
+                    browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
                 PayPalWebStatus.CheckoutCanceled(orderId)
             }
 
@@ -124,7 +125,7 @@ internal class PayPalWebLauncher(
             PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.unknownError)
         } else {
             val payerId = deepLinkUrl.getQueryParameter("PayerID")
-            val orderId = metadata.getString(METADATA_KEY_ORDER_ID)
+            val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
             if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
                 PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError)
             } else {

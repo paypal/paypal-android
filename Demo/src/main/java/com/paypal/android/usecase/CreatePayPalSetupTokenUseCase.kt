@@ -24,19 +24,24 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
         vaultExperienceContext: PayPalWebCheckoutVaultExperienceContext
     ): PayPalSetupToken {
 
-        val request = SetupTokenRequest().apply {
-            paymentSource[PaymentSource.PayPal] = PayPalPaymentSource().apply {
-                usageType = UsageType.Merchant
-                experienceContext.apply {
-                    vaultInstruction = VaultInstruction.OnPayerApproval
-                    returnUrl = vaultExperienceContext.returnUrl
-                    cancelUrl = vaultExperienceContext.cancelUrl
+        // language=JSON
+        val request = """
+            {
+              "payment_source": {
+                "paypal": {
+                  "usage_type": "MERCHANT",
+                  "experience_context": {
+                    "vault_instruction": "ON_PAYER_APPROVAL",
+                    "return_url": "${vaultExperienceContext.returnUrl}",
+                    "cancel_url": "${vaultExperienceContext.cancelUrl}"
+                  }
                 }
+              }
             }
-        }
+        """
 
         // Ref: https://stackoverflow.com/a/19610814
-        val body = Json.encodeToString(request).replace("\\/", "/")
+        val body = request.replace("\\/", "/")
 
         val jsonOrder = JsonParser.parseString(body) as JsonObject
         val response = sdkSampleServerAPI.createSetupToken(jsonOrder)

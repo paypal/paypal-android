@@ -21,7 +21,7 @@ class PayPalWebCheckoutClient internal constructor(
 ) {
 
     companion object {
-        internal const val VAULT_DOMAIN = "vault_paypal"
+        internal const val VAULT_HOST = "vault_paypal"
         internal const val VAULT_RETURN_URL_PATH = "success"
         internal const val VAULT_CANCEL_URL_PATH = "user_canceled"
 
@@ -46,7 +46,7 @@ class PayPalWebCheckoutClient internal constructor(
         PayPalWebLauncher(urlScheme, configuration),
         PayPalWebCheckoutVaultExperienceContext(
             urlScheme,
-            domain = VAULT_DOMAIN,
+            domain = VAULT_HOST,
             returnUrlPath = VAULT_RETURN_URL_PATH,
             cancelUrlPath = VAULT_CANCEL_URL_PATH
         )
