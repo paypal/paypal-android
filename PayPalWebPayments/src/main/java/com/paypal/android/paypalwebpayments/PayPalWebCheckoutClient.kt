@@ -22,12 +22,9 @@ import kotlinx.coroutines.launch
 class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
     private val activity: FragmentActivity,
-    private val coreConfig: CoreConfig,
     private val analyticsService: AnalyticsService,
-    private val browserSwitchClient: BrowserSwitchClient,
-    private val browserSwitchHelper: BrowserSwitchHelper,
+    private val browserSwitchClient: PayPalWebBrowserSwitchClient,
     val experienceContext: PayPalWebCheckoutVaultExperienceContext,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     companion object {
@@ -52,10 +49,8 @@ class PayPalWebCheckoutClient internal constructor(
         urlScheme: String
     ) : this(
         activity,
-        configuration,
         AnalyticsService(activity.applicationContext, configuration),
-        BrowserSwitchClient(),
-        BrowserSwitchHelper(urlScheme),
+        PayPalWebBrowserSwitchClient(urlScheme, configuration),
         PayPalWebCheckoutVaultExperienceContext(
             urlScheme,
             domain = VAULT_DOMAIN,
@@ -63,10 +58,6 @@ class PayPalWebCheckoutClient internal constructor(
             cancelUrlPath = VAULT_CANCEL_URL_PATH
         )
     )
-
-    private val exceptionHandler = CoreCoroutineExceptionHandler {
-        notifyWebCheckoutFailure(it)
-    }
 
     /**
      * Sets a listener to receive notifications when a PayPal Checkout event occurs.
@@ -90,29 +81,17 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun start(request: PayPalWebCheckoutRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-
-        CoroutineScope(dispatcher).launch(exceptionHandler) {
-            try {
-                val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-                    request.orderId,
-                    coreConfig,
-                    request.fundingSource
-                )
-                browserSwitchClient.start(activity, browserSwitchOptions)
-            } catch (e: PayPalSDKError) {
-                notifyWebCheckoutFailure(
-                    APIClientError.clientIDNotFoundError(
-                        e.code,
-                        e.correlationId
-                    )
-                )
-            }
+        browserSwitchClient.launchPayPalWebCheckout(activity, request)?.let { launchError ->
+            notifyWebCheckoutFailure(launchError)
         }
     }
 
+    fun vault(activity: AppCompatActivity, request: PayPalWebVaultRequest) {
+        browserSwitchClient.launchPayPalWebVault(activity, request)
+    }
+
     internal fun handleBrowserSwitchResult() {
-        val browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        browserSwitchHelper.parsePayPalWebStatus(browserSwitchResult)?.let { status ->
+        browserSwitchClient.deliverResult(activity)?.let { status ->
             when (status) {
                 is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
                 is PayPalWebStatus.CheckoutError -> notifyWebCheckoutFailure(status.error)
@@ -163,11 +142,5 @@ class PayPalWebCheckoutClient internal constructor(
             null
         )
         vaultListener?.onPayPalWebVaultCanceled()
-    }
-
-    fun vault(activity: AppCompatActivity, setupTokenId: String, approveVaultHref: String) {
-        val browserSwitchOptions = browserSwitchHelper
-            .configurePayPalVaultApproveSwitchOptions(setupTokenId, approveVaultHref)
-        browserSwitchClient.start(activity, browserSwitchOptions)
     }
 }
