@@ -98,9 +98,9 @@ internal class PayPalWebLauncher(
             val isVaultResult =
                 browserSwitchResult.deepLinkUrl?.path?.contains(VAULT_DOMAIN) ?: false
             if (isVaultResult) {
-                parseWebCheckoutResult(browserSwitchResult)
+                parseVaultResult(browserSwitchResult)
             }
-            parseVaultResult(browserSwitchResult)
+            parseWebCheckoutResult(browserSwitchResult)
         }
 
     private fun parseWebCheckoutResult(browserSwitchResult: BrowserSwitchResult) =
