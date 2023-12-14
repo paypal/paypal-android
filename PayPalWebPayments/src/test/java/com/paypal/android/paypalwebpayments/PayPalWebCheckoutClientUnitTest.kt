@@ -18,11 +18,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
 
-    companion object {
-        const val MOCK_RETURN_URL = "com.example.app://vault/success"
-        const val MOCK_CANCEL_URL = "com.example.app://vault/cancel"
-    }
-
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val coreConfig: CoreConfig = mockk(relaxed = true)
 
@@ -34,15 +29,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-
-        val experienceContext =
-            PayPalWebCheckoutVaultExperienceContext(MOCK_RETURN_URL, MOCK_CANCEL_URL)
-        sut = PayPalWebCheckoutClient(
-            activity,
-            analyticsService,
-            payPalWebLauncher,
-            experienceContext
-        )
+        sut = PayPalWebCheckoutClient(activity, analyticsService, payPalWebLauncher)
     }
 
     @Test

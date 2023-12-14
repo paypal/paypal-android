@@ -62,6 +62,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
+            get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -87,6 +88,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
+            get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -112,6 +114,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
+            get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -137,6 +140,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
+            get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -170,6 +174,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token-id")
+            get { metadata?.get("request_type") }.isEqualTo("vault")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse("https://example.com/approval/url"))
         }

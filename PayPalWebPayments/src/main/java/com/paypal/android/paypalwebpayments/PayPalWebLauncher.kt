@@ -10,9 +10,6 @@ import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.DEEP_LINK_PARAM_APPROVAL_SESSION_ID
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.DEEP_LINK_PARAM_APPROVAL_TOKEN_ID
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient.Companion.VAULT_HOST
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -24,8 +21,15 @@ internal class PayPalWebLauncher(
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
     companion object {
-        const val METADATA_KEY_ORDER_ID = "order_id"
-        const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
+        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
+        private const val METADATA_KEY_ORDER_ID = "order_id"
+        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
+
+        private const val REQUEST_TYPE_CHECKOUT = "checkout"
+        private const val REQUEST_TYPE_VAULT = "vault"
+
+        private const val URL_PARAM_APPROVAL_TOKEN_ID = "approval_token_id"
+        private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
 
     fun launchPayPalWebCheckout(
@@ -34,6 +38,7 @@ internal class PayPalWebLauncher(
     ): PayPalSDKError? {
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
         val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
@@ -49,6 +54,7 @@ internal class PayPalWebLauncher(
     ): PayPalSDKError? {
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(Uri.parse(request.approveVaultHref))
             .returnUrlScheme(urlScheme)
@@ -90,9 +96,9 @@ internal class PayPalWebLauncher(
 
     fun deliverBrowserSwitchResult(activity: FragmentActivity) =
         browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
-            val isVaultResult =
-                browserSwitchResult.deepLinkUrl?.host?.contains(VAULT_HOST) ?: false
-            if (isVaultResult) {
+            val requestType =
+                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
+            if (requestType == REQUEST_TYPE_VAULT) {
                 parseVaultResult(browserSwitchResult)
             } else {
                 parseWebCheckoutResult(browserSwitchResult)
@@ -142,9 +148,9 @@ internal class PayPalWebLauncher(
         return if (deepLinkUrl == null || requestMetadata == null) {
             PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
         } else {
-            val approvalTokenId = deepLinkUrl.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_TOKEN_ID)
+            val approvalTokenId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_TOKEN_ID)
             val approvalSessionId =
-                deepLinkUrl.getQueryParameter(DEEP_LINK_PARAM_APPROVAL_SESSION_ID)
+                deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
             if (approvalTokenId == null || approvalSessionId == null) {
                 PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
             } else {

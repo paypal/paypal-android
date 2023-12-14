@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultExperienceContext
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
@@ -13,9 +12,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(
-        vaultExperienceContext: PayPalWebCheckoutVaultExperienceContext
-    ): PayPalSetupToken {
+    suspend operator fun invoke(): PayPalSetupToken {
 
         // language=JSON
         val request = """
@@ -25,8 +22,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
                   "usage_type": "MERCHANT",
                   "experience_context": {
                     "vault_instruction": "ON_PAYER_APPROVAL",
-                    "return_url": "${vaultExperienceContext.returnUrl}",
-                    "cancel_url": "${vaultExperienceContext.cancelUrl}"
+                    "return_url": "com.example.app://vault/success",
+                    "cancel_url": "com.example.app://vault/cancel"
                   }
                 }
               }

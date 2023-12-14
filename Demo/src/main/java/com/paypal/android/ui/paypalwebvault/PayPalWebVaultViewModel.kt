@@ -10,8 +10,8 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
+import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
@@ -104,7 +104,7 @@ class PayPalWebVaultViewModel @Inject constructor(
             paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
             paypalClient.vaultListener = this@PayPalWebVaultViewModel
 
-            setupToken = createPayPalSetupTokenUseCase(paypalClient.experienceContext)
+            setupToken = createPayPalSetupTokenUseCase()
             isCreateSetupTokenLoading = false
         }
     }

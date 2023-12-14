@@ -39,6 +39,7 @@ class PayPalWebViewModel @Inject constructor(
 
     companion object {
         private val TAG = PayPalWebViewModel::class.qualifiedName
+        private const val URL_SCHEME = "com.paypal.android.demo"
     }
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
@@ -117,26 +118,29 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
+    private suspend fun fetchClientId(): String? = try {
+        sdkSampleServerAPI.fetchClientId()
+    } catch (e: UnknownHostException) {
+        payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
+        isStartCheckoutLoading = false
+        null
+    } catch (e: HttpException) {
+        payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
+        isStartCheckoutLoading = false
+        null
+    }
+
     fun startWebCheckout(activity: AppCompatActivity) {
         isStartCheckoutLoading = true
         viewModelScope.launch {
-            try {
-                val clientId = sdkSampleServerAPI.fetchClientId()
+            fetchClientId()?.let { clientId ->
                 val coreConfig = CoreConfig(clientId)
                 payPalDataCollector = PayPalDataCollector(coreConfig)
-
-                paypalClient =
-                    PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
+                paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
                 paypalClient.listener = this@PayPalWebViewModel
 
                 val orderId = createdOrder!!.id!!
                 paypalClient.start(PayPalWebCheckoutRequest(orderId, fundingSource))
-            } catch (e: UnknownHostException) {
-                payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
-                isStartCheckoutLoading = false
-            } catch (e: HttpException) {
-                payPalWebCheckoutError = APIClientError.payPalCheckoutError(e.message!!)
-                isStartCheckoutLoading = false
             }
         }
     }

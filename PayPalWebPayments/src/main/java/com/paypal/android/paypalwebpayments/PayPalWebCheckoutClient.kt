@@ -16,18 +16,8 @@ class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
     private val activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
-    private val payPalWebLauncher: PayPalWebLauncher,
-    val experienceContext: PayPalWebCheckoutVaultExperienceContext,
+    private val payPalWebLauncher: PayPalWebLauncher
 ) {
-
-    companion object {
-        internal const val VAULT_HOST = "vault_paypal"
-        internal const val VAULT_RETURN_URL_PATH = "success"
-        internal const val VAULT_CANCEL_URL_PATH = "user_canceled"
-
-        internal const val DEEP_LINK_PARAM_APPROVAL_TOKEN_ID = "approval_token_id"
-        internal const val DEEP_LINK_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
-    }
 
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
@@ -44,12 +34,6 @@ class PayPalWebCheckoutClient internal constructor(
         activity,
         AnalyticsService(activity.applicationContext, configuration),
         PayPalWebLauncher(urlScheme, configuration),
-        PayPalWebCheckoutVaultExperienceContext(
-            urlScheme,
-            domain = VAULT_HOST,
-            returnUrlPath = VAULT_RETURN_URL_PATH,
-            cancelUrlPath = VAULT_CANCEL_URL_PATH
-        )
     )
 
     /**
