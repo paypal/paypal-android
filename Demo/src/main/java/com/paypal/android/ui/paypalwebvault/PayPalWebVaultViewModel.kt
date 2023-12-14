@@ -48,7 +48,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     private var isCreatePaymentTokenLoading: Boolean
         get() = _uiState.value.isCreatePaymentTokenLoading
         set(value) {
-            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
+            _uiState.update { it.copy(isCreatePaymentTokenLoading = value) }
         }
 
     private var isVaultPayPalLoading: Boolean
@@ -93,9 +93,19 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(isVaultingCanceled = value) }
         }
 
-    fun createSetupToken(activity: AppCompatActivity) {
+    fun createSetupToken() {
         viewModelScope.launch {
             isCreateSetupTokenLoading = true
+
+            setupToken = createPayPalSetupTokenUseCase()
+            isCreateSetupTokenLoading = false
+        }
+    }
+
+    fun updateSetupToken(activity: AppCompatActivity) {
+        viewModelScope.launch {
+            isVaultPayPalLoading = true
+            val request = setupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
 
             val clientId = sdkSampleServerAPI.fetchClientId()
             val coreConfig = CoreConfig(clientId)
@@ -104,15 +114,6 @@ class PayPalWebVaultViewModel @Inject constructor(
             paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
             paypalClient.vaultListener = this@PayPalWebVaultViewModel
 
-            setupToken = createPayPalSetupTokenUseCase()
-            isCreateSetupTokenLoading = false
-        }
-    }
-
-    fun updateSetupToken() {
-        viewModelScope.launch {
-            isVaultPayPalLoading = true
-            val request = setupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
             paypalClient.vault(request)
         }
     }

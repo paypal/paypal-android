@@ -22,8 +22,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
                   "usage_type": "MERCHANT",
                   "experience_context": {
                     "vault_instruction": "ON_PAYER_APPROVAL",
-                    "return_url": "com.example.app://vault/success",
-                    "cancel_url": "com.example.app://vault/cancel"
+                    "return_url": "com.paypal.android.demo://vault/success",
+                    "cancel_url": "com.paypal.android.demo://vault/cancel"
                   }
                 }
               }
