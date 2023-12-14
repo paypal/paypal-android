@@ -33,23 +33,33 @@ internal class PayPalWebLauncher(
         activity: FragmentActivity,
         request: PayPalWebCheckoutRequest,
     ): PayPalSDKError? {
+        val browserSwitchOptions = request.run {
+            configurePayPalBrowserSwitchOptions(orderId, coreConfig, fundingSource)
+        }
+        return launchBrowserSwitch(activity, browserSwitchOptions)
+    }
+
+    fun launchPayPalWebVault(
+        activity: FragmentActivity,
+        vaultRequest: PayPalWebVaultRequest
+    ): PayPalSDKError? {
+        val browserSwitchOptions = vaultRequest.run {
+            configurePayPalVaultApproveSwitchOptions(setupTokenId, approveVaultHref)
+        }
+        return launchBrowserSwitch(activity, browserSwitchOptions)
+    }
+
+    private fun launchBrowserSwitch(
+        activity: FragmentActivity,
+        options: BrowserSwitchOptions
+    ): PayPalSDKError? {
         var error: PayPalSDKError? = null
         try {
-            val browserSwitchOptions = request.run {
-                configurePayPalBrowserSwitchOptions(orderId, coreConfig, fundingSource)
-            }
-            browserSwitchClient.start(activity, browserSwitchOptions)
+            browserSwitchClient.start(activity, options)
         } catch (e: BrowserSwitchException) {
             error = PayPalWebCheckoutError.browserSwitchError(e)
         }
         return error
-    }
-
-    fun launchPayPalWebVault(activity: FragmentActivity, vaultRequest: PayPalWebVaultRequest) {
-        val browserSwitchOptions = vaultRequest.run {
-            configurePayPalVaultApproveSwitchOptions(setupTokenId, approveVaultHref)
-        }
-        browserSwitchClient.start(activity, browserSwitchOptions)
     }
 
     private fun buildPayPalCheckoutUri(
