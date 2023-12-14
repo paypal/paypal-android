@@ -63,7 +63,7 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
                 isLoading = uiState.isVaultPayPalLoading,
                 onSubmit = {
                     context.getActivity()?.let { activity ->
-                        viewModel.updateSetupToken(activity)
+                        viewModel.updateSetupToken()
                     }
                 }
             )

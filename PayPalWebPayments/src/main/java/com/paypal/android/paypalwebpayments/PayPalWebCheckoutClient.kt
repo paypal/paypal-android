@@ -79,8 +79,10 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
-    fun vault(activity: AppCompatActivity, request: PayPalWebVaultRequest) {
-        payPalWebLauncher.launchPayPalWebVault(activity, request)
+    fun vault(request: PayPalWebVaultRequest) {
+        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
+            notifyVaultFailure(launchError)
+        }
     }
 
     internal fun handleBrowserSwitchResult() {

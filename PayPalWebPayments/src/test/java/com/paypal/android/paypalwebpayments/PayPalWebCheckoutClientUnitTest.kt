@@ -23,16 +23,18 @@ class PayPalWebCheckoutClientUnitTest {
         const val MOCK_CANCEL_URL = "com.example.app://vault/cancel"
     }
 
-    private val payPalWebLauncher: PayPalWebLauncher = mockk(relaxed = true)
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val coreConfig: CoreConfig = mockk(relaxed = true)
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
 
+    private lateinit var payPalWebLauncher: PayPalWebLauncher
     private lateinit var sut: PayPalWebCheckoutClient
 
     @Before
     fun beforeEach() {
+        payPalWebLauncher = mockk(relaxed = true)
+
         val experienceContext =
             PayPalWebCheckoutVaultExperienceContext(MOCK_RETURN_URL, MOCK_CANCEL_URL)
         sut = PayPalWebCheckoutClient(
@@ -45,9 +47,60 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() launches PayPal web checkout`() {
+        sut.listener = mockk(relaxed = true)
+
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns null
+
         val request = PayPalWebCheckoutRequest("fake-order-id")
         sut.start(request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+        verify(exactly = 0) { sut.listener?.onPayPalWebFailure(any()) }
+    }
+
+    @Test
+    fun `start() notifies merchant of browser switch failure`() {
+        sut.listener = mockk(relaxed = true)
+
+        val sdkError = PayPalSDKError(123, "fake error description")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns sdkError
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        sut.start(request)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { sut.listener?.onPayPalWebFailure(capture(slot)) }
+
+        assertSame(slot.captured, sdkError)
+    }
+
+    @Test
+    fun `vault() launches PayPal web checkout`() {
+        sut.vaultListener = mockk(relaxed = true)
+
+        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns null
+
+        val request =
+            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+        sut.vault(request)
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebVault(activity, request) }
+        verify(exactly = 0) { sut.vaultListener?.onPayPalWebVaultFailure(any()) }
+    }
+
+    @Test
+    fun `vault() notifies merchant of browser switch failure`() {
+        sut.vaultListener = mockk(relaxed = true)
+
+        val sdkError = PayPalSDKError(123, "fake error description")
+        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns sdkError
+
+        val request =
+            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+        sut.vault(request)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { sut.vaultListener?.onPayPalWebVaultFailure(capture(slot)) }
+
+        assertSame(slot.captured, sdkError)
     }
 
     @Test
