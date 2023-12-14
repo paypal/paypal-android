@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
+import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
@@ -139,6 +140,20 @@ class PayPalWebLauncherUnitTest {
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
+    }
+
+    @Test
+    fun `launchPayPalWebCheckout() returns an error when it cannot browser switch`() {
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val browserSwitchException = mockk<BrowserSwitchException>()
+        every { browserSwitchException.message } returns "error message from browser switch"
+
+        every { browserSwitchClient.start(any(), any()) } throws browserSwitchException
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val error = sut.launchPayPalWebCheckout(activity, request)
+        assertEquals("error message from browser switch", error?.errorDescription)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments.errors
 
+import com.braintreepayments.api.BrowserSwitchException
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal object PayPalWebCheckoutError {
@@ -14,5 +15,10 @@ internal object PayPalWebCheckoutError {
     val malformedResultError = PayPalSDKError(
         code = PayPalWebCheckoutErrorCode.MALFORMED_RESULT.ordinal,
         errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
+    )
+
+    fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.BROWSER_SWITCH.ordinal,
+        errorDescription = cause.message ?: "Unable to Browser Switch"
     )
 }

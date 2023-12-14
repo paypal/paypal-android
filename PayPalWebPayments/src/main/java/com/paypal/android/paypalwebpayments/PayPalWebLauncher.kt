@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
+import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
@@ -38,8 +39,8 @@ internal class PayPalWebLauncher(
                 configurePayPalBrowserSwitchOptions(orderId, coreConfig, fundingSource)
             }
             browserSwitchClient.start(activity, browserSwitchOptions)
-        } catch (e: PayPalSDKError) {
-            error = APIClientError.clientIDNotFoundError(e.code, e.correlationId)
+        } catch (e: BrowserSwitchException) {
+            error = PayPalWebCheckoutError.browserSwitchError(e)
         }
         return error
     }
