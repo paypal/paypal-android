@@ -7,7 +7,6 @@ import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -33,19 +32,27 @@ internal class PayPalWebLauncher(
         activity: FragmentActivity,
         request: PayPalWebCheckoutRequest,
     ): PayPalSDKError? {
-        val browserSwitchOptions = request.run {
-            configurePayPalBrowserSwitchOptions(orderId, coreConfig, fundingSource)
-        }
+        val metadata = JSONObject()
+            .put(METADATA_KEY_ORDER_ID, request.orderId)
+        val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
+        val browserSwitchOptions = BrowserSwitchOptions()
+            .url(url)
+            .returnUrlScheme(urlScheme)
+            .metadata(metadata)
+
         return launchBrowserSwitch(activity, browserSwitchOptions)
     }
 
     fun launchPayPalWebVault(
         activity: FragmentActivity,
-        vaultRequest: PayPalWebVaultRequest
+        request: PayPalWebVaultRequest
     ): PayPalSDKError? {
-        val browserSwitchOptions = vaultRequest.run {
-            configurePayPalVaultApproveSwitchOptions(setupTokenId, approveVaultHref)
-        }
+        val metadata = JSONObject()
+            .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
+        val browserSwitchOptions = BrowserSwitchOptions()
+            .url(Uri.parse(request.approveVaultHref))
+            .returnUrlScheme(urlScheme)
+            .metadata(metadata)
         return launchBrowserSwitch(activity, browserSwitchOptions)
     }
 
@@ -79,30 +86,6 @@ internal class PayPalWebLauncher(
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
             .build()
-    }
-
-    private fun configurePayPalBrowserSwitchOptions(
-        orderId: String?,
-        config: CoreConfig,
-        funding: PayPalWebCheckoutFundingSource
-    ): BrowserSwitchOptions {
-        val metadata = JSONObject().put(METADATA_KEY_ORDER_ID, orderId)
-        return BrowserSwitchOptions()
-            .url(buildPayPalCheckoutUri(orderId, config, funding))
-            .returnUrlScheme(urlScheme)
-            .metadata(metadata)
-    }
-
-    private fun configurePayPalVaultApproveSwitchOptions(
-        setupTokenId: String?,
-        approveOrderHref: String
-    ): BrowserSwitchOptions {
-        val metadata = JSONObject()
-            .put(METADATA_KEY_SETUP_TOKEN_ID, setupTokenId)
-        return BrowserSwitchOptions()
-            .url(Uri.parse(approveOrderHref))
-            .returnUrlScheme(urlScheme)
-            .metadata(metadata)
     }
 
     fun deliverBrowserSwitchResult(activity: FragmentActivity) =
