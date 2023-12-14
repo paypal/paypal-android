@@ -130,7 +130,6 @@ fun PayPalWebCheckoutVaultResultView(result: PayPalWebCheckoutVaultResult) {
                 text = "PayPal Web Vault Result",
                 style = MaterialTheme.typography.titleLarge
             )
-            PropertyView(name = "Approval Token ID", value = result.approvalTokenId)
             PropertyView(name = "Approval Session ID", value = result.approvalSessionId)
         }
     }
