@@ -28,7 +28,6 @@ internal class PayPalWebLauncher(
         private const val REQUEST_TYPE_CHECKOUT = "checkout"
         private const val REQUEST_TYPE_VAULT = "vault"
 
-        private const val URL_PARAM_APPROVAL_TOKEN_ID = "approval_token_id"
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
 
@@ -146,15 +145,13 @@ internal class PayPalWebLauncher(
         val requestMetadata = browserSwitchResult.requestMetadata
 
         return if (deepLinkUrl == null || requestMetadata == null) {
-            PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
+            PayPalWebStatus.VaultError(PayPalWebCheckoutError.unknownError)
         } else {
-            val approvalTokenId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_TOKEN_ID)
-            val approvalSessionId =
-                deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-            if (approvalTokenId == null || approvalSessionId == null) {
+            val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
+            if (approvalSessionId.isNullOrEmpty()) {
                 PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
             } else {
-                val result = PayPalWebCheckoutVaultResult(approvalTokenId, approvalSessionId)
+                val result = PayPalWebCheckoutVaultResult(approvalSessionId)
                 PayPalWebStatus.VaultSuccess(result)
             }
         }

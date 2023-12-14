@@ -214,7 +214,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses failure when Payer Id is blank`() {
+    fun `deliverBrowserSwitchResult() parses checkout failure when Payer Id is blank`() {
         val browserSwitchResult =
             createCheckoutSuccessBrowserSwitchResult(orderId = "fake-order-id", payerId = "")
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
@@ -227,7 +227,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses failure when Order Id is blank`() {
+    fun `deliverBrowserSwitchResult() parses checkout failure when Order Id is blank`() {
         val browserSwitchResult =
             createCheckoutSuccessBrowserSwitchResult(orderId = "", payerId = "fake-payer-id")
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
@@ -240,7 +240,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses failure when deeplink is null`() {
+    fun `deliverBrowserSwitchResult() parses checkout failure when deeplink is null`() {
         val browserSwitchResult =
             createCheckoutSuccessBrowserSwitchResult(orderId = "fake-order-id", deepLinkUrl = null)
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
@@ -253,7 +253,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses failure when metadata is null`() {
+    fun `deliverBrowserSwitchResult() parses checkout failure when metadata is null`() {
         val browserSwitchResult =
             createCheckoutSuccessBrowserSwitchResult(payerId = "fake-payer-id", metadata = null)
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
@@ -266,8 +266,9 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses cancelations`() {
-        val browserSwitchResult = createCheckoutCanceledBrowserSwitchResult()
+    fun `deliverBrowserSwitchResult() parses checkout cancelations`() {
+        val browserSwitchResult = createCheckoutCanceledBrowserSwitchResult("fake-order-id")
+        createBrowserSwitchResult(BrowserSwitchStatus.CANCELED)
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
@@ -275,31 +276,110 @@ class PayPalWebLauncherUnitTest {
         assertTrue(status is PayPalWebStatus.CheckoutCanceled)
     }
 
-    private fun createCheckoutMetadata(orderId: String) = JSONObject().put("order_id", orderId)
+    @Test
+    fun `deliverBrowserSwitchResult() parses successful vault result`() {
+        val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
+            setupTokenId = "fake-setup-token-id",
+            approvalSessionId = "fake-approval-session-id",
+        )
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
-    private fun createDeepLinkUrl(payerId: String) =
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val status = sut.deliverBrowserSwitchResult(activity) as PayPalWebStatus.VaultSuccess
+        assertEquals("fake-approval-session-id", status.result.approvalSessionId)
+    }
+
+    @Test
+    fun `deliverBrowserSwitchResult() parses vault failure when approval session id is blank`() {
+        val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
+            setupTokenId = "fake-setup-token-id",
+            approvalSessionId = "",
+        )
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val status = sut.deliverBrowserSwitchResult(activity) as PayPalWebStatus.VaultError
+        val expectedDescription =
+            "Result did not contain the expected data. Payer ID or Order ID is null."
+        assertEquals(expectedDescription, status.error.errorDescription)
+    }
+
+    @Test
+    fun `deliverBrowserSwitchResult() parses vault failure when deeplink is null`() {
+        val browserSwitchResult =
+            createVaultSuccessBrowserSwitchResult(
+                setupTokenId = "fake-setup-token-id",
+                deepLinkUrl = null
+            )
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val status = sut.deliverBrowserSwitchResult(activity) as PayPalWebStatus.VaultError
+        val expectedDescription =
+            "An unknown error occurred. Contact developer.paypal.com/support."
+        assertEquals(expectedDescription, status.error.errorDescription)
+    }
+
+    @Test
+    fun `deliverBrowserSwitchResult() parses vault cancelations`() {
+        val browserSwitchResult = createVaultCanceledBrowserSwitchResult("fake-setup-token-id")
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val status = sut.deliverBrowserSwitchResult(activity)
+        assertTrue(status is PayPalWebStatus.VaultCanceled)
+    }
+
+    private fun createCheckoutMetadata(orderId: String) = JSONObject()
+        .put("order_id", orderId)
+        .put("request_type", "checkout")
+
+    private fun createCheckoutDeepLinkUrl(payerId: String) =
         Uri.parse("http://testurl.com/checkout?PayerID=$payerId")
 
     private fun createCheckoutSuccessBrowserSwitchResult(
         orderId: String? = null,
         payerId: String? = null,
         metadata: JSONObject? = orderId?.let { createCheckoutMetadata(it) },
-        deepLinkUrl: Uri? = payerId?.let { createDeepLinkUrl(it) }
+        deepLinkUrl: Uri? = payerId?.let { createCheckoutDeepLinkUrl(it) }
+    ) = createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, metadata, deepLinkUrl)
+
+    private fun createCheckoutCanceledBrowserSwitchResult(orderId: String) =
+        createBrowserSwitchResult(
+            BrowserSwitchStatus.CANCELED,
+            metadata = createCheckoutMetadata(orderId)
+        )
+
+    private fun createVaultMetadata(setupTokenId: String) = JSONObject()
+        .put("setup_token_id", setupTokenId)
+        .put("request_type", "vault")
+
+    private fun createVaultDeepLinkUrl(approvalSessionId: String) =
+        Uri.parse("http://testurl.com/checkout?approval_session_id=$approvalSessionId")
+
+    private fun createVaultSuccessBrowserSwitchResult(
+        setupTokenId: String? = null,
+        approvalSessionId: String? = null,
+        metadata: JSONObject? = setupTokenId?.let { createVaultMetadata(it) },
+        deepLinkUrl: Uri? = approvalSessionId?.let { createVaultDeepLinkUrl(it) }
+    ) = createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, metadata, deepLinkUrl)
+
+    private fun createVaultCanceledBrowserSwitchResult(setupTokenId: String) =
+        createBrowserSwitchResult(
+            BrowserSwitchStatus.CANCELED,
+            metadata = createVaultMetadata(setupTokenId)
+        )
+
+    private fun createBrowserSwitchResult(
+        @BrowserSwitchStatus status: Int,
+        metadata: JSONObject? = null,
+        deepLinkUrl: Uri? = null
     ): BrowserSwitchResult {
         // TODO: migrate to Library Private constructor for BrowserSwitchResult instead of using mockk
         val browserSwitchResult = mockk<BrowserSwitchResult>()
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
+        every { browserSwitchResult.status } returns status
         every { browserSwitchResult.deepLinkUrl } returns deepLinkUrl
         every { browserSwitchResult.requestMetadata } returns metadata
-        return browserSwitchResult
-    }
-
-    private fun createCheckoutCanceledBrowserSwitchResult(): BrowserSwitchResult {
-        // TODO: migrate to Library Private constructor for BrowserSwitchResult instead of using mockk
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.CANCELED
-        every { browserSwitchResult.deepLinkUrl } returns null
-        every { browserSwitchResult.requestMetadata } returns null
         return browserSwitchResult
     }
 }
