@@ -1,6 +1,5 @@
 package com.paypal.android.paypalwebpayments
 
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
