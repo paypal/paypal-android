@@ -58,8 +58,8 @@
     <string name="intent_capture">CAPTURE</string>
 
     <string name="store_in_vault">STORE IN VAULT</string>
-    <string-array name="boolean_options">
-        <item>YES</item>
+    <string-array name="store_in_vault_options">
         <item>NO</item>
+        <item>ON_SUCCESS</item>
     </string-array>
 </resources>

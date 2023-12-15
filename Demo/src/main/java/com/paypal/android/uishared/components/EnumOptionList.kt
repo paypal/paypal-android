@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.uishared.enums.BooleanOption
+import com.paypal.android.uishared.enums.StoreInVaultOption
 
 // Ref: https://stackoverflow.com/a/51663849
 @Composable
@@ -101,9 +101,9 @@ fun OptionListPreview() {
         Surface {
             EnumOptionList(
                 title = "Fake Title",
-                stringArrayResId = R.array.boolean_options,
+                stringArrayResId = R.array.store_in_vault_options,
                 onOptionSelected = {},
-                selectedOption = BooleanOption.YES,
+                selectedOption = StoreInVaultOption.ON_SUCCESS,
                 modifier = Modifier.padding(8.dp)
             )
         }

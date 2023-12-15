@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,50 +24,35 @@ import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.ui.OptionList
 import com.paypal.android.ui.WireframeButton
-import com.paypal.android.uishared.enums.BooleanOption
+import com.paypal.android.uishared.enums.StoreInVaultOption
 
 @Composable
 fun CreateOrderWithVaultOptionForm(
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
-    shouldVault: BooleanOption = BooleanOption.NO,
+    shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
     vaultCustomerId: String = "",
     isLoading: Boolean = false,
-    onShouldVaultChanged: (BooleanOption) -> Unit = {},
+    onShouldVaultChanged: (StoreInVaultOption) -> Unit = {},
     onVaultCustomerIdChanged: (String) -> Unit = {},
     onIntentOptionSelected: (OrderIntent) -> Unit = {},
     onSubmit: () -> Unit = {}
 ) {
     val localFocusManager = LocalFocusManager.current
-
-    val captureValue = stringResource(id = R.string.intent_capture)
-    val authorizeValue = stringResource(id = R.string.intent_authorize)
-    val selectedOrderIntent = when (orderIntent) {
-        OrderIntent.CAPTURE -> captureValue
-        OrderIntent.AUTHORIZE -> authorizeValue
-    }
     Column {
         Spacer(modifier = Modifier.size(8.dp))
-        OptionList(
+        EnumOptionList(
             title = stringResource(id = R.string.intent_title),
-            options = listOf(authorizeValue, captureValue),
-            selectedOption = selectedOrderIntent,
-            onOptionSelected = { option ->
-                val newOrderIntent = when (option) {
-                    captureValue -> OrderIntent.CAPTURE
-                    authorizeValue -> OrderIntent.AUTHORIZE
-                    else -> null
-                }
-                newOrderIntent?.let { onIntentOptionSelected(it) }
-            }
+            stringArrayResId = R.array.intent_options,
+            onOptionSelected = { onIntentOptionSelected(it) },
+            selectedOption = orderIntent
         )
         Spacer(modifier = Modifier.size(16.dp))
         EnumOptionList(
             title = stringResource(id = R.string.store_in_vault),
-            stringArrayResId = R.array.boolean_options,
+            stringArrayResId = R.array.store_in_vault_options,
             onOptionSelected = { onShouldVaultChanged(it) },
             selectedOption = shouldVault
         )
-
         OutlinedTextField(
             value = vaultCustomerId,
             label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
