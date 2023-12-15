@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -57,17 +58,21 @@ fun CardForm(
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 modifier = Modifier
                     .weight(1.0f)
-                    .padding(start = 8.dp)
+                    .padding(start = 16.dp)
             )
             Button(
                 shape = RectangleShape,
                 onClick = onUseTestCardClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary
+                ),
                 modifier = Modifier
                     .defaultMinSize(minHeight = 50.dp)
                     .padding(0.dp)
             ) {
                 Text(
-                    text = "Use Test Card 💳",
+                    text = "✨ Use a Test Card",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
                         .padding(8.dp)
