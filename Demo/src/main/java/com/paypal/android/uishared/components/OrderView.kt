@@ -15,28 +15,34 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.Order
 
 @Composable
-fun OrderView(order: Order, title: String) {
+fun OrderView(order: Order, title: String? = null) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        title?.let { text ->
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
             PropertyView(name = "ID", value = order.id)
-            PropertyView(name = "Intent", value = order.intent)
-            PropertyView(name = "Status", value = order.status)
-            PropertyView(name = "Card Last 4", value = order.cardLast4)
-            PropertyView(name = "Card Brand", value = order.cardBrand)
-            PropertyView(name = "Vault Id / Payment Token", value = order.vaultId)
-            PropertyView(name = "Customer Vault Id", value = order.customerId)
+            order.intent?.let { PropertyView(name = "Intent", value = it) }
+            order.status?.let { PropertyView(name = "Status", value = it) }
+            order.cardLast4?.let { PropertyView(name = "Card Last 4", value = order.cardLast4) }
+            order.cardBrand?.let { PropertyView(name = "Card Brand", value = order.cardBrand) }
+            order.vaultId?.let {
+                PropertyView(name = "Vault Id / Payment Token", value = order.vaultId)
+            }
+            order.customerId?.let {
+                PropertyView(name = "Customer Vault Id", value = order.customerId)
+            }
             Spacer(modifier = Modifier.size(24.dp))
         }
     }

@@ -75,7 +75,9 @@ fun ApproveOrderView(
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                 ) {
-                    CreateOrderState(createOrderState = uiState.createOrderState)
+                    (uiState.createOrderState as? ActionButtonState.Success)?.value?.let { order ->
+                        OrderView(order = order)
+                    }
                 }
             }
         }
@@ -115,22 +117,6 @@ fun ApproveOrderView(
             OrderView(order = completedOrder, title = "Order Complete")
         }
         Spacer(modifier = Modifier.size(24.dp))
-    }
-}
-
-@Composable
-fun CreateOrderState(createOrderState: ActionButtonState<Order, Exception>) {
-    when (createOrderState) {
-        is ActionButtonState.Success -> {
-            val order = createOrderState.value
-            OrderView(order = order, title = "Order")
-        }
-
-        is ActionButtonState.Failure -> {
-            Text("Add Error View")
-        }
-
-        else -> {}
     }
 }
 
