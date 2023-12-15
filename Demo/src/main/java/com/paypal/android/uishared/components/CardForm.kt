@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,15 +58,15 @@ fun CardForm(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 modifier = Modifier
-                    .weight(1.0f)
                     .padding(start = 16.dp)
+                    .weight(1.0f)
             )
             Button(
-                shape = RectangleShape,
+                shape = RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp),
                 onClick = onUseTestCardClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier
                     .defaultMinSize(minHeight = 50.dp)
