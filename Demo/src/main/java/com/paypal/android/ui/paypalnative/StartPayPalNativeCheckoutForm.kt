@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.ActionButton
 
 @Composable
 fun StartPayPalNativeCheckoutForm(
@@ -28,7 +28,7 @@ fun StartPayPalNativeCheckoutForm(
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.size(16.dp))
-            WireframeButton(
+            ActionButton(
                 text = stringResource(R.string.start_checkout),
                 isLoading = isLoading,
                 onClick = { onSubmit() },

@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.ActionButton
 
 @Composable
 fun CompleteOrderForm(
@@ -31,7 +31,7 @@ fun CompleteOrderForm(
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.size(8.dp))
-            WireframeButton(
+            ActionButton(
                 text = "${orderIntent.name} ORDER",
                 isLoading = isLoading,
                 onClick = { onSubmit() },

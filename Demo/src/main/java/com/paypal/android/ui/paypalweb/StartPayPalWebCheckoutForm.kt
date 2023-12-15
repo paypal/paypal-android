@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.ui.OptionList
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.ActionButton
 
 @Composable
 fun StartPayPalWebCheckoutForm(
@@ -55,7 +55,7 @@ fun StartPayPalWebCheckoutForm(
                 }
             )
             Spacer(modifier = Modifier.size(16.dp))
-            WireframeButton(
+            ActionButton(
                 text = "Start Checkout",
                 isLoading = isLoading,
                 onClick = { onSubmit() },

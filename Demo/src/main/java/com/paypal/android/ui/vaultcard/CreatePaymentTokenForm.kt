@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.ActionButton
 
 @Composable
 fun CreatePaymentTokenForm(
@@ -29,7 +29,7 @@ fun CreatePaymentTokenForm(
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(modifier = Modifier.size(8.dp))
-            WireframeButton(
+            ActionButton(
                 text = "Create Payment Token",
                 isLoading = isLoading,
                 onClick = { onSubmit() },

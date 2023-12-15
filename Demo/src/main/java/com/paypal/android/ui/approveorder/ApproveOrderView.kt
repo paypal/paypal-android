@@ -6,11 +6,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.ui.ActionButton
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
@@ -39,6 +42,7 @@ fun ApproveOrderView(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+
     LaunchedEffect(uiState) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
@@ -52,21 +56,43 @@ fun ApproveOrderView(
                 testTagsAsResourceId = true
             }
     ) {
-        StepContainer(stepNumber = 1, title = "Create an Order") {
-            CreateOrderWithVaultOptionForm(
-                orderIntent = uiState.intentOption,
-                shouldVault = uiState.shouldVault,
-                isLoading = uiState.isCreateOrderLoading,
-                onIntentOptionSelected = { value -> viewModel.intentOption = value },
-                onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-                onSubmit = { viewModel.createOrder() }
-            )
+        StepContainer(stepNumber = 1, title = "Create Order") {
+            Column {
+                CreateOrderWithVaultOptionForm(
+                    orderIntent = uiState.intentOption,
+                    shouldVault = uiState.shouldVault,
+                    onIntentOptionSelected = { value -> viewModel.intentOption = value },
+                    onShouldVaultChanged = { value -> viewModel.shouldVault = value },
+                )
+
+                ActionButton(
+                    text = "CREATE ORDER",
+                    isLoading = uiState.isCreateOrderLoading,
+                    onClick = { viewModel.createOrder() },
+                    content = {
+                        uiState.createdOrder?.let {
+                            OrderView(order = uiState.createdOrder!!, title = "Order")
+                        }
+                    },
+                    containerColor = if (uiState.createdOrder != null) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.inverseSurface
+                    },
+                    contentColor = if (uiState.createdOrder != null) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.inverseOnSurface
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                )
+            }
         }
         uiState.createdOrder?.let { createdOrder ->
             Spacer(modifier = Modifier.size(24.dp))
-            OrderView(order = createdOrder, title = "Order Created")
-            Spacer(modifier = Modifier.size(24.dp))
-            StepContainer(stepNumber = 2, title = "Approve Order with Card") {
+            StepContainer(stepNumber = 2, title = "Approve Order") {
                 ApproveOrderForm(
                     uiState = uiState,
                     onCardNumberChange = { value -> viewModel.cardNumber = value },

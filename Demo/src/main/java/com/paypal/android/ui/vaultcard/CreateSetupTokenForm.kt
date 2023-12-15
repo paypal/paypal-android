@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.ActionButton
 
 @Composable
 fun CreateSetupTokenForm(
@@ -46,7 +46,7 @@ fun CreateSetupTokenForm(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.size(8.dp))
-            WireframeButton(
+            ActionButton(
                 text = "Create Setup Token",
                 isLoading = isLoading,
                 onClick = { onSubmit() },

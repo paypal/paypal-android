@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.ui.OptionList
-import com.paypal.android.ui.WireframeButton
+import com.paypal.android.ui.ActionButton
 
 @Composable
 fun CreateOrderForm(
@@ -52,7 +52,7 @@ fun CreateOrderForm(
                 }
             )
             Spacer(modifier = Modifier.size(16.dp))
-            WireframeButton(
+            ActionButton(
                 text = "Create Order",
                 isLoading = isLoading,
                 onClick = { onSubmit() },

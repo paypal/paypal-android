@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +16,7 @@ import com.paypal.android.api.model.Order
 
 @Composable
 fun OrderView(order: Order, title: String) {
-    OutlinedCard(
+    Column(
         modifier = Modifier.fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.size(16.dp))
@@ -31,7 +30,7 @@ fun OrderView(order: Order, title: String) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            PropertyView(name = "Order", value = order.id)
+            PropertyView(name = "ID", value = order.id)
             PropertyView(name = "Intent", value = order.intent)
             PropertyView(name = "Status", value = order.status)
             PropertyView(name = "Card Last 4", value = order.cardLast4)
