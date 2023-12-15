@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.uishared.state.ActionButtonState
 
-private val successGreen = Color(0xff2dc937)
+private val successGreen = Color(0xff007f5f)
 
 @Composable
 fun <S, E> StatefulActionButton(
