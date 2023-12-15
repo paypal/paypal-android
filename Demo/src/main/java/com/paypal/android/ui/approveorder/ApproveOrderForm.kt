@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.cardpayments.threedsecure.SCA
-import com.paypal.android.ui.ActionButton
+import com.paypal.android.uishared.components.ActionButton
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.EnumOptionList
 

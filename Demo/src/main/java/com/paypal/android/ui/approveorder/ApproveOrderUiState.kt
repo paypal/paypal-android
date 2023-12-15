@@ -6,10 +6,11 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.uishared.state.ActionButtonState
 
 @Immutable
 data class ApproveOrderUiState(
-    val createdOrder: Order? = null,
+    val createOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
     val completedOrder: Order? = null,
     val approveOrderResult: CardResult? = null,
     val approveOrderErrorMessage: String? = null,
@@ -18,7 +19,6 @@ data class ApproveOrderUiState(
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val isCreateOrderLoading: Boolean = false,
     val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
     val isApproveOrderLoading: Boolean = false,
     val isCompleteOrderLoading: Boolean = false,

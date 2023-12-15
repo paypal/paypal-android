@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.paypal.android.ui.ActionButton
+import com.paypal.android.uishared.components.ActionButton
 
 @Composable
 fun CreateSetupTokenForm(

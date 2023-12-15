@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.ui.ActionButton
 
 @Composable
 fun CompleteOrderForm(

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.ui.OptionList
-import com.paypal.android.ui.ActionButton
+import com.paypal.android.uishared.components.ActionButton
 
 @Composable
 fun StartPayPalWebCheckoutForm(

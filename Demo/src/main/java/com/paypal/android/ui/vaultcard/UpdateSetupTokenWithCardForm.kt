@@ -12,7 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.paypal.android.ui.ActionButton
+import com.paypal.android.uishared.components.ActionButton
 import com.paypal.android.uishared.components.CardForm
 
 @OptIn(ExperimentalMaterial3Api::class)

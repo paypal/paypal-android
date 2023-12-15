@@ -20,6 +20,7 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
 import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,15 +48,16 @@ class ApproveOrderViewModel @Inject constructor(
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
+
     fun createOrder() {
         viewModelScope.launch {
-            isCreateOrderLoading = true
+            createOrderState = ActionButtonState.Loading
             val uiState = uiState.value
             val orderRequest = uiState.run {
                 OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
             }
-            createdOrder = createOrderUseCase(orderRequest)
-            isCreateOrderLoading = false
+            val order = createOrderUseCase(orderRequest)
+            createOrderState = ActionButtonState.Success(order)
         }
     }
 
@@ -104,9 +106,8 @@ class ApproveOrderViewModel @Inject constructor(
             isCompleteOrderLoading = true
 
             val cmid = payPalDataCollector.collectDeviceData(context)
-            val orderId = createdOrder!!.id!!
 
-            completedOrder = completeOrderUseCase(orderId, intentOption, cmid)
+            completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
             isCompleteOrderLoading = false
         }
     }
@@ -127,11 +128,14 @@ class ApproveOrderViewModel @Inject constructor(
         )
     }
 
-    var createdOrder: Order?
-        get() = _uiState.value.createdOrder
+    var createOrderState
+        get() = _uiState.value.createOrderState
         set(value) {
-            _uiState.update { it.copy(createdOrder = value) }
+            _uiState.update { it.copy(createOrderState = value) }
         }
+
+    private val createdOrder: Order?
+        get() = (createOrderState as? ActionButtonState.Success)?.value
 
     var approveOrderResult: CardResult?
         get() = _uiState.value.approveOrderResult
@@ -186,11 +190,6 @@ class ApproveOrderViewModel @Inject constructor(
             _uiState.update { it.copy(shouldVault = value) }
         }
 
-    var isCreateOrderLoading: Boolean
-        get() = _uiState.value.isCreateOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isCreateOrderLoading = value) }
-        }
     var isApproveOrderLoading: Boolean
         get() = _uiState.value.isApproveOrderLoading
         set(value) {

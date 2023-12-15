@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,12 +23,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paypal.android.ui.ActionButton
+import com.paypal.android.api.model.Order
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.StatefulActionButton
 import com.paypal.android.uishared.components.StepContainer
+import com.paypal.android.uishared.state.ActionButtonState
 
 // TODO: Investigate the best way to break this composable up into smaller individual units
 @Suppress("LongMethod")
@@ -64,33 +66,20 @@ fun ApproveOrderView(
                     onIntentOptionSelected = { value -> viewModel.intentOption = value },
                     onShouldVaultChanged = { value -> viewModel.shouldVault = value },
                 )
-
-                ActionButton(
-                    text = "CREATE ORDER",
-                    isLoading = uiState.isCreateOrderLoading,
+                StatefulActionButton(
+                    defaultTitle = "CREATE ORDER",
+                    successTitle = "ORDER CREATED",
+                    state = uiState.createOrderState,
                     onClick = { viewModel.createOrder() },
-                    content = {
-                        uiState.createdOrder?.let {
-                            OrderView(order = uiState.createdOrder!!, title = "Order")
-                        }
-                    },
-                    containerColor = if (uiState.createdOrder != null) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.inverseSurface
-                    },
-                    contentColor = if (uiState.createdOrder != null) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.inverseOnSurface
-                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp)
-                )
+                ) {
+                    CreateOrderState(createOrderState = uiState.createOrderState)
+                }
             }
         }
-        uiState.createdOrder?.let { createdOrder ->
+        if (uiState.createOrderState is ActionButtonState.Success) {
             Spacer(modifier = Modifier.size(24.dp))
             StepContainer(stepNumber = 2, title = "Approve Order") {
                 ApproveOrderForm(
@@ -106,6 +95,7 @@ fun ApproveOrderView(
                 )
             }
         }
+
         uiState.approveOrderResult?.let { cardResult ->
             Spacer(modifier = Modifier.size(24.dp))
             ApproveOrderSuccessView(cardResult = cardResult)
@@ -125,6 +115,22 @@ fun ApproveOrderView(
             OrderView(order = completedOrder, title = "Order Complete")
         }
         Spacer(modifier = Modifier.size(24.dp))
+    }
+}
+
+@Composable
+fun CreateOrderState(createOrderState: ActionButtonState<Order, Exception>) {
+    when (createOrderState) {
+        is ActionButtonState.Success -> {
+            val order = createOrderState.value
+            OrderView(order = order, title = "Order")
+        }
+
+        is ActionButtonState.Failure -> {
+            Text("Add Error View")
+        }
+
+        else -> {}
     }
 }
 

@@ -1,4 +1,4 @@
-package com.paypal.android.ui
+package com.paypal.android.uishared.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,34 +21,60 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.paypal.android.uishared.state.ActionButtonState
+
+private val successGreen = Color(0xff2dc937)
 
 @Composable
-fun ActionButton(
-    text: String,
+fun <S, E> StatefulActionButton(
+    defaultTitle: String,
+    successTitle: String,
+    state: ActionButtonState<S, E>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    containerColor: Color = MaterialTheme.colorScheme.inverseSurface,
-    contentColor: Color = MaterialTheme.colorScheme.inverseOnSurface,
     content: @Composable () -> Unit = {},
 ) {
+    val isLoading = state is ActionButtonState.Loading
+    // TODO: use material themed color for success
+    val buttonBackground = when (state) {
+        is ActionButtonState.Loading, is ActionButtonState.Ready ->
+            MaterialTheme.colorScheme.inverseSurface
+
+        is ActionButtonState.Failure -> MaterialTheme.colorScheme.errorContainer
+        is ActionButtonState.Success -> successGreen
+    }
+
+    val buttonForeground = when (state) {
+        is ActionButtonState.Loading, is ActionButtonState.Ready ->
+            MaterialTheme.colorScheme.inverseOnSurface
+
+        is ActionButtonState.Failure -> MaterialTheme.colorScheme.onErrorContainer
+        is ActionButtonState.Success -> Color.White
+    }
+
     Card(
         modifier = modifier
     ) {
         Button(
-            onClick = onClick,
+            onClick = {
+                if (state is ActionButtonState.Ready) {
+                    onClick()
+                }
+            },
             // force button to rectangle to allow Card parent to perform corner radius clipping
             shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
-                containerColor = containerColor,
-                contentColor = contentColor
+                containerColor = buttonBackground,
+                contentColor = buttonForeground
             ),
             modifier = Modifier
                 .fillMaxWidth()
         ) {
             Box {
+                // in loading state, blend text in with background and show loading indicator
                 Text(
-                    text = text,
+                    text = if (state is ActionButtonState.Success) successTitle else defaultTitle,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .padding(vertical = 8.dp)
@@ -71,13 +97,14 @@ fun ActionButton(
 
 @Preview
 @Composable
-fun WireframeButtonPreview() {
+fun StatefulActionButtonPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column {
-                ActionButton(
-                    text = "Fake Text",
-                    isLoading = false,
+                StatefulActionButton(
+                    defaultTitle = "Fake Default Title",
+                    successTitle = "Fake Success Title",
+                    state = ActionButtonState.Ready,
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()

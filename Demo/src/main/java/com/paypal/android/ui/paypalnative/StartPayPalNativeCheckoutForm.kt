@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.ui.ActionButton
+import com.paypal.android.uishared.components.ActionButton
 
 @Composable
 fun StartPayPalNativeCheckoutForm(
