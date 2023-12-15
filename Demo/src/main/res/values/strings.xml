@@ -48,7 +48,18 @@
     <string name="funding_source_pay_pal_credit">Pay Pal Credit</string>
     <string name="funding_source_pay_pal_pay_later">Pay Pal Pay Later</string>
 
-    <string name="intent_title">Intent</string>
+    <string name="intent_title">INTENT</string>
+    <string-array name="intent_options">
+        <item>AUTHORIZE</item>
+        <item>CAPTURE</item>
+    </string-array>
+
     <string name="intent_authorize">AUTHORIZE</string>
     <string name="intent_capture">CAPTURE</string>
+
+    <string name="store_in_vault">STORE IN VAULT</string>
+    <string-array name="boolean_options">
+        <item>YES</item>
+        <item>NO</item>
+    </string-array>
 </resources>

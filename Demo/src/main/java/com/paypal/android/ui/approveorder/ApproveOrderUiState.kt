@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.uishared.enums.BooleanOption
 
 @Immutable
 data class ApproveOrderUiState(
@@ -17,7 +18,7 @@ data class ApproveOrderUiState(
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val isCreateOrderLoading: Boolean = false,
-    val shouldVault: Boolean = false,
+    val shouldVault: BooleanOption = BooleanOption.NO,
     val customerId: String = "",
     val isApproveOrderLoading: Boolean = false,
     val isCompleteOrderLoading: Boolean = false,

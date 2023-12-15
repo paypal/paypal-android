@@ -1,5 +1,6 @@
-package com.paypal.android.ui
+package com.paypal.android.uishared.components
 
+import androidx.annotation.ArrayRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,18 +18,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.paypal.android.R
+import com.paypal.android.uishared.enums.BooleanOption
 
+// Ref: https://stackoverflow.com/a/51663849
 @Composable
-fun OptionList(
+inline fun <reified T : Enum<T>> EnumOptionList(
     title: String,
-    options: List<String>,
-    onOptionSelected: (String) -> Unit,
+    @ArrayRes stringArrayResId: Int,
+    crossinline onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
-    selectedOption: String = "",
+    selectedOption: T,
 ) {
+    val options = stringArrayResource(id = stringArrayResId)
+
     Card(
         modifier = modifier
     ) {
@@ -38,6 +46,7 @@ fun OptionList(
         ) {
             Text(
                 text = title,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
@@ -55,8 +64,10 @@ fun OptionList(
                         .padding(horizontal = 16.dp)
                         .defaultMinSize(minHeight = 50.dp)
                         .selectable(
-                            selected = (option == selectedOption),
-                            onClick = { onOptionSelected(option) },
+                            selected = (enumValueOf<T>(option) == selectedOption),
+                            onClick = {
+                                onOptionSelected(enumValueOf(option))
+                            },
                             role = Role.RadioButton
                         )
                 ) {
@@ -70,7 +81,7 @@ fun OptionList(
                             .align(Alignment.CenterVertically)
                     )
                     RadioButton(
-                        selected = (option == selectedOption),
+                        selected = (enumValueOf<T>(option) == selectedOption),
                         onClick = null,
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
@@ -87,12 +98,12 @@ fun OptionList(
 @Composable
 fun OptionListPreview() {
     MaterialTheme {
-        Surface() {
-            OptionList(
+        Surface {
+            EnumOptionList(
                 title = "Fake Title",
-                options = listOf("One", "Two", "Three"),
+                stringArrayResId = R.array.boolean_options,
                 onOptionSelected = {},
-                selectedOption = "One",
+                selectedOption = BooleanOption.YES,
                 modifier = Modifier.padding(8.dp)
             )
         }

@@ -27,8 +27,9 @@ fun StepContainer(
 ) {
     Column(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
     ) {
+        // header row
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -61,27 +62,15 @@ fun StepContainer(
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Red)
                 )
             }
         }
+        // content row
         Row(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp)
         ) {
-            // invisible box to preserve step content alignment
-            Box(
-                modifier = Modifier
-                    .alpha(0f)
-                    .size(60.dp)
-            )
-            Column(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .weight(1.0f)
-            ) {
-                content()
-            }
+            content()
         }
     }
 }

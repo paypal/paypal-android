@@ -25,6 +25,7 @@ import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.StepContainer
 
 // TODO: Investigate the best way to break this composable up into smaller individual units
 @Suppress("LongMethod")
@@ -51,17 +52,18 @@ fun ApproveOrderView(
                 testTagsAsResourceId = true
             }
     ) {
-        CreateOrderWithVaultOptionForm(
-            title = "Create an Order to proceed:",
-            orderIntent = uiState.intentOption,
-            shouldVault = uiState.shouldVault,
-            vaultCustomerId = uiState.customerId,
-            isLoading = uiState.isCreateOrderLoading,
-            onIntentOptionSelected = { value -> viewModel.intentOption = value },
-            onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-            onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
-            onSubmit = { viewModel.createOrder() }
-        )
+        StepContainer(stepNumber = 1, title = "Create an Order") {
+            CreateOrderWithVaultOptionForm(
+                orderIntent = uiState.intentOption,
+                shouldVault = uiState.shouldVault,
+                vaultCustomerId = uiState.customerId,
+                isLoading = uiState.isCreateOrderLoading,
+                onIntentOptionSelected = { value -> viewModel.intentOption = value },
+                onShouldVaultChanged = { value -> viewModel.shouldVault = value },
+                onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
+                onSubmit = { viewModel.createOrder() }
+            )
+        }
         uiState.createdOrder?.let { createdOrder ->
             Spacer(modifier = Modifier.size(24.dp))
             OrderView(order = createdOrder, title = "Order Created")

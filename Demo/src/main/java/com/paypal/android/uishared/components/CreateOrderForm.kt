@@ -69,7 +69,7 @@ fun CreateOrderForm(
 fun CreateOrderFormPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            CreateOrderWithVaultOptionForm(title = "Sample Title")
+            CreateOrderForm(title = "Sample Title")
         }
     }
 }
