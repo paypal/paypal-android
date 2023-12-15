@@ -38,14 +38,14 @@ fun StepContainer(
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.inverseSurface,
                         shape = CircleShape
                     )
                     .size(60.dp)
             ) {
                 Text(
                     text = "$stepNumber",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -58,7 +58,7 @@ fun StepContainer(
             ) {
                 Text(
                     text = title,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .fillMaxWidth()
