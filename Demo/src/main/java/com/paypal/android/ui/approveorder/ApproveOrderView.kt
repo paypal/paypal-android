@@ -68,17 +68,19 @@ fun ApproveOrderView(
             Spacer(modifier = Modifier.size(24.dp))
             OrderView(order = createdOrder, title = "Order Created")
             Spacer(modifier = Modifier.size(24.dp))
-            ApproveOrderForm(
-                uiState = uiState,
-                onCardNumberChange = { value -> viewModel.cardNumber = value },
-                onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
-                onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
-                onSCAOptionSelected = { value -> viewModel.scaOption = value },
-                onUseTestCardClick = { onUseTestCardClick() },
-                onSubmit = {
-                    context.getActivity()?.let { viewModel.approveOrder(it) }
-                }
-            )
+            StepContainer(stepNumber = 2, title = "Approve Order with Card") {
+                ApproveOrderForm(
+                    uiState = uiState,
+                    onCardNumberChange = { value -> viewModel.cardNumber = value },
+                    onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
+                    onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
+                    onSCAOptionSelected = { value -> viewModel.scaOption = value },
+                    onUseTestCardClick = { onUseTestCardClick() },
+                    onSubmit = {
+                        context.getActivity()?.let { viewModel.approveOrder(it) }
+                    }
+                )
+            }
         }
         uiState.approveOrderResult?.let { cardResult ->
             Spacer(modifier = Modifier.size(24.dp))

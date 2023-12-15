@@ -31,6 +31,11 @@
     <string name="shipping_preference_set_provided_address">Set Provided Address</string>
 
     <string name="sca_title">SCA</string>
+    <string-array name="sca_options">
+        <item>SCA_ALWAYS</item>
+        <item>SCA_WHEN_REQUIRED</item>
+    </string-array>
+
     <string name="sca_always">ALWAYS</string>
     <string name="sca_when_required">WHEN REQUIRED</string>
 

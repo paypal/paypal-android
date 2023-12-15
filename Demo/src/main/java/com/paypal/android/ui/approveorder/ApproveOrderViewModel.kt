@@ -118,11 +118,7 @@ class ApproveOrderViewModel @Inject constructor(
 
     private fun createCardRequest(uiState: ApproveOrderUiState, order: Order): CardRequest {
         val card = parseCard(uiState)
-        val sca = when (uiState.scaOption) {
-            "ALWAYS" -> SCA.SCA_ALWAYS
-            else -> SCA.SCA_WHEN_REQUIRED
-        }
-        return CardRequest(order.id!!, card, APP_RETURN_URL, sca)
+        return CardRequest(order.id!!, card, APP_RETURN_URL, uiState.scaOption)
     }
 
     private fun parseCard(uiState: ApproveOrderUiState): Card {
@@ -159,7 +155,7 @@ class ApproveOrderViewModel @Inject constructor(
         set(value) {
             _uiState.update { it.copy(completedOrder = value) }
         }
-    var scaOption: String
+    var scaOption: SCA
         get() = _uiState.value.scaOption
         set(value) {
             _uiState.update { it.copy(scaOption = value) }

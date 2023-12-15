@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.enums.StoreInVaultOption
 
 @Immutable
@@ -12,7 +13,7 @@ data class ApproveOrderUiState(
     val completedOrder: Order? = null,
     val approveOrderResult: CardResult? = null,
     val approveOrderErrorMessage: String? = null,
-    val scaOption: String = "ALWAYS",
+    val scaOption: SCA = SCA.SCA_ALWAYS,
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
