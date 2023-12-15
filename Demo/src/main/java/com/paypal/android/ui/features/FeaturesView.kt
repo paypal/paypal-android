@@ -16,17 +16,17 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
-import com.paypal.android.uishared.theme.DemoColors
 
 private val cardFeatures = listOf(
     Feature.CARD_APPROVE_ORDER,
@@ -50,7 +50,7 @@ fun FeaturesView(
 ) {
     LazyColumn(
         modifier = Modifier
-            .background(DemoColors.white)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp)
             .fillMaxSize()
     ) {
@@ -99,7 +99,7 @@ fun FeatureGroupHeader(text: String) {
     Spacer(modifier = Modifier.size(24.dp))
     Text(
         text = text,
-        color = DemoColors.black,
+        color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.titleLarge,
     )
@@ -115,14 +115,14 @@ fun FeatureView(
     val chevronPainter = painterResource(id = R.drawable.chevron)
     Column(
         modifier = Modifier
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.primaryContainer)
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
         Row {
             Text(
                 text = stringResource(id = feature.stringRes),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .weight(1.0f)
@@ -131,7 +131,7 @@ fun FeatureView(
             Icon(
                 painter = chevronPainter,
                 contentDescription = null,
-                tint = DemoColors.gray,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier
                     .size(14.dp)
                     .align(Alignment.CenterVertically)
@@ -140,9 +140,20 @@ fun FeatureView(
         }
         if (!isLast) {
             Divider(
-                color = DemoColors.white,
+                color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.padding(start = 16.dp)
             )
+        }
+    }
+}
+
+@ExperimentalFoundationApi
+@Preview
+@Composable
+fun FeaturesViewPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            FeaturesView(onFeatureSelected = {})
         }
     }
 }
