@@ -115,14 +115,14 @@ fun FeatureView(
     val chevronPainter = painterResource(id = R.drawable.chevron)
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
         Row {
             Text(
                 text = stringResource(id = feature.stringRes),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .weight(1.0f)
@@ -131,7 +131,7 @@ fun FeatureView(
             Icon(
                 painter = chevronPainter,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .size(14.dp)
                     .align(Alignment.CenterVertically)
