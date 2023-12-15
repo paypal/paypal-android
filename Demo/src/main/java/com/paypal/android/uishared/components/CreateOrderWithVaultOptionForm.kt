@@ -28,10 +28,8 @@ import com.paypal.android.uishared.enums.StoreInVaultOption
 fun CreateOrderWithVaultOptionForm(
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
     shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
-    vaultCustomerId: String = "",
     isLoading: Boolean = false,
     onShouldVaultChanged: (StoreInVaultOption) -> Unit = {},
-    onVaultCustomerIdChanged: (String) -> Unit = {},
     onIntentOptionSelected: (OrderIntent) -> Unit = {},
     onSubmit: () -> Unit = {}
 ) {
@@ -50,14 +48,6 @@ fun CreateOrderWithVaultOptionForm(
             stringArrayResId = R.array.store_in_vault_options,
             onOptionSelected = { onShouldVaultChanged(it) },
             selectedOption = shouldVault
-        )
-        OutlinedTextField(
-            value = vaultCustomerId,
-            label = { Text("VAULT CUSTOMER ID (OPTIONAL)") },
-            onValueChange = { onVaultCustomerIdChanged(it) },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { localFocusManager.clearFocus() }),
-            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.size(8.dp))
         WireframeButton(

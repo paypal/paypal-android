@@ -4,6 +4,5 @@ import com.paypal.android.api.model.OrderIntent
 
 data class OrderRequest(
     val orderIntent: OrderIntent,
-    val shouldVault: Boolean = false,
-    val vaultCustomerId: String = ""
+    val shouldVault: Boolean = false
 )

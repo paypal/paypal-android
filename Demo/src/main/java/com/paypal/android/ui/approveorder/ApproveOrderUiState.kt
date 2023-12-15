@@ -20,7 +20,6 @@ data class ApproveOrderUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val isCreateOrderLoading: Boolean = false,
     val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
-    val customerId: String = "",
     val isApproveOrderLoading: Boolean = false,
     val isCompleteOrderLoading: Boolean = false,
 )

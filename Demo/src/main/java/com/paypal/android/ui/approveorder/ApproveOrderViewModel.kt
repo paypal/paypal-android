@@ -50,14 +50,9 @@ class ApproveOrderViewModel @Inject constructor(
     fun createOrder() {
         viewModelScope.launch {
             isCreateOrderLoading = true
-
             val uiState = uiState.value
             val orderRequest = uiState.run {
-                OrderRequest(
-                    intentOption,
-                    shouldVault == StoreInVaultOption.ON_SUCCESS,
-                    customerId
-                )
+                OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
             }
             createdOrder = createOrderUseCase(orderRequest)
             isCreateOrderLoading = false
@@ -189,12 +184,6 @@ class ApproveOrderViewModel @Inject constructor(
         get() = _uiState.value.shouldVault
         set(value) {
             _uiState.update { it.copy(shouldVault = value) }
-        }
-
-    var customerId: String
-        get() = _uiState.value.customerId
-        set(value) {
-            _uiState.update { it.copy(customerId = value) }
         }
 
     var isCreateOrderLoading: Boolean

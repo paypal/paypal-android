@@ -56,11 +56,9 @@ fun ApproveOrderView(
             CreateOrderWithVaultOptionForm(
                 orderIntent = uiState.intentOption,
                 shouldVault = uiState.shouldVault,
-                vaultCustomerId = uiState.customerId,
                 isLoading = uiState.isCreateOrderLoading,
                 onIntentOptionSelected = { value -> viewModel.intentOption = value },
                 onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-                onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
                 onSubmit = { viewModel.createOrder() }
             )
         }
