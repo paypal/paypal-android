@@ -33,7 +33,7 @@ fun ApproveOrderForm(
 ) {
     Column(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.size(8.dp))

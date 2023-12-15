@@ -46,7 +46,6 @@ inline fun <reified T : Enum<T>> EnumOptionList(
         ) {
             Text(
                 text = title,
-                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier

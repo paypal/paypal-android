@@ -81,6 +81,7 @@ fun ApproveOrderView(
                 }
             }
         }
+
         if (uiState.createOrderState is ActionButtonState.Success) {
             Spacer(modifier = Modifier.size(24.dp))
             StepContainer(stepNumber = 2, title = "Approve Order") {
