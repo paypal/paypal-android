@@ -19,43 +19,37 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun CardResultView(result: CardResult) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = UIConstants.paddingMedium)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = UIConstants.paddingMedium)
-        ) {
+        Text(
+            text = "Order ID",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(top = UIConstants.paddingMedium)
+        )
+        Text(
+            text = result.orderId,
+            modifier = Modifier
+                .padding(top = 4.dp)
+        )
+        Text(
+            text = "Deep Link URL",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(top = UIConstants.paddingMedium)
+        )
+        if (result.deepLinkUrl == null) {
             Text(
-                text = "Approve Order Result",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = "Order",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = UIConstants.paddingMedium)
-            )
-            Text(
-                text = result.orderId,
+                text = "NOT SET",
                 modifier = Modifier
                     .padding(top = 4.dp)
             )
-            Text(
-                text = "Deep Link URL",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = UIConstants.paddingMedium)
-            )
-            if (result.deepLinkUrl == null) {
-                Text(
-                    text = "NOT SET",
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                )
-            } else {
-                UriView(uri = result.deepLinkUrl!!)
-            }
-            Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
+        } else {
+            UriView(uri = result.deepLinkUrl!!)
         }
+        Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
     }
 }
 
