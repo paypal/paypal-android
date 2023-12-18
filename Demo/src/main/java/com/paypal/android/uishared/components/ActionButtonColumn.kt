@@ -26,7 +26,7 @@ import com.paypal.android.uishared.state.ActionButtonState
 private val successGreen = Color(0xff007f5f)
 
 @Composable
-fun <S, E> StatefulActionButton(
+fun <S, E> ActionButtonColumn(
     defaultTitle: String,
     successTitle: String,
     state: ActionButtonState<S, E>,
@@ -101,7 +101,7 @@ fun StatefulActionButtonPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column {
-                StatefulActionButton(
+                ActionButtonColumn(
                     defaultTitle = "Fake Default Title",
                     successTitle = "Fake Success Title",
                     state = ActionButtonState.Ready,

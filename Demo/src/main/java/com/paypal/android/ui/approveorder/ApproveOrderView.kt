@@ -24,11 +24,10 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.uishared.components.OrderView
-import com.paypal.android.uishared.components.StatefulActionButton
+import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.StepContainer
 import com.paypal.android.uishared.state.ActionButtonState
 
@@ -78,7 +77,7 @@ fun ApproveOrderStep1(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewM
                 onIntentOptionSelected = { value -> viewModel.intentOption = value },
                 onShouldVaultChanged = { value -> viewModel.shouldVault = value },
             )
-            StatefulActionButton(
+            ActionButtonColumn(
                 defaultTitle = "CREATE ORDER",
                 successTitle = "ORDER CREATED",
                 state = uiState.createOrderState,
@@ -113,7 +112,7 @@ fun ApproveOrderStep2(
                 onUseTestCardClick = { onUseTestCardClick() },
             )
             Spacer(modifier = Modifier.size(16.dp))
-            StatefulActionButton(
+            ActionButtonColumn(
                 defaultTitle = "APPROVE ORDER",
                 successTitle = "ORDER APPROVED!",
                 state = uiState.approveOrderState,
@@ -141,7 +140,7 @@ fun ApproveOrderStep3(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewM
                 OrderIntent.CAPTURE -> "ORDER CAPTURED!"
                 OrderIntent.AUTHORIZE -> "ORDER AUTHORIZED!"
             }
-            StatefulActionButton(
+            ActionButtonColumn(
                 defaultTitle = "${uiState.intentOption.name} ORDER",
                 successTitle = successTitle,
                 state = uiState.completeOrderState,
