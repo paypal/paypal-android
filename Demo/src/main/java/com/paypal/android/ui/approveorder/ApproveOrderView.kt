@@ -90,9 +90,6 @@ fun ApproveOrderView(
                     onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
                     onSCAOptionSelected = { value -> viewModel.scaOption = value },
                     onUseTestCardClick = { onUseTestCardClick() },
-                    onSubmit = {
-                        context.getActivity()?.let { viewModel.approveOrder(it) }
-                    }
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StatefulActionButton(

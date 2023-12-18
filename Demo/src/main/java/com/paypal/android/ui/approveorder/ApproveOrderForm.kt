@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.cardpayments.threedsecure.SCA
-import com.paypal.android.uishared.components.ActionButton
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.EnumOptionList
 
@@ -29,7 +28,6 @@ fun ApproveOrderForm(
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
     onSCAOptionSelected: (SCA) -> Unit,
-    onSubmit: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -53,13 +51,6 @@ fun ApproveOrderForm(
             onOptionSelected = { onSCAOptionSelected(it) },
             selectedOption = uiState.scaOption
         )
-        Spacer(modifier = Modifier.size(16.dp))
-        ActionButton(
-            text = "APPROVE ORDER",
-            isLoading = uiState.isApproveOrderLoading,
-            onClick = { onSubmit() },
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 
@@ -75,7 +66,6 @@ fun ApproveOrderFormPreview() {
                 onSecurityCodeChange = {},
                 onSCAOptionSelected = {},
                 onUseTestCardClick = {},
-                onSubmit = {}
             )
         }
     }

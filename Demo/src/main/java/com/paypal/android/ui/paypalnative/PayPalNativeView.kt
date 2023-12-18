@@ -61,11 +61,11 @@ fun PayPalNativeView(
             Spacer(modifier = Modifier.size(24.dp))
             PayPalWebCheckoutResultView(result.orderId, result.payerId)
             Spacer(modifier = Modifier.size(24.dp))
-            CompleteOrderForm(
-                isLoading = uiState.isCompleteOrderLoading,
-                orderIntent = uiState.intentOption,
-                onSubmit = { viewModel.completeOrder() }
-            )
+//            CompleteOrderForm(
+//                isLoading = uiState.isCompleteOrderLoading,
+//                orderIntent = uiState.intentOption,
+//                onSubmit = { viewModel.completeOrder() }
+//            )
         }
         uiState.payPalNativeCheckoutError?.let { error ->
             Spacer(modifier = Modifier.size(24.dp))
