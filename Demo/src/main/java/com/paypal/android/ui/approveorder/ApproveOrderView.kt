@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
@@ -43,8 +44,8 @@ fun ApproveOrderView(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
-    LaunchedEffect(uiState) {
-        // continuously scroll to bottom of the list when event state is updated
+    LaunchedEffect(scrollState.maxValue) {
+        // continuously scroll to bottom of the list when scroll bounds change
         scrollState.animateScrollTo(scrollState.maxValue)
     }
     Column(
@@ -102,28 +103,30 @@ fun ApproveOrderStep2(
 ) {
     val context = LocalContext.current
     StepContainer(stepNumber = 2, title = "Approve Order") {
-        ApproveOrderForm(
-            uiState = uiState,
-            onCardNumberChange = { value -> viewModel.cardNumber = value },
-            onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
-            onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
-            onSCAOptionSelected = { value -> viewModel.scaOption = value },
-            onUseTestCardClick = { onUseTestCardClick() },
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        StatefulActionButton(
-            defaultTitle = "APPROVE ORDER",
-            successTitle = "ORDER APPROVED!",
-            state = uiState.approveOrderState,
-            onClick = {
-                context.getActivity()?.let { viewModel.approveOrder(it) }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            when (val state = uiState.approveOrderState) {
-                is ActionButtonState.Success -> ApproveOrderSuccessView(cardResult = state.value)
-                is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
-                else -> {}
+        Column {
+            ApproveOrderForm(
+                uiState = uiState,
+                onCardNumberChange = { value -> viewModel.cardNumber = value },
+                onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
+                onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
+                onSCAOptionSelected = { value -> viewModel.scaOption = value },
+                onUseTestCardClick = { onUseTestCardClick() },
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            StatefulActionButton(
+                defaultTitle = "APPROVE ORDER",
+                successTitle = "ORDER APPROVED!",
+                state = uiState.approveOrderState,
+                onClick = {
+                    context.getActivity()?.let { viewModel.approveOrder(it) }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                when (val state = uiState.approveOrderState) {
+                    is ActionButtonState.Success -> ApproveOrderSuccessView(cardResult = state.value)
+                    is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
+                    else -> {}
+                }
             }
         }
     }
@@ -133,21 +136,25 @@ fun ApproveOrderStep2(
 fun ApproveOrderStep3(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
     val context = LocalContext.current
     StepContainer(stepNumber = 3, title = "Complete Order") {
-        CompleteOrderForm()
-        Spacer(modifier = Modifier.size(8.dp))
-        StatefulActionButton(
-            defaultTitle = "${uiState.intentOption.name} ORDER",
-            successTitle = "ORDER ${uiState.intentOption.name}ED!",
-            state = uiState.completeOrderState,
-            onClick = {
-                viewModel.completeOrder(context)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            when (val state = uiState.completeOrderState) {
-                is ActionButtonState.Success -> OrderView(order = state.value)
-                is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
-                else -> {}
+        Column {
+            val successTitle = when (uiState.intentOption) {
+                OrderIntent.CAPTURE -> "ORDER CAPTURED!"
+                OrderIntent.AUTHORIZE -> "ORDER AUTHORIZED!"
+            }
+            StatefulActionButton(
+                defaultTitle = "${uiState.intentOption.name} ORDER",
+                successTitle = successTitle,
+                state = uiState.completeOrderState,
+                onClick = {
+                    viewModel.completeOrder(context)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                when (val state = uiState.completeOrderState) {
+                    is ActionButtonState.Success -> OrderView(order = state.value)
+                    is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
+                    else -> {}
+                }
             }
         }
     }

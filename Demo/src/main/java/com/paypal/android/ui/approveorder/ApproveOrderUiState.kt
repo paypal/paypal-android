@@ -24,5 +24,5 @@ data class ApproveOrderUiState(
         get() = createOrderState is ActionButtonState.Success
 
     val isApproveOrderSuccessful: Boolean
-        get() = createOrderState is ActionButtonState.Success
+        get() = approveOrderState is ActionButtonState.Success
 }
