@@ -11,8 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.api.model.Order
+import com.paypal.android.utils.UIConstants
 
 @Composable
 fun OrderView(order: Order, title: String? = null) {
@@ -20,17 +20,17 @@ fun OrderView(order: Order, title: String? = null) {
         modifier = Modifier.fillMaxWidth()
     ) {
         title?.let { text ->
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = UIConstants.paddingMedium)
             )
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = UIConstants.paddingMedium)
         ) {
             PropertyView(name = "ID", value = order.id)
             order.intent?.let { PropertyView(name = "Intent", value = it) }
@@ -43,7 +43,7 @@ fun OrderView(order: Order, title: String? = null) {
             order.customerId?.let {
                 PropertyView(name = "Customer Vault Id", value = order.customerId)
             }
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
         }
     }
 }

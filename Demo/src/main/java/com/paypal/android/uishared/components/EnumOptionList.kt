@@ -20,11 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.utils.UIConstants
 
 // Ref: https://stackoverflow.com/a/51663849
 @Composable
@@ -49,7 +49,7 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(UIConstants.paddingMedium)
                     .fillMaxWidth()
             )
         }
@@ -75,7 +75,7 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
-                            .padding(vertical = 16.dp)
+                            .padding(vertical = UIConstants.paddingMedium)
                             .weight(1.0f)
                             .align(Alignment.CenterVertically)
                     )
@@ -86,7 +86,7 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                     )
                 }
                 if (!isLast) {
-                    Divider(modifier = Modifier.padding(start = 16.dp))
+                    Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
                 }
             }
         }
@@ -103,7 +103,7 @@ fun OptionListPreview() {
                 stringArrayResId = R.array.store_in_vault_options,
                 onOptionSelected = {},
                 selectedOption = StoreInVaultOption.ON_SUCCESS,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(UIConstants.paddingSmall)
             )
         }
     }

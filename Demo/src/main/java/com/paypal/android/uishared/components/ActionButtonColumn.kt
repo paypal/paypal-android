@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.utils.UIConstants
 
 private val successGreen = Color(0xff007f5f)
 
@@ -77,7 +78,7 @@ fun <S, E> ActionButtonColumn(
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = UIConstants.paddingSmall)
                         .alpha(if (isLoading) 0.0f else 1.0f)
                 )
                 CircularProgressIndicator(
@@ -108,7 +109,7 @@ fun StatefulActionButtonPreview() {
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(UIConstants.paddingMedium)
                 )
             }
         }

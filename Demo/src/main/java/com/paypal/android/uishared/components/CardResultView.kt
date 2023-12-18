@@ -14,16 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CardResultView(
-    result: CardResult
-) {
+fun CardResultView(result: CardResult) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = UIConstants.paddingMedium)
         ) {
             Text(
                 text = "Approve Order Result",
@@ -33,7 +32,7 @@ fun CardResultView(
                 text = "Order",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .padding(top = 16.dp)
+                    .padding(top = UIConstants.paddingMedium)
             )
             Text(
                 text = result.orderId,
@@ -44,7 +43,7 @@ fun CardResultView(
                 text = "Deep Link URL",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
-                    .padding(top = 16.dp)
+                    .padding(top = UIConstants.paddingMedium)
             )
             if (result.deepLinkUrl == null) {
                 Text(
@@ -55,7 +54,7 @@ fun CardResultView(
             } else {
                 UriView(uri = result.deepLinkUrl!!)
             }
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
         }
     }
 }
