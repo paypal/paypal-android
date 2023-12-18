@@ -102,7 +102,7 @@ class PayPalWebVaultViewModel @Inject constructor(
         }
     }
 
-    fun updateSetupToken(activity: AppCompatActivity) {
+    fun vaultSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
             isVaultPayPalLoading = true
             val request = setupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
