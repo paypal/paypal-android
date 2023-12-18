@@ -10,7 +10,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
+import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
@@ -75,16 +75,16 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(paymentToken = value) }
         }
 
-    var payPalWebCheckoutVaultResult: PayPalWebCheckoutVaultResult?
-        get() = _uiState.value.payPalWebCheckoutVaultResult
+    var payPalWebVaultResult: PayPalWebVaultResult?
+        get() = _uiState.value.payPalWebVaultResult
         set(value) {
-            _uiState.update { it.copy(payPalWebCheckoutVaultResult = value) }
+            _uiState.update { it.copy(payPalWebVaultResult = value) }
         }
 
-    var payPalWebCheckoutVaultError: PayPalSDKError?
-        get() = _uiState.value.payPalWebCheckoutVaultError
+    var payPalWebVaultError: PayPalSDKError?
+        get() = _uiState.value.payPalWebVaultError
         set(value) {
-            _uiState.update { it.copy(payPalWebCheckoutVaultError = value) }
+            _uiState.update { it.copy(payPalWebVaultError = value) }
         }
 
     var isVaultingCanceled: Boolean
@@ -126,13 +126,13 @@ class PayPalWebVaultViewModel @Inject constructor(
         }
     }
 
-    override fun onPayPalWebVaultSuccess(result: PayPalWebCheckoutVaultResult) {
-        payPalWebCheckoutVaultResult = result
+    override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
+        payPalWebVaultResult = result
         isVaultPayPalLoading = false
     }
 
     override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-        payPalWebCheckoutVaultError = error
+        payPalWebVaultError = error
         isVaultPayPalLoading = false
     }
 

@@ -4,10 +4,8 @@
 * PaymentButtons
   * Supporting custom corner radius on the PayPal Button
 * PayPalWebPayments
-  * Add `PayPalWebCheckoutVaultExperienceContext` data class
-  * Add `PayPalWebCheckoutVaultListener` interface
-  * Add `PayPalWebCheckoutVaultResult` data class
-  * Add `experienceContext` property to `PayPalWebCheckoutClient`
+  * Add `PayPalWebVaultListener` interface
+  * Add `PayPalWebVaultResult` data class
   * Add `vaultListener` property to `PayPalWebCheckoutClient`
   * Add `vault()` method to `PayPalWebCheckoutClient`
 

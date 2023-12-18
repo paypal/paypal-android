@@ -151,7 +151,7 @@ internal class PayPalWebLauncher(
             if (approvalSessionId.isNullOrEmpty()) {
                 PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
             } else {
-                val result = PayPalWebCheckoutVaultResult(approvalSessionId)
+                val result = PayPalWebVaultResult(approvalSessionId)
                 PayPalWebStatus.VaultSuccess(result)
             }
         }

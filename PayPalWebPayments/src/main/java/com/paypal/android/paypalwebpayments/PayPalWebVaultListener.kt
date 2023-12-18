@@ -11,7 +11,7 @@ interface PayPalWebVaultListener {
      * Called when the PayPal flow completes successfully.
      * @param result [PayPalWebCheckoutResult] with order information.
      */
-    fun onPayPalWebVaultSuccess(result: PayPalWebCheckoutVaultResult)
+    fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult)
 
     /**
      * Called when the PayPal flow completes with an error.

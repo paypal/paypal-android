@@ -101,7 +101,7 @@ class PayPalWebCheckoutClient internal constructor(
         listener?.onPayPalWebCanceled()
     }
 
-    private fun notifyVaultSuccess(result: PayPalWebCheckoutVaultResult) {
+    private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
         analyticsService.sendAnalyticsEvent(
             "paypal-web-payments:browser-login:canceled",
             null

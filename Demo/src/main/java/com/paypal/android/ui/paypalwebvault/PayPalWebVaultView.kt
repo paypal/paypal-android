@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
+import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.ui.WireframeButton
 import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutCanceledView
@@ -66,16 +66,16 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
                 }
             )
         }
-        uiState.payPalWebCheckoutVaultResult?.let { vaultResult ->
+        uiState.payPalWebVaultResult?.let { vaultResult ->
             Spacer(modifier = Modifier.size(8.dp))
-            PayPalWebCheckoutVaultResultView(vaultResult)
+            PayPalWebVaultResultView(vaultResult)
             Spacer(modifier = Modifier.size(8.dp))
             CreatePaymentTokenForm(
                 isLoading = uiState.isCreatePaymentTokenLoading,
                 onSubmit = { viewModel.createPaymentToken() }
             )
         }
-        uiState.payPalWebCheckoutVaultError?.let { error ->
+        uiState.payPalWebVaultError?.let { error ->
             Spacer(modifier = Modifier.size(24.dp))
             PayPalSDKErrorView(error = error)
         }
@@ -117,7 +117,7 @@ fun VaultPayPal(
 }
 
 @Composable
-fun PayPalWebCheckoutVaultResultView(result: PayPalWebCheckoutVaultResult) {
+fun PayPalWebVaultResultView(result: PayPalWebVaultResult) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {

@@ -9,6 +9,6 @@ internal sealed class PayPalWebStatus {
     class CheckoutCanceled(val orderId: String?) : PayPalWebStatus()
 
     class VaultError(val error: PayPalSDKError) : PayPalWebStatus()
-    class VaultSuccess(val result: PayPalWebCheckoutVaultResult) : PayPalWebStatus()
+    class VaultSuccess(val result: PayPalWebVaultResult) : PayPalWebStatus()
     object VaultCanceled : PayPalWebStatus()
 }
