@@ -62,6 +62,11 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
+    /**
+     * Vault PayPal as a payment method. Result will be delivered to your [PayPalWebVaultListener].
+     *
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     */
     fun vault(request: PayPalWebVaultRequest) {
         payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
             notifyVaultFailure(launchError)
