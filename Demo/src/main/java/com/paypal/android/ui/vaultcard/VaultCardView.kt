@@ -24,9 +24,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.ui.approveorder.getActivity
-import com.paypal.android.uishared.components.CardPaymentTokenView
+import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
-import com.paypal.android.uishared.components.CardSetupTokenView
+import com.paypal.android.uishared.components.SetupTokenView
+import com.paypal.android.utils.UIConstants
 
 @ExperimentalMaterial3Api
 @Composable
@@ -37,25 +38,26 @@ fun VaultCardView(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
-    LaunchedEffect(uiState) {
+    LaunchedEffect(scrollState.maxValue) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+    val contentPadding = UIConstants.paddingMedium
     Column(
+        verticalArrangement = UIConstants.spacingLarge,
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
         CreateSetupTokenForm(
-            isLoading = uiState.isCreateSetupTokenLoading,
-            customerId = uiState.customerId,
+            uiState = uiState,
             onCustomerIdValueChange = { value -> viewModel.customerId = value },
             onSubmit = { viewModel.createSetupToken() }
         )
         uiState.setupToken?.let { setupToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            CardSetupTokenView(setupToken = setupToken)
+            SetupTokenView(setupToken = setupToken)
             Spacer(modifier = Modifier.size(8.dp))
             UpdateSetupTokenWithCardForm(
                 uiState = uiState,
@@ -71,13 +73,13 @@ fun VaultCardView(
             VaultSuccessView(cardVaultResult = vaultResult)
             Spacer(modifier = Modifier.size(8.dp))
             CreatePaymentTokenForm(
-                isLoading = uiState.isCreatePaymentTokenLoading,
+                uiState = uiState,
                 onSubmit = { viewModel.createPaymentToken() }
             )
         }
         uiState.paymentToken?.let { paymentToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            CardPaymentTokenView(paymentToken = paymentToken)
+            PaymentTokenView(paymentToken = paymentToken)
         }
     }
 }
