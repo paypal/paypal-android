@@ -3,6 +3,7 @@ package com.paypal.android.ui.approveorder
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,6 +48,7 @@ fun ApproveOrderView(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
     Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
@@ -99,7 +101,6 @@ fun ApproveOrderStep2(
     onUseTestCardClick: () -> Unit
 ) {
     val context = LocalContext.current
-    Spacer(modifier = Modifier.size(24.dp))
     StepContainer(stepNumber = 2, title = "Approve Order") {
         ApproveOrderForm(
             uiState = uiState,
@@ -131,7 +132,6 @@ fun ApproveOrderStep2(
 @Composable
 fun ApproveOrderStep3(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
     val context = LocalContext.current
-    Spacer(modifier = Modifier.size(24.dp))
     StepContainer(stepNumber = 3, title = "Complete Order") {
         CompleteOrderForm()
         Spacer(modifier = Modifier.size(8.dp))
