@@ -63,7 +63,7 @@ class ApproveOrderViewModel @Inject constructor(
 
     fun approveOrder(activity: AppCompatActivity) {
         viewModelScope.launch {
-            isApproveOrderLoading = true
+            approveOrderState = ActionButtonState.Loading
 
             val clientId = sdkSampleServerAPI.fetchClientId()
             val coreConfig = CoreConfig(clientId = clientId)
@@ -72,18 +72,15 @@ class ApproveOrderViewModel @Inject constructor(
             cardClient = CardClient(activity, coreConfig)
             cardClient.approveOrderListener = object : ApproveOrderListener {
                 override fun onApproveOrderSuccess(result: CardResult) {
-                    approveOrderResult = result
-                    isApproveOrderLoading = false
+                    approveOrderState = ActionButtonState.Success(result)
                 }
 
                 override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    approveOrderErrorMessage = "CAPTURE fail: ${error.errorDescription}"
-                    isApproveOrderLoading = false
+                    approveOrderState = ActionButtonState.Failure(error)
                 }
 
                 override fun onApproveOrderCanceled() {
-                    approveOrderErrorMessage = "USER CANCELED"
-                    isApproveOrderLoading = false
+                    approveOrderState = ActionButtonState.Failure(Exception("USER CANCELED"))
                 }
 
                 override fun onApproveOrderThreeDSecureWillLaunch() {
@@ -92,7 +89,6 @@ class ApproveOrderViewModel @Inject constructor(
 
                 override fun onApproveOrderThreeDSecureDidFinish() {
                     Log.d(TAG, "3DS Success")
-                    isApproveOrderLoading = false
                 }
             }
 
@@ -103,12 +99,11 @@ class ApproveOrderViewModel @Inject constructor(
 
     fun completeOrder(context: Context) {
         viewModelScope.launch {
-            isCompleteOrderLoading = true
+            completeOrderState = ActionButtonState.Loading
 
             val cmid = payPalDataCollector.collectDeviceData(context)
-
-            completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
-            isCompleteOrderLoading = false
+            val completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
+            completeOrderState = ActionButtonState.Success(completedOrder)
         }
     }
 
@@ -137,23 +132,18 @@ class ApproveOrderViewModel @Inject constructor(
     private val createdOrder: Order?
         get() = (createOrderState as? ActionButtonState.Success)?.value
 
-    var approveOrderResult: CardResult?
-        get() = _uiState.value.approveOrderResult
+    var approveOrderState
+        get() = _uiState.value.approveOrderState
         set(value) {
-            _uiState.update { it.copy(approveOrderResult = value) }
+            _uiState.update { it.copy(approveOrderState = value) }
         }
 
-    var approveOrderErrorMessage: String?
-        get() = _uiState.value.approveOrderErrorMessage
+    var completeOrderState
+        get() = _uiState.value.completeOrderState
         set(value) {
-            _uiState.update { it.copy(approveOrderErrorMessage = value) }
+            _uiState.update { it.copy(completeOrderState = value) }
         }
 
-    var completedOrder: Order?
-        get() = _uiState.value.completedOrder
-        set(value) {
-            _uiState.update { it.copy(completedOrder = value) }
-        }
     var scaOption: SCA
         get() = _uiState.value.scaOption
         set(value) {
@@ -188,18 +178,6 @@ class ApproveOrderViewModel @Inject constructor(
         get() = _uiState.value.shouldVault
         set(value) {
             _uiState.update { it.copy(shouldVault = value) }
-        }
-
-    var isApproveOrderLoading: Boolean
-        get() = _uiState.value.isApproveOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isApproveOrderLoading = value) }
-        }
-
-    var isCompleteOrderLoading: Boolean
-        get() = _uiState.value.isCompleteOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isCompleteOrderLoading = value) }
         }
 
     fun prefillCard(testCard: TestCard) {

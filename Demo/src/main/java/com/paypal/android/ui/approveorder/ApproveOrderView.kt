@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,7 +22,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paypal.android.api.model.Order
 import com.paypal.android.uishared.components.CompleteOrderForm
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.MessageView
@@ -82,7 +80,7 @@ fun ApproveOrderView(
             }
         }
 
-        if (uiState.createOrderState is ActionButtonState.Success) {
+        if (uiState.isCreateOrderSuccessful) {
             Spacer(modifier = Modifier.size(24.dp))
             StepContainer(stepNumber = 2, title = "Approve Order") {
                 ApproveOrderForm(
@@ -96,26 +94,46 @@ fun ApproveOrderView(
                         context.getActivity()?.let { viewModel.approveOrder(it) }
                     }
                 )
+                Spacer(modifier = Modifier.size(16.dp))
+                StatefulActionButton(
+                    defaultTitle = "APPROVE ORDER",
+                    successTitle = "ORDER APPROVED!",
+                    state = uiState.approveOrderState,
+                    onClick = {
+                        context.getActivity()?.let { viewModel.approveOrder(it) }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    when (val state = uiState.approveOrderState) {
+                        is ActionButtonState.Success -> ApproveOrderSuccessView(cardResult = state.value)
+                        is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
+                        else -> {}
+                    }
+                }
             }
         }
 
-        uiState.approveOrderResult?.let { cardResult ->
+        if (uiState.isApproveOrderSuccessful) {
             Spacer(modifier = Modifier.size(24.dp))
-            ApproveOrderSuccessView(cardResult = cardResult)
-            Spacer(modifier = Modifier.size(24.dp))
-            CompleteOrderForm(
-                isLoading = uiState.isCompleteOrderLoading,
-                orderIntent = uiState.intentOption,
-                onSubmit = { viewModel.completeOrder(context) }
-            )
-        }
-        uiState.approveOrderErrorMessage?.let { errorMessage ->
-            Spacer(modifier = Modifier.size(24.dp))
-            MessageView(message = errorMessage)
-        }
-        uiState.completedOrder?.let { completedOrder ->
-            Spacer(modifier = Modifier.size(24.dp))
-            OrderView(order = completedOrder, title = "Order Complete")
+            StepContainer(stepNumber = 3, title = "Complete Order") {
+                CompleteOrderForm()
+                Spacer(modifier = Modifier.size(8.dp))
+                StatefulActionButton(
+                    defaultTitle = "${uiState.intentOption.name} ORDER",
+                    successTitle = "ORDER ${uiState.intentOption.name}ED!",
+                    state = uiState.completeOrderState,
+                    onClick = {
+                        viewModel.completeOrder(context)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    when (val state = uiState.completeOrderState) {
+                        is ActionButtonState.Success -> OrderView(order = state.value)
+                        is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
+                        else -> {}
+                    }
+                }
+            }
         }
         Spacer(modifier = Modifier.size(24.dp))
     }

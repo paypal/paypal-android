@@ -11,15 +11,18 @@ import com.paypal.android.uishared.state.ActionButtonState
 @Immutable
 data class ApproveOrderUiState(
     val createOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
-    val completedOrder: Order? = null,
-    val approveOrderResult: CardResult? = null,
-    val approveOrderErrorMessage: String? = null,
+    val approveOrderState: ActionButtonState<CardResult, Exception> = ActionButtonState.Ready,
+    val completeOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
     val scaOption: SCA = SCA.SCA_ALWAYS,
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
-    val isApproveOrderLoading: Boolean = false,
-    val isCompleteOrderLoading: Boolean = false,
-)
+) {
+    val isCreateOrderSuccessful: Boolean
+        get() = createOrderState is ActionButtonState.Success
+
+    val isApproveOrderSuccessful: Boolean
+        get() = createOrderState is ActionButtonState.Success
+}
