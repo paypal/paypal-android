@@ -72,6 +72,25 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             prefixTextView.visibility = prefixTextVisibility
         }
 
+    var customCornerRadius: Float? = null
+        set(value) {
+            field = value // Set the field value
+
+            // Determine the corner treatment based on the value
+            val cornerTreatment = if (value == 0.0f) {
+                CutCornerTreatment()
+            } else {
+                RoundedCornerTreatment()
+            }
+
+            // Build the shapeAppearanceModel considering the possibility of a null customCornerRadius
+            shapeAppearanceModel = ShapeAppearanceModel.builder().apply {
+                value?.let {
+                    setAllCornerSizes(it)
+                }
+                setAllCorners(cornerTreatment)
+            }.build()
+        }
     /**
      * Updates the shape of the Payment Button with the provided [PaymentButtonShape]
      * and defaults to [ROUNDED] if one is not provided.
@@ -84,7 +103,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             shapeHasChanged = field != value
             field = value
 
-            val cornerRadius = when (field) {
+            val cornerRadius = customCornerRadius ?: when (field) {
                 PaymentButtonShape.ROUNDED -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_radius_rounded)
                 }
@@ -94,9 +113,18 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 }
             }
 
-            val cornerTreatment = when (field) {
-                PaymentButtonShape.ROUNDED, PaymentButtonShape.PILL -> RoundedCornerTreatment()
-                PaymentButtonShape.RECTANGLE -> CutCornerTreatment()
+            val cornerTreatment = if (customCornerRadius != null) {
+                if (customCornerRadius == 0.0f) {
+                    CutCornerTreatment()
+                } else {
+                    RoundedCornerTreatment()
+                }
+
+            } else {
+                when (field) {
+                    PaymentButtonShape.ROUNDED, PaymentButtonShape.PILL -> RoundedCornerTreatment()
+                    PaymentButtonShape.RECTANGLE -> CutCornerTreatment()
+                }
             }
 
             shapeAppearanceModel = ShapeAppearanceModel.builder()

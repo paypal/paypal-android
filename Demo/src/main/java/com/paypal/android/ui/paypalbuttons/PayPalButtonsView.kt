@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypalbuttons
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +11,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,6 +32,7 @@ import com.paypal.android.paymentbuttons.PayPalCreditButton
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
+import com.paypal.android.paymentbuttons.PaymentButtonShape
 
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
@@ -87,6 +92,23 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 selectedOption = uiState.paymentButtonShape,
                 onSelection = { value -> viewModel.paymentButtonShape = value }
             )
+            Spacer(modifier = Modifier.size(4.dp))
+            Text(
+                text = "Custom Corner Radius",
+                color = Color.Black,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Slider(
+                value = uiState.customCornerRadius ?: 0.0f,
+                valueRange = 0f..100.0f,
+                onValueChange = { value -> viewModel.customCornerRadius = value }
+            )
+
+//            PaymentButtonCustomCornerRadiusOptionList(
+//                selectedOption = "Test",
+//                onSelection = { value -> viewModel.customCornerRadius = null }
+//            )
             Spacer(modifier = Modifier.size(8.dp))
             PaymentButtonSizeOptionList(
                 selectedOption = uiState.paymentButtonSize,
@@ -141,7 +163,7 @@ private fun configureButton(
     button: PaymentButton<out PaymentButtonColor>,
     uiState: PayPalButtonsUiState
 ) {
-    button.shape = uiState.paymentButtonShape
+    button.shape = PaymentButtonShape.RECTANGLE
     button.size = uiState.paymentButtonSize
 
     if (button is PayPalButton) {
@@ -152,6 +174,10 @@ private fun configureButton(
         button.color = uiState.payPalCreditButtonColor
     } else {
         button.color = uiState.payPalButtonColor
+    }
+
+    uiState.customCornerRadius?.let { customCornerRadius ->
+        button.customCornerRadius = customCornerRadius
     }
 }
 
@@ -177,6 +203,23 @@ fun PayPalButtonColorOptionListFactory(
                 selectedOption = payPalCreditButtonColor,
                 onSelection = onPayPalCreditButtonColorChange,
             )
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Preview
+@Composable
+fun FeaturesViewPreview() {
+    val scrollState = rememberScrollState()
+
+    MaterialTheme {
+        Surface(
+            modifier = Modifier
+                .verticalScroll(state = scrollState)
+                .fillMaxSize()
+        ) {
+            PayPalButtonsView()
         }
     }
 }
