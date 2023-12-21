@@ -158,7 +158,7 @@ private fun configureButton(
     button: PaymentButton<out PaymentButtonColor>,
     uiState: PayPalButtonsUiState
 ) {
-    button.shape = PaymentButtonShape.RECTANGLE
+    button.shape = uiState.paymentButtonShape
     button.size = uiState.paymentButtonSize
 
     if (button is PayPalButton) {
