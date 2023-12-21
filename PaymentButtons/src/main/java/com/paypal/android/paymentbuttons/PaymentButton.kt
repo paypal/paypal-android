@@ -73,16 +73,45 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
 
     /**
+     * Updates the corner radius of the button
+     *
+     * Cannot be used with PaymentButtonShape
+     */
+    var customCornerRadius: Float? = null
+        set(value) {
+            field = value
+
+            if (value == null) return
+
+            val cornerTreatment = if (value == 0.0f) {
+                CutCornerTreatment()
+            } else {
+                RoundedCornerTreatment()
+            }
+
+            shapeAppearanceModel = ShapeAppearanceModel.builder().apply {
+                value?.let {
+                    setAllCornerSizes(it)
+                }
+                setAllCorners(cornerTreatment)
+            }.build()
+        }
+
+    /**
      * Updates the shape of the Payment Button with the provided [PaymentButtonShape]
      * and defaults to [ROUNDED] if one is not provided.
      *
      * If your application is taking advantage of Material Theming then your own shape definitions
      * will be used as the default.
+     *
+     * Cannot be used with customCornerRadius
      */
     var shape: PaymentButtonShape = PaymentButtonShape.ROUNDED
         set(value) {
             shapeHasChanged = field != value
             field = value
+
+            this.customCornerRadius = null
 
             val cornerRadius = when (field) {
                 PaymentButtonShape.ROUNDED -> {

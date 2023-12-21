@@ -10,12 +10,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,6 +89,18 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 selectedOption = uiState.paymentButtonShape,
                 onSelection = { value -> viewModel.paymentButtonShape = value }
             )
+            Spacer(modifier = Modifier.size(4.dp))
+            Text(
+                text = "Custom Corner Radius",
+                color = Color.Black,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Slider(
+                value = uiState.customCornerRadius ?: 0.0f,
+                valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
+                onValueChange = { value -> viewModel.customCornerRadius = value }
+            )
             Spacer(modifier = Modifier.size(8.dp))
             PaymentButtonSizeOptionList(
                 selectedOption = uiState.paymentButtonSize,
@@ -95,6 +109,8 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
         }
     }
 }
+
+const val CORNER_RADIUS_SLIDER_MAX = 100.0f
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
@@ -153,6 +169,10 @@ private fun configureButton(
     } else {
         button.color = uiState.payPalButtonColor
     }
+
+    uiState.customCornerRadius?.let { customCornerRadius ->
+        button.customCornerRadius = customCornerRadius
+    }
 }
 
 @Composable
@@ -178,5 +198,14 @@ fun PayPalButtonColorOptionListFactory(
                 onSelection = onPayPalCreditButtonColorChange,
             )
         }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Preview
+@Composable
+fun FeaturesViewPreview() {
+    MaterialTheme {
+        PayPalButtonsView()
     }
 }
