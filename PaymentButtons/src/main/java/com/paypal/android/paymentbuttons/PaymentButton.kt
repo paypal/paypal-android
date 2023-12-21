@@ -74,10 +74,13 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     /**
      * Custom corner radius
+     * Default set to null
      */
     var customCornerRadius: Float? = null
         set(value) {
             field = value
+
+            if (value == null) return
 
             val cornerTreatment = if (value == 0.0f) {
                 CutCornerTreatment()
@@ -105,7 +108,9 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             shapeHasChanged = field != value
             field = value
 
-            val cornerRadius = customCornerRadius ?: when (field) {
+            this.customCornerRadius = null
+
+            val cornerRadius = when (field) {
                 PaymentButtonShape.ROUNDED -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_radius_rounded)
                 }
@@ -115,18 +120,9 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 }
             }
 
-            val cornerTreatment = if (customCornerRadius != null) {
-                if (customCornerRadius == 0.0f) {
-                    CutCornerTreatment()
-                } else {
-                    RoundedCornerTreatment()
-                }
-
-            } else {
-                when (field) {
-                    PaymentButtonShape.ROUNDED, PaymentButtonShape.PILL -> RoundedCornerTreatment()
-                    PaymentButtonShape.RECTANGLE -> CutCornerTreatment()
-                }
+            val cornerTreatment = when (field) {
+                PaymentButtonShape.ROUNDED, PaymentButtonShape.PILL -> RoundedCornerTreatment()
+                PaymentButtonShape.RECTANGLE -> CutCornerTreatment()
             }
 
             shapeAppearanceModel = ShapeAppearanceModel.builder()
