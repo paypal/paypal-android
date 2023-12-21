@@ -72,18 +72,19 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             prefixTextView.visibility = prefixTextVisibility
         }
 
+    /**
+     * Custom corner radius
+     */
     var customCornerRadius: Float? = null
         set(value) {
-            field = value // Set the field value
+            field = value
 
-            // Determine the corner treatment based on the value
             val cornerTreatment = if (value == 0.0f) {
                 CutCornerTreatment()
             } else {
                 RoundedCornerTreatment()
             }
 
-            // Build the shapeAppearanceModel considering the possibility of a null customCornerRadius
             shapeAppearanceModel = ShapeAppearanceModel.builder().apply {
                 value?.let {
                     setAllCornerSizes(it)
@@ -91,6 +92,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 setAllCorners(cornerTreatment)
             }.build()
         }
+
     /**
      * Updates the shape of the Payment Button with the provided [PaymentButtonShape]
      * and defaults to [ROUNDED] if one is not provided.
