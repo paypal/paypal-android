@@ -73,8 +73,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
 
     /**
-     * Custom corner radius
-     * Default set to null
+     * Cannot be used with PaymentButtonShape
      */
     var customCornerRadius: Float? = null
         set(value) {
@@ -102,6 +101,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      *
      * If your application is taking advantage of Material Theming then your own shape definitions
      * will be used as the default.
+     *
+     * Cannot be used with customCornerRadius
      */
     var shape: PaymentButtonShape = PaymentButtonShape.ROUNDED
         set(value) {
