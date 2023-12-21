@@ -98,7 +98,7 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
             Spacer(modifier = Modifier.size(8.dp))
             Slider(
                 value = uiState.customCornerRadius ?: 0.0f,
-                valueRange = 0f..100.0f,
+                valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
                 onValueChange = { value -> viewModel.customCornerRadius = value }
             )
             Spacer(modifier = Modifier.size(8.dp))
@@ -109,6 +109,8 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
         }
     }
 }
+
+const val CORNER_RADIUS_SLIDER_MAX = 100.0f
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
