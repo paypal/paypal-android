@@ -206,15 +206,7 @@ fun PayPalButtonColorOptionListFactory(
 @Preview
 @Composable
 fun FeaturesViewPreview() {
-    val scrollState = rememberScrollState()
-
     MaterialTheme {
-        Surface(
-            modifier = Modifier
-                .verticalScroll(state = scrollState)
-                .fillMaxSize()
-        ) {
-            PayPalButtonsView()
-        }
+        PayPalButtonsView()
     }
 }
