@@ -104,11 +104,6 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 valueRange = 0f..100.0f,
                 onValueChange = { value -> viewModel.customCornerRadius = value }
             )
-
-//            PaymentButtonCustomCornerRadiusOptionList(
-//                selectedOption = "Test",
-//                onSelection = { value -> viewModel.customCornerRadius = null }
-//            )
             Spacer(modifier = Modifier.size(8.dp))
             PaymentButtonSizeOptionList(
                 selectedOption = uiState.paymentButtonSize,
