@@ -73,6 +73,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
 
     /**
+     * Updates the corner radius of the button
+     *
      * Cannot be used with PaymentButtonShape
      */
     var customCornerRadius: Float? = null
