@@ -1,10 +1,8 @@
 package com.paypal.android.ui.vaultcard
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
@@ -55,14 +52,7 @@ fun VaultCardView(
             Step2_VaultCard(uiState, viewModel, onUseTestCardClick)
         }
         if (uiState.isVaultCardSuccessful) {
-            CreatePaymentTokenForm(
-                uiState = uiState,
-                onSubmit = { viewModel.createPaymentToken() }
-            )
-        }
-        uiState.paymentToken?.let { paymentToken ->
-            Spacer(modifier = Modifier.size(8.dp))
-            PaymentTokenView(paymentToken = paymentToken)
+            Step3_CreatePaymentToken(uiState, viewModel)
         }
     }
 }
@@ -130,7 +120,29 @@ fun Step2_VaultCard(
                 VaultSuccessView(cardVaultResult = vaultResult)
             }
         }
+    }
+}
 
+@ExperimentalMaterial3Api
+@Composable
+fun Step3_CreatePaymentToken(
+    uiState: VaultCardUiState,
+    viewModel: VaultCardViewModel
+) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Create Payment Token")
+        ActionButtonColumn(
+            defaultTitle = "CREATE PAYMENT TOKEN",
+            successTitle = "PAYMENT TOKEN CREATED",
+            state = uiState.createPaymentTokenState,
+            onClick = { viewModel.createPaymentToken() }
+        ) {
+            (uiState.createPaymentTokenState as? ActionButtonState.Success)?.value?.let { paymentToken ->
+                PaymentTokenView(paymentToken = paymentToken)
+            }
+        }
     }
 }
 

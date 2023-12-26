@@ -3,7 +3,6 @@ package com.paypal.android.ui.vaultcard
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.PaymentToken
 import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
@@ -52,19 +51,10 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(vaultCardState = value) }
         }
 
-    private val cardVaultResult: CardVaultResult?
-        get() = (vaultCardState as? ActionButtonState.Success)?.value
-
-    var paymentToken: PaymentToken?
-        get() = _uiState.value.paymentToken
+    private var createPaymentTokenState
+        get() = _uiState.value.createPaymentTokenState
         set(value) {
-            _uiState.update { it.copy(paymentToken = value) }
-        }
-
-    var isCreatePaymentTokenLoading: Boolean
-        get() = _uiState.value.isCreatePaymentTokenLoading
-        set(value) {
-            _uiState.update { it.copy(isCreatePaymentTokenLoading = value) }
+            _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
     var cardNumber: String
@@ -129,9 +119,9 @@ class VaultCardViewModel @Inject constructor(
 
     fun createPaymentToken() {
         viewModelScope.launch {
-            isCreatePaymentTokenLoading = true
-            paymentToken = createPaymentTokenUseCase(createdSetupToken!!)
-            isCreatePaymentTokenLoading = false
+            createPaymentTokenState = ActionButtonState.Loading
+            val paymentToken = createPaymentTokenUseCase(createdSetupToken!!)
+            createPaymentTokenState = ActionButtonState.Success(paymentToken)
         }
     }
 

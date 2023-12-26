@@ -9,8 +9,7 @@ import com.paypal.android.uishared.state.ActionButtonState
 data class VaultCardUiState(
     val createSetupTokenState: ActionButtonState<SetupToken, Exception> = ActionButtonState.Ready,
     val vaultCardState: ActionButtonState<CardVaultResult, Exception> = ActionButtonState.Ready,
-    val paymentToken: PaymentToken? = null,
-    val isCreatePaymentTokenLoading: Boolean = false,
+    val createPaymentTokenState: ActionButtonState<PaymentToken, Exception> = ActionButtonState.Ready,
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
