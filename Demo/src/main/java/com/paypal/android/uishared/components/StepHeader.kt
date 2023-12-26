@@ -34,12 +34,12 @@ fun StepHeader(
                     color = MaterialTheme.colorScheme.inverseSurface,
                     shape = CircleShape
                 )
-                .size(56.dp)
+                .size(40.dp)
         ) {
             Text(
                 text = "$stepNumber",
                 color = MaterialTheme.colorScheme.inverseOnSurface,
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier
                     .align(Alignment.Center)
             )
@@ -52,7 +52,7 @@ fun StepHeader(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier
                     .fillMaxWidth()
             )

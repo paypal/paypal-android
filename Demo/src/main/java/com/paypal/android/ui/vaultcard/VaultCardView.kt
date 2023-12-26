@@ -24,9 +24,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.ui.approveorder.getActivity
+import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.PaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.SetupTokenView
+import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
 
 @ExperimentalMaterial3Api
@@ -50,15 +53,8 @@ fun VaultCardView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        CreateSetupTokenForm(
-            uiState = uiState,
-            onCustomerIdValueChange = { value -> viewModel.customerId = value },
-            onSubmit = { viewModel.createSetupToken() }
-        )
-        uiState.setupToken?.let { setupToken ->
-            Spacer(modifier = Modifier.size(8.dp))
-            SetupTokenView(setupToken = setupToken)
-            Spacer(modifier = Modifier.size(8.dp))
+        Step1_CreateSetupToken(uiState, viewModel)
+        if (uiState.isCreateSetupTokenSuccessful) {
             UpdateSetupTokenWithCardForm(
                 uiState = uiState,
                 onCardNumberChange = { viewModel.cardNumber = it },
@@ -98,6 +94,25 @@ fun VaultSuccessView(cardVaultResult: CardVaultResult) {
             )
             PropertyView(name = "Setup Token Id", value = cardVaultResult.setupTokenId)
             PropertyView(name = "Status", value = cardVaultResult.status)
+        }
+    }
+}
+
+@Composable
+fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCardViewModel) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 1, title = "Create Setup Token")
+        ActionButtonColumn(
+            defaultTitle = "CREATE SETUP TOKEN",
+            successTitle = "SETUP TOKEN CREATED",
+            state = uiState.createSetupTokenState,
+            onClick = { viewModel.createSetupToken() }
+        ) {
+            (uiState.createSetupTokenState as? ActionButtonState.Success)?.value?.let { setupToken ->
+                SetupTokenView(setupToken = setupToken)
+            }
         }
     }
 }

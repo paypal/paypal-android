@@ -3,8 +3,8 @@ package com.paypal.android.ui.vaultcard
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.CardPaymentToken
-import com.paypal.android.api.model.CardSetupToken
+import com.paypal.android.api.model.PaymentToken
+import com.paypal.android.api.model.SetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -15,8 +15,9 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
-import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
-import com.paypal.android.usecase.CreateCardSetupTokenUseCase
+import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.usecase.CreatePaymentTokenUseCase
+import com.paypal.android.usecase.CreateSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
     val sdkSampleServerAPI: SDKSampleServerAPI,
-    val createCardSetupTokenUseCase: CreateCardSetupTokenUseCase,
-    val createCardPaymentTokenUseCase: CreateCardPaymentTokenUseCase
+    val createSetupTokenUseCase: CreateSetupTokenUseCase,
+    val createPaymentTokenUseCase: CreatePaymentTokenUseCase
 ) : ViewModel() {
 
     private lateinit var cardClient: CardClient
@@ -36,22 +37,19 @@ class VaultCardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
 
-    var setupToken: CardSetupToken?
-        get() = _uiState.value.setupToken
+    private var createSetupTokenState
+        get() = _uiState.value.createSetupTokenState
         set(value) {
-            _uiState.update { it.copy(setupToken = value) }
+            _uiState.update { it.copy(createSetupTokenState = value) }
         }
 
-    var paymentToken: CardPaymentToken?
+    private val createdSetupToken: SetupToken?
+        get() = (createSetupTokenState as? ActionButtonState.Success)?.value
+
+    var paymentToken: PaymentToken?
         get() = _uiState.value.paymentToken
         set(value) {
             _uiState.update { it.copy(paymentToken = value) }
-        }
-
-    var isCreateSetupTokenLoading: Boolean
-        get() = _uiState.value.isCreateSetupTokenLoading
-        set(value) {
-            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
         }
 
     var isUpdateSetupTokenLoading: Boolean
@@ -64,12 +62,6 @@ class VaultCardViewModel @Inject constructor(
         get() = _uiState.value.isCreatePaymentTokenLoading
         set(value) {
             _uiState.update { it.copy(isCreatePaymentTokenLoading = value) }
-        }
-
-    var customerId: String
-        get() = _uiState.value.customerId
-        set(value) {
-            _uiState.update { it.copy(customerId = value) }
         }
 
     var cardNumber: String
@@ -109,9 +101,9 @@ class VaultCardViewModel @Inject constructor(
 
     fun createSetupToken() {
         viewModelScope.launch {
-            isCreateSetupTokenLoading = true
-            setupToken = createCardSetupTokenUseCase(customerId)
-            isCreateSetupTokenLoading = false
+            createSetupTokenState = ActionButtonState.Loading
+            val setupToken = createSetupTokenUseCase()
+            createSetupTokenState = ActionButtonState.Success(setupToken)
         }
     }
 
@@ -135,7 +127,7 @@ class VaultCardViewModel @Inject constructor(
             }
 
             val card = parseCard(_uiState.value)
-            val cardVaultRequest = CardVaultRequest(setupToken!!.id, card)
+            val cardVaultRequest = CardVaultRequest(createdSetupToken!!.id, card)
             cardClient.vault(activity, cardVaultRequest)
         }
     }
@@ -143,7 +135,7 @@ class VaultCardViewModel @Inject constructor(
     fun createPaymentToken() {
         viewModelScope.launch {
             isCreatePaymentTokenLoading = true
-            paymentToken = createCardPaymentTokenUseCase(setupToken!!)
+            paymentToken = createPaymentTokenUseCase(createdSetupToken!!)
             isCreatePaymentTokenLoading = false
         }
     }
