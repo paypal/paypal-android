@@ -46,16 +46,19 @@ class VaultCardViewModel @Inject constructor(
     private val createdSetupToken: SetupToken?
         get() = (createSetupTokenState as? ActionButtonState.Success)?.value
 
+    private var vaultCardState
+        get() = _uiState.value.vaultCardState
+        set(value) {
+            _uiState.update { it.copy(vaultCardState = value) }
+        }
+
+    private val cardVaultResult: CardVaultResult?
+        get() = (vaultCardState as? ActionButtonState.Success)?.value
+
     var paymentToken: PaymentToken?
         get() = _uiState.value.paymentToken
         set(value) {
             _uiState.update { it.copy(paymentToken = value) }
-        }
-
-    var isUpdateSetupTokenLoading: Boolean
-        get() = _uiState.value.isUpdateSetupTokenLoading
-        set(value) {
-            _uiState.update { it.copy(isUpdateSetupTokenLoading = value) }
         }
 
     var isCreatePaymentTokenLoading: Boolean
@@ -82,12 +85,6 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
 
-    var cardVaultResult: CardVaultResult?
-        get() = _uiState.value.cardVaultResult
-        set(value) {
-            _uiState.update { it.copy(cardVaultResult = value) }
-        }
-
     fun prefillCard(testCard: TestCard) {
         val card = testCard.card
         _uiState.update { currentState ->
@@ -109,20 +106,18 @@ class VaultCardViewModel @Inject constructor(
 
     fun updateSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
-            isUpdateSetupTokenLoading = true
+            vaultCardState = ActionButtonState.Loading
             val clientId = sdkSampleServerAPI.fetchClientId()
 
             val configuration = CoreConfig(clientId = clientId)
             cardClient = CardClient(activity, configuration)
             cardClient.cardVaultListener = object : CardVaultListener {
                 override fun onVaultSuccess(result: CardVaultResult) {
-                    isUpdateSetupTokenLoading = false
-                    cardVaultResult = result
+                    vaultCardState = ActionButtonState.Success(result)
                 }
 
                 override fun onVaultFailure(error: PayPalSDKError) {
-                    isUpdateSetupTokenLoading = false
-                    // TODO: handle error
+                    vaultCardState = ActionButtonState.Failure(error)
                 }
             }
 
