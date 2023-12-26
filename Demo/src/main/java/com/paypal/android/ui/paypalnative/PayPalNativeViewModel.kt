@@ -18,6 +18,7 @@ import com.paypal.android.paypalnativepayments.PayPalNativePaysheetActions
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingAddress
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingListener
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
+import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
@@ -51,41 +52,26 @@ class PayPalNativeViewModel @Inject constructor(
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    var isCreateOrderLoading: Boolean
-        get() = _uiState.value.isCreateOrderLoading
+    private var payPalNativeCheckoutState
+        get() = _uiState.value.payPalNativeCheckoutState
         set(value) {
-            _uiState.update { it.copy(isCreateOrderLoading = value) }
+            _uiState.update { it.copy(payPalNativeCheckoutState = value) }
         }
 
-    var isStartCheckoutLoading: Boolean
-        get() = _uiState.value.isStartCheckoutLoading
+    private var createOrderState
+        get() = _uiState.value.createOrderState
         set(value) {
-            _uiState.update { it.copy(isStartCheckoutLoading = value) }
+            _uiState.update { it.copy(createOrderState = value) }
         }
 
-    var isCheckoutCanceled: Boolean
-        get() = _uiState.value.isCheckoutCanceled
+    private var completeOrderState
+        get() = _uiState.value.completeOrderState
         set(value) {
-            _uiState.update { it.copy(isCheckoutCanceled = value) }
+            _uiState.update { it.copy(completeOrderState = value) }
         }
 
-    var isCompleteOrderLoading: Boolean
-        get() = _uiState.value.isCompleteOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isCompleteOrderLoading = value) }
-        }
-
-    var createdOrder: Order?
-        get() = _uiState.value.createdOrder
-        set(value) {
-            _uiState.update { it.copy(createdOrder = value) }
-        }
-
-    var completedOrder: Order?
-        get() = _uiState.value.completedOrder
-        set(value) {
-            _uiState.update { it.copy(completedOrder = value) }
-        }
+    private val createdOrder: Order?
+        get() = (createOrderState as? ActionButtonState.Success)?.value
 
     var shippingPreference: ShippingPreferenceType
         get() = _uiState.value.shippingPreference
@@ -93,36 +79,22 @@ class PayPalNativeViewModel @Inject constructor(
             _uiState.update { it.copy(shippingPreference = value) }
         }
 
-    var payPalNativeCheckoutResult: PayPalNativeCheckoutResult?
-        get() = _uiState.value.payPalNativeCheckoutResult
-        set(value) {
-            _uiState.update { it.copy(payPalNativeCheckoutResult = value) }
-        }
-
-    var payPalNativeCheckoutError: PayPalSDKError?
-        get() = _uiState.value.payPalNativeCheckoutError
-        set(value) {
-            _uiState.update { it.copy(payPalNativeCheckoutError = value) }
-        }
-
     private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {
-            isStartCheckoutLoading = true
+            payPalNativeCheckoutState = ActionButtonState.Loading
         }
 
         override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
-            isStartCheckoutLoading = false
-            payPalNativeCheckoutResult = result
+            payPalNativeCheckoutState = ActionButtonState.Success(result)
         }
 
         override fun onPayPalCheckoutFailure(error: PayPalSDKError) {
-            isStartCheckoutLoading = false
-            payPalNativeCheckoutError = error
+            payPalNativeCheckoutState = ActionButtonState.Failure(error)
         }
 
         override fun onPayPalCheckoutCanceled() {
-            isStartCheckoutLoading = false
-            isCheckoutCanceled = true
+            val error = PayPalSDKError(123, "USER CANCELED")
+            payPalNativeCheckoutState = ActionButtonState.Failure(error)
         }
     }
 
@@ -186,26 +158,25 @@ class PayPalNativeViewModel @Inject constructor(
 
     fun completeOrder() {
         viewModelScope.launch {
-            isCompleteOrderLoading = true
+            completeOrderState = ActionButtonState.Loading
 
             val cmid = payPalDataCollector.collectDeviceData(getApplication())
             val orderId = createdOrder!!.id!!
             val orderIntent = intentOption
 
-            completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
-            isCompleteOrderLoading = false
+            val completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
+            completeOrderState = ActionButtonState.Success(completedOrder)
         }
     }
 
     fun createOrder() {
         viewModelScope.launch {
-            isCreateOrderLoading = true
+            createOrderState = ActionButtonState.Loading
 
             val shippingPreference = shippingPreference
             val orderIntent = intentOption
-            createdOrder = getOrderUseCase(shippingPreference, orderIntent)
-
-            isCreateOrderLoading = false
+            val createdOrder = getOrderUseCase(shippingPreference, orderIntent)
+            createOrderState = ActionButtonState.Success(createdOrder)
         }
     }
 }

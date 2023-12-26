@@ -4,16 +4,18 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
+import com.paypal.android.uishared.state.ActionButtonState
 
 data class PayPalNativeUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val isCreateOrderLoading: Boolean = false,
-    val isCompleteOrderLoading: Boolean = false,
-    val createdOrder: Order? = null,
-    val completedOrder: Order? = null,
+    val createOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
+    val payPalNativeCheckoutState: ActionButtonState<PayPalNativeCheckoutResult, PayPalSDKError> = ActionButtonState.Ready,
+    val completeOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
     val shippingPreference: ShippingPreferenceType = ShippingPreferenceType.GET_FROM_FILE,
-    val isStartCheckoutLoading: Boolean = false,
-    val isCheckoutCanceled: Boolean = false,
-    val payPalNativeCheckoutResult: PayPalNativeCheckoutResult? = null,
-    val payPalNativeCheckoutError: PayPalSDKError? = null
-)
+) {
+    val isCreateOrderSuccessful: Boolean
+        get() = createOrderState is ActionButtonState.Success
+
+    val isPayPalNativeCheckoutSuccessful: Boolean
+        get() = payPalNativeCheckoutState is ActionButtonState.Success
+}
