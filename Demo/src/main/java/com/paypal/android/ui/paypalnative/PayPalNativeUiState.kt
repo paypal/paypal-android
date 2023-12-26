@@ -9,7 +9,8 @@ import com.paypal.android.uishared.state.ActionButtonState
 data class PayPalNativeUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
-    val payPalNativeCheckoutState: ActionButtonState<PayPalNativeCheckoutResult, PayPalSDKError> = ActionButtonState.Ready,
+    val payPalNativeCheckoutState: ActionButtonState<PayPalNativeCheckoutResult, PayPalSDKError> =
+        ActionButtonState.Ready,
     val completeOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
     val shippingPreference: ShippingPreferenceType = ShippingPreferenceType.GET_FROM_FILE,
 ) {

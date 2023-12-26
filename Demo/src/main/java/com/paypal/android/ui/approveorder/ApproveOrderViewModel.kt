@@ -48,7 +48,6 @@ class ApproveOrderViewModel @Inject constructor(
     private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
-
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionButtonState.Loading
@@ -123,7 +122,7 @@ class ApproveOrderViewModel @Inject constructor(
         )
     }
 
-    var createOrderState
+    private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
             _uiState.update { it.copy(createOrderState = value) }
@@ -138,7 +137,7 @@ class ApproveOrderViewModel @Inject constructor(
             _uiState.update { it.copy(approveOrderState = value) }
         }
 
-    var completeOrderState
+    private var completeOrderState
         get() = _uiState.value.completeOrderState
         set(value) {
             _uiState.update { it.copy(completeOrderState = value) }
