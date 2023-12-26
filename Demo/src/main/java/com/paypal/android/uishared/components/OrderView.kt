@@ -17,7 +17,9 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun OrderView(order: Order, title: String? = null) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(UIConstants.paddingMedium)
     ) {
         title?.let { text ->
             Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
@@ -28,9 +30,9 @@ fun OrderView(order: Order, title: String? = null) {
             )
         }
         Column(
+            verticalArrangement = UIConstants.spacingMedium,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = UIConstants.paddingMedium)
         ) {
             PropertyView(name = "ID", value = order.id)
             order.intent?.let { PropertyView(name = "Intent", value = it) }
@@ -43,7 +45,6 @@ fun OrderView(order: Order, title: String? = null) {
             order.customerId?.let {
                 PropertyView(name = "Customer Vault Id", value = order.customerId)
             }
-            Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
         }
     }
 }

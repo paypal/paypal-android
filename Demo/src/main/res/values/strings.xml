@@ -67,4 +67,12 @@
         <item>NO</item>
         <item>ON_SUCCESS</item>
     </string-array>
+
+    <string name="pay_pal_funding_source_title">FUNDING SOURCE</string>
+    <string-array name="pay_pal_funding_source_options">
+        <item>PAYPAL_CREDIT</item>
+        <item>PAY_LATER</item>
+        <item>PAYPAL</item>
+    </string-array>
+
 </resources>

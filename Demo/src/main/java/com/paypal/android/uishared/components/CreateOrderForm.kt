@@ -18,48 +18,22 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.ui.OptionList
+import com.paypal.android.utils.UIConstants
 
 @Composable
 fun CreateOrderForm(
-    title: String,
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
-    isLoading: Boolean = false,
     onIntentOptionSelected: (OrderIntent) -> Unit = {},
-    onSubmit: () -> Unit = {}
 ) {
-    val captureValue = stringResource(id = R.string.intent_capture)
-    val authorizeValue = stringResource(id = R.string.intent_authorize)
-    val selectedOrderIntent = when (orderIntent) {
-        OrderIntent.CAPTURE -> captureValue
-        OrderIntent.AUTHORIZE -> authorizeValue
-    }
-    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = title, style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.size(16.dp))
-            OptionList(
-                title = stringResource(id = R.string.intent_title),
-                options = listOf(authorizeValue, captureValue),
-                selectedOption = selectedOrderIntent,
-                onOptionSelected = { option ->
-                    val newOrderIntent = when (option) {
-                        captureValue -> OrderIntent.CAPTURE
-                        authorizeValue -> OrderIntent.AUTHORIZE
-                        else -> null
-                    }
-                    newOrderIntent?.let { onIntentOptionSelected(it) }
-                }
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            ActionButton(
-                text = "Create Order",
-                isLoading = isLoading,
-                onClick = { onSubmit() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-            )
-        }
+    Column(
+        verticalArrangement = UIConstants.spacingMedium
+    ) {
+        EnumOptionList(
+            title = stringResource(id = R.string.intent_title),
+            stringArrayResId = R.array.intent_options,
+            onOptionSelected = { onIntentOptionSelected(it) },
+            selectedOption = orderIntent
+        )
     }
 }
 
@@ -68,7 +42,7 @@ fun CreateOrderForm(
 fun CreateOrderFormPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            CreateOrderForm(title = "Sample Title")
+            CreateOrderForm()
         }
     }
 }
