@@ -1,8 +1,10 @@
 package com.paypal.android.ui.vaultcard
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,6 +56,7 @@ fun VaultCardView(
         if (uiState.isVaultCardSuccessful) {
             Step3_CreatePaymentToken(uiState, viewModel)
         }
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
