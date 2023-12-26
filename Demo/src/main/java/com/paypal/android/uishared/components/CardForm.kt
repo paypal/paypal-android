@@ -1,14 +1,11 @@
 package com.paypal.android.uishared.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -22,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.ui.approveorder.CardNumberVisualTransformation
 import com.paypal.android.ui.approveorder.DateVisualTransformation
+import com.paypal.android.utils.UIConstants
 
 @ExperimentalMaterial3Api
 @Composable
@@ -44,9 +41,7 @@ fun CardForm(
     onUseTestCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier
-    ) {
+    Card(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -81,42 +76,76 @@ fun CardForm(
             }
         }
         Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
+            verticalArrangement = UIConstants.spacingSmall,
+            modifier = Modifier.padding(horizontal = 8.dp)
         ) {
-            Spacer(modifier = Modifier.size(8.dp))
-            OutlinedTextField(
-                value = cardNumber,
-                label = { Text(stringResource(id = R.string.card_field_card_number)) },
+            CardNumberTextField(
+                cardNumber = cardNumber,
                 onValueChange = { value -> onCardNumberChange(value) },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                visualTransformation = CardNumberVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.size(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = expirationDate,
-                    label = { Text(stringResource(id = R.string.card_field_expiration)) },
+            Row(horizontalArrangement = UIConstants.spacingMedium) {
+                ExpirationDateTextField(
+                    expirationDate = expirationDate,
                     onValueChange = { value -> onExpirationDateChange(value) },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    visualTransformation = DateVisualTransformation(),
                     modifier = Modifier.weight(weight = 1.5f)
                 )
-                OutlinedTextField(
-                    value = securityCode,
-                    label = { Text(stringResource(id = R.string.card_field_security_code)) },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    visualTransformation = PasswordVisualTransformation(),
+                SecurityCodeTextField(
+                    securityCode = securityCode,
                     onValueChange = { value -> onSecurityCodeChange(value) },
                     modifier = Modifier.weight(1.0f)
                 )
             }
         }
-        Spacer(modifier = Modifier.size(16.dp))
     }
+}
+
+@Composable
+private fun CardNumberTextField(
+    cardNumber: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = cardNumber,
+        label = { Text(stringResource(id = R.string.card_field_card_number)) },
+        onValueChange = onValueChange,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+        visualTransformation = CardNumberVisualTransformation(),
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ExpirationDateTextField(
+    expirationDate: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = expirationDate,
+        label = { Text(stringResource(id = R.string.card_field_expiration)) },
+        onValueChange = onValueChange,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+        visualTransformation = DateVisualTransformation(),
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun SecurityCodeTextField(
+    securityCode: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = securityCode,
+        label = { Text(stringResource(id = R.string.card_field_security_code)) },
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+        visualTransformation = PasswordVisualTransformation(),
+        onValueChange = onValueChange,
+        modifier = modifier
+    )
 }
 
 @ExperimentalMaterial3Api
@@ -124,7 +153,7 @@ fun CardForm(
 @Composable
 fun CardFormPreview() {
     MaterialTheme {
-        Surface() {
+        Surface {
             CardForm(
                 cardNumber = "",
                 expirationDate = "",
