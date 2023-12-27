@@ -77,7 +77,7 @@ fun CardForm(
         }
         Column(
             verticalArrangement = UIConstants.spacingSmall,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(UIConstants.paddingSmall)
         ) {
             CardNumberTextField(
                 cardNumber = cardNumber,

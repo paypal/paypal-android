@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.ui.paypalnative.ShippingPreferenceType
+import com.paypal.android.utils.UIConstants
 
 @Composable
 fun CreateOrderWithShippingPreferenceForm(
@@ -23,15 +24,15 @@ fun CreateOrderWithShippingPreferenceForm(
     onIntentOptionSelected: (OrderIntent) -> Unit = {},
     onShippingPreferenceSelected: (ShippingPreferenceType) -> Unit = {},
 ) {
-    Column(modifier = Modifier.padding(8.dp)) {
-        Spacer(modifier = Modifier.size(16.dp))
+    Column(
+        verticalArrangement = UIConstants.spacingMedium
+    ) {
         EnumOptionList(
             title = stringResource(id = R.string.intent_title),
             stringArrayResId = R.array.intent_options,
             onOptionSelected = { onIntentOptionSelected(it) },
             selectedOption = orderIntent
         )
-        Spacer(modifier = Modifier.size(16.dp))
         EnumOptionList(
             title = stringResource(id = R.string.pay_pal_shipping_preference_title),
             stringArrayResId = R.array.pay_pal_shipping_preference_options,
