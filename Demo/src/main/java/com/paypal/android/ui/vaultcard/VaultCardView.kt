@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
-import com.paypal.android.ui.approveorder.getActivity
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.PaymentTokenView
@@ -28,6 +27,7 @@ import com.paypal.android.uishared.components.SetupTokenView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
+import com.paypal.android.utils.getActivity
 
 @ExperimentalMaterial3Api
 @Composable

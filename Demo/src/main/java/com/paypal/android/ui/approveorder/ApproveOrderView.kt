@@ -30,6 +30,7 @@ import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
+import com.paypal.android.utils.getActivity
 
 // TODO: Investigate the best way to break this composable up into smaller individual units
 @Suppress("LongMethod")
@@ -58,19 +59,19 @@ fun ApproveOrderView(
                 testTagsAsResourceId = true
             }
     ) {
-        ApproveOrderStep1(uiState, viewModel)
+        Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
-            ApproveOrderStep2(uiState, viewModel, onUseTestCardClick)
+            Step2_ApproveOrder(uiState, viewModel, onUseTestCardClick)
         }
         if (uiState.isApproveOrderSuccessful) {
-            ApproveOrderStep3(uiState, viewModel)
+            Step3_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-fun ApproveOrderStep1(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -97,7 +98,7 @@ fun ApproveOrderStep1(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewM
 }
 
 @Composable
-fun ApproveOrderStep2(
+private fun Step2_ApproveOrder(
     uiState: ApproveOrderUiState,
     viewModel: ApproveOrderViewModel,
     onUseTestCardClick: () -> Unit
@@ -134,7 +135,7 @@ fun ApproveOrderStep2(
 }
 
 @Composable
-fun ApproveOrderStep3(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium
@@ -160,12 +161,4 @@ fun ApproveOrderStep3(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewM
             }
         }
     }
-}
-
-// TODO: move to utility file
-// Ref: https://stackoverflow.com/a/68423182
-fun Context.getActivity(): AppCompatActivity? = when (this) {
-    is AppCompatActivity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
 }
