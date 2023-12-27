@@ -130,7 +130,7 @@ private fun Step2_ApproveOrder(
 }
 
 @Composable
-fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium

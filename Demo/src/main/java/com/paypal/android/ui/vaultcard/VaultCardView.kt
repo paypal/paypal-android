@@ -72,7 +72,7 @@ fun VaultSuccessView(cardVaultResult: CardVaultResult) {
 }
 
 @Composable
-fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCardViewModel) {
+private fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCardViewModel) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -92,7 +92,7 @@ fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCardViewMo
 
 @ExperimentalMaterial3Api
 @Composable
-fun Step2_VaultCard(
+private fun Step2_VaultCard(
     uiState: VaultCardUiState,
     viewModel: VaultCardViewModel,
     onUseTestCardClick: () -> Unit
@@ -128,7 +128,7 @@ fun Step2_VaultCard(
 
 @ExperimentalMaterial3Api
 @Composable
-fun Step3_CreatePaymentToken(
+private fun Step3_CreatePaymentToken(
     uiState: VaultCardUiState,
     viewModel: VaultCardViewModel
 ) {
