@@ -18,10 +18,12 @@
     <string name="checkout_cancelled">Checkout Cancelled</string>
     <string name="user_cancelled">User cancelled the checkout</string>
 
-    <string name="shipping_preference">Shipping Preference</string>
-    <string name="shipping_preference_get_from_file">Get From File</string>
-    <string name="shipping_preference_no_shipping">No Shipping</string>
-    <string name="shipping_preference_set_provided_address">Set Provided Address</string>
+    <string name="pay_pal_shipping_preference_title">SHIPPING PREFERENCE</string>
+    <string-array name="pay_pal_shipping_preference_options">
+        <item>GET_FROM_FILE</item>
+        <item>NO_SHIPPING</item>
+        <item>SET_PROVIDED_ADDRESS</item>
+    </string-array>
 
     <string name="sca_title">SCA</string>
     <string-array name="sca_options">
@@ -42,9 +44,6 @@
         <item>AUTHORIZE</item>
         <item>CAPTURE</item>
     </string-array>
-
-    <string name="intent_authorize">AUTHORIZE</string>
-    <string name="intent_capture">CAPTURE</string>
 
     <string name="store_in_vault">STORE IN VAULT</string>
     <string-array name="store_in_vault_options">
