@@ -131,7 +131,8 @@ class PayPalWebViewModel @Inject constructor(
     @SuppressLint("SetTextI18n")
     override fun onPayPalWebCanceled() {
         Log.i(TAG, "User cancelled")
-        payPalWebCheckoutState = ActionButtonState.Failure(PayPalSDKError(123, "USER CANCELED"))
+        val error = Exception("USER CANCELED")
+        payPalWebCheckoutState = ActionButtonState.Failure(error)
     }
 
     fun completeOrder(context: Context) {

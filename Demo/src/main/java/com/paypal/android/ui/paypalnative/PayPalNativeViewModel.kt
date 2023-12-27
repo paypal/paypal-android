@@ -93,7 +93,7 @@ class PayPalNativeViewModel @Inject constructor(
         }
 
         override fun onPayPalCheckoutCanceled() {
-            val error = PayPalSDKError(123, "USER CANCELED")
+            val error = Exception("USER CANCELED")
             payPalNativeCheckoutState = ActionButtonState.Failure(error)
         }
     }

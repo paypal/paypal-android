@@ -18,8 +18,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutResultView
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderWithShippingPreferenceForm
+import com.paypal.android.uishared.components.MessageView
 import com.paypal.android.uishared.components.OrderView
-import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
@@ -102,7 +102,7 @@ private fun Step2_StartPayPalNativeCheckout(
             }
 
             (uiState.payPalNativeCheckoutState as? ActionButtonState.Failure)?.value?.let { error ->
-                PayPalSDKErrorView(error = error)
+                MessageView(message = error.message!!)
             }
         }
     }
