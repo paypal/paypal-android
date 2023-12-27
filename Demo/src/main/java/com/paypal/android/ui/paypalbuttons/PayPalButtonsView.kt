@@ -33,6 +33,7 @@ import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
 import com.paypal.android.utils.UIConstants
+import kotlin.math.roundToInt
 
 const val CORNER_RADIUS_SLIDER_MAX = 100.0f
 
@@ -61,7 +62,7 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
             style = MaterialTheme.typography.titleLarge,
         )
         Column(
-            verticalArrangement = UIConstants.spacingSmall,
+            verticalArrangement = UIConstants.spacingMedium,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1.0f)
@@ -124,13 +125,26 @@ fun CustomCornerRadiusSlider(value: Float?, onValueChange: (Float) -> Unit) {
                 vertical = UIConstants.paddingMedium
             )
         ) {
+            Text(
+                text = value?.let { "${value}px" } ?: "UNSET",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .padding(bottom = UIConstants.paddingSmall)
+                    .fillMaxWidth()
+            )
             Slider(
                 value = value ?: 0.0f,
                 valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
+                steps = CORNER_RADIUS_SLIDER_MAX.toInt(),
                 colors = SliderDefaults.colors(
-                    inactiveTrackColor = MaterialTheme.colorScheme.inverseSurface,
+                    inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
-                onValueChange = onValueChange
+                onValueChange = { value ->
+                    // round to integer
+                    val roundedValue = value.roundToInt().toFloat()
+                    onValueChange(roundedValue)
+                }
             )
         }
     }
