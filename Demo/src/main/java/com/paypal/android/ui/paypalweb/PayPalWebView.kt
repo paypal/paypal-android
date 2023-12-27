@@ -21,7 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
-import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionButtonState
@@ -106,7 +106,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             }
 
             (uiState.payPalWebCheckoutState as? ActionButtonState.Failure)?.value?.let { error ->
-                MessageView(message = error.message!!)
+                ErrorView(error = error)
             }
         }
     }

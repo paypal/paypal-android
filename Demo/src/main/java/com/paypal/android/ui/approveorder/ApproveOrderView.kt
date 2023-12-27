@@ -22,7 +22,7 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardResultView
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
-import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionButtonState
@@ -122,7 +122,7 @@ private fun Step2_ApproveOrder(
         ) {
             when (val state = uiState.approveOrderState) {
                 is ActionButtonState.Success -> CardResultView(result = state.value)
-                is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
+                is ActionButtonState.Failure -> ErrorView(error = state.value)
                 else -> {}
             }
         }
@@ -151,7 +151,7 @@ fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderVie
         ) {
             when (val state = uiState.completeOrderState) {
                 is ActionButtonState.Success -> OrderView(order = state.value)
-                is ActionButtonState.Failure -> MessageView(message = state.value.message!!)
+                is ActionButtonState.Failure -> ErrorView(error = state.value)
                 else -> {}
             }
         }

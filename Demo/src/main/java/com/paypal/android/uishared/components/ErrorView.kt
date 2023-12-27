@@ -8,13 +8,17 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun PayPalSDKErrorView(error: PayPalSDKError) {
+fun ErrorView(error: Exception) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)
     ) {
-        PropertyView(name = "Error Code", value = "${error.code}")
-        PropertyView(name = "Error Description", value = error.errorDescription)
-        PropertyView(name = "Correlation ID", value = error.correlationId)
+        if (error is PayPalSDKError) {
+            PropertyView(name = "Error Code", value = "${error.code}")
+            PropertyView(name = "Error Description", value = error.errorDescription)
+            PropertyView(name = "Correlation ID", value = error.correlationId)
+        } else {
+            PropertyView(name = "Message", value = error.message)
+        }
     }
 }
