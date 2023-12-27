@@ -13,11 +13,6 @@
     <string name="card_field_expiration">EXP. DATE</string>
     <string name="card_field_security_code">SEC. CODE</string>
 
-    <!-- PayPal Native-->
-    <string name="start_checkout">Start Checkout</string>
-    <string name="checkout_cancelled">Checkout Cancelled</string>
-    <string name="user_cancelled">User cancelled the checkout</string>
-
     <string name="pay_pal_shipping_preference_title">SHIPPING PREFERENCE</string>
     <string-array name="pay_pal_shipping_preference_options">
         <item>GET_FROM_FILE</item>
