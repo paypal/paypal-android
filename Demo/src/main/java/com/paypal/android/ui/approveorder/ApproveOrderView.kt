@@ -1,8 +1,5 @@
 package com.paypal.android.ui.approveorder
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,9 +29,7 @@ import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
-// TODO: Investigate the best way to break this composable up into smaller individual units
-@Suppress("LongMethod")
-@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
 @Composable
 fun ApproveOrderView(
