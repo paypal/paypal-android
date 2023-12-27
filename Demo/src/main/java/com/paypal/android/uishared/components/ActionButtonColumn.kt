@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
 
-private val successGreen = Color(0xff007f5f)
+private val successGreen = Color(color = 0xff007f5f)
 
 @Composable
 fun <S, E> ActionButtonColumn(

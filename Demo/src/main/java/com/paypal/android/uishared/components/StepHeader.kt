@@ -71,7 +71,7 @@ fun StepHeader(
 fun PayPalWebViewPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            StepHeader(99, "Title 99")
+            StepHeader(stepNumber = 99, title = "Title 99")
         }
     }
 }
