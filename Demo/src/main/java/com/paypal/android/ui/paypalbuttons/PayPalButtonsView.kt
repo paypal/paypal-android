@@ -1,14 +1,18 @@
 package com.paypal.android.ui.paypalbuttons
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +33,8 @@ import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
 import com.paypal.android.utils.UIConstants
+
+const val CORNER_RADIUS_SLIDER_MAX = 100.0f
 
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
@@ -84,14 +90,8 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 selectedOption = uiState.paymentButtonShape,
                 onSelection = { value -> viewModel.paymentButtonShape = value }
             )
-            Text(
-                text = "Custom Corner Radius",
-                color = Color.Black,
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Slider(
-                value = uiState.customCornerRadius ?: 0.0f,
-                valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
+            CustomCornerRadiusSlider(
+                value = uiState.customCornerRadius,
                 onValueChange = { value -> viewModel.customCornerRadius = value }
             )
             PaymentButtonSizeOptionList(
@@ -102,7 +102,39 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
     }
 }
 
-const val CORNER_RADIUS_SLIDER_MAX = 100.0f
+@Composable
+fun CustomCornerRadiusSlider(value: Float?, onValueChange: (Float) -> Unit) {
+    Card {
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.inverseSurface)
+        ) {
+            Text(
+                text = "Custom Corner Radius",
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .padding(UIConstants.paddingMedium)
+                    .fillMaxWidth()
+            )
+        }
+        Column(
+            modifier = Modifier.padding(
+                horizontal = UIConstants.paddingLarge,
+                vertical = UIConstants.paddingMedium
+            )
+        ) {
+            Slider(
+                value = value ?: 0.0f,
+                valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
+                colors = SliderDefaults.colors(
+                    inactiveTrackColor = MaterialTheme.colorScheme.inverseSurface,
+                ),
+                onValueChange = onValueChange
+            )
+        }
+    }
+}
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
