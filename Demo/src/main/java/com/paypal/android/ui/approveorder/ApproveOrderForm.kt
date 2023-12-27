@@ -1,10 +1,8 @@
 package com.paypal.android.ui.approveorder
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,6 +27,7 @@ fun ApproveOrderForm(
     onSCAOptionSelected: (SCA) -> Unit,
 ) {
     Column(
+        verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
             .fillMaxWidth()
     ) {
@@ -41,7 +40,6 @@ fun ApproveOrderForm(
             onSecurityCodeChange = { onSecurityCodeChange(it) },
             onUseTestCardClick = { onUseTestCardClick() }
         )
-        Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
         EnumOptionList(
             title = stringResource(id = R.string.sca_title),
             stringArrayResId = R.array.sca_options,
