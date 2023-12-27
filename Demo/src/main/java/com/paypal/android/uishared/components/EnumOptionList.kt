@@ -60,7 +60,6 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                 val isLast = (index == options.lastIndex)
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
                         .defaultMinSize(minHeight = 50.dp)
                         .selectable(
                             selected = (enumValueOf<T>(option) == selectedOption),
@@ -75,14 +74,16 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
-                            .padding(vertical = UIConstants.paddingMedium)
+                            .padding(UIConstants.paddingMedium)
                             .weight(1.0f)
                             .align(Alignment.CenterVertically)
                     )
                     RadioButton(
                         selected = (enumValueOf<T>(option) == selectedOption),
                         onClick = null,
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = UIConstants.paddingMedium)
                     )
                 }
                 if (!isLast) {

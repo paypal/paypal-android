@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.paypal.android.utils.UIConstants
 
 @Composable
 fun OptionList(
@@ -41,7 +42,7 @@ fun OptionList(
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(UIConstants.paddingMedium)
                     .fillMaxWidth()
             )
         }
@@ -52,7 +53,6 @@ fun OptionList(
                 val isLast = (index == options.lastIndex)
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
                         .defaultMinSize(minHeight = 50.dp)
                         .selectable(
                             selected = (option == selectedOption),
@@ -65,18 +65,20 @@ fun OptionList(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
-                            .padding(vertical = 16.dp)
+                            .padding(UIConstants.paddingMedium)
                             .weight(1.0f)
                             .align(Alignment.CenterVertically)
                     )
                     RadioButton(
                         selected = (option == selectedOption),
                         onClick = null,
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(horizontal = UIConstants.paddingMedium)
                     )
                 }
                 if (!isLast) {
-                    Divider(modifier = Modifier.padding(start = 16.dp))
+                    Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
                 }
             }
         }
