@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -36,6 +37,7 @@ import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
 // Ref: https://github.com/android/compose-samples/tree/main
 
 @Suppress("LongMethod")
+@ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @Composable
