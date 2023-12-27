@@ -87,7 +87,7 @@ fun OptionList(
 @Composable
 fun OptionListPreview() {
     MaterialTheme {
-        Surface() {
+        Surface {
             OptionList(
                 title = "Fake Title",
                 options = listOf("One", "Two", "Three"),
