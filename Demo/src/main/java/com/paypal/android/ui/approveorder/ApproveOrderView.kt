@@ -113,7 +113,7 @@ private fun Step2_ApproveOrder(
         )
         ActionButtonColumn(
             defaultTitle = "APPROVE ORDER",
-            successTitle = "ORDER APPROVED!",
+            successTitle = "ORDER APPROVED",
             state = uiState.approveOrderState,
             onClick = {
                 context.getActivity()?.let { viewModel.approveOrder(it) }
@@ -137,8 +137,8 @@ private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: Approve
     ) {
         StepHeader(stepNumber = 3, title = "Complete Order")
         val successTitle = when (uiState.intentOption) {
-            OrderIntent.CAPTURE -> "ORDER CAPTURED!"
-            OrderIntent.AUTHORIZE -> "ORDER AUTHORIZED!"
+            OrderIntent.CAPTURE -> "ORDER CAPTURED"
+            OrderIntent.AUTHORIZE -> "ORDER AUTHORIZED"
         }
         ActionButtonColumn(
             defaultTitle = "${uiState.intentOption.name} ORDER",
