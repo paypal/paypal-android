@@ -112,10 +112,8 @@ open class PayPalButton @JvmOverloads constructor(
  *
  * @see GOLD is the default color if one is not provided and is the recommended choice as research
  * has shown it results in the best conversion.
- * @see BLUE is the preferred alternative color if gold does not work for your experience. Research
- * has shown that people know it is our brand color, which provides a halo of trust and security to
- * your experience.
- * @see WHITE is one of our secondary alternatives. This color is less capable of drawing people's
+ * @see WHITE is the preferred alternative color if gold does not work for your experience.
+ * @see BLUE is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
  * @see BLACK is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
