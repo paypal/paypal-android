@@ -129,6 +129,7 @@ enum class PayPalButtonColor(
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
     GOLD(value = 0, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.LIGHT),
+    @Deprecated("Deprecated color. Replace with gold or white.")
     BLUE(value = 1, colorResId = R.color.paypal_blue, luminance = PaymentButtonColorLuminance.DARK),
     WHITE(
         value = 2,
@@ -136,7 +137,9 @@ enum class PayPalButtonColor(
         hasOutline = true,
         luminance = PaymentButtonColorLuminance.LIGHT
     ),
+    @Deprecated("Deprecated color. Replace with gold or white.")
     BLACK(value = 3, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK),
+    @Deprecated("Deprecated color. Replace with gold or white.")
     SILVER(value = 4, colorResId = R.color.paypal_silver, luminance = PaymentButtonColorLuminance.LIGHT);
 
     companion object {

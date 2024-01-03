@@ -3,6 +3,7 @@
 ## unreleased 
 * PaymentButtons
   * Supporting custom corner radius on the PayPal Button
+  * Deprecate black, silver, and blue button colors
 
 ## 1.1.0 (2023-12-05)
 
