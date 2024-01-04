@@ -1,6 +1,6 @@
 package com.paypal.android.api.model
 
-data class PaymentToken(
+data class CardPaymentToken(
     val id: String,
     val customerId: String,
     val cardLast4: String,

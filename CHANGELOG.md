@@ -3,6 +3,11 @@
 ## unreleased 
 * PaymentButtons
   * Supporting custom corner radius on the PayPal Button
+* PayPalWebPayments
+  * Add `PayPalWebVaultListener` interface
+  * Add `PayPalWebVaultResult` data class
+  * Add `vaultListener` property to `PayPalWebCheckoutClient`
+  * Add `vault()` method to `PayPalWebCheckoutClient`
 
 ## 1.1.0 (2023-12-05)
 

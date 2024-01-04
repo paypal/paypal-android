@@ -5,6 +5,7 @@
     <string name="feature_approve_order">Approve Order</string>
     <string name="feature_vault">Vault</string>
     <string name="feature_paypal_web">PayPal Web</string>
+    <string name="feature_paypal_web_vault">PayPal Web Vault</string>
     <string name="feature_paypal_native">PayPal Native</string>
     <string name="feature_paypal_buttons">PayPal Buttons</string>
 
@@ -19,8 +20,10 @@
     <!-- PayPal Native-->
     <string name="start_checkout">Start Checkout</string>
     <string name="order_approved">Order Approved</string>
-    <string name="checkout_cancelled">Checkout Cancelled</string>
-    <string name="user_cancelled">User cancelled the checkout</string>
+    <string name="checkout_canceled">Checkout Canceled</string>
+    <string name="user_canceled">User cancelled the checkout</string>
+
+    <string name="pay_pal_vault_canceled">Vault Paypal Canceled</string>
 
     <string name="shipping_preference">Shipping Preference</string>
     <string name="shipping_preference_get_from_file">Get From File</string>

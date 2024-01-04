@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalweb
+package com.paypal.android.ui.paypalwebvault
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +15,7 @@ import com.paypal.android.R
 fun PayPalWebCheckoutCanceledView() {
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(8.dp)) {
-            Text(stringResource(id = R.string.checkout_canceled))
+            Text(stringResource(id = R.string.pay_pal_vault_canceled))
             Text(stringResource(id = R.string.user_canceled))
         }
     }
