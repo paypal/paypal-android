@@ -2,7 +2,7 @@ package com.paypal.android.ui.paypalwebvault
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -12,7 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
@@ -37,9 +36,10 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
     }
     val contentPadding = UIConstants.paddingMedium
     Column(
+        verticalArrangement = UIConstants.spacingLarge,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
+            .fillMaxSize()
+            .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
         Step1_CreateSetupToken(uiState, viewModel)
@@ -114,19 +114,14 @@ private fun Step3_CreatePaymentToken(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 3, title = "Create Payment Token")
-        Column(
-            verticalArrangement = UIConstants.spacingMedium,
+        ActionButtonColumn(
+            defaultTitle = "CREATE PAYMENT TOKEN",
+            successTitle = "PAYMENT TOKEN CREATED",
+            state = uiState.createPaymentTokenState,
+            onClick = { viewModel.createPaymentToken() }
         ) {
-            StepHeader(stepNumber = 3, title = "Create Payment Token")
-            ActionButtonColumn(
-                defaultTitle = "CREATE PAYMENT TOKEN",
-                successTitle = "PAYMENT TOKEN CREATED",
-                state = uiState.createPaymentTokenState,
-                onClick = { viewModel.createPaymentToken() }
-            ) {
-                (uiState.createPaymentTokenState as? ActionButtonState.Success)?.value?.let { paymentToken ->
-                    PayPalPaymentTokenView(paymentToken = paymentToken)
-                }
+            (uiState.createPaymentTokenState as? ActionButtonState.Success)?.value?.let { paymentToken ->
+                PayPalPaymentTokenView(paymentToken = paymentToken)
             }
         }
     }

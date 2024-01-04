@@ -29,6 +29,7 @@ import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
+// TODO: Rename to CardVaultView
 @ExperimentalMaterial3Api
 @Composable
 fun VaultCardView(

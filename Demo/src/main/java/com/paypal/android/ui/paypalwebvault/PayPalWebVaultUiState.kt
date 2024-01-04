@@ -11,7 +11,7 @@ data class PayPalWebVaultUiState(
     val createPaymentTokenState: ActionButtonState<PayPalPaymentToken, Exception> = ActionButtonState.Ready,
 ) {
     val isCreateSetupTokenSuccessful: Boolean
-        get() = vaultPayPalState is ActionButtonState.Success
+        get() = createSetupTokenState is ActionButtonState.Success
 
     val isVaultPayPalSuccessful: Boolean
         get() = vaultPayPalState is ActionButtonState.Success
