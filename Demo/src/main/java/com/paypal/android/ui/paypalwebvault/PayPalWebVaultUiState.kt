@@ -2,7 +2,6 @@ package com.paypal.android.ui.paypalwebvault
 
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.uishared.state.ActionButtonState
 
