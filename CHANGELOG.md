@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased 
+## 1.2.0 (2024-01-04) 
 * PaymentButtons
   * Supporting custom corner radius on the PayPal Button
 * PayPalWebPayments
