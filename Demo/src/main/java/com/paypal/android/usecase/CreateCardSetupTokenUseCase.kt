@@ -11,7 +11,7 @@ class CreateCardSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(customerId: String?): CardSetupToken {
+    suspend operator fun invoke(): CardSetupToken {
         // create a payment token with an empty card attribute; the merchant app will
         // provide the card's details through the SDK
 

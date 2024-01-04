@@ -3,7 +3,7 @@ package com.paypal.android.ui.vaultcard
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -15,8 +15,8 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.uishared.state.ActionButtonState
-import com.paypal.android.usecase.CreatePaymentTokenUseCase
-import com.paypal.android.usecase.CreateSetupTokenUseCase
+import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
+import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +27,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
     val sdkSampleServerAPI: SDKSampleServerAPI,
-    val createSetupTokenUseCase: CreateSetupTokenUseCase,
-    val createPaymentTokenUseCase: CreatePaymentTokenUseCase
+    val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
+    val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
     private lateinit var cardClient: CardClient
@@ -42,7 +42,7 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(createSetupTokenState = value) }
         }
 
-    private val createdSetupToken: SetupToken?
+    private val createdSetupToken: CardSetupToken?
         get() = (createSetupTokenState as? ActionButtonState.Success)?.value
 
     private var vaultCardState

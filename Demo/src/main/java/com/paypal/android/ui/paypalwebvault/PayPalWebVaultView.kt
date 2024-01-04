@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,116 +16,128 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
-import com.paypal.android.ui.WireframeButton
-import com.paypal.android.ui.approveorder.getActivity
-import com.paypal.android.ui.paypalweb.PayPalWebCheckoutCanceledView
-import com.paypal.android.ui.vaultcard.CreatePaymentTokenForm
-import com.paypal.android.ui.vaultcard.CreateSetupTokenForm
+import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
-import com.paypal.android.uishared.components.PayPalSDKErrorView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
+import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.utils.UIConstants
+import com.paypal.android.utils.getActivity
 
 @Composable
 fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
-    LaunchedEffect(uiState) {
+    LaunchedEffect(scrollState.maxValue) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+    val contentPadding = UIConstants.paddingMedium
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .verticalScroll(scrollState)
     ) {
-        CreateSetupTokenForm(
-            isLoading = uiState.isCreateSetupTokenLoading,
-            customerId = uiState.vaultCustomerId,
-            onCustomerIdValueChange = { value -> viewModel.vaultCustomerId = value },
-            onSubmit = {
-                viewModel.createSetupToken()
+        Step1_CreateSetupToken(uiState, viewModel)
+        if (uiState.isCreateSetupTokenSuccessful) {
+            Step2_VaultPayPal(uiState, viewModel)
+        }
+        if (uiState.isVaultPayPalSuccessful) {
+            Step3_CreatePaymentToken(uiState, viewModel)
+        }
+        Spacer(modifier = Modifier.size(contentPadding))
+    }
+}
+
+@Composable
+private fun Step1_CreateSetupToken(
+    uiState: PayPalWebVaultUiState,
+    viewModel: PayPalWebVaultViewModel
+) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 1, title = "Create Setup Token")
+        ActionButtonColumn(
+            defaultTitle = "CREATE SETUP TOKEN",
+            successTitle = "SETUP TOKEN CREATED",
+            state = uiState.createSetupTokenState,
+            onClick = { viewModel.createSetupToken() }
+        ) {
+            (uiState.createSetupTokenState as? ActionButtonState.Success)?.value?.let { setupToken ->
+                PayPalSetupTokenView(setupToken = setupToken)
             }
-        )
-        uiState.setupToken?.let { setupToken ->
-            Spacer(modifier = Modifier.size(8.dp))
-            PayPalSetupTokenView(setupToken = setupToken)
-            Spacer(modifier = Modifier.size(8.dp))
-            VaultPayPal(
-                isLoading = uiState.isVaultPayPalLoading,
-                onSubmit = {
-                    context.getActivity()?.let { activity ->
-                        viewModel.vaultSetupToken(activity)
-                    }
-                }
-            )
-        }
-        uiState.payPalWebVaultResult?.let { vaultResult ->
-            Spacer(modifier = Modifier.size(8.dp))
-            PayPalWebVaultResultView(vaultResult)
-            Spacer(modifier = Modifier.size(8.dp))
-            CreatePaymentTokenForm(
-                isLoading = uiState.isCreatePaymentTokenLoading,
-                onSubmit = { viewModel.createPaymentToken() }
-            )
-        }
-        uiState.payPalWebVaultError?.let { error ->
-            Spacer(modifier = Modifier.size(24.dp))
-            PayPalSDKErrorView(error = error)
-        }
-        if (uiState.isVaultingCanceled) {
-            Spacer(modifier = Modifier.size(24.dp))
-            PayPalWebCheckoutCanceledView()
-        }
-        uiState.paymentToken?.let { paymentToken ->
-            Spacer(modifier = Modifier.size(8.dp))
-            PayPalPaymentTokenView(paymentToken = paymentToken)
         }
     }
 }
 
 @Composable
-fun VaultPayPal(
-    isLoading: Boolean,
-    onSubmit: () -> Unit
+private fun Step2_VaultPayPal(
+    uiState: PayPalWebVaultUiState,
+    viewModel: PayPalWebVaultViewModel
 ) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth()
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
+        StepHeader(stepNumber = 2, title = "Vault PayPal")
+        ActionButtonColumn(
+            defaultTitle = "VAULT PAYPAL",
+            successTitle = "PAYPAL VAULTED",
+            state = uiState.vaultPayPalState,
+            onClick = {
+                context.getActivity()?.let { activity ->
+                    viewModel.vaultSetupToken(activity)
+                }
+            }
         ) {
-            Text(
-                text = "Vault PayPal",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            WireframeButton(
-                text = "Vault PayPal",
-                isLoading = isLoading,
-                onClick = { onSubmit() },
-                modifier = Modifier.fillMaxWidth()
-            )
+            (uiState.vaultPayPalState as? ActionButtonState.Success)?.value?.let { vaultResult ->
+                PayPalWebVaultResultView(result = vaultResult)
+            }
+            (uiState.vaultPayPalState as? ActionButtonState.Failure)?.value?.let { error ->
+                ErrorView(error = error)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step3_CreatePaymentToken(
+    uiState: PayPalWebVaultUiState,
+    viewModel: PayPalWebVaultViewModel
+) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Create Payment Token")
+        Column(
+            verticalArrangement = UIConstants.spacingMedium,
+        ) {
+            StepHeader(stepNumber = 3, title = "Create Payment Token")
+            ActionButtonColumn(
+                defaultTitle = "CREATE PAYMENT TOKEN",
+                successTitle = "PAYMENT TOKEN CREATED",
+                state = uiState.createPaymentTokenState,
+                onClick = { viewModel.createPaymentToken() }
+            ) {
+                (uiState.createPaymentTokenState as? ActionButtonState.Success)?.value?.let { paymentToken ->
+                    PayPalPaymentTokenView(paymentToken = paymentToken)
+                }
+            }
         }
     }
 }
 
 @Composable
 fun PayPalWebVaultResultView(result: PayPalWebVaultResult) {
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
     ) {
-        Column(
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Text(
-                text = "PayPal Web Vault Result",
-                style = MaterialTheme.typography.titleLarge
-            )
-            PropertyView(name = "Approval Session ID", value = result.approvalSessionId)
-        }
+        PropertyView(name = "Approval Session ID", value = result.approvalSessionId)
     }
 }

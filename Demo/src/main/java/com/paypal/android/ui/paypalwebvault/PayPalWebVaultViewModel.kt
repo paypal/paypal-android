@@ -3,16 +3,16 @@ package com.paypal.android.ui.paypalwebvault
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
+import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
+import com.paypal.android.uishared.state.ActionButtonState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,74 +38,39 @@ class PayPalWebVaultViewModel @Inject constructor(
 
     private lateinit var paypalClient: PayPalWebCheckoutClient
     private lateinit var payPalDataCollector: PayPalDataCollector
-
-    private var isCreateSetupTokenLoading: Boolean
-        get() = _uiState.value.isCreateSetupTokenLoading
+    private var createSetupTokenState
+        get() = _uiState.value.createSetupTokenState
         set(value) {
-            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
+            _uiState.update { it.copy(createSetupTokenState = value) }
         }
 
-    private var isCreatePaymentTokenLoading: Boolean
-        get() = _uiState.value.isCreatePaymentTokenLoading
+    private var vaultPayPalState
+        get() = _uiState.value.vaultPayPalState
         set(value) {
-            _uiState.update { it.copy(isCreatePaymentTokenLoading = value) }
+            _uiState.update { it.copy(vaultPayPalState = value) }
         }
 
-    private var isVaultPayPalLoading: Boolean
-        get() = _uiState.value.isVaultPayPalLoading
+    private var createPaymentTokenState
+        get() = _uiState.value.createPaymentTokenState
         set(value) {
-            _uiState.update { it.copy(isVaultPayPalLoading = value) }
-        }
-
-    var vaultCustomerId: String
-        get() = _uiState.value.vaultCustomerId
-        set(value) {
-            _uiState.update { it.copy(vaultCustomerId = value) }
-        }
-
-    private var setupToken: PayPalSetupToken?
-        get() = _uiState.value.setupToken
-        set(value) {
-            _uiState.update { it.copy(setupToken = value) }
-        }
-
-    private var paymentToken: PayPalPaymentToken?
-        get() = _uiState.value.paymentToken
-        set(value) {
-            _uiState.update { it.copy(paymentToken = value) }
-        }
-
-    var payPalWebVaultResult: PayPalWebVaultResult?
-        get() = _uiState.value.payPalWebVaultResult
-        set(value) {
-            _uiState.update { it.copy(payPalWebVaultResult = value) }
-        }
-
-    var payPalWebVaultError: PayPalSDKError?
-        get() = _uiState.value.payPalWebVaultError
-        set(value) {
-            _uiState.update { it.copy(payPalWebVaultError = value) }
-        }
-
-    var isVaultingCanceled: Boolean
-        get() = _uiState.value.isVaultingCanceled
-        set(value) {
-            _uiState.update { it.copy(isVaultingCanceled = value) }
+            _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
     fun createSetupToken() {
         viewModelScope.launch {
-            isCreateSetupTokenLoading = true
-
-            setupToken = createPayPalSetupTokenUseCase()
-            isCreateSetupTokenLoading = false
+            createSetupTokenState = ActionButtonState.Loading
+            val setupToken = createPayPalSetupTokenUseCase()
+            createSetupTokenState = ActionButtonState.Success(setupToken)
         }
     }
 
+    private val createdSetupToken: PayPalSetupToken?
+        get() = (createSetupTokenState as? ActionButtonState.Success)?.value
+
     fun vaultSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
-            isVaultPayPalLoading = true
-            val request = setupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
+            vaultPayPalState = ActionButtonState.Loading
+            val request = createdSetupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
 
             val clientId = sdkSampleServerAPI.fetchClientId()
             val coreConfig = CoreConfig(clientId)
@@ -120,24 +85,21 @@ class PayPalWebVaultViewModel @Inject constructor(
 
     fun createPaymentToken() {
         viewModelScope.launch {
-            isCreatePaymentTokenLoading = true
-            paymentToken = createPayPalPaymentTokenUseCase(setupToken!!)
-            isCreatePaymentTokenLoading = false
+            createPaymentTokenState = ActionButtonState.Loading
+            val paymentToken = createPayPalPaymentTokenUseCase(createdSetupToken!!)
+            createPaymentTokenState = ActionButtonState.Success(paymentToken)
         }
     }
 
     override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-        payPalWebVaultResult = result
-        isVaultPayPalLoading = false
+        vaultPayPalState = ActionButtonState.Success(result)
     }
 
     override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-        payPalWebVaultError = error
-        isVaultPayPalLoading = false
+        vaultPayPalState = ActionButtonState.Failure(error)
     }
 
     override fun onPayPalWebVaultCanceled() {
-        isVaultingCanceled = true
-        isVaultPayPalLoading = false
+        vaultPayPalState = ActionButtonState.Failure(Exception("USER CANCELED"))
     }
 }

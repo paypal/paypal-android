@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun SetupTokenView(setupToken: SetupToken) {
+fun CardSetupTokenView(setupToken: CardSetupToken) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)
