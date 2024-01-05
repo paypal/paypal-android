@@ -166,22 +166,27 @@ class CardClient internal constructor(
                     metadata.orderId
                 )
                 val deepLinkUrl = browserSwitchResult.deepLinkUrl
-                val result = parseCardResult(metadata.orderId, deepLinkUrl)
+                val result = parseApproveOrderDeepLink(metadata.orderId, deepLinkUrl)
                 notifyApproveOrderSuccess(result)
             } catch (error: PayPalSDKError) {
                 analyticsService.sendAnalyticsEvent(
                     "card-payments:3ds:get-order-info:failed",
                     metadata.orderId
                 )
-                throw error
+                notifyApproveOrderFailure(error)
             }
         }
     }
 
     @Throws(PayPalSDKError::class)
-    private fun parseCardResult(orderId: String, deepLinkUrl: Uri?): CardResult {
-        val liabilityShift = deepLinkUrl?.getQueryParameter("liability_shift")
-        return CardResult(orderId, deepLinkUrl, liabilityShift)
+    private fun parseApproveOrderDeepLink(orderId: String, deepLinkUrl: Uri?): CardResult {
+        val error = deepLinkUrl?.getQueryParameter("error")
+        if (error != null) {
+            throw CardError.threeDSVerificationError
+        } else {
+            val liabilityShift = deepLinkUrl?.getQueryParameter("liability_shift")
+            return CardResult(orderId, deepLinkUrl, liabilityShift)
+        }
     }
 
     private fun notifyApproveOrderCanceled() {
