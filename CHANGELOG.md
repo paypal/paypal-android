@@ -1,5 +1,12 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* CardPayments
+  * Add `liabilityShift` property to `CardResult`
+  * Parse `liabilityShift` from deep link return URL in `CardClient#approveOrder()` browser-switched flow
+  * Callback `PayPalSDKError` when CardClient#approveOrder()` 3DS verification fails
+
 ## 1.3.0 (2024-01-09)
 * PaymentButtons
   * Add `PayPalCreditButtonColor.WHITE` and `.GOLD`
@@ -9,6 +16,7 @@
   * Bump native-checkout version to release `1.2.1`
 
 ## 1.2.0 (2024-01-04) 
+
 * PaymentButtons
   * Supporting custom corner radius on the PayPal Button
 * PayPalWebPayments
