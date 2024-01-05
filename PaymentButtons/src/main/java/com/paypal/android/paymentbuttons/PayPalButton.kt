@@ -114,11 +114,11 @@ open class PayPalButton @JvmOverloads constructor(
  * has shown it results in the best conversion.
  * @see WHITE is the preferred alternative color if gold does not work for your experience.
  * @see BLUE is one of our secondary alternatives. This color is less capable of drawing people's
- * attention.
+ * attention. Deprecated - please use GOLD or WHITE.
  * @see BLACK is one of our secondary alternatives. This color is less capable of drawing people's
- * attention.
+ * attention. Deprecated - please use GOLD or WHITE.
  * @see SILVER is one of our secondary alternatives. This color is less capable of drawing people's
- * attention.
+ * attention. Deprecated - please use GOLD or WHITE.
  */
 enum class PayPalButtonColor(
     val value: Int,
