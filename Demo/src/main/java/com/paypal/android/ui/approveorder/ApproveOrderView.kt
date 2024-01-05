@@ -25,7 +25,7 @@ import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -85,7 +85,7 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.createOrderState as? ActionButtonState.Success)?.value?.let { order ->
+            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
                 OrderView(order = order)
             }
         }
@@ -121,8 +121,8 @@ private fun Step2_ApproveOrder(
             modifier = Modifier.fillMaxWidth()
         ) {
             when (val state = uiState.approveOrderState) {
-                is ActionButtonState.Success -> CardResultView(result = state.value)
-                is ActionButtonState.Failure -> ErrorView(error = state.value)
+                is ActionState.Success -> CardResultView(result = state.value)
+                is ActionState.Failure -> ErrorView(error = state.value)
                 else -> {}
             }
         }
@@ -150,8 +150,8 @@ private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: Approve
             modifier = Modifier.fillMaxWidth()
         ) {
             when (val state = uiState.completeOrderState) {
-                is ActionButtonState.Success -> OrderView(order = state.value)
-                is ActionButtonState.Failure -> ErrorView(error = state.value)
+                is ActionState.Success -> OrderView(order = state.value)
+                is ActionState.Failure -> ErrorView(error = state.value)
                 else -> {}
             }
         }

@@ -21,7 +21,7 @@ import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -68,7 +68,7 @@ private fun Step1_CreateSetupToken(
             state = uiState.createSetupTokenState,
             onClick = { viewModel.createSetupToken() }
         ) {
-            (uiState.createSetupTokenState as? ActionButtonState.Success)?.value?.let { setupToken ->
+            (uiState.createSetupTokenState as? ActionState.Success)?.value?.let { setupToken ->
                 PayPalSetupTokenView(setupToken = setupToken)
             }
         }
@@ -95,10 +95,10 @@ private fun Step2_VaultPayPal(
                 }
             }
         ) {
-            (uiState.vaultPayPalState as? ActionButtonState.Success)?.value?.let { vaultResult ->
+            (uiState.vaultPayPalState as? ActionState.Success)?.value?.let { vaultResult ->
                 PayPalWebVaultResultView(result = vaultResult)
             }
-            (uiState.vaultPayPalState as? ActionButtonState.Failure)?.value?.let { error ->
+            (uiState.vaultPayPalState as? ActionState.Failure)?.value?.let { error ->
                 ErrorView(error = error)
             }
         }
@@ -120,7 +120,7 @@ private fun Step3_CreatePaymentToken(
             state = uiState.createPaymentTokenState,
             onClick = { viewModel.createPaymentToken() }
         ) {
-            (uiState.createPaymentTokenState as? ActionButtonState.Success)?.value?.let { paymentToken ->
+            (uiState.createPaymentTokenState as? ActionState.Success)?.value?.let { paymentToken ->
                 PayPalPaymentTokenView(paymentToken = paymentToken)
             }
         }

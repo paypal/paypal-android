@@ -6,13 +6,13 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.enums.StoreInVaultOption
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 
 @Immutable
 data class ApproveOrderUiState(
-    val createOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
-    val approveOrderState: ActionButtonState<CardResult, Exception> = ActionButtonState.Ready,
-    val completeOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
+    val createOrderState: ActionState<Order, Exception> = ActionState.Ready,
+    val approveOrderState: ActionState<CardResult, Exception> = ActionState.Ready,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Ready,
     val scaOption: SCA = SCA.SCA_ALWAYS,
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
@@ -21,8 +21,8 @@ data class ApproveOrderUiState(
     val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
 ) {
     val isCreateOrderSuccessful: Boolean
-        get() = createOrderState is ActionButtonState.Success
+        get() = createOrderState is ActionState.Success
 
     val isApproveOrderSuccessful: Boolean
-        get() = approveOrderState is ActionButtonState.Success
+        get() = approveOrderState is ActionState.Success
 }

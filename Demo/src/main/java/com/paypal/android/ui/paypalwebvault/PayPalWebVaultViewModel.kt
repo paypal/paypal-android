@@ -12,7 +12,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
 import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,18 +58,18 @@ class PayPalWebVaultViewModel @Inject constructor(
 
     fun createSetupToken() {
         viewModelScope.launch {
-            createSetupTokenState = ActionButtonState.Loading
+            createSetupTokenState = ActionState.Loading
             val setupToken = createPayPalSetupTokenUseCase()
-            createSetupTokenState = ActionButtonState.Success(setupToken)
+            createSetupTokenState = ActionState.Success(setupToken)
         }
     }
 
     private val createdSetupToken: PayPalSetupToken?
-        get() = (createSetupTokenState as? ActionButtonState.Success)?.value
+        get() = (createSetupTokenState as? ActionState.Success)?.value
 
     fun vaultSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
-            vaultPayPalState = ActionButtonState.Loading
+            vaultPayPalState = ActionState.Loading
             val request = createdSetupToken!!.run { PayPalWebVaultRequest(id, approveVaultHref!!) }
 
             val clientId = sdkSampleServerAPI.fetchClientId()
@@ -85,21 +85,21 @@ class PayPalWebVaultViewModel @Inject constructor(
 
     fun createPaymentToken() {
         viewModelScope.launch {
-            createPaymentTokenState = ActionButtonState.Loading
+            createPaymentTokenState = ActionState.Loading
             val paymentToken = createPayPalPaymentTokenUseCase(createdSetupToken!!)
-            createPaymentTokenState = ActionButtonState.Success(paymentToken)
+            createPaymentTokenState = ActionState.Success(paymentToken)
         }
     }
 
     override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-        vaultPayPalState = ActionButtonState.Success(result)
+        vaultPayPalState = ActionState.Success(result)
     }
 
     override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-        vaultPayPalState = ActionButtonState.Failure(error)
+        vaultPayPalState = ActionState.Failure(error)
     }
 
     override fun onPayPalWebVaultCanceled() {
-        vaultPayPalState = ActionButtonState.Failure(Exception("USER CANCELED"))
+        vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
     }
 }

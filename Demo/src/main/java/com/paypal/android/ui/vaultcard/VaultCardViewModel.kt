@@ -14,7 +14,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +43,7 @@ class VaultCardViewModel @Inject constructor(
         }
 
     private val createdSetupToken: CardSetupToken?
-        get() = (createSetupTokenState as? ActionButtonState.Success)?.value
+        get() = (createSetupTokenState as? ActionState.Success)?.value
 
     private var vaultCardState
         get() = _uiState.value.vaultCardState
@@ -88,26 +88,26 @@ class VaultCardViewModel @Inject constructor(
 
     fun createSetupToken() {
         viewModelScope.launch {
-            createSetupTokenState = ActionButtonState.Loading
+            createSetupTokenState = ActionState.Loading
             val setupToken = createSetupTokenUseCase()
-            createSetupTokenState = ActionButtonState.Success(setupToken)
+            createSetupTokenState = ActionState.Success(setupToken)
         }
     }
 
     fun updateSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
-            vaultCardState = ActionButtonState.Loading
+            vaultCardState = ActionState.Loading
             val clientId = sdkSampleServerAPI.fetchClientId()
 
             val configuration = CoreConfig(clientId = clientId)
             cardClient = CardClient(activity, configuration)
             cardClient.cardVaultListener = object : CardVaultListener {
                 override fun onVaultSuccess(result: CardVaultResult) {
-                    vaultCardState = ActionButtonState.Success(result)
+                    vaultCardState = ActionState.Success(result)
                 }
 
                 override fun onVaultFailure(error: PayPalSDKError) {
-                    vaultCardState = ActionButtonState.Failure(error)
+                    vaultCardState = ActionState.Failure(error)
                 }
             }
 
@@ -119,9 +119,9 @@ class VaultCardViewModel @Inject constructor(
 
     fun createPaymentToken() {
         viewModelScope.launch {
-            createPaymentTokenState = ActionButtonState.Loading
+            createPaymentTokenState = ActionState.Loading
             val paymentToken = createPaymentTokenUseCase(createdSetupToken!!)
-            createPaymentTokenState = ActionButtonState.Success(paymentToken)
+            createPaymentTokenState = ActionState.Success(paymentToken)
         }
     }
 

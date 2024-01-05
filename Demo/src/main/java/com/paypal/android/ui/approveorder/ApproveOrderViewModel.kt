@@ -20,7 +20,7 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
 import com.paypal.android.uishared.enums.StoreInVaultOption
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,19 +50,19 @@ class ApproveOrderViewModel @Inject constructor(
 
     fun createOrder() {
         viewModelScope.launch {
-            createOrderState = ActionButtonState.Loading
+            createOrderState = ActionState.Loading
             val uiState = uiState.value
             val orderRequest = uiState.run {
                 OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
             }
             val order = createOrderUseCase(orderRequest)
-            createOrderState = ActionButtonState.Success(order)
+            createOrderState = ActionState.Success(order)
         }
     }
 
     fun approveOrder(activity: AppCompatActivity) {
         viewModelScope.launch {
-            approveOrderState = ActionButtonState.Loading
+            approveOrderState = ActionState.Loading
 
             val clientId = sdkSampleServerAPI.fetchClientId()
             val coreConfig = CoreConfig(clientId = clientId)
@@ -71,15 +71,15 @@ class ApproveOrderViewModel @Inject constructor(
             cardClient = CardClient(activity, coreConfig)
             cardClient.approveOrderListener = object : ApproveOrderListener {
                 override fun onApproveOrderSuccess(result: CardResult) {
-                    approveOrderState = ActionButtonState.Success(result)
+                    approveOrderState = ActionState.Success(result)
                 }
 
                 override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    approveOrderState = ActionButtonState.Failure(error)
+                    approveOrderState = ActionState.Failure(error)
                 }
 
                 override fun onApproveOrderCanceled() {
-                    approveOrderState = ActionButtonState.Failure(Exception("USER CANCELED"))
+                    approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
                 }
 
                 override fun onApproveOrderThreeDSecureWillLaunch() {
@@ -98,11 +98,11 @@ class ApproveOrderViewModel @Inject constructor(
 
     fun completeOrder(context: Context) {
         viewModelScope.launch {
-            completeOrderState = ActionButtonState.Loading
+            completeOrderState = ActionState.Loading
 
             val cmid = payPalDataCollector.collectDeviceData(context)
             val completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
-            completeOrderState = ActionButtonState.Success(completedOrder)
+            completeOrderState = ActionState.Success(completedOrder)
         }
     }
 
@@ -129,7 +129,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
 
     private val createdOrder: Order?
-        get() = (createOrderState as? ActionButtonState.Success)?.value
+        get() = (createOrderState as? ActionState.Success)?.value
 
     var approveOrderState
         get() = _uiState.value.approveOrderState

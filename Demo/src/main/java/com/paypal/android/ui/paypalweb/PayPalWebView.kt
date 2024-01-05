@@ -24,7 +24,7 @@ import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -75,7 +75,7 @@ private fun Step1_CreateOrder(uiState: PayPalWebUiState, viewModel: PayPalWebVie
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.createOrderState as? ActionButtonState.Success)?.value?.let { order ->
+            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
                 OrderView(order = order)
             }
         }
@@ -101,11 +101,11 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.payPalWebCheckoutState as? ActionButtonState.Success)?.value?.let { result ->
+            (uiState.payPalWebCheckoutState as? ActionState.Success)?.value?.let { result ->
                 PayPalWebCheckoutResultView(result.orderId, result.payerId)
             }
 
-            (uiState.payPalWebCheckoutState as? ActionButtonState.Failure)?.value?.let { error ->
+            (uiState.payPalWebCheckoutState as? ActionState.Failure)?.value?.let { error ->
                 ErrorView(error = error)
             }
         }
@@ -127,7 +127,7 @@ private fun Step3_CompleteOrder(uiState: PayPalWebUiState, viewModel: PayPalWebV
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.completeOrderState as? ActionButtonState.Success)?.value?.let { completedOrder ->
+            (uiState.completeOrderState as? ActionState.Success)?.value?.let { completedOrder ->
                 OrderView(order = completedOrder)
             }
         }

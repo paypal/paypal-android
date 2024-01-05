@@ -3,19 +3,19 @@ package com.paypal.android.ui.paypalnative
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 
 data class PayPalNativeUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val createOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
-    val payPalNativeCheckoutState: ActionButtonState<PayPalNativeCheckoutResult, Exception> =
-        ActionButtonState.Ready,
-    val completeOrderState: ActionButtonState<Order, Exception> = ActionButtonState.Ready,
+    val createOrderState: ActionState<Order, Exception> = ActionState.Ready,
+    val payPalNativeCheckoutState: ActionState<PayPalNativeCheckoutResult, Exception> =
+        ActionState.Ready,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Ready,
     val shippingPreference: ShippingPreferenceType = ShippingPreferenceType.GET_FROM_FILE,
 ) {
     val isCreateOrderSuccessful: Boolean
-        get() = createOrderState is ActionButtonState.Success
+        get() = createOrderState is ActionState.Success
 
     val isPayPalNativeCheckoutSuccessful: Boolean
-        get() = payPalNativeCheckoutState is ActionButtonState.Success
+        get() = payPalNativeCheckoutState is ActionState.Success
 }

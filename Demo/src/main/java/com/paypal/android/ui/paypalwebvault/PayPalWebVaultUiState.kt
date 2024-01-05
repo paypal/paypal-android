@@ -3,16 +3,16 @@ package com.paypal.android.ui.paypalwebvault
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 
 data class PayPalWebVaultUiState(
-    val createSetupTokenState: ActionButtonState<PayPalSetupToken, Exception> = ActionButtonState.Ready,
-    val vaultPayPalState: ActionButtonState<PayPalWebVaultResult, Exception> = ActionButtonState.Ready,
-    val createPaymentTokenState: ActionButtonState<PayPalPaymentToken, Exception> = ActionButtonState.Ready,
+    val createSetupTokenState: ActionState<PayPalSetupToken, Exception> = ActionState.Ready,
+    val vaultPayPalState: ActionState<PayPalWebVaultResult, Exception> = ActionState.Ready,
+    val createPaymentTokenState: ActionState<PayPalPaymentToken, Exception> = ActionState.Ready,
 ) {
     val isCreateSetupTokenSuccessful: Boolean
-        get() = createSetupTokenState is ActionButtonState.Success
+        get() = createSetupTokenState is ActionState.Success
 
     val isVaultPayPalSuccessful: Boolean
-        get() = vaultPayPalState is ActionButtonState.Success
+        get() = vaultPayPalState is ActionState.Success
 }

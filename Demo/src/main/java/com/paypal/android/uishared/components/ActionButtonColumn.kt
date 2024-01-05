@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 
 private val successGreen = Color(color = 0xff007f5f)
@@ -30,27 +30,27 @@ private val successGreen = Color(color = 0xff007f5f)
 fun <S, E> ActionButtonColumn(
     defaultTitle: String,
     successTitle: String,
-    state: ActionButtonState<S, E>,
+    state: ActionState<S, E>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit = {},
 ) {
-    val isLoading = state is ActionButtonState.Loading
+    val isLoading = state is ActionState.Loading
     // TODO: use material themed color for success
     val buttonBackground = when (state) {
-        is ActionButtonState.Loading, is ActionButtonState.Ready ->
+        is ActionState.Loading, is ActionState.Ready ->
             MaterialTheme.colorScheme.inverseSurface
 
-        is ActionButtonState.Failure -> MaterialTheme.colorScheme.errorContainer
-        is ActionButtonState.Success -> successGreen
+        is ActionState.Failure -> MaterialTheme.colorScheme.errorContainer
+        is ActionState.Success -> successGreen
     }
 
     val buttonForeground = when (state) {
-        is ActionButtonState.Loading, is ActionButtonState.Ready ->
+        is ActionState.Loading, is ActionState.Ready ->
             MaterialTheme.colorScheme.inverseOnSurface
 
-        is ActionButtonState.Failure -> MaterialTheme.colorScheme.onErrorContainer
-        is ActionButtonState.Success -> Color.White
+        is ActionState.Failure -> MaterialTheme.colorScheme.onErrorContainer
+        is ActionState.Success -> Color.White
     }
 
     Card(
@@ -58,7 +58,7 @@ fun <S, E> ActionButtonColumn(
     ) {
         Button(
             onClick = {
-                if (state is ActionButtonState.Ready) {
+                if (state is ActionState.Ready) {
                     onClick()
                 }
             },
@@ -74,7 +74,7 @@ fun <S, E> ActionButtonColumn(
             Box {
                 // in loading state, blend text in with background and show loading indicator
                 Text(
-                    text = if (state is ActionButtonState.Success) successTitle else defaultTitle,
+                    text = if (state is ActionState.Success) successTitle else defaultTitle,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -105,7 +105,7 @@ fun StatefulActionButtonPreview() {
                 ActionButtonColumn(
                     defaultTitle = "Fake Default Title",
                     successTitle = "Fake Success Title",
-                    state = ActionButtonState.Ready,
+                    state = ActionState.Ready,
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()

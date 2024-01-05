@@ -21,7 +21,7 @@ import com.paypal.android.uishared.components.CreateOrderWithShippingPreferenceF
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionButtonState
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 
 @Composable
@@ -73,7 +73,7 @@ private fun Step1_CreateOrder(uiState: PayPalNativeUiState, viewModel: PayPalNat
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.createOrderState as? ActionButtonState.Success)?.value?.let { order ->
+            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
                 OrderView(order = order)
             }
         }
@@ -97,11 +97,11 @@ private fun Step2_StartPayPalNativeCheckout(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.payPalNativeCheckoutState as? ActionButtonState.Success)?.value?.let { result ->
+            (uiState.payPalNativeCheckoutState as? ActionState.Success)?.value?.let { result ->
                 PayPalWebCheckoutResultView(result.orderId, result.payerId)
             }
 
-            (uiState.payPalNativeCheckoutState as? ActionButtonState.Failure)?.value?.let { error ->
+            (uiState.payPalNativeCheckoutState as? ActionState.Failure)?.value?.let { error ->
                 ErrorView(error = error)
             }
         }
@@ -122,7 +122,7 @@ private fun Step3_CompleteOrder(uiState: PayPalNativeUiState, viewModel: PayPalN
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            (uiState.completeOrderState as? ActionButtonState.Success)?.value?.let { completedOrder ->
+            (uiState.completeOrderState as? ActionState.Success)?.value?.let { completedOrder ->
                 OrderView(order = completedOrder)
             }
         }
