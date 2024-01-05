@@ -160,24 +160,28 @@ class CardClient internal constructor(
 
     private fun handleBrowserSwitchSuccess(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
-            CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
-                try {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:get-order-info:succeeded",
-                        metadata.orderId
-                    )
-                    val deepLinkUrl = browserSwitchResult.deepLinkUrl
-                    val result = CardResult(metadata.orderId, deepLinkUrl)
-                    notifyApproveOrderSuccess(result)
-                } catch (error: PayPalSDKError) {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:get-order-info:failed",
-                        metadata.orderId
-                    )
-                    throw error
-                }
+            try {
+                analyticsService.sendAnalyticsEvent(
+                    "card-payments:3ds:get-order-info:succeeded",
+                    metadata.orderId
+                )
+                val deepLinkUrl = browserSwitchResult.deepLinkUrl
+                val result = parseCardResult(metadata.orderId, deepLinkUrl)
+                notifyApproveOrderSuccess(result)
+            } catch (error: PayPalSDKError) {
+                analyticsService.sendAnalyticsEvent(
+                    "card-payments:3ds:get-order-info:failed",
+                    metadata.orderId
+                )
+                throw error
             }
         }
+    }
+
+    @Throws(PayPalSDKError::class)
+    private fun parseCardResult(orderId: String, deepLinkUrl: Uri?): CardResult {
+        val liabilityShift = deepLinkUrl?.getQueryParameter("liability_shift")
+        return CardResult(orderId, deepLinkUrl, liabilityShift)
     }
 
     private fun notifyApproveOrderCanceled() {
