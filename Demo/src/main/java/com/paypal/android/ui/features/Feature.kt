@@ -8,6 +8,7 @@ enum class Feature(@StringRes val stringRes: Int, val routeName: String) {
     CARD_APPROVE_ORDER(R.string.feature_approve_order, DemoAppDestinations.CARD_APPROVE_ORDER),
     CARD_VAULT(R.string.feature_vault, DemoAppDestinations.CARD_VAULT),
     PAYPAL_WEB(R.string.feature_paypal_web, DemoAppDestinations.PAYPAL_WEB),
+    PAYPAL_WEB_VAULT(R.string.feature_paypal_web_vault, DemoAppDestinations.PAYPAL_WEB_VAULT),
     PAYPAL_BUTTONS(R.string.feature_paypal_buttons, DemoAppDestinations.PAYPAL_BUTTONS),
     PAYPAL_NATIVE(R.string.feature_paypal_native, DemoAppDestinations.PAYPAL_NATIVE)
 }

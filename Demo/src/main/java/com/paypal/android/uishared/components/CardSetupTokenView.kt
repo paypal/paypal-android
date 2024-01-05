@@ -9,10 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.paypal.android.api.model.SetupToken
+import com.paypal.android.api.model.CardSetupToken
 
 @Composable
-fun SetupTokenView(setupToken: SetupToken) {
+fun CardSetupTokenView(setupToken: CardSetupToken) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {

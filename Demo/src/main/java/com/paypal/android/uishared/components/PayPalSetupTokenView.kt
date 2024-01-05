@@ -9,10 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.paypal.android.api.model.PaymentToken
+import com.paypal.android.api.model.PayPalSetupToken
 
 @Composable
-fun PaymentTokenView(paymentToken: PaymentToken) {
+fun PayPalSetupTokenView(setupToken: PayPalSetupToken) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -20,13 +20,12 @@ fun PaymentTokenView(paymentToken: PaymentToken) {
             modifier = Modifier.padding(8.dp)
         ) {
             Text(
-                text = "Payment Token",
+                text = "Setup Token",
                 style = MaterialTheme.typography.titleLarge
             )
-            PropertyView(name = "ID", value = paymentToken.id)
-            PropertyView(name = "Customer ID", value = paymentToken.customerId)
-            PropertyView(name = "Card Brand", value = paymentToken.cardBrand)
-            PropertyView(name = "Card Last 4", value = paymentToken.cardLast4)
+            PropertyView(name = "ID", value = setupToken.id)
+            PropertyView(name = "Customer ID", value = setupToken.customerId)
+            PropertyView(name = "Status", value = setupToken.status)
         }
     }
 }

@@ -1,30 +1,21 @@
 package com.paypal.android.paypalwebpayments
 
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchResult
-import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+
+// NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
+// it now offers both checkout and vaulting
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
+    // NEXT MAJOR VERSION: remove hardcoded activity reference
     private val activity: FragmentActivity,
-    private val coreConfig: CoreConfig,
     private val analyticsService: AnalyticsService,
-    private val browserSwitchClient: BrowserSwitchClient,
-    private val browserSwitchHelper: BrowserSwitchHelper,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val payPalWebLauncher: PayPalWebLauncher
 ) {
 
     /**
@@ -40,36 +31,23 @@ class PayPalWebCheckoutClient internal constructor(
         urlScheme: String
     ) : this(
         activity,
-        configuration,
         AnalyticsService(activity.applicationContext, configuration),
-        BrowserSwitchClient(),
-        BrowserSwitchHelper(urlScheme)
+        PayPalWebLauncher(urlScheme, configuration),
     )
 
-    private val exceptionHandler = CoreCoroutineExceptionHandler {
-        deliverFailure(it)
-    }
-
-    private var browserSwitchResult: BrowserSwitchResult? = null
-
-    private var orderId: String? = null
-
     /**
-     * Sets a listener to receive notifications when a PayPal event occurs.
+     * Sets a listener to receive notifications when a PayPal Checkout event occurs.
      */
     var listener: PayPalWebCheckoutListener? = null
-        /**
-         * @param value a [PayPalWebCheckoutListener] to receive results from the PayPal flow
-         */
-        set(value) {
-            field = value
-            browserSwitchResult?.also {
-                handleBrowserSwitchResult()
-            }
-        }
+
+    /**
+     * Sets a listener to receive notificatioins when a Paypal Vault event occurs.
+     */
+    var vaultListener: PayPalWebVaultListener? = null
 
     init {
         activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
+        // NEXT MAJOR VERSION: remove hardcoded activity reference
     }
 
     /**
@@ -78,69 +56,74 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", orderId)
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
+        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
+            notifyWebCheckoutFailure(launchError)
+        }
+    }
 
-        CoroutineScope(dispatcher).launch(exceptionHandler) {
-            try {
-                val browserSwitchOptions = browserSwitchHelper.configurePayPalBrowserSwitchOptions(
-                    request.orderId,
-                    coreConfig,
-                    request.fundingSource
-                )
-                browserSwitchClient.start(activity, browserSwitchOptions)
-            } catch (e: PayPalSDKError) {
-                deliverFailure(APIClientError.clientIDNotFoundError(e.code, e.correlationId))
-            }
+    /**
+     * Vault PayPal as a payment method. Result will be delivered to your [PayPalWebVaultListener].
+     *
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     */
+    fun vault(request: PayPalWebVaultRequest) {
+        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
+            notifyVaultFailure(launchError)
         }
     }
 
     internal fun handleBrowserSwitchResult() {
-        browserSwitchResult = browserSwitchClient.deliverResult(activity)
-        listener?.also {
-            browserSwitchResult?.also { result ->
-                when (result.status) {
-                    BrowserSwitchStatus.SUCCESS -> deliverSuccess()
-                    BrowserSwitchStatus.CANCELED -> deliverCancellation()
-                }
+        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+            when (status) {
+                is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
+                is PayPalWebStatus.CheckoutError -> notifyWebCheckoutFailure(status.error)
+                is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
+                is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+                is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
+                PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
             }
         }
     }
 
-    private fun deliverSuccess() {
-        if (browserSwitchResult?.deepLinkUrl != null && browserSwitchResult?.requestMetadata != null) {
-            val webResult = PayPalDeepLinkUrlResult(
-                browserSwitchResult?.deepLinkUrl!!,
-                browserSwitchResult?.requestMetadata!!
-            )
-            if (!webResult.orderId.isNullOrBlank() && !webResult.payerId.isNullOrBlank()) {
-                deliverSuccess(
-                    PayPalWebCheckoutResult(
-                        webResult.orderId,
-                        webResult.payerId
-                    )
-                )
-            } else {
-                deliverFailure(PayPalWebCheckoutError.malformedResultError)
-            }
-        } else {
-            deliverFailure(PayPalWebCheckoutError.unknownError)
-        }
-        browserSwitchResult = null
+    private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", null)
+        listener?.onPayPalWebSuccess(result)
     }
 
-    private fun deliverCancellation() {
-        browserSwitchResult = null
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
-        listener?.onPayPalWebCanceled()
-    }
-
-    private fun deliverFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
+    private fun notifyWebCheckoutFailure(error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", null)
         listener?.onPayPalWebFailure(error)
     }
 
-    private fun deliverSuccess(result: PayPalWebCheckoutResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", orderId)
-        listener?.onPayPalWebSuccess(result)
+    private fun notifyWebCheckoutCancelation(
+        orderId: String?
+    ) {
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:browser-login:canceled",
+            orderId
+        )
+        listener?.onPayPalWebCanceled()
+    }
+
+    private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:browser-login:canceled",
+            null
+        )
+        vaultListener?.onPayPalWebVaultSuccess(result)
+    }
+
+    private fun notifyVaultFailure(error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", null)
+        vaultListener?.onPayPalWebVaultFailure(error)
+    }
+
+    private fun notifyVaultCancelation() {
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:browser-login:canceled",
+            null
+        )
+        vaultListener?.onPayPalWebVaultCanceled()
     }
 }

@@ -3,7 +3,7 @@ package com.paypal.android.paypalwebpayments
 import com.paypal.android.corepayments.PayPalSDKError
 
 /**
- * Implement this callback to receive results from [PayPalWebCheckoutClient].
+ * Implement this callback to receive results from [PayPalWebCheckoutClient.start].
  */
 interface PayPalWebCheckoutListener {
 

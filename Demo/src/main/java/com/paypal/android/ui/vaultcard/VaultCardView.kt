@@ -24,9 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.ui.approveorder.getActivity
-import com.paypal.android.uishared.components.PaymentTokenView
+import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.PropertyView
-import com.paypal.android.uishared.components.SetupTokenView
+import com.paypal.android.uishared.components.CardSetupTokenView
 
 @ExperimentalMaterial3Api
 @Composable
@@ -48,13 +48,14 @@ fun VaultCardView(
             .verticalScroll(scrollState)
     ) {
         CreateSetupTokenForm(
-            uiState = uiState,
+            isLoading = uiState.isCreateSetupTokenLoading,
+            customerId = uiState.customerId,
             onCustomerIdValueChange = { value -> viewModel.customerId = value },
             onSubmit = { viewModel.createSetupToken() }
         )
         uiState.setupToken?.let { setupToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            SetupTokenView(setupToken = setupToken)
+            CardSetupTokenView(setupToken = setupToken)
             Spacer(modifier = Modifier.size(8.dp))
             UpdateSetupTokenWithCardForm(
                 uiState = uiState,
@@ -70,13 +71,13 @@ fun VaultCardView(
             VaultSuccessView(cardVaultResult = vaultResult)
             Spacer(modifier = Modifier.size(8.dp))
             CreatePaymentTokenForm(
-                uiState = uiState,
+                isLoading = uiState.isCreatePaymentTokenLoading,
                 onSubmit = { viewModel.createPaymentToken() }
             )
         }
         uiState.paymentToken?.let { paymentToken ->
             Spacer(modifier = Modifier.size(8.dp))
-            PaymentTokenView(paymentToken = paymentToken)
+            CardPaymentTokenView(paymentToken = paymentToken)
         }
     }
 }

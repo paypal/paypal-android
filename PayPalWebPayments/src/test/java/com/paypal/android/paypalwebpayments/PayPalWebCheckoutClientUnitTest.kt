@@ -1,260 +1,148 @@
 package com.paypal.android.paypalwebpayments
 
-import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchResult
-import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import org.json.JSONObject
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.reflect.Field
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
 
-    private val browserSwitchClient: BrowserSwitchClient = mockk(relaxed = true)
-    private val browserSwitchHelper: BrowserSwitchHelper = mockk(relaxed = true)
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val coreConfig: CoreConfig = mockk(relaxed = true)
 
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
 
-    @Test
-    fun `start() starts browserSwitchClient with correct parameters`() = runTest {
-        val sut = getPayPalCheckoutClient(testScheduler = testScheduler)
-        val browserSwitchOptions = mockk<BrowserSwitchOptions>(relaxed = true)
+    private lateinit var payPalWebLauncher: PayPalWebLauncher
+    private lateinit var sut: PayPalWebCheckoutClient
 
-        coEvery {
-            browserSwitchHelper.configurePayPalBrowserSwitchOptions(any(), any(), any())
-        } returns browserSwitchOptions
-
-        sut.start(mockk(relaxed = true))
-        advanceUntilIdle()
-
-        verify(exactly = 1) { browserSwitchClient.start(activity, browserSwitchOptions) }
+    @Before
+    fun beforeEach() {
+        payPalWebLauncher = mockk(relaxed = true)
+        sut = PayPalWebCheckoutClient(activity, analyticsService, payPalWebLauncher)
     }
 
     @Test
-    fun `handleBrowserSwitchResult delivers SUCCESS when PayerId and order id are not null`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
+    fun `start() launches PayPal web checkout`() {
+        sut.listener = mockk(relaxed = true)
+
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns null
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        sut.start(request)
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+        verify(exactly = 0) { sut.listener?.onPayPalWebFailure(any()) }
+    }
+
+    @Test
+    fun `start() notifies merchant of browser switch failure`() {
+        sut.listener = mockk(relaxed = true)
+
+        val sdkError = PayPalSDKError(123, "fake error description")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns sdkError
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        sut.start(request)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { sut.listener?.onPayPalWebFailure(capture(slot)) }
+
+        assertSame(slot.captured, sdkError)
+    }
+
+    @Test
+    fun `vault() launches PayPal web checkout`() {
+        sut.vaultListener = mockk(relaxed = true)
+
+        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns null
+
+        val request =
+            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+        sut.vault(request)
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebVault(activity, request) }
+        verify(exactly = 0) { sut.vaultListener?.onPayPalWebVaultFailure(any()) }
+    }
+
+    @Test
+    fun `vault() notifies merchant of browser switch failure`() {
+        sut.vaultListener = mockk(relaxed = true)
+
+        val sdkError = PayPalSDKError(123, "fake error description")
+        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns sdkError
+
+        val request =
+            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+        sut.vault(request)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { sut.vaultListener?.onPayPalWebVaultFailure(capture(slot)) }
+
+        assertSame(slot.captured, sdkError)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult notifies merchant of Checkout success`() {
+        sut.listener = mockk(relaxed = true)
+
+        val successResult = PayPalWebCheckoutResult("fake-order-id", "fake-payer-id")
+        every {
+            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+        } returns PayPalWebStatus.CheckoutSuccess(successResult)
+
+        sut.handleBrowserSwitchResult()
 
         val slot = slot<PayPalWebCheckoutResult>()
-
-        val payerId = "fake_payer_id"
-        val orderId = "fake_order_id"
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-        val url = "http://testurl.com/checkout?PayerID=$payerId"
-        val metadata = JSONObject()
-        metadata.put("order_id", orderId)
-
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-        every { browserSwitchResult.deepLinkUrl } returns Uri.parse(url)
-        every { browserSwitchResult.requestMetadata } returns metadata
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 1) { payPalClient.listener?.onPayPalWebSuccess(capture(slot)) }
-        assertEquals(slot.captured.orderId, orderId)
-        assertEquals(slot.captured.payerId, payerId)
-
-        assertNullBrowserSwitchResult(payPalClient)
+        verify(exactly = 1) { sut.listener?.onPayPalWebSuccess(capture(slot)) }
+        assertSame(successResult, slot.captured)
     }
 
     @Test
-    fun `handleBrowserSwitchResult delivers Failure when PayerId is null or blank`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
+    fun `handleBrowserSwitchResult notifies merchant of Checkout failure`() {
+        sut.listener = mockk(relaxed = true)
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+        } returns PayPalWebStatus.CheckoutError(error)
+
+        sut.handleBrowserSwitchResult()
 
         val slot = slot<PayPalSDKError>()
-
-        val payerId = ""
-        val orderId = "fake_order_id"
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-        val url = "http://testurl.com/checkout?PayerID=$payerId"
-        val metadata = JSONObject()
-        metadata.put("order_id", orderId)
-
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-        every { browserSwitchResult.deepLinkUrl } returns Uri.parse(url)
-        every { browserSwitchResult.requestMetadata } returns metadata
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(
-            slot.captured.errorDescription,
-            "Result did not contain the expected data. Payer ID or Order ID is null."
-        )
-
-        assertNullBrowserSwitchResult(payPalClient)
+        verify(exactly = 1) { sut.listener?.onPayPalWebFailure(capture(slot)) }
+        assertSame(error, slot.captured)
     }
 
     @Test
-    fun `handleBrowserSwitchResult delivers Failure when order id is null or blank`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
+    fun `handleBrowserSwitchResult notifies merchant of Checkout cancelation`() {
+        sut.listener = mockk(relaxed = true)
 
-        val slot = slot<PayPalSDKError>()
+        val status = PayPalWebStatus.CheckoutCanceled("fake-order_id")
+        every {
+            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+        } returns status
 
-        val payerId = "fake_payer_id"
-        val orderId = ""
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-        val url = "http://testurl.com/checkout?PayerID=$payerId"
-        val metadata = JSONObject()
-        metadata.put("order_id", orderId)
+        sut.handleBrowserSwitchResult()
 
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-        every { browserSwitchResult.deepLinkUrl } returns Uri.parse(url)
-        every { browserSwitchResult.requestMetadata } returns metadata
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(
-            slot.captured.errorDescription,
-            "Result did not contain the expected data. Payer ID or Order ID is null."
-        )
-
-        assertNullBrowserSwitchResult(payPalClient)
-    }
-
-    @Test
-    fun `handleBrowserSwitchResult delivers Failure when deeplink is null`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
-
-        val slot = slot<PayPalSDKError>()
-
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-        every { browserSwitchResult.deepLinkUrl } returns null
-        every { browserSwitchResult.requestMetadata } returns mockk()
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(
-            slot.captured.errorDescription,
-            "An unknown error occurred. Contact developer.paypal.com/support."
-        )
-
-        assertNullBrowserSwitchResult(payPalClient)
-    }
-
-    @Test
-    fun `handleBrowserSwitchResult delivers Failure when metadata is null`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
-
-        val slot = slot<PayPalSDKError>()
-
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-        every { browserSwitchResult.deepLinkUrl } returns mockk()
-        every { browserSwitchResult.requestMetadata } returns null
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 1) { payPalClient.listener?.onPayPalWebFailure(capture(slot)) }
-        assertEquals(
-            slot.captured.errorDescription,
-            "An unknown error occurred. Contact developer.paypal.com/support."
-        )
-
-        assertNullBrowserSwitchResult(payPalClient)
-    }
-
-    @Test
-    fun `handleBrowserSwitchResult delivers Cancelled when browserSwitchStatus is CANCELLED`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
-
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.CANCELED
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 1) { payPalClient.listener?.onPayPalWebCanceled() }
-
-        assertNullBrowserSwitchResult(payPalClient)
+        verify(exactly = 1) { sut.listener?.onPayPalWebCanceled() }
     }
 
     @Test
     fun `handleBrowserSwitchResult doesn't deliver result when browserSwitchResult is null`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk(relaxed = true)
+        sut.listener = mockk(relaxed = true)
+        every { payPalWebLauncher.deliverBrowserSwitchResult(activity) } returns null
 
-        every { browserSwitchClient.deliverResult(activity) } returns null
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify { payPalClient.listener?.wasNot(Called) }
-    }
-
-    @Test
-    fun `handleBrowserSwitchResult doesn't deliver result when listener is null`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = null
-
-        val browserSwitchResult = mockk<BrowserSwitchResult>()
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        payPalClient.handleBrowserSwitchResult()
-
-        verify(exactly = 0) { browserSwitchResult.deepLinkUrl }
-        verify(exactly = 0) { browserSwitchResult.requestMetadata }
-    }
-
-    @Test
-    fun `when listener is set and result is null, no result is delivered`() {
-        val payPalClient = getPayPalCheckoutClient()
-        payPalClient.listener = mockk()
-
-        verify { payPalClient.listener?.wasNot(Called) }
-    }
-
-    @Test
-    fun `when listener is set and result is not null, a result is delivered`() {
-        val payPalClient = getPayPalCheckoutClient()
-
-        val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
-
-        every { browserSwitchResult.status } returns BrowserSwitchStatus.SUCCESS
-
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-        payPalClient.handleBrowserSwitchResult()
-        payPalClient.listener = mockk(relaxed = true)
-
-        verify(exactly = 2) { browserSwitchClient.deliverResult(any()) }
+        sut.handleBrowserSwitchResult()
+        verify { sut.listener?.wasNot(Called) }
     }
 
     @Test
@@ -263,38 +151,6 @@ class PayPalWebCheckoutClientUnitTest {
         every { activity.lifecycle } returns lifeCycle
 
         PayPalWebCheckoutClient(activity, coreConfig, "")
-
         verify { lifeCycle.addObserver(ofType(PayPalWebCheckoutLifeCycleObserver::class)) }
-    }
-
-    private fun assertNullBrowserSwitchResult(payPalClient: PayPalWebCheckoutClient) {
-        val privateResult: Field =
-            PayPalWebCheckoutClient::class.java.getDeclaredField("browserSwitchResult")
-        privateResult.isAccessible = true
-        val result = privateResult.get(payPalClient)
-        assertNull(result)
-    }
-
-    private fun getPayPalCheckoutClient(
-        coreConfig: CoreConfig = CoreConfig("fake-client-id"),
-        testScheduler: TestCoroutineScheduler? = null
-    ): PayPalWebCheckoutClient {
-        return (testScheduler?.let {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-            PayPalWebCheckoutClient(
-                activity,
-                coreConfig,
-                analyticsService,
-                browserSwitchClient,
-                browserSwitchHelper,
-                dispatcher
-            )
-        } ?: PayPalWebCheckoutClient(
-            activity,
-            coreConfig,
-            analyticsService,
-            browserSwitchClient,
-            browserSwitchHelper
-        ))
     }
 }

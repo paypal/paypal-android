@@ -1,9 +1,14 @@
 # PayPal Android SDK Release Notes
 
-## unreleased 
+## 1.2.0 (2024-01-04) 
 * PaymentButtons
   * Supporting custom corner radius on the PayPal Button
   * Deprecate black, silver, and blue button colors
+* PayPalWebPayments
+  * Add `PayPalWebVaultListener` interface
+  * Add `PayPalWebVaultResult` data class
+  * Add `vaultListener` property to `PayPalWebCheckoutClient`
+  * Add `vault()` method to `PayPalWebCheckoutClient`
 
 ## 1.1.0 (2023-12-05)
 
