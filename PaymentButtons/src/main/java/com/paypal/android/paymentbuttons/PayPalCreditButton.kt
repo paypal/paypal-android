@@ -40,6 +40,7 @@ class PayPalCreditButton @JvmOverloads constructor(
             updateShapeDrawableFillColor(field)
         }
 
+    // NEXT_MAJOR_VERSION: - Remove monochrome credit logo
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
     override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_credit_color
@@ -60,10 +61,6 @@ class PayPalCreditButton @JvmOverloads constructor(
             DARK_BLUE.value
         )
         color = PayPalCreditButtonColor(attribute)
-    }
-
-    companion object {
-        const val LUMINANCE_ERROR = "PayPalCreditButton does not have a light luminance compatible wordmark."
     }
 }
 
