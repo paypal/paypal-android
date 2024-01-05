@@ -112,10 +112,8 @@ open class PayPalButton @JvmOverloads constructor(
  *
  * @see GOLD is the default color if one is not provided and is the recommended choice as research
  * has shown it results in the best conversion.
- * @see BLUE is the preferred alternative color if gold does not work for your experience. Research
- * has shown that people know it is our brand color, which provides a halo of trust and security to
- * your experience.
- * @see WHITE is one of our secondary alternatives. This color is less capable of drawing people's
+ * @see WHITE is the preferred alternative color if gold does not work for your experience.
+ * @see BLUE is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
  * @see BLACK is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
@@ -129,6 +127,7 @@ enum class PayPalButtonColor(
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
     GOLD(value = 0, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.LIGHT),
+    @Deprecated("Deprecated color. Replace with gold or white.")
     BLUE(value = 1, colorResId = R.color.paypal_blue, luminance = PaymentButtonColorLuminance.DARK),
     WHITE(
         value = 2,
@@ -136,7 +135,9 @@ enum class PayPalButtonColor(
         hasOutline = true,
         luminance = PaymentButtonColorLuminance.LIGHT
     ),
+    @Deprecated("Deprecated color. Replace with gold or white.")
     BLACK(value = 3, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK),
+    @Deprecated("Deprecated color. Replace with gold or white.")
     SILVER(value = 4, colorResId = R.color.paypal_silver, luminance = PaymentButtonColorLuminance.LIGHT);
 
     companion object {
