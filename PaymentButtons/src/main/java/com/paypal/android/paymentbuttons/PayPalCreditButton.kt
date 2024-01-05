@@ -42,8 +42,7 @@ class PayPalCreditButton @JvmOverloads constructor(
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
-    override val wordmarkLightLuminanceResId: Int
-        get() = throw UnsupportedOperationException(LUMINANCE_ERROR)
+    override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_credit_color
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
@@ -82,12 +81,12 @@ enum class PayPalCreditButtonColor(
 ) : PaymentButtonColor {
     DARK_BLUE(value = 0, colorResId = R.color.paypal_dark_blue, luminance = PaymentButtonColorLuminance.DARK),
     BLACK(value = 1, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK),
-    GOLD(value = 2, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.DARK),
+    GOLD(value = 2, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.LIGHT),
     WHITE(
         value = 3,
         colorResId = R.color.paypal_white,
         hasOutline = true,
-        luminance = PaymentButtonColorLuminance.DARK
+        luminance = PaymentButtonColorLuminance.LIGHT
     );
     // TODO: - Replace luminance for gold & white color
 
