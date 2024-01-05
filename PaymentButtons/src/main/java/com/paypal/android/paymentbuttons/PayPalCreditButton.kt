@@ -81,7 +81,15 @@ enum class PayPalCreditButtonColor(
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
     DARK_BLUE(value = 0, colorResId = R.color.paypal_dark_blue, luminance = PaymentButtonColorLuminance.DARK),
-    BLACK(value = 1, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK);
+    BLACK(value = 1, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK),
+    GOLD(value = 2, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.DARK),
+    WHITE(
+        value = 3,
+        colorResId = R.color.paypal_white,
+        hasOutline = true,
+        luminance = PaymentButtonColorLuminance.DARK
+    );
+    // TODO: - Replace luminance for gold & white color
 
     companion object {
         /**
@@ -94,6 +102,8 @@ enum class PayPalCreditButtonColor(
             return when (attributeIndex) {
                 DARK_BLUE.value -> DARK_BLUE
                 BLACK.value -> BLACK
+                GOLD.value -> GOLD
+                WHITE.value -> WHITE
                 else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", values().size)
             }
         }
