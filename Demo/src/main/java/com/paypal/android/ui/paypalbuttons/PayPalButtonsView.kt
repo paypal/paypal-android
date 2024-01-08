@@ -1,6 +1,8 @@
 package com.paypal.android.ui.paypalbuttons
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,9 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,6 +32,10 @@ import com.paypal.android.paymentbuttons.PayPalCreditButton
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
+import com.paypal.android.uishared.components.IntSlider
+import com.paypal.android.utils.UIConstants
+
+const val CORNER_RADIUS_SLIDER_MAX = 100
 
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
@@ -38,26 +44,26 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
+    val contentPadding = UIConstants.paddingMedium
     Column(
+        verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = contentPadding)
     ) {
         Text(
             text = stringResource(id = R.string.pay_pal_button_preview),
             color = Color.Black,
             style = MaterialTheme.typography.titleLarge,
         )
-        Spacer(modifier = Modifier.size(16.dp))
         PayPalButtonFactory(uiState = uiState)
-        Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(id = R.string.pay_pal_button_options),
             color = Color.Black,
             style = MaterialTheme.typography.titleLarge,
         )
-        Spacer(modifier = Modifier.size(16.dp))
         Column(
+            verticalArrangement = UIConstants.spacingMedium,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1.0f)
@@ -67,7 +73,6 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 selectedOption = uiState.fundingType,
                 onSelection = { value -> viewModel.selectedFundingType = value }
             )
-            Spacer(modifier = Modifier.size(8.dp))
             PayPalButtonColorOptionListFactory(
                 fundingType = uiState.fundingType,
                 payPalButtonColor = uiState.payPalButtonColor,
@@ -78,39 +83,70 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 }
             )
             if (uiState.fundingType == ButtonFundingType.PAYPAL) {
-                Spacer(modifier = Modifier.size(8.dp))
                 PayPalButtonLabelOptionList(
                     selectedOption = uiState.payPalButtonLabel,
                     onSelection = { value -> viewModel.payPalButtonLabel = value }
                 )
             }
-            Spacer(modifier = Modifier.size(8.dp))
             PaymentButtonShapeOptionList(
                 selectedOption = uiState.paymentButtonShape,
                 onSelection = { value -> viewModel.paymentButtonShape = value }
             )
-            Spacer(modifier = Modifier.size(4.dp))
-            Text(
-                text = "Custom Corner Radius",
-                color = Color.Black,
-                style = MaterialTheme.typography.titleLarge,
+            CustomCornerRadiusSlider(
+                cornerRadius = uiState.customCornerRadius,
+                onCornerRadiusChange = { value -> viewModel.customCornerRadius = value }
             )
-            Spacer(modifier = Modifier.size(8.dp))
-            Slider(
-                value = uiState.customCornerRadius ?: 0.0f,
-                valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
-                onValueChange = { value -> viewModel.customCornerRadius = value }
-            )
-            Spacer(modifier = Modifier.size(8.dp))
             PaymentButtonSizeOptionList(
                 selectedOption = uiState.paymentButtonSize,
                 onSelection = { value -> viewModel.paymentButtonSize = value }
             )
+            Spacer(modifier = Modifier.size(contentPadding))
         }
     }
 }
 
-const val CORNER_RADIUS_SLIDER_MAX = 100.0f
+@Composable
+fun CustomCornerRadiusSlider(cornerRadius: Int?, onCornerRadiusChange: (Int) -> Unit) {
+    Card {
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.inverseSurface)
+        ) {
+            Text(
+                text = "Custom Corner Radius",
+                color = MaterialTheme.colorScheme.inverseOnSurface,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .padding(UIConstants.paddingMedium)
+                    .fillMaxWidth()
+            )
+        }
+        Column(
+            modifier = Modifier.padding(
+                horizontal = UIConstants.paddingLarge,
+                vertical = UIConstants.paddingMedium
+            )
+        ) {
+            Text(
+                text = cornerRadius?.let { "${cornerRadius}px" } ?: "UNSET",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .padding(bottom = UIConstants.paddingSmall)
+                    .fillMaxWidth()
+            )
+            IntSlider(
+                value = cornerRadius ?: 0,
+                valueRange = 0..CORNER_RADIUS_SLIDER_MAX,
+                steps = CORNER_RADIUS_SLIDER_MAX,
+                colors = SliderDefaults.colors(
+                    inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                onValueChange = onCornerRadiusChange,
+            )
+        }
+    }
+}
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
@@ -171,7 +207,7 @@ private fun configureButton(
     }
 
     uiState.customCornerRadius?.let { customCornerRadius ->
-        button.customCornerRadius = customCornerRadius
+        button.customCornerRadius = customCornerRadius.toFloat()
     }
 }
 
@@ -204,7 +240,7 @@ fun PayPalButtonColorOptionListFactory(
 @ExperimentalMaterial3Api
 @Preview
 @Composable
-fun FeaturesViewPreview() {
+fun PayPalButtonsViewPreview() {
     MaterialTheme {
         PayPalButtonsView()
     }

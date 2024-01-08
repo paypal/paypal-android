@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -36,6 +37,7 @@ import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
 // Ref: https://github.com/android/compose-samples/tree/main
 
 @Suppress("LongMethod")
+@ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @Composable
@@ -70,7 +72,7 @@ fun DemoApp() {
             ) {
                 // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
                 composable(DemoAppDestinations.FEATURES_ROUTE) {
-                    FeaturesView(onFeatureSelected = { feature ->
+                    FeaturesView(onSelectedFeatureChange = { feature ->
                         navController.navigate(feature.routeName)
                     })
                 }
@@ -109,7 +111,7 @@ fun DemoApp() {
                     PayPalNativeView()
                 }
                 composable(DemoAppDestinations.SELECT_TEST_CARD) {
-                    SelectCardView(onTestCardSelected = { testCardId ->
+                    SelectCardView(onSelectedTestCardChange = { testCardId ->
                         val prevBackStackEntry = navController.previousBackStackEntry
                         prevBackStackEntry?.savedStateHandle?.set("test_card_id", testCardId)
                         navController.popBackStack()

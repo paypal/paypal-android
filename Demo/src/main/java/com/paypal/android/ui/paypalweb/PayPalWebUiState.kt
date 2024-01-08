@@ -5,16 +5,18 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
+import com.paypal.android.uishared.state.ActionState
 
 data class PayPalWebUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val isCreateOrderLoading: Boolean = false,
-    val isStartCheckoutLoading: Boolean = false,
-    val createdOrder: Order? = null,
-    val completedOrder: Order? = null,
-    val payPalWebCheckoutResult: PayPalWebCheckoutResult? = null,
-    val payPalWebCheckoutError: PayPalSDKError? = null,
-    val isCheckoutCanceled: Boolean = false,
-    val isCompleteOrderLoading: Boolean = false,
+    val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
+    val payPalWebCheckoutState: ActionState<PayPalWebCheckoutResult, Exception> = ActionState.Idle,
+    val completeOrderState: ActionState<Order, PayPalSDKError> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-)
+) {
+    val isCreateOrderSuccessful: Boolean
+        get() = createOrderState is ActionState.Success
+
+    val isPayPalWebCheckoutSuccessful: Boolean
+        get() = payPalWebCheckoutState is ActionState.Success
+}

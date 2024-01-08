@@ -38,7 +38,7 @@ class PayPalButtonsViewModel : ViewModel() {
             _uiState.update { it.copy(payPalButtonLabel = value) }
         }
 
-    var customCornerRadius: Float?
+    var customCornerRadius: Int?
         get() = _uiState.value.customCornerRadius
         set(value) {
             _uiState.update { it.copy(customCornerRadius = value) }

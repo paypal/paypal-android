@@ -14,25 +14,18 @@
     <string name="card_field_expiration">EXP. DATE</string>
     <string name="card_field_security_code">SEC. CODE</string>
 
-    <!-- Preference Titles -->
-    <string name="environment_title">Environment</string>
-
-    <!-- PayPal Native-->
-    <string name="start_checkout">Start Checkout</string>
-    <string name="order_approved">Order Approved</string>
-    <string name="checkout_canceled">Checkout Canceled</string>
-    <string name="user_canceled">User cancelled the checkout</string>
-
-    <string name="pay_pal_vault_canceled">Vault Paypal Canceled</string>
-
-    <string name="shipping_preference">Shipping Preference</string>
-    <string name="shipping_preference_get_from_file">Get From File</string>
-    <string name="shipping_preference_no_shipping">No Shipping</string>
-    <string name="shipping_preference_set_provided_address">Set Provided Address</string>
+    <string name="pay_pal_shipping_preference_title">SHIPPING PREFERENCE</string>
+    <string-array name="pay_pal_shipping_preference_options">
+        <item>GET_FROM_FILE</item>
+        <item>NO_SHIPPING</item>
+        <item>SET_PROVIDED_ADDRESS</item>
+    </string-array>
 
     <string name="sca_title">SCA</string>
-    <string name="sca_always">ALWAYS</string>
-    <string name="sca_when_required">WHEN REQUIRED</string>
+    <string-array name="sca_options">
+        <item>SCA_ALWAYS</item>
+        <item>SCA_WHEN_REQUIRED</item>
+    </string-array>
 
     <string name="pay_pal_button_preview">Button Preview</string>
     <string name="pay_pal_button_options">Button Options</string>
@@ -42,13 +35,23 @@
     <string name="pay_pal_button_shape">Button Shape</string>
     <string name="pay_pal_button_size">Button Size</string>
 
-    <string name="select_funding">Select Funding</string>
+    <string name="intent_title">INTENT</string>
+    <string-array name="intent_options">
+        <item>AUTHORIZE</item>
+        <item>CAPTURE</item>
+    </string-array>
 
-    <string name="funding_source_one_time_checkout">One Time Checkout</string>
-    <string name="funding_source_pay_pal_credit">Pay Pal Credit</string>
-    <string name="funding_source_pay_pal_pay_later">Pay Pal Pay Later</string>
+    <string name="store_in_vault">STORE IN VAULT</string>
+    <string-array name="store_in_vault_options">
+        <item>NO</item>
+        <item>ON_SUCCESS</item>
+    </string-array>
 
-    <string name="intent_title">Intent</string>
-    <string name="intent_authorize">AUTHORIZE</string>
-    <string name="intent_capture">CAPTURE</string>
+    <string name="pay_pal_funding_source_title">FUNDING SOURCE</string>
+    <string-array name="pay_pal_funding_source_options">
+        <item>PAYPAL_CREDIT</item>
+        <item>PAY_LATER</item>
+        <item>PAYPAL</item>
+    </string-array>
+
 </resources>

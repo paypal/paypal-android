@@ -4,21 +4,25 @@ import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.uishared.state.ActionState
 
 @Immutable
 data class ApproveOrderUiState(
-    val createdOrder: Order? = null,
-    val completedOrder: Order? = null,
-    val approveOrderResult: CardResult? = null,
-    val approveOrderErrorMessage: String? = null,
-    val scaOption: String = "ALWAYS",
+    val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
+    val approveOrderState: ActionState<CardResult, Exception> = ActionState.Idle,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
+    val scaOption: SCA = SCA.SCA_ALWAYS,
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val isCreateOrderLoading: Boolean = false,
-    val shouldVault: Boolean = false,
-    val customerId: String = "",
-    val isApproveOrderLoading: Boolean = false,
-    val isCompleteOrderLoading: Boolean = false,
-)
+    val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
+) {
+    val isCreateOrderSuccessful: Boolean
+        get() = createOrderState is ActionState.Success
+
+    val isApproveOrderSuccessful: Boolean
+        get() = approveOrderState is ActionState.Success
+}

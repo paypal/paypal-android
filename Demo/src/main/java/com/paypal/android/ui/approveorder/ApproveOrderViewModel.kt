@@ -19,6 +19,8 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
+import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,18 +50,19 @@ class ApproveOrderViewModel @Inject constructor(
 
     fun createOrder() {
         viewModelScope.launch {
-            isCreateOrderLoading = true
-
+            createOrderState = ActionState.Loading
             val uiState = uiState.value
-            val orderRequest = uiState.run { OrderRequest(intentOption, shouldVault, customerId) }
-            createdOrder = createOrderUseCase(orderRequest)
-            isCreateOrderLoading = false
+            val orderRequest = uiState.run {
+                OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
+            }
+            val order = createOrderUseCase(orderRequest)
+            createOrderState = ActionState.Success(order)
         }
     }
 
     fun approveOrder(activity: AppCompatActivity) {
         viewModelScope.launch {
-            isApproveOrderLoading = true
+            approveOrderState = ActionState.Loading
 
             val clientId = sdkSampleServerAPI.fetchClientId()
             val coreConfig = CoreConfig(clientId = clientId)
@@ -68,18 +71,15 @@ class ApproveOrderViewModel @Inject constructor(
             cardClient = CardClient(activity, coreConfig)
             cardClient.approveOrderListener = object : ApproveOrderListener {
                 override fun onApproveOrderSuccess(result: CardResult) {
-                    approveOrderResult = result
-                    isApproveOrderLoading = false
+                    approveOrderState = ActionState.Success(result)
                 }
 
                 override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    approveOrderErrorMessage = "CAPTURE fail: ${error.errorDescription}"
-                    isApproveOrderLoading = false
+                    approveOrderState = ActionState.Failure(error)
                 }
 
                 override fun onApproveOrderCanceled() {
-                    approveOrderErrorMessage = "USER CANCELED"
-                    isApproveOrderLoading = false
+                    approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
                 }
 
                 override fun onApproveOrderThreeDSecureWillLaunch() {
@@ -88,7 +88,6 @@ class ApproveOrderViewModel @Inject constructor(
 
                 override fun onApproveOrderThreeDSecureDidFinish() {
                     Log.d(TAG, "3DS Success")
-                    isApproveOrderLoading = false
                 }
             }
 
@@ -99,23 +98,18 @@ class ApproveOrderViewModel @Inject constructor(
 
     fun completeOrder(context: Context) {
         viewModelScope.launch {
-            isCompleteOrderLoading = true
+            completeOrderState = ActionState.Loading
 
             val cmid = payPalDataCollector.collectDeviceData(context)
-            val orderId = createdOrder!!.id!!
-
-            completedOrder = completeOrderUseCase(orderId, intentOption, cmid)
-            isCompleteOrderLoading = false
+            // TECH DEBT: introduce a UseCaseResult type to avoid force unwrapping optionals here
+            val completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
+            completeOrderState = ActionState.Success(completedOrder)
         }
     }
 
     private fun createCardRequest(uiState: ApproveOrderUiState, order: Order): CardRequest {
         val card = parseCard(uiState)
-        val sca = when (uiState.scaOption) {
-            "ALWAYS" -> SCA.SCA_ALWAYS
-            else -> SCA.SCA_WHEN_REQUIRED
-        }
-        return CardRequest(order.id!!, card, APP_RETURN_URL, sca)
+        return CardRequest(order.id!!, card, APP_RETURN_URL, uiState.scaOption)
     }
 
     private fun parseCard(uiState: ApproveOrderUiState): Card {
@@ -129,30 +123,28 @@ class ApproveOrderViewModel @Inject constructor(
         )
     }
 
-    var createdOrder: Order?
-        get() = _uiState.value.createdOrder
+    private var createOrderState
+        get() = _uiState.value.createOrderState
         set(value) {
-            _uiState.update { it.copy(createdOrder = value) }
+            _uiState.update { it.copy(createOrderState = value) }
         }
 
-    var approveOrderResult: CardResult?
-        get() = _uiState.value.approveOrderResult
+    private val createdOrder: Order?
+        get() = (createOrderState as? ActionState.Success)?.value
+
+    var approveOrderState
+        get() = _uiState.value.approveOrderState
         set(value) {
-            _uiState.update { it.copy(approveOrderResult = value) }
+            _uiState.update { it.copy(approveOrderState = value) }
         }
 
-    var approveOrderErrorMessage: String?
-        get() = _uiState.value.approveOrderErrorMessage
+    private var completeOrderState
+        get() = _uiState.value.completeOrderState
         set(value) {
-            _uiState.update { it.copy(approveOrderErrorMessage = value) }
+            _uiState.update { it.copy(completeOrderState = value) }
         }
 
-    var completedOrder: Order?
-        get() = _uiState.value.completedOrder
-        set(value) {
-            _uiState.update { it.copy(completedOrder = value) }
-        }
-    var scaOption: String
+    var scaOption: SCA
         get() = _uiState.value.scaOption
         set(value) {
             _uiState.update { it.copy(scaOption = value) }
@@ -182,33 +174,10 @@ class ApproveOrderViewModel @Inject constructor(
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    var shouldVault: Boolean
+    var shouldVault: StoreInVaultOption
         get() = _uiState.value.shouldVault
         set(value) {
             _uiState.update { it.copy(shouldVault = value) }
-        }
-
-    var customerId: String
-        get() = _uiState.value.customerId
-        set(value) {
-            _uiState.update { it.copy(customerId = value) }
-        }
-
-    var isCreateOrderLoading: Boolean
-        get() = _uiState.value.isCreateOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isCreateOrderLoading = value) }
-        }
-    var isApproveOrderLoading: Boolean
-        get() = _uiState.value.isApproveOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isApproveOrderLoading = value) }
-        }
-
-    var isCompleteOrderLoading: Boolean
-        get() = _uiState.value.isCompleteOrderLoading
-        set(value) {
-            _uiState.update { it.copy(isCompleteOrderLoading = value) }
         }
 
     fun prefillCard(testCard: TestCard) {

@@ -2,11 +2,11 @@ package com.paypal.android.ui.selectcard
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,53 +19,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.models.TestCard
+import com.paypal.android.utils.UIConstants
 
 @ExperimentalFoundationApi
 @ExperimentalMaterial3Api
 @Composable
 fun SelectCardView(
     viewModel: SelectCardViewModel = viewModel(),
-    onTestCardSelected: (String) -> Unit = {}
+    onSelectedTestCardChange: (String) -> Unit = {}
 ) {
     LazyColumn(
+        verticalArrangement = UIConstants.spacingSmall,
+        contentPadding = PaddingValues(UIConstants.paddingMedium),
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
     ) {
         stickyHeader {
             TestCardGroupHeader("Verified Test Cards")
         }
         items(viewModel.verifiedTestCards) { card ->
-            Spacer(modifier = Modifier.size(8.dp))
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card.id)
+                onSelectedTestCardChange(card.id)
             }
         }
         stickyHeader {
             TestCardGroupHeader("Test Cards without 3DS")
         }
         items(viewModel.nonThreeDSCards) { card ->
-            Spacer(modifier = Modifier.size(8.dp))
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card.id)
+                onSelectedTestCardChange(card.id)
             }
         }
         stickyHeader {
             TestCardGroupHeader("Test Cards with 3DS")
         }
         items(viewModel.threeDSCards) { card ->
-            Spacer(modifier = Modifier.size(8.dp))
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card.id)
+                onSelectedTestCardChange(card.id)
             }
         }
     }
@@ -90,16 +88,19 @@ fun TestCardView(testCard: TestCard, onClick: () -> Unit) {
         onClick = { onClick() },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = testCard.name,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 8.dp, end = 8.dp)
-        )
-        Text(
-            text = testCard.formattedCardNumber,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 4.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
-        )
+        Column(
+            verticalArrangement = UIConstants.spacingExtraSmall,
+            modifier = Modifier.padding(UIConstants.paddingMedium)
+        ) {
+            Text(
+                text = testCard.name,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = testCard.formattedCardNumber,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
     }
 }
 
@@ -113,6 +114,6 @@ fun TestCardGroupHeader(text: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(top = 20.dp, bottom = 4.dp)
+            .padding(top = UIConstants.paddingSmall, bottom = UIConstants.paddingExtraSmall)
     )
 }

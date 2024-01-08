@@ -12,51 +12,43 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CardResultView(
-    result: CardResult
-) {
+fun CardResultView(result: CardResult) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = UIConstants.paddingMedium)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
+        Text(
+            text = "Order ID",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(top = UIConstants.paddingMedium)
+        )
+        Text(
+            text = result.orderId,
+            modifier = Modifier
+                .padding(top = UIConstants.paddingExtraSmall)
+        )
+        Text(
+            text = "Deep Link URL",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .padding(top = UIConstants.paddingMedium)
+        )
+        if (result.deepLinkUrl == null) {
             Text(
-                text = "Approve Order Result",
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = "Order",
-                style = MaterialTheme.typography.titleMedium,
+                text = "NOT SET",
                 modifier = Modifier
-                    .padding(top = 16.dp)
+                    .padding(top = UIConstants.paddingExtraSmall)
             )
-            Text(
-                text = result.orderId,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-            )
-            Text(
-                text = "Deep Link URL",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-            )
-            if (result.deepLinkUrl == null) {
-                Text(
-                    text = "NOT SET",
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                )
-            } else {
-                UriView(uri = result.deepLinkUrl!!)
-            }
-            Spacer(modifier = Modifier.size(24.dp))
+        } else {
+            UriView(uri = result.deepLinkUrl!!)
         }
+        Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
     }
 }
 

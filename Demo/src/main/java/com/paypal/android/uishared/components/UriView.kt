@@ -8,30 +8,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.paypal.android.utils.UIConstants
 
 @Composable
 fun UriView(uri: Uri) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
         modifier = Modifier
-            .padding(top = 4.dp)
+            .padding(top = UIConstants.paddingSmall)
     ) {
         Text("Scheme:")
         Text(uri.scheme ?: "NOT SET")
     }
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
         modifier = Modifier
-            .padding(top = 4.dp)
+            .padding(top = UIConstants.paddingSmall)
     ) {
         Text("Host:")
         Text(uri.host ?: "NOT SET")
     }
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
         modifier = Modifier
-            .padding(top = 4.dp)
+            .padding(top = UIConstants.paddingSmall)
     ) {
         Text("Path:")
         Text(uri.path ?: "NOT SET")
@@ -41,14 +41,14 @@ fun UriView(uri: Uri) {
         Text(
             text = "Params:",
             modifier = Modifier
-                .padding(top = 4.dp)
+                .padding(top = UIConstants.paddingSmall)
         )
         Column(
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier.padding(UIConstants.paddingSmall)
         ) {
             for (paramName in queryParameterNames) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall)
                 ) {
                     Text("$paramName:")
                     Text(uri.getQueryParameter(paramName) ?: "PRESENT BUT NOT SET")

@@ -14,7 +14,7 @@ fun PayPalButtonFundingTypeOptionList(
         title = stringResource(id = R.string.pay_pal_button_type),
         options = ButtonFundingType.values().map { it.name },
         selectedOption = selectedOption.name,
-        onOptionSelected = { option ->
+        onSelectedOptionChange = { option ->
             onSelection(ButtonFundingType.valueOf(option))
         }
     )

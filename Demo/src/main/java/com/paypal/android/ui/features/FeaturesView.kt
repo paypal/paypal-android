@@ -16,17 +16,17 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.paypal.android.R
-import com.paypal.android.uishared.theme.DemoColors
+import com.paypal.android.utils.UIConstants
 
 private val cardFeatures = listOf(
     Feature.CARD_APPROVE_ORDER,
@@ -46,31 +46,31 @@ private val payPalNativeFeatures = listOf(
 @ExperimentalFoundationApi
 @Composable
 fun FeaturesView(
-    onFeatureSelected: (Feature) -> Unit,
+    onSelectedFeatureChange: (Feature) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
-            .background(DemoColors.white)
-            .padding(horizontal = 16.dp)
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = UIConstants.paddingMedium)
             .fillMaxSize()
     ) {
         stickyHeader {
             FeatureGroupHeader(text = "Card")
         }
         item {
-            FeatureOptions(cardFeatures, onFeatureSelected = onFeatureSelected)
+            FeatureOptions(cardFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
         stickyHeader {
             FeatureGroupHeader("PayPal Web")
         }
         item {
-            FeatureOptions(payPalWebFeatures, onFeatureSelected = onFeatureSelected)
+            FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
         stickyHeader {
             FeatureGroupHeader("PayPal Native")
         }
         item {
-            FeatureOptions(payPalNativeFeatures, onFeatureSelected = onFeatureSelected)
+            FeatureOptions(payPalNativeFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
     }
 }
@@ -78,7 +78,7 @@ fun FeaturesView(
 @Composable
 fun FeatureOptions(
     features: List<Feature>,
-    onFeatureSelected: (Feature) -> Unit,
+    onSelectedFeatureChange: (Feature) -> Unit,
 ) {
     Card(
         shape = CardDefaults.elevatedShape,
@@ -88,7 +88,7 @@ fun FeatureOptions(
             FeatureView(
                 feature = feature,
                 isLast = (index == features.lastIndex),
-                onClick = { onFeatureSelected(feature) }
+                onClick = { onSelectedFeatureChange(feature) }
             )
         }
     }
@@ -96,14 +96,14 @@ fun FeatureOptions(
 
 @Composable
 fun FeatureGroupHeader(text: String) {
-    Spacer(modifier = Modifier.size(24.dp))
+    Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
     Text(
         text = text,
-        color = DemoColors.black,
+        color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.titleLarge,
     )
-    Spacer(modifier = Modifier.size(12.dp))
+    Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
 }
 
 @Composable
@@ -115,34 +115,45 @@ fun FeatureView(
     val chevronPainter = painterResource(id = R.drawable.chevron)
     Column(
         modifier = Modifier
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
         Row {
             Text(
                 text = stringResource(id = feature.stringRes),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .weight(1.0f)
-                    .padding(vertical = 16.dp, horizontal = 20.dp)
+                    .padding(UIConstants.paddingMedium)
             )
             Icon(
                 painter = chevronPainter,
                 contentDescription = null,
-                tint = DemoColors.gray,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .size(14.dp)
+                    .size(UIConstants.chevronSize)
                     .align(Alignment.CenterVertically)
             )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
         }
         if (!isLast) {
             Divider(
-                color = DemoColors.white,
-                modifier = Modifier.padding(start = 16.dp)
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.padding(start = UIConstants.paddingMedium)
             )
+        }
+    }
+}
+
+@ExperimentalFoundationApi
+@Preview
+@Composable
+fun FeaturesViewPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            FeaturesView(onSelectedFeatureChange = {})
         }
     }
 }

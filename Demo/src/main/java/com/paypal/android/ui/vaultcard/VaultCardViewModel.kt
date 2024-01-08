@@ -3,7 +3,6 @@ package com.paypal.android.ui.vaultcard
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
@@ -15,6 +14,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,8 +27,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
     val sdkSampleServerAPI: SDKSampleServerAPI,
-    val createCardSetupTokenUseCase: CreateCardSetupTokenUseCase,
-    val createCardPaymentTokenUseCase: CreateCardPaymentTokenUseCase
+    val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
+    val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
     private lateinit var cardClient: CardClient
@@ -36,40 +36,25 @@ class VaultCardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
 
-    var setupToken: CardSetupToken?
-        get() = _uiState.value.setupToken
+    private var createSetupTokenState
+        get() = _uiState.value.createSetupTokenState
         set(value) {
-            _uiState.update { it.copy(setupToken = value) }
+            _uiState.update { it.copy(createSetupTokenState = value) }
         }
 
-    var paymentToken: CardPaymentToken?
-        get() = _uiState.value.paymentToken
+    private val createdSetupToken: CardSetupToken?
+        get() = (createSetupTokenState as? ActionState.Success)?.value
+
+    private var vaultCardState
+        get() = _uiState.value.vaultCardState
         set(value) {
-            _uiState.update { it.copy(paymentToken = value) }
+            _uiState.update { it.copy(vaultCardState = value) }
         }
 
-    var isCreateSetupTokenLoading: Boolean
-        get() = _uiState.value.isCreateSetupTokenLoading
+    private var createPaymentTokenState
+        get() = _uiState.value.createPaymentTokenState
         set(value) {
-            _uiState.update { it.copy(isCreateSetupTokenLoading = value) }
-        }
-
-    var isUpdateSetupTokenLoading: Boolean
-        get() = _uiState.value.isUpdateSetupTokenLoading
-        set(value) {
-            _uiState.update { it.copy(isUpdateSetupTokenLoading = value) }
-        }
-
-    var isCreatePaymentTokenLoading: Boolean
-        get() = _uiState.value.isCreatePaymentTokenLoading
-        set(value) {
-            _uiState.update { it.copy(isCreatePaymentTokenLoading = value) }
-        }
-
-    var customerId: String
-        get() = _uiState.value.customerId
-        set(value) {
-            _uiState.update { it.copy(customerId = value) }
+            _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
     var cardNumber: String
@@ -90,12 +75,6 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
 
-    var cardVaultResult: CardVaultResult?
-        get() = _uiState.value.cardVaultResult
-        set(value) {
-            _uiState.update { it.copy(cardVaultResult = value) }
-        }
-
     fun prefillCard(testCard: TestCard) {
         val card = testCard.card
         _uiState.update { currentState ->
@@ -109,42 +88,40 @@ class VaultCardViewModel @Inject constructor(
 
     fun createSetupToken() {
         viewModelScope.launch {
-            isCreateSetupTokenLoading = true
-            setupToken = createCardSetupTokenUseCase(customerId)
-            isCreateSetupTokenLoading = false
+            createSetupTokenState = ActionState.Loading
+            val setupToken = createSetupTokenUseCase()
+            createSetupTokenState = ActionState.Success(setupToken)
         }
     }
 
     fun updateSetupToken(activity: AppCompatActivity) {
         viewModelScope.launch {
-            isUpdateSetupTokenLoading = true
+            vaultCardState = ActionState.Loading
             val clientId = sdkSampleServerAPI.fetchClientId()
 
             val configuration = CoreConfig(clientId = clientId)
             cardClient = CardClient(activity, configuration)
             cardClient.cardVaultListener = object : CardVaultListener {
                 override fun onVaultSuccess(result: CardVaultResult) {
-                    isUpdateSetupTokenLoading = false
-                    cardVaultResult = result
+                    vaultCardState = ActionState.Success(result)
                 }
 
                 override fun onVaultFailure(error: PayPalSDKError) {
-                    isUpdateSetupTokenLoading = false
-                    // TODO: handle error
+                    vaultCardState = ActionState.Failure(error)
                 }
             }
 
             val card = parseCard(_uiState.value)
-            val cardVaultRequest = CardVaultRequest(setupToken!!.id, card)
+            val cardVaultRequest = CardVaultRequest(createdSetupToken!!.id, card)
             cardClient.vault(activity, cardVaultRequest)
         }
     }
 
     fun createPaymentToken() {
         viewModelScope.launch {
-            isCreatePaymentTokenLoading = true
-            paymentToken = createCardPaymentTokenUseCase(setupToken!!)
-            isCreatePaymentTokenLoading = false
+            createPaymentTokenState = ActionState.Loading
+            val paymentToken = createPaymentTokenUseCase(createdSetupToken!!)
+            createPaymentTokenState = ActionState.Success(paymentToken)
         }
     }
 

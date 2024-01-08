@@ -1,11 +1,9 @@
 package com.paypal.android.ui.approveorder
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -19,91 +17,143 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paypal.android.uishared.components.CompleteOrderForm
+import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.CardResultView
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
-import com.paypal.android.uishared.components.MessageView
+import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.utils.UIConstants
+import com.paypal.android.utils.getActivity
 
-// TODO: Investigate the best way to break this composable up into smaller individual units
-@Suppress("LongMethod")
-@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
 @Composable
 fun ApproveOrderView(
     viewModel: ApproveOrderViewModel,
     onUseTestCardClick: () -> Unit = {}
 ) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
-    LaunchedEffect(uiState) {
-        // continuously scroll to bottom of the list when event state is updated
+
+    LaunchedEffect(scrollState.maxValue) {
+        // continuously scroll to bottom of the list when scroll bounds change
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+    val contentPadding = UIConstants.paddingMedium
     Column(
+        verticalArrangement = UIConstants.spacingLarge,
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
             .semantics {
                 testTagsAsResourceId = true
             }
     ) {
-        CreateOrderWithVaultOptionForm(
-            title = "Create an Order to proceed:",
-            orderIntent = uiState.intentOption,
-            shouldVault = uiState.shouldVault,
-            vaultCustomerId = uiState.customerId,
-            isLoading = uiState.isCreateOrderLoading,
-            onIntentOptionSelected = { value -> viewModel.intentOption = value },
-            onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-            onVaultCustomerIdChanged = { value -> viewModel.customerId = value },
-            onSubmit = { viewModel.createOrder() }
-        )
-        uiState.createdOrder?.let { createdOrder ->
-            Spacer(modifier = Modifier.size(24.dp))
-            OrderView(order = createdOrder, title = "Order Created")
-            Spacer(modifier = Modifier.size(24.dp))
-            ApproveOrderForm(
-                uiState = uiState,
-                onCardNumberChange = { value -> viewModel.cardNumber = value },
-                onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
-                onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
-                onSCAOptionSelected = { value -> viewModel.scaOption = value },
-                onUseTestCardClick = { onUseTestCardClick() },
-                onSubmit = {
-                    context.getActivity()?.let { viewModel.approveOrder(it) }
-                }
-            )
+        Step1_CreateOrder(uiState, viewModel)
+        if (uiState.isCreateOrderSuccessful) {
+            Step2_ApproveOrder(uiState, viewModel, onUseTestCardClick)
         }
-        uiState.approveOrderResult?.let { cardResult ->
-            Spacer(modifier = Modifier.size(24.dp))
-            ApproveOrderSuccessView(cardResult = cardResult)
-            Spacer(modifier = Modifier.size(24.dp))
-            CompleteOrderForm(
-                isLoading = uiState.isCompleteOrderLoading,
-                orderIntent = uiState.intentOption,
-                onSubmit = { viewModel.completeOrder(context) }
-            )
+        if (uiState.isApproveOrderSuccessful) {
+            Step3_CompleteOrder(uiState, viewModel)
         }
-        uiState.approveOrderErrorMessage?.let { errorMessage ->
-            Spacer(modifier = Modifier.size(24.dp))
-            MessageView(message = errorMessage)
-        }
-        uiState.completedOrder?.let { completedOrder ->
-            Spacer(modifier = Modifier.size(24.dp))
-            OrderView(order = completedOrder, title = "Order Complete")
-        }
-        Spacer(modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
-// TODO: move to utility file
-// Ref: https://stackoverflow.com/a/68423182
-fun Context.getActivity(): AppCompatActivity? = when (this) {
-    is AppCompatActivity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
+@Composable
+private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 1, title = "Create Order")
+        CreateOrderWithVaultOptionForm(
+            orderIntent = uiState.intentOption,
+            shouldVault = uiState.shouldVault,
+            onIntentOptionChanged = { value -> viewModel.intentOption = value },
+            onShouldVaultChanged = { value -> viewModel.shouldVault = value },
+        )
+        ActionButtonColumn(
+            defaultTitle = "CREATE ORDER",
+            successTitle = "ORDER CREATED",
+            state = uiState.createOrderState,
+            onClick = { viewModel.createOrder() },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
+                OrderView(order = order)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step2_ApproveOrder(
+    uiState: ApproveOrderUiState,
+    viewModel: ApproveOrderViewModel,
+    onUseTestCardClick: () -> Unit
+) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium
+    ) {
+        StepHeader(stepNumber = 2, title = "Approve Order")
+        ApproveOrderForm(
+            uiState = uiState,
+            onCardNumberChange = { value -> viewModel.cardNumber = value },
+            onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
+            onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
+            onSCAChange = { value -> viewModel.scaOption = value },
+            onUseTestCardClick = { onUseTestCardClick() },
+        )
+        ActionButtonColumn(
+            defaultTitle = "APPROVE ORDER",
+            successTitle = "ORDER APPROVED",
+            state = uiState.approveOrderState,
+            onClick = {
+                context.getActivity()?.let { viewModel.approveOrder(it) }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            when (val state = uiState.approveOrderState) {
+                is ActionState.Success -> CardResultView(result = state.value)
+                is ActionState.Failure -> ErrorView(error = state.value)
+                else -> {}
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium
+    ) {
+        StepHeader(stepNumber = 3, title = "Complete Order")
+        val successTitle = when (uiState.intentOption) {
+            OrderIntent.CAPTURE -> "ORDER CAPTURED"
+            OrderIntent.AUTHORIZE -> "ORDER AUTHORIZED"
+        }
+        ActionButtonColumn(
+            defaultTitle = "${uiState.intentOption.name} ORDER",
+            successTitle = successTitle,
+            state = uiState.completeOrderState,
+            onClick = {
+                viewModel.completeOrder(context)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            when (val state = uiState.completeOrderState) {
+                is ActionState.Success -> OrderView(order = state.value)
+                is ActionState.Failure -> ErrorView(error = state.value)
+                else -> {}
+            }
+        }
+    }
 }

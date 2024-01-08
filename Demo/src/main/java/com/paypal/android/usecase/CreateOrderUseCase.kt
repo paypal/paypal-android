@@ -13,11 +13,7 @@ class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(orderRequest: OrderRequest): Order = withContext(Dispatchers.IO) {
-        sdkSampleServerAPI.createOrder(createOrderRequestJSON(orderRequest))
-    }
-
-    private fun createOrderRequestJSON(orderRequest: OrderRequest): JSONObject {
+    suspend operator fun invoke(request: OrderRequest): Order = withContext(Dispatchers.IO) {
         val amountJSON = JSONObject()
             .put("currency_code", "USD")
             .put("value", "10.99")
@@ -25,23 +21,16 @@ class CreateOrderUseCase @Inject constructor(
         val purchaseUnitJSON = JSONObject()
             .put("amount", amountJSON)
 
-        val requestJSON = JSONObject()
-            .put("intent", orderRequest.orderIntent)
+        val orderRequest = JSONObject()
+            .put("intent", request.orderIntent)
             .put("purchase_units", JSONArray().put(purchaseUnitJSON))
 
-        if (orderRequest.shouldVault) {
+        if (request.shouldVault) {
             val vaultJSON = JSONObject()
                 .put("store_in_vault", "ON_SUCCESS")
 
             val cardAttributesJSON = JSONObject()
                 .put("vault", vaultJSON)
-
-            val vaultCustomerId = orderRequest.vaultCustomerId
-            if (vaultCustomerId.isNotEmpty()) {
-                val customerJSON = JSONObject()
-                    .put("id", vaultCustomerId)
-                cardAttributesJSON.put("customer", customerJSON)
-            }
 
             val cardJSON = JSONObject()
                 .put("attributes", cardAttributesJSON)
@@ -49,8 +38,8 @@ class CreateOrderUseCase @Inject constructor(
             val paymentSourceJSON = JSONObject()
                 .put("card", cardJSON)
 
-            requestJSON.put("payment_source", paymentSourceJSON)
+            orderRequest.put("payment_source", paymentSourceJSON)
         }
-        return requestJSON
+        sdkSampleServerAPI.createOrder(orderRequest)
     }
 }
