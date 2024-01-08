@@ -43,7 +43,7 @@ fun ApproveOrderForm(
         EnumOptionList(
             title = stringResource(id = R.string.sca_title),
             stringArrayResId = R.array.sca_options,
-            onOptionSelected = { onSCAChange(it) },
+            onSelectedOptionChange = { onSCAChange(it) },
             selectedOption = uiState.scaOption
         )
     }

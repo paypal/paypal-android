@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.ui.paypalweb.PayPalWebCheckoutResultView
@@ -49,7 +48,7 @@ fun PayPalNativeView(
         if (uiState.isPayPalNativeCheckoutSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
         }
-        Spacer(modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
@@ -62,8 +61,8 @@ private fun Step1_CreateOrder(uiState: PayPalNativeUiState, viewModel: PayPalNat
         CreateOrderWithShippingPreferenceForm(
             orderIntent = uiState.intentOption,
             shippingPreference = uiState.shippingPreference,
-            onIntentOptionSelected = { value -> viewModel.intentOption = value },
-            onShippingPreferenceSelected = { value -> viewModel.shippingPreference = value },
+            onOrderIntentChange = { value -> viewModel.intentOption = value },
+            onShippingPreferenceChange = { value -> viewModel.shippingPreference = value },
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",

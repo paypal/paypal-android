@@ -53,7 +53,7 @@ fun CardForm(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.inverseOnSurface,
                 modifier = Modifier
-                    .padding(start = 16.dp)
+                    .padding(start = UIConstants.paddingMedium)
                     .weight(1.0f)
             )
             Button(

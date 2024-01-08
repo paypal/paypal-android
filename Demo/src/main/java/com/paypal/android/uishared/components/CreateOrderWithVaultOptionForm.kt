@@ -18,7 +18,7 @@ fun CreateOrderWithVaultOptionForm(
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
     shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
     onShouldVaultChanged: (StoreInVaultOption) -> Unit = {},
-    onIntentOptionSelected: (OrderIntent) -> Unit = {},
+    onIntentOptionChanged: (OrderIntent) -> Unit = {},
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium
@@ -26,13 +26,13 @@ fun CreateOrderWithVaultOptionForm(
         EnumOptionList(
             title = stringResource(id = R.string.intent_title),
             stringArrayResId = R.array.intent_options,
-            onOptionSelected = { onIntentOptionSelected(it) },
+            onSelectedOptionChange = { onIntentOptionChanged(it) },
             selectedOption = orderIntent
         )
         EnumOptionList(
             title = stringResource(id = R.string.store_in_vault),
             stringArrayResId = R.array.store_in_vault_options,
-            onOptionSelected = { onShouldVaultChanged(it) },
+            onSelectedOptionChange = { onShouldVaultChanged(it) },
             selectedOption = shouldVault
         )
     }

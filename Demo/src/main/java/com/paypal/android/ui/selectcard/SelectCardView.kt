@@ -28,7 +28,7 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun SelectCardView(
     viewModel: SelectCardViewModel = viewModel(),
-    onTestCardSelected: (String) -> Unit = {}
+    onSelectedTestCardChange: (String) -> Unit = {}
 ) {
     LazyColumn(
         verticalArrangement = UIConstants.spacingSmall,
@@ -43,7 +43,7 @@ fun SelectCardView(
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card.id)
+                onSelectedTestCardChange(card.id)
             }
         }
         stickyHeader {
@@ -53,7 +53,7 @@ fun SelectCardView(
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card.id)
+                onSelectedTestCardChange(card.id)
             }
         }
         stickyHeader {
@@ -63,7 +63,7 @@ fun SelectCardView(
             TestCardView(
                 testCard = card
             ) {
-                onTestCardSelected(card.id)
+                onSelectedTestCardChange(card.id)
             }
         }
     }

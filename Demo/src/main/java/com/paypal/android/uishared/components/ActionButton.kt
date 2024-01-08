@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.paypal.android.utils.UIConstants
 
 @Composable
 fun ActionButton(
@@ -51,13 +52,13 @@ fun ActionButton(
                     text = text,
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = UIConstants.paddingMedium)
                         .alpha(if (isLoading) 0.0f else 1.0f)
                 )
                 CircularProgressIndicator(
                     color = Color.White,
                     modifier = Modifier
-                        .size(28.dp)
+                        .size(32.dp)
                         .align(Alignment.Center)
                         .alpha(if (isLoading) 1.0f else 0.0f)
                 )
@@ -81,7 +82,7 @@ fun WireframeButtonPreview() {
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(UIConstants.paddingMedium)
                 )
             }
         }

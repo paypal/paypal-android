@@ -47,7 +47,7 @@ private val payPalNativeFeatures = listOf(
 @ExperimentalFoundationApi
 @Composable
 fun FeaturesView(
-    onFeatureSelected: (Feature) -> Unit,
+    onSelectedFeatureChange: (Feature) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -59,19 +59,19 @@ fun FeaturesView(
             FeatureGroupHeader(text = "Card")
         }
         item {
-            FeatureOptions(cardFeatures, onFeatureSelected = onFeatureSelected)
+            FeatureOptions(cardFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
         stickyHeader {
             FeatureGroupHeader("PayPal Web")
         }
         item {
-            FeatureOptions(payPalWebFeatures, onFeatureSelected = onFeatureSelected)
+            FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
         stickyHeader {
             FeatureGroupHeader("PayPal Native")
         }
         item {
-            FeatureOptions(payPalNativeFeatures, onFeatureSelected = onFeatureSelected)
+            FeatureOptions(payPalNativeFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
     }
 }
@@ -79,7 +79,7 @@ fun FeaturesView(
 @Composable
 fun FeatureOptions(
     features: List<Feature>,
-    onFeatureSelected: (Feature) -> Unit,
+    onSelectedFeatureChange: (Feature) -> Unit,
 ) {
     Card(
         shape = CardDefaults.elevatedShape,
@@ -89,7 +89,7 @@ fun FeatureOptions(
             FeatureView(
                 feature = feature,
                 isLast = (index == features.lastIndex),
-                onClick = { onFeatureSelected(feature) }
+                onClick = { onSelectedFeatureChange(feature) }
             )
         }
     }
@@ -154,7 +154,7 @@ fun FeatureView(
 fun FeaturesViewPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            FeaturesView(onFeatureSelected = {})
+            FeaturesView(onSelectedFeatureChange = {})
         }
     }
 }

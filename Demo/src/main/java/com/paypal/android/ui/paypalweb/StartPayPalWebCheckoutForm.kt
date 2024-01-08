@@ -11,7 +11,7 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun StartPayPalWebCheckoutForm(
     fundingSource: PayPalWebCheckoutFundingSource,
-    onFundingSourceSelected: (PayPalWebCheckoutFundingSource) -> Unit,
+    onFundingSourceChange: (PayPalWebCheckoutFundingSource) -> Unit,
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium
@@ -19,7 +19,7 @@ fun StartPayPalWebCheckoutForm(
         EnumOptionList(
             title = stringResource(id = R.string.pay_pal_funding_source_title),
             stringArrayResId = R.array.pay_pal_funding_source_options,
-            onOptionSelected = onFundingSourceSelected,
+            onSelectedOptionChange = onFundingSourceChange,
             selectedOption = fundingSource
         )
     }

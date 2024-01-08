@@ -17,8 +17,8 @@ import com.paypal.android.utils.UIConstants
 fun CreateOrderWithShippingPreferenceForm(
     orderIntent: OrderIntent,
     shippingPreference: ShippingPreferenceType,
-    onIntentOptionSelected: (OrderIntent) -> Unit = {},
-    onShippingPreferenceSelected: (ShippingPreferenceType) -> Unit = {},
+    onOrderIntentChange: (OrderIntent) -> Unit = {},
+    onShippingPreferenceChange: (ShippingPreferenceType) -> Unit = {},
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium
@@ -26,13 +26,13 @@ fun CreateOrderWithShippingPreferenceForm(
         EnumOptionList(
             title = stringResource(id = R.string.intent_title),
             stringArrayResId = R.array.intent_options,
-            onOptionSelected = { onIntentOptionSelected(it) },
+            onSelectedOptionChange = { onOrderIntentChange(it) },
             selectedOption = orderIntent
         )
         EnumOptionList(
             title = stringResource(id = R.string.pay_pal_shipping_preference_title),
             stringArrayResId = R.array.pay_pal_shipping_preference_options,
-            onOptionSelected = { onShippingPreferenceSelected(it) },
+            onSelectedOptionChange = { onShippingPreferenceChange(it) },
             selectedOption = shippingPreference
         )
     }

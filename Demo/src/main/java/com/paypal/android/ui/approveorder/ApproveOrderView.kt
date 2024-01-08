@@ -74,7 +74,7 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
         CreateOrderWithVaultOptionForm(
             orderIntent = uiState.intentOption,
             shouldVault = uiState.shouldVault,
-            onIntentOptionSelected = { value -> viewModel.intentOption = value },
+            onIntentOptionChanged = { value -> viewModel.intentOption = value },
             onShouldVaultChanged = { value -> viewModel.shouldVault = value },
         )
         ActionButtonColumn(

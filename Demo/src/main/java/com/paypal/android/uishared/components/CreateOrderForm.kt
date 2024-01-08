@@ -15,7 +15,7 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun CreateOrderForm(
     orderIntent: OrderIntent = OrderIntent.AUTHORIZE,
-    onIntentOptionSelected: (OrderIntent) -> Unit = {},
+    onOrderIntentChange: (OrderIntent) -> Unit = {},
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium
@@ -23,7 +23,7 @@ fun CreateOrderForm(
         EnumOptionList(
             title = stringResource(id = R.string.intent_title),
             stringArrayResId = R.array.intent_options,
-            onOptionSelected = { onIntentOptionSelected(it) },
+            onSelectedOptionChange = { onOrderIntentChange(it) },
             selectedOption = orderIntent
         )
     }

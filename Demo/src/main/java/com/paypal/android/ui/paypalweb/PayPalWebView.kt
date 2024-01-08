@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.uishared.components.ActionButtonColumn
@@ -53,7 +52,7 @@ fun PayPalWebView(
         if (uiState.isPayPalWebCheckoutSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
         }
-        Spacer(modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
@@ -65,7 +64,7 @@ private fun Step1_CreateOrder(uiState: PayPalWebUiState, viewModel: PayPalWebVie
         StepHeader(stepNumber = 1, title = "Create an Order")
         CreateOrderForm(
             orderIntent = uiState.intentOption,
-            onIntentOptionSelected = { value -> viewModel.intentOption = value },
+            onOrderIntentChange = { value -> viewModel.intentOption = value },
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
@@ -91,7 +90,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
         StepHeader(stepNumber = 2, title = "Launch PayPal Web")
         StartPayPalWebCheckoutForm(
             fundingSource = uiState.fundingSource,
-            onFundingSourceSelected = { value -> viewModel.fundingSource = value },
+            onFundingSourceChange = { value -> viewModel.fundingSource = value },
         )
         ActionButtonColumn(
             defaultTitle = "START CHECKOUT",

@@ -15,7 +15,7 @@ fun PaymentButtonSizeOptionList(
         title = stringResource(id = R.string.pay_pal_button_size),
         options = PaymentButtonSize.values().map { it.name },
         selectedOption = selectedOption.name,
-        onOptionSelected = { option ->
+        onSelectedOptionChange = { option ->
             onSelection(PaymentButtonSize.valueOf(option))
         }
     )

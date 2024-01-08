@@ -25,7 +25,7 @@ import com.paypal.android.utils.UIConstants
 fun OptionList(
     title: String,
     options: List<String>,
-    onOptionSelected: (String) -> Unit,
+    onSelectedOptionChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     selectedOption: String = "",
 ) {
@@ -55,7 +55,7 @@ fun OptionList(
                         .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
                         .selectable(
                             selected = (option == selectedOption),
-                            onClick = { onOptionSelected(option) },
+                            onClick = { onSelectedOptionChange(option) },
                             role = Role.RadioButton
                         )
                 ) {
@@ -92,7 +92,7 @@ fun OptionListPreview() {
             OptionList(
                 title = "Fake Title",
                 options = listOf("One", "Two", "Three"),
-                onOptionSelected = {},
+                onSelectedOptionChange = {},
                 selectedOption = "One",
                 modifier = Modifier.padding(UIConstants.paddingSmall)
             )

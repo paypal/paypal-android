@@ -30,7 +30,7 @@ import com.paypal.android.utils.UIConstants
 inline fun <reified T : Enum<T>> EnumOptionList(
     title: String,
     @ArrayRes stringArrayResId: Int,
-    crossinline onOptionSelected: (T) -> Unit,
+    crossinline onSelectedOptionChange: (T) -> Unit,
     modifier: Modifier = Modifier,
     selectedOption: T,
 ) {
@@ -63,7 +63,7 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                         .selectable(
                             selected = (enumValueOf<T>(option) == selectedOption),
                             onClick = {
-                                onOptionSelected(enumValueOf(option))
+                                onSelectedOptionChange(enumValueOf(option))
                             },
                             role = Role.RadioButton
                         )
@@ -101,7 +101,7 @@ fun OptionListPreview() {
             EnumOptionList(
                 title = "Fake Title",
                 stringArrayResId = R.array.store_in_vault_options,
-                onOptionSelected = {},
+                onSelectedOptionChange = {},
                 selectedOption = StoreInVaultOption.ON_SUCCESS,
                 modifier = Modifier.padding(UIConstants.paddingSmall)
             )
