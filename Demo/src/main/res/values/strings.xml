@@ -9,9 +9,6 @@
     <string name="feature_paypal_native">PayPal Native</string>
     <string name="feature_paypal_buttons">PayPal Buttons</string>
 
-    <string name="user_canceled">User cancelled the checkout</string>
-    <string name="pay_pal_vault_canceled">Vault Paypal Canceled</string>
-
     <!-- Card Fields -->
     <string name="card_field_card_number">CARD NUMBER</string>
     <string name="card_field_expiration">EXP. DATE</string>
