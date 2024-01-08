@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paypal.android.R
+import com.paypal.android.utils.UIConstants
 
 private val cardFeatures = listOf(
     Feature.CARD_APPROVE_ORDER,
@@ -51,7 +52,7 @@ fun FeaturesView(
     LazyColumn(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = UIConstants.paddingMedium)
             .fillMaxSize()
     ) {
         stickyHeader {
@@ -126,22 +127,22 @@ fun FeatureView(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .weight(1.0f)
-                    .padding(vertical = 16.dp, horizontal = 20.dp)
+                    .padding(UIConstants.paddingMedium)
             )
             Icon(
                 painter = chevronPainter,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .size(14.dp)
+                    .size(16.dp)
                     .align(Alignment.CenterVertically)
             )
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
         }
         if (!isLast) {
             Divider(
                 color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = UIConstants.paddingMedium)
             )
         }
     }
