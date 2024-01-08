@@ -38,7 +38,7 @@ fun <S, E> ActionButtonColumn(
     val isLoading = state is ActionState.Loading
     // TODO: use material themed color for success
     val buttonBackground = when (state) {
-        is ActionState.Loading, is ActionState.Ready ->
+        is ActionState.Loading, is ActionState.Idle ->
             MaterialTheme.colorScheme.inverseSurface
 
         is ActionState.Failure -> MaterialTheme.colorScheme.errorContainer
@@ -46,7 +46,7 @@ fun <S, E> ActionButtonColumn(
     }
 
     val buttonForeground = when (state) {
-        is ActionState.Loading, is ActionState.Ready ->
+        is ActionState.Loading, is ActionState.Idle ->
             MaterialTheme.colorScheme.inverseOnSurface
 
         is ActionState.Failure -> MaterialTheme.colorScheme.onErrorContainer
@@ -58,7 +58,7 @@ fun <S, E> ActionButtonColumn(
     ) {
         Button(
             onClick = {
-                if (state is ActionState.Ready) {
+                if (state is ActionState.Idle) {
                     onClick()
                 }
             },
@@ -105,7 +105,7 @@ fun StatefulActionButtonPreview() {
                 ActionButtonColumn(
                     defaultTitle = "Fake Default Title",
                     successTitle = "Fake Success Title",
-                    state = ActionState.Ready,
+                    state = ActionState.Idle,
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()

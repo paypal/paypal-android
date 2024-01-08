@@ -10,9 +10,9 @@ import com.paypal.android.uishared.state.ActionState
 
 @Immutable
 data class ApproveOrderUiState(
-    val createOrderState: ActionState<Order, Exception> = ActionState.Ready,
-    val approveOrderState: ActionState<CardResult, Exception> = ActionState.Ready,
-    val completeOrderState: ActionState<Order, Exception> = ActionState.Ready,
+    val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
+    val approveOrderState: ActionState<CardResult, Exception> = ActionState.Idle,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val scaOption: SCA = SCA.SCA_ALWAYS,
     val cardNumber: String = "",
     val cardExpirationDate: String = "",

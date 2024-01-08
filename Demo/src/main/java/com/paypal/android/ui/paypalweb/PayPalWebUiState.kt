@@ -9,9 +9,9 @@ import com.paypal.android.uishared.state.ActionState
 
 data class PayPalWebUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val createOrderState: ActionState<Order, Exception> = ActionState.Ready,
-    val payPalWebCheckoutState: ActionState<PayPalWebCheckoutResult, Exception> = ActionState.Ready,
-    val completeOrderState: ActionState<Order, PayPalSDKError> = ActionState.Ready,
+    val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
+    val payPalWebCheckoutState: ActionState<PayPalWebCheckoutResult, Exception> = ActionState.Idle,
+    val completeOrderState: ActionState<Order, PayPalSDKError> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
 ) {
     val isCreateOrderSuccessful: Boolean

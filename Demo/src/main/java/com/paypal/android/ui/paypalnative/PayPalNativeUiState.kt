@@ -7,10 +7,10 @@ import com.paypal.android.uishared.state.ActionState
 
 data class PayPalNativeUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val createOrderState: ActionState<Order, Exception> = ActionState.Ready,
+    val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val payPalNativeCheckoutState: ActionState<PayPalNativeCheckoutResult, Exception> =
-        ActionState.Ready,
-    val completeOrderState: ActionState<Order, Exception> = ActionState.Ready,
+        ActionState.Idle,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val shippingPreference: ShippingPreferenceType = ShippingPreferenceType.GET_FROM_FILE,
 ) {
     val isCreateOrderSuccessful: Boolean
