@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.utils.UIConstants
 
 @Composable
@@ -30,7 +29,7 @@ fun StepHeader(stepNumber: Int, title: String) {
                     color = MaterialTheme.colorScheme.inverseSurface,
                     shape = CircleShape
                 )
-                .size(40.dp)
+                .size(UIConstants.stepNumberBackgroundSize)
         ) {
             Text(
                 text = "$stepNumber",

@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 
@@ -84,7 +83,7 @@ fun <S, E> ActionButtonColumn(
                 CircularProgressIndicator(
                     color = Color.White,
                     modifier = Modifier
-                        .size(28.dp)
+                        .size(UIConstants.progressIndicatorSize)
                         .align(Alignment.Center)
                         .alpha(if (isLoading) 1.0f else 0.0f)
                 )

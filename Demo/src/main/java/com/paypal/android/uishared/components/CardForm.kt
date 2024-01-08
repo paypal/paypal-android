@@ -23,7 +23,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.ui.approveorder.CardNumberVisualTransformation
 import com.paypal.android.ui.approveorder.DateVisualTransformation
@@ -57,7 +56,10 @@ fun CardForm(
                     .weight(1.0f)
             )
             Button(
-                shape = RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp),
+                shape = RoundedCornerShape(
+                    topStart = UIConstants.buttonCornerRadius,
+                    bottomStart = UIConstants.buttonCornerRadius
+                ),
                 onClick = onUseTestCardClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -65,7 +67,6 @@ fun CardForm(
                 ),
                 modifier = Modifier
                     .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
-                    .padding(0.dp)
             ) {
                 Text(
                     text = "✨ Use a Test Card",

@@ -25,7 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.utils.UIConstants
 
@@ -97,14 +96,14 @@ fun FeatureOptions(
 
 @Composable
 fun FeatureGroupHeader(text: String) {
-    Spacer(modifier = Modifier.size(24.dp))
+    Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
     Text(
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.titleLarge,
     )
-    Spacer(modifier = Modifier.size(12.dp))
+    Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
 }
 
 @Composable
@@ -134,7 +133,7 @@ fun FeatureView(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(UIConstants.chevronSize)
                     .align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
