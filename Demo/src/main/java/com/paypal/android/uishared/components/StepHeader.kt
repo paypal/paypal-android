@@ -20,14 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun StepHeader(
-    stepNumber: Int,
-    title: String,
-    modifier: Modifier = Modifier
-) {
+fun StepHeader(stepNumber: Int, title: String) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
