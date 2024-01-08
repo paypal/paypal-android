@@ -24,7 +24,7 @@ fun ApproveOrderForm(
     onCardNumberChange: (String) -> Unit,
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
-    onSCAOptionSelected: (SCA) -> Unit,
+    onSCAChange: (SCA) -> Unit,
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
@@ -43,7 +43,7 @@ fun ApproveOrderForm(
         EnumOptionList(
             title = stringResource(id = R.string.sca_title),
             stringArrayResId = R.array.sca_options,
-            onOptionSelected = { onSCAOptionSelected(it) },
+            onOptionSelected = { onSCAChange(it) },
             selectedOption = uiState.scaOption
         )
     }
@@ -59,7 +59,7 @@ fun ApproveOrderFormPreview() {
                 onCardNumberChange = {},
                 onExpirationDateChange = {},
                 onSecurityCodeChange = {},
-                onSCAOptionSelected = {},
+                onSCAChange = {},
                 onUseTestCardClick = {},
             )
         }

@@ -108,7 +108,7 @@ private fun Step2_ApproveOrder(
             onCardNumberChange = { value -> viewModel.cardNumber = value },
             onExpirationDateChange = { value -> viewModel.cardExpirationDate = value },
             onSecurityCodeChange = { value -> viewModel.cardSecurityCode = value },
-            onSCAOptionSelected = { value -> viewModel.scaOption = value },
+            onSCAChange = { value -> viewModel.scaOption = value },
             onUseTestCardClick = { onUseTestCardClick() },
         )
         ActionButtonColumn(
