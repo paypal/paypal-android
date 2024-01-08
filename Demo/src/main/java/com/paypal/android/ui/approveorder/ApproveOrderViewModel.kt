@@ -101,6 +101,7 @@ class ApproveOrderViewModel @Inject constructor(
             completeOrderState = ActionState.Loading
 
             val cmid = payPalDataCollector.collectDeviceData(context)
+            // TECH DEBT: introduce a UseCaseResult type to avoid force unwrapping optionals here
             val completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
             completeOrderState = ActionState.Success(completedOrder)
         }

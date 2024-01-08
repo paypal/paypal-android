@@ -13,5 +13,5 @@ data class PayPalButtonsUiState(
     val payPalButtonLabel: PayPalButtonLabel = PayPalButtonLabel.PAYPAL,
     val paymentButtonShape: PaymentButtonShape = PaymentButtonShape.ROUNDED,
     val paymentButtonSize: PaymentButtonSize = PaymentButtonSize.SMALL,
-    val customCornerRadius: Float? = null
+    val customCornerRadius: Int? = null
 )

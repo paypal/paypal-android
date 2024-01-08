@@ -13,7 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +32,10 @@ import com.paypal.android.paymentbuttons.PayPalCreditButton
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
+import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.utils.UIConstants
-import kotlin.math.roundToInt
 
-const val CORNER_RADIUS_SLIDER_MAX = 100.0f
+const val CORNER_RADIUS_SLIDER_MAX = 100
 
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
@@ -94,8 +93,8 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 onSelection = { value -> viewModel.paymentButtonShape = value }
             )
             CustomCornerRadiusSlider(
-                value = uiState.customCornerRadius,
-                onValueChange = { value -> viewModel.customCornerRadius = value }
+                cornerRadius = uiState.customCornerRadius,
+                onCornerRadiusChange = { value -> viewModel.customCornerRadius = value }
             )
             PaymentButtonSizeOptionList(
                 selectedOption = uiState.paymentButtonSize,
@@ -107,7 +106,7 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
 }
 
 @Composable
-fun CustomCornerRadiusSlider(value: Float?, onValueChange: (Float) -> Unit) {
+fun CustomCornerRadiusSlider(cornerRadius: Int?, onCornerRadiusChange: (Int) -> Unit) {
     Card {
         Row(
             modifier = Modifier
@@ -129,25 +128,21 @@ fun CustomCornerRadiusSlider(value: Float?, onValueChange: (Float) -> Unit) {
             )
         ) {
             Text(
-                text = value?.let { "${value}px" } ?: "UNSET",
+                text = cornerRadius?.let { "${cornerRadius}px" } ?: "UNSET",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .padding(bottom = UIConstants.paddingSmall)
                     .fillMaxWidth()
             )
-            Slider(
-                value = value ?: 0.0f,
-                valueRange = 0f..CORNER_RADIUS_SLIDER_MAX,
-                steps = CORNER_RADIUS_SLIDER_MAX.toInt(),
+            IntSlider(
+                value = cornerRadius ?: 0,
+                valueRange = 0..CORNER_RADIUS_SLIDER_MAX,
+                steps = CORNER_RADIUS_SLIDER_MAX,
                 colors = SliderDefaults.colors(
                     inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
-                onValueChange = { value ->
-                    // round to integer
-                    val roundedValue = value.roundToInt().toFloat()
-                    onValueChange(roundedValue)
-                }
+                onValueChange = onCornerRadiusChange,
             )
         }
     }
@@ -212,7 +207,7 @@ private fun configureButton(
     }
 
     uiState.customCornerRadius?.let { customCornerRadius ->
-        button.customCornerRadius = customCornerRadius
+        button.customCornerRadius = customCornerRadius.toFloat()
     }
 }
 
