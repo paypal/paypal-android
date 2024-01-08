@@ -38,9 +38,8 @@ fun CardForm(
     onExpirationDateChange: (String) -> Unit,
     onSecurityCodeChange: (String) -> Unit,
     onUseTestCardClick: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
-    Card(modifier = modifier) {
+    Card {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -65,14 +64,12 @@ fun CardForm(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                modifier = Modifier
-                    .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
+                modifier = Modifier.defaultMinSize(minHeight = UIConstants.minimumTouchSize)
             ) {
                 Text(
                     text = "✨ Use a Test Card",
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(UIConstants.paddingSmall)
+                    modifier = Modifier.padding(UIConstants.paddingSmall)
                 )
             }
         }
