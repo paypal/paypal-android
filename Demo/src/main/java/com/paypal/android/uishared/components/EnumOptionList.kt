@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.R
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.utils.UIConstants
@@ -60,7 +59,7 @@ inline fun <reified T : Enum<T>> EnumOptionList(
                 val isLast = (index == options.lastIndex)
                 Row(
                     modifier = Modifier
-                        .defaultMinSize(minHeight = 50.dp)
+                        .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
                         .selectable(
                             selected = (enumValueOf<T>(option) == selectedOption),
                             onClick = {

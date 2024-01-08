@@ -64,14 +64,14 @@ fun CardForm(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier
-                    .defaultMinSize(minHeight = 50.dp)
+                    .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
                     .padding(0.dp)
             ) {
                 Text(
                     text = "✨ Use a Test Card",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(UIConstants.paddingSmall)
                 )
             }
         }

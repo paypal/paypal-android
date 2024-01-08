@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.dp
 
 object UIConstants {
+    // Ref: https://support.google.com/accessibility/android/answer/7101858
+    val minimumTouchSize = 48.dp
+
     val paddingExtraSmall = 4.dp
     val paddingSmall = 8.dp
     val paddingMedium = 16.dp

@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.paypal.android.utils.UIConstants
 
 @Composable
@@ -53,7 +52,7 @@ fun OptionList(
                 val isLast = (index == options.lastIndex)
                 Row(
                     modifier = Modifier
-                        .defaultMinSize(minHeight = 50.dp)
+                        .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
                         .selectable(
                             selected = (option == selectedOption),
                             onClick = { onOptionSelected(option) },
@@ -95,7 +94,7 @@ fun OptionListPreview() {
                 options = listOf("One", "Two", "Three"),
                 onOptionSelected = {},
                 selectedOption = "One",
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(UIConstants.paddingSmall)
             )
         }
     }
