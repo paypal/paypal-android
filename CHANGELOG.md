@@ -5,7 +5,7 @@
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Parse `liabilityShift` from deep link return URL in `CardClient#approveOrder()` browser-switched flow
-  * Callback `PayPalSDKError` when CardClient#approveOrder()` 3DS verification fails
+  * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons
