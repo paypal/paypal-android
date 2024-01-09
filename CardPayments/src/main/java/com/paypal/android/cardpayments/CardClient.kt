@@ -161,10 +161,6 @@ class CardClient internal constructor(
     private fun handleBrowserSwitchSuccess(browserSwitchResult: BrowserSwitchResult) {
         ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)?.let { metadata ->
             try {
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:get-order-info:succeeded",
-                    metadata.orderId
-                )
                 val deepLinkUrl = browserSwitchResult.deepLinkUrl
                 val result = parseApproveOrderDeepLink(metadata.orderId, deepLinkUrl)
                 notifyApproveOrderSuccess(result)
