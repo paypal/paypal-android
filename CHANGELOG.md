@@ -5,6 +5,8 @@
   * Add `PayPalCreditButtonColor.WHITE` and `.GOLD`
   * Deprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
   * Deprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
+* PayPalNativeCheckout
+  * Bump native-checkout version to release `1.2.1`
 
 ## 1.2.0 (2024-01-04) 
 * PaymentButtons
