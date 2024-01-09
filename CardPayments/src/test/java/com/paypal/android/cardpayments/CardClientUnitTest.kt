@@ -176,7 +176,7 @@ class CardClientUnitTest {
         }
 
     @Test
-    fun `handle browser switch result notifies user of error`() =
+    fun `handle browser switch result notifies user of error when deep link contains one`() =
         runTest {
             val sut = createCardClient(testScheduler)
 
@@ -188,6 +188,30 @@ class CardClientUnitTest {
                 BrowserSwitchStatus.SUCCESS,
                 approveOrderMetadata,
                 Uri.parse(successDeepLink)
+            )
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            coVerify(exactly = 1) {
+                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
+            }
+
+            val error = errorSlot.captured
+            assertEquals(0, error.code)
+            assertEquals("3DS Verification is returning an error.", error.errorDescription)
+        }
+
+    @Test
+    fun `handle browser switch result notifies user of error when deep link is null`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            val browserSwitchResult = createBrowserSwitchResult(
+                BrowserSwitchStatus.SUCCESS,
+                approveOrderMetadata,
+                deepLinkUrl = null
             )
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 

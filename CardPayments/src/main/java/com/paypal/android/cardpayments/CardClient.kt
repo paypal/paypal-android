@@ -176,11 +176,15 @@ class CardClient internal constructor(
 
     @Throws(PayPalSDKError::class)
     private fun parseApproveOrderDeepLink(orderId: String, deepLinkUrl: Uri?): CardResult {
-        val error = deepLinkUrl?.getQueryParameter("error")
+        if (deepLinkUrl == null) {
+            throw CardError.threeDSVerificationError
+        }
+
+        val error = deepLinkUrl.getQueryParameter("error")
         if (error != null) {
             throw CardError.threeDSVerificationError
         } else {
-            val liabilityShift = deepLinkUrl?.getQueryParameter("liability_shift")
+            val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
             return CardResult(orderId, deepLinkUrl, liabilityShift)
         }
     }
