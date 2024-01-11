@@ -9,4 +9,10 @@ internal object CardError {
         code = CardErrorCode.THREEDS_VERIFICATION_FAILED.ordinal,
         errorDescription = "3DS Verification is returning an error."
     )
+
+    // 1.
+    val malformedDeepLinkError = PayPalSDKError(
+        code = CardErrorCode.MALFORMED_DEEPLINK_URL.ordinal,
+        errorDescription = "Malformed deeplink URL."
+    )
 }

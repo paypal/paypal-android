@@ -183,10 +183,17 @@ class CardClient internal constructor(
         val error = deepLinkUrl.getQueryParameter("error")
         if (error != null) {
             throw CardError.threeDSVerificationError
-        } else {
-            val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
-            return CardResult(orderId, deepLinkUrl, liabilityShift)
         }
+
+        val state = deepLinkUrl.getQueryParameter("state")
+        val code = deepLinkUrl.getQueryParameter("code")
+        if (state == null || code == null) {
+            throw CardError.malformedDeepLinkError
+        }
+
+        val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
+        return CardResult(orderId, deepLinkUrl, liabilityShift)
+
     }
 
     private fun notifyApproveOrderCanceled() {
