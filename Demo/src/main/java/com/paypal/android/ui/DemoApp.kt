@@ -1,5 +1,19 @@
 package com.paypal.android.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -68,6 +82,8 @@ fun DemoApp() {
             NavHost(
                 navController = navController,
                 startDestination = "features",
+                enterTransition = { fadeIn() + slideInVertically { (it * 0.05).toInt() } },
+                exitTransition = { fadeOut() },
                 modifier = Modifier.padding(innerPadding)
             ) {
                 // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76
