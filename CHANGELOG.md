@@ -5,6 +5,8 @@
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
+* FraudDetection
+  * Bump Magnes dependency to version 5.4.0
 * PaymentButtons
   * Font typeface changed to "PayPalOpen" to meet brand guidelines
 

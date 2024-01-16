@@ -48,15 +48,9 @@ dependencies {
 
 The PayPal SDK uses a client ID for authentication. This can be found in your [PayPal Developer Dashboard](https://developer.paypal.com/api/rest/#link-getstarted).
 
-## Modules
+## Documentation
 
-Each feature module has its own onboarding guide:
-
-- [CardPayments](docs/CardPayments)
-- [PaymentButtons](docs/PaymentButtons)
-- [PayPal Web Payments](docs/PayPalWebPayments)
-- [PayPal Native Payments](docs/PayPalNativePayments)
-- [FraudProtection](docs/FraudProtection)
+Documentation for the project can be found [here](https://developer.paypal.com/docs/checkout/advanced/android/).
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.
