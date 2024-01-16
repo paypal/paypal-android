@@ -5,6 +5,9 @@
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
+* Breaking Changes
+  * PaymentButtons
+    * Font typeface changed to "PayPalOpen" to meet brand guidelines
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons
