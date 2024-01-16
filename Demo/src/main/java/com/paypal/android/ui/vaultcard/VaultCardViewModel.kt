@@ -89,8 +89,7 @@ class VaultCardViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            val setupToken = createSetupTokenUseCase()
-            createSetupTokenState = ActionState.Success(setupToken)
+            createSetupTokenState = createSetupTokenUseCase().asActionState()
         }
     }
 
@@ -120,8 +119,7 @@ class VaultCardViewModel @Inject constructor(
     fun createPaymentToken() {
         viewModelScope.launch {
             createPaymentTokenState = ActionState.Loading
-            val paymentToken = createPaymentTokenUseCase(createdSetupToken!!)
-            createPaymentTokenState = ActionState.Success(paymentToken)
+            createPaymentTokenState = createPaymentTokenUseCase(createdSetupToken!!).asActionState()
         }
     }
 
