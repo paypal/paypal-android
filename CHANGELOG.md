@@ -5,6 +5,8 @@
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
+* FraudDetection
+  * Bump Magnes dependency to version 5.4.0
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons
