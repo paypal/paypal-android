@@ -41,7 +41,8 @@ class CardClientUnitTest {
     private val orderId = "sample-order-id"
 
     private val cardRequest = CardRequest(orderId, card, "return_url")
-    private val cardVaultRequest = CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
+    private val cardVaultRequest =
+        CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
@@ -145,12 +146,20 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handle browser switch result notifies user of success with updated order info`() =
+    fun `handle browser switch result notifies user of success with liability shift`() =
         runTest {
             val sut = createCardClient(testScheduler)
 
-            val browserSwitchResult =
-                createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, approveOrderMetadata)
+            val scheme = "com.paypal.android.demo"
+            val domain = "example.com"
+            val successDeepLink =
+                "$scheme://$domain/return_url?state=undefined&code=undefined&liability_shift=NO"
+
+            val browserSwitchResult = createBrowserSwitchResult(
+                BrowserSwitchStatus.SUCCESS,
+                approveOrderMetadata,
+                Uri.parse(successDeepLink)
+            )
             every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
 
             sut.handleBrowserSwitchResult(activity)
@@ -163,6 +172,118 @@ class CardClientUnitTest {
 
             val cardResult = cardResultSlot.captured
             assertEquals("sample-order-id", cardResult.orderId)
+            assertEquals("NO", cardResult.liabilityShift)
+        }
+
+    @Test
+    fun `handle browser switch result notifies user of error when deep link contains one`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+
+            val scheme = "com.paypal.android.demo"
+            val domain = "example.com"
+            val successDeepLink = "$scheme://$domain/return_url?error=error"
+
+            val browserSwitchResult = createBrowserSwitchResult(
+                BrowserSwitchStatus.SUCCESS,
+                approveOrderMetadata,
+                Uri.parse(successDeepLink)
+            )
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            coVerify(exactly = 1) {
+                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
+            }
+
+            val error = errorSlot.captured
+            assertEquals(0, error.code)
+            assertEquals("3DS Verification is returning an error.", error.errorDescription)
+        }
+
+    @Test
+    fun `handle browser switch result notifies user of error when deep link is null`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            val browserSwitchResult = createBrowserSwitchResult(
+                BrowserSwitchStatus.SUCCESS,
+                approveOrderMetadata,
+                deepLinkUrl = null
+            )
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            coVerify(exactly = 1) {
+                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
+            }
+
+            val error = errorSlot.captured
+            assertEquals(0, error.code)
+            assertEquals("3DS Verification is returning an error.", error.errorDescription)
+        }
+
+    @Test
+    fun `handle browser switch result notifies user of error when success deep link is missing code parameter`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+
+            val scheme = "com.paypal.android.demo"
+            val domain = "example.com"
+            val successDeepLink = "$scheme://$domain/return_url?state=undefined&liability_shift=NO"
+
+            val browserSwitchResult = createBrowserSwitchResult(
+                BrowserSwitchStatus.SUCCESS,
+                approveOrderMetadata,
+                Uri.parse(successDeepLink)
+            )
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            coVerify(exactly = 1) {
+                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
+            }
+
+            val error = errorSlot.captured
+            assertEquals(1, error.code)
+            assertEquals("Malformed deeplink URL.", error.errorDescription)
+        }
+
+    @Test
+    fun `handle browser switch result notifies user of error when success deep link is missing state parameter`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+
+            val scheme = "com.paypal.android.demo"
+            val domain = "example.com"
+            val successDeepLink = "$scheme://$domain/return_url?code=undefined&liability_shift=NO"
+
+            val browserSwitchResult = createBrowserSwitchResult(
+                BrowserSwitchStatus.SUCCESS,
+                approveOrderMetadata,
+                Uri.parse(successDeepLink)
+            )
+            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+            sut.handleBrowserSwitchResult(activity)
+            advanceUntilIdle()
+
+            val errorSlot = slot<PayPalSDKError>()
+            coVerify(exactly = 1) {
+                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
+            }
+
+            val error = errorSlot.captured
+            assertEquals(1, error.code)
+            assertEquals("Malformed deeplink URL.", error.errorDescription)
         }
 
     @Test
@@ -231,11 +352,13 @@ class CardClientUnitTest {
 
     private fun createBrowserSwitchResult(
         @BrowserSwitchStatus status: Int,
-        metadata: ApproveOrderMetadata? = null
+        metadata: ApproveOrderMetadata? = null,
+        deepLinkUrl: Uri? = null
     ): BrowserSwitchResult {
 
         val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
         every { browserSwitchResult.status } returns status
+        every { browserSwitchResult.deepLinkUrl } returns deepLinkUrl
 
         every { browserSwitchResult.requestMetadata } returns metadata?.toJSON()
         return browserSwitchResult
