@@ -60,39 +60,48 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun approveOrder(activity: AppCompatActivity) {
-        viewModelScope.launch {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
             approveOrderState = ActionState.Loading
+            viewModelScope.launch {
+                approveOrderWithId(activity, orderId)
+            }
+        }
+    }
 
-            val clientId = sdkSampleServerAPI.fetchClientId()
-            val coreConfig = CoreConfig(clientId = clientId)
-            payPalDataCollector = PayPalDataCollector(coreConfig)
+    private suspend fun approveOrderWithId(activity: AppCompatActivity, orderId: String) {
+        val clientId = sdkSampleServerAPI.fetchClientId()
+        val coreConfig = CoreConfig(clientId = clientId)
+        payPalDataCollector = PayPalDataCollector(coreConfig)
 
-            cardClient = CardClient(activity, coreConfig)
-            cardClient.approveOrderListener = object : ApproveOrderListener {
-                override fun onApproveOrderSuccess(result: CardResult) {
-                    approveOrderState = ActionState.Success(result)
-                }
-
-                override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    approveOrderState = ActionState.Failure(error)
-                }
-
-                override fun onApproveOrderCanceled() {
-                    approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
-                }
-
-                override fun onApproveOrderThreeDSecureWillLaunch() {
-                    Log.d(TAG, "3DS Auth Requested")
-                }
-
-                override fun onApproveOrderThreeDSecureDidFinish() {
-                    Log.d(TAG, "3DS Success")
-                }
+        cardClient = CardClient(activity, coreConfig)
+        cardClient.approveOrderListener = object : ApproveOrderListener {
+            override fun onApproveOrderSuccess(result: CardResult) {
+                approveOrderState = ActionState.Success(result)
             }
 
-            val cardRequest = createCardRequest(uiState.value, createdOrder!!)
-            cardClient.approveOrder(activity, cardRequest)
+            override fun onApproveOrderFailure(error: PayPalSDKError) {
+                approveOrderState = ActionState.Failure(error)
+            }
+
+            override fun onApproveOrderCanceled() {
+                approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
+            }
+
+            override fun onApproveOrderThreeDSecureWillLaunch() {
+                Log.d(TAG, "3DS Auth Requested")
+            }
+
+            override fun onApproveOrderThreeDSecureDidFinish() {
+                Log.d(TAG, "3DS Success")
+            }
         }
+
+        val card = parseCard(uiState.value)
+        val cardRequest = CardRequest(orderId, card, APP_RETURN_URL, uiState.value.scaOption)
+        cardClient.approveOrder(activity, cardRequest)
     }
 
     fun completeOrder(context: Context) {
@@ -110,8 +119,6 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     private fun createCardRequest(uiState: ApproveOrderUiState, order: Order): CardRequest {
-        val card = parseCard(uiState)
-        return CardRequest(order.id!!, card, APP_RETURN_URL, uiState.scaOption)
     }
 
     private fun parseCard(uiState: ApproveOrderUiState): Card {
