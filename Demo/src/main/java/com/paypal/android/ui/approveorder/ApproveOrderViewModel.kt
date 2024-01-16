@@ -118,9 +118,6 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    private fun createCardRequest(uiState: ApproveOrderUiState, order: Order): CardRequest {
-    }
-
     private fun parseCard(uiState: ApproveOrderUiState): Card {
         // expiration date in UI State needs to be formatted because it uses a visual transformation
         val dateString = DateString(uiState.cardExpirationDate)
