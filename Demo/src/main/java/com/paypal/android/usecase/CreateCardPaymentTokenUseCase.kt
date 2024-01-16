@@ -12,7 +12,7 @@ class CreateCardPaymentTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(setupToken: CardSetupToken): CardPaymentToken {
+    suspend operator fun invoke(setupToken: CardSetupToken): UseCaseResult<CardPaymentToken, Exception> {
         // language=JSON
         val request = """
             {
@@ -34,11 +34,13 @@ class CreateCardPaymentTokenUseCase @Inject constructor(
             .getJSONObject("payment_source")
             .getJSONObject("card")
 
-        return CardPaymentToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            cardLast4 = cardJSON.getString("last_digits"),
-            cardBrand = cardJSON.getString("brand")
+        return UseCaseResult.Success(
+            CardPaymentToken(
+                id = responseJSON.getString("id"),
+                customerId = customerJSON.getString("id"),
+                cardLast4 = cardJSON.getString("last_digits"),
+                cardBrand = cardJSON.getString("brand")
+            )
         )
     }
 }

@@ -13,7 +13,7 @@ class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(request: OrderRequest): Order = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(request: OrderRequest): UseCaseResult<Order, Exception> = withContext(Dispatchers.IO) {
         val amountJSON = JSONObject()
             .put("currency_code", "USD")
             .put("value", "10.99")
@@ -40,6 +40,8 @@ class CreateOrderUseCase @Inject constructor(
 
             orderRequest.put("payment_source", paymentSourceJSON)
         }
-        sdkSampleServerAPI.createOrder(orderRequest)
+        UseCaseResult.Success(
+            sdkSampleServerAPI.createOrder(orderRequest)
+        )
     }
 }

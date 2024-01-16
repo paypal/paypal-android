@@ -8,7 +8,9 @@ import javax.inject.Inject
 class GetClientIdUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
-    suspend operator fun invoke(): String = withContext(Dispatchers.IO) {
-        sdkSampleServerAPI.fetchClientId()
+    suspend operator fun invoke(): UseCaseResult<String, Exception> = withContext(Dispatchers.IO) {
+        UseCaseResult.Success(
+            sdkSampleServerAPI.fetchClientId()
+        )
     }
 }

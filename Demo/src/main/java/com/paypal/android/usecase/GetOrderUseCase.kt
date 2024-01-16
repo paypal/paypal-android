@@ -16,12 +16,14 @@ class GetOrderUseCase @Inject constructor(
     suspend operator fun invoke(
         shippingPreferenceType: ShippingPreferenceType,
         orderIntent: OrderIntent
-    ): Order = withContext(Dispatchers.IO) {
+    ): UseCaseResult<Order, Exception> = withContext(Dispatchers.IO) {
         val order = OrderUtils.createOrderBuilder(
             "5.0",
             orderIntent = orderIntent,
             shippingPreference = shippingPreferenceType.nxoShippingPreference
         )
-        sdkSampleServerAPI.createOrder(order)
+        UseCaseResult.Success(
+            sdkSampleServerAPI.createOrder(order)
+        )
     }
 }

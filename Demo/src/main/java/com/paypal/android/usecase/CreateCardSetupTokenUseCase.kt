@@ -11,7 +11,7 @@ class CreateCardSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(): CardSetupToken {
+    suspend operator fun invoke(): UseCaseResult<CardSetupToken, Exception> {
         // create a payment token with an empty card attribute; the merchant app will
         // provide the card's details through the SDK
 
@@ -29,10 +29,12 @@ class CreateCardSetupTokenUseCase @Inject constructor(
         val responseJSON = JSONObject(response.string())
 
         val customerJSON = responseJSON.getJSONObject("customer")
-        return CardSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status"),
+        return UseCaseResult.Success(
+            CardSetupToken(
+                id = responseJSON.getString("id"),
+                customerId = customerJSON.getString("id"),
+                status = responseJSON.getString("status"),
+            )
         )
     }
 }

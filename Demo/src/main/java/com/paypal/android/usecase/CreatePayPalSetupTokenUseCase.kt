@@ -12,7 +12,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(): PayPalSetupToken {
+    suspend operator fun invoke(): UseCaseResult<PayPalSetupToken, Exception> {
 
         // language=JSON
         val request = """
@@ -40,11 +40,13 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
         val customerJSON = responseJSON.getJSONObject("customer")
         val approveVaultHref = findApprovalHref(responseJSON)
 
-        return PayPalSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status"),
-            approveVaultHref = approveVaultHref
+        return UseCaseResult.Success(
+            PayPalSetupToken(
+                id = responseJSON.getString("id"),
+                customerId = customerJSON.getString("id"),
+                status = responseJSON.getString("status"),
+                approveVaultHref = approveVaultHref
+            )
         )
     }
 
