@@ -141,11 +141,15 @@ class PayPalWebViewModel @Inject constructor(
     }
 
     fun completeOrder(context: Context) {
-        viewModelScope.launch {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
             completeOrderState = ActionState.Loading
-            val cmid = payPalDataCollector.collectDeviceData(context)
-            val orderId = createdOrder!!.id!!
-            completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).asActionState()
+            viewModelScope.launch {
+                val cmid = payPalDataCollector.collectDeviceData(context)
+                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).asActionState()
+            }
         }
     }
 }
