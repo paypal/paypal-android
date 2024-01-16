@@ -11,7 +11,7 @@ data class PayPalWebUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutResult, Exception> = ActionState.Idle,
-    val completeOrderState: ActionState<Order, PayPalSDKError> = ActionState.Idle,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
 ) {
     val isCreateOrderSuccessful: Boolean

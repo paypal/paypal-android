@@ -87,8 +87,7 @@ class PayPalWebViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(orderIntent = intentOption, shouldVault = false)
             }
-            val createdOrder = createOrderUseCase(orderRequest)
-            createOrderState = ActionState.Success(createdOrder)
+            createOrderState = createOrderUseCase(orderRequest).asActionState()
         }
     }
 
@@ -140,8 +139,7 @@ class PayPalWebViewModel @Inject constructor(
             completeOrderState = ActionState.Loading
             val cmid = payPalDataCollector.collectDeviceData(context)
             val orderId = createdOrder!!.id!!
-            val completedOrder = completeOrderUseCase(orderId, intentOption, cmid)
-            completeOrderState = ActionState.Success(completedOrder)
+            completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).asActionState()
         }
     }
 }
