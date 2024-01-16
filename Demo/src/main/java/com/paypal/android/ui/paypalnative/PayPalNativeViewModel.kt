@@ -23,6 +23,7 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
+import com.paypal.android.usecase.UseCaseResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,7 +82,6 @@ class PayPalNativeViewModel @Inject constructor(
 
     private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {
-            payPalNativeCheckoutState = ActionState.Loading
         }
 
         override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
@@ -139,18 +139,33 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun startNativeCheckout() {
-        viewModelScope.launch {
-            val clientId = getClientIdUseCase()
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            payPalNativeCheckoutState =
+                ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                startNativeCheckoutWithOrderId(orderId)
+            }
+        }
+    }
 
-            val coreConfig = CoreConfig(clientId)
-            val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
-            payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)
-            payPalClient.listener = payPalListener
-            payPalClient.shippingListener = shippingListener
+    private suspend fun startNativeCheckoutWithOrderId(orderId: String) {
+        payPalNativeCheckoutState = ActionState.Loading
+        when (val getClientIdResult = getClientIdUseCase()) {
+            is UseCaseResult.Failure -> {
+                payPalNativeCheckoutState = ActionState.Failure(getClientIdResult.value)
+            }
 
-            payPalDataCollector = PayPalDataCollector(coreConfig)
+            is UseCaseResult.Success -> {
+                val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
+                val coreConfig = CoreConfig(getClientIdResult.value)
+                payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)
 
-            createdOrder?.id?.also { orderId ->
+                payPalClient.listener = payPalListener
+                payPalClient.shippingListener = shippingListener
+
+                payPalDataCollector = PayPalDataCollector(coreConfig)
                 payPalClient.startCheckout(PayPalNativeCheckoutRequest(orderId))
             }
         }

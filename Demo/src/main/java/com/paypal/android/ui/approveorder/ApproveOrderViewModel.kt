@@ -55,8 +55,7 @@ class ApproveOrderViewModel @Inject constructor(
             val orderRequest = uiState.run {
                 OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
             }
-            val order = createOrderUseCase(orderRequest)
-            createOrderState = ActionState.Success(order)
+            createOrderState = createOrderUseCase(orderRequest).asActionState()
         }
     }
 
@@ -100,10 +99,13 @@ class ApproveOrderViewModel @Inject constructor(
         viewModelScope.launch {
             completeOrderState = ActionState.Loading
 
-            val cmid = payPalDataCollector.collectDeviceData(context)
-            // TECH DEBT: introduce a UseCaseResult type to avoid force unwrapping optionals here
-            val completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
-            completeOrderState = ActionState.Success(completedOrder)
+            val orderId = createdOrder?.id
+            completeOrderState = if (orderId == null) {
+                ActionState.Failure(Exception("Create an order to continue."))
+            } else {
+                val cmid = payPalDataCollector.collectDeviceData(context)
+                completeOrderUseCase(orderId, intentOption, cmid).asActionState()
+            }
         }
     }
 
