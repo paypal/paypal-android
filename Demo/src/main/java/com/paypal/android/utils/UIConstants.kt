@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 
 object UIConstants {
     private const val slideInOffsetPercentY = 0.05
-    fun slideInInitialOffsetY(fullHeightOfComposable: Int) =
+    fun calculateSlideInAnimStartOffsetY(fullHeightOfComposable: Int) =
         (fullHeightOfComposable * slideInOffsetPercentY).toInt()
 
     // Ref: https://support.google.com/accessibility/android/answer/7101858

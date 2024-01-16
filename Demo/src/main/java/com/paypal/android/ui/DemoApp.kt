@@ -73,7 +73,7 @@ fun DemoApp() {
                 navController = navController,
                 startDestination = "features",
                 enterTransition = {
-                    fadeIn() + slideInVertically { UIConstants.slideInInitialOffsetY(it) }
+                    fadeIn() + slideInVertically { UIConstants.calculateSlideInAnimStartOffsetY(it) }
                 },
                 exitTransition = { fadeOut() },
                 modifier = Modifier.padding(innerPadding)
