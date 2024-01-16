@@ -5,6 +5,7 @@
     <!-- Payment Buttons -->
     <dimen name="paypal_payment_button_corner_radius_rounded">4dp</dimen>
     <dimen name="paypal_payment_button_corner_radius_square">0dp</dimen>
+    <dimen name="paypal_payment_button_corner_pill">24dp</dimen>
     <dimen name="paypal_payment_button_text_margin">@dimen/margin_8x</dimen>
     <!-- The stroke used for white buttons to help them standout on light backgrounds. -->
     <dimen name="paypal_payment_button_stroke_width">1dp</dimen>

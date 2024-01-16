@@ -117,20 +117,16 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 PaymentButtonShape.ROUNDED -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_radius_rounded)
                 }
-                PaymentButtonShape.PILL -> height.toFloat()
+                PaymentButtonShape.PILL -> {
+                    resources.getDimension(R.dimen.paypal_payment_button_corner_pill)
+                }
                 PaymentButtonShape.RECTANGLE -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_radius_square)
                 }
             }
 
-            val cornerTreatment = when (field) {
-                PaymentButtonShape.ROUNDED, PaymentButtonShape.PILL -> RoundedCornerTreatment()
-                PaymentButtonShape.RECTANGLE -> CutCornerTreatment()
-            }
-
             shapeAppearanceModel = ShapeAppearanceModel.builder()
                 .setAllCornerSizes(cornerRadius)
-                .setAllCorners(cornerTreatment)
                 .build()
         }
 
