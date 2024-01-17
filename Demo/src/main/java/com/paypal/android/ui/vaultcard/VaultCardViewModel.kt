@@ -75,6 +75,12 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
 
+    var shouldEnable3DS: Boolean
+        get() = _uiState.value.shouldEnable3DS
+        set(value) {
+            _uiState.update { it.copy(shouldEnable3DS = value) }
+        }
+
     fun prefillCard(testCard: TestCard) {
         val card = testCard.card
         _uiState.update { currentState ->
@@ -89,8 +95,7 @@ class VaultCardViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            // TODO: get perform 3DS value from UI
-            val setupToken = createSetupTokenUseCase(true)
+            val setupToken = createSetupTokenUseCase(shouldEnable3DS)
             createSetupTokenState = ActionState.Success(setupToken)
         }
     }
