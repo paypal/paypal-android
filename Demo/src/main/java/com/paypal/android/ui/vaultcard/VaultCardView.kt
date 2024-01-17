@@ -1,5 +1,6 @@
 package com.paypal.android.ui.vaultcard
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.CardSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.components.UriView
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
@@ -70,6 +73,13 @@ fun VaultSuccessView(cardVaultResult: CardVaultResult) {
     ) {
         PropertyView(name = "Setup Token Id", value = cardVaultResult.setupTokenId)
         PropertyView(name = "Status", value = cardVaultResult.status)
+        cardVaultResult.approvalHref?.let { approvalHref ->
+            Text(
+                text = "Approval Href",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            UriView(uri = Uri.parse(approvalHref))
+        }
     }
 }
 

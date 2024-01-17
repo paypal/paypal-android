@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 /**
  * Use this client to approve an order with a [Card].
@@ -133,18 +134,37 @@ class CardClient internal constructor(
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
-        val applicationContext = context.applicationContext
+    fun vault(activity: FragmentActivity, cardVaultRequest: CardVaultRequest) {
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            updateSetupToken(applicationContext, cardVaultRequest)
+            updateSetupToken(activity, cardVaultRequest)
         }
     }
 
-    private suspend fun updateSetupToken(context: Context, cardVaultRequest: CardVaultRequest) {
+    private suspend fun updateSetupToken(
+        activity: FragmentActivity,
+        cardVaultRequest: CardVaultRequest
+    ) {
         val result = cardVaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
+            paymentMethodTokensAPI.updateSetupToken(activity, setupTokenId, card)
         }
-        cardVaultListener?.onVaultSuccess(result)
+
+        val approvalHref = result.approvalHref
+        if (approvalHref == null) {
+            cardVaultListener?.onVaultSuccess(result)
+        } else {
+            // launch the 3DS flow
+            val urlScheme = cardVaultRequest.run { Uri.parse(returnUrl).scheme }
+
+            val vaultCardMetadata = JSONObject()
+//            val approveOrderMetadata =
+//                ApproveOrderMetadata(cardRequest.orderId, response.paymentSource)
+            val options = BrowserSwitchOptions()
+                .url(Uri.parse(approvalHref))
+                .returnUrlScheme(urlScheme)
+                .metadata(vaultCardMetadata)
+
+            browserSwitchClient.start(activity, options)
+        }
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {

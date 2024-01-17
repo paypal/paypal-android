@@ -3,7 +3,6 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import org.json.JSONArray
@@ -71,7 +70,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             return CardVaultResult(
                 setupTokenId = setupToken.getString("id"),
                 status = setupToken.getString("status"),
-                approveHref = approveLink?.getString("href")
+                approvalHref = approveLink?.getString("href")
             )
         }
         throw PayPalSDKError(

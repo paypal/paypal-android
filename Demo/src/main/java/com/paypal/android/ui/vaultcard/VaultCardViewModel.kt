@@ -36,6 +36,10 @@ class VaultCardViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
 
+    companion object {
+        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+    }
+
     private var createSetupTokenState
         get() = _uiState.value.createSetupTokenState
         set(value) {
@@ -118,7 +122,7 @@ class VaultCardViewModel @Inject constructor(
             }
 
             val card = parseCard(_uiState.value)
-            val cardVaultRequest = CardVaultRequest(createdSetupToken!!.id, card)
+            val cardVaultRequest = CardVaultRequest(createdSetupToken!!.id, card, APP_RETURN_URL)
             cardClient.vault(activity, cardVaultRequest)
         }
     }

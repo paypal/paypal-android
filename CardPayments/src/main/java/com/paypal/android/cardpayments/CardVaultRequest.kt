@@ -15,4 +15,5 @@ import kotlinx.parcelize.Parcelize
 data class CardVaultRequest(
     val setupTokenId: String,
     val card: Card,
+    val returnUrl: String,
 ) : Parcelable

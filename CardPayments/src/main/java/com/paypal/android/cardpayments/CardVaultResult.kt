@@ -15,5 +15,5 @@ import kotlinx.parcelize.Parcelize
 data class CardVaultResult(
     val setupTokenId: String,
     val status: String,
-    val approveHref: String? = null
+    val approvalHref: String? = null
 ) : Parcelable
