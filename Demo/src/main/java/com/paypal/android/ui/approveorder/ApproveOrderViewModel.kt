@@ -23,6 +23,8 @@ import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.usecase.GetClientIdUseCase
+import com.paypal.android.usecase.UseCaseResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +35,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ApproveOrderViewModel @Inject constructor(
     private val createOrderUseCase: CreateOrderUseCase,
-    private val sdkSampleServerAPI: SDKSampleServerAPI,
+    private val getClientIdUseCase: GetClientIdUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
@@ -64,7 +66,6 @@ class ApproveOrderViewModel @Inject constructor(
         if (orderId == null) {
             approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            approveOrderState = ActionState.Loading
             viewModelScope.launch {
                 approveOrderWithId(activity, orderId)
             }
@@ -72,36 +73,48 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     private suspend fun approveOrderWithId(activity: AppCompatActivity, orderId: String) {
-        val clientId = sdkSampleServerAPI.fetchClientId()
-        val coreConfig = CoreConfig(clientId = clientId)
-        payPalDataCollector = PayPalDataCollector(coreConfig)
+        approveOrderState = ActionState.Loading
 
-        cardClient = CardClient(activity, coreConfig)
-        cardClient.approveOrderListener = object : ApproveOrderListener {
-            override fun onApproveOrderSuccess(result: CardResult) {
-                approveOrderState = ActionState.Success(result)
+        when (val clientIdResult = getClientIdUseCase()) {
+            is UseCaseResult.Failure -> {
+                approveOrderState = ActionState.Failure(Exception("Unable to fetch Client ID."))
             }
 
-            override fun onApproveOrderFailure(error: PayPalSDKError) {
-                approveOrderState = ActionState.Failure(error)
-            }
+            is UseCaseResult.Success -> {
+                val clientId = clientIdResult.value
 
-            override fun onApproveOrderCanceled() {
-                approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
-            }
+                val coreConfig = CoreConfig(clientId = clientId)
+                payPalDataCollector = PayPalDataCollector(coreConfig)
 
-            override fun onApproveOrderThreeDSecureWillLaunch() {
-                Log.d(TAG, "3DS Auth Requested")
-            }
+                cardClient = CardClient(activity, coreConfig)
+                cardClient.approveOrderListener = object : ApproveOrderListener {
+                    override fun onApproveOrderSuccess(result: CardResult) {
+                        approveOrderState = ActionState.Success(result)
+                    }
 
-            override fun onApproveOrderThreeDSecureDidFinish() {
-                Log.d(TAG, "3DS Success")
+                    override fun onApproveOrderFailure(error: PayPalSDKError) {
+                        approveOrderState = ActionState.Failure(error)
+                    }
+
+                    override fun onApproveOrderCanceled() {
+                        approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
+                    }
+
+                    override fun onApproveOrderThreeDSecureWillLaunch() {
+                        Log.d(TAG, "3DS Auth Requested")
+                    }
+
+                    override fun onApproveOrderThreeDSecureDidFinish() {
+                        Log.d(TAG, "3DS Success")
+                    }
+                }
+
+                val card = parseCard(uiState.value)
+                val cardRequest =
+                    CardRequest(orderId, card, APP_RETURN_URL, uiState.value.scaOption)
+                cardClient.approveOrder(activity, cardRequest)
             }
         }
-
-        val card = parseCard(uiState.value)
-        val cardRequest = CardRequest(orderId, card, APP_RETURN_URL, uiState.value.scaOption)
-        cardClient.approveOrder(activity, cardRequest)
     }
 
     fun completeOrder(context: Context) {

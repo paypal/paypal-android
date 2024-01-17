@@ -22,11 +22,6 @@ class GetOrderUseCase @Inject constructor(
             orderIntent = orderIntent,
             shippingPreference = shippingPreferenceType.nxoShippingPreference
         )
-        try {
-            val order = sdkSampleServerAPI.createOrder(orderRequest)
-            UseCaseResult.Success(order)
-        } catch (e: Exception) {
-            UseCaseResult.Failure(e)
-        }
+        sdkSampleServerAPI.createOrder(orderRequest)
     }
 }

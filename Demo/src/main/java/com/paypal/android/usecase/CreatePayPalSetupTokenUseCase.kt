@@ -6,8 +6,6 @@ import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 import javax.inject.Inject
 
 class CreatePayPalSetupTokenUseCase @Inject constructor(
@@ -16,18 +14,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 
     suspend operator fun invoke(): UseCaseResult<PayPalSetupToken, Exception> =
         withContext(Dispatchers.IO) {
-            try {
-                val setupToken = createPayPalSetupToken()
-                UseCaseResult.Success(setupToken)
-            } catch (e: Exception) {
-                UseCaseResult.Failure(e)
-            }
-        }
-
-    private suspend fun createPayPalSetupToken(): PayPalSetupToken {
-
-        // language=JSON
-        val request = """
+            // language=JSON
+            val request = """
             {
               "payment_source": {
                 "paypal": {
@@ -42,32 +30,10 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             }
         """
 
-        // Ref: https://stackoverflow.com/a/19610814
-        val body = request.replace("\\/", "/")
+            // Ref: https://stackoverflow.com/a/19610814
+            val body = request.replace("\\/", "/")
 
-        val jsonOrder = JsonParser.parseString(body) as JsonObject
-        val response = sdkSampleServerAPI.createSetupToken(jsonOrder)
-
-        val responseJSON = JSONObject(response.string())
-        val customerJSON = responseJSON.getJSONObject("customer")
-        val approveVaultHref = findApprovalHref(responseJSON)
-
-        return PayPalSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status"),
-            approveVaultHref = approveVaultHref
-        )
-    }
-
-    private fun findApprovalHref(responseJSON: JSONObject): String? {
-        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
-        for (i in 0 until linksJSON.length()) {
-            val link = linksJSON.getJSONObject(i)
-            if (link.getString("rel") == "approve") {
-                return link.getString("href")
-            }
+            val jsonOrder = JsonParser.parseString(body) as JsonObject
+            sdkSampleServerAPI.createPayPalSetupToken(jsonOrder)
         }
-        return null
-    }
 }

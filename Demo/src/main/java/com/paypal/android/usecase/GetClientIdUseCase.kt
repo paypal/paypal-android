@@ -9,11 +9,6 @@ class GetClientIdUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
     suspend operator fun invoke(): UseCaseResult<String, Exception> = withContext(Dispatchers.IO) {
-        try {
-            val clientId = sdkSampleServerAPI.fetchClientId()
-            UseCaseResult.Success(clientId)
-        } catch (e: Exception) {
-            UseCaseResult.Failure(e)
-        }
+        sdkSampleServerAPI.fetchClientId()
     }
 }
