@@ -29,7 +29,7 @@ fun BooleanOptionList(
     modifier: Modifier = Modifier,
     value: Boolean,
 ) {
-    val options = listOf("YES", "NO")
+    val options = listOf("NO", "YES")
 
     Card(
         modifier = modifier
