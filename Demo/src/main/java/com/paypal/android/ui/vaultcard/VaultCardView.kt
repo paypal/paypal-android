@@ -90,9 +90,9 @@ private fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCa
     ) {
         StepHeader(stepNumber = 1, title = "Create Setup Token")
         BooleanOptionList(
-            title = "ENABLE 3DS",
-            onValueChange = { value -> viewModel.shouldEnable3DS = value },
-            value = uiState.shouldEnable3DS
+            title = "REQUEST 3DS?",
+            onValueChange = { value -> viewModel.shouldRequest3DS = value },
+            value = uiState.shouldRequest3DS
         )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",

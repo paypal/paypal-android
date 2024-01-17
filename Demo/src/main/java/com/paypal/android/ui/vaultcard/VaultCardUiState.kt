@@ -12,7 +12,7 @@ data class VaultCardUiState(
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
-    val shouldEnable3DS: Boolean = false,
+    val shouldRequest3DS: Boolean = false,
 ) {
     val isCreateSetupTokenSuccessful: Boolean
         get() = createSetupTokenState is ActionState.Success
