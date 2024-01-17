@@ -36,23 +36,6 @@ fun <S, E> ActionButtonColumn(
     content: @Composable (CompletedActionState<S, E>) -> Unit = {},
 ) {
     val isLoading = state is ActionState.Loading
-    // TODO: use material themed color for success
-    val buttonBackground = when (state) {
-        is ActionState.Loading, is ActionState.Idle ->
-            MaterialTheme.colorScheme.inverseSurface
-
-        is ActionState.Failure -> MaterialTheme.colorScheme.errorContainer
-        is ActionState.Success -> successGreen
-    }
-
-    val buttonForeground = when (state) {
-        is ActionState.Loading, is ActionState.Idle ->
-            MaterialTheme.colorScheme.inverseOnSurface
-
-        is ActionState.Failure -> MaterialTheme.colorScheme.onErrorContainer
-        is ActionState.Success -> Color.White
-    }
-
     Card(
         modifier = modifier
     ) {
@@ -65,8 +48,8 @@ fun <S, E> ActionButtonColumn(
             // force button to rectangle to allow Card parent to perform corner radius clipping
             shape = RectangleShape,
             colors = ButtonDefaults.buttonColors(
-                containerColor = buttonBackground,
-                contentColor = buttonForeground
+                containerColor = state.buttonBackground,
+                contentColor = state.buttonForeground
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,6 +85,23 @@ fun <S, E> ActionButtonColumn(
         }
     }
 }
+
+// TODO: use material themed color for success
+private val <S, E> ActionState<S, E>.buttonBackground: Color
+    @Composable
+    get() = when (this) {
+        is ActionState.Loading, is ActionState.Idle -> MaterialTheme.colorScheme.inverseSurface
+        is ActionState.Failure -> MaterialTheme.colorScheme.errorContainer
+        is ActionState.Success -> successGreen
+    }
+
+private val <S, E> ActionState<S, E>.buttonForeground: Color
+    @Composable
+    get() = when (this) {
+        is ActionState.Loading, is ActionState.Idle -> MaterialTheme.colorScheme.inverseOnSurface
+        is ActionState.Failure -> MaterialTheme.colorScheme.onErrorContainer
+        is ActionState.Success -> Color.White
+    }
 
 @Preview
 @Composable
