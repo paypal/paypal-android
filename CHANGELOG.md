@@ -7,6 +7,8 @@
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
 * FraudDetection
   * Bump Magnes dependency to version 5.4.0
+* PaymentButtons
+  * Update font typeface to "PayPalOpen" to meet brand guidelines
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons
