@@ -1,5 +1,6 @@
 package com.paypal.android.ui.vaultcard
 
+import android.app.Notification.Action
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -94,32 +95,45 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun updateSetupToken(activity: AppCompatActivity) {
-        viewModelScope.launch {
-            vaultCardState = ActionState.Loading
-            val clientId = sdkSampleServerAPI.fetchClientId()
-
-            val configuration = CoreConfig(clientId = clientId)
-            cardClient = CardClient(activity, configuration)
-            cardClient.cardVaultListener = object : CardVaultListener {
-                override fun onVaultSuccess(result: CardVaultResult) {
-                    vaultCardState = ActionState.Success(result)
-                }
-
-                override fun onVaultFailure(error: PayPalSDKError) {
-                    vaultCardState = ActionState.Failure(error)
-                }
+        val setupToken = createdSetupToken
+        if (setupToken == null) {
+            vaultCardState = ActionState.Failure(Exception("Create a setup token to continue."))
+        } else {
+            viewModelScope.launch {
+                updateSetupTokenWithId(activity, setupToken.id)
             }
-
-            val card = parseCard(_uiState.value)
-            val cardVaultRequest = CardVaultRequest(createdSetupToken!!.id, card)
-            cardClient.vault(activity, cardVaultRequest)
         }
     }
 
+    private suspend fun updateSetupTokenWithId(activity: AppCompatActivity, setupTokenId: String) {
+        vaultCardState = ActionState.Loading
+        val clientId = sdkSampleServerAPI.fetchClientId()
+
+        val configuration = CoreConfig(clientId = clientId)
+        cardClient = CardClient(activity, configuration)
+        cardClient.cardVaultListener = object : CardVaultListener {
+            override fun onVaultSuccess(result: CardVaultResult) {
+                vaultCardState = ActionState.Success(result)
+            }
+
+            override fun onVaultFailure(error: PayPalSDKError) {
+                vaultCardState = ActionState.Failure(error)
+            }
+        }
+
+        val card = parseCard(_uiState.value)
+        val cardVaultRequest = CardVaultRequest(setupTokenId, card)
+        cardClient.vault(activity, cardVaultRequest)
+    }
+
     fun createPaymentToken() {
-        viewModelScope.launch {
-            createPaymentTokenState = ActionState.Loading
-            createPaymentTokenState = createPaymentTokenUseCase(createdSetupToken!!).mapToActionState()
+        val setupToken = createdSetupToken
+        if (setupToken == null) {
+            vaultCardState = ActionState.Failure(Exception("Create a setup token to continue."))
+        } else {
+            viewModelScope.launch {
+                createPaymentTokenState = createPaymentTokenUseCase(setupToken).mapToActionState()
+            }
         }
     }
 

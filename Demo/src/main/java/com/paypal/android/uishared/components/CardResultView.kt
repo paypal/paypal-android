@@ -39,14 +39,15 @@ fun CardResultView(result: CardResult) {
             modifier = Modifier
                 .padding(top = UIConstants.paddingMedium)
         )
-        if (result.deepLinkUrl == null) {
+        val deepLinkUrl = result.deepLinkUrl
+        if (deepLinkUrl == null) {
             Text(
                 text = "NOT SET",
                 modifier = Modifier
                     .padding(top = UIConstants.paddingExtraSmall)
             )
         } else {
-            UriView(uri = result.deepLinkUrl!!)
+            UriView(uri = deepLinkUrl)
         }
         Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
     }
