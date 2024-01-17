@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -134,38 +135,44 @@ class CardClient internal constructor(
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    fun vault(activity: FragmentActivity, cardVaultRequest: CardVaultRequest) {
+    fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
+        val applicationContext = context.applicationContext
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            updateSetupToken(activity, cardVaultRequest)
+            updateSetupToken(applicationContext, cardVaultRequest)
         }
     }
 
-    private suspend fun updateSetupToken(
-        activity: FragmentActivity,
-        cardVaultRequest: CardVaultRequest
-    ) {
+    private suspend fun updateSetupToken(context: Context, cardVaultRequest: CardVaultRequest) {
         val result = cardVaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(activity, setupTokenId, card)
+            paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
         }
+        cardVaultListener?.onVaultSuccess(result)
+    }
 
-        val approvalHref = result.approvalHref
-        if (approvalHref == null) {
-            cardVaultListener?.onVaultSuccess(result)
-        } else {
-            // launch the 3DS flow
-            val urlScheme = cardVaultRequest.run { Uri.parse(returnUrl).scheme }
+    fun vault2(activity: AppCompatActivity, cardVaultRequest: CardVaultRequest) =
+        CoroutineScope(dispatcher).launch {
+            val result = cardVaultRequest.run {
+                paymentMethodTokensAPI.updateSetupToken(activity, setupTokenId, card)
+            }
 
-            val vaultCardMetadata = JSONObject()
+            val approvalHref = result.approvalHref
+            if (approvalHref == null) {
+                cardVaultListener?.onVaultSuccess(result)
+            } else {
+                // launch the 3DS flow
+                val urlScheme = cardVaultRequest.run { Uri.parse(returnUrl).scheme }
+
+                val vaultCardMetadata = JSONObject()
 //            val approveOrderMetadata =
 //                ApproveOrderMetadata(cardRequest.orderId, response.paymentSource)
-            val options = BrowserSwitchOptions()
-                .url(Uri.parse(approvalHref))
-                .returnUrlScheme(urlScheme)
-                .metadata(vaultCardMetadata)
+                val options = BrowserSwitchOptions()
+                    .url(Uri.parse(approvalHref))
+                    .returnUrlScheme(urlScheme)
+                    .metadata(vaultCardMetadata)
 
-            browserSwitchClient.start(activity, options)
+                browserSwitchClient.start(activity, options)
+            }
         }
-    }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
@@ -211,7 +218,10 @@ class CardClient internal constructor(
     }
 
     private fun notifyApproveOrderCanceled() {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
+        analyticsService.sendAnalyticsEvent(
+            "card-payments:3ds:challenge:user-canceled",
+            orderId
+        )
         approveOrderListener?.onApproveOrderCanceled()
     }
 
