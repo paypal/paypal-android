@@ -55,7 +55,7 @@ class ApproveOrderViewModel @Inject constructor(
             val orderRequest = uiState.run {
                 OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
             }
-            createOrderState = createOrderUseCase(orderRequest).asActionState()
+            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
 
@@ -113,7 +113,7 @@ class ApproveOrderViewModel @Inject constructor(
                 ActionState.Failure(Exception("Create an order to continue."))
             } else {
                 val cmid = payPalDataCollector.collectDeviceData(context)
-                completeOrderUseCase(orderId, intentOption, cmid).asActionState()
+                completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }

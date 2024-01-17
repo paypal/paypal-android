@@ -89,7 +89,7 @@ class VaultCardViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createSetupTokenUseCase().asActionState()
+            createSetupTokenState = createSetupTokenUseCase().mapToActionState()
         }
     }
 
@@ -119,7 +119,7 @@ class VaultCardViewModel @Inject constructor(
     fun createPaymentToken() {
         viewModelScope.launch {
             createPaymentTokenState = ActionState.Loading
-            createPaymentTokenState = createPaymentTokenUseCase(createdSetupToken!!).asActionState()
+            createPaymentTokenState = createPaymentTokenUseCase(createdSetupToken!!).mapToActionState()
         }
     }
 

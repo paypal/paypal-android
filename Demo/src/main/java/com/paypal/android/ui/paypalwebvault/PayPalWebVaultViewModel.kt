@@ -60,7 +60,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createPayPalSetupTokenUseCase().asActionState()
+            createSetupTokenState = createPayPalSetupTokenUseCase().mapToActionState()
         }
     }
 
@@ -87,7 +87,7 @@ class PayPalWebVaultViewModel @Inject constructor(
         vaultPayPalState = ActionState.Loading
         when (val clientIdResult = getClientIdUseCase()) {
             is UseCaseResult.Failure -> {
-                vaultPayPalState = clientIdResult.asActionState()
+                vaultPayPalState = clientIdResult.mapToActionState()
             }
 
             is UseCaseResult.Success -> {
@@ -110,7 +110,7 @@ class PayPalWebVaultViewModel @Inject constructor(
             createPaymentTokenState = ActionState.Loading
             viewModelScope.launch {
                 createPaymentTokenState =
-                    createPayPalPaymentTokenUseCase(setupToken).asActionState()
+                    createPayPalPaymentTokenUseCase(setupToken).mapToActionState()
             }
         }
     }

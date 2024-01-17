@@ -179,7 +179,7 @@ class PayPalNativeViewModel @Inject constructor(
                 ActionState.Failure(Exception("Create an order to continue."))
             } else {
                 val cmid = payPalDataCollector.collectDeviceData(getApplication())
-                completeOrderUseCase(orderId, intentOption, cmid).asActionState()
+                completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }
@@ -187,7 +187,7 @@ class PayPalNativeViewModel @Inject constructor(
     fun createOrder() {
         createOrderState = ActionState.Loading
         viewModelScope.launch {
-            createOrderState = getOrderUseCase(shippingPreference, intentOption).asActionState()
+            createOrderState = getOrderUseCase(shippingPreference, intentOption).mapToActionState()
         }
     }
 }

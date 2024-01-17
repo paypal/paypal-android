@@ -6,7 +6,7 @@ sealed class UseCaseResult<out S, out E> {
     data class Success<S>(val value: S) : UseCaseResult<S, Nothing>()
     data class Failure<E>(val value: E) : UseCaseResult<Nothing, E>()
 
-    fun asActionState(): ActionState<S, E> = when (this) {
+    fun mapToActionState(): ActionState<S, E> = when (this) {
         is Success -> ActionState.Success(value)
         is Failure -> ActionState.Failure(value)
     }

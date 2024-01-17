@@ -85,7 +85,7 @@ class PayPalWebViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(orderIntent = intentOption, shouldVault = false)
             }
-            createOrderState = createOrderUseCase(orderRequest).asActionState()
+            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
 
@@ -105,7 +105,7 @@ class PayPalWebViewModel @Inject constructor(
 
         when (val clientIdResult = getClientIdUseCase()) {
             is UseCaseResult.Failure -> {
-                payPalWebCheckoutState = clientIdResult.asActionState()
+                payPalWebCheckoutState = clientIdResult.mapToActionState()
             }
 
             is UseCaseResult.Success -> {
@@ -148,7 +148,7 @@ class PayPalWebViewModel @Inject constructor(
             completeOrderState = ActionState.Loading
             viewModelScope.launch {
                 val cmid = payPalDataCollector.collectDeviceData(context)
-                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).asActionState()
+                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }
