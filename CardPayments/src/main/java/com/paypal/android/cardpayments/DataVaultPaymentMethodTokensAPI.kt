@@ -3,8 +3,10 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import org.json.JSONArray
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
@@ -19,7 +21,11 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): CardVaultResult {
+    suspend fun updateSetupToken(
+        context: Context,
+        setupTokenId: String,
+        card: Card
+    ): CardVaultResult {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
@@ -58,9 +64,14 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->
             val setupToken = responseJSON.getJSONObject("updateVaultSetupToken")
+            val linksArray = setupToken.optJSONArray("links") ?: JSONArray()
+            val links = (0 until linksArray.length()).map { linksArray.getJSONObject(it) }
+            val approveLink = links.firstOrNull { "approve" == it.getString("rel") }
+
             return CardVaultResult(
                 setupTokenId = setupToken.getString("id"),
-                status = setupToken.getString("status")
+                status = setupToken.getString("status"),
+                approveHref = approveLink?.getString("href")
             )
         }
         throw PayPalSDKError(
