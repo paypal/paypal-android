@@ -27,13 +27,7 @@ class UpdateOrderUseCase @Inject constructor(
                 path = "/purchase_units/@reference_id=='PUHF'/amount",
                 value = amount
             )
-
-            try {
-                sdkSampleServerAPI.patchOrder(orderId, listOf(patchAmount, patchShipping))
-                UseCaseResult.Success(true)
-            } catch (e: Exception) {
-                UseCaseResult.Failure(e)
-            }
+            sdkSampleServerAPI.patchOrder(orderId, listOf(patchAmount, patchShipping))
         }
 
     data class PatchRequestBody(

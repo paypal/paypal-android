@@ -16,7 +16,6 @@ import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONArray
 import org.json.JSONObject
-import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -25,7 +24,6 @@ import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 private const val CONNECT_TIMEOUT_IN_SEC = 20L
@@ -155,6 +153,7 @@ class SDKSampleServerAPI {
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
         findService(merchantIntegration).patchOrder(orderId, body)
+        true
     }
 
     suspend fun captureOrder(
@@ -245,17 +244,13 @@ class SDKSampleServerAPI {
     }
 
     // Ref: https://medium.com/@douglas.iacovelli/how-to-handle-errors-with-retrofit-and-coroutines-33e7492a912
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun <T> safeApiCall(
         apiCall: suspend () -> T
     ): UseCaseResult<T, SDKSampleServerException> = try {
         UseCaseResult.Success(apiCall.invoke())
-    } catch (throwable: Throwable) {
-        val e = when (throwable) {
-            is IOException -> SDKSampleServerException(throwable.message, throwable)
-            is HttpException -> SDKSampleServerException(throwable.message, throwable)
-            else -> SDKSampleServerException(throwable.message, throwable)
-        }
-        UseCaseResult.Failure(e)
+    } catch (e: Throwable) {
+        UseCaseResult.Failure(SDKSampleServerException(e.message, e))
     }
 
     private fun parseOrder(json: JSONObject): Order {
