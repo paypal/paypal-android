@@ -46,7 +46,11 @@ fun CardResultView(result: CardResult) {
                     .padding(top = UIConstants.paddingExtraSmall)
             )
         } else {
-            UriView(uri = result.deepLinkUrl!!)
+            UriView(
+                uri = result.deepLinkUrl!!,
+                modifier = Modifier
+                    .padding(top = UIConstants.paddingExtraSmall)
+            )
         }
         Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
     }

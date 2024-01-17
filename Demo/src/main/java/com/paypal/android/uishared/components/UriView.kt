@@ -11,47 +11,45 @@ import androidx.compose.ui.Modifier
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun UriView(uri: Uri) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
-        modifier = Modifier
-            .padding(top = UIConstants.paddingSmall)
+fun UriView(
+    uri: Uri,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
+        modifier = modifier
     ) {
-        Text("Scheme:")
-        Text(uri.scheme ?: "NOT SET")
-    }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
-        modifier = Modifier
-            .padding(top = UIConstants.paddingSmall)
-    ) {
-        Text("Host:")
-        Text(uri.host ?: "NOT SET")
-    }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
-        modifier = Modifier
-            .padding(top = UIConstants.paddingSmall)
-    ) {
-        Text("Path:")
-        Text(uri.path ?: "NOT SET")
-    }
-    val queryParameterNames = uri.queryParameterNames ?: emptySet()
-    if (queryParameterNames.isNotEmpty()) {
-        Text(
-            text = "Params:",
-            modifier = Modifier
-                .padding(top = UIConstants.paddingSmall)
-        )
-        Column(
-            modifier = Modifier.padding(UIConstants.paddingSmall)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
         ) {
-            for (paramName in queryParameterNames) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall)
-                ) {
-                    Text("$paramName:")
-                    Text(uri.getQueryParameter(paramName) ?: "PRESENT BUT NOT SET")
+            Text("Scheme:")
+            Text(uri.scheme ?: "NOT SET")
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
+        ) {
+            Text("Host:")
+            Text(uri.host ?: "NOT SET")
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall),
+        ) {
+            Text("Path:")
+            Text(uri.path ?: "NOT SET")
+        }
+        val queryParameterNames = uri.queryParameterNames ?: emptySet()
+        if (queryParameterNames.isNotEmpty()) {
+            Text(text = "Params:")
+            Column(
+                modifier = Modifier.padding(start = UIConstants.paddingSmall)
+            ) {
+                for (paramName in queryParameterNames) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(UIConstants.paddingSmall)
+                    ) {
+                        Text("$paramName:")
+                        Text(uri.getQueryParameter(paramName) ?: "PRESENT BUT NOT SET")
+                    }
                 }
             }
         }
