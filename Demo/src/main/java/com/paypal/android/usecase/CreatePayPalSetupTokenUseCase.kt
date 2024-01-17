@@ -4,6 +4,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
@@ -12,7 +14,17 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(): UseCaseResult<PayPalSetupToken, Exception> {
+    suspend operator fun invoke(): UseCaseResult<PayPalSetupToken, Exception> =
+        withContext(Dispatchers.IO) {
+            try {
+                val setupToken = createPayPalSetupToken()
+                UseCaseResult.Success(setupToken)
+            } catch (e: Exception) {
+                UseCaseResult.Failure(e)
+            }
+        }
+
+    private suspend fun createPayPalSetupToken(): PayPalSetupToken {
 
         // language=JSON
         val request = """
@@ -40,13 +52,11 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
         val customerJSON = responseJSON.getJSONObject("customer")
         val approveVaultHref = findApprovalHref(responseJSON)
 
-        return UseCaseResult.Success(
-            PayPalSetupToken(
-                id = responseJSON.getString("id"),
-                customerId = customerJSON.getString("id"),
-                status = responseJSON.getString("status"),
-                approveVaultHref = approveVaultHref
-            )
+        return PayPalSetupToken(
+            id = responseJSON.getString("id"),
+            customerId = customerJSON.getString("id"),
+            status = responseJSON.getString("status"),
+            approveVaultHref = approveVaultHref
         )
     }
 
