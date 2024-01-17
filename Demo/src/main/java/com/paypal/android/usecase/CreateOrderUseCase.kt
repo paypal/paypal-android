@@ -13,35 +13,40 @@ class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(request: OrderRequest): UseCaseResult<Order, Exception> = withContext(Dispatchers.IO) {
-        val amountJSON = JSONObject()
-            .put("currency_code", "USD")
-            .put("value", "10.99")
+    suspend operator fun invoke(request: OrderRequest): UseCaseResult<Order, Exception> =
+        withContext(Dispatchers.IO) {
+            val amountJSON = JSONObject()
+                .put("currency_code", "USD")
+                .put("value", "10.99")
 
-        val purchaseUnitJSON = JSONObject()
-            .put("amount", amountJSON)
+            val purchaseUnitJSON = JSONObject()
+                .put("amount", amountJSON)
 
-        val orderRequest = JSONObject()
-            .put("intent", request.orderIntent)
-            .put("purchase_units", JSONArray().put(purchaseUnitJSON))
+            val orderRequest = JSONObject()
+                .put("intent", request.orderIntent)
+                .put("purchase_units", JSONArray().put(purchaseUnitJSON))
 
-        if (request.shouldVault) {
-            val vaultJSON = JSONObject()
-                .put("store_in_vault", "ON_SUCCESS")
+            if (request.shouldVault) {
+                val vaultJSON = JSONObject()
+                    .put("store_in_vault", "ON_SUCCESS")
 
-            val cardAttributesJSON = JSONObject()
-                .put("vault", vaultJSON)
+                val cardAttributesJSON = JSONObject()
+                    .put("vault", vaultJSON)
 
-            val cardJSON = JSONObject()
-                .put("attributes", cardAttributesJSON)
+                val cardJSON = JSONObject()
+                    .put("attributes", cardAttributesJSON)
 
-            val paymentSourceJSON = JSONObject()
-                .put("card", cardJSON)
+                val paymentSourceJSON = JSONObject()
+                    .put("card", cardJSON)
 
-            orderRequest.put("payment_source", paymentSourceJSON)
+                orderRequest.put("payment_source", paymentSourceJSON)
+            }
+            try {
+                UseCaseResult.Success(
+                    sdkSampleServerAPI.createOrder(orderRequest)
+                )
+            } catch (e: Exception) {
+                UseCaseResult.Failure(e)
+            }
         }
-        UseCaseResult.Success(
-            sdkSampleServerAPI.createOrder(orderRequest)
-        )
-    }
 }

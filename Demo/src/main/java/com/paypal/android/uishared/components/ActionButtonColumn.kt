@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 
 private val successGreen = Color(color = 0xff007f5f)
@@ -32,7 +33,7 @@ fun <S, E> ActionButtonColumn(
     state: ActionState<S, E>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit = {},
+    content: @Composable (CompletedActionState<S, E>) -> Unit = {},
 ) {
     val isLoading = state is ActionState.Loading
     // TODO: use material themed color for success
@@ -91,7 +92,14 @@ fun <S, E> ActionButtonColumn(
         }
 
         // optional content
-        content()
+        val completedState = when (state) {
+            is ActionState.Success -> CompletedActionState.Success(state.value)
+            is ActionState.Failure -> CompletedActionState.Failure(state.value)
+            else -> null
+        }
+        completedState?.let {
+            content(completedState)
+        }
     }
 }
 
