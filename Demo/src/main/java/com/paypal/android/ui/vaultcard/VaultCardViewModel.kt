@@ -1,6 +1,5 @@
 package com.paypal.android.ui.vaultcard
 
-import android.app.Notification.Action
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

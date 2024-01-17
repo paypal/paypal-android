@@ -82,6 +82,7 @@ class PayPalNativeViewModel @Inject constructor(
 
     private val payPalListener = object : PayPalNativeCheckoutListener {
         override fun onPayPalCheckoutStart() {
+            payPalNativeCheckoutState = ActionState.Loading
         }
 
         override fun onPayPalCheckoutSuccess(result: PayPalNativeCheckoutResult) {
