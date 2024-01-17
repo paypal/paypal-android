@@ -24,6 +24,7 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -73,9 +74,10 @@ private fun Step1_CreateOrder(uiState: PayPalWebUiState, viewModel: PayPalWebVie
             onClick = { viewModel.createOrder() },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
-                OrderView(order = order)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
             }
         }
     }
@@ -99,13 +101,12 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             onClick = { context.getActivity()?.let { viewModel.startWebCheckout(it) } },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.payPalWebCheckoutState as? ActionState.Success)?.value?.let { result ->
-                PayPalWebCheckoutResultView(result.orderId, result.payerId)
-            }
-
-            (uiState.payPalWebCheckoutState as? ActionState.Failure)?.value?.let { error ->
-                ErrorView(error = error)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> state.value.run {
+                    PayPalWebCheckoutResultView(orderId, payerId)
+                }
             }
         }
     }
@@ -125,9 +126,10 @@ private fun Step3_CompleteOrder(uiState: PayPalWebUiState, viewModel: PayPalWebV
             onClick = { context.getActivity()?.let { viewModel.completeOrder(it) } },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.completeOrderState as? ActionState.Success)?.value?.let { completedOrder ->
-                OrderView(order = completedOrder)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
             }
         }
     }

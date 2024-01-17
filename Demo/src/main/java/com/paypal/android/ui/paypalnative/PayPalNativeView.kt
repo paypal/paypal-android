@@ -21,6 +21,7 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 
 @Composable
@@ -71,9 +72,10 @@ private fun Step1_CreateOrder(uiState: PayPalNativeUiState, viewModel: PayPalNat
             onClick = { viewModel.createOrder() },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
-                OrderView(order = order)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Success -> OrderView(order = state.value)
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
             }
         }
     }
@@ -95,13 +97,13 @@ private fun Step2_StartPayPalNativeCheckout(
             onClick = { viewModel.startNativeCheckout() },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.payPalNativeCheckoutState as? ActionState.Success)?.value?.let { result ->
-                PayPalWebCheckoutResultView(result.orderId, result.payerId)
-            }
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Success -> state.value.run {
+                    PayPalWebCheckoutResultView(orderId, payerId)
+                }
 
-            (uiState.payPalNativeCheckoutState as? ActionState.Failure)?.value?.let { error ->
-                ErrorView(error = error)
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
             }
         }
     }
@@ -120,9 +122,10 @@ private fun Step3_CompleteOrder(uiState: PayPalNativeUiState, viewModel: PayPalN
             onClick = { viewModel.completeOrder() },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.completeOrderState as? ActionState.Success)?.value?.let { completedOrder ->
-                OrderView(order = completedOrder)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Success -> OrderView(order = state.value)
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
             }
         }
     }
