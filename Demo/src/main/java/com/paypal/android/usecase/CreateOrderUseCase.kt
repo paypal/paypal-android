@@ -2,6 +2,7 @@ package com.paypal.android.usecase
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.models.OrderRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,7 +14,7 @@ class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(request: OrderRequest): UseCaseResult<Order, Exception> =
+    suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> =
         withContext(Dispatchers.IO) {
             val amountJSON = JSONObject()
                 .put("currency_code", "USD")

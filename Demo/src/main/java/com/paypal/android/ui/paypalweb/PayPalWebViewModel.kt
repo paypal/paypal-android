@@ -21,7 +21,7 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.usecase.UseCaseResult
+import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -104,11 +104,11 @@ class PayPalWebViewModel @Inject constructor(
         payPalWebCheckoutState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
-            is UseCaseResult.Failure -> {
+            is SDKSampleServerResult.Failure -> {
                 payPalWebCheckoutState = clientIdResult.mapToActionState()
             }
 
-            is UseCaseResult.Success -> {
+            is SDKSampleServerResult.Success -> {
                 val coreConfig = CoreConfig(clientIdResult.value)
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 

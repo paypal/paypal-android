@@ -1,6 +1,7 @@
 package com.paypal.android.usecase
 
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.paypalnativepayments.PayPalNativeShippingMethod
 import com.paypal.android.utils.OrderUtils
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,7 @@ class UpdateOrderUseCase @Inject constructor(
     suspend operator fun invoke(
         orderId: String,
         shippingMethod: PayPalNativeShippingMethod
-    ): UseCaseResult<Boolean, Exception> =
+    ): SDKSampleServerResult<Boolean, Exception> =
         withContext(Dispatchers.IO) {
             // https://developer.paypal.com/docs/api/orders/v2/#orders_patch
             val options = OrderUtils.createShippingOptionsBuilder(selectedId = shippingMethod.id)

@@ -9,7 +9,6 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.usecase.UpdateOrderUseCase
-import com.paypal.android.usecase.UseCaseResult
 import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -247,10 +246,10 @@ class SDKSampleServerAPI {
     @Suppress("TooGenericExceptionCaught")
     private suspend fun <T> safeApiCall(
         apiCall: suspend () -> T
-    ): UseCaseResult<T, SDKSampleServerException> = try {
-        UseCaseResult.Success(apiCall.invoke())
+    ): SDKSampleServerResult<T, SDKSampleServerException> = try {
+        SDKSampleServerResult.Success(apiCall.invoke())
     } catch (e: Throwable) {
-        UseCaseResult.Failure(SDKSampleServerException(e.message, e))
+        SDKSampleServerResult.Failure(SDKSampleServerException(e.message, e))
     }
 
     private fun parseOrder(json: JSONObject): Order {

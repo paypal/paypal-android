@@ -17,7 +17,7 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.usecase.UseCaseResult
+import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -109,11 +109,11 @@ class VaultCardViewModel @Inject constructor(
         vaultCardState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
-            is UseCaseResult.Failure -> {
+            is SDKSampleServerResult.Failure -> {
                 vaultCardState = clientIdResult.mapToActionState()
             }
 
-            is UseCaseResult.Success -> {
+            is SDKSampleServerResult.Success -> {
                 val clientId = clientIdResult.value
                 val configuration = CoreConfig(clientId = clientId)
                 cardClient = CardClient(activity, configuration)

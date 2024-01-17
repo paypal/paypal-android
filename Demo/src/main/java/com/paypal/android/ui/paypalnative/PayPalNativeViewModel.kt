@@ -23,7 +23,7 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
-import com.paypal.android.usecase.UseCaseResult
+import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -154,11 +154,11 @@ class PayPalNativeViewModel @Inject constructor(
     private suspend fun startNativeCheckoutWithOrderId(orderId: String) {
         payPalNativeCheckoutState = ActionState.Loading
         when (val getClientIdResult = getClientIdUseCase()) {
-            is UseCaseResult.Failure -> {
+            is SDKSampleServerResult.Failure -> {
                 payPalNativeCheckoutState = ActionState.Failure(getClientIdResult.value)
             }
 
-            is UseCaseResult.Success -> {
+            is SDKSampleServerResult.Success -> {
                 val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
                 val coreConfig = CoreConfig(getClientIdResult.value)
                 payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)

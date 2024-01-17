@@ -23,7 +23,7 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.usecase.UseCaseResult
+import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,11 +75,11 @@ class ApproveOrderViewModel @Inject constructor(
         approveOrderState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
-            is UseCaseResult.Failure -> {
+            is SDKSampleServerResult.Failure -> {
                 approveOrderState = ActionState.Failure(Exception("Unable to fetch Client ID."))
             }
 
-            is UseCaseResult.Success -> {
+            is SDKSampleServerResult.Success -> {
                 val clientId = clientIdResult.value
 
                 val coreConfig = CoreConfig(clientId = clientId)
