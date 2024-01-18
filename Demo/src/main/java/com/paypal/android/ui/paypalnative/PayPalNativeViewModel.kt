@@ -1,12 +1,12 @@
 package com.paypal.android.ui.paypalnative
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -23,14 +23,11 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
-import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +43,9 @@ class PayPalNativeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PayPalNativeUiState())
     val uiState = _uiState.asStateFlow()
+
+    private lateinit var payPalClient: PayPalNativeCheckoutClient
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
@@ -116,27 +116,15 @@ class PayPalNativeViewModel @Inject constructor(
             actions: PayPalNativePaysheetActions,
             shippingMethod: PayPalNativeShippingMethod
         ) {
-
-            viewModelScope.launch(exceptionHandler) {
-                orderId?.also {
-                    try {
-                        updateOrderUseCase(it, shippingMethod)
-                        actions.approve()
-                    } catch (e: IOException) {
-                        actions.reject()
-                        throw e
+            orderId?.let { orderId ->
+                viewModelScope.launch {
+                    when (updateOrderUseCase(orderId, shippingMethod)) {
+                        is SDKSampleServerResult.Failure -> actions.reject()
+                        is SDKSampleServerResult.Success -> actions.approve()
                     }
                 }
             }
         }
-    }
-
-    private lateinit var payPalClient: PayPalNativeCheckoutClient
-    private lateinit var payPalDataCollector: PayPalDataCollector
-
-    private val exceptionHandler = CoroutineExceptionHandler { _, e ->
-        // TODO: show error in UI using a Compose UI Alert Dialog to improve error messaging UX
-        Toast.makeText(getApplication(), e.message, Toast.LENGTH_LONG).show()
     }
 
     fun startNativeCheckout() {
@@ -173,12 +161,12 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun completeOrder() {
-        completeOrderState = ActionState.Loading
         viewModelScope.launch {
             val orderId = createdOrder?.id
-            completeOrderState = if (orderId == null) {
-                ActionState.Failure(Exception("Create an order to continue."))
+            if (orderId == null) {
+                completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
             } else {
+                completeOrderState = ActionState.Loading
                 val cmid = payPalDataCollector.collectDeviceData(getApplication())
                 completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
@@ -186,8 +174,8 @@ class PayPalNativeViewModel @Inject constructor(
     }
 
     fun createOrder() {
-        createOrderState = ActionState.Loading
         viewModelScope.launch {
+            createOrderState = ActionState.Loading
             createOrderState = getOrderUseCase(shippingPreference, intentOption).mapToActionState()
         }
     }

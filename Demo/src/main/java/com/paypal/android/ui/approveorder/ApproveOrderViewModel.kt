@@ -50,11 +50,11 @@ class ApproveOrderViewModel @Inject constructor(
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     fun createOrder() {
-        createOrderState = ActionState.Loading
-        val orderRequest = uiState.value.run {
-            OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
-        }
         viewModelScope.launch {
+            createOrderState = ActionState.Loading
+            val orderRequest = uiState.value.run {
+                OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
+            }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
@@ -117,8 +117,8 @@ class ApproveOrderViewModel @Inject constructor(
         if (orderId == null) {
             completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            completeOrderState = ActionState.Loading
             viewModelScope.launch {
+                completeOrderState = ActionState.Loading
                 val cmid = payPalDataCollector.collectDeviceData(context)
                 completeOrderState =
                     completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
