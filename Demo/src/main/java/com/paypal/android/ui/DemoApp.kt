@@ -1,5 +1,8 @@
 package com.paypal.android.ui
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +34,7 @@ import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
 import com.paypal.android.uishared.components.DemoAppTopBar
 import com.paypal.android.uishared.effects.NavDestinationChangeDisposableEffect
+import com.paypal.android.utils.UIConstants
 
 // The architecture of the Demo app is heavily influenced by Google sample apps written
 // entirely in compose, most specifically the Jetsnack app
@@ -68,6 +72,10 @@ fun DemoApp() {
             NavHost(
                 navController = navController,
                 startDestination = "features",
+                enterTransition = {
+                    fadeIn() + slideInVertically { UIConstants.getSlideInStartOffsetY(it) }
+                },
+                exitTransition = { fadeOut() },
                 modifier = Modifier.padding(innerPadding)
             ) {
                 // Ref: https://youtu.be/goFpG25uoc8?si=hqYGEaA95We6qUiE&t=76

@@ -56,7 +56,7 @@ fun OptionList(
                         .selectable(
                             selected = (option == selectedOption),
                             onClick = { onSelectedOptionChange(option) },
-                            role = Role.RadioButton
+                            role = Role.RadioButton,
                         )
                 ) {
                     Text(

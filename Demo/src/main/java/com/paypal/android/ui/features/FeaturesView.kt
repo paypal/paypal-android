@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.paypal.android.R
@@ -117,7 +118,10 @@ fun FeatureView(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(
+                onClick = onClick,
+                role = Role.Button
+            )
     ) {
         Row {
             Text(
