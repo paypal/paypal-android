@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -23,7 +24,6 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,12 +50,11 @@ class ApproveOrderViewModel @Inject constructor(
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     fun createOrder() {
+        createOrderState = ActionState.Loading
+        val orderRequest = uiState.value.run {
+            OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
+        }
         viewModelScope.launch {
-            createOrderState = ActionState.Loading
-            val uiState = uiState.value
-            val orderRequest = uiState.run {
-                OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
-            }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
@@ -76,12 +75,11 @@ class ApproveOrderViewModel @Inject constructor(
 
         when (val clientIdResult = getClientIdUseCase()) {
             is SDKSampleServerResult.Failure -> {
-                approveOrderState = ActionState.Failure(Exception("Unable to fetch Client ID."))
+                approveOrderState = clientIdResult.mapToActionState()
             }
 
             is SDKSampleServerResult.Success -> {
                 val clientId = clientIdResult.value
-
                 val coreConfig = CoreConfig(clientId = clientId)
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
@@ -108,37 +106,36 @@ class ApproveOrderViewModel @Inject constructor(
                     }
                 }
 
-                val card = parseCard(uiState.value)
-                val cardRequest =
-                    CardRequest(orderId, card, APP_RETURN_URL, uiState.value.scaOption)
+                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
                 cardClient.approveOrder(activity, cardRequest)
             }
         }
     }
 
     fun completeOrder(context: Context) {
-        viewModelScope.launch {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
             completeOrderState = ActionState.Loading
-
-            val orderId = createdOrder?.id
-            completeOrderState = if (orderId == null) {
-                ActionState.Failure(Exception("Create an order to continue."))
-            } else {
+            viewModelScope.launch {
                 val cmid = payPalDataCollector.collectDeviceData(context)
-                completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+                completeOrderState =
+                    completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }
 
-    private fun parseCard(uiState: ApproveOrderUiState): Card {
+    private fun mapUIStateToCardRequestWithOrderId(orderId: String) = uiState.value.run {
         // expiration date in UI State needs to be formatted because it uses a visual transformation
-        val dateString = DateString(uiState.cardExpirationDate)
-        return Card(
-            number = uiState.cardNumber,
+        val dateString = DateString(cardExpirationDate)
+        val card = Card(
+            number = cardNumber,
             expirationMonth = dateString.formattedMonth,
             expirationYear = dateString.formattedYear,
-            securityCode = uiState.cardSecurityCode
+            securityCode = cardSecurityCode
         )
+        CardRequest(orderId, card, APP_RETURN_URL, scaOption)
     }
 
     private var createOrderState
