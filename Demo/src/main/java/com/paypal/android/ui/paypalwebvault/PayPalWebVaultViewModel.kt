@@ -73,8 +73,8 @@ class PayPalWebVaultViewModel @Inject constructor(
         if (setupTokenId == null || setupTokenApprovalHref == null) {
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
-            val request = PayPalWebVaultRequest(setupTokenId, setupTokenApprovalHref)
             viewModelScope.launch {
+                val request = PayPalWebVaultRequest(setupTokenId, setupTokenApprovalHref)
                 vaultSetupTokenWithRequest(activity, request)
             }
         }
