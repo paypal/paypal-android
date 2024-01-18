@@ -168,7 +168,7 @@ class PayPalNativeViewModel @Inject constructor(
             } else {
                 completeOrderState = ActionState.Loading
                 val cmid = payPalDataCollector.collectDeviceData(getApplication())
-                completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }
