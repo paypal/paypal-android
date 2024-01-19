@@ -203,6 +203,20 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         renderButton()
     }
 
+    private fun configureAccessibiltyLabel() {
+        setClickable(true);
+
+        //contentDescription = context.getString(R.string.paypal_payment_button_description)
+
+        if (prefixText != null) {
+            contentDescription = prefixText + " PayPal logo"
+        } else if (suffixText != null) {
+            contentDescription = "PayPal logo " + suffixText
+        } else {
+            contentDescription = "PayPal logo"
+        }
+    }
+
     private fun renderButton() {
         payPalWordmarkImage.visibility = VISIBLE
         updateShapeDrawableFillColor(color)
@@ -210,6 +224,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         prefixTextView.visibility = prefixTextVisibility
         isEnabled = true
         visibility = VISIBLE
+        configureAccessibiltyLabel()
     }
 
     override fun onDraw(canvas: Canvas?) {

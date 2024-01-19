@@ -30,7 +30,7 @@ buildscript {
 
             // Jetpack Compose
             // Ref: https://developer.android.com/jetpack/compose/setup#setup-compose
-            "composeMaterial3"            : "androidx.compose.material3:material3",
+            "composeMaterial3"            : "androidx.compose.material3:material3:1.2.0-beta01",
             "composeUi"                   : "androidx.compose.ui:ui",
             "composeUiTestJUnit4"         : "androidx.compose.ui:ui-test-junit4",
             "composeUiTestManifest"       : "androidx.compose.ui:ui-test-manifest",
