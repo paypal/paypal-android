@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="add_money_with_label">Přidat peníze přes</string>
+    <string name="book_with_label">Rezervovat přes</string>
+    <string name="buy_with_label">Koupit přes</string>
+    <string name="buy_now_with_label">Koupit přes</string>
+    <string name="checkout_with_label">Platba přes</string>
+    <string name="credit_label">Kredit</string>
+    <string name="continue_with_label">Pokračovat přes</string>
+    <string name="order_with_label">Objednat přes</string>
+    <string name="pay_with_label">Zaplatit přes</string>
+    <string name="pay_later_label">Zaplatit později</string>
+    <string name="pay_later_with_label">Zaplatit později přes</string>
+    <string name="paypal">PayPal</string>
+    <string name="reload_with_label">Dobít přes</string>
+    <string name="rent_with_label">Pronajmout přes</string>
+    <string name="reserve_with_label">Rezervovat přes</string>
+    <string name="subscribe_with_label">Přihlásit se k odběru přes</string>
+    <string name="support_with_label">Podpořit přes</string>
+    <string name="tagline_label">Bezpečnější a jednodušší způsob placení</string>
+    <string name="tip_with_label">Nechat spropitné přes</string>
+    <string name="top_up_with_label">Přidat prostředky přes</string>
+
+</resources>

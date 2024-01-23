@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="add_money_with_label">Add Money with</string>
+    <string name="book_with_label">Book with</string>
+    <string name="buy_with_label">Buy with</string>
+    <string name="buy_now_with_label">Buy Now with</string>
+    <string name="checkout_with_label">Checkout with</string>
+    <string name="credit_label">Credit</string>
+    <string name="continue_with_label">Continue with</string>
+    <string name="order_with_label">Order with</string>
+    <string name="pay_with_label">Pay with</string>
+    <string name="pay_later_label">Pay Later</string>
+    <string name="pay_later_with_label">Pay Later with</string>
+    <string name="paypal">PayPal</string>
+    <string name="reload_with_label">Reload with</string>
+    <string name="rent_with_label">Rent with</string>
+    <string name="reserve_with_label">Reserve with</string>
+    <string name="subscribe_with_label">Subscribe with</string>
+    <string name="support_with_label">Support with</string>
+    <string name="tagline_label">A safer, easier way to pay</string>
+    <string name="tip_with_label">Tip with</string>
+    <string name="top_up_with_label">Top Up with</string>
+    
+</resources>

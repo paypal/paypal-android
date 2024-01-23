@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="add_money_with_label">Indsæt penge med</string>
+    <string name="book_with_label">Book med</string>
+    <string name="buy_with_label">Køb med</string>
+    <string name="buy_now_with_label">Køb nu med</string>
+    <string name="checkout_with_label">Betal med</string>
+    <string name="credit_label">Kredit</string>
+    <string name="continue_with_label">Fortsæt med</string>
+    <string name="order_with_label">Bestil med</string>
+    <string name="pay_with_label">Betal med</string>
+    <string name="pay_later_label">Betal senere</string>
+    <string name="pay_later_with_label">Betal senere med</string>
+    <string name="paypal">PayPal</string>
+    <string name="reload_with_label">Genindlæs med</string>
+    <string name="rent_with_label">Lej med</string>
+    <string name="reserve_with_label">Reserver med</string>
+    <string name="subscribe_with_label">Abonner med</string>
+    <string name="support_with_label">Hjælp med</string>
+    <string name="tagline_label">En sikrere og nemmere måde at betale på</string>
+    <string name="tip_with_label">Giv drikkepenge med</string>
+    <string name="top_up_with_label">Tank op med</string>
+
+</resources>

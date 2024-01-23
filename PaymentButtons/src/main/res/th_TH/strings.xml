@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="add_money_with_label">เติมเงินด้วย</string>
+    <string name="book_with_label">จองด้วย</string>
+    <string name="buy_with_label">ซื้อด้วย</string>
+    <string name="buy_now_with_label">ซื้อทันทีด้วย</string>
+    <string name="checkout_with_label">ชําระเงินด้วย</string>
+    <string name="credit_label">เครดิต</string>
+    <string name="continue_with_label">ดําเนินการต่อด้วย</string>
+    <string name="order_with_label">สั่งซื้อด้วย</string>
+    <string name="pay_with_label">ชำระเงินด้วย</string>
+    <string name="pay_later_label">ชำระเงินในภายหลัง</string>
+    <string name="pay_later_with_label">ชําระเงินในภายหลังด้วย</string>
+    <string name="paypal">PayPal</string>
+    <string name="reload_with_label">เติมด้วย</string>
+    <string name="rent_with_label">เช่าด้วย</string>
+    <string name="reserve_with_label">สํารองด้วย</string>
+    <string name="subscribe_with_label">สมัครสมาชิกด้วย</string>
+    <string name="support_with_label">สนับสนุนด้วย</string>
+    <string name="tagline_label">วิธีชำระเงินที่ปลอดภัยกว่าและง่ายกว่า</string>
+    <string name="tip_with_label">ให้ทิปด้วย</string>
+    <string name="top_up_with_label">เติมเงินด้วย</string>
+
+</resources>
