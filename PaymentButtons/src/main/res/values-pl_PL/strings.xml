@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Dodaj środki za pomocą</string>
+    <string name="paypal_checkout_book_with_label">Zarezerwuj za pomocą</string>
+    <string name="paypal_checkout_buy_with_label">Zakupy z</string>
+    <string name="paypal_checkout_buy_now_with_label">Kup teraz z</string>
+    <string name="paypal_checkout_checkout_with_label">Zapłać z</string>
+    <string name="paypal_checkout_credit_label">Kredyt</string>
+    <string name="paypal_checkout_continue_with_label">Kontynuuj w systemie</string>
+    <string name="paypal_checkout_order_with_label">Zamów z</string>
+    <string name="paypal_checkout_pay_with_label">Zapłać za pomocą</string>
+    <string name="paypal_checkout_pay_later_label">Pay Later</string>
+    <string name="paypal_checkout_pay_later_with_label">Pay Later z</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Doładuj za pomocą</string>
+    <string name="paypal_checkout_rent_with_label">Wynajmij za pomocą</string>
+    <string name="paypal_checkout_reserve_with_label">Zarezerwuj za pomocą</string>
+    <string name="paypal_checkout_subscribe_with_label">Subskrybuj za pomocą</string>
+    <string name="paypal_checkout_support_with_label">Udziel wsparcia za pomocą</string>
+    <string name="paypal_checkout_tagline_label">Płać wygodnie i bezpiecznie</string>
+    <string name="paypal_checkout_tip_with_label">Daj napiwek za pomocą</string>
+    <string name="paypal_checkout_top_up_with_label">Doładuj za pomocą</string>
+
+</resources>

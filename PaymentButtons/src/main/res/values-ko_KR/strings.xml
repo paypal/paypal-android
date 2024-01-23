@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">다음을 통해 금액 추가:</string>
+    <string name="paypal_checkout_book_with_label">다음을 통해 예약:</string>
+    <string name="paypal_checkout_buy_with_label">다음을 통해 구매:</string>
+    <string name="paypal_checkout_buy_now_with_label">다음을 통해 바로 구매:</string>
+    <string name="paypal_checkout_checkout_with_label">다음을 통해 결제:</string>
+    <string name="paypal_checkout_credit_label">입금</string>
+    <string name="paypal_checkout_continue_with_label">다음을 통해 계속:</string>
+    <string name="paypal_checkout_order_with_label">다음을 통해 주문:</string>
+    <string name="paypal_checkout_pay_with_label">다음을 통해 결제:</string>
+    <string name="paypal_checkout_pay_later_label">Pay Later</string>
+    <string name="paypal_checkout_pay_later_with_label">Pay Later:</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">다음을 통해 충전:</string>
+    <string name="paypal_checkout_rent_with_label">다음을 통해 임대료 지불:</string>
+    <string name="paypal_checkout_reserve_with_label">다음을 통해 예약:</string>
+    <string name="paypal_checkout_subscribe_with_label">다음을 통해 정기결제:</string>
+    <string name="paypal_checkout_support_with_label">다음을 통해 지원:</string>
+    <string name="paypal_checkout_tagline_label">더 안전하고 간편한 결제 방법:</string>
+    <string name="paypal_checkout_tip_with_label">다음을 통해 팁 지불:</string>
+    <string name="paypal_checkout_top_up_with_label">다음을 통해 잔액 충전:</string>
+
+</resources>

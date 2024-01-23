@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Tambahkan Dana dengan</string>
+    <string name="paypal_checkout_book_with_label">Pesan dengan</string>
+    <string name="paypal_checkout_buy_with_label">Beli dengan</string>
+    <string name="paypal_checkout_buy_now_with_label">Beli Sekarang dengan</string>
+    <string name="paypal_checkout_checkout_with_label">Checkout dengan</string>
+    <string name="paypal_checkout_credit_label">Kredit</string>
+    <string name="paypal_checkout_continue_with_label">Lanjutkan dengan</string>
+    <string name="paypal_checkout_order_with_label">Pesan dengan</string>
+    <string name="paypal_checkout_pay_with_label">Bayar dengan</string>
+    <string name="paypal_checkout_pay_later_label">Bayar nanti</string>
+    <string name="paypal_checkout_pay_later_with_label">Bayar Nanti dengan</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Muat ulang dengan</string>
+    <string name="paypal_checkout_rent_with_label">Sewa dengan</string>
+    <string name="paypal_checkout_reserve_with_label">Pesan dengan</string>
+    <string name="paypal_checkout_subscribe_with_label">Berlangganan dengan</string>
+    <string name="paypal_checkout_support_with_label">Dukungan dengan</string>
+    <string name="paypal_checkout_tagline_label">Cara membayar yang lebih mudah dan aman</string>
+    <string name="paypal_checkout_tip_with_label">Tip dengan</string>
+    <string name="paypal_checkout_top_up_with_label">Tambah Saldo dengan</string>
+
+</resources>

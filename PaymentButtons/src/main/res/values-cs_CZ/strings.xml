@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Přidat peníze přes</string>
+    <string name="paypal_checkout_book_with_label">Rezervovat přes</string>
+    <string name="paypal_checkout_buy_with_label">Koupit přes</string>
+    <string name="paypal_checkout_buy_now_with_label">Koupit přes</string>
+    <string name="paypal_checkout_checkout_with_label">Platba přes</string>
+    <string name="paypal_checkout_credit_label">Kredit</string>
+    <string name="paypal_checkout_continue_with_label">Pokračovat přes</string>
+    <string name="paypal_checkout_order_with_label">Objednat přes</string>
+    <string name="paypal_checkout_pay_with_label">Zaplatit přes</string>
+    <string name="paypal_checkout_pay_later_label">Zaplatit později</string>
+    <string name="paypal_checkout_pay_later_with_label">Zaplatit později přes</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Dobít přes</string>
+    <string name="paypal_checkout_rent_with_label">Pronajmout přes</string>
+    <string name="paypal_checkout_reserve_with_label">Rezervovat přes</string>
+    <string name="paypal_checkout_subscribe_with_label">Přihlásit se k odběru přes</string>
+    <string name="paypal_checkout_support_with_label">Podpořit přes</string>
+    <string name="paypal_checkout_tagline_label">Bezpečnější a jednodušší způsob placení</string>
+    <string name="paypal_checkout_tip_with_label">Nechat spropitné přes</string>
+    <string name="paypal_checkout_top_up_with_label">Přidat prostředky přes</string>
+
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Пополнить счет с помощью</string>
+    <string name="paypal_checkout_book_with_label">Зарезервировать с помощью</string>
+    <string name="paypal_checkout_buy_with_label">Купить с помощью</string>
+    <string name="paypal_checkout_buy_now_with_label">Купить сейчас с помощью</string>
+    <string name="paypal_checkout_checkout_with_label">Произвести расчет с помощью</string>
+    <string name="paypal_checkout_credit_label">Кредит</string>
+    <string name="paypal_checkout_continue_with_label">Продолжить с</string>
+    <string name="paypal_checkout_order_with_label">Заказать с помощью</string>
+    <string name="paypal_checkout_pay_with_label">Оплатить с помощью</string>
+    <string name="paypal_checkout_pay_later_label">Оплатить позже</string>
+    <string name="paypal_checkout_pay_later_with_label">Оплатить позже с помощью</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Пополнить с помощью</string>
+    <string name="paypal_checkout_rent_with_label">Арендовать с помощью</string>
+    <string name="paypal_checkout_reserve_with_label">Зарезервировать с помощью</string>
+    <string name="paypal_checkout_subscribe_with_label">Подписаться с помощью</string>
+    <string name="paypal_checkout_support_with_label">Поддержать с помощью</string>
+    <string name="paypal_checkout_tagline_label">Более безопасный и простой способ оплаты</string>
+    <string name="paypal_checkout_tip_with_label">Оставить чаевые с помощью</string>
+    <string name="paypal_checkout_top_up_with_label">Пополнить с помощью</string>
+
+</resources>

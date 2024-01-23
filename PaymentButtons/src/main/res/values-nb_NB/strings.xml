@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Legg til penger med</string>
+    <string name="paypal_checkout_book_with_label">Bestill med</string>
+    <string name="paypal_checkout_buy_with_label">Kjøp med</string>
+    <string name="paypal_checkout_buy_now_with_label">Kjøp nå med</string>
+    <string name="paypal_checkout_checkout_with_label">Betal med</string>
+    <string name="paypal_checkout_credit_label">Krediter</string>
+    <string name="paypal_checkout_continue_with_label">Fortsett med</string>
+    <string name="paypal_checkout_order_with_label">Bestill med</string>
+    <string name="paypal_checkout_pay_with_label">Betal med</string>
+    <string name="paypal_checkout_pay_later_label">Betal senere</string>
+    <string name="paypal_checkout_pay_later_with_label">Betal senere med</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Fyll på med</string>
+    <string name="paypal_checkout_rent_with_label">Lei med</string>
+    <string name="paypal_checkout_reserve_with_label">Reserver hos</string>
+    <string name="paypal_checkout_subscribe_with_label">Abonner med</string>
+    <string name="paypal_checkout_support_with_label">Støtte med</string>
+    <string name="paypal_checkout_tagline_label">En tryggere og enklere betalingsmåte</string>
+    <string name="paypal_checkout_tip_with_label">Tips med</string>
+    <string name="paypal_checkout_top_up_with_label">Fyll på med</string>
+
+</resources>

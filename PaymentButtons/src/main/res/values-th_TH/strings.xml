@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">เติมเงินด้วย</string>
+    <string name="paypal_checkout_book_with_label">จองด้วย</string>
+    <string name="paypal_checkout_buy_with_label">ซื้อด้วย</string>
+    <string name="paypal_checkout_buy_now_with_label">ซื้อทันทีด้วย</string>
+    <string name="paypal_checkout_checkout_with_label">ชําระเงินด้วย</string>
+    <string name="paypal_checkout_credit_label">เครดิต</string>
+    <string name="paypal_checkout_continue_with_label">ดําเนินการต่อด้วย</string>
+    <string name="paypal_checkout_order_with_label">สั่งซื้อด้วย</string>
+    <string name="paypal_checkout_pay_with_label">ชำระเงินด้วย</string>
+    <string name="paypal_checkout_pay_later_label">ชำระเงินในภายหลัง</string>
+    <string name="paypal_checkout_pay_later_with_label">ชําระเงินในภายหลังด้วย</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">เติมด้วย</string>
+    <string name="paypal_checkout_rent_with_label">เช่าด้วย</string>
+    <string name="paypal_checkout_reserve_with_label">สํารองด้วย</string>
+    <string name="paypal_checkout_subscribe_with_label">สมัครสมาชิกด้วย</string>
+    <string name="paypal_checkout_support_with_label">สนับสนุนด้วย</string>
+    <string name="paypal_checkout_tagline_label">วิธีชำระเงินที่ปลอดภัยกว่าและง่ายกว่า</string>
+    <string name="paypal_checkout_tip_with_label">ให้ทิปด้วย</string>
+    <string name="paypal_checkout_top_up_with_label">เติมเงินด้วย</string>
+
+</resources>

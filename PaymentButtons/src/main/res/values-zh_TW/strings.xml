@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">使用 PayPal 新增金額</string>
+    <string name="paypal_checkout_book_with_label">使用 PayPal 預約</string>
+    <string name="paypal_checkout_buy_with_label">使用 PayPal 購買</string>
+    <string name="paypal_checkout_buy_now_with_label">使用 PayPal 立即購</string>
+    <string name="paypal_checkout_checkout_with_label">使用 PayPal 結帳</string>
+    <string name="paypal_checkout_credit_label">Credit</string>
+    <string name="paypal_checkout_continue_with_label">使用 PayPal 繼續</string>
+    <string name="paypal_checkout_order_with_label">使用 PayPal 訂購</string>
+    <string name="paypal_checkout_pay_with_label">使用 PayPal 付款</string>
+    <string name="paypal_checkout_pay_later_label">Pay Later</string>
+    <string name="paypal_checkout_pay_later_with_label">使用 PayPal Pay Later</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">使用 PayPal 儲值</string>
+    <string name="paypal_checkout_rent_with_label">使用 PayPal 租賃</string>
+    <string name="paypal_checkout_reserve_with_label">使用 PayPal 預訂</string>
+    <string name="paypal_checkout_subscribe_with_label">使用 PayPal 訂閱</string>
+    <string name="paypal_checkout_support_with_label">使用 PayPal 支援</string>
+    <string name="paypal_checkout_tagline_label">更安全便利的付款方式</string>
+    <string name="paypal_checkout_tip_with_label">使用 PayPal 支付小費</string>
+    <string name="paypal_checkout_top_up_with_label">使用 PayPal 儲值</string>
+
+</resources>

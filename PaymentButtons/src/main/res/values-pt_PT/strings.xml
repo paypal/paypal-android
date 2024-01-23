@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Adicionar dinheiro com</string>
+    <string name="paypal_checkout_book_with_label">Reservar com</string>
+    <string name="paypal_checkout_buy_with_label">Comprar com</string>
+    <string name="paypal_checkout_buy_now_with_label">Comprar agora com</string>
+    <string name="paypal_checkout_checkout_with_label">Checkout com</string>
+    <string name="paypal_checkout_credit_label">Crédito</string>
+    <string name="paypal_checkout_continue_with_label">Continuar com</string>
+    <string name="paypal_checkout_order_with_label">Pedir com</string>
+    <string name="paypal_checkout_pay_with_label">Pagar com</string>
+    <string name="paypal_checkout_pay_later_label">Pay Later</string>
+    <string name="paypal_checkout_pay_later_with_label">Pay Later com</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Carregar com</string>
+    <string name="paypal_checkout_rent_with_label">Alugar com</string>
+    <string name="paypal_checkout_reserve_with_label">Reservar com</string>
+    <string name="paypal_checkout_subscribe_with_label">Subscrever com</string>
+    <string name="paypal_checkout_support_with_label">Apoiar com</string>
+    <string name="paypal_checkout_tagline_label">Uma maneira de fazer pagamentos com maior facilidade e segurança</string>
+    <string name="paypal_checkout_tip_with_label">Dar gorjeta com</string>
+    <string name="paypal_checkout_top_up_with_label">Carregar com</string>
+
+</resources>

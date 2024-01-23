@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Geld toevoegen met</string>
+    <string name="paypal_checkout_book_with_label">Boeken met</string>
+    <string name="paypal_checkout_buy_with_label">Kopen met</string>
+    <string name="paypal_checkout_buy_now_with_label">Nu kopen met</string>
+    <string name="paypal_checkout_checkout_with_label">Betalen met</string>
+    <string name="paypal_checkout_credit_label">Creditkaart</string>
+    <string name="paypal_checkout_continue_with_label">Doorgaan met</string>
+    <string name="paypal_checkout_order_with_label">Bestellen met</string>
+    <string name="paypal_checkout_pay_with_label">Betalen met</string>
+    <string name="paypal_checkout_pay_later_label">Later betalen</string>
+    <string name="paypal_checkout_pay_later_with_label">Later betalen met</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">Opwaarderen met</string>
+    <string name="paypal_checkout_rent_with_label">Huren met</string>
+    <string name="paypal_checkout_reserve_with_label">Reserveren met</string>
+    <string name="paypal_checkout_subscribe_with_label">Abonneren met</string>
+    <string name="paypal_checkout_support_with_label">Ondersteuning bij</string>
+    <string name="paypal_checkout_tagline_label">Een veiligere, eenvoudigere manier om te betalen</string>
+    <string name="paypal_checkout_tip_with_label">Een fooi geven met</string>
+    <string name="paypal_checkout_top_up_with_label">Geld storten met</string>
+
+</resources>

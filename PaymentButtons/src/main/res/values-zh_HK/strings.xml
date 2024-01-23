@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">儲值付款方式為</string>
+    <string name="paypal_checkout_book_with_label">預約透過</string>
+    <string name="paypal_checkout_buy_with_label">購物付款透過</string>
+    <string name="paypal_checkout_buy_now_with_label">「立即買」透過</string>
+    <string name="paypal_checkout_checkout_with_label">結帳透過</string>
+    <string name="paypal_checkout_credit_label">入帳透過</string>
+    <string name="paypal_checkout_continue_with_label">繼續使用</string>
+    <string name="paypal_checkout_order_with_label">訂購透過</string>
+    <string name="paypal_checkout_pay_with_label">付款透過</string>
+    <string name="paypal_checkout_pay_later_label">稍後付款</string>
+    <string name="paypal_checkout_pay_later_with_label">稍後付款透過</string>
+    <string name="paypal_checkout_paypal">PayPal</string>
+    <string name="paypal_checkout_reload_with_label">儲值透過</string>
+    <string name="paypal_checkout_rent_with_label">租借透過</string>
+    <string name="paypal_checkout_reserve_with_label">保留準備金透過</string>
+    <string name="paypal_checkout_subscribe_with_label">訂用透過</string>
+    <string name="paypal_checkout_support_with_label">支持透過</string>
+    <string name="paypal_checkout_tagline_label">更安全、更方便的付款方式</string>
+    <string name="paypal_checkout_tip_with_label">付小費透過</string>
+    <string name="paypal_checkout_top_up_with_label">儲值透過</string>
+
+</resources>

@@ -1,13 +1,5 @@
+<?xml version="1.0"?>
 <resources>
-
-    <!-- Payment Methods Description -->
-    <string name="paypal_payment_button_description">PayPal Button</string>
-    <string name="paypal_payment_credit_button_description">PayPal Credit Button</string>
-    <string name="paypal_checkout_smart_payment_button_label_buy_now">Buy Now</string>
-    <string name="paypal_checkout_smart_payment_button_label_checkout">Checkout</string>
-    <string name="paypal_checkout_smart_payment_button_label_pay">Pay with</string>
-    <string name="paypal_checkout_smart_payment_button_label_pay_later">Pay Later</string>
-
     <string name="paypal_checkout_add_money_with_label">Add Money with</string>
     <string name="paypal_checkout_book_with_label">Book with</string>
     <string name="paypal_checkout_buy_with_label">Buy with</string>
@@ -28,4 +20,5 @@
     <string name="paypal_checkout_tagline_label">A safer, easier way to pay</string>
     <string name="paypal_checkout_tip_with_label">Tip with</string>
     <string name="paypal_checkout_top_up_with_label">Top Up with</string>
+    
 </resources>

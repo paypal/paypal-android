@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<resources>
+    <string name="paypal_checkout_add_money_with_label">Lisää rahaa</string>
+    <string name="paypal_checkout_book_with_label">Varaa</string>
+    <string name="paypal_checkout_buy_with_label">Osta</string>
+    <string name="paypal_checkout_buy_now_with_label">Osta nyt</string>
+    <string name="paypal_checkout_checkout_with_label">Maksa</string>
+    <string name="paypal_checkout_credit_label">Luotto</string>
+    <string name="paypal_checkout_continue_with_label">Jatka</string>
+    <string name="paypal_checkout_order_with_label">Tilaa</string>
+    <string name="paypal_checkout_pay_with_label">Maksa</string>
+    <string name="paypal_checkout_pay_later_label">Maksa myöhemmin</string>
+    <string name="paypal_checkout_pay_later_with_label">Maksa myöhemmin</string>
+    <string name="paypal_checkout_paypal">PayPalilla</string>
+    <string name="paypal_checkout_reload_with_label">Lataa uudelleen</string>
+    <string name="paypal_checkout_rent_with_label">Vuokraa</string>
+    <string name="paypal_checkout_reserve_with_label">Varaa</string>
+    <string name="paypal_checkout_subscribe_with_label">Tilaa</string>
+    <string name="paypal_checkout_support_with_label">Tue</string>
+    <string name="paypal_checkout_tagline_label">Turvallisempi ja helpompi maksutapa</string>
+    <string name="paypal_checkout_tip_with_label">Anna tippiä</string>
+    <string name="paypal_checkout_top_up_with_label">Lisää rahaa</string>
+
+</resources>
