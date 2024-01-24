@@ -32,6 +32,8 @@ android {
 dependencies {
     implementation deps.androidxCoreKtx
     implementation deps.material
+
+    testImplementation deps.junit
 }
 
 project.ext.name = "payment-buttons"
