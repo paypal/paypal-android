@@ -231,14 +231,10 @@ enum class PayPalButtonLabel(
          * @throws [IllegalArgumentException] when an invalid index is provided.
          */
         operator fun invoke(attributeIndex: Int): PayPalButtonLabel {
-            return when (attributeIndex) {
-                PAYPAL.value -> PAYPAL
-                CHECKOUT.value -> CHECKOUT
-                BUY_NOW.value -> BUY_NOW
-                PAY.value -> PAY
-                PAY_LATER.value -> PAY_LATER
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonLabel", values().size)
+            require(attributeIndex in 0 until values().size) {
+                throw createFormattedIllegalArgumentException("PaymentButtonLabel", values().size)
             }
+            return enumValues<PayPalButtonLabel>()[attributeIndex]
         }
     }
 }
