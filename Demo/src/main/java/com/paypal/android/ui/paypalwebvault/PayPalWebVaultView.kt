@@ -21,7 +21,7 @@ import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -67,9 +67,10 @@ private fun Step1_CreateSetupToken(
             successTitle = "SETUP TOKEN CREATED",
             state = uiState.createSetupTokenState,
             onClick = { viewModel.createSetupToken() }
-        ) {
-            (uiState.createSetupTokenState as? ActionState.Success)?.value?.let { setupToken ->
-                PayPalSetupTokenView(setupToken = setupToken)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> PayPalSetupTokenView(setupToken = state.value)
             }
         }
     }
@@ -94,12 +95,10 @@ private fun Step2_VaultPayPal(
                     viewModel.vaultSetupToken(activity)
                 }
             }
-        ) {
-            (uiState.vaultPayPalState as? ActionState.Success)?.value?.let { vaultResult ->
-                PayPalWebVaultResultView(result = vaultResult)
-            }
-            (uiState.vaultPayPalState as? ActionState.Failure)?.value?.let { error ->
-                ErrorView(error = error)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> PayPalWebVaultResultView(result = state.value)
             }
         }
     }
@@ -119,9 +118,10 @@ private fun Step3_CreatePaymentToken(
             successTitle = "PAYMENT TOKEN CREATED",
             state = uiState.createPaymentTokenState,
             onClick = { viewModel.createPaymentToken() }
-        ) {
-            (uiState.createPaymentTokenState as? ActionState.Success)?.value?.let { paymentToken ->
-                PayPalPaymentTokenView(paymentToken = paymentToken)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> PayPalPaymentTokenView(paymentToken = state.value)
             }
         }
     }

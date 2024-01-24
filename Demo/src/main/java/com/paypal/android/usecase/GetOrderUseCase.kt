@@ -3,6 +3,7 @@ package com.paypal.android.usecase
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.ui.paypalnative.ShippingPreferenceType
 import com.paypal.android.utils.OrderUtils
 import kotlinx.coroutines.Dispatchers
@@ -16,12 +17,12 @@ class GetOrderUseCase @Inject constructor(
     suspend operator fun invoke(
         shippingPreferenceType: ShippingPreferenceType,
         orderIntent: OrderIntent
-    ): Order = withContext(Dispatchers.IO) {
-        val order = OrderUtils.createOrderBuilder(
+    ): SDKSampleServerResult<Order, Exception> = withContext(Dispatchers.IO) {
+        val orderRequest = OrderUtils.createOrderBuilder(
             "5.0",
             orderIntent = orderIntent,
             shippingPreference = shippingPreferenceType.nxoShippingPreference
         )
-        sdkSampleServerAPI.createOrder(order)
+        sdkSampleServerAPI.createOrder(orderRequest)
     }
 }

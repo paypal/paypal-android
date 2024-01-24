@@ -1,12 +1,12 @@
 package com.paypal.android.ui.paypalnative
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.BuildConfig
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -24,12 +24,10 @@ import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.usecase.GetOrderUseCase
 import com.paypal.android.usecase.UpdateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +43,9 @@ class PayPalNativeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PayPalNativeUiState())
     val uiState = _uiState.asStateFlow()
+
+    private lateinit var payPalClient: PayPalNativeCheckoutClient
+    private lateinit var payPalDataCollector: PayPalDataCollector
 
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
@@ -115,42 +116,45 @@ class PayPalNativeViewModel @Inject constructor(
             actions: PayPalNativePaysheetActions,
             shippingMethod: PayPalNativeShippingMethod
         ) {
-
-            viewModelScope.launch(exceptionHandler) {
-                orderId?.also {
-                    try {
-                        updateOrderUseCase(it, shippingMethod)
-                        actions.approve()
-                    } catch (e: IOException) {
-                        actions.reject()
-                        throw e
+            orderId?.let { orderId ->
+                viewModelScope.launch {
+                    when (updateOrderUseCase(orderId, shippingMethod)) {
+                        is SDKSampleServerResult.Failure -> actions.reject()
+                        is SDKSampleServerResult.Success -> actions.approve()
                     }
                 }
             }
         }
     }
 
-    private lateinit var payPalClient: PayPalNativeCheckoutClient
-    private lateinit var payPalDataCollector: PayPalDataCollector
-
-    private val exceptionHandler = CoroutineExceptionHandler { _, e ->
-        // TODO: show error in UI using a Compose UI Alert Dialog to improve error messaging UX
-        Toast.makeText(getApplication(), e.message, Toast.LENGTH_LONG).show()
+    fun startNativeCheckout() {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            payPalNativeCheckoutState =
+                ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                startNativeCheckoutWithOrderId(orderId)
+            }
+        }
     }
 
-    fun startNativeCheckout() {
-        viewModelScope.launch {
-            val clientId = getClientIdUseCase()
+    private suspend fun startNativeCheckoutWithOrderId(orderId: String) {
+        payPalNativeCheckoutState = ActionState.Loading
+        when (val getClientIdResult = getClientIdUseCase()) {
+            is SDKSampleServerResult.Failure -> {
+                payPalNativeCheckoutState = ActionState.Failure(getClientIdResult.value)
+            }
 
-            val coreConfig = CoreConfig(clientId)
-            val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
-            payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)
-            payPalClient.listener = payPalListener
-            payPalClient.shippingListener = shippingListener
+            is SDKSampleServerResult.Success -> {
+                val returnUrl = "${BuildConfig.APPLICATION_ID}://paypalpay"
+                val coreConfig = CoreConfig(getClientIdResult.value)
+                payPalClient = PayPalNativeCheckoutClient(getApplication(), coreConfig, returnUrl)
 
-            payPalDataCollector = PayPalDataCollector(coreConfig)
+                payPalClient.listener = payPalListener
+                payPalClient.shippingListener = shippingListener
 
-            createdOrder?.id?.also { orderId ->
+                payPalDataCollector = PayPalDataCollector(coreConfig)
                 payPalClient.startCheckout(PayPalNativeCheckoutRequest(orderId))
             }
         }
@@ -158,25 +162,21 @@ class PayPalNativeViewModel @Inject constructor(
 
     fun completeOrder() {
         viewModelScope.launch {
-            completeOrderState = ActionState.Loading
-
-            val cmid = payPalDataCollector.collectDeviceData(getApplication())
-            val orderId = createdOrder!!.id!!
-            val orderIntent = intentOption
-
-            val completedOrder = completeOrderUseCase(orderId, orderIntent, cmid)
-            completeOrderState = ActionState.Success(completedOrder)
+            val orderId = createdOrder?.id
+            if (orderId == null) {
+                completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+            } else {
+                completeOrderState = ActionState.Loading
+                val cmid = payPalDataCollector.collectDeviceData(getApplication())
+                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+            }
         }
     }
 
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
-
-            val shippingPreference = shippingPreference
-            val orderIntent = intentOption
-            val createdOrder = getOrderUseCase(shippingPreference, orderIntent)
-            createOrderState = ActionState.Success(createdOrder)
+            createOrderState = getOrderUseCase(shippingPreference, intentOption).mapToActionState()
         }
     }
 }

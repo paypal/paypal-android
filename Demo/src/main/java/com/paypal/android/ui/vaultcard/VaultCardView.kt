@@ -23,9 +23,10 @@ import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.CardSetupTokenView
+import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -83,9 +84,10 @@ private fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCa
             successTitle = "SETUP TOKEN CREATED",
             state = uiState.createSetupTokenState,
             onClick = { viewModel.createSetupToken() }
-        ) {
-            (uiState.createSetupTokenState as? ActionState.Success)?.value?.let { setupToken ->
-                CardSetupTokenView(setupToken = setupToken)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> CardSetupTokenView(setupToken = state.value)
             }
         }
     }
@@ -119,9 +121,10 @@ private fun Step2_VaultCard(
             onClick = {
                 context.getActivity()?.let { viewModel.updateSetupToken(it) }
             }
-        ) {
-            (uiState.vaultCardState as? ActionState.Success)?.value?.let { vaultResult ->
-                VaultSuccessView(cardVaultResult = vaultResult)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> VaultSuccessView(cardVaultResult = state.value)
             }
         }
     }
@@ -142,9 +145,10 @@ private fun Step3_CreatePaymentToken(
             successTitle = "PAYMENT TOKEN CREATED",
             state = uiState.createPaymentTokenState,
             onClick = { viewModel.createPaymentToken() }
-        ) {
-            (uiState.createPaymentTokenState as? ActionState.Success)?.value?.let { paymentToken ->
-                CardPaymentTokenView(paymentToken = paymentToken)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> CardPaymentTokenView(paymentToken = state.value)
             }
         }
     }

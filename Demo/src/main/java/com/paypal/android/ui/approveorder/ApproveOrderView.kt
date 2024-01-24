@@ -25,7 +25,7 @@ import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
@@ -84,9 +84,10 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
             onClick = { viewModel.createOrder() },
             modifier = Modifier
                 .fillMaxWidth()
-        ) {
-            (uiState.createOrderState as? ActionState.Success)?.value?.let { order ->
-                OrderView(order = order)
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
             }
         }
     }
@@ -119,11 +120,10 @@ private fun Step2_ApproveOrder(
                 context.getActivity()?.let { viewModel.approveOrder(it) }
             },
             modifier = Modifier.fillMaxWidth()
-        ) {
-            when (val state = uiState.approveOrderState) {
-                is ActionState.Success -> CardResultView(result = state.value)
-                is ActionState.Failure -> ErrorView(error = state.value)
-                else -> {}
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> CardResultView(result = state.value)
             }
         }
     }
@@ -144,15 +144,12 @@ private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: Approve
             defaultTitle = "${uiState.intentOption.name} ORDER",
             successTitle = successTitle,
             state = uiState.completeOrderState,
-            onClick = {
-                viewModel.completeOrder(context)
-            },
+            onClick = { viewModel.completeOrder(context) },
             modifier = Modifier.fillMaxWidth()
-        ) {
-            when (val state = uiState.completeOrderState) {
-                is ActionState.Success -> OrderView(order = state.value)
-                is ActionState.Failure -> ErrorView(error = state.value)
-                else -> {}
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Success -> OrderView(order = state.value)
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
             }
         }
     }

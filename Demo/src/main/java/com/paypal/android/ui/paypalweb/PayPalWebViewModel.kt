@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -22,18 +20,18 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.usecase.GetClientIdUseCase
+import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 @HiltViewModel
 class PayPalWebViewModel @Inject constructor(
-    val sdkSampleServerAPI: SDKSampleServerAPI,
+    val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase
 ) : ViewModel(), PayPalWebCheckoutListener {
@@ -87,31 +85,38 @@ class PayPalWebViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(orderIntent = intentOption, shouldVault = false)
             }
-            val createdOrder = createOrderUseCase(orderRequest)
-            createOrderState = ActionState.Success(createdOrder)
+            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
 
     fun startWebCheckout(activity: AppCompatActivity) {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                startWebCheckoutWithOrderId(activity, orderId)
+            }
+        }
+    }
+
+    private suspend fun startWebCheckoutWithOrderId(activity: AppCompatActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
-        viewModelScope.launch {
-            try {
-                val clientId = sdkSampleServerAPI.fetchClientId()
-                val coreConfig = CoreConfig(clientId)
+
+        when (val clientIdResult = getClientIdUseCase()) {
+            is SDKSampleServerResult.Failure -> {
+                payPalWebCheckoutState = clientIdResult.mapToActionState()
+            }
+
+            is SDKSampleServerResult.Success -> {
+                val coreConfig = CoreConfig(clientIdResult.value)
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 paypalClient =
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
                 paypalClient.listener = this@PayPalWebViewModel
 
-                val orderId = createdOrder!!.id!!
                 paypalClient.start(PayPalWebCheckoutRequest(orderId, fundingSource))
-            } catch (e: UnknownHostException) {
-                val error = APIClientError.payPalCheckoutError(e.message!!)
-                payPalWebCheckoutState = ActionState.Failure(error)
-            } catch (e: HttpException) {
-                val error = APIClientError.payPalCheckoutError(e.message!!)
-                payPalWebCheckoutState = ActionState.Failure(error)
             }
         }
     }
@@ -136,12 +141,15 @@ class PayPalWebViewModel @Inject constructor(
     }
 
     fun completeOrder(context: Context) {
-        viewModelScope.launch {
-            completeOrderState = ActionState.Loading
-            val cmid = payPalDataCollector.collectDeviceData(context)
-            val orderId = createdOrder!!.id!!
-            val completedOrder = completeOrderUseCase(orderId, intentOption, cmid)
-            completeOrderState = ActionState.Success(completedOrder)
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                completeOrderState = ActionState.Loading
+                val cmid = payPalDataCollector.collectDeviceData(context)
+                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+            }
         }
     }
 }

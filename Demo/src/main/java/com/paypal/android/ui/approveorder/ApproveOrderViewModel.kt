@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
@@ -23,6 +23,7 @@ import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +34,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ApproveOrderViewModel @Inject constructor(
     private val createOrderUseCase: CreateOrderUseCase,
-    private val sdkSampleServerAPI: SDKSampleServerAPI,
+    private val getClientIdUseCase: GetClientIdUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
@@ -51,76 +52,90 @@ class ApproveOrderViewModel @Inject constructor(
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
-            val uiState = uiState.value
-            val orderRequest = uiState.run {
+            val orderRequest = uiState.value.run {
                 OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
             }
-            val order = createOrderUseCase(orderRequest)
-            createOrderState = ActionState.Success(order)
+            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
 
     fun approveOrder(activity: AppCompatActivity) {
-        viewModelScope.launch {
-            approveOrderState = ActionState.Loading
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                approveOrderWithId(activity, orderId)
+            }
+        }
+    }
 
-            val clientId = sdkSampleServerAPI.fetchClientId()
-            val coreConfig = CoreConfig(clientId = clientId)
-            payPalDataCollector = PayPalDataCollector(coreConfig)
+    private suspend fun approveOrderWithId(activity: AppCompatActivity, orderId: String) {
+        approveOrderState = ActionState.Loading
 
-            cardClient = CardClient(activity, coreConfig)
-            cardClient.approveOrderListener = object : ApproveOrderListener {
-                override fun onApproveOrderSuccess(result: CardResult) {
-                    approveOrderState = ActionState.Success(result)
-                }
-
-                override fun onApproveOrderFailure(error: PayPalSDKError) {
-                    approveOrderState = ActionState.Failure(error)
-                }
-
-                override fun onApproveOrderCanceled() {
-                    approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
-                }
-
-                override fun onApproveOrderThreeDSecureWillLaunch() {
-                    Log.d(TAG, "3DS Auth Requested")
-                }
-
-                override fun onApproveOrderThreeDSecureDidFinish() {
-                    Log.d(TAG, "3DS Success")
-                }
+        when (val clientIdResult = getClientIdUseCase()) {
+            is SDKSampleServerResult.Failure -> {
+                approveOrderState = clientIdResult.mapToActionState()
             }
 
-            val cardRequest = createCardRequest(uiState.value, createdOrder!!)
-            cardClient.approveOrder(activity, cardRequest)
+            is SDKSampleServerResult.Success -> {
+                val clientId = clientIdResult.value
+                val coreConfig = CoreConfig(clientId = clientId)
+                payPalDataCollector = PayPalDataCollector(coreConfig)
+
+                cardClient = CardClient(activity, coreConfig)
+                cardClient.approveOrderListener = object : ApproveOrderListener {
+                    override fun onApproveOrderSuccess(result: CardResult) {
+                        approveOrderState = ActionState.Success(result)
+                    }
+
+                    override fun onApproveOrderFailure(error: PayPalSDKError) {
+                        approveOrderState = ActionState.Failure(error)
+                    }
+
+                    override fun onApproveOrderCanceled() {
+                        approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
+                    }
+
+                    override fun onApproveOrderThreeDSecureWillLaunch() {
+                        Log.d(TAG, "3DS Auth Requested")
+                    }
+
+                    override fun onApproveOrderThreeDSecureDidFinish() {
+                        Log.d(TAG, "3DS Success")
+                    }
+                }
+
+                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
+                cardClient.approveOrder(activity, cardRequest)
+            }
         }
     }
 
     fun completeOrder(context: Context) {
-        viewModelScope.launch {
-            completeOrderState = ActionState.Loading
-
-            val cmid = payPalDataCollector.collectDeviceData(context)
-            // TECH DEBT: introduce a UseCaseResult type to avoid force unwrapping optionals here
-            val completedOrder = completeOrderUseCase(createdOrder!!.id!!, intentOption, cmid)
-            completeOrderState = ActionState.Success(completedOrder)
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                completeOrderState = ActionState.Loading
+                val cmid = payPalDataCollector.collectDeviceData(context)
+                completeOrderState =
+                    completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+            }
         }
     }
 
-    private fun createCardRequest(uiState: ApproveOrderUiState, order: Order): CardRequest {
-        val card = parseCard(uiState)
-        return CardRequest(order.id!!, card, APP_RETURN_URL, uiState.scaOption)
-    }
-
-    private fun parseCard(uiState: ApproveOrderUiState): Card {
+    private fun mapUIStateToCardRequestWithOrderId(orderId: String) = uiState.value.run {
         // expiration date in UI State needs to be formatted because it uses a visual transformation
-        val dateString = DateString(uiState.cardExpirationDate)
-        return Card(
-            number = uiState.cardNumber,
+        val dateString = DateString(cardExpirationDate)
+        val card = Card(
+            number = cardNumber,
             expirationMonth = dateString.formattedMonth,
             expirationYear = dateString.formattedYear,
-            securityCode = uiState.cardSecurityCode
+            securityCode = cardSecurityCode
         )
+        CardRequest(orderId, card, APP_RETURN_URL, scaOption)
     }
 
     private var createOrderState
