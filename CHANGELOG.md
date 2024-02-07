@@ -1,7 +1,8 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
-
+* PaymentButtons
+  * Button colors that were deprecated in the `1.3.0` release are being reinstated.
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
