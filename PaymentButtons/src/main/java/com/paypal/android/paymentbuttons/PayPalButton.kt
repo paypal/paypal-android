@@ -118,9 +118,9 @@ open class PayPalButton @JvmOverloads constructor(
  * @see WHITE is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
  * @see BLACK is one of our secondary alternatives. This color is less capable of drawing people's
- * attention. Deprecated - please use GOLD or WHITE.
+ * attention.
  * @see SILVER is one of our secondary alternatives. This color is less capable of drawing people's
- * attention. Deprecated - please use GOLD or WHITE.
+ * attention.
  */
 enum class PayPalButtonColor(
     val value: Int,

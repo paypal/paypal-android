@@ -35,8 +35,6 @@
         <attr name="paypal_credit_color" format="enum">
             <enum name="dark_blue" value="0" />
             <enum name="black" value="1" />
-            <enum name="gold" value="2" />
-            <enum name="white" value="3" />
         </attr>
     </declare-styleable>
 </resources>
