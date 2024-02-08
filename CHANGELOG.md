@@ -2,7 +2,8 @@
 
 ## unreleased
 * PaymentButtons
-  * Button colors that were deprecated in the `1.3.0` release are being reinstated.
+  * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
+  * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
