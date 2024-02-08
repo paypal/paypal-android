@@ -42,8 +42,7 @@ class PayPalCreditButton @JvmOverloads constructor(
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
 
-    override val wordmarkLightLuminanceResId: Int
-        get() = throw UnsupportedOperationException(LUMINANCE_ERROR)
+    override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_credit_color
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
