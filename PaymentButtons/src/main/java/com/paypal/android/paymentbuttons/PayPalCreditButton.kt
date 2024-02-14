@@ -69,8 +69,8 @@ class PayPalCreditButton @JvmOverloads constructor(
  *
  * @see DARK_BLUE is the default and recommended color for PayPal Credit.
  * @see BLACK is a secondary alternative color for PayPal Credit.
- * @see GOLD Deprecated. Will be removed in a future major version - please use BLACK or DARK_BLUE.
- * @see WHITE Deprecated. Will be removed in a future major version - please use BLACK or DARK_BLUE.
+ * @see GOLD
+ * @see WHITE
  */
 enum class PayPalCreditButtonColor(
     val value: Int,
