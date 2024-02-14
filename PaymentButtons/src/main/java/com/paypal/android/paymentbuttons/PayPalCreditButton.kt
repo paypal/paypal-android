@@ -88,15 +88,11 @@ enum class PayPalCreditButtonColor(
         colorResId = R.color.paypal_black,
         luminance = PaymentButtonColorLuminance.DARK
     ),
-
-    @Deprecated("Deprecated color. Replace with blue or black.")
     GOLD(
         value = 2,
         colorResId = R.color.paypal_gold,
         luminance = PaymentButtonColorLuminance.LIGHT
     ),
-
-    @Deprecated("Deprecated color. Replace with blue or black.")
     WHITE(
         value = 3,
         colorResId = R.color.paypal_white,
