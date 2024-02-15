@@ -2,7 +2,6 @@
 
 ## unreleased
 * PaymentButtons
-  * Deprecate `PayPalCreditButtonColor.GOLD` and `.WHITE`
   * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
   * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
 * CardPayments
