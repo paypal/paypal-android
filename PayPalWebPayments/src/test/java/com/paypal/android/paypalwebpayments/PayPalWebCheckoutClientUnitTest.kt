@@ -113,7 +113,7 @@ class PayPalWebCheckoutClientUnitTest {
         val error = PayPalSDKError(123, "fake-error-description")
         every {
             payPalWebLauncher.deliverBrowserSwitchResult(activity)
-        } returns PayPalWebStatus.CheckoutError(error)
+        } returns PayPalWebStatus.CheckoutError(error, null)
 
         sut.handleBrowserSwitchResult()
 
