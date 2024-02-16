@@ -18,6 +18,8 @@ internal class PayPalWebLauncher(
     private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
 ) {
+
+    private val redirectUri = "$urlScheme://paypal_web"
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
     companion object {

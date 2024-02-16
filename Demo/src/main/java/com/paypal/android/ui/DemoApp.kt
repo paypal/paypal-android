@@ -1,5 +1,6 @@
 package com.paypal.android.ui
 
+import android.util.Log
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -21,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
@@ -106,7 +108,17 @@ fun DemoApp() {
                         onUseTestCardClick = { navController.navigate(DemoAppDestinations.SELECT_TEST_CARD) }
                     )
                 }
-                composable(DemoAppDestinations.PAYPAL_WEB) {
+                composable(
+                    DemoAppDestinations.PAYPAL_WEB,
+                    deepLinks = listOf(
+                        navDeepLink {
+                            uriPattern =
+                                "com.paypal.android.demo://x-callback-url/paypal-sdk/paypal-checkout?PayerID={payerId}"
+                        }
+                    )
+                ) { backStackEntry ->
+                    val payerId = backStackEntry.arguments?.getString("payerId")
+                    Log.d("PAYER ID", payerId ?: "NOT SET")
                     PayPalWebView()
                 }
                 composable(DemoAppDestinations.PAYPAL_WEB_VAULT) {

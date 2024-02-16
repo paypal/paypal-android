@@ -13,6 +13,7 @@ import com.paypal.checkout.config.AuthConfig
 import com.paypal.checkout.config.CheckoutConfig
 import com.paypal.checkout.config.UIConfig
 import com.paypal.checkout.createorder.CreateOrder
+import com.paypal.checkout.createorder.UserAction
 import com.paypal.checkout.error.OnError
 import com.paypal.checkout.shipping.OnShippingChange
 import com.paypal.checkout.shipping.ShippingChangeActions
@@ -93,7 +94,8 @@ class PayPalNativeCheckoutClient internal constructor(
                         showExitSurveyDialog = false
                     ),
                     returnUrl = returnUrl,
-                    authConfig = authConfig
+                    authConfig = authConfig,
+                    userAction = UserAction.PAY_NOW
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()

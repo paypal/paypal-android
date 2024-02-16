@@ -46,7 +46,7 @@ class PayPalWebCheckoutClient internal constructor(
     var vaultListener: PayPalWebVaultListener? = null
 
     init {
-        activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
+//        activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
         // NEXT MAJOR VERSION: remove hardcoded activity reference
     }
 
