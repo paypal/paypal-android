@@ -7,11 +7,11 @@ class EnvironmentUnitTest {
 
     @Test
     fun `it should return the correct url for the LIVE environment`() {
-        assertEquals("https://api.paypal.com", Environment.LIVE.url)
+        assertEquals("https://api-m.paypal.com", Environment.LIVE.url)
     }
 
     @Test
     fun `it should return the correct url for the SANDBOX environment`() {
-        assertEquals("https://api.sandbox.paypal.com", Environment.SANDBOX.url)
+        assertEquals("https://api-m.sandbox.paypal.com", Environment.SANDBOX.url)
     }
 }

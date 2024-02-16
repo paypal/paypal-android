@@ -48,7 +48,7 @@ class RestClientUnitTest {
         sut.send(apiGETRequest)
 
         val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://api.sandbox.paypal.com/sample/path"), httpRequest.url)
+        assertEquals(URL("https://api-m.sandbox.paypal.com/sample/path"), httpRequest.url)
     }
 
     @Test
@@ -59,7 +59,7 @@ class RestClientUnitTest {
         sut.send(apiGETRequest)
 
         val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://api.paypal.com/sample/path"), httpRequest.url)
+        assertEquals(URL("https://api-m.paypal.com/sample/path"), httpRequest.url)
     }
 
     @Test
