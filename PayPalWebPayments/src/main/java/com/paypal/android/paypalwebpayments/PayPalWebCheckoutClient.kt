@@ -68,6 +68,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
     fun vault(request: PayPalWebVaultRequest) {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
         payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
             notifyVaultFailure(launchError)
         }
@@ -105,17 +106,17 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled")
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:succeeded")
         vaultListener?.onPayPalWebVaultSuccess(result)
     }
 
     private fun notifyVaultFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed")
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed")
         vaultListener?.onPayPalWebVaultFailure(error)
     }
 
     private fun notifyVaultCancelation() {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled")
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
         vaultListener?.onPayPalWebVaultCanceled()
     }
 }
