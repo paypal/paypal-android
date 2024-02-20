@@ -52,6 +52,7 @@ class PayPalNativeCheckoutClient internal constructor(
                 AnalyticsService(application, coreConfig),
             )
 
+    private var startCheckoutOrderId: String? = null
     private val exceptionHandler = CoreCoroutineExceptionHandler {
         listener?.onPayPalCheckoutFailure(it)
     }
@@ -78,6 +79,7 @@ class PayPalNativeCheckoutClient internal constructor(
      * @param request the PayPalNativeCheckoutRequest for the transaction
      */
     fun startCheckout(request: PayPalNativeCheckoutRequest) {
+        startCheckoutOrderId = request.orderId
         analyticsService.sendAnalyticsEvent("paypal-native-payments:started", request.orderId)
         CoroutineScope(dispatcher).launch(exceptionHandler) {
             try {
@@ -149,7 +151,7 @@ class PayPalNativeCheckoutClient internal constructor(
                 ShippingChangeType.ADDRESS_CHANGE -> {
                     analyticsService.sendAnalyticsEvent(
                         "paypal-native-payments:shipping-address-changed",
-                        null
+                        shippingChangeData.payToken
                     )
                     it.onPayPalNativeShippingAddressChange(
                         PayPalNativePaysheetActions(shippingChangeActions),
@@ -160,7 +162,7 @@ class PayPalNativeCheckoutClient internal constructor(
                 ShippingChangeType.OPTION_CHANGE -> {
                     analyticsService.sendAnalyticsEvent(
                         "paypal-native-payments:shipping-method-changed",
-                        null
+                        shippingChangeData.payToken
                     )
                     it.onPayPalNativeShippingMethodChange(
                         PayPalNativePaysheetActions(shippingChangeActions),
@@ -172,7 +174,7 @@ class PayPalNativeCheckoutClient internal constructor(
     }
 
     private fun notifyOnCancel() {
-        analyticsService.sendAnalyticsEvent("paypal-native-payments:canceled", null)
+        analyticsService.sendAnalyticsEvent("paypal-native-payments:canceled", startCheckoutOrderId)
         listener?.onPayPalCheckoutCanceled()
     }
 }

@@ -39,10 +39,11 @@ class CardClient internal constructor(
      */
     var cardVaultListener: CardVaultListener? = null
 
+    private var approveOrderId: String? = null
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        notifyApproveOrderFailure(error, null)
+        notifyApproveOrderFailure(error, approveOrderId)
     }
 
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
@@ -76,6 +77,7 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
+        approveOrderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
 
         CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
