@@ -67,10 +67,10 @@ class PayPalCreditButton @JvmOverloads constructor(
 /**
  * Defines the colors available for PayPal Credit buttons.
  *
- * @see GOLD is the recommended color for PayPal Credit.
- * @see WHITE is a secondary alternative color for PayPal Credit.
- * @see DARK_BLUE is the default color if one is not provided. Deprecated - please use GOLD or WHITE.
- * @see BLACK is a secondary alternative color for PayPal Credit. Deprecated - please use GOLD or WHITE.
+ * @see DARK_BLUE is the default and recommended color for PayPal Credit
+ * @see BLACK is a secondary alternative color for PayPal Credit
+ * @see GOLD alternative color for PayPal Credit
+ * @see WHITE alternative color for PayPal Credit
  */
 enum class PayPalCreditButtonColor(
     val value: Int,
@@ -78,11 +78,21 @@ enum class PayPalCreditButtonColor(
     override val hasOutline: Boolean = false,
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
-    @Deprecated("Deprecated color. Replace with gold or white.")
-    DARK_BLUE(value = 0, colorResId = R.color.paypal_dark_blue, luminance = PaymentButtonColorLuminance.DARK),
-    @Deprecated("Deprecated color. Replace with gold or white.")
-    BLACK(value = 1, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK),
-    GOLD(value = 2, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.LIGHT),
+    DARK_BLUE(
+        value = 0,
+        colorResId = R.color.paypal_dark_blue,
+        luminance = PaymentButtonColorLuminance.DARK
+    ),
+    BLACK(
+        value = 1,
+        colorResId = R.color.paypal_black,
+        luminance = PaymentButtonColorLuminance.DARK
+    ),
+    GOLD(
+        value = 2,
+        colorResId = R.color.paypal_gold,
+        luminance = PaymentButtonColorLuminance.LIGHT
+    ),
     WHITE(
         value = 3,
         colorResId = R.color.paypal_white,

@@ -1,7 +1,9 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
-
+* PaymentButtons
+  * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
+  * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
