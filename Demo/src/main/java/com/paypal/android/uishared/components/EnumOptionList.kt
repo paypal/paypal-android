@@ -95,7 +95,7 @@ inline fun <reified T : Enum<T>> EnumOptionList(
 
 @Preview
 @Composable
-fun OptionListPreview() {
+fun EnumOptionListPreview() {
     MaterialTheme {
         Surface {
             EnumOptionList(

@@ -1,4 +1,4 @@
-package com.paypal.android.ui
+package com.paypal.android.uishared.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
