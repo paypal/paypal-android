@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.BooleanOptionList
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.CardSetupTokenView
@@ -79,6 +80,11 @@ private fun Step1_CreateSetupToken(uiState: VaultCardUiState, viewModel: VaultCa
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create Setup Token")
+        BooleanOptionList(
+            title = "SCA WHEN REQUIRED",
+            selectedOption = uiState.shouldRequest3DS,
+            onSelectedOptionChange = { value -> viewModel.shouldRequest3DS = value },
+        )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
             successTitle = "SETUP TOKEN CREATED",

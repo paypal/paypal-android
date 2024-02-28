@@ -76,6 +76,12 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
 
+    var shouldRequest3DS: Boolean
+        get() = _uiState.value.shouldRequest3DS
+        set(value) {
+            _uiState.update { it.copy(shouldRequest3DS = value) }
+        }
+
     fun prefillCard(testCard: TestCard) {
         val card = testCard.card
         _uiState.update { currentState ->
