@@ -96,7 +96,8 @@ class VaultCardViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createSetupTokenUseCase().mapToActionState()
+            val perform3DS = _uiState.value.shouldRequest3DS
+            createSetupTokenState = createSetupTokenUseCase(perform3DS).mapToActionState()
         }
     }
 
