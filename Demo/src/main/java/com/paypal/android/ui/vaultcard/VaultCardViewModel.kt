@@ -135,7 +135,8 @@ class VaultCardViewModel @Inject constructor(
                 }
 
                 val card = parseCard(_uiState.value)
-                val cardVaultRequest = CardVaultRequest(setupTokenId, card)
+                val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
+                val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
                 cardClient.vault(activity, cardVaultRequest)
             }
         }

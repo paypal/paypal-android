@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 /**
  * Use this client to approve an order with a [Card].
@@ -128,22 +129,39 @@ class CardClient internal constructor(
      *
      * Call this method to attach a payment source to a setup token.
      *
-     * @param context [Context] Android context
+     * @param activity [FragmentActivity] Android activity reference
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
-        val applicationContext = context.applicationContext
+    fun vault(activity: FragmentActivity, cardVaultRequest: CardVaultRequest) {
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            updateSetupToken(applicationContext, cardVaultRequest)
+            updateSetupToken(activity, cardVaultRequest)
         }
     }
 
-    private suspend fun updateSetupToken(context: Context, cardVaultRequest: CardVaultRequest) {
+    private suspend fun updateSetupToken(
+        activity: FragmentActivity,
+        cardVaultRequest: CardVaultRequest
+    ) {
         val result = cardVaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
+            paymentMethodTokensAPI.updateSetupToken(activity.applicationContext, setupTokenId, card)
         }
-        cardVaultListener?.onVaultSuccess(result)
+        val approveHref = result.approveHref
+        if (approveHref == null) {
+            // no 3DS required; we're done
+            cardVaultListener?.onVaultSuccess(result)
+        } else {
+            // preform 3DS
+            val urlScheme = cardVaultRequest.run { Uri.parse(returnUrl).scheme }
+            val metadata = JSONObject()
+                .put("SETUP_TOKEN_ID", cardVaultRequest.setupTokenId)
+            val options = BrowserSwitchOptions()
+                .url(Uri.parse(approveHref))
+                .returnUrlScheme(urlScheme)
+                .metadata(metadata)
+
+            browserSwitchClient.start(activity, options)
+        }
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
