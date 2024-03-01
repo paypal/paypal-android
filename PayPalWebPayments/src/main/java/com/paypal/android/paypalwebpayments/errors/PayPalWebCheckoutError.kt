@@ -17,6 +17,7 @@ internal object PayPalWebCheckoutError {
         errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
     )
 
+    // 2. An error occurred while browser switching
     fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
         code = PayPalWebCheckoutErrorCode.BROWSER_SWITCH.ordinal,
         errorDescription = cause.message ?: "Unable to Browser Switch"

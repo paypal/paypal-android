@@ -1,6 +1,7 @@
 package com.paypal.android.ui.vaultcard
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
@@ -18,6 +19,7 @@ import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.cardpayments.CardAuthChallenge
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -162,5 +164,9 @@ class VaultCardViewModel @Inject constructor(
             expirationYear = dateString.formattedYear,
             securityCode = uiState.cardSecurityCode
         )
+    }
+
+    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
+        cardClient.presentAuthChallenge(activity, authChallenge)
     }
 }

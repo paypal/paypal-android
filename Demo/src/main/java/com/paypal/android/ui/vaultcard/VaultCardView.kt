@@ -27,6 +27,7 @@ import com.paypal.android.uishared.components.CardSetupTokenView
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
@@ -44,6 +45,16 @@ fun VaultCardView(
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+
+    val context = LocalContext.current
+    LaunchedEffect(uiState.authChallenge) {
+        context.getActivity()?.let { activity ->
+            uiState.authChallenge?.let { authChallenge ->
+                viewModel.presentAuthChallenge(activity, authChallenge)
+            }
+        }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,

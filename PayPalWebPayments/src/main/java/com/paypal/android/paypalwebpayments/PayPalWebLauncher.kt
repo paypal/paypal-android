@@ -13,6 +13,8 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
+// TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
+
 internal class PayPalWebLauncher(
     private val urlScheme: String,
     private val coreConfig: CoreConfig,

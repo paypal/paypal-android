@@ -30,6 +30,7 @@ class CardClient internal constructor(
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
+    private val authChallengeLauncher: CardAuthChallengeLauncher,
     private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -64,6 +65,7 @@ class CardClient internal constructor(
                 DataVaultPaymentMethodTokensAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
+                CardAuthChallengeLauncher(),
                 Dispatchers.Main
             )
 
@@ -71,6 +73,7 @@ class CardClient internal constructor(
         activity.lifecycle.addObserver(lifeCycleObserver)
     }
 
+    // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
     /**
      * Confirm [Card] payment source for an order.
      *
@@ -78,6 +81,7 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
+        // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
 
@@ -129,48 +133,54 @@ class CardClient internal constructor(
      *
      * Call this method to attach a payment source to a setup token.
      *
-     * @param activity [FragmentActivity] Android activity reference
+     * @param context [Context] Android context reference
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    fun vault(activity: FragmentActivity, cardVaultRequest: CardVaultRequest) {
+    fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
+        val applicationContext = context.applicationContext
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            updateSetupToken(activity, cardVaultRequest)
+            updateSetupToken(applicationContext, cardVaultRequest)
         }
     }
 
     private suspend fun updateSetupToken(
-        activity: FragmentActivity,
+        context: Context,
         cardVaultRequest: CardVaultRequest
     ) {
-        val result = cardVaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(activity.applicationContext, setupTokenId, card)
+        val updateSetupTokenResult = cardVaultRequest.run {
+            paymentMethodTokensAPI.updateSetupToken(context, setupTokenId, card)
         }
-        val approveHref = result.approveHref
-        if (approveHref == null) {
-            // no 3DS required; we're done
-            cardVaultListener?.onVaultSuccess(result)
-        } else {
-            // preform 3DS
-            val urlScheme = cardVaultRequest.run { Uri.parse(returnUrl).scheme }
-            val metadata = JSONObject()
-                .put("SETUP_TOKEN_ID", cardVaultRequest.setupTokenId)
-            val options = BrowserSwitchOptions()
-                .url(Uri.parse(approveHref))
-                .returnUrlScheme(urlScheme)
-                .metadata(metadata)
+        val authChallenge = updateSetupTokenResult.approveHref?.let { approveHref ->
+            val url = Uri.parse(approveHref)
+            CardAuthChallenge(url = url, request = cardVaultRequest)
+        }
+        val result =
+            updateSetupTokenResult.run { CardVaultResult(setupTokenId, status, authChallenge) }
+        cardVaultListener?.onVaultSuccess(result)
+    }
 
-            browserSwitchClient.start(activity, options)
+    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
+        authChallengeLauncher.presentAuthChallenge(activity, authChallenge)?.let { launchError ->
+            // TODO: notify auth challenger presentation failure
         }
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
+        authChallengeLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+            when (status) {
+                is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+                is CardStatus.VaultError -> notifyVaultFailure(status.error)
+                CardStatus.VaultCanceled -> notifyVaultCancelation()
+            }
+        }
+
         val browserSwitchResult = browserSwitchClient.deliverResult(activity)
         if (browserSwitchResult != null && approveOrderListener != null) {
             approveOrderListener?.onApproveOrderThreeDSecureDidFinish()
             when (browserSwitchResult.status) {
                 BrowserSwitchStatus.SUCCESS -> handleBrowserSwitchSuccess(browserSwitchResult)
-                BrowserSwitchStatus.CANCELED -> notifyApproveOrderCanceled(browserSwitchResult)
+                BrowserSwitchStatus.CANCELED -> notifyApproveOrderCanceled()
             }
         }
     }
@@ -222,5 +232,21 @@ class CardClient internal constructor(
     private fun notifyApproveOrderFailure(error: PayPalSDKError, orderId: String?) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
         approveOrderListener?.onApproveOrderFailure(error)
+    }
+
+    private fun notifyVaultSuccess(result: CardVaultResult) {
+        analyticsService.sendAnalyticsEvent("card:browser-login:canceled", result.setupTokenId)
+        cardVaultListener?.onVaultSuccess(result)
+    }
+
+    private fun notifyVaultFailure(error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent("card:failed", null)
+        cardVaultListener?.onVaultFailure(error)
+    }
+
+    private fun notifyVaultCancelation() {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
+        // TODO: consider either adding a listener method or next major version returning a result type
+        cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
     }
 }
