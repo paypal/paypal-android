@@ -1,6 +1,5 @@
 package com.paypal.android.cardpayments
 
-import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchException
@@ -16,31 +15,39 @@ internal class CardAuthLauncher(
 
     companion object {
         private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val METADATA_KEY_ORDER_ID = "order_id"
-        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
-
-        private const val REQUEST_TYPE_CHECKOUT = "checkout"
+        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
         private const val REQUEST_TYPE_VAULT = "vault"
 
-        private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
+        private const val METADATA_KEY_ORDER_ID = "order_id"
+        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
 
     fun presentAuthChallenge(
         activity: FragmentActivity,
         authChallenge: CardAuthChallenge
     ): PayPalSDKError? {
-        // preform 3DS browser switch
-        val vaultRequest = authChallenge.request
-        val returnUrlScheme = vaultRequest.run { Uri.parse(returnUrl).scheme!! }
-        val metadata = JSONObject()
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-            .put(METADATA_KEY_SETUP_TOKEN_ID, vaultRequest.setupTokenId)
+        val metadata = when (authChallenge) {
+            is CardAuthChallenge.ApproveOrder -> {
+                val request = authChallenge.request
+                JSONObject()
+                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
+                    .put(METADATA_KEY_ORDER_ID, request.orderId)
+            }
 
-        val options = BrowserSwitchOptions()
+            is CardAuthChallenge.Vault -> {
+                val request = authChallenge.request
+                JSONObject()
+                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+                    .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
+            }
+        }
+
+        // launch the 3DS flow
+        val browserSwitchOptions = BrowserSwitchOptions()
             .url(authChallenge.url)
-            .returnUrlScheme(returnUrlScheme)
+            .returnUrlScheme(authChallenge.returnUrlScheme)
             .metadata(metadata)
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(activity, browserSwitchOptions)
     }
 
     private fun launchBrowserSwitch(
@@ -63,8 +70,8 @@ internal class CardAuthLauncher(
             if (requestType == REQUEST_TYPE_VAULT) {
                 parseVaultResult(browserSwitchResult)
             } else {
-                // TODO: migrate approve order to use auth challenge launcher pattern internally
-//                parseWebCheckoutResult(browserSwitchResult)
+                // Assume REQUEST_TYPE_APPROVE_ORDER
+                parseApproveOrderResult(browserSwitchResult)
             }
         }
 
@@ -74,6 +81,21 @@ internal class CardAuthLauncher(
             BrowserSwitchStatus.CANCELED -> CardStatus.VaultCanceled
             else -> null
         }
+
+    private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
+        val orderId = browserSwitchResult.requestMetadata?.getString(METADATA_KEY_ORDER_ID)
+        return if (orderId == null) {
+            CardStatus.ApproveOrderError(CardError.unknownError)
+        } else {
+            when (browserSwitchResult.status) {
+                BrowserSwitchStatus.SUCCESS ->
+                    parseApproveOrderSuccessResult(browserSwitchResult, orderId)
+
+                BrowserSwitchStatus.CANCELED -> CardStatus.ApproveOrderCanceled(orderId)
+                else -> null
+            }
+        }
+    }
 
     private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchResult): CardStatus {
         val deepLinkUrl = browserSwitchResult.deepLinkUrl
@@ -102,6 +124,27 @@ internal class CardAuthLauncher(
                 } else {
                     CardStatus.VaultError(CardError.unknownError)
                 }
+            }
+        }
+    }
+
+    private fun parseApproveOrderSuccessResult(
+        browserSwitchResult: BrowserSwitchResult,
+        orderId: String
+    ): CardStatus {
+        val deepLinkUrl = browserSwitchResult.deepLinkUrl
+
+        return if (deepLinkUrl == null || deepLinkUrl.getQueryParameter("error") != null) {
+            CardStatus.ApproveOrderError(CardError.threeDSVerificationError)
+        } else {
+            val state = deepLinkUrl.getQueryParameter("state")
+            val code = deepLinkUrl.getQueryParameter("code")
+            if (state == null || code == null) {
+                CardStatus.ApproveOrderError(CardError.malformedDeepLinkError)
+            } else {
+                val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
+                val result = CardResult(orderId, deepLinkUrl, liabilityShift)
+                CardStatus.ApproveOrderSuccess(result)
             }
         }
     }
