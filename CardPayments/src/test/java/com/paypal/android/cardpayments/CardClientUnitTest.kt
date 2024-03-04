@@ -28,6 +28,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,6 +44,8 @@ class CardClientUnitTest {
     private val cardRequest = CardRequest(orderId, card, "return_url")
     private val cardVaultRequest =
         CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
+
+    private val authChallengeLauncher = mockk<CardAuthChallengeLauncher>(relaxed = true)
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
@@ -301,10 +304,11 @@ class CardClientUnitTest {
     fun `vault notifies listener of update setup token success`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val cardVaultResult = CardVaultResult("fake-setup-token-id-from-result", "fake-status")
+        val updateSetupTokenResult =
+            UpdateSetupTokenResult("fake-setup-token-id-from-result", "fake-status", null)
         coEvery {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
-        } returns cardVaultResult
+        } returns updateSetupTokenResult
 
         sut.vault(activity, cardVaultRequest)
         advanceUntilIdle()
@@ -313,7 +317,9 @@ class CardClientUnitTest {
         verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
-        assertEquals(cardVaultResult, actual)
+        assertEquals("fake-setup-token-id-from-result", actual.setupTokenId)
+        assertEquals("fake-status", actual.status)
+        assertNull(actual.authChallenge)
     }
 
     @Test
@@ -343,6 +349,7 @@ class CardClientUnitTest {
             paymentMethodTokensAPI,
             analyticsService,
             browserSwitchClient,
+            authChallengeLauncher,
             dispatcher
         )
         sut.approveOrderListener = approveOrderListener
