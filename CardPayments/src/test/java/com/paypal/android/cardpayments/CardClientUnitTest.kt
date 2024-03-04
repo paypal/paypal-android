@@ -45,7 +45,7 @@ class CardClientUnitTest {
     private val cardVaultRequest =
         CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
 
-    private val authChallengeLauncher = mockk<CardAuthChallengeLauncher>(relaxed = true)
+    private val authChallengeLauncher = mockk<CardAuthLauncher>(relaxed = true)
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)

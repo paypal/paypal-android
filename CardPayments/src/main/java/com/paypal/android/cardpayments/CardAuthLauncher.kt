@@ -10,7 +10,7 @@ import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.corepayments.PayPalSDKError
 import org.json.JSONObject
 
-internal class CardAuthChallengeLauncher(
+internal class CardAuthLauncher(
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
 ) {
 

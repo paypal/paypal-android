@@ -16,7 +16,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 /**
  * Use this client to approve an order with a [Card].
@@ -30,7 +29,7 @@ class CardClient internal constructor(
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
     private val browserSwitchClient: BrowserSwitchClient,
-    private val authChallengeLauncher: CardAuthChallengeLauncher,
+    private val authChallengeLauncher: CardAuthLauncher,
     private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -65,7 +64,7 @@ class CardClient internal constructor(
                 DataVaultPaymentMethodTokensAPI(configuration),
                 AnalyticsService(activity.applicationContext, configuration),
                 BrowserSwitchClient(),
-                CardAuthChallengeLauncher(),
+                CardAuthLauncher(),
                 Dispatchers.Main
             )
 
