@@ -15,5 +15,7 @@ import kotlinx.parcelize.Parcelize
 data class CardVaultResult(
     val setupTokenId: String,
     val status: String,
+    // NOTE: This technically needs to null by default to prevent a breaking change
+    // NEXT MAJOR VERSION: make `CardVaultResult` constructor private
     val authChallenge: CardAuthChallenge? = null
 ) : Parcelable
