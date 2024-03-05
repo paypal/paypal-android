@@ -27,7 +27,6 @@ import com.paypal.android.uishared.components.CardSetupTokenView
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity

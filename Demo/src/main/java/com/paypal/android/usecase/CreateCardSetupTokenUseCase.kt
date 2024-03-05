@@ -7,7 +7,6 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import javax.inject.Inject
 
 class CreateCardSetupTokenUseCase @Inject constructor(
