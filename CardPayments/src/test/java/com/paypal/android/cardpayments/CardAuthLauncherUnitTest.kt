@@ -239,6 +239,25 @@ class CardAuthLauncherUnitTest {
         assertEquals("SCA_COMPLETE", vaultResult.status)
     }
 
+    @Test
+    fun `deliverBrowserSwitchResult() returns vault canceled when deep link url contains the word cancel`() {
+        sut = CardAuthLauncher(browserSwitchClient)
+
+        val scheme = "com.paypal.android.demo"
+        val domain = "example.com"
+        val successDeepLink = "$scheme://$domain/canceled"
+
+        val browserSwitchResult = createBrowserSwitchResult(
+            BrowserSwitchStatus.SUCCESS,
+            vaultMetadata,
+            Uri.parse(successDeepLink)
+        )
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        val status = sut.deliverBrowserSwitchResult(activity) as CardStatus.VaultCanceled
+        assertEquals("fake-setup-token-id", status.setupTokenId)
+    }
+
     private fun createBrowserSwitchResult(
         @BrowserSwitchStatus status: Int,
         metadata: JSONObject? = null,

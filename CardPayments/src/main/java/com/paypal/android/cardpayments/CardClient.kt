@@ -158,7 +158,7 @@ class CardClient internal constructor(
             when (status) {
                 is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
                 is CardStatus.VaultError -> notifyVaultFailure(status.error)
-                CardStatus.VaultCanceled -> notifyVaultCancelation()
+                is CardStatus.VaultCanceled -> notifyVaultCancelation()
                 is CardStatus.ApproveOrderError -> notifyApproveOrderFailure(status.error)
                 is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
                 is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled()

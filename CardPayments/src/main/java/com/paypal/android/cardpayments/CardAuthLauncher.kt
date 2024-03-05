@@ -75,15 +75,18 @@ internal class CardAuthLauncher(
             }
         }
 
-    private fun parseVaultResult(browserSwitchResult: BrowserSwitchResult) =
-        when (browserSwitchResult.status) {
+    private fun parseVaultResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
+        val setupTokenId =
+            browserSwitchResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
+        return when (browserSwitchResult.status) {
             BrowserSwitchStatus.SUCCESS -> parseVaultSuccessResult(browserSwitchResult)
-            BrowserSwitchStatus.CANCELED -> CardStatus.VaultCanceled
+            BrowserSwitchStatus.CANCELED -> CardStatus.VaultCanceled(setupTokenId)
             else -> null
         }
+    }
 
     private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
-        val orderId = browserSwitchResult.requestMetadata?.getString(METADATA_KEY_ORDER_ID)
+        val orderId = browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
         return if (orderId == null) {
             CardStatus.ApproveOrderError(CardError.unknownError)
         } else {
@@ -109,18 +112,17 @@ internal class CardAuthLauncher(
 
             // NOTE: this assumes that when the merchant created a setup token, they used a
             // return_url with word "success" in it (or a cancel_url with the word "cancel" in it)
+            val setupTokenId =
+                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
             val deepLinkUrlString = deepLinkUrl.toString()
             val didSucceed = deepLinkUrlString.contains("success")
             if (didSucceed) {
-                val setupTokenId = browserSwitchResult.requestMetadata?.getString(
-                    METADATA_KEY_SETUP_TOKEN_ID
-                )
                 val result = CardVaultResult(setupTokenId!!, "SCA_COMPLETE")
                 CardStatus.VaultSuccess(result)
             } else {
                 val didCancel = deepLinkUrlString.contains("cancel")
                 if (didCancel) {
-                    CardStatus.VaultCanceled
+                    CardStatus.VaultCanceled(setupTokenId)
                 } else {
                     CardStatus.VaultError(CardError.unknownError)
                 }
