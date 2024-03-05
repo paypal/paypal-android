@@ -16,5 +16,8 @@ fun CardSetupTokenView(setupToken: CardSetupToken) {
         PropertyView(name = "ID", value = setupToken.id)
         PropertyView(name = "Customer ID", value = setupToken.customerId)
         PropertyView(name = "Status", value = setupToken.status)
+        setupToken.verificationStatus?.let { verificationStatus ->
+            PropertyView(name = "Verification Status", value = verificationStatus)
+        }
     }
 }

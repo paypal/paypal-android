@@ -22,11 +22,10 @@ fun OrderView(order: Order, title: String? = null) {
             .padding(UIConstants.paddingMedium)
     ) {
         title?.let { text ->
-            Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = UIConstants.paddingMedium)
+                modifier = Modifier.padding(vertical = UIConstants.paddingMedium)
             )
         }
         Column(

@@ -5,7 +5,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
@@ -18,8 +20,7 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.cardpayments.CardAuthChallenge
+import com.paypal.android.usecase.GetSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
+    val getSetupTokenUseCase: GetSetupTokenUseCase,
     val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
@@ -48,16 +50,28 @@ class VaultCardViewModel @Inject constructor(
     private val createdSetupToken: CardSetupToken?
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
-    private var vaultCardState
-        get() = _uiState.value.vaultCardState
+    private var updateSetupTokenState
+        get() = _uiState.value.updateSetupTokenState
         set(value) {
-            _uiState.update { it.copy(vaultCardState = value) }
+            _uiState.update { it.copy(updateSetupTokenState = value) }
+        }
+
+    private var authChallengeState
+        get() = _uiState.value.authChallengeState
+        set(value) {
+            _uiState.update { it.copy(authChallengeState = value) }
         }
 
     private var createPaymentTokenState
         get() = _uiState.value.createPaymentTokenState
         set(value) {
             _uiState.update { it.copy(createPaymentTokenState = value) }
+        }
+
+    private var refreshSetupTokenState
+        get() = _uiState.value.refreshSetupTokenState
+        set(value) {
+            _uiState.update { it.copy(refreshSetupTokenState = value) }
         }
 
     var cardNumber: String
@@ -106,7 +120,8 @@ class VaultCardViewModel @Inject constructor(
     fun updateSetupToken(activity: AppCompatActivity) {
         val setupToken = createdSetupToken
         if (setupToken == null) {
-            vaultCardState = ActionState.Failure(Exception("Create a setup token to continue."))
+            updateSetupTokenState =
+                ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
                 updateSetupTokenWithId(activity, setupToken.id)
@@ -115,11 +130,11 @@ class VaultCardViewModel @Inject constructor(
     }
 
     private suspend fun updateSetupTokenWithId(activity: AppCompatActivity, setupTokenId: String) {
-        vaultCardState = ActionState.Loading
+        updateSetupTokenState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
             is SDKSampleServerResult.Failure -> {
-                vaultCardState = clientIdResult.mapToActionState()
+                updateSetupTokenState = clientIdResult.mapToActionState()
             }
 
             is SDKSampleServerResult.Success -> {
@@ -127,12 +142,13 @@ class VaultCardViewModel @Inject constructor(
                 val configuration = CoreConfig(clientId = clientId)
                 cardClient = CardClient(activity, configuration)
                 cardClient.cardVaultListener = object : CardVaultListener {
+
                     override fun onVaultSuccess(result: CardVaultResult) {
-                        vaultCardState = ActionState.Success(result)
+                        updateSetupTokenState = ActionState.Success(result)
                     }
 
                     override fun onVaultFailure(error: PayPalSDKError) {
-                        vaultCardState = ActionState.Failure(error)
+                        updateSetupTokenState = ActionState.Failure(error)
                     }
                 }
 
@@ -147,8 +163,10 @@ class VaultCardViewModel @Inject constructor(
     fun createPaymentToken() {
         val setupToken = createdSetupToken
         if (setupToken == null) {
-            vaultCardState = ActionState.Failure(Exception("Create a setup token to continue."))
+            createPaymentTokenState =
+                ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
+            createPaymentTokenState = ActionState.Loading
             viewModelScope.launch {
                 createPaymentTokenState = createPaymentTokenUseCase(setupToken).mapToActionState()
             }
@@ -167,6 +185,22 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
+        authChallengeState = ActionState.Loading
+
+        // change listener behavior to handle auth result
+        cardClient.cardVaultListener = object : CardVaultListener {
+            override fun onVaultSuccess(result: CardVaultResult) {
+                viewModelScope.launch {
+                    refreshSetupTokenState =
+                        getSetupTokenUseCase(result.setupTokenId).mapToActionState()
+                    authChallengeState = ActionState.Success(result)
+                }
+            }
+
+            override fun onVaultFailure(error: PayPalSDKError) {
+                authChallengeState = ActionState.Failure(error)
+            }
+        }
         cardClient.presentAuthChallenge(activity, authChallenge)
     }
 }
