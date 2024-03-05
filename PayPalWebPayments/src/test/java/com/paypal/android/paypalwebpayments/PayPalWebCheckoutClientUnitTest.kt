@@ -143,6 +143,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         sut.handleBrowserSwitchResult()
         verify { sut.listener?.wasNot(Called) }
+        verify { sut.vaultListener?.wasNot(Called) }
     }
 
     @Test

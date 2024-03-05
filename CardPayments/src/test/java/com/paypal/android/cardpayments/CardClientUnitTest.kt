@@ -177,7 +177,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of approve order success`() = runTest {
+    fun `handleBrowserSwitchResult() notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
@@ -194,7 +194,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of approve order failure`() = runTest {
+    fun `handleBrowserSwitchResult() notifies merchant of approve order failure`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
@@ -211,7 +211,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of approve order cancelation`() = runTest {
+    fun `handleBrowserSwitchResult() notifies merchant of approve order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
@@ -222,6 +222,20 @@ class CardClientUnitTest {
         sut.handleBrowserSwitchResult(activity)
         verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderCanceled() }
     }
+
+    @Test
+    fun `handleBrowserSwitchResult() doesn't deliver result when browserSwitchResult is null`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            sut.approveOrderListener = approveOrderListener
+            sut.cardVaultListener = cardVaultListener
+
+            every { cardAuthLauncher.deliverBrowserSwitchResult(activity) } returns null
+
+            sut.handleBrowserSwitchResult(activity)
+            verify { sut.approveOrderListener?.wasNot(Called) }
+            verify { sut.cardVaultListener?.wasNot(Called) }
+        }
 
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
