@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-sealed class CardAuthChallenge() {
+sealed class CardAuthChallenge {
     // Ref: https://stackoverflow.com/a/44420084
     internal abstract val url: Uri
     internal abstract val returnUrlScheme: String?
