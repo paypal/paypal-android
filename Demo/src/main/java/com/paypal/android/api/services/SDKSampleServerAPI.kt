@@ -83,6 +83,11 @@ class SDKSampleServerAPI {
 
         @POST("/payment_tokens")
         suspend fun createPaymentToken(@Body jsonObject: JsonObject): ResponseBody
+
+        @GET("/setup-tokens/{setupTokenId}")
+        suspend fun getSetupToken(
+            @Path("setupTokenId") setupTokenId: String,
+        ): ResponseBody
     }
 
     private val serviceMap: Map<MerchantIntegration, RetrofitService>
@@ -187,6 +192,24 @@ class SDKSampleServerAPI {
             id = responseJSON.getString("id"),
             customerId = customerJSON.getString("id"),
             status = responseJSON.getString("status"),
+        )
+    }
+
+    suspend fun getSetupToken(
+        setupTokenId: String,
+        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
+    ) = safeApiCall {
+        val response = findService(merchantIntegration).getSetupToken(setupTokenId)
+        val responseJSON = JSONObject(response.string())
+        val customerJSON = responseJSON.getJSONObject("customer")
+        val cardJSON = responseJSON
+            .getJSONObject("payment_source")
+            .getJSONObject("card")
+        CardSetupToken(
+            id = responseJSON.getString("id"),
+            customerId = customerJSON.getString("id"),
+            status = responseJSON.getString("status"),
+            verificationStatus = cardJSON.getString("verification_status")
         )
     }
 

@@ -13,6 +13,7 @@ class CreateCardSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
+    // TODO: pass SCA enum as parameter instead of perform3DS
     suspend operator fun invoke(perform3DS: Boolean): SDKSampleServerResult<CardSetupToken, Exception> =
         withContext(Dispatchers.IO) {
             // create a payment token with an empty card attribute; the merchant app will
