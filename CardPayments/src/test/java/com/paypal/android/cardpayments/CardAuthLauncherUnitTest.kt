@@ -37,13 +37,17 @@ class CardAuthLauncherUnitTest {
         .put("request_type", "approve_order")
         .put("order_id", "fake-order-id")
 
+    private val vaultMetadata = JSONObject()
+        .put("request_type", "vault")
+        .put("setup_token_id", "fake-setup-token-id")
+
     @Before
     fun beforeEach() {
         browserSwitchClient = mockk(relaxed = true)
     }
 
     @Test
-    fun `presentAuthChallenge() returns an error when it cannot browser switch`() {
+    fun `presentAuthChallenge() returns an error for approve order when it cannot browser switch`() {
         val browserSwitchException = mockk<BrowserSwitchException>()
         every { browserSwitchException.message } returns "error message from browser switch"
 
@@ -212,6 +216,27 @@ class CardAuthLauncherUnitTest {
 
         val status = sut.deliverBrowserSwitchResult(activity) as CardStatus.ApproveOrderCanceled
         assertEquals("fake-order-id", status.orderId)
+    }
+
+    @Test
+    fun `deliverBrowserSwitchResult() returns vault success when deep link url contains the word success`() {
+        sut = CardAuthLauncher(browserSwitchClient)
+
+        val scheme = "com.paypal.android.demo"
+        val domain = "example.com"
+        val successDeepLink = "$scheme://$domain/success"
+
+        val browserSwitchResult = createBrowserSwitchResult(
+            BrowserSwitchStatus.SUCCESS,
+            vaultMetadata,
+            Uri.parse(successDeepLink)
+        )
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        val status = sut.deliverBrowserSwitchResult(activity) as CardStatus.VaultSuccess
+        val vaultResult = status.result
+        assertEquals("fake-setup-token-id", vaultResult.setupTokenId)
+        assertEquals("SCA_COMPLETE", vaultResult.status)
     }
 
     private fun createBrowserSwitchResult(
