@@ -30,6 +30,7 @@ class CardClient internal constructor(
 
     var approveOrderListener: ApproveOrderListener? = null
 
+    // NEXT MAJOR VERSION: rename to vaultListener
     /**
      * @suppress
      */

@@ -189,7 +189,7 @@ class CardClientUnitTest {
         sut.handleBrowserSwitchResult(activity)
 
         val slot = slot<CardResult>()
-        verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderSuccess(capture(slot)) }
+        verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(slot)) }
         assertSame(successResult, slot.captured)
     }
 
@@ -206,7 +206,7 @@ class CardClientUnitTest {
         sut.handleBrowserSwitchResult(activity)
 
         val slot = slot<PayPalSDKError>()
-        verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderFailure(capture(slot)) }
+        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(slot)) }
         assertSame(error, slot.captured)
     }
 
@@ -220,7 +220,56 @@ class CardClientUnitTest {
         } returns CardStatus.ApproveOrderCanceled("fake-order-id")
 
         sut.handleBrowserSwitchResult(activity)
-        verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderCanceled() }
+        verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of vault success`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val successResult = CardVaultResult("fake-setup-token-id", "fake-status")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.VaultSuccess(successResult)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<CardVaultResult>()
+        verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(slot)) }
+        assertSame(successResult, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of vault failure`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.VaultError(error)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(slot)) }
+        assertSame(error, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of vault order cancelation`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.VaultCanceled("fake-setup-token-id")
+
+        sut.handleBrowserSwitchResult(activity)
+        // BREAKING CHANGE CALLOUT: if we introduce an "onVaultCanceled()" listener method, it could
+        // break existing merchant integrations
+        verify(exactly = 1) { cardVaultListener.onVaultFailure(any()) }
     }
 
     @Test
