@@ -24,6 +24,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -173,6 +174,53 @@ class CardClientUnitTest {
 
         val capturedError = errorSlot.captured
         assertEquals("mock_error_message", capturedError.errorDescription)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult notifies merchant of approve order success`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        val successResult = CardResult("fake-order-id")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.ApproveOrderSuccess(successResult)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<CardResult>()
+        verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderSuccess(capture(slot)) }
+        assertSame(successResult, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult notifies merchant of approve order failure`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.ApproveOrderError(error)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderFailure(capture(slot)) }
+        assertSame(error, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult notifies merchant of approve order cancelation`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.ApproveOrderCanceled("fake-order-id")
+
+        sut.handleBrowserSwitchResult(activity)
+        verify(exactly = 1) { sut.approveOrderListener?.onApproveOrderCanceled() }
     }
 
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
