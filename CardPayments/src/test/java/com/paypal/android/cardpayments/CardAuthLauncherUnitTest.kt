@@ -17,7 +17,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class CardAuthLauncherUnitTest {
 
     private lateinit var browserSwitchClient: BrowserSwitchClient
@@ -45,7 +48,7 @@ class CardAuthLauncherUnitTest {
 
         every { browserSwitchClient.start(any(), any()) } throws browserSwitchException
 
-        val returnUrl = "merchant.app://return.com/destination"
+        val returnUrl = "merchant.app://return.com/deep-link"
         val cardRequest = CardRequest("fake-order-id", card, returnUrl)
         val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
 
@@ -59,7 +62,7 @@ class CardAuthLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every { browserSwitchClient.start(activity, capture(slot)) } just runs
 
-        val returnUrl = "merchant.app://return.com/destination"
+        val returnUrl = "merchant.app://return.com/deep-link"
         val cardRequest = CardRequest("fake-order-id", card, returnUrl)
         val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
 
@@ -72,7 +75,7 @@ class CardAuthLauncherUnitTest {
         assertEquals("approve_order", metadata?.getString("request_type"))
         assertEquals("fake-order-id", metadata?.getString("order_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
-        assertEquals(Uri.parse("merchant.app://return.com/destination"), browserSwitchOptions.url)
+        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
     }
 
     @Test
@@ -80,7 +83,7 @@ class CardAuthLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every { browserSwitchClient.start(activity, capture(slot)) } just runs
 
-        val returnUrl = "merchant.app://return.com/destination"
+        val returnUrl = "merchant.app://return.com/deep-link"
         val vaultRequest = CardVaultRequest("fake-setup-token-id", card, returnUrl)
         val vaultAuthRequest = CardAuthChallenge.Vault(url, vaultRequest)
 
@@ -93,7 +96,7 @@ class CardAuthLauncherUnitTest {
         assertEquals("vault", metadata?.getString("request_type"))
         assertEquals("fake-setup-token-id", metadata?.getString("setup_token_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
-        assertEquals(Uri.parse("merchant.app://return.com/destination"), browserSwitchOptions.url)
+        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
     }
 
     // TODO: migrate from approve order flow
