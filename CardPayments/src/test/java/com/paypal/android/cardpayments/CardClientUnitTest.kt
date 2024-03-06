@@ -286,6 +286,65 @@ class CardClientUnitTest {
             verify { sut.cardVaultListener?.wasNot(Called) }
         }
 
+    @Test
+    fun `presentAuthChallenge() presents an approve order auth challenge using auth launcher`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            sut.approveOrderListener = approveOrderListener
+
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns null
+
+            sut.presentAuthChallenge(activity, authChallenge)
+            verify { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) }
+            verify(exactly = 0) { approveOrderListener.onApproveOrderFailure(any()) }
+        }
+
+    @Test
+    fun `presentAuthChallenge() propagates error to approve order listener`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns error
+
+        sut.presentAuthChallenge(activity, authChallenge)
+        verify { approveOrderListener.onApproveOrderFailure(error) }
+    }
+
+    @Test
+    fun `presentAuthChallenge() presents a vault auth challenge using auth launcher`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns null
+
+        sut.presentAuthChallenge(activity, authChallenge)
+        verify { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) }
+        verify(exactly = 0) { cardVaultListener.onVaultFailure(any()) }
+    }
+
+    @Test
+    fun `presentAuthChallenge() propagates error to vault listener`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns error
+
+        sut.presentAuthChallenge(activity, authChallenge)
+        verify { cardVaultListener.onVaultFailure(error) }
+    }
+
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(

@@ -139,7 +139,13 @@ class CardClient internal constructor(
 
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
         authChallengeLauncher.presentAuthChallenge(activity, authChallenge)?.let { launchError ->
-            // TODO: notify auth challenger presentation failure
+            when (authChallenge) {
+                is CardAuthChallenge.ApproveOrder ->
+                    approveOrderListener?.onApproveOrderFailure(launchError)
+
+                is CardAuthChallenge.Vault ->
+                    cardVaultListener?.onVaultFailure(launchError)
+            }
         }
     }
 
