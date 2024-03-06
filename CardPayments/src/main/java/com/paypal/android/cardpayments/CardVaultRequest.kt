@@ -15,6 +15,6 @@ import kotlinx.parcelize.Parcelize
 data class CardVaultRequest(
     val setupTokenId: String,
     val card: Card,
-    // NOTE: This needs to null by default to prevent a breaking change
+    // NOTE: This needs to be null by default to prevent a breaking change
     val returnUrl: String? = "",
 ) : Parcelable

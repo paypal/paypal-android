@@ -162,4 +162,9 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
         assertEquals("fake-status", result.status)
     }
+
+    @Test
+    fun updateSetupToken_returnsVaultResultWithPayerActionURL() = runTest {
+        // TODO: implement
+    }
 }
