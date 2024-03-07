@@ -7,6 +7,10 @@
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
+  * Add `CardClient#presentAuthChallenge()`
+  * Add `returnUrl` property to `CardVaultRequest`
+  * Add `authChallenge` property to `CardVaultResult`
+  * Add `CardAuthChallenge` type
 * FraudDetection
   * Bump Magnes dependency to version 5.4.0
 * PaymentButtons

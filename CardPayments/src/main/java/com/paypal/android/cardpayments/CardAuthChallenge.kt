@@ -4,6 +4,10 @@ import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+/**
+ * Pass this object to [CardClient.presentAuthChallenge] to present an authentication challenge
+ * that was received in response to a [CardClient.approveOrder] or [CardClient.vault] call.
+ */
 sealed class CardAuthChallenge {
     // Ref: https://stackoverflow.com/a/44420084
     internal abstract val url: Uri

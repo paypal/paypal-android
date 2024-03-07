@@ -137,6 +137,9 @@ class CardClient internal constructor(
         }
     }
 
+    /**
+     * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
+     */
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
         authChallengeLauncher.presentAuthChallenge(activity, authChallenge)?.let { launchError ->
             when (authChallenge) {
