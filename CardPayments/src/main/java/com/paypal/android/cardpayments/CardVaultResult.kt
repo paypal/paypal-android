@@ -7,7 +7,8 @@ package com.paypal.android.cardpayments
  *
  * @param setupTokenId the id for the setup token that was recently updated
  * @param status the status of the updated setup token
- * @param authChallenge an authentication challenge; will be non-null when 3DS authentication is required to complete a vault
+ * @param authChallenge an authentication challenge; will be non-null when 3DS authentication
+ * is required to complete a vault
  */
 // NEXT MAJOR VERSION: make `CardVaultResult` constructor private
 data class CardVaultResult(
