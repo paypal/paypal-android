@@ -15,17 +15,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.paypal.android.R
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
-import com.paypal.android.uishared.components.BooleanOptionList
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.CardSetupTokenView
 import com.paypal.android.uishared.components.CardVaultResultView
+import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.InfoColumn
 import com.paypal.android.uishared.components.PropertyView
@@ -103,10 +105,11 @@ private fun Step_CreateSetupToken(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = stepNumber, title = "Create Setup Token")
-        BooleanOptionList(
-            title = "SCA WHEN REQUIRED",
-            selectedOption = uiState.shouldRequest3DS,
-            onSelectedOptionChange = { value -> viewModel.shouldRequest3DS = value },
+        EnumOptionList(
+            title = stringResource(id = R.string.sca_title),
+            stringArrayResId = R.array.sca_options,
+            onSelectedOptionChange = { value -> viewModel.scaOption = value },
+            selectedOption = uiState.scaOption
         )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",

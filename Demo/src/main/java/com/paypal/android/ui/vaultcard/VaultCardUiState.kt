@@ -4,6 +4,7 @@ import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardVaultResult
+import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.state.ActionState
 
 data class VaultCardUiState(
@@ -15,7 +16,7 @@ data class VaultCardUiState(
     val cardNumber: String = "",
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
-    val shouldRequest3DS: Boolean = false,
+    val scaOption: SCA = SCA.SCA_WHEN_REQUIRED,
 ) {
     val isCreateSetupTokenSuccessful: Boolean
         get() = createSetupTokenState is ActionState.Success

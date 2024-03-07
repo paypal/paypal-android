@@ -12,6 +12,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
+import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
@@ -92,10 +93,10 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(cardSecurityCode = value) }
         }
 
-    var shouldRequest3DS: Boolean
-        get() = _uiState.value.shouldRequest3DS
+    var scaOption: SCA
+        get() = _uiState.value.scaOption
         set(value) {
-            _uiState.update { it.copy(shouldRequest3DS = value) }
+            _uiState.update { it.copy(scaOption = value) }
         }
 
     fun prefillCard(testCard: TestCard) {
@@ -112,8 +113,8 @@ class VaultCardViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            val perform3DS = _uiState.value.shouldRequest3DS
-            createSetupTokenState = createSetupTokenUseCase(perform3DS).mapToActionState()
+            val sca = _uiState.value.scaOption
+            createSetupTokenState = createSetupTokenUseCase(sca).mapToActionState()
         }
     }
 
