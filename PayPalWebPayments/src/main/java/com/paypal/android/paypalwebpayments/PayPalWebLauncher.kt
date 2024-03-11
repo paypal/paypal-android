@@ -121,12 +121,13 @@ internal class PayPalWebLauncher(
         val metadata = browserSwitchResult.requestMetadata
 
         return if (deepLinkUrl == null || metadata == null) {
-            PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.unknownError)
+            val orderId = metadata?.optString(METADATA_KEY_ORDER_ID)
+            PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.unknownError, orderId)
         } else {
             val payerId = deepLinkUrl.getQueryParameter("PayerID")
             val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
             if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
-                PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError)
+                PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError, orderId)
             } else {
                 PayPalWebStatus.CheckoutSuccess(PayPalWebCheckoutResult(orderId, payerId))
             }

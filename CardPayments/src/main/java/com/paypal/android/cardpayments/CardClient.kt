@@ -39,17 +39,16 @@ class CardClient internal constructor(
      */
     var cardVaultListener: CardVaultListener? = null
 
+    private var approveOrderId: String? = null
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        notifyApproveOrderFailure(error)
+        notifyApproveOrderFailure(error, approveOrderId)
     }
 
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
         cardVaultListener?.onVaultFailure(error)
     }
-
-    private var orderId: String? = null
 
     /**
      *  CardClient constructor
@@ -78,8 +77,8 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      */
     fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
-        orderId = cardRequest.orderId
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
+        approveOrderId = cardRequest.orderId
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
 
         CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
             confirmPaymentSource(activity, cardRequest)
@@ -100,7 +99,7 @@ class CardClient internal constructor(
             } else {
                 analyticsService.sendAnalyticsEvent(
                     "card-payments:3ds:confirm-payment-source:challenge-required",
-                    orderId
+                    cardRequest.orderId
                 )
                 approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
@@ -153,7 +152,7 @@ class CardClient internal constructor(
             approveOrderListener?.onApproveOrderThreeDSecureDidFinish()
             when (browserSwitchResult.status) {
                 BrowserSwitchStatus.SUCCESS -> handleBrowserSwitchSuccess(browserSwitchResult)
-                BrowserSwitchStatus.CANCELED -> notifyApproveOrderCanceled()
+                BrowserSwitchStatus.CANCELED -> notifyApproveOrderCanceled(browserSwitchResult)
             }
         }
     }
@@ -169,7 +168,7 @@ class CardClient internal constructor(
                     "card-payments:3ds:get-order-info:failed",
                     metadata.orderId
                 )
-                notifyApproveOrderFailure(error)
+                notifyApproveOrderFailure(error, metadata.orderId)
             }
         }
     }
@@ -190,17 +189,19 @@ class CardClient internal constructor(
         return CardResult(orderId, deepLinkUrl, liabilityShift)
     }
 
-    private fun notifyApproveOrderCanceled() {
+    private fun notifyApproveOrderCanceled(browserSwitchResult: BrowserSwitchResult) {
+        val metadata = ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)
+        val orderId = metadata?.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
         approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
+        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", result.orderId)
         approveOrderListener?.onApproveOrderSuccess(result)
     }
 
-    private fun notifyApproveOrderFailure(error: PayPalSDKError) {
+    private fun notifyApproveOrderFailure(error: PayPalSDKError, orderId: String?) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
         approveOrderListener?.onApproveOrderFailure(error)
     }

@@ -282,6 +282,7 @@ class PayPalNativeCheckoutClientTest {
 
         every { shippingData.shippingChangeType } returns ShippingChangeType.ADDRESS_CHANGE
         every { shippingData.shippingAddress } returns ShippingChangeAddress(countryCode = mockCountryCode)
+        every { shippingData.payToken } returns "mock-order-id"
 
         every {
             PayPalCheckout.registerCallbacks(
@@ -308,7 +309,7 @@ class PayPalNativeCheckoutClientTest {
             )
             analyticsService.sendAnalyticsEvent(
                 "paypal-native-payments:shipping-address-changed",
-                null
+                "mock-order-id"
             )
         }
     }
@@ -325,6 +326,7 @@ class PayPalNativeCheckoutClientTest {
 
             every { shippingData.shippingChangeType } returns ShippingChangeType.OPTION_CHANGE
             every { shippingData.selectedShippingOption } returns Options(mockId, true, mockLabel)
+            every { shippingData.payToken } returns "mock-order-id"
 
             every {
                 PayPalCheckout.registerCallbacks(
@@ -359,7 +361,7 @@ class PayPalNativeCheckoutClientTest {
                 )
                 analyticsService.sendAnalyticsEvent(
                     "paypal-native-payments:shipping-method-changed",
-                    null
+                    "mock-order-id"
                 )
             }
         }
