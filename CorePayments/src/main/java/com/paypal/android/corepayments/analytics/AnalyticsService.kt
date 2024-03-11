@@ -65,4 +65,29 @@ class AnalyticsService internal constructor(
             }
         }
     }
+
+    fun sendAnalyticsEvent(name: String, buttonType: String) {
+        scope.launch {
+            val timestamp = System.currentTimeMillis()
+            try {
+                val deviceData = deviceInspector.inspect()
+                val analyticsEventData = AnalyticsEventData(
+                    environment.name.lowercase(),
+                    name,
+                    timestamp,
+                    orderId = null,
+                    buttonType = buttonType
+                )
+                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
+                response.error?.message?.let { errorMessage ->
+                    Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
+                }
+            } catch (e: PayPalSDKError) {
+                Log.d(
+                    "[PayPal SDK]",
+                    "Failed to send analytics due to missing clientId: ${e.message}"
+                )
+            }
+        }
+    }
 }

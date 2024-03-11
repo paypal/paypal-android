@@ -17,6 +17,9 @@ import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
 
 @Suppress("TooManyFunctions")
@@ -30,6 +33,9 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      * Signals that the backing shape has changed and may require a full redraw.
      */
     private var shapeHasChanged = false
+
+    internal val analyticsService: AnalyticsService =
+        AnalyticsService(context, CoreConfig(clientId = "N/A", environment = Environment.LIVE))
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
@@ -220,6 +226,14 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
         }
+    }
+
+    override fun setOnClickListener(l: OnClickListener?) {
+        super.setOnClickListener(l)
+        analyticsService.sendAnalyticsEvent(
+            "paypal-button:tapped",
+            fundingType.toString().lowercase()
+        )
     }
 
     private fun updateSizeFrom(typedArray: TypedArray) {
