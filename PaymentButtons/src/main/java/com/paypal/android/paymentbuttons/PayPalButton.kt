@@ -72,7 +72,8 @@ open class PayPalButton @JvmOverloads constructor(
         contentDescription = context.getString(R.string.paypal_payment_button_description)
         analyticsService.sendAnalyticsEvent(
             "paypal-button:initialized",
-            PaymentButtonFundingType.PAYPAL.toString().lowercase()
+            orderId = null,
+            buttonType = PaymentButtonFundingType.PAYPAL.toString().lowercase()
         )
     }
 

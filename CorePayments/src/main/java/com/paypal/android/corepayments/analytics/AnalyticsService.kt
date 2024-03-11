@@ -40,7 +40,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-    fun sendAnalyticsEvent(name: String, orderId: String?) {
+    fun sendAnalyticsEvent(name: String, orderId: String?, buttonType: String? = null) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
@@ -51,31 +51,7 @@ class AnalyticsService internal constructor(
                     environment.name.lowercase(),
                     name,
                     timestamp,
-                    orderId
-                )
-                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
-                response.error?.message?.let { errorMessage ->
-                    Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
-                }
-            } catch (e: PayPalSDKError) {
-                Log.d(
-                    "[PayPal SDK]",
-                    "Failed to send analytics due to missing clientId: ${e.message}"
-                )
-            }
-        }
-    }
-
-    fun sendAnalyticsEvent(name: String, buttonType: String) {
-        scope.launch {
-            val timestamp = System.currentTimeMillis()
-            try {
-                val deviceData = deviceInspector.inspect()
-                val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
-                    name,
-                    timestamp,
-                    orderId = null,
+                    orderId = orderId,
                     buttonType = buttonType
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)

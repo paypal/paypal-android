@@ -232,7 +232,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         super.setOnClickListener(l)
         analyticsService.sendAnalyticsEvent(
             "paypal-button:tapped",
-            fundingType.toString().lowercase()
+            orderId = null,
+            buttonType = fundingType.toString().lowercase()
         )
     }
 

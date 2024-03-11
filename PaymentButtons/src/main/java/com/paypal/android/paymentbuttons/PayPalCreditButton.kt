@@ -55,7 +55,8 @@ class PayPalCreditButton @JvmOverloads constructor(
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
         analyticsService.sendAnalyticsEvent(
             "paypal-button:initialized",
-            PaymentButtonFundingType.PAYPAL_CREDIT.toString().lowercase()
+            orderId = null,
+            buttonType = PaymentButtonFundingType.PAYPAL_CREDIT.toString().lowercase()
         )
     }
 
