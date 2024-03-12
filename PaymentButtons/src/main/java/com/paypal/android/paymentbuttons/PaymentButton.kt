@@ -228,13 +228,15 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
     }
 
-    override fun setOnClickListener(l: OnClickListener?) {
-        super.setOnClickListener(l)
-        analyticsService.sendAnalyticsEvent(
-            "paypal-button:tapped",
-            orderId = null,
-            buttonType = fundingType.toString().lowercase()
-        )
+    override fun setOnClickListener(listener: OnClickListener?) {
+        super.setOnClickListener { view ->
+            listener?.onClick(view)
+            analyticsService.sendAnalyticsEvent(
+                "paypal-button:tapped",
+                orderId = null,
+                buttonType = fundingType.toString().lowercase()
+            )
+        }
     }
 
     private fun updateSizeFrom(typedArray: TypedArray) {
