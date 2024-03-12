@@ -11,7 +11,6 @@ class GetSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    // TODO: pass SCA enum as parameter instead of perform3DS
     suspend operator fun invoke(setupTokenId: String): SDKSampleServerResult<CardSetupToken, Exception> =
         withContext(Dispatchers.IO) {
             sdkSampleServerAPI.getSetupToken(setupTokenId)
