@@ -201,7 +201,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(123, "fake-error-description")
         every {
             cardAuthLauncher.deliverBrowserSwitchResult(activity)
-        } returns CardStatus.ApproveOrderError(error)
+        } returns CardStatus.ApproveOrderError(error, "fake-order-id")
 
         sut.handleBrowserSwitchResult(activity)
 

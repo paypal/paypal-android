@@ -88,7 +88,7 @@ internal class CardAuthLauncher(
     private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
         val orderId = browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
         return if (orderId == null) {
-            CardStatus.ApproveOrderError(CardError.unknownError)
+            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
         } else {
             when (browserSwitchResult.status) {
                 BrowserSwitchStatus.SUCCESS ->
@@ -137,12 +137,12 @@ internal class CardAuthLauncher(
         val deepLinkUrl = browserSwitchResult.deepLinkUrl
 
         return if (deepLinkUrl == null || deepLinkUrl.getQueryParameter("error") != null) {
-            CardStatus.ApproveOrderError(CardError.threeDSVerificationError)
+            CardStatus.ApproveOrderError(CardError.threeDSVerificationError, orderId)
         } else {
             val state = deepLinkUrl.getQueryParameter("state")
             val code = deepLinkUrl.getQueryParameter("code")
             if (state == null || code == null) {
-                CardStatus.ApproveOrderError(CardError.malformedDeepLinkError)
+                CardStatus.ApproveOrderError(CardError.malformedDeepLinkError, orderId)
             } else {
                 val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
                 val result = CardResult(orderId, deepLinkUrl, liabilityShift)

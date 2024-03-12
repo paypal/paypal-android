@@ -94,7 +94,7 @@ class CardClient internal constructor(
                 } else {
                     analyticsService.sendAnalyticsEvent(
                         "card-payments:3ds:confirm-payment-source:challenge-required",
-                        orderId
+                        cardRequest.orderId
                     )
                     approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
@@ -158,16 +158,16 @@ class CardClient internal constructor(
                 is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
                 is CardStatus.VaultError -> notifyVaultFailure(status.error)
                 is CardStatus.VaultCanceled -> notifyVaultCancelation()
-                is CardStatus.ApproveOrderError -> notifyApproveOrderFailure(status.error)
+                is CardStatus.ApproveOrderError ->
+                    notifyApproveOrderFailure(status.error, status.orderId)
+
                 is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
-                is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled()
+                is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
             }
         }
     }
 
-    private fun notifyApproveOrderCanceled(browserSwitchResult: BrowserSwitchResult) {
-        val metadata = ApproveOrderMetadata.fromJSON(browserSwitchResult.requestMetadata)
-        val orderId = metadata?.orderId
+    private fun notifyApproveOrderCanceled(orderId: String?) {
         analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
         approveOrderListener?.onApproveOrderCanceled()
     }
