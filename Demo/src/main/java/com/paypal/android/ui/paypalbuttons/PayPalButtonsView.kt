@@ -1,5 +1,7 @@
 package com.paypal.android.ui.paypalbuttons
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
@@ -154,7 +157,11 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAYPAL -> {
             AndroidView(
                 factory = { context ->
-                    PayPalButton(context)
+                    PayPalButton(context).apply {
+                        setOnClickListener {
+                            showToast(context, "PayPalButton clicked!")
+                        }
+                    }
                 },
                 update = { button ->
                     configureButton(button, uiState)
@@ -166,7 +173,11 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAY_LATER -> {
             AndroidView(
                 factory = { context ->
-                    PayLaterButton(context)
+                    PayLaterButton(context).apply {
+                        setOnClickListener {
+                            showToast(context, "PayLaterButton clicked!")
+                        }
+                    }
                 },
                 update = { button ->
                     configureButton(button, uiState)
@@ -178,7 +189,11 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAYPAL_CREDIT -> {
             AndroidView(
                 factory = { context ->
-                    PayPalCreditButton(context)
+                    PayPalCreditButton(context).apply {
+                        setOnClickListener {
+                            showToast(context, "PayPalCreditButton clicked!")
+                        }
+                    }
                 },
                 update = { button ->
                     configureButton(button, uiState)
@@ -235,6 +250,10 @@ fun PayPalButtonColorOptionListFactory(
             )
         }
     }
+}
+
+private fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
 }
 
 @ExperimentalMaterial3Api
