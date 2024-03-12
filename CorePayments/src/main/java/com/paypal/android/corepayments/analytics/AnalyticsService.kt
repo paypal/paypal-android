@@ -40,7 +40,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-    fun sendAnalyticsEvent(name: String, orderId: String?, buttonType: String? = null) {
+    fun sendAnalyticsEvent(name: String, orderId: String? = null, buttonType: String? = null) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
