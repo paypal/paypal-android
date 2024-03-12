@@ -50,7 +50,7 @@ class PayLaterButton @JvmOverloads constructor(
     init {
         updateLabel(PayPalButtonLabel.PAY_LATER)
         analyticsService.sendAnalyticsEvent(
-            "paypal-button:initialized",
+            "payment-button:initialized",
             orderId = null,
             buttonType = PaymentButtonFundingType.PAY_LATER.toString().lowercase()
         )
