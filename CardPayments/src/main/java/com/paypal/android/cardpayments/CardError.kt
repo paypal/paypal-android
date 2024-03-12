@@ -1,5 +1,6 @@
 package com.paypal.android.cardpayments
 
+import com.braintreepayments.api.BrowserSwitchException
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal object CardError {
@@ -14,5 +15,17 @@ internal object CardError {
     val malformedDeepLinkError = PayPalSDKError(
         code = CardErrorCode.MALFORMED_DEEPLINK_URL.ordinal,
         errorDescription = "Malformed deeplink URL."
+    )
+
+    // 2. An unknown error occurred.
+    val unknownError = PayPalSDKError(
+        code = CardErrorCode.UNKNOWN.ordinal,
+        errorDescription = "An unknown error occurred. Contact developer.paypal.com/support."
+    )
+
+    // 3. An unknown error occurred.
+    fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
+        code = CardErrorCode.BROWSER_SWITCH.ordinal,
+        errorDescription = cause.message ?: "Unable to Browser Switch"
     )
 }

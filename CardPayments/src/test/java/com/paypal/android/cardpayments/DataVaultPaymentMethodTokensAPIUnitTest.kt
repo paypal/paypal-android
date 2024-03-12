@@ -16,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -137,13 +138,17 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
     }
 
     @Test
-    fun updateSetupToken_returnsVaultResult() = runTest {
+    fun updateSetupToken_returnsStatusApprovedVaultResult() = runTest {
         // language=JSON
         val json = """
             {
               "updateVaultSetupToken": {
                 "id": "fake-setup-token-id-from-result",
-                "status": "fake-status"
+                "status": "APPROVED",
+                "links": [
+                    { "rel": "self", "href": "https://fake.com/self/url" },
+                    { "rel": "confirm", "href": "https://fake.com/confirm/url" }
+                ]
               }
             }
         """.trimIndent()
@@ -160,6 +165,39 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
 
         assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
-        assertEquals("fake-status", result.status)
+        assertEquals("APPROVED", result.status)
+        assertNull(result.approveHref)
+    }
+
+    @Test
+    fun updateSetupToken_returnsVaultResultWithPayerActionURL() = runTest {
+        // language=JSON
+        val json = """
+            {
+                "updateVaultSetupToken": {
+                    "id": "fake-setup-token-id-from-result",
+                    "status": "PAYER_ACTION_REQUIRED",
+                    "links": [
+                        { "rel": "self", "href": "https://fake.com/self/url" },
+                        { "rel": "approve", "href": "https://fake.com/approval/url" }
+                    ]
+                }
+            }
+        """.trimIndent()
+        val graphQLResponse = GraphQLResponse(JSONObject(json))
+        coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResponse
+
+        val card = Card(
+            number = "4111111111111111",
+            expirationMonth = "01",
+            expirationYear = "24",
+            securityCode = "123"
+        )
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
+        val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+
+        assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
+        assertEquals("PAYER_ACTION_REQUIRED", result.status)
+        assertEquals("https://fake.com/approval/url", result.approveHref)
     }
 }

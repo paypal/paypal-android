@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.paypal.android.R
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
-import com.paypal.android.ui.OptionList
+import com.paypal.android.uishared.components.OptionList
 
 @Composable
 fun PayPalCreditButtonColorOptionList(

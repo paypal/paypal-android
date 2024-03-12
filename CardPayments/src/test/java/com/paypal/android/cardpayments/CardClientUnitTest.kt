@@ -5,13 +5,8 @@ import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchResult
-import com.braintreepayments.api.BrowserSwitchStatus
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
-import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -28,6 +23,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,9 +37,11 @@ class CardClientUnitTest {
     private val card = Card("4111111111111111", "01", "24", "123")
     private val orderId = "sample-order-id"
 
-    private val cardRequest = CardRequest(orderId, card, "return_url")
+    private val cardRequest = CardRequest(orderId, card, "merchant.app://return_url")
     private val cardVaultRequest =
         CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
+
+    private val cardAuthLauncher = mockk<CardAuthLauncher>(relaxed = true)
 
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
@@ -51,13 +50,8 @@ class CardClientUnitTest {
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED)
 
-    private val paymentSource = PaymentSource("1111", "Visa")
-    private val approveOrderMetadata = ApproveOrderMetadata("sample-order-id", paymentSource)
-
     private val activity = mockk<FragmentActivity>(relaxed = true)
     private val activityLifecycle = mockk<Lifecycle>(relaxed = true)
-
-    private val browserSwitchClient = mockk<BrowserSwitchClient>(relaxed = true)
 
     private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
     private val cardVaultListener = mockk<CardVaultListener>(relaxed = true)
@@ -122,189 +116,34 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `approve order performs browser switch when payer action is required`() = runTest {
-        val sut = createCardClient(testScheduler)
-
+    fun `approveOrder() presents auth challenge when payer action is required`() = runTest {
         val threeDSecureAuthChallengeResponse =
             ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED, "/payer/action/href")
 
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
 
+        val sut = createCardClient(testScheduler)
         sut.approveOrder(activity, cardRequest)
         advanceUntilIdle()
 
-        val browserSwitchOptionsSlot = slot<BrowserSwitchOptions>()
-        verify(exactly = 1) {
-            browserSwitchClient.start(
-                activity,
-                capture(browserSwitchOptionsSlot)
-            )
-        }
+        val authChallengeSlot = slot<CardAuthChallenge>()
+        verify { cardAuthLauncher.presentAuthChallenge(activity, capture(authChallengeSlot)) }
 
-        val browserSwitchOptions = browserSwitchOptionsSlot.captured
-        assertEquals(Uri.parse("/payer/action/href"), browserSwitchOptions.url)
-    }
-
-    @Test
-    fun `handle browser switch result notifies user of success with liability shift`() =
-        runTest {
-            val sut = createCardClient(testScheduler)
-
-            val scheme = "com.paypal.android.demo"
-            val domain = "example.com"
-            val successDeepLink =
-                "$scheme://$domain/return_url?state=undefined&code=undefined&liability_shift=NO"
-
-            val browserSwitchResult = createBrowserSwitchResult(
-                BrowserSwitchStatus.SUCCESS,
-                approveOrderMetadata,
-                Uri.parse(successDeepLink)
-            )
-            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-            sut.handleBrowserSwitchResult(activity)
-            advanceUntilIdle()
-
-            val cardResultSlot = slot<CardResult>()
-            coVerify(exactly = 1) {
-                approveOrderListener.onApproveOrderSuccess(capture(cardResultSlot))
-            }
-
-            val cardResult = cardResultSlot.captured
-            assertEquals("sample-order-id", cardResult.orderId)
-            assertEquals("NO", cardResult.liabilityShift)
-        }
-
-    @Test
-    fun `handle browser switch result notifies user of error when deep link contains one`() =
-        runTest {
-            val sut = createCardClient(testScheduler)
-
-            val scheme = "com.paypal.android.demo"
-            val domain = "example.com"
-            val successDeepLink = "$scheme://$domain/return_url?error=error"
-
-            val browserSwitchResult = createBrowserSwitchResult(
-                BrowserSwitchStatus.SUCCESS,
-                approveOrderMetadata,
-                Uri.parse(successDeepLink)
-            )
-            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-            sut.handleBrowserSwitchResult(activity)
-            advanceUntilIdle()
-
-            val errorSlot = slot<PayPalSDKError>()
-            coVerify(exactly = 1) {
-                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
-            }
-
-            val error = errorSlot.captured
-            assertEquals(0, error.code)
-            assertEquals("3DS Verification is returning an error.", error.errorDescription)
-        }
-
-    @Test
-    fun `handle browser switch result notifies user of error when deep link is null`() =
-        runTest {
-            val sut = createCardClient(testScheduler)
-            val browserSwitchResult = createBrowserSwitchResult(
-                BrowserSwitchStatus.SUCCESS,
-                approveOrderMetadata,
-                deepLinkUrl = null
-            )
-            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-            sut.handleBrowserSwitchResult(activity)
-            advanceUntilIdle()
-
-            val errorSlot = slot<PayPalSDKError>()
-            coVerify(exactly = 1) {
-                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
-            }
-
-            val error = errorSlot.captured
-            assertEquals(0, error.code)
-            assertEquals("3DS Verification is returning an error.", error.errorDescription)
-        }
-
-    @Test
-    fun `handle browser switch result notifies user of error when success deep link is missing code parameter`() =
-        runTest {
-            val sut = createCardClient(testScheduler)
-
-            val scheme = "com.paypal.android.demo"
-            val domain = "example.com"
-            val successDeepLink = "$scheme://$domain/return_url?state=undefined&liability_shift=NO"
-
-            val browserSwitchResult = createBrowserSwitchResult(
-                BrowserSwitchStatus.SUCCESS,
-                approveOrderMetadata,
-                Uri.parse(successDeepLink)
-            )
-            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-            sut.handleBrowserSwitchResult(activity)
-            advanceUntilIdle()
-
-            val errorSlot = slot<PayPalSDKError>()
-            coVerify(exactly = 1) {
-                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
-            }
-
-            val error = errorSlot.captured
-            assertEquals(1, error.code)
-            assertEquals("Malformed deeplink URL.", error.errorDescription)
-        }
-
-    @Test
-    fun `handle browser switch result notifies user of error when success deep link is missing state parameter`() =
-        runTest {
-            val sut = createCardClient(testScheduler)
-
-            val scheme = "com.paypal.android.demo"
-            val domain = "example.com"
-            val successDeepLink = "$scheme://$domain/return_url?code=undefined&liability_shift=NO"
-
-            val browserSwitchResult = createBrowserSwitchResult(
-                BrowserSwitchStatus.SUCCESS,
-                approveOrderMetadata,
-                Uri.parse(successDeepLink)
-            )
-            every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-            sut.handleBrowserSwitchResult(activity)
-            advanceUntilIdle()
-
-            val errorSlot = slot<PayPalSDKError>()
-            coVerify(exactly = 1) {
-                approveOrderListener.onApproveOrderFailure(capture(errorSlot))
-            }
-
-            val error = errorSlot.captured
-            assertEquals(1, error.code)
-            assertEquals("Malformed deeplink URL.", error.errorDescription)
-        }
-
-    @Test
-    fun `handle browser switch result notifies listener of cancelation`() = runTest {
-        val sut = createCardClient(testScheduler)
-
-        val browserSwitchResult = createBrowserSwitchResult(BrowserSwitchStatus.CANCELED)
-        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
-
-        sut.handleBrowserSwitchResult(activity)
-        verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
+        val authChallenge = authChallengeSlot.captured as CardAuthChallenge.ApproveOrder
+        assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)
+        assertEquals(cardRequest, authChallenge.request)
+        assertEquals("merchant.app", authChallenge.returnUrlScheme)
     }
 
     @Test
     fun `vault notifies listener of update setup token success`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val cardVaultResult = CardVaultResult("fake-setup-token-id-from-result", "fake-status")
+        val updateSetupTokenResult =
+            UpdateSetupTokenResult("fake-setup-token-id-from-result", "fake-status", null)
         coEvery {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
-        } returns cardVaultResult
+        } returns updateSetupTokenResult
 
         sut.vault(activity, cardVaultRequest)
         advanceUntilIdle()
@@ -313,7 +152,9 @@ class CardClientUnitTest {
         verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
-        assertEquals(cardVaultResult, actual)
+        assertEquals("fake-setup-token-id-from-result", actual.setupTokenId)
+        assertEquals("fake-status", actual.status)
+        assertNull(actual.authChallenge)
     }
 
     @Test
@@ -335,6 +176,175 @@ class CardClientUnitTest {
         assertEquals("mock_error_message", capturedError.errorDescription)
     }
 
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of approve order success`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        val successResult = CardResult("fake-order-id")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.ApproveOrderSuccess(successResult)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<CardResult>()
+        verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(slot)) }
+        assertSame(successResult, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of approve order failure`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.ApproveOrderError(error, "fake-order-id")
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(slot)) }
+        assertSame(error, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of approve order cancelation`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.ApproveOrderCanceled("fake-order-id")
+
+        sut.handleBrowserSwitchResult(activity)
+        verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of vault success`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val successResult = CardVaultResult("fake-setup-token-id", "fake-status")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.VaultSuccess(successResult)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<CardVaultResult>()
+        verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(slot)) }
+        assertSame(successResult, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of vault failure`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.VaultError(error)
+
+        sut.handleBrowserSwitchResult(activity)
+
+        val slot = slot<PayPalSDKError>()
+        verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(slot)) }
+        assertSame(error, slot.captured)
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() notifies merchant of vault order cancelation`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        every {
+            cardAuthLauncher.deliverBrowserSwitchResult(activity)
+        } returns CardStatus.VaultCanceled("fake-setup-token-id")
+
+        sut.handleBrowserSwitchResult(activity)
+        // BREAKING CHANGE CALLOUT: if we introduce an "onVaultCanceled()" listener method, it could
+        // break existing merchant integrations
+        verify(exactly = 1) { cardVaultListener.onVaultFailure(any()) }
+    }
+
+    @Test
+    fun `handleBrowserSwitchResult() doesn't deliver result when browserSwitchResult is null`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            sut.approveOrderListener = approveOrderListener
+            sut.cardVaultListener = cardVaultListener
+
+            every { cardAuthLauncher.deliverBrowserSwitchResult(activity) } returns null
+
+            sut.handleBrowserSwitchResult(activity)
+            verify { sut.approveOrderListener?.wasNot(Called) }
+            verify { sut.cardVaultListener?.wasNot(Called) }
+        }
+
+    @Test
+    fun `presentAuthChallenge() presents an approve order auth challenge using auth launcher`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            sut.approveOrderListener = approveOrderListener
+
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns null
+
+            sut.presentAuthChallenge(activity, authChallenge)
+            verify { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) }
+            verify(exactly = 0) { approveOrderListener.onApproveOrderFailure(any()) }
+        }
+
+    @Test
+    fun `presentAuthChallenge() propagates error to approve order listener`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.approveOrderListener = approveOrderListener
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns error
+
+        sut.presentAuthChallenge(activity, authChallenge)
+        verify { approveOrderListener.onApproveOrderFailure(error) }
+    }
+
+    @Test
+    fun `presentAuthChallenge() presents a vault auth challenge using auth launcher`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns null
+
+        sut.presentAuthChallenge(activity, authChallenge)
+        verify { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) }
+        verify(exactly = 0) { cardVaultListener.onVaultFailure(any()) }
+    }
+
+    @Test
+    fun `presentAuthChallenge() propagates error to vault listener`() = runTest {
+        val sut = createCardClient(testScheduler)
+        sut.cardVaultListener = cardVaultListener
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns error
+
+        sut.presentAuthChallenge(activity, authChallenge)
+        verify { cardVaultListener.onVaultFailure(error) }
+    }
+
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(
@@ -342,25 +352,11 @@ class CardClientUnitTest {
             checkoutOrdersAPI,
             paymentMethodTokensAPI,
             analyticsService,
-            browserSwitchClient,
+            cardAuthLauncher,
             dispatcher
         )
         sut.approveOrderListener = approveOrderListener
         sut.cardVaultListener = cardVaultListener
         return sut
-    }
-
-    private fun createBrowserSwitchResult(
-        @BrowserSwitchStatus status: Int,
-        metadata: ApproveOrderMetadata? = null,
-        deepLinkUrl: Uri? = null
-    ): BrowserSwitchResult {
-
-        val browserSwitchResult = mockk<BrowserSwitchResult>(relaxed = true)
-        every { browserSwitchResult.status } returns status
-        every { browserSwitchResult.deepLinkUrl } returns deepLinkUrl
-
-        every { browserSwitchResult.requestMetadata } returns metadata?.toJSON()
-        return browserSwitchResult
     }
 }

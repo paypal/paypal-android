@@ -5,6 +5,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import org.json.JSONArray
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
@@ -19,7 +20,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): CardVaultResult {
+    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): UpdateSetupTokenResult {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
@@ -57,10 +58,17 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         val graphQLResponse =
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->
-            val setupToken = responseJSON.getJSONObject("updateVaultSetupToken")
-            return CardVaultResult(
-                setupTokenId = setupToken.getString("id"),
-                status = setupToken.getString("status")
+            val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
+            val status = setupTokenJSON.getString("status")
+            val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
+                findLinkHref(setupTokenJSON, "approve")
+            } else {
+                null
+            }
+            return UpdateSetupTokenResult(
+                setupTokenId = setupTokenJSON.getString("id"),
+                status = status,
+                approveHref = approveHref
             )
         }
         throw PayPalSDKError(
@@ -68,5 +76,16 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             "Error updating setup token: ${graphQLResponse.errors}",
             graphQLResponse.correlationId
         )
+    }
+
+    private fun findLinkHref(responseJSON: JSONObject, rel: String): String? {
+        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
+        for (i in 0 until linksJSON.length()) {
+            val link = linksJSON.getJSONObject(i)
+            if (link.getString("rel") == rel) {
+                return link.getString("href")
+            }
+        }
+        return null
     }
 }

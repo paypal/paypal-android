@@ -1,8 +1,5 @@
 package com.paypal.android.cardpayments
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
 /**
  * @suppress
  *
@@ -10,9 +7,12 @@ import kotlinx.parcelize.Parcelize
  *
  * @param setupTokenId the id for the setup token that was recently updated
  * @param status the status of the updated setup token
+ * @param authChallenge an authentication challenge; will be non-null when 3DS authentication
+ * is required to complete a vault
  */
-@Parcelize
+// NEXT MAJOR VERSION: make `CardVaultResult` constructor private
 data class CardVaultResult(
     val setupTokenId: String,
-    val status: String
-) : Parcelable
+    val status: String,
+    val authChallenge: CardAuthChallenge? = null
+)

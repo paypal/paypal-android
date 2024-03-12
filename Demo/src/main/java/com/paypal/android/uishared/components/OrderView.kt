@@ -1,10 +1,8 @@
 package com.paypal.android.uishared.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,11 +20,10 @@ fun OrderView(order: Order, title: String? = null) {
             .padding(UIConstants.paddingMedium)
     ) {
         title?.let { text ->
-            Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(horizontal = UIConstants.paddingMedium)
+                modifier = Modifier.padding(vertical = UIConstants.paddingMedium)
             )
         }
         Column(

@@ -119,13 +119,12 @@ class CardRequestFactoryUnitTest {
 
     @Test
     fun `it request 3DS strong consumer authentication with SCA_ALWAYS`() {
-        val card =
-            Card(
-                number = "4111111111111111",
-                expirationMonth = "01",
-                expirationYear = "2022",
-                "123"
-            )
+        val card = Card(
+            number = "4111111111111111",
+            expirationMonth = "01",
+            expirationYear = "2022",
+            "123"
+        )
 
         val cardRequest = CardRequest(orderId, card, returnUrl, SCA.SCA_ALWAYS)
 
