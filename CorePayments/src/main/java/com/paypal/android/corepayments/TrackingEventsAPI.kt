@@ -45,8 +45,8 @@ internal class TrackingEventsAPI constructor(
             .put(KEY_IS_SIMULATOR, isSimulator)
             .put(KEY_MERCHANT_APP_VERSION, merchantAppVersion)
             .put(KEY_PLATFORM, "Android")
-            .put(KEY_ORDER_ID, event.orderId)
-            .put(KEY_BUTTON_TYPE, event.buttonType)
+            .putOpt(KEY_ORDER_ID, event.orderId)
+            .putOpt(KEY_BUTTON_TYPE, event.buttonType)
             .put(KEY_TIMESTAMP, event.timestamp.toString())
             .put(KEY_TENANT_NAME, "PayPal")
 

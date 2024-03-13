@@ -55,7 +55,8 @@ class TrackingEventsAPIUnitTest {
             environment = "fake-environment",
             eventName = "fake-event",
             timestamp = 123L,
-            orderId = "fake-order-id"
+            orderId = "fake-order-id",
+            buttonType = "paypal"
         )
         sut.sendEvent(event, deviceData)
 
@@ -81,6 +82,7 @@ class TrackingEventsAPIUnitTest {
                         "is_simulator": true,
                         "mapv": "fake-merchant-app-version",
                         "mobile_device_model": "fake-device-model",
+                        "button_type": "paypal",
                         "platform": "Android",
                         "order_id": "fake-order-id",
                         "t": "123",
