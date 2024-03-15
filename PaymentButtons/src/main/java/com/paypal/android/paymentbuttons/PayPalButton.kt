@@ -73,7 +73,7 @@ open class PayPalButton @JvmOverloads constructor(
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
-            buttonType = PaymentButtonFundingType.PAYPAL.toString().lowercase()
+            buttonType = PaymentButtonFundingType.PAYPAL.buttonType
         )
     }
 

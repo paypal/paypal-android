@@ -314,8 +314,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 }
 
-internal enum class PaymentButtonFundingType {
-    PAYPAL,
-    PAY_LATER,
-    PAYPAL_CREDIT;
+internal enum class PaymentButtonFundingType(val buttonType: String) {
+    PAYPAL("PayPal"),
+    PAY_LATER("Pay Later"),
+    PAYPAL_CREDIT("Credit");
 }

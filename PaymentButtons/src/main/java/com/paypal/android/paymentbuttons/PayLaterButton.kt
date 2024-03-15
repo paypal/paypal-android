@@ -52,7 +52,7 @@ class PayLaterButton @JvmOverloads constructor(
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
-            buttonType = PaymentButtonFundingType.PAY_LATER.toString().lowercase()
+            buttonType = PaymentButtonFundingType.PAY_LATER.buttonType
         )
     }
 }
