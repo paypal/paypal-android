@@ -234,7 +234,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             analyticsService.sendAnalyticsEvent(
                 "payment-button:tapped",
                 orderId = null,
-                buttonType = fundingType.toString().lowercase()
+                buttonType = fundingType.buttonType
             )
         }
     }
