@@ -50,7 +50,7 @@ open class PayPalButton @JvmOverloads constructor(
      * the wordmark. Note: this does not support [PAY_LATER], if you require a button with that
      * label then use the specialized [PayLaterButton].
      */
-    open var label: PayPalButtonLabel = PayPalButtonLabel.PAYPAL
+    var label: PayPalButtonLabel = PayPalButtonLabel.PAYPAL
         set(value) {
             if (value != PayPalButtonLabel.PAY_LATER) {
                 field = value
@@ -92,7 +92,7 @@ open class PayPalButton @JvmOverloads constructor(
         label = PayPalButtonLabel(paypalLabelAttribute)
     }
 
-    protected fun updateLabel(updatedLabel: PayPalButtonLabel) {
+    private fun updateLabel(updatedLabel: PayPalButtonLabel) {
         when (updatedLabel.position) {
             PayPalButtonLabel.Position.START -> {
                 suffixTextVisibility = View.GONE
