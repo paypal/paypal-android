@@ -40,7 +40,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-    fun sendAnalyticsEvent(name: String, orderId: String? = null) {
+    fun sendAnalyticsEvent(name: String, orderId: String? = null, buttonType: String? = null) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
@@ -51,7 +51,8 @@ class AnalyticsService internal constructor(
                     environment.name.lowercase(),
                     name,
                     timestamp,
-                    orderId
+                    orderId = orderId,
+                    buttonType = buttonType
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->

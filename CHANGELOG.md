@@ -4,6 +4,8 @@
 * PaymentButtons
   * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
   * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
+  * Added analytics events
+    * `payment-button:initialized` and `payment-button:tapped`
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails

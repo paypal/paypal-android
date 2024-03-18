@@ -53,6 +53,11 @@ class PayPalCreditButton @JvmOverloads constructor(
                 updateColorFrom(typedArray)
             }
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
+        analyticsService.sendAnalyticsEvent(
+            "payment-button:initialized",
+            orderId = null,
+            buttonType = PaymentButtonFundingType.PAYPAL_CREDIT.buttonType
+        )
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {
