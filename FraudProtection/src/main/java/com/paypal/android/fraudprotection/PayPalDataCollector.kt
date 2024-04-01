@@ -69,6 +69,7 @@ class PayPalDataCollector internal constructor(
                 .disableBeacon(false)
                 .setMagnesEnvironment(environment)
                 .setAppGuid(uuidHelper.getInstallationGUID(context))
+                .setHasUserLocationConsent(request.hasUserLocationConsent)
             magnesSDK.setUp(magnesSettingsBuilder.build())
             val result = magnesSDK.collectAndSubmit(
                 appContext,
