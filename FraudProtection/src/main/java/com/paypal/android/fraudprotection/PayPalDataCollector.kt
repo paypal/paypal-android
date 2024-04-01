@@ -35,12 +35,22 @@ class PayPalDataCollector internal constructor(
      *
      * @return clientMetadataId Your server will send this to PayPal
      */
+    @Deprecated("This method is no longer supported.")
     @JvmOverloads
     fun collectDeviceData(
         context: Context,
         clientMetadataId: String? = null,
         additionalData: HashMap<String, String>? = null
     ): String {
+        val request = PayPalDataCollectorRequest(
+            hasUserLocationConsent = false,
+            clientMetadataId = clientMetadataId,
+            additionalData = additionalData
+        )
+        return collectDeviceData(context, request)
+    }
+
+    fun collectDeviceData(context: Context, request: PayPalDataCollectorRequest): String {
         val appContext = context.applicationContext
         return try {
             val magnesSettingsBuilder = MagnesSettings.Builder(appContext)
@@ -51,8 +61,8 @@ class PayPalDataCollector internal constructor(
             magnesSDK.setUp(magnesSettingsBuilder.build())
             val result = magnesSDK.collectAndSubmit(
                 appContext,
-                clientMetadataId,
-                additionalData
+                request.clientMetadataId,
+                HashMap(request.additionalData ?: emptyMap())
             )
             result.paypalClientMetaDataId
         } catch (e: InvalidInputException) {
