@@ -3,9 +3,11 @@ package com.paypal.android.ui.paypalweb
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.CoreConfig
@@ -45,6 +47,8 @@ class PayPalWebViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var pendingRequestState: String? = null
 
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
@@ -100,7 +104,7 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: AppCompatActivity, orderId: String) {
+    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -116,7 +120,16 @@ class PayPalWebViewModel @Inject constructor(
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
                 paypalClient.listener = this@PayPalWebViewModel
 
-                paypalClient.start(PayPalWebCheckoutRequest(orderId, fundingSource))
+                val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
+                when (val startResult = paypalClient.start(activity, checkoutRequest)) {
+                    is BrowserSwitchStartResult.Failure -> {
+                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
+                    }
+
+                    is BrowserSwitchStartResult.Success -> {
+                        pendingRequestState = startResult.pendingRequestState
+                    }
+                }
             }
         }
     }
@@ -148,8 +161,17 @@ class PayPalWebViewModel @Inject constructor(
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
                 val cmid = payPalDataCollector.collectDeviceData(context)
-                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+                completeOrderState =
+                    completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
+        }
+    }
+
+    fun parseBrowserSwitchResult(activity: ComponentActivity?) {
+        val intent = activity?.intent
+        val pendingRequestState = this.pendingRequestState
+        if (intent != null && pendingRequestState != null) {
+            paypalClient?.parseBrowserSwitchResult(intent, pendingRequestState)
         }
     }
 }

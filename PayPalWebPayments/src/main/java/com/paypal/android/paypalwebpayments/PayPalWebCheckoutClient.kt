@@ -1,6 +1,10 @@
 package com.paypal.android.paypalwebpayments
 
+import android.content.Context
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
+import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -12,8 +16,6 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
-    // NEXT MAJOR VERSION: remove hardcoded activity reference
-    private val activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
@@ -21,17 +23,16 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
      *
-     * @param activity a [FragmentActivity]
+     * @param context an Android [Context]
      * @param configuration a [CoreConfig] object
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(
-        activity: FragmentActivity,
+        context: Context,
         configuration: CoreConfig,
         urlScheme: String
     ) : this(
-        activity,
-        AnalyticsService(activity.applicationContext, configuration),
+        AnalyticsService(context.applicationContext, configuration),
         PayPalWebLauncher(urlScheme, configuration),
     )
 
@@ -45,21 +46,17 @@ class PayPalWebCheckoutClient internal constructor(
      */
     var vaultListener: PayPalWebVaultListener? = null
 
-    init {
-        activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
-        // NEXT MAJOR VERSION: remove hardcoded activity reference
-    }
-
     /**
      * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(request: PayPalWebCheckoutRequest) {
+    fun start(activity: ComponentActivity, request: PayPalWebCheckoutRequest): BrowserSwitchStartResult {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
-            notifyWebCheckoutFailure(launchError, request.orderId)
-        }
+        return payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+//            ?.let { launchError ->
+//            notifyWebCheckoutFailure(launchError, request.orderId)
+//        }
     }
 
     /**
@@ -67,15 +64,16 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    fun vault(request: PayPalWebVaultRequest) {
+    fun vault(activity: ComponentActivity, request: PayPalWebVaultRequest): BrowserSwitchStartResult {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
-        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
-            notifyVaultFailure(launchError)
-        }
+        return payPalWebLauncher.launchPayPalWebVault(activity, request)
+//            ?.let { launchError ->
+//            notifyVaultFailure(launchError)
+//        }
     }
 
-    internal fun handleBrowserSwitchResult() {
-        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+    fun parseBrowserSwitchResult(intent: Intent, pendingRequestState: String) =
+        payPalWebLauncher.parseBrowserSwitchResult(intent, pendingRequestState)?.let { status ->
             when (status) {
                 is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
                 is PayPalWebStatus.CheckoutError -> status.run {
@@ -88,7 +86,6 @@ class PayPalWebCheckoutClient internal constructor(
                 PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
             }
         }
-    }
 
     private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)

@@ -32,7 +32,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(activity, analyticsService, payPalWebLauncher)
+        sut = PayPalWebCheckoutClient(analyticsService, payPalWebLauncher)
     }
 
     @Test
