@@ -4,6 +4,7 @@ import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import java.lang.ref.WeakReference
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -13,7 +14,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
  */
 class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
-    private var activity: FragmentActivity,
+    activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
@@ -45,6 +46,8 @@ class PayPalWebCheckoutClient internal constructor(
      */
     var vaultListener: PayPalWebVaultListener? = null
 
+    private val activityRef = WeakReference(activity)
+
     private var observer = PayPalWebCheckoutLifeCycleObserver(this)
 
     init {
@@ -60,8 +63,11 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun start(request: PayPalWebCheckoutRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
-            notifyWebCheckoutFailure(launchError, request.orderId)
+
+        activityRef.get()?.let { activity ->
+            payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
+                notifyWebCheckoutFailure(launchError, request.orderId)
+            }
         }
     }
 
@@ -72,23 +78,28 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun vault(request: PayPalWebVaultRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
-        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
-            notifyVaultFailure(launchError)
+
+        activityRef.get()?.let { activity ->
+            payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
+                notifyVaultFailure(launchError)
+            }
         }
     }
 
     internal fun handleBrowserSwitchResult() {
-        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-            when (status) {
-                is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
-                is PayPalWebStatus.CheckoutError -> status.run {
-                    notifyWebCheckoutFailure(error, orderId)
-                }
+        activityRef.get()?.let { activity ->
+            payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+                when (status) {
+                    is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
+                    is PayPalWebStatus.CheckoutError -> status.run {
+                        notifyWebCheckoutFailure(error, orderId)
+                    }
 
-                is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
-                is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
-                PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+                    is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
+                    is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+                    is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
+                    PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+                }
             }
         }
     }
@@ -124,7 +135,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     fun removeObservers() {
-        activity.lifecycle.removeObserver(observer)
+        activityRef.get()?.let { it.lifecycle.removeObserver(observer) }
         vaultListener = null
         listener = null
     }

@@ -1,5 +1,6 @@
 package com.paypal.android.cardpayments
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
@@ -12,6 +13,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 /**
  * Use this client to approve an order with a [Card].
@@ -20,7 +22,7 @@ import kotlinx.coroutines.launch
  * @property cardVaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
-    private val activity: FragmentActivity,
+    activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
@@ -38,6 +40,8 @@ class CardClient internal constructor(
 
     private var approveOrderId: String? = null
     private val lifeCycleObserver = CardLifeCycleObserver(this)
+
+    private val activityRef = WeakReference(activity)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
         notifyApproveOrderFailure(error, approveOrderId)
@@ -199,7 +203,7 @@ class CardClient internal constructor(
     }
 
     fun removeObservers() {
-        activity.lifecycle.removeObserver(lifeCycleObserver)
+        activityRef.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
         approveOrderListener = null
         cardVaultListener = null
     }
