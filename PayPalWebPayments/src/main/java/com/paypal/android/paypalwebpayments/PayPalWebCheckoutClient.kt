@@ -13,7 +13,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
  */
 class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
-    private val activity: FragmentActivity,
+    private var activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
@@ -41,13 +41,16 @@ class PayPalWebCheckoutClient internal constructor(
     var listener: PayPalWebCheckoutListener? = null
 
     /**
-     * Sets a listener to receive notificatioins when a Paypal Vault event occurs.
+     * Sets a listener to receive notifications when a Paypal Vault event occurs.
      */
     var vaultListener: PayPalWebVaultListener? = null
 
+    private var observer = PayPalWebCheckoutLifeCycleObserver(this)
+
     init {
-        activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
+        activity.lifecycle.addObserver(observer)
         // NEXT MAJOR VERSION: remove hardcoded activity reference
+
     }
 
     /**
@@ -118,5 +121,11 @@ class PayPalWebCheckoutClient internal constructor(
     private fun notifyVaultCancelation() {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
         vaultListener?.onPayPalWebVaultCanceled()
+    }
+
+    fun removeObservers() {
+        activity.lifecycle.removeObserver(observer)
+        vaultListener = null
+        listener = null
     }
 }

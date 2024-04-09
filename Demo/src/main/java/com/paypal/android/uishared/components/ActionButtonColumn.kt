@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
@@ -54,17 +55,17 @@ fun <S, E> ActionButtonColumn(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Box {
-                // in loading state, blend text in with background and show loading indicator
-                Text(
-                    text = if (state is ActionState.Success) successTitle else defaultTitle,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(vertical = UIConstants.paddingSmall)
-                        .alpha(if (isLoading) 0.0f else 1.0f)
-                )
-                CircularProgressIndicator(
+                    Box {
+                        // in loading state, blend text in with background and show loading indicator
+                        Text(
+                            text = if (state is ActionState.Success) successTitle else defaultTitle,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(vertical = UIConstants.paddingSmall)
+                                .alpha(if (isLoading) 0.0f else 1.0f)
+                        )
+                        CircularProgressIndicator(
                     color = Color.White,
                     modifier = Modifier
                         .size(UIConstants.progressIndicatorSize)
@@ -112,12 +113,15 @@ fun StatefulActionButtonPreview() {
                 ActionButtonColumn(
                     defaultTitle = "Fake Default Title",
                     successTitle = "Fake Success Title",
-                    state = ActionState.Idle,
+                    state = ActionState.Success("Sample Value"),
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(UIConstants.paddingMedium)
-                )
+                ) { state ->
+                    Text(text = "Sample Text", modifier = Modifier.padding(64.dp))
+
+                }
             }
         }
     }
