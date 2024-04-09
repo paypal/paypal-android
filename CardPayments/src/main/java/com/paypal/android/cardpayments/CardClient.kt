@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
  * @property cardVaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
-    activity: FragmentActivity,
+    private val activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
@@ -196,5 +196,11 @@ class CardClient internal constructor(
         analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
         // TODO: consider either adding a listener method or next major version returning a result type
         cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
+    }
+
+    fun removeObservers() {
+        activity.lifecycle.removeObserver(lifeCycleObserver)
+        approveOrderListener = null
+        cardVaultListener = null
     }
 }
