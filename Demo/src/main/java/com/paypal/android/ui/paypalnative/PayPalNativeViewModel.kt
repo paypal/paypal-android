@@ -10,6 +10,7 @@ import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutClient
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutListener
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutRequest
@@ -167,7 +168,8 @@ class PayPalNativeViewModel @Inject constructor(
                 completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
             } else {
                 completeOrderState = ActionState.Loading
-                val cmid = payPalDataCollector.collectDeviceData(getApplication())
+                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val cmid = payPalDataCollector.collectDeviceData(getApplication(), dataCollectorRequest)
                 completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }

@@ -14,7 +14,11 @@
   * Add `authChallenge` property to `CardVaultResult`
   * Add `CardAuthChallenge` type
 * FraudDetection
-  * Bump Magnes dependency to version 5.4.0
+  * Fixes Google Play Store Rejection
+    * Bump Magnes version to 5.5.0
+    * Create `PayPalDataCollectorRequest`
+    * Add `PayPalDataCollector#collectDeviceData(context, request)`
+    * Deprecate `PayPalDataCollector#collectDeviceData(context, clientMetadataId, additionalData)`
 * PaymentButtons
   * Update font typeface to "PayPalOpen" to meet brand guidelines
 

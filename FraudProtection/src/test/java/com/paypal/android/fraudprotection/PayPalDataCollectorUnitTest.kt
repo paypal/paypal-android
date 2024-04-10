@@ -16,6 +16,8 @@ import lib.android.paypal.com.magnessdk.MagnesSettings
 import lib.android.paypal.com.magnessdk.MagnesSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import java.util.UUID
 
@@ -23,6 +25,13 @@ class PayPalDataCollectorUnitTest {
 
     private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
     private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE)
+
+    private lateinit var context: Context
+
+    @Before
+    fun beforeEach() {
+        context = mockk(relaxed = true)
+    }
 
     @Test
     fun `when environment is SANDBOX, magnes settings environment is STAGE`() {
@@ -33,11 +42,14 @@ class PayPalDataCollectorUnitTest {
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        sut.collectDeviceData(mockk(relaxed = true))
+        sut.collectDeviceData(context, PayPalDataCollectorRequest(hasUserLocationConsent = false))
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
         val magnesSettings = magnesSettingsSlot.captured
-        assertEquals(magnesSettings.environment, lib.android.paypal.com.magnessdk.Environment.SANDBOX)
+        assertEquals(
+            magnesSettings.environment,
+            lib.android.paypal.com.magnessdk.Environment.SANDBOX
+        )
         assertFalse(magnesSettings.isDisableBeacon)
         assertEquals(magnesSettings.appGuid, appGUID)
         assertEquals(magnesSettings.magnesSource, MagnesSource.PAYPAL.version)
@@ -53,7 +65,7 @@ class PayPalDataCollectorUnitTest {
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
         val sut = PayPalDataCollector(liveConfig, mockMagnesSDK, mockUUIDHelper)
-        sut.collectDeviceData(mockk(relaxed = true))
+        sut.collectDeviceData(context, PayPalDataCollectorRequest(hasUserLocationConsent = false))
 
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
@@ -64,14 +76,15 @@ class PayPalDataCollectorUnitTest {
     @Test
     fun `when appGUID is invalid, InvalidInputException is thrown`() {
         mockkStatic(Log::class)
-        val errorMessage = "Application’s Globally Unique Identifier (AppGUID) does not match the criteria," +
-                " This is a string that identifies the merchant application that sets up Magnes on the mobile" +
-                " device. If the merchant app does not pass an AppGuid, Magnes creates one to identify" +
-                " the app. An AppGuid is an application identifier per-installation; that is," +
-                " if a new instance of the app is installed on the mobile device, or the app" +
-                " is reinstalled, it will have a new AppGuid.\n ***AppGuid Criteria*** \n   " +
-                "Max length: 36 characters \n   Min Length: 30 characters \n   " +
-                "Regex: Letters, numbers and dashes only \n"
+        val errorMessage =
+            "Application’s Globally Unique Identifier (AppGUID) does not match the criteria," +
+                    " This is a string that identifies the merchant application that sets up Magnes on the mobile" +
+                    " device. If the merchant app does not pass an AppGuid, Magnes creates one to identify" +
+                    " the app. An AppGuid is an application identifier per-installation; that is," +
+                    " if a new instance of the app is installed on the mobile device, or the app" +
+                    " is reinstalled, it will have a new AppGuid.\n ***AppGuid Criteria*** \n   " +
+                    "Max length: 36 characters \n   Min Length: 30 characters \n   " +
+                    "Regex: Letters, numbers and dashes only \n"
         val appGUID = "invalid_uuid"
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
@@ -80,7 +93,10 @@ class PayPalDataCollectorUnitTest {
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        val result = sut.collectDeviceData(mockk(relaxed = true))
+        val result = sut.collectDeviceData(
+            context,
+            PayPalDataCollectorRequest(hasUserLocationConsent = false)
+        )
 
         verify { Log.e(any(), any(), capture(exceptionSlot)) }
 
@@ -103,14 +119,38 @@ class PayPalDataCollectorUnitTest {
         every { mockMagnesSDK.collectAndSubmit(any(), any(), any()) } returns magnesResult
 
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        val result = sut.collectDeviceData(mockContext, clientMetadataId, HashMap())
+        val request = PayPalDataCollectorRequest(
+            hasUserLocationConsent = false,
+            clientMetadataId = clientMetadataId
+        )
+        val result = sut.collectDeviceData(mockContext, request)
         assertEquals(result, clientMetadataId)
     }
 
     @Test
     fun `when setLogging is called, System is called with correct value`() {
-        val sut = PayPalDataCollector(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
+        val sut =
+            PayPalDataCollector(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
         sut.setLogging(true)
         assertEquals(System.getProperty("magnes.debug.mode"), true.toString())
+    }
+
+    @Test
+    fun `collectDeviceData forwards hasUserLocationConsent value`() {
+        val appGUID = UUID.randomUUID().toString()
+        val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
+        val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
+        val magnesSettingsSlot = slot<MagnesSettings>()
+
+        every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
+
+        val sut = PayPalDataCollector(liveConfig, mockMagnesSDK, mockUUIDHelper)
+        val request = PayPalDataCollectorRequest(hasUserLocationConsent = true)
+        sut.collectDeviceData(context, request)
+
+        verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
+
+        val magnesSettings = magnesSettingsSlot.captured
+        assertTrue(magnesSettings.hasUserLocationConsent())
     }
 }
