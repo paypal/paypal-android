@@ -15,7 +15,7 @@
   * Add `CardAuthChallenge` type
 * FraudDetection
   * Fixes Google Play Store Rejection
-    * Bump Magnes version to 5.5.0
+    * Bump Magnes version to 5.5.1
     * Create `PayPalDataCollectorRequest`
     * Add `PayPalDataCollector#collectDeviceData(context, request)`
     * Deprecate `PayPalDataCollector#collectDeviceData(context, clientMetadataId, additionalData)`
