@@ -27,6 +27,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import java.lang.reflect.Field
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -40,8 +41,6 @@ import org.junit.Before
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import java.lang.reflect.Field
-import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
 @ExperimentalCoroutinesApi
