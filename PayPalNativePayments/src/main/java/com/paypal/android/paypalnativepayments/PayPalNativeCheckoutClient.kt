@@ -97,9 +97,12 @@ class PayPalNativeCheckoutClient internal constructor(
                 )
                 PayPalCheckout.setConfig(config)
                 listener?.onPayPalCheckoutStart()
-                PayPalCheckout.startCheckout(CreateOrder {
-                    it.set(request.orderId)
-                })
+                PayPalCheckout.startCheckout(
+                    createOrder = CreateOrder {
+                        it.set(request.orderId)
+                    },
+                    hasUserLocationConsent = request.hasUserLocationConsent
+                )
             } catch (e: PayPalSDKError) {
                 listener?.onPayPalCheckoutFailure(
                     APIClientError.clientIDNotFoundError(
