@@ -55,17 +55,17 @@ fun <S, E> ActionButtonColumn(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-                    Box {
-                        // in loading state, blend text in with background and show loading indicator
-                        Text(
-                            text = if (state is ActionState.Success) successTitle else defaultTitle,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .padding(vertical = UIConstants.paddingSmall)
-                                .alpha(if (isLoading) 0.0f else 1.0f)
-                        )
-                        CircularProgressIndicator(
+            Box {
+                // in loading state, blend text in with background and show loading indicator
+                Text(
+                    text = if (state is ActionState.Success) successTitle else defaultTitle,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(vertical = UIConstants.paddingSmall)
+                        .alpha(if (isLoading) 0.0f else 1.0f)
+                )
+                CircularProgressIndicator(
                     color = Color.White,
                     modifier = Modifier
                         .size(UIConstants.progressIndicatorSize)
@@ -113,7 +113,7 @@ fun StatefulActionButtonPreview() {
                 ActionButtonColumn(
                     defaultTitle = "Fake Default Title",
                     successTitle = "Fake Success Title",
-                    state = ActionState.Success("Sample Value"),
+                    state = ActionState.Idle,
                     onClick = {},
                     modifier = Modifier
                         .fillMaxWidth()
