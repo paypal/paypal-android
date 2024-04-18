@@ -27,6 +27,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import java.lang.reflect.Field
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -40,7 +41,7 @@ import org.junit.Before
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import java.lang.reflect.Field
+import strikt.assertions.isTrue
 
 @ExperimentalCoroutinesApi
 class PayPalNativeCheckoutClientTest {
@@ -87,6 +88,27 @@ class PayPalNativeCheckoutClientTest {
             get { environment }.isEqualTo(com.paypal.checkout.config.Environment.SANDBOX)
         }
     }
+
+    @Test
+    fun `when user location consent is set, startCheckout is called with the user location consent set`() =
+        runTest {
+            val userLocationConsentSlot = slot<Boolean>()
+            every {
+                PayPalCheckout.startCheckout(any(), capture(userLocationConsentSlot))
+            } answers { userLocationConsentSlot.captured }
+
+            sut = getPayPalCheckoutClient(testScheduler = testScheduler)
+            sut.startCheckout(
+                PayPalNativeCheckoutRequest(
+                    "order_id",
+                    "test@test.com",
+                    true
+                )
+            )
+            advanceUntilIdle()
+
+            expectThat(userLocationConsentSlot.captured).isTrue()
+        }
 
     @Test
     fun `when startCheckout is invoked with an invalid return_url, onPayPalCheckout failure is called`() =

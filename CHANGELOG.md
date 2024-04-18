@@ -15,10 +15,14 @@
   * Add `CardAuthChallenge` type
 * FraudDetection
   * Fixes Google Play Store Rejection
-    * Bump Magnes version to 5.5.0
+    * Bump Magnes version to 5.5.1
     * Create `PayPalDataCollectorRequest`
     * Add `PayPalDataCollector#collectDeviceData(context, request)`
     * Deprecate `PayPalDataCollector#collectDeviceData(context, clientMetadataId, additionalData)`
+* PayPalNativePayments
+  * Fixes Google Play Store Rejection
+    * Bump Native Checkout version to 1.3.2
+    * Add `hasUserLocationConsent` to `PayPalNativeCheckoutRequest`
 * PaymentButtons
   * Update font typeface to "PayPalOpen" to meet brand guidelines
 
