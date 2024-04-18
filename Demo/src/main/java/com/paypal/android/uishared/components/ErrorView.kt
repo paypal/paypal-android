@@ -31,7 +31,6 @@ fun ErrorView(error: Exception) {
     }
 }
 
-
 @Preview
 @Composable
 fun ErrorViewActionColumnPreview() {
