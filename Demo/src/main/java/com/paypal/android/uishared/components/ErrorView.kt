@@ -37,7 +37,6 @@ fun ErrorViewActionColumnPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
                 ErrorView(error = java.lang.Exception("Fake Exception"))
-
         }
     }
 }
