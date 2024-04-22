@@ -9,11 +9,11 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
-import lib.android.com.paypal.magnessdk.InvalidInputException
-import lib.android.com.paypal.magnessdk.MagnesResult
-import lib.android.com.paypal.magnessdk.MagnesSDK
-import lib.android.com.paypal.magnessdk.MagnesSettings
-import lib.android.com.paypal.magnessdk.MagnesSource
+import lib.android.paypal.com.magnessdk.InvalidInputException
+import lib.android.paypal.com.magnessdk.MagnesResult
+import lib.android.paypal.com.magnessdk.MagnesSDK
+import lib.android.paypal.com.magnessdk.MagnesSettings
+import lib.android.paypal.com.magnessdk.MagnesSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -48,7 +48,7 @@ class PayPalDataCollectorUnitTest {
         val magnesSettings = magnesSettingsSlot.captured
         assertEquals(
             magnesSettings.environment,
-            lib.android.com.paypal.magnessdk.Environment.SANDBOX
+            lib.android.paypal.com.magnessdk.Environment.SANDBOX
         )
         assertFalse(magnesSettings.isDisableBeacon)
         assertEquals(magnesSettings.appGuid, appGUID)
@@ -70,7 +70,7 @@ class PayPalDataCollectorUnitTest {
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
         val magnesSettings = magnesSettingsSlot.captured
-        assertEquals(magnesSettings.environment, lib.android.com.paypal.magnessdk.Environment.LIVE)
+        assertEquals(magnesSettings.environment, lib.android.paypal.com.magnessdk.Environment.LIVE)
     }
 
     @Test
