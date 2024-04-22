@@ -30,8 +30,11 @@ data class PayPalNativeCheckoutRequest(
     )
     constructor(orderId: String) : this(orderId, null, false)
 
-    @Deprecated("Use the constructor to pass in the `hasUserLocationConsent` parameter.",
-        replaceWith = ReplaceWith("PayPalNativeCheckoutRequest(orderId, userAuthenticationEmail, hasUserLocationConsent)")
+    @Deprecated(
+        message = "Use the constructor to pass in the `hasUserLocationConsent` parameter.",
+        replaceWith = ReplaceWith(
+            "PayPalNativeCheckoutRequest(orderId, userAuthenticationEmail, hasUserLocationConsent)"
+        )
     )
     constructor(orderId: String, userAuthenticationEmail: String?) : this(
         orderId,
