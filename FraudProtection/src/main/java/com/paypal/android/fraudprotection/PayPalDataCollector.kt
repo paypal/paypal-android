@@ -3,10 +3,10 @@ package com.paypal.android.fraudprotection
 import android.content.Context
 import android.util.Log
 import com.paypal.android.corepayments.CoreConfig
-import lib.android.com.paypal.magnessdk.InvalidInputException
-import lib.android.com.paypal.magnessdk.MagnesSDK
-import lib.android.com.paypal.magnessdk.MagnesSettings
-import lib.android.com.paypal.magnessdk.MagnesSource
+import lib.android.paypal.com.magnessdk.InvalidInputException
+import lib.android.paypal.com.magnessdk.MagnesSDK
+import lib.android.paypal.com.magnessdk.MagnesSettings
+import lib.android.paypal.com.magnessdk.MagnesSource
 
 /**
  * Enables you to collect data about a customer's device and correlate it with a session identifier on your server.
