@@ -13,10 +13,13 @@
   * Add `returnUrl` property to `CardVaultRequest`
   * Add `authChallenge` property to `CardVaultResult`
   * Add `CardAuthChallenge` type
+  * Add `removeObservers` to `CardClient`
 * FraudDetection
   * Bump Magnes dependency to version 5.4.0
 * PaymentButtons
   * Update font typeface to "PayPalOpen" to meet brand guidelines
+* PayPalWebPayments
+  * Add `removeObservers` to `PayPalWebCheckoutClient`
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons

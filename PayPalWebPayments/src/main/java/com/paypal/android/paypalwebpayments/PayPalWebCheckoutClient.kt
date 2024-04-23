@@ -134,6 +134,9 @@ class PayPalWebCheckoutClient internal constructor(
         vaultListener?.onPayPalWebVaultCanceled()
     }
 
+    /**
+     * Call this method at the end of the web checkout flow
+     */
     fun removeObservers() {
         activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
         vaultListener = null
