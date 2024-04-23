@@ -120,7 +120,6 @@ fun StatefulActionButtonPreview() {
                         .padding(UIConstants.paddingMedium)
                 ) { state ->
                     Text(text = "Sample Text", modifier = Modifier.padding(64.dp))
-
                 }
             }
         }

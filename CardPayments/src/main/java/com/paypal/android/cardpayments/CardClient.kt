@@ -1,6 +1,5 @@
 package com.paypal.android.cardpayments
 
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity

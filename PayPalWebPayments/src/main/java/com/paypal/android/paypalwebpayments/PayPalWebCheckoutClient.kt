@@ -53,7 +53,6 @@ class PayPalWebCheckoutClient internal constructor(
     init {
         activity.lifecycle.addObserver(observer)
         // NEXT MAJOR VERSION: remove hardcoded activity reference
-
     }
 
     /**
@@ -86,6 +85,7 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
+    @Suppress("NestedBlockDepth")
     internal fun handleBrowserSwitchResult() {
         activityRef.get()?.let { activity ->
             payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
