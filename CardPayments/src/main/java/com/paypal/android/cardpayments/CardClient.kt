@@ -201,6 +201,9 @@ class CardClient internal constructor(
         cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
     }
 
+    /**
+     * Call this method at the end of the card flow
+     */
     fun removeObservers() {
         activityReference.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
         approveOrderListener = null
