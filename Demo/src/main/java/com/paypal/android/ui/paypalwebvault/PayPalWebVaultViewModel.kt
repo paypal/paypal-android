@@ -126,4 +126,9 @@ class PayPalWebVaultViewModel @Inject constructor(
     override fun onPayPalWebVaultCanceled() {
         vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        paypalClient.removeObservers()
+    }
 }
