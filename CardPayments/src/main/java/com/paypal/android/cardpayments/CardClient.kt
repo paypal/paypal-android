@@ -40,7 +40,7 @@ class CardClient internal constructor(
     private var approveOrderId: String? = null
     private val lifeCycleObserver = CardLifeCycleObserver(this)
 
-    private val activityRef = WeakReference(activity)
+    private val activityReference = WeakReference(activity)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
         notifyApproveOrderFailure(error, approveOrderId)
@@ -202,7 +202,7 @@ class CardClient internal constructor(
     }
 
     fun removeObservers() {
-        activityRef.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
+        activityReference.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
         approveOrderListener = null
         cardVaultListener = null
     }
