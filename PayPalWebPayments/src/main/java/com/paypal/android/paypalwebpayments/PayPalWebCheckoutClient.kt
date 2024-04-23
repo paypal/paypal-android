@@ -46,7 +46,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     var vaultListener: PayPalWebVaultListener? = null
 
-    private val activityRef = WeakReference(activity)
+    private val activityReference = WeakReference(activity)
 
     private var observer = PayPalWebCheckoutLifeCycleObserver(this)
 
@@ -63,7 +63,7 @@ class PayPalWebCheckoutClient internal constructor(
     fun start(request: PayPalWebCheckoutRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
 
-        activityRef.get()?.let { activity ->
+        activityReference.get()?.let { activity ->
             payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
                 notifyWebCheckoutFailure(launchError, request.orderId)
             }
@@ -78,7 +78,7 @@ class PayPalWebCheckoutClient internal constructor(
     fun vault(request: PayPalWebVaultRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
 
-        activityRef.get()?.let { activity ->
+        activityReference.get()?.let { activity ->
             payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
                 notifyVaultFailure(launchError)
             }
@@ -87,7 +87,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     @Suppress("NestedBlockDepth")
     internal fun handleBrowserSwitchResult() {
-        activityRef.get()?.let { activity ->
+        activityReference.get()?.let { activity ->
             payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
                 when (status) {
                     is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
@@ -135,7 +135,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     fun removeObservers() {
-        activityRef.get()?.let { it.lifecycle.removeObserver(observer) }
+        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
         vaultListener = null
         listener = null
     }
