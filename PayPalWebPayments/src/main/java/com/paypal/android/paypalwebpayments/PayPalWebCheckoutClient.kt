@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import java.lang.ref.WeakReference
 
@@ -67,6 +68,10 @@ class PayPalWebCheckoutClient internal constructor(
             payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
                 notifyWebCheckoutFailure(launchError, request.orderId)
             }
+        }?: run {
+            // This block executes if activity is null.
+            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
+            notifyWebCheckoutFailure(error, request.orderId)
         }
     }
 
