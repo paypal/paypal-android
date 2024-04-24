@@ -22,6 +22,7 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -147,7 +148,8 @@ class PayPalWebViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
-                val cmid = payPalDataCollector.collectDeviceData(context)
+                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
                 completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
