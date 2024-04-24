@@ -69,7 +69,6 @@ class PayPalWebCheckoutClient internal constructor(
                 notifyWebCheckoutFailure(launchError, request.orderId)
             }
         }?: run {
-            // This block executes if activity is null.
             val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
             notifyWebCheckoutFailure(error, request.orderId)
         }
