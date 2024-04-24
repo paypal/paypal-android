@@ -19,7 +19,7 @@
 * PaymentButtons
   * Update font typeface to "PayPalOpen" to meet brand guidelines
 * PayPalWebPayments
-  * Add `removeObservers` to `PayPalWebCheckoutClient`
+  * Add `PayPalWebCheckoutClient.removeObservers()` method
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons
