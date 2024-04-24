@@ -202,4 +202,16 @@ class PayPalWebCheckoutClientUnitTest {
         PayPalWebCheckoutClient(activity, coreConfig, "")
         verify { lifeCycle.addObserver(ofType(PayPalWebCheckoutLifeCycleObserver::class)) }
     }
+
+    @Test
+    fun `when client is complete, lifecycle observer is removed`() {
+        val lifeCycle = mockk<Lifecycle>(relaxed = true)
+        every { activity.lifecycle } returns lifeCycle
+
+        sut.removeObservers()
+
+        verify { sut.observer == isNull() }
+        verify { sut.listener == isNull() }
+        verify { sut.vaultListener == isNull() }
+    }
 }
