@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
  */
 class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
-    activity: FragmentActivity,
+    private val activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
