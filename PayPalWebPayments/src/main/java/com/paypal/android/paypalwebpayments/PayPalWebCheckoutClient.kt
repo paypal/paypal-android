@@ -48,7 +48,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     private val activityReference = WeakReference(activity)
 
-    var observer = PayPalWebCheckoutLifeCycleObserver(this)
+    private var observer = PayPalWebCheckoutLifeCycleObserver(this)
 
     init {
         activity.lifecycle.addObserver(observer)

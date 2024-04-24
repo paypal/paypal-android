@@ -6,6 +6,8 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.*
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -207,11 +209,13 @@ class PayPalWebCheckoutClientUnitTest {
     fun `when client is complete, lifecycle observer is removed`() {
         val lifeCycle = mockk<Lifecycle>(relaxed = true)
         every { activity.lifecycle } returns lifeCycle
+        
+        assertNotNull(sut.listener)
+        assertNotNull(sut.vaultListener)
 
         sut.removeObservers()
 
-        verify { sut.observer == isNull() }
-        verify { sut.listener == isNull() }
-        verify { sut.vaultListener == isNull() }
+        assertEquals(sut.listener, null)
+        assertEquals(sut.vaultListener, null)
     }
 }
