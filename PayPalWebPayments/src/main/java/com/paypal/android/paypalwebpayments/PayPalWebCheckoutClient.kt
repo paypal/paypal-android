@@ -138,7 +138,10 @@ class PayPalWebCheckoutClient internal constructor(
      * Call this method at the end of the web checkout flow to clear out all observers and listeners
      */
     fun removeObservers() {
-        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
+        activity.lifecycle?.let { lifecycle ->
+            lifecycle.removeObserver(observer)
+        }
+
         vaultListener = null
         listener = null
     }
