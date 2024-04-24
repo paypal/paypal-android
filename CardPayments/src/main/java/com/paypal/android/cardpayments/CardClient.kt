@@ -202,7 +202,7 @@ class CardClient internal constructor(
     }
 
     /**
-     * Call this method at the end of the card flow
+     * Call this method at the end of the card flow to clear out all observers and listeners
      */
     fun removeObservers() {
         activityReference.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
