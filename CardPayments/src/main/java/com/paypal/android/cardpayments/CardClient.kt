@@ -38,7 +38,7 @@ class CardClient internal constructor(
     var cardVaultListener: CardVaultListener? = null
 
     private var approveOrderId: String? = null
-    private val lifeCycleObserver = CardLifeCycleObserver(this)
+    internal val lifeCycleObserver = CardLifeCycleObserver(this)
 
     private val activityReference = WeakReference(activity)
 
