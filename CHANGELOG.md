@@ -13,7 +13,7 @@
   * Add `returnUrl` property to `CardVaultRequest`
   * Add `authChallenge` property to `CardVaultResult`
   * Add `CardAuthChallenge` type
-  * Add `removeObservers` to `CardClient`
+  * Add `CardClient.removeObservers()` method
 * FraudDetection
   * Bump Magnes dependency to version 5.4.0
 * PaymentButtons
