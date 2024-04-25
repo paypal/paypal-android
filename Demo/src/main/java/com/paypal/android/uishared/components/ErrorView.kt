@@ -1,9 +1,13 @@
 package com.paypal.android.uishared.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.utils.UIConstants
 
@@ -19,6 +23,16 @@ fun ErrorView(error: Exception) {
             PropertyView(name = "Correlation ID", value = error.correlationId)
         } else {
             PropertyView(name = "Message", value = error.message)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ErrorViewActionColumnPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+                ErrorView(error = java.lang.Exception("Fake Exception"))
         }
     }
 }

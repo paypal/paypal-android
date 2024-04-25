@@ -204,4 +204,9 @@ class VaultCardViewModel @Inject constructor(
         }
         cardClient.presentAuthChallenge(activity, authChallenge)
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        cardClient.removeObservers()
+    }
 }

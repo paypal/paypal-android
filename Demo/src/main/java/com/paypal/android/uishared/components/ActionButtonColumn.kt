@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
@@ -117,7 +118,9 @@ fun StatefulActionButtonPreview() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(UIConstants.paddingMedium)
-                )
+                ) { state ->
+                    Text(text = "Sample Text", modifier = Modifier.padding(64.dp))
+                }
             }
         }
     }

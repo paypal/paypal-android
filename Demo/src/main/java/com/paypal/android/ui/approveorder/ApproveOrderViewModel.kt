@@ -207,4 +207,10 @@ class ApproveOrderViewModel @Inject constructor(
             )
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        cardClient.removeObservers()
+    }
 }

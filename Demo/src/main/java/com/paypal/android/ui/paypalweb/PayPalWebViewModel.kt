@@ -154,4 +154,10 @@ class PayPalWebViewModel @Inject constructor(
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+
+        paypalClient.removeObservers()
+    }
 }

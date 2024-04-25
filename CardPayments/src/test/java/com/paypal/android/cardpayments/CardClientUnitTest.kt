@@ -29,6 +29,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import strikt.api.expectThat
+import strikt.assertions.isNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -358,5 +360,19 @@ class CardClientUnitTest {
         sut.approveOrderListener = approveOrderListener
         sut.cardVaultListener = cardVaultListener
         return sut
+    }
+
+    @Test
+    fun `when client is complete, lifecycle observer is removed`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        val lifeCycle = mockk<Lifecycle>(relaxed = true)
+        every { activity.lifecycle } returns lifeCycle
+
+        sut.removeObservers()
+
+        verify { lifeCycle.removeObserver(sut.lifeCycleObserver) }
+        expectThat(sut.approveOrderListener).isNull()
+        expectThat(sut.cardVaultListener).isNull()
     }
 }

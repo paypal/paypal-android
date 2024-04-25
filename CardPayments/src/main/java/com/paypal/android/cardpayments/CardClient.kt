@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
 /**
  * Use this client to approve an order with a [Card].
@@ -37,7 +38,9 @@ class CardClient internal constructor(
     var cardVaultListener: CardVaultListener? = null
 
     private var approveOrderId: String? = null
-    private val lifeCycleObserver = CardLifeCycleObserver(this)
+    internal val lifeCycleObserver = CardLifeCycleObserver(this)
+
+    private val activityReference = WeakReference(activity)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
         notifyApproveOrderFailure(error, approveOrderId)
@@ -196,5 +199,14 @@ class CardClient internal constructor(
         analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
         // TODO: consider either adding a listener method or next major version returning a result type
         cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
+    }
+
+    /**
+     * Call this method at the end of the card flow to clear out all observers and listeners
+     */
+    fun removeObservers() {
+        activityReference.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
+        approveOrderListener = null
+        cardVaultListener = null
     }
 }

@@ -13,6 +13,7 @@
   * Add `returnUrl` property to `CardVaultRequest`
   * Add `authChallenge` property to `CardVaultResult`
   * Add `CardAuthChallenge` type
+  * Add `CardClient.removeObservers()` method
 * FraudDetection
   * Fixes Google Play Store Rejection
     * Bump Magnes version to 5.5.1
@@ -25,6 +26,8 @@
     * Add `hasUserLocationConsent` to `PayPalNativeCheckoutRequest`
 * PaymentButtons
   * Update font typeface to "PayPalOpen" to meet brand guidelines
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutClient.removeObservers()` method
 
 ## 1.3.0 (2024-01-09)
 * PaymentButtons

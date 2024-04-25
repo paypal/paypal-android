@@ -13,6 +13,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import strikt.api.expectThat
+import strikt.assertions.isNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -201,5 +203,17 @@ class PayPalWebCheckoutClientUnitTest {
 
         PayPalWebCheckoutClient(activity, coreConfig, "")
         verify { lifeCycle.addObserver(ofType(PayPalWebCheckoutLifeCycleObserver::class)) }
+    }
+
+    @Test
+    fun `when client is complete, lifecycle observer is removed`() {
+        val lifeCycle = mockk<Lifecycle>(relaxed = true)
+        every { activity.lifecycle } returns lifeCycle
+
+        sut.removeObservers()
+
+        verify { lifeCycle.removeObserver(sut.observer) }
+        expectThat(sut.listener).isNull()
+        expectThat(sut.vaultListener).isNull()
     }
 }

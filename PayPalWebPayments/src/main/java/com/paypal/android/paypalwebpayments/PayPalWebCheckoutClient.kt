@@ -4,6 +4,7 @@ import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import java.lang.ref.WeakReference
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -41,12 +42,16 @@ class PayPalWebCheckoutClient internal constructor(
     var listener: PayPalWebCheckoutListener? = null
 
     /**
-     * Sets a listener to receive notificatioins when a Paypal Vault event occurs.
+     * Sets a listener to receive notifications when a Paypal Vault event occurs.
      */
     var vaultListener: PayPalWebVaultListener? = null
 
+    private val activityReference = WeakReference(activity)
+
+    internal var observer = PayPalWebCheckoutLifeCycleObserver(this)
+
     init {
-        activity.lifecycle.addObserver(PayPalWebCheckoutLifeCycleObserver(this))
+        activity.lifecycle.addObserver(observer)
         // NEXT MAJOR VERSION: remove hardcoded activity reference
     }
 
@@ -57,8 +62,14 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun start(request: PayPalWebCheckoutRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
-            notifyWebCheckoutFailure(launchError, request.orderId)
+
+        activityReference.get()?.let { activity ->
+            payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
+                notifyWebCheckoutFailure(launchError, request.orderId)
+            }
+        } ?: {
+            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
+            notifyWebCheckoutFailure(error, request.orderId)
         }
     }
 
@@ -69,23 +80,32 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun vault(request: PayPalWebVaultRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
-        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
-            notifyVaultFailure(launchError)
+
+        activityReference.get()?.let { activity ->
+            payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
+                notifyVaultFailure(launchError)
+            }
+        } ?: {
+            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
+            notifyVaultFailure(error)
         }
     }
 
+    @Suppress("NestedBlockDepth")
     internal fun handleBrowserSwitchResult() {
-        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-            when (status) {
-                is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
-                is PayPalWebStatus.CheckoutError -> status.run {
-                    notifyWebCheckoutFailure(error, orderId)
-                }
+        activityReference.get()?.let { activity ->
+            payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+                when (status) {
+                    is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
+                    is PayPalWebStatus.CheckoutError -> status.run {
+                        notifyWebCheckoutFailure(error, orderId)
+                    }
 
-                is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
-                is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
-                PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+                    is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
+                    is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+                    is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
+                    PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+                }
             }
         }
     }
@@ -118,5 +138,14 @@ class PayPalWebCheckoutClient internal constructor(
     private fun notifyVaultCancelation() {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
         vaultListener?.onPayPalWebVaultCanceled()
+    }
+
+    /**
+     * Call this method at the end of the web checkout flow to clear out all observers and listeners
+     */
+    fun removeObservers() {
+        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
+        vaultListener = null
+        listener = null
     }
 }
