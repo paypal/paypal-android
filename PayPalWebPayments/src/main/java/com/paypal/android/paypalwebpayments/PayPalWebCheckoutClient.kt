@@ -3,7 +3,6 @@ package com.paypal.android.paypalwebpayments
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import java.lang.ref.WeakReference
 
