@@ -68,7 +68,7 @@ class PayPalWebCheckoutClient internal constructor(
             payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
                 notifyWebCheckoutFailure(launchError, request.orderId)
             }
-        }?: run {
+        } ?: {
             val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
             notifyWebCheckoutFailure(error, request.orderId)
         }
@@ -86,7 +86,7 @@ class PayPalWebCheckoutClient internal constructor(
             payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
                 notifyVaultFailure(launchError)
             }
-        }?: run {
+        } ?: {
             val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
             notifyVaultFailure(error)
         }
