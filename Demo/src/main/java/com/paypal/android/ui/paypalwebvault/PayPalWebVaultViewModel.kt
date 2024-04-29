@@ -37,7 +37,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
     val uiState = _uiState.asStateFlow()
 
-    private lateinit var paypalClient: PayPalWebCheckoutClient
+    private var paypalClient: PayPalWebCheckoutClient? = null
     private lateinit var payPalDataCollector: PayPalDataCollector
     private var createSetupTokenState
         get() = _uiState.value.createSetupTokenState
@@ -95,9 +95,9 @@ class PayPalWebVaultViewModel @Inject constructor(
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
-                paypalClient.vaultListener = this@PayPalWebVaultViewModel
+                paypalClient?.vaultListener = this@PayPalWebVaultViewModel
 
-                paypalClient.vault(request)
+                paypalClient?.vault(request)
             }
         }
     }
@@ -129,6 +129,6 @@ class PayPalWebVaultViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        paypalClient.removeObservers()
+        paypalClient?.removeObservers()
     }
 }
