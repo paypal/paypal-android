@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 1.4.0 (2024-04-29)
 * PaymentButtons
   * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
   * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
