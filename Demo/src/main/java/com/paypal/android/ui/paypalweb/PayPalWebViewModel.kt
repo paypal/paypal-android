@@ -41,7 +41,7 @@ class PayPalWebViewModel @Inject constructor(
         private val TAG = PayPalWebViewModel::class.qualifiedName
     }
 
-    private lateinit var paypalClient: PayPalWebCheckoutClient
+    private var paypalClient: PayPalWebCheckoutClient? = null
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
@@ -115,9 +115,9 @@ class PayPalWebViewModel @Inject constructor(
 
                 paypalClient =
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
-                paypalClient.listener = this@PayPalWebViewModel
+                paypalClient?.listener = this@PayPalWebViewModel
 
-                paypalClient.start(PayPalWebCheckoutRequest(orderId, fundingSource))
+                paypalClient?.start(PayPalWebCheckoutRequest(orderId, fundingSource))
             }
         }
     }
@@ -157,7 +157,6 @@ class PayPalWebViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-
-        paypalClient.removeObservers()
+        paypalClient?.removeObservers()
     }
 }

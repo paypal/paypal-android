@@ -37,7 +37,7 @@ class VaultCardViewModel @Inject constructor(
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
-    private lateinit var cardClient: CardClient
+    private var cardClient: CardClient? = null
 
     private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
@@ -142,7 +142,7 @@ class VaultCardViewModel @Inject constructor(
                 val clientId = clientIdResult.value
                 val configuration = CoreConfig(clientId = clientId)
                 cardClient = CardClient(activity, configuration)
-                cardClient.cardVaultListener = object : CardVaultListener {
+                cardClient?.cardVaultListener = object : CardVaultListener {
 
                     override fun onVaultSuccess(result: CardVaultResult) {
                         updateSetupTokenState = ActionState.Success(result)
@@ -156,7 +156,7 @@ class VaultCardViewModel @Inject constructor(
                 val card = parseCard(_uiState.value)
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
                 val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
-                cardClient.vault(activity, cardVaultRequest)
+                cardClient?.vault(activity, cardVaultRequest)
             }
         }
     }
@@ -189,7 +189,7 @@ class VaultCardViewModel @Inject constructor(
         authChallengeState = ActionState.Loading
 
         // change listener behavior to handle auth result
-        cardClient.cardVaultListener = object : CardVaultListener {
+        cardClient?.cardVaultListener = object : CardVaultListener {
             override fun onVaultSuccess(result: CardVaultResult) {
                 viewModelScope.launch {
                     refreshSetupTokenState =
@@ -202,11 +202,11 @@ class VaultCardViewModel @Inject constructor(
                 authChallengeState = ActionState.Failure(error)
             }
         }
-        cardClient.presentAuthChallenge(activity, authChallenge)
+        cardClient?.presentAuthChallenge(activity, authChallenge)
     }
 
     override fun onCleared() {
         super.onCleared()
-        cardClient.removeObservers()
+        cardClient?.removeObservers()
     }
 }

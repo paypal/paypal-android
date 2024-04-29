@@ -47,7 +47,7 @@ class ApproveOrderViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
 
-    private lateinit var cardClient: CardClient
+    private var cardClient: CardClient? = null
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     fun createOrder() {
@@ -85,7 +85,7 @@ class ApproveOrderViewModel @Inject constructor(
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 cardClient = CardClient(activity, coreConfig)
-                cardClient.approveOrderListener = object : ApproveOrderListener {
+                cardClient?.approveOrderListener = object : ApproveOrderListener {
                     override fun onApproveOrderSuccess(result: CardResult) {
                         approveOrderState = ActionState.Success(result)
                     }
@@ -108,7 +108,7 @@ class ApproveOrderViewModel @Inject constructor(
                 }
 
                 val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
-                cardClient.approveOrder(activity, cardRequest)
+                cardClient?.approveOrder(activity, cardRequest)
             }
         }
     }
@@ -210,7 +210,6 @@ class ApproveOrderViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-
-        cardClient.removeObservers()
+        cardClient?.removeObservers()
     }
 }
