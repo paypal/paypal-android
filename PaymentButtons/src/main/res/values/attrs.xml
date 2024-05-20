@@ -39,4 +39,14 @@
             <enum name="white" value="3" />
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="PayLaterButton">
+    <attr name="paylater_color" format="enum">
+        <enum name="gold" value="0" />
+        <enum name="blue" value="1" />
+        <enum name="white" value="2" />
+        <enum name="black" value="3" />
+        <enum name="silver" value="4" />
+    </attr>
+    </declare-styleable>
 </resources>

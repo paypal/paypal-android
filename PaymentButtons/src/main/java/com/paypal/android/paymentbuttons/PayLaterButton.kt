@@ -64,12 +64,23 @@ class PayLaterButton @JvmOverloads constructor(
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAY_LATER
 
     init {
+        context.obtainStyledAttributes(attributeSet, R.styleable.PayLaterButton).use { typedArray ->
+            updateColorFrom(typedArray)
+        }
         updateLabel(PayPalButtonLabel.PAY_LATER)
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
             buttonType = PaymentButtonFundingType.PAY_LATER.buttonType
         )
+    }
+
+    private fun updateColorFrom(typedArray: TypedArray) {
+        val paypalColorAttributeIndex = typedArray.getInt(
+            R.styleable.PayLaterButton_paylater_color,
+            PayPalButtonColor.GOLD.value
+        )
+        color = PayPalButtonColor(paypalColorAttributeIndex)
     }
 
     private fun updateLabel(updatedLabel: PayPalButtonLabel) {

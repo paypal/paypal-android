@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.paypal.android.paymentbuttons.PayLaterButton
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:paylater_color="white"
+        />
+
+    <com.paypal.android.paymentbuttons.PayLaterButton
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button1"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        app:paylater_color="gold"
+        />
+
+    <com.paypal.android.paymentbuttons.PayLaterButton
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button2"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        app:paylater_color="blue"
+        />
+
+    <com.paypal.android.paymentbuttons.PayLaterButton
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button3"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        app:paylater_color="silver"
+        />
+
+    <com.paypal.android.paymentbuttons.PayLaterButton
+        android:id="@+id/button5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button4"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        app:paylater_color="black"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
