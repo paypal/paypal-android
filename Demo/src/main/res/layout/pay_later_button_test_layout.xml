@@ -3,8 +3,10 @@
 <!-- XML view for testing only. These aren't used anywhere else in the demo application. -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:ignore="UnusedResources"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.paypal.android.paymentbuttons.PayLaterButton
