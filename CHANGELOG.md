@@ -1,11 +1,10 @@
 # PayPal Android SDK Release Notes
 
-## 1.4.0 (2024-04-29)
+## unreleased
 * PaymentButtons
-  * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
-  * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
-  * Added analytics events
-    * `payment-button:initialized` and `payment-button:tapped`
+  * Add `paylater_color` to `PayLaterButton` to control the color of the pay later button from XML.
+
+## 1.4.0 (2024-04-29)
 * CardPayments
   * Add `liabilityShift` property to `CardResult`
   * Callback `PayPalSDKError` when `CardClient#approveOrder()` 3DS verification fails
@@ -20,12 +19,16 @@
     * Create `PayPalDataCollectorRequest`
     * Add `PayPalDataCollector#collectDeviceData(context, request)`
     * Deprecate `PayPalDataCollector#collectDeviceData(context, clientMetadataId, additionalData)`
+* PaymentButtons
+  * Undeprecate `PayPalCreditButtonColor.BLACK` and `.DARK_BLUE`
+  * Undeprecate `PayPalButtonColor.BLUE`, `.BLACK`, and `.SILVER`
+  * Added analytics events
+    * `payment-button:initialized` and `payment-button:tapped`
+  * Update font typeface to "PayPalOpen" to meet brand guidelines
 * PayPalNativePayments
   * Fixes Google Play Store Rejection
     * Bump Native Checkout version to 1.3.2
     * Add `hasUserLocationConsent` to `PayPalNativeCheckoutRequest`
-* PaymentButtons
-  * Update font typeface to "PayPalOpen" to meet brand guidelines
 * PayPalWebPayments
   * Add `PayPalWebCheckoutClient.removeObservers()` method
 
