@@ -37,6 +37,7 @@ private val cardFeatures = listOf(
 private val payPalWebFeatures = listOf(
     Feature.PAYPAL_WEB,
     Feature.PAYPAL_BUTTONS,
+    Feature.PAYPAL_STATIC_BUTTONS,
     Feature.PAYPAL_WEB_VAULT
 )
 
