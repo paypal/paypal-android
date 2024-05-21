@@ -1,10 +1,12 @@
 package com.paypal.android.ui.paypalstaticbuttons
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.viewinterop.AndroidView
 import com.paypal.android.R
 
+@SuppressLint("InflateParams")
 @Composable
 fun PayPalStaticButtonsView() {
     AndroidView(
