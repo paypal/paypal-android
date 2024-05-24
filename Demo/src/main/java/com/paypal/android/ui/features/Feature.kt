@@ -10,5 +10,9 @@ enum class Feature(@StringRes val stringRes: Int, val routeName: String) {
     PAYPAL_WEB(R.string.feature_paypal_web, DemoAppDestinations.PAYPAL_WEB),
     PAYPAL_WEB_VAULT(R.string.feature_paypal_web_vault, DemoAppDestinations.PAYPAL_WEB_VAULT),
     PAYPAL_BUTTONS(R.string.feature_paypal_buttons, DemoAppDestinations.PAYPAL_BUTTONS),
+    PAYPAL_STATIC_BUTTONS(
+        R.string.feature_paypal_static_buttons,
+        DemoAppDestinations.PAYPAL_STATIC_BUTTONS
+    ),
     PAYPAL_NATIVE(R.string.feature_paypal_native, DemoAppDestinations.PAYPAL_NATIVE)
 }

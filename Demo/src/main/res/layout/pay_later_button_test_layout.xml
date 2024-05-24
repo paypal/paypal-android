@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="UnusedResources">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PayPal Button"
+            tools:ignore="HardcodedText" />
+
+        <com.paypal.android.paymentbuttons.PayPalButton
+            android:id="@+id/button7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_color="white" />
+
+        <com.paypal.android.paymentbuttons.PayPalButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_color="black" />
+
+        <com.paypal.android.paymentbuttons.PayPalButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_color="blue" />
+
+        <com.paypal.android.paymentbuttons.PayPalButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_color="gold" />
+
+        <com.paypal.android.paymentbuttons.PayPalButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_color="silver" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pay Later"
+            tools:ignore="HardcodedText" />
+
+        <com.paypal.android.paymentbuttons.PayLaterButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paylater_color="white" />
+
+        <com.paypal.android.paymentbuttons.PayLaterButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paylater_color="gold" />
+
+        <com.paypal.android.paymentbuttons.PayLaterButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paylater_color="blue" />
+
+        <com.paypal.android.paymentbuttons.PayLaterButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paylater_color="silver" />
+
+        <com.paypal.android.paymentbuttons.PayLaterButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paylater_color="black" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PayPal Credit"
+            tools:ignore="HardcodedText" />
+
+        <com.paypal.android.paymentbuttons.PayPalCreditButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_credit_color="black" />
+
+        <com.paypal.android.paymentbuttons.PayPalCreditButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:paypal_credit_color="dark_blue" />
+
+    </LinearLayout>
+</ScrollView>
