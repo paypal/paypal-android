@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 1.4.1 (2024-06-06)
 * PaymentButtons
   * Add `paylater_color` to `PayLaterButton` to control the color of the pay later button from XML.
 
