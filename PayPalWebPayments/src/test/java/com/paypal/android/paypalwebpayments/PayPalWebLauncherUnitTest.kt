@@ -95,50 +95,6 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebVault() browser switches to SANDBOX PayPal vault checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
-
-        val slot = slot<BrowserSwitchOptions>()
-        every { browserSwitchClient.start(activity, capture(slot)) } just runs
-
-        val request = PayPalWebVaultRequest("fake-setup-token")
-        sut.launchPayPalWebVault(activity, request)
-
-        val expectedUrl = "https://paypal.com/agreements/approve?" +
-                "approval_session_id=fake-setup-token"
-
-        val browserSwitchOptions = slot.captured
-        expectThat(browserSwitchOptions) {
-            get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
-            get { metadata?.get("request_type") }.isEqualTo("vault")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
-        }
-    }
-
-    @Test
-    fun `launchPayPalWebVault() browser switches to LIVE PayPal vault checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
-
-        val slot = slot<BrowserSwitchOptions>()
-        every { browserSwitchClient.start(activity, capture(slot)) } just runs
-
-        val request = PayPalWebVaultRequest("fake-setup-token")
-        sut.launchPayPalWebVault(activity, request)
-
-        val expectedUrl = "https://sandbox.paypal.com/agreements/approve?" +
-                "approval_session_id=fake-setup-token"
-
-        val browserSwitchOptions = slot.captured
-        expectThat(browserSwitchOptions) {
-            get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
-            get { metadata?.get("request_type") }.isEqualTo("vault")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
-        }
-    }
-
-    @Test
     fun `launchPayPalWebCheckout() browser switches to PayPal Credit web checkout`() {
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
 
@@ -205,22 +161,46 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebVault() browser switches to approval url`() {
+    fun `launchPayPalWebVault() browser switches to SANDBOX PayPal vault checkout`() {
         sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every { browserSwitchClient.start(activity, capture(slot)) } just runs
 
-        val vaultRequest =
-            PayPalWebVaultRequest("fake-setup-token-id")
-        sut.launchPayPalWebVault(activity, vaultRequest)
+        val request = PayPalWebVaultRequest("fake-setup-token")
+        sut.launchPayPalWebVault(activity, request)
+
+        val expectedUrl = "https://sandbox.paypal.com/agreements/approve?" +
+                "approval_session_id=fake-setup-token"
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
-            get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token-id")
+            get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
             get { metadata?.get("request_type") }.isEqualTo("vault")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse("https://example.com/approval/url"))
+            get { url }.isEqualTo(Uri.parse(expectedUrl))
+        }
+    }
+
+    @Test
+    fun `launchPayPalWebVault() browser switches to LIVE PayPal vault checkout`() {
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val slot = slot<BrowserSwitchOptions>()
+        every { browserSwitchClient.start(activity, capture(slot)) } just runs
+
+        val request = PayPalWebVaultRequest("fake-setup-token")
+        sut.launchPayPalWebVault(activity, request)
+
+        val expectedUrl = "https://paypal.com/agreements/approve?" +
+                "approval_session_id=fake-setup-token"
+
+        val browserSwitchOptions = slot.captured
+        expectThat(browserSwitchOptions) {
+            get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
+            get { metadata?.get("request_type") }.isEqualTo("vault")
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
+            get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
     }
 
