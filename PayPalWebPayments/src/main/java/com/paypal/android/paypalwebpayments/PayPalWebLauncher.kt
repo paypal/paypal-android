@@ -56,8 +56,9 @@ internal class PayPalWebLauncher(
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
             .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+        val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
         val browserSwitchOptions = BrowserSwitchOptions()
-            .url(Uri.parse(request.approveVaultHref))
+            .url(url)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
         return launchBrowserSwitch(activity, browserSwitchOptions)
@@ -92,6 +93,20 @@ internal class PayPalWebLauncher(
             .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
+            .build()
+    }
+
+    private fun buildPayPalVaultUri(
+        setupTokenId: String,
+        config: CoreConfig
+    ): Uri {
+        val baseURL = when (config.environment) {
+            Environment.LIVE -> "https://paypal.com/agreements/approve"
+            Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
+        }
+        return Uri.parse(baseURL)
+            .buildUpon()
+            .appendQueryParameter("approval_session_id", setupTokenId)
             .build()
     }
 
