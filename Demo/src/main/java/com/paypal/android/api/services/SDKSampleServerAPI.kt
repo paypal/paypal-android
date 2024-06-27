@@ -255,13 +255,11 @@ class SDKSampleServerAPI {
 
         val responseJSON = JSONObject(response.string())
         val customerJSON = responseJSON.getJSONObject("customer")
-        val approveVaultHref = findApprovalHref(responseJSON)
 
         PayPalSetupToken(
             id = responseJSON.getString("id"),
             customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status"),
-            approveVaultHref = approveVaultHref
+            status = responseJSON.getString("status")
         )
     }
 
@@ -289,16 +287,5 @@ class SDKSampleServerAPI {
             vaultId = optNonEmptyString(vaultJSON, "id"),
             customerId = optNonEmptyString(vaultCustomerJSON, "id")
         )
-    }
-
-    private fun findApprovalHref(responseJSON: JSONObject): String? {
-        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
-        for (i in 0 until linksJSON.length()) {
-            val link = linksJSON.getJSONObject(i)
-            if (link.getString("rel") == "approve") {
-                return link.getString("href")
-            }
-        }
-        return null
     }
 }
