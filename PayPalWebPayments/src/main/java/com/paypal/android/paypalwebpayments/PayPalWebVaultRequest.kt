@@ -17,5 +17,5 @@ constructor(
      *
      * @property [setupTokenId] ID for the setup token associated with the vault approval
      */
-    constructor(setupTokenId: String): this(setupTokenId, null)
+    constructor(setupTokenId: String) : this(setupTokenId, null)
 }

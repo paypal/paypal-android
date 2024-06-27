@@ -212,7 +212,7 @@ class PayPalWebLauncherUnitTest {
         every { browserSwitchClient.start(activity, capture(slot)) } just runs
 
         val vaultRequest =
-            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+            PayPalWebVaultRequest("fake-setup-token-id")
         sut.launchPayPalWebVault(activity, vaultRequest)
 
         val browserSwitchOptions = slot.captured
@@ -234,7 +234,7 @@ class PayPalWebLauncherUnitTest {
         every { browserSwitchClient.start(any(), any()) } throws browserSwitchException
 
         val vaultRequest =
-            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+            PayPalWebVaultRequest("fake-setup-token-id")
         sut.launchPayPalWebVault(activity, vaultRequest)
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
