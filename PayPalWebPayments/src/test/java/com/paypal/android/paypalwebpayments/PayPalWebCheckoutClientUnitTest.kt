@@ -72,7 +72,7 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns null
 
         val request =
-            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+            PayPalWebVaultRequest("fake-setup-token-id")
         sut.vault(request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebVault(activity, request) }
         verify(exactly = 0) { vaultListener.onPayPalWebVaultFailure(any()) }
@@ -86,7 +86,7 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns sdkError
 
         val request =
-            PayPalWebVaultRequest("fake-setup-token-id", "https://example.com/approval/url")
+            PayPalWebVaultRequest("fake-setup-token-id")
         sut.vault(request)
 
         val slot = slot<PayPalSDKError>()
