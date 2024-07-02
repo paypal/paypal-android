@@ -1,6 +1,7 @@
 package com.paypal.android.paypalnativepayments
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * A listener to receive notifications if the user changes their shipping information.
  *
  * This is **only required** if the order ID was created with `shipping_preferences = GET_FROM_FILE`.
@@ -8,6 +9,7 @@ package com.paypal.android.paypalnativepayments
  * If the order ID was created with `shipping_preferences = NO_SHIPPING` or `SET_PROVIDED_ADDRESS`,
  * don't implement this listener.
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 interface PayPalNativeShippingListener {
 
     /**

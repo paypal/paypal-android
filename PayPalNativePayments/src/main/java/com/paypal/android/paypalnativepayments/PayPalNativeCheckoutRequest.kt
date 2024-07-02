@@ -1,8 +1,10 @@
 package com.paypal.android.paypalnativepayments
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * Used to configure options for approving a PayPal native order
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 data class PayPalNativeCheckoutRequest(
     /**
      * The order ID associated with the request.
