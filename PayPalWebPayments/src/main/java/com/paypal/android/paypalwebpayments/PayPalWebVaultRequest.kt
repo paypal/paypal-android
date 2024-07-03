@@ -6,10 +6,11 @@ package com.paypal.android.paypalwebpayments
  * @property [setupTokenId] ID for the setup token associated with the vault approval
  * @property [approveVaultHref] URL for the approval web page
  */
-data class PayPalWebVaultRequest @Deprecated("Use PayPalWebVaultRequest(setupTokenId:) instead.")
+data class PayPalWebVaultRequest @Deprecated("Use PayPalWebVaultRequest(setupTokenId) instead.")
 constructor(
     val setupTokenId: String,
-    val approveVaultHref: String?? // NEXT_MAJOR_VERSION: - Remove this property
+    @Deprecated("The approveVaultHref property is no longer required and will be ignored.")
+    val approveVaultHref: String? // NEXT_MAJOR_VERSION: - Remove this property
 ) {
 
     /**
