@@ -24,8 +24,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * Use this client to checkout with PayPal.
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 class PayPalNativeCheckoutClient internal constructor(
     private val application: Application,
     private val coreConfig: CoreConfig,

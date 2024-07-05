@@ -3,8 +3,10 @@ package com.paypal.android.paypalnativepayments
 import com.paypal.checkout.shipping.ShippingChangeActions
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * The actions that can be used to update the Paysheet UI after [PayPalNativeShippingListener] methods are invoked.
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 class PayPalNativePaysheetActions(private val shippingChangeActions: ShippingChangeActions) {
 
     /**
