@@ -7,9 +7,8 @@ android {
     compileSdk 31
 
     defaultConfig {
-        minSdk 21
-        targetSdk 31
-
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -26,7 +25,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
 
@@ -39,3 +38,10 @@ dependencies {
     androidTestImplementation deps.androidxJUnit
     androidTestImplementation deps.androidxEspressoCore
 }
+
+project.ext.name = "venmo-payments"
+project.ext.version = rootProject.version
+project.ext.pom_name = "PayPal SDK - VenmoPayments"
+project.ext.pom_desc = "Library for Venmo payment methods"
+
+apply from: rootProject.file("gradle/gradle-publish.gradle")
