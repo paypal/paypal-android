@@ -92,7 +92,11 @@ class CardClient internal constructor(
                 )
 
                 if (response.payerActionHref == null) {
-                    val result = CardResult(response.orderId)
+                    val result = CardResult(
+                        orderId = response.orderId,
+                        status = response.status?.name,
+                        didAttemptThreeDSecureAuthentication = false
+                    )
                     notifyApproveOrderSuccess(result)
                 } else {
                     analyticsService.sendAnalyticsEvent(

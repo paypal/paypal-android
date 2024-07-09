@@ -15,6 +15,7 @@ import io.mockk.slot
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -124,6 +125,8 @@ class CardAuthLauncherUnitTest {
         val cardResult = status.result
         assertEquals("fake-order-id", cardResult.orderId)
         assertEquals("NO", cardResult.liabilityShift)
+        assertTrue(cardResult.didAttemptThreeDSecureAuthentication)
+        assertNull(cardResult.status)
     }
 
     @Test
