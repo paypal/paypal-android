@@ -31,9 +31,12 @@ fun CardResultView(result: CardResult) {
 fun CardResultViewWith3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            CardResultView(
-                CardResult("fake-order-id", "fake-status", true)
+            val result = CardResult(
+                orderId = "fake-order-id",
+                status = "fake-status",
+                didAttemptThreeDSecureAuthentication = true
             )
+            CardResultView(result)
         }
     }
 }
@@ -43,9 +46,12 @@ fun CardResultViewWith3DSAuth() {
 fun CardResultViewWithout3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            CardResultView(
-                CardResult("fake-order-id", "fake-status", false)
+            val result = CardResult(
+                orderId = "fake-order-id",
+                status = "fake-status",
+                didAttemptThreeDSecureAuthentication = false
             )
+            CardResultView(result)
         }
     }
 }
