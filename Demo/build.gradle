@@ -98,7 +98,7 @@ dependencies {
     debugImplementation project(':PayPalNativePayments')
     debugImplementation project(':PayPalWebPayments')
     debugImplementation project(':PaymentButtons')
-    debugImplementation project(':Venmo')
+    debugImplementation project(':VenmoPayments')
 
     releaseImplementation deps.cardPayments
     releaseImplementation deps.paymentButtons
