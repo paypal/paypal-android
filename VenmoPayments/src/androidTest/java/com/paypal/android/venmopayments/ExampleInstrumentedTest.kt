@@ -1,4 +1,4 @@
-package com.paypal.android.venmo
+package com.paypal.android.venmopayments
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.paypal.android.venmo.test", appContext.packageName)
+        assertEquals("com.paypal.android.venmopayments.test", appContext.packageName)
     }
 }

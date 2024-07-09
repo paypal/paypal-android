@@ -1,4 +1,4 @@
-package com.paypal.android.venmo
+package com.paypal.android.venmopayments
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
