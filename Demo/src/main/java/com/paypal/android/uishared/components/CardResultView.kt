@@ -17,7 +17,7 @@ fun CardResultView(result: CardResult) {
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = UIConstants.paddingMedium)
+            .padding(UIConstants.paddingMedium)
     ) {
         PropertyView(name = "Order ID", value = result.orderId)
         PropertyView(name = "Order Status", value = result.status)
