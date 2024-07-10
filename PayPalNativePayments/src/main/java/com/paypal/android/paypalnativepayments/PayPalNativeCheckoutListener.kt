@@ -3,8 +3,10 @@ package com.paypal.android.paypalnativepayments
 import com.paypal.android.corepayments.PayPalSDKError
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * Implement this callback to receive results from [PayPalNativeCheckoutClient].
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 interface PayPalNativeCheckoutListener {
 
     /**

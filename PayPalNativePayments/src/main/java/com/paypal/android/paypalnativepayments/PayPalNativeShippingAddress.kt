@@ -3,8 +3,10 @@ package com.paypal.android.paypalnativepayments
 import com.paypal.checkout.shipping.ShippingChangeAddress
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * The user's selected shipping address via the PayPal Native Checkout UI.
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 data class PayPalNativeShippingAddress internal constructor(
     /**
      * The highest level sub-division in a country, which is usually a province, state, or ISO-3166-2 subdivision.

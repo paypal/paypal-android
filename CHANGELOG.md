@@ -4,7 +4,10 @@
 * PayPalWebPayments
   * Deprecate `PayPalWebVaultRequest(setupTokenId, approveVaultHref)`
   * Add `PayPalWebVaultRequest(setupTokenId)`
-
+* PayPalNativePayments (DEPRECATED)
+  * **NOTE:** This module is being deprecated and will be removed in the future version of the SDK. Use `PayPalWebPayments` module instead.
+  * Add deprecated warning message to all classes
+  
 ## 1.4.1 (2024-06-06)
 * PaymentButtons
   * Add `paylater_color` to `PayLaterButton` to control the color of the pay later button from XML.

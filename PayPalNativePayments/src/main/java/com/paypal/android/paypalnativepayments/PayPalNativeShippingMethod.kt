@@ -3,12 +3,14 @@ package com.paypal.android.paypalnativepayments
 import com.paypal.checkout.order.Options
 
 /**
+ * Deprecated. Use PayPalWebPayments module instead
  * Shipping method details for an order via the PayPal Native Checkout UI.
  * If you want to show shipping options in the PayPal Native Paysheet,
  * provide `purchase_units[].shipping.options` when creating an orderId with
  * the [`orders/v2` API](https://developer.paypal.com/docs/api/orders/v2/#definition-purchase_unit)
  * on your server. Otherwise, our Paysheet won't display any shipping options.
  */
+@Deprecated("Deprecated. Use PayPalWebPayments module instead")
 data class PayPalNativeShippingMethod internal constructor(
 
     /**
