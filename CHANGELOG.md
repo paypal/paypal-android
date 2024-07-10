@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 1.5.0 (2024-07-10)
 * PayPalWebPayments
   * Deprecate `PayPalWebVaultRequest(setupTokenId, approveVaultHref)`
   * Add `PayPalWebVaultRequest(setupTokenId)`
