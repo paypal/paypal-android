@@ -1,5 +1,7 @@
 package com.paypal.android.cardpayments
 
+import android.net.Uri
+
 /**
  * A result returned by [CardClient] when an order was successfully approved with a [Card].
  *
@@ -11,6 +13,12 @@ package com.paypal.android.cardpayments
  */
 data class CardResult(
     val orderId: String,
+
+    /**
+     * @suppress
+     */
+    @Deprecated("Use status instead.")
+    val deepLinkUrl: Uri? = null,
 
     @Deprecated("Use didAttemptThreeDSecureAuthentication instead.")
     val liabilityShift: String? = null,
