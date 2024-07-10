@@ -1,6 +1,9 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+* PayPalWebPayments
+  * Deprecate `PayPalWebVaultRequest(setupTokenId, approveVaultHref)`
+  * Add `PayPalWebVaultRequest(setupTokenId)`
 * PayPalNativePayments (DEPRECATED)
   * **NOTE:** This module is being deprecated and will be removed in the future version of the SDK. Use `PayPalWebPayments` module instead.
   * Add deprecated warning message to all classes
