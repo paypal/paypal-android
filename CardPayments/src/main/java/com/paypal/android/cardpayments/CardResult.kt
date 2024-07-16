@@ -23,7 +23,7 @@ data class CardResult(
     @Deprecated("Use didAttemptThreeDSecureAuthentication instead.")
     val liabilityShift: String? = null,
 
-    var status: String? = null,
+    val status: String? = null,
 
     val didAttemptThreeDSecureAuthentication: Boolean = false
 )
