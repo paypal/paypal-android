@@ -4,6 +4,7 @@
 
 * CardPayments
   * Deprecate `CardResult.liabilityShift` property
+  * Deprecate `CardResult.deepLinkUrl` property
   * Add `CardResult.status` property
   * Add `CardResult.didAttemptThreeDSecureAuthentication` property
 
