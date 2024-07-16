@@ -1,14 +1,10 @@
 package com.paypal.android.uishared.components
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,64 +14,44 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun CardResultView(result: CardResult) {
     Column(
+        verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = UIConstants.paddingMedium)
+            .padding(UIConstants.paddingMedium)
     ) {
-        Text(
-            text = "Order ID",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(top = UIConstants.paddingMedium)
-        )
-        Text(
-            text = result.orderId,
-            modifier = Modifier
-                .padding(top = UIConstants.paddingExtraSmall)
-        )
-        Text(
-            text = "Deep Link URL",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .padding(top = UIConstants.paddingMedium)
-        )
-        val deepLinkUrl = result.deepLinkUrl
-        if (deepLinkUrl == null) {
-            Text(
-                text = "NOT SET",
-                modifier = Modifier
-                    .padding(top = UIConstants.paddingExtraSmall)
-            )
-        } else {
-            UriView(uri = deepLinkUrl)
-        }
-        Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
+        PropertyView(name = "Order ID", value = result.orderId)
+        PropertyView(name = "Order Status", value = result.status)
+        val didAttemptText = if (result.didAttemptThreeDSecureAuthentication) "YES" else "NO"
+        PropertyView(name = "Did Attempt 3DS Authentication", value = didAttemptText)
     }
 }
 
 @Preview
 @Composable
-fun CardResultViewWithDeepLinkPreview() {
+fun CardResultViewWith3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            CardResultView(
-                CardResult(
-                    "fake-order-id",
-                    Uri.parse("fake-scheme://fake-host/fake-path?fakeParam1=value1&fakeParam2=value2")
-                )
+            val result = CardResult(
+                orderId = "fake-order-id",
+                status = "fake-status",
+                didAttemptThreeDSecureAuthentication = true
             )
+            CardResultView(result)
         }
     }
 }
 
 @Preview
 @Composable
-fun CardResultViewWithoutDeepLinkPreview() {
+fun CardResultViewWithout3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            CardResultView(
-                CardResult("fake-order-id")
+            val result = CardResult(
+                orderId = "fake-order-id",
+                status = "fake-status",
+                didAttemptThreeDSecureAuthentication = false
             )
+            CardResultView(result)
         }
     }
 }

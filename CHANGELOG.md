@@ -1,5 +1,13 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* CardPayments
+  * Deprecate `CardResult.liabilityShift` property
+  * Deprecate `CardResult.deepLinkUrl` property
+  * Add `CardResult.status` property
+  * Add `CardResult.didAttemptThreeDSecureAuthentication` property
+
 ## 1.5.0 (2024-07-10)
 * PayPalWebPayments
   * Deprecate `PayPalWebVaultRequest(setupTokenId, approveVaultHref)`

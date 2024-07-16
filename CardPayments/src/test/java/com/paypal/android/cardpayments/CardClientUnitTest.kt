@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Before
@@ -98,6 +99,8 @@ class CardClientUnitTest {
 
         val actual = resultSlot.captured
         assertEquals("sample-order-id", actual.orderId)
+        assertEquals(OrderStatus.APPROVED.name, actual.status)
+        assertFalse(actual.didAttemptThreeDSecureAuthentication)
     }
 
     @Test
@@ -183,7 +186,11 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
-        val successResult = CardResult("fake-order-id")
+        val successResult = CardResult(
+            orderId = "fake-order-id",
+            status = OrderStatus.APPROVED.name,
+            didAttemptThreeDSecureAuthentication = false
+        )
         every {
             cardAuthLauncher.deliverBrowserSwitchResult(activity)
         } returns CardStatus.ApproveOrderSuccess(successResult)

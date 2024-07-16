@@ -145,7 +145,11 @@ internal class CardAuthLauncher(
                 CardStatus.ApproveOrderError(CardError.malformedDeepLinkError, orderId)
             } else {
                 val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
-                val result = CardResult(orderId, deepLinkUrl, liabilityShift)
+                val result = CardResult(
+                    orderId = orderId,
+                    liabilityShift = liabilityShift,
+                    didAttemptThreeDSecureAuthentication = true
+                )
                 CardStatus.ApproveOrderSuccess(result)
             }
         }
