@@ -18,7 +18,7 @@ import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.utils.UIConstants
 
-@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalComposeUiApi
 @Composable
 fun VenmoCheckoutView(
     viewModel: VenmoCheckoutViewModel = hiltViewModel(),
@@ -37,27 +37,27 @@ fun VenmoCheckoutView(
                 testTagsAsResourceId = true
             }
     ) {
-        Step1_CheckEligibility(uiState)
+        Step1_LaunchVenmo(uiState)
     }
 }
 
 @Composable
-private fun Step1_CheckEligibility(uiState: VenmoCheckoutUiState) {
+private fun Step1_LaunchVenmo(uiState: VenmoCheckoutUiState) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Check Eligibility")
+        StepHeader(stepNumber = 1, title = "Launch Venmo")
         ActionButtonColumn(
-            defaultTitle = "CHECK VENMO ELIGIBILITY",
-            successTitle = "SUCCESS",
-            state = uiState.checkEligibilityState,
+            defaultTitle = "LAUNCH VENMO",
+            successTitle = "LAUNCH VENMO SUCCESS",
+            state = uiState.venmoCheckoutState,
             onClick = {
-                // TODO: check eligibility
+                // TODO: launch venmo
             },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
-            // TODO: handle eligibility check result
+            // TODO: handle venmo result
         }
     }
 }
