@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.api.eligibility
+package com.paypal.android.corepayments.apis.eligibility
 
 /**
  *  Class representing eligibility for a set of payment methods

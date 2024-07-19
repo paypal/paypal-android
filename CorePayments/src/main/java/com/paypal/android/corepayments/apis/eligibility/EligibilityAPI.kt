@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.api.eligibility
+package com.paypal.android.corepayments.apis.eligibility
 
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig

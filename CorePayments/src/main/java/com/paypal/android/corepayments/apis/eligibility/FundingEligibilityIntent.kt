@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.api.eligibility
+package com.paypal.android.corepayments.apis.eligibility
 
 internal enum class FundingEligibilityIntent {
     SALE, CAPTURE, AUTHORIZE, ORDER, TOKENIZE, SUBSCRIPTION
