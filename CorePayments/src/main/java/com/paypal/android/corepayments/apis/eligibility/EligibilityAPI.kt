@@ -5,6 +5,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
+import com.paypal.android.corepayments.features.eligibility.EligibilityRequest
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.optBooleanAtKeyPath
 import org.json.JSONArray
@@ -38,12 +39,14 @@ internal class EligibilityAPI internal constructor(
      *  @return [Eligibility] for payment methods
      *  @throws PayPalSDKError if something went wrong in the API call
      */
-    suspend fun checkEligibility(context: Context): Eligibility {
+    suspend fun checkEligibility(context: Context, request: EligibilityRequest): Eligibility {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
         val enableFundingMethods = listOf(SupportedPaymentMethodsType.VENMO.name)
+        val currency = SupportedCountryCurrencyType.valueOf(request.currencyCode)
         val variables = JSONObject()
             .put(VARIABLE_CLIENT_ID, config.clientId)
             .put(VARIABLE_INTENT, FundingEligibilityIntent.CAPTURE.name)
+            .put(VARIABLE_CURRENCY, currency.name)
             .put(VARIABLE_CURRENCY, SupportedCountryCurrencyType.USD.name)
             .put(VARIABLE_ENABLE_FUNDING, JSONArray(enableFundingMethods))
 

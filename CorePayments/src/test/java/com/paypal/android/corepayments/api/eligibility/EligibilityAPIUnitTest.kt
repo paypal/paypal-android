@@ -43,7 +43,7 @@ class EligibilityAPIUnitTest {
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        sut.checkEligibility(context)
+        sut.checkEligibility(context,)
 
         val requestBodySlot = slot<JSONObject>()
         coVerify { graphQLClient.send(capture(requestBodySlot)) }
@@ -85,7 +85,7 @@ class EligibilityAPIUnitTest {
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.checkEligibility(context)
+        val result = sut.checkEligibility(context,)
 
         Assert.assertTrue(result.isCreditCardEligible)
         Assert.assertTrue(result.isVenmoEligible)
