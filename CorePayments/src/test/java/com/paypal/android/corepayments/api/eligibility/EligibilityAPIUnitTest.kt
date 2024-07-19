@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.apis.eligibility.EligibilityAPI
+import com.paypal.android.corepayments.features.eligibility.EligibilityRequest
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResponse
 import io.mockk.coEvery
@@ -43,7 +44,7 @@ class EligibilityAPIUnitTest {
     @Test
     fun checkEligibility_sendsGraphQLRequest() = runTest {
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        sut.checkEligibility(context,)
+        sut.checkEligibility(context, EligibilityRequest("USD"))
 
         val requestBodySlot = slot<JSONObject>()
         coVerify { graphQLClient.send(capture(requestBodySlot)) }
@@ -85,7 +86,7 @@ class EligibilityAPIUnitTest {
         coEvery { graphQLClient.send(any()) } returns graphQLResponse
 
         sut = EligibilityAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.checkEligibility(context,)
+        val result = sut.checkEligibility(context, EligibilityRequest("USD"))
 
         Assert.assertTrue(result.isCreditCardEligible)
         Assert.assertTrue(result.isVenmoEligible)
