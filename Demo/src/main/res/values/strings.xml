@@ -49,6 +49,7 @@
     </string-array>
 
     <string name="pay_pal_funding_source_title">FUNDING SOURCE</string>
+    <string name="feature_venmo_checkout">Venmo Checkout</string>
     <string-array name="pay_pal_funding_source_options">
         <item>PAYPAL_CREDIT</item>
         <item>PAY_LATER</item>
