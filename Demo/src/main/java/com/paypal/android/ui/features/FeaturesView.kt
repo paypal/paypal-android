@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,6 +46,10 @@ private val payPalNativeFeatures = listOf(
     Feature.PAYPAL_NATIVE
 )
 
+private val venmoFeatures = listOf(
+    Feature.VENMO_CHECKOUT
+)
+
 @ExperimentalFoundationApi
 @Composable
 fun FeaturesView(
@@ -53,8 +58,8 @@ fun FeaturesView(
     LazyColumn(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = UIConstants.paddingMedium)
-            .fillMaxSize()
+            .fillMaxSize(),
+        contentPadding = PaddingValues(bottom = UIConstants.paddingMedium)
     ) {
         stickyHeader {
             FeatureGroupHeader(text = "Card")
@@ -74,6 +79,12 @@ fun FeaturesView(
         item {
             FeatureOptions(payPalNativeFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
+        stickyHeader {
+            FeatureGroupHeader("Venmo")
+        }
+        item {
+            FeatureOptions(venmoFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
+        }
     }
 }
 
@@ -84,7 +95,13 @@ fun FeatureOptions(
 ) {
     Card(
         shape = CardDefaults.elevatedShape,
-        elevation = CardDefaults.elevatedCardElevation()
+        elevation = CardDefaults.elevatedCardElevation(),
+        modifier = Modifier
+            .padding(
+                start = UIConstants.paddingMedium,
+                end = UIConstants.paddingMedium,
+                bottom = UIConstants.paddingSmall
+            )
     ) {
         features.forEachIndexed { index, feature ->
             FeatureView(
@@ -98,14 +115,20 @@ fun FeatureOptions(
 
 @Composable
 fun FeatureGroupHeader(text: String) {
-    Spacer(modifier = Modifier.size(UIConstants.paddingLarge))
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurface,
-        fontWeight = FontWeight.Bold,
-        style = MaterialTheme.typography.titleLarge,
-    )
-    Spacer(modifier = Modifier.size(UIConstants.paddingMedium))
+    Row(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(UIConstants.paddingMedium)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable

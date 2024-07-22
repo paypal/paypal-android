@@ -10,6 +10,7 @@ object DemoAppDestinations {
     const val PAYPAL_STATIC_BUTTONS = "paypal_static_buttons"
     const val PAYPAL_NATIVE = "paypal_native"
     const val SELECT_TEST_CARD = "select_test_card"
+    const val VENMO_CHECKOUT = "venmo_checkout"
 
     fun titleForDestination(destination: String?): String = when (destination) {
         CARD_APPROVE_ORDER -> "Card Approve Order"
@@ -21,6 +22,7 @@ object DemoAppDestinations {
         PAYPAL_NATIVE -> "PayPal Native"
         SELECT_TEST_CARD -> "Select a Test Card"
         PAYPAL_WEB_VAULT -> "PayPal Web Vault"
+        VENMO_CHECKOUT -> "Venmo Checkout"
         else -> "Demo"
     }
 }

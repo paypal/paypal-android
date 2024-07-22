@@ -55,4 +55,5 @@
         <item>PAYPAL</item>
     </string-array>
 
+    <string name="feature_venmo_checkout">Venmo Checkout</string>
 </resources>
