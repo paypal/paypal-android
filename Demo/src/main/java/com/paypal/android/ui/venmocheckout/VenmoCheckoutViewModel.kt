@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.features.eligibility.CheckEligibilityResult
+import com.paypal.android.corepayments.features.eligibility.CheckEligibilityResultListener
 import com.paypal.android.corepayments.features.eligibility.EligibilityClient
 import com.paypal.android.corepayments.features.eligibility.EligibilityRequest
 import com.paypal.android.corepayments.features.eligibility.EligibilityResult
@@ -60,7 +60,7 @@ class VenmoCheckoutViewModel @Inject constructor(
                     eligibilityClient = EligibilityClient(context, coreConfig)
                     val eligibilityRequest =
                         EligibilityRequest(intent = intentOption, currencyCode = "USD")
-                    eligibilityClient.check(eligibilityRequest, object : CheckEligibilityResult {
+                    eligibilityClient.check(eligibilityRequest, object : CheckEligibilityResultListener {
                         override fun onCheckEligibilitySuccess(result: EligibilityResult) {
                             checkEligibilityState = ActionState.Success(result)
                         }
