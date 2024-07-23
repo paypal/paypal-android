@@ -1,5 +1,9 @@
 package com.paypal.android.corepayments.features.eligibility
 
-fun interface CheckEligibilityResult {
-    fun onCheckEligibilityResult(result: EligibilityResult)
+import com.paypal.android.corepayments.PayPalSDKError
+
+interface CheckEligibilityResult {
+    fun onCheckEligibilitySuccess(result: EligibilityResult)
+
+    fun onCheckEligibilityFailure(error: PayPalSDKError)
 }

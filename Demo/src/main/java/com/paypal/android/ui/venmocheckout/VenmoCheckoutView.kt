@@ -19,7 +19,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.EnumOptionList
+import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 
 @ExperimentalComposeUiApi
@@ -66,7 +68,10 @@ private fun Step1_LaunchVenmo(uiState: VenmoCheckoutUiState, viewModel: VenmoChe
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
-            // TODO: handle venmo result
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> EligibilityResultView(result = state.value)
+            }
         }
     }
 }

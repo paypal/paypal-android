@@ -26,14 +26,13 @@ class EligibilityClient internal constructor(
         callback: CheckEligibilityResult
     ) {
         CoroutineScope(dispatcher).launch {
-            val eligibilityResult = try {
+            try {
                 val response =
                     eligibilityAPI.checkEligibility(applicationContext, eligibilityRequest)
-                EligibilityResult.Success(isVenmoEligible = response.isVenmoEligible)
+                callback.onCheckEligibilitySuccess(EligibilityResult(response.isVenmoEligible))
             } catch (e: PayPalSDKError) {
-                EligibilityResult.Failure(e)
+                callback.onCheckEligibilityFailure(e)
             }
-            callback.onCheckEligibilityResult(eligibilityResult)
         }
     }
 }
