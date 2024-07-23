@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -46,6 +47,7 @@ fun VenmoCheckoutView(
 
 @Composable
 private fun Step1_LaunchVenmo(uiState: VenmoCheckoutUiState, viewModel: VenmoCheckoutViewModel) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -57,12 +59,10 @@ private fun Step1_LaunchVenmo(uiState: VenmoCheckoutUiState, viewModel: VenmoChe
             selectedOption = uiState.intentOption
         )
         ActionButtonColumn(
-            defaultTitle = "LAUNCH VENMO",
-            successTitle = "LAUNCH VENMO SUCCESS",
-            state = uiState.venmoCheckoutState,
-            onClick = {
-                // TODO: launch venmo
-            },
+            defaultTitle = "CHECK ELIGIBILITY",
+            successTitle = "CHECK ELIGIBILITY SUCCESS",
+            state = uiState.checkEligibilityState,
+            onClick = { viewModel.getEligibility(context) },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
