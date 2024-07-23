@@ -8,7 +8,6 @@
   * Add `EligibilityClient`
   * Add `EligibilityRequest`
   * Add `EligibilityResult`
-  * 
 * CardPayments
   * Deprecate `CardResult.liabilityShift` property
   * Deprecate `CardResult.deepLinkUrl` property
