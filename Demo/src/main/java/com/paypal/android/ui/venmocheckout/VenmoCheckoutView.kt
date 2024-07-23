@@ -10,11 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.utils.UIConstants
 
@@ -37,16 +40,22 @@ fun VenmoCheckoutView(
                 testTagsAsResourceId = true
             }
     ) {
-        Step1_LaunchVenmo(uiState)
+        Step1_LaunchVenmo(uiState, viewModel)
     }
 }
 
 @Composable
-private fun Step1_LaunchVenmo(uiState: VenmoCheckoutUiState) {
+private fun Step1_LaunchVenmo(uiState: VenmoCheckoutUiState, viewModel: VenmoCheckoutViewModel) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Launch Venmo")
+        EnumOptionList(
+            title = stringResource(id = R.string.intent_title),
+            stringArrayResId = R.array.intent_options,
+            onSelectedOptionChange = { value -> viewModel.intentOption = value },
+            selectedOption = uiState.intentOption
+        )
         ActionButtonColumn(
             defaultTitle = "LAUNCH VENMO",
             successTitle = "LAUNCH VENMO SUCCESS",
