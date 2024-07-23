@@ -1,7 +1,8 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
-
+* CorePayments
+  * Add `OrderIntent` enum
 * CardPayments
   * Deprecate `CardResult.liabilityShift` property
   * Deprecate `CardResult.deepLinkUrl` property

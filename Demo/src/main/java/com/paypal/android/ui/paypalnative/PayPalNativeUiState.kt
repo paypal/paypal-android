@@ -1,7 +1,7 @@
 package com.paypal.android.ui.paypalnative
 
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.corepayments.OrderIntent
 import com.paypal.android.paypalnativepayments.PayPalNativeCheckoutResult
 import com.paypal.android.uishared.state.ActionState
 

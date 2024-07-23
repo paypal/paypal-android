@@ -58,7 +58,8 @@ class VenmoCheckoutViewModel @Inject constructor(
                     val coreConfig = CoreConfig(clientId = clientId)
 
                     eligibilityClient = EligibilityClient(context, coreConfig)
-                    val eligibilityRequest = EligibilityRequest("USD")
+                    val eligibilityRequest =
+                        EligibilityRequest(intent = intentOption, currencyCode = "USD")
                     eligibilityClient.check(eligibilityRequest, object: CheckEligibilityResult {
                         override fun onCheckEligibilitySuccess(result: EligibilityResult) {
                             checkEligibilityState = ActionState.Success(result)

@@ -2,7 +2,7 @@ package com.paypal.android.ui.approveorder
 
 import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.corepayments.OrderIntent
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.enums.StoreInVaultOption

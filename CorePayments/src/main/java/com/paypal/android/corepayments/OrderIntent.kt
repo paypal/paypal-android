@@ -1,4 +1,4 @@
-package com.paypal.android.api.model
+package com.paypal.android.corepayments
 
 /**
  * The intent to either capture payment immediately or authorize a payment for an order after order creation

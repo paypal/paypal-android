@@ -1,7 +1,7 @@
 package com.paypal.android.usecase
 
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.corepayments.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import kotlinx.coroutines.Dispatchers

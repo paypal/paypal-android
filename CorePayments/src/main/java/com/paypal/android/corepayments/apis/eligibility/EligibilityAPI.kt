@@ -45,9 +45,8 @@ internal class EligibilityAPI internal constructor(
         val currency = SupportedCountryCurrencyType.valueOf(request.currencyCode)
         val variables = JSONObject()
             .put(VARIABLE_CLIENT_ID, config.clientId)
-            .put(VARIABLE_INTENT, FundingEligibilityIntent.CAPTURE.name)
+            .put(VARIABLE_INTENT, request.intent.name)
             .put(VARIABLE_CURRENCY, currency.name)
-            .put(VARIABLE_CURRENCY, SupportedCountryCurrencyType.USD.name)
             .put(VARIABLE_ENABLE_FUNDING, JSONArray(enableFundingMethods))
 
         val graphQLRequest = JSONObject()
