@@ -11,9 +11,6 @@ import com.paypal.android.corepayments.optBooleanAtKeyPath
 import org.json.JSONArray
 import org.json.JSONObject
 
-/**
- *  API that checks merchants eligibility for different payment methods.
- */
 internal class EligibilityAPI internal constructor(
     private val config: CoreConfig,
     private val graphQLClient: GraphQLClient,
@@ -26,19 +23,10 @@ internal class EligibilityAPI internal constructor(
         const val VARIABLE_ENABLE_FUNDING = "enableFunding"
     }
 
-    /**
-     *  EligibilityAPI constructor.
-     *  @param config configuration parameters for eligibility API
-     */
     constructor(config: CoreConfig) :
             this(config, GraphQLClient(config), ResourceLoader())
 
-    /**
-     *  Checks if merchant is eligible for a set of payment methods
-     *  @param context Android context
-     *  @return [Eligibility] for payment methods
-     *  @throws PayPalSDKError if something went wrong in the API call
-     */
+    @Throws(PayPalSDKError::class)
     suspend fun checkEligibility(context: Context, request: EligibilityRequest): Eligibility {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
         val enableFundingMethods = listOf(SupportedPaymentMethodsType.VENMO.name)
