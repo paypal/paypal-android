@@ -31,7 +31,6 @@ fun VenmoCheckoutView(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
-
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,

@@ -47,9 +47,9 @@ internal class EligibilityAPI internal constructor(
 
             return fundingEligibility.run {
                 Eligibility(
-                    isVenmoEligible  = optBooleanAtKeyPath("venmo.eligible"),
+                    isVenmoEligible = optBooleanAtKeyPath("venmo.eligible"),
                     isCreditCardEligible = optBooleanAtKeyPath("card.eligible"),
-                    isPaypalEligible   = optBooleanAtKeyPath("paypal.eligible"),
+                    isPaypalEligible = optBooleanAtKeyPath("paypal.eligible"),
                     isPayLaterEligible = optBooleanAtKeyPath("paylater.eligible"),
                     isPaypalCreditEligible = optBooleanAtKeyPath("credit.eligible"),
                 )

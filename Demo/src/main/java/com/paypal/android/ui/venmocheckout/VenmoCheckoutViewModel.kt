@@ -33,7 +33,6 @@ class VenmoCheckoutViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(VenmoCheckoutUiState())
     val uiState = _uiState.asStateFlow()
 
-
     var intentOption
         get() = _uiState.value.intentOption
         set(value) {
@@ -53,6 +52,7 @@ class VenmoCheckoutViewModel @Inject constructor(
                 is SDKSampleServerResult.Failure -> {
                     checkEligibilityState = clientIdResult.mapToActionState()
                 }
+
                 is SDKSampleServerResult.Success -> {
                     val clientId = clientIdResult.value
                     val coreConfig = CoreConfig(clientId = clientId)
@@ -60,7 +60,7 @@ class VenmoCheckoutViewModel @Inject constructor(
                     eligibilityClient = EligibilityClient(context, coreConfig)
                     val eligibilityRequest =
                         EligibilityRequest(intent = intentOption, currencyCode = "USD")
-                    eligibilityClient.check(eligibilityRequest, object: CheckEligibilityResult {
+                    eligibilityClient.check(eligibilityRequest, object : CheckEligibilityResult {
                         override fun onCheckEligibilitySuccess(result: EligibilityResult) {
                             checkEligibilityState = ActionState.Success(result)
                         }
@@ -71,7 +71,6 @@ class VenmoCheckoutViewModel @Inject constructor(
                     })
                 }
             }
-
         }
     }
 }
