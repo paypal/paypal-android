@@ -7,7 +7,6 @@ import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.OrderIntent
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.apis.eligibility.EligibilityAPI
 import com.paypal.android.corepayments.features.eligibility.EligibilityRequest
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResponse
