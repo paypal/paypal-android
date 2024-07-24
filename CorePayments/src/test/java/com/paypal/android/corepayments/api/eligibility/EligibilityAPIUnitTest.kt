@@ -92,7 +92,7 @@ class EligibilityAPIUnitTest {
         Assert.assertTrue(result.isCreditCardEligible)
         Assert.assertTrue(result.isVenmoEligible)
         Assert.assertTrue(result.isPayLaterEligible)
-        Assert.assertTrue(result.isPaypalCreditEligible)
-        Assert.assertTrue(result.isPaypalEligible)
+        Assert.assertTrue(result.isPayPalCreditEligible)
+        Assert.assertTrue(result.isPayPalEligible)
     }
 }

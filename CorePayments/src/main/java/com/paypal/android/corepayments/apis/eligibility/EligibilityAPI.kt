@@ -11,10 +11,10 @@ import com.paypal.android.corepayments.optBooleanAtKeyPath
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal class EligibilityAPI internal constructor(
+internal class EligibilityAPI(
     private val config: CoreConfig,
-    private val graphQLClient: GraphQLClient,
-    private val resourceLoader: ResourceLoader
+    private val graphQLClient: GraphQLClient = GraphQLClient(config),
+    private val resourceLoader: ResourceLoader = ResourceLoader()
 ) {
     companion object {
         const val VARIABLE_CLIENT_ID = "clientId"
@@ -22,9 +22,6 @@ internal class EligibilityAPI internal constructor(
         const val VARIABLE_CURRENCY = "currency"
         const val VARIABLE_ENABLE_FUNDING = "enableFunding"
     }
-
-    constructor(config: CoreConfig) :
-            this(config, GraphQLClient(config), ResourceLoader())
 
     @Throws(PayPalSDKError::class)
     suspend fun checkEligibility(context: Context, request: EligibilityRequest): Eligibility {
@@ -49,9 +46,9 @@ internal class EligibilityAPI internal constructor(
                 Eligibility(
                     isVenmoEligible = optBooleanAtKeyPath("venmo.eligible"),
                     isCreditCardEligible = optBooleanAtKeyPath("card.eligible"),
-                    isPaypalEligible = optBooleanAtKeyPath("paypal.eligible"),
+                    isPayPalEligible = optBooleanAtKeyPath("paypal.eligible"),
                     isPayLaterEligible = optBooleanAtKeyPath("paylater.eligible"),
-                    isPaypalCreditEligible = optBooleanAtKeyPath("credit.eligible"),
+                    isPayPalCreditEligible = optBooleanAtKeyPath("credit.eligible"),
                 )
             }
         } else {
