@@ -34,11 +34,11 @@ class EligibilityClient internal constructor(
      * Check eligibility for a set of payment methods.
      *
      * @param eligibilityRequest A request object (see [EligibilityRequest]).
-     * @param callback A callback to receive a success or error result (see [CheckEligibilityResultListener]).
+     * @param callback A callback to receive a success or error result (see [EligibilityCheckListener]).
      */
     fun check(
         eligibilityRequest: EligibilityRequest,
-        callback: CheckEligibilityResultListener
+        callback: EligibilityCheckListener
     ) {
         CoroutineScope(dispatcher).launch {
             try {

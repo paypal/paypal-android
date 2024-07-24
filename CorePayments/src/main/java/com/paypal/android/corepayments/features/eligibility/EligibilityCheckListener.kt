@@ -5,7 +5,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 /**
  * Implement this interface to receive results from calls to [EligibilityClient.check].
  */
-interface CheckEligibilityResultListener {
+interface EligibilityCheckListener {
 
     /**
      * Called when [EligibilityClient.check] succeeds.

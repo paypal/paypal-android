@@ -27,7 +27,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.Exception
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -41,7 +40,7 @@ class EligibilityClientUnitTest {
     private lateinit var eligibilityAPI: EligibilityAPI
     private val eligibilityRequest = EligibilityRequest(OrderIntent.CAPTURE, "USD")
 
-    private lateinit var checkEligibilityListener: CheckEligibilityResultListener
+    private lateinit var eligibilityCheckListener: EligibilityCheckListener
 
     @Before
     fun beforeEach() {
@@ -49,7 +48,7 @@ class EligibilityClientUnitTest {
         Dispatchers.setMain(mainThreadSurrogate)
 
         eligibilityAPI = mockk(relaxed = true)
-        checkEligibilityListener = mockk(relaxed = true)
+        eligibilityCheckListener = mockk(relaxed = true)
     }
 
     @After
@@ -74,12 +73,12 @@ class EligibilityClientUnitTest {
         } returns eligibility
 
         val sut = EligibilityClient(applicationContext, eligibilityAPI, dispatcher)
-        sut.check(eligibilityRequest, checkEligibilityListener)
+        sut.check(eligibilityRequest, eligibilityCheckListener)
         advanceUntilIdle()
 
         val resultSlot = slot<EligibilityResult>()
         verify(exactly = 1) {
-            checkEligibilityListener.onCheckEligibilitySuccess(capture(resultSlot))
+            eligibilityCheckListener.onCheckEligibilitySuccess(capture(resultSlot))
         }
 
         val actual = resultSlot.captured
@@ -100,12 +99,12 @@ class EligibilityClientUnitTest {
         } throws error
 
         val sut = EligibilityClient(applicationContext, eligibilityAPI, dispatcher)
-        sut.check(eligibilityRequest, checkEligibilityListener)
+        sut.check(eligibilityRequest, eligibilityCheckListener)
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()
         verify(exactly = 1) {
-            checkEligibilityListener.onCheckEligibilityFailure(capture(errorSlot))
+            eligibilityCheckListener.onCheckEligibilityFailure(capture(errorSlot))
         }
         assertSame(error, errorSlot.captured)
     }
