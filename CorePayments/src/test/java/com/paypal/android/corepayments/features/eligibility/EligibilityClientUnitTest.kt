@@ -3,6 +3,7 @@ package com.paypal.android.corepayments.features.eligibility
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.OrderIntent
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.apis.eligibility.Eligibility
 import com.paypal.android.corepayments.apis.eligibility.EligibilityAPI
 import io.mockk.coEvery
@@ -20,11 +21,13 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.lang.Exception
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -36,6 +39,9 @@ class EligibilityClientUnitTest {
     private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
 
     private lateinit var eligibilityAPI: EligibilityAPI
+    private val eligibilityRequest = EligibilityRequest(OrderIntent.CAPTURE, "USD")
+
+    private lateinit var checkEligibilityListener: CheckEligibilityResultListener
 
     @Before
     fun beforeEach() {
@@ -43,6 +49,7 @@ class EligibilityClientUnitTest {
         Dispatchers.setMain(mainThreadSurrogate)
 
         eligibilityAPI = mockk(relaxed = true)
+        checkEligibilityListener = mockk(relaxed = true)
     }
 
     @After
@@ -52,7 +59,9 @@ class EligibilityClientUnitTest {
     }
 
     @Test
-    fun `check() forwards eligibility check success`() = runTest {
+    fun `check() forwards eligibility check success to listener`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+
         val eligibility = Eligibility(
             isVenmoEligible = true,
             isPayPalEligible = false,
@@ -60,20 +69,18 @@ class EligibilityClientUnitTest {
             isPayLaterEligible = false,
             isCreditCardEligible = true
         )
-
-        val request = EligibilityRequest(OrderIntent.CAPTURE, "USD")
         coEvery {
-            eligibilityAPI.checkEligibility(applicationContext, request)
+            eligibilityAPI.checkEligibility(applicationContext, eligibilityRequest)
         } returns eligibility
 
-        val listener = mockk<CheckEligibilityResultListener>(relaxed = true)
-        val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = EligibilityClient(applicationContext, eligibilityAPI, dispatcher)
-        sut.check(request, listener)
+        sut.check(eligibilityRequest, checkEligibilityListener)
         advanceUntilIdle()
 
         val resultSlot = slot<EligibilityResult>()
-        verify(exactly = 1) { listener.onCheckEligibilitySuccess(capture(resultSlot)) }
+        verify(exactly = 1) {
+            checkEligibilityListener.onCheckEligibilitySuccess(capture(resultSlot))
+        }
 
         val actual = resultSlot.captured
         assertTrue(actual.isVenmoEligible)
@@ -81,5 +88,25 @@ class EligibilityClientUnitTest {
         assertTrue(actual.isCreditEligible)
         assertFalse(actual.isPayLaterEligible)
         assertTrue(actual.isCardEligible)
+    }
+
+    @Test
+    fun `check() forwards eligibility check failure to listener`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+
+        val error = PayPalSDKError(123, "sample error")
+        coEvery {
+            eligibilityAPI.checkEligibility(applicationContext, eligibilityRequest)
+        } throws error
+
+        val sut = EligibilityClient(applicationContext, eligibilityAPI, dispatcher)
+        sut.check(eligibilityRequest, checkEligibilityListener)
+        advanceUntilIdle()
+
+        val errorSlot = slot<PayPalSDKError>()
+        verify(exactly = 1) {
+            checkEligibilityListener.onCheckEligibilityFailure(capture(errorSlot))
+        }
+        assertSame(error, errorSlot.captured)
     }
 }
