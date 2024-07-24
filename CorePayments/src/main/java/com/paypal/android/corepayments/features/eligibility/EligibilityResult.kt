@@ -1,5 +1,7 @@
 package com.paypal.android.corepayments.features.eligibility
 
+import androidx.annotation.RestrictTo
+
 /**
  * Contains the result of a successful [EligibilityClient.check] response.
  *
@@ -9,7 +11,7 @@ package com.paypal.android.corepayments.features.eligibility
  * @property [isPayLaterEligible] indicates PayPal Pay Later eligibility
  * @property [isCreditEligible] indicates PayPal Credit eligibility
  */
-data class EligibilityResult internal constructor(
+data class EligibilityResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     val isVenmoEligible: Boolean,
     val isCardEligible: Boolean,
     val isPayPalEligible: Boolean,

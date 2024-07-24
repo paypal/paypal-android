@@ -27,11 +27,10 @@ internal class EligibilityAPI(
     suspend fun checkEligibility(context: Context, request: EligibilityRequest): Eligibility {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
         val enableFundingMethods = listOf(SupportedPaymentMethod.VENMO.name)
-        val currency = SupportedCountryCurrencyType.valueOf(request.currencyCode)
         val variables = JSONObject()
             .put(VARIABLE_CLIENT_ID, config.clientId)
             .put(VARIABLE_INTENT, request.intent.name)
-            .put(VARIABLE_CURRENCY, currency.name)
+            .put(VARIABLE_CURRENCY, request.currencyCode)
             .put(VARIABLE_ENABLE_FUNDING, JSONArray(enableFundingMethods))
 
         val graphQLRequest = JSONObject()

@@ -30,7 +30,13 @@ fun EligibilityResultView(result: EligibilityResult) {
 fun EligibilityResultViewPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            val result = EligibilityResult(true)
+            val result = EligibilityResult(
+                isVenmoEligible = true,
+                isCardEligible = true,
+                isPayPalEligible = true,
+                isPayLaterEligible = true,
+                isCreditEligible = true
+            )
             EligibilityResultView(result)
         }
     }
