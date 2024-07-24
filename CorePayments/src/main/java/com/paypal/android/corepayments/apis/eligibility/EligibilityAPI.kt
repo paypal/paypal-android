@@ -26,7 +26,7 @@ internal class EligibilityAPI(
     @Throws(PayPalSDKError::class)
     suspend fun checkEligibility(context: Context, request: EligibilityRequest): Eligibility {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_funding_eligibility)
-        val enableFundingMethods = listOf(SupportedPaymentMethodsType.VENMO.name)
+        val enableFundingMethods = listOf(SupportedPaymentMethod.VENMO.name)
         val currency = SupportedCountryCurrencyType.valueOf(request.currencyCode)
         val variables = JSONObject()
             .put(VARIABLE_CLIENT_ID, config.clientId)

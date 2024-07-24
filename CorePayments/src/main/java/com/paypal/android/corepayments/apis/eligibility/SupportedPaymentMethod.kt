@@ -1,5 +1,5 @@
 package com.paypal.android.corepayments.apis.eligibility
 
-internal enum class SupportedPaymentMethodsType {
+internal enum class SupportedPaymentMethod {
     VENMO, CREDIT, PAYLATER
 }
