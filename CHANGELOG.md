@@ -2,6 +2,12 @@
 
 ## unreleased
 
+* CorePayments
+  * Add `OrderIntent` enum
+  * Add `CheckEligibilityResultListener` interface
+  * Add `EligibilityClient`
+  * Add `EligibilityRequest`
+  * Add `EligibilityResult`
 * CardPayments
   * Deprecate `CardResult.liabilityShift` property
   * Deprecate `CardResult.deepLinkUrl` property

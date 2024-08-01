@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.paypal.android.R
-import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.corepayments.OrderIntent
 import com.paypal.android.utils.UIConstants
 
 @Composable
