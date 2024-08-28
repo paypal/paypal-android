@@ -70,7 +70,7 @@ buildscript {
             "androidxTestUiAutomator"     : "androidx.test.uiautomator:uiautomator:2.2.0",
             "mockk"                       : "io.mockk:mockk:1.13.5",
             "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1",
-            "robolectric"                 : "org.robolectric:robolectric:4.10.3",
+            "robolectric"                 : "org.robolectric:robolectric:4.11.1",
             "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",
             "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
             "striktCore"                  : "io.strikt:strikt-core:0.30.1",
