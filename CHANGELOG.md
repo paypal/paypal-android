@@ -2,6 +2,8 @@
 
 ## unreleased
 
+* All Modules
+  * Upgrade compileSdkVersion and targetSdkVersion to API 35
 * CardPayments
   * Deprecate `CardResult.liabilityShift` property
   * Deprecate `CardResult.deepLinkUrl` property
