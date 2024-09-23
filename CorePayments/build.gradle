@@ -61,6 +61,7 @@ dependencies {
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
+    implementation deps.browserSwitch
 
     testImplementation deps.jsonAssert
     testImplementation deps.junit

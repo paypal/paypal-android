@@ -1,5 +1,6 @@
 package com.paypal.android.ui.approveorder
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,13 +11,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.core.util.Consumer
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.uishared.components.ActionButtonColumn
@@ -26,8 +32,9 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 @ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
@@ -43,6 +50,22 @@ fun ApproveOrderView(
         // continuously scroll to bottom of the list when scroll bounds change
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+
+    // Ref: https://stackoverflow.com/a/66549433
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+
+    val context = LocalContext.current
+    LaunchedEffect(lifecycleState) {
+        if (lifecycleState == Lifecycle.State.RESUMED) {
+            context.getActivityOrNull()?.let { viewModel.handleActivityResume(it) }
+        }
+    }
+
+    OnNewIntentEffect {
+        context.getActivityOrNull()?.let { viewModel.handleActivityResume(it) }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -117,7 +140,7 @@ private fun Step2_ApproveOrder(
             successTitle = "ORDER APPROVED",
             state = uiState.approveOrderState,
             onClick = {
-                context.getActivity()?.let { viewModel.approveOrder(it) }
+                context.getActivityOrNull()?.let { viewModel.approveOrder(it) }
             },
             modifier = Modifier.fillMaxWidth()
         ) { state ->

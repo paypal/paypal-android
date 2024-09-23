@@ -6,12 +6,15 @@ import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchResult
 import com.braintreepayments.api.BrowserSwitchStatus
+import com.paypal.android.corepayments.BrowserSwitchAuthChallenge
 import com.paypal.android.corepayments.PayPalSDKError
-import org.json.JSONObject
 
-internal class CardAuthLauncher(
-    private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
+class CardAuthLauncher internal constructor(
+    private val browserSwitchClient: BrowserSwitchClient
 ) {
+
+    // needed to fully encapsulate browser switch dependency
+    constructor() : this(BrowserSwitchClient())
 
     companion object {
         private const val METADATA_KEY_REQUEST_TYPE = "request_type"
@@ -24,30 +27,31 @@ internal class CardAuthLauncher(
 
     fun presentAuthChallenge(
         activity: FragmentActivity,
-        authChallenge: CardAuthChallenge
+        authChallenge: BrowserSwitchAuthChallenge
     ): PayPalSDKError? {
-        val metadata = when (authChallenge) {
-            is CardAuthChallenge.ApproveOrder -> {
-                val request = authChallenge.request
-                JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
-                    .put(METADATA_KEY_ORDER_ID, request.orderId)
-            }
-
-            is CardAuthChallenge.Vault -> {
-                val request = authChallenge.request
-                JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-                    .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-            }
-        }
-
-        // launch the 3DS flow
-        val browserSwitchOptions = BrowserSwitchOptions()
-            .url(authChallenge.url)
-            .returnUrlScheme(authChallenge.returnUrlScheme)
-            .metadata(metadata)
-        return launchBrowserSwitch(activity, browserSwitchOptions)
+        return launchBrowserSwitch(activity, authChallenge.options)
+//        val metadata = when (authChallenge) {
+//            is CardAuthChallenge.ApproveOrder -> {
+//                val request = authChallenge.request
+//                JSONObject()
+//                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
+//                    .put(METADATA_KEY_ORDER_ID, request.orderId)
+//            }
+//
+//            is CardAuthChallenge.Vault -> {
+//                val request = authChallenge.request
+//                JSONObject()
+//                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+//                    .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
+//            }
+//        }
+//
+//        // launch the 3DS flow
+//        val browserSwitchOptions = BrowserSwitchOptions()
+//            .url(authChallenge.url)
+//            .returnUrlScheme(authChallenge.returnUrlScheme)
+//            .metadata(metadata)
+//        return launchBrowserSwitch(activity, browserSwitchOptions)
     }
 
     private fun launchBrowserSwitch(
@@ -62,6 +66,23 @@ internal class CardAuthLauncher(
         }
         return error
     }
+
+    fun parseAuthState(activity: FragmentActivity): CardApproveOrderResult? =
+        browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
+            val requestType =
+                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
+            if (requestType == REQUEST_TYPE_VAULT) {
+                // TODO: implement
+            } else {
+                // Assume REQUEST_TYPE_APPROVE_ORDER
+                return CardApproveOrderResult.Success(
+                    orderId = "fake-order-id",
+                    status = "fake-status",
+                    didAttemptThreeDSecureAuthentication = false
+                )
+            }
+            return null
+        }
 
     fun deliverBrowserSwitchResult(activity: FragmentActivity) =
         browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->

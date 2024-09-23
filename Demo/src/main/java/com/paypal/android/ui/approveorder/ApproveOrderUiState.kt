@@ -3,6 +3,7 @@ package com.paypal.android.ui.approveorder
 import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.enums.StoreInVaultOption
@@ -11,7 +12,7 @@ import com.paypal.android.uishared.state.ActionState
 @Immutable
 data class ApproveOrderUiState(
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
-    val approveOrderState: ActionState<CardResult, Exception> = ActionState.Idle,
+    val approveOrderState: ActionState<CardApproveOrderResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val scaOption: SCA = SCA.SCA_ALWAYS,
     val cardNumber: String = "",

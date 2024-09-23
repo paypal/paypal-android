@@ -35,7 +35,7 @@ import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 // TODO: Rename to CardVaultView
 @ExperimentalMaterial3Api
@@ -152,7 +152,7 @@ private fun Step_VaultCard(
             successTitle = "CARD VAULTED",
             state = uiState.updateSetupTokenState,
             onClick = {
-                context.getActivity()?.let { viewModel.updateSetupToken(it) }
+                context.getActivityOrNull()?.let { viewModel.updateSetupToken(it) }
             }
         ) { state ->
             when (state) {
@@ -181,7 +181,7 @@ private fun Step_PresentAuthChallenge(
             successTitle = "AUTH CHALLENGE COMPLETE",
             state = uiState.authChallengeState,
             onClick = {
-                context.getActivity()?.let { viewModel.presentAuthChallenge(it, authChallenge) }
+                context.getActivityOrNull()?.let { viewModel.presentAuthChallenge(it, authChallenge) }
             }
         ) { state ->
             when (state) {
