@@ -12,24 +12,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 
 /**
  * Use this client to approve an order with a [Card].
  *
- * @property approveOrderListener listener to receive callbacks from [CardClient.approveOrder].
  * @property cardVaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
-    activity: FragmentActivity,
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analyticsService: AnalyticsService,
-    private val authChallengeLauncher: CardAuthLauncher,
     private val dispatcher: CoroutineDispatcher
 ) {
-
-//    var approveOrderListener: ApproveOrderListener? = null
 
     // NEXT MAJOR VERSION: rename to vaultListener
     /**
@@ -38,9 +32,6 @@ class CardClient internal constructor(
     var cardVaultListener: CardVaultListener? = null
 
     private var approveOrderId: String? = null
-    internal val lifeCycleObserver = CardLifeCycleObserver(this)
-
-    private val activityReference = WeakReference(activity)
 
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
         notifyApproveOrderFailure(error, approveOrderId)
@@ -53,29 +44,23 @@ class CardClient internal constructor(
     /**
      *  CardClient constructor
      *
-     *  @param [activity] Activity that launches the card client
+     *  @param [context] Activity that launches the card client
      *  @param [configuration] Configuration parameters for client
      */
-    constructor(activity: FragmentActivity, configuration: CoreConfig) :
+    constructor(context: Context, configuration: CoreConfig) :
             this(
-                activity,
                 CheckoutOrdersAPI(configuration),
                 DataVaultPaymentMethodTokensAPI(configuration),
-                AnalyticsService(activity.applicationContext, configuration),
-                CardAuthLauncher(),
+                AnalyticsService(context.applicationContext, configuration),
                 Dispatchers.Main
             )
-
-    init {
-        activity.lifecycle.addObserver(lifeCycleObserver)
-    }
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
     /**
      * Confirm [Card] payment source for an order.
      *
-     * @param activity [FragmentActivity] activity used to start 3DS flow (if requested)
      * @param cardRequest [CardRequest] for requesting an order approval
+     * @param callback [ApproveOrderListener] callback used to return a result to the caller
      */
     fun approveOrder(cardRequest: CardRequest, callback: ApproveOrderListener) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
@@ -217,8 +202,6 @@ class CardClient internal constructor(
      * Call this method at the end of the card flow to clear out all observers and listeners
      */
     fun removeObservers() {
-        activityReference.get()?.let { it.lifecycle.removeObserver(lifeCycleObserver) }
-//        approveOrderListener = null
         cardVaultListener = null
     }
 
