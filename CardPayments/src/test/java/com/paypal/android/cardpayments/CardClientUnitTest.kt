@@ -56,7 +56,7 @@ class CardClientUnitTest {
     private val activity = mockk<FragmentActivity>(relaxed = true)
     private val activityLifecycle = mockk<Lifecycle>(relaxed = true)
 
-    private val approveOrderListener = mockk<ApproveOrderListener>(relaxed = true)
+    private val cardApproveOrderListener = mockk<CardApproveOrderListener>(relaxed = true)
     private val cardVaultListener = mockk<CardVaultListener>(relaxed = true)
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -95,7 +95,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val resultSlot = slot<CardResult>()
-        verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(resultSlot)) }
+        verify(exactly = 1) { cardApproveOrderListener.onApproveOrderSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
         assertEquals("sample-order-id", actual.orderId)
@@ -114,7 +114,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()
-        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
+        verify(exactly = 1) { cardApproveOrderListener.onApproveOrderFailure(capture(errorSlot)) }
 
         val capturedError = errorSlot.captured
         assertEquals("mock_error_message", capturedError.errorDescription)
@@ -184,7 +184,7 @@ class CardClientUnitTest {
     @Test
     fun `handleBrowserSwitchResult() notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
-        sut.approveOrderListener = approveOrderListener
+        sut.approveOrderListener = cardApproveOrderListener
 
         val successResult = CardResult(
             orderId = "fake-order-id",
@@ -198,14 +198,14 @@ class CardClientUnitTest {
         sut.handleBrowserSwitchResult(activity)
 
         val slot = slot<CardResult>()
-        verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(slot)) }
+        verify(exactly = 1) { cardApproveOrderListener.onApproveOrderSuccess(capture(slot)) }
         assertSame(successResult, slot.captured)
     }
 
     @Test
     fun `handleBrowserSwitchResult() notifies merchant of approve order failure`() = runTest {
         val sut = createCardClient(testScheduler)
-        sut.approveOrderListener = approveOrderListener
+        sut.approveOrderListener = cardApproveOrderListener
 
         val error = PayPalSDKError(123, "fake-error-description")
         every {
@@ -215,21 +215,21 @@ class CardClientUnitTest {
         sut.handleBrowserSwitchResult(activity)
 
         val slot = slot<PayPalSDKError>()
-        verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(slot)) }
+        verify(exactly = 1) { cardApproveOrderListener.onApproveOrderFailure(capture(slot)) }
         assertSame(error, slot.captured)
     }
 
     @Test
     fun `handleBrowserSwitchResult() notifies merchant of approve order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
-        sut.approveOrderListener = approveOrderListener
+        sut.approveOrderListener = cardApproveOrderListener
 
         every {
             cardAuthLauncher.deliverBrowserSwitchResult(activity)
         } returns CardStatus.ApproveOrderCanceled("fake-order-id")
 
         sut.handleBrowserSwitchResult(activity)
-        verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
+        verify(exactly = 1) { cardApproveOrderListener.onApproveOrderCanceled() }
     }
 
     @Test
@@ -285,7 +285,7 @@ class CardClientUnitTest {
     fun `handleBrowserSwitchResult() doesn't deliver result when browserSwitchResult is null`() =
         runTest {
             val sut = createCardClient(testScheduler)
-            sut.approveOrderListener = approveOrderListener
+            sut.approveOrderListener = cardApproveOrderListener
             sut.cardVaultListener = cardVaultListener
 
             every { cardAuthLauncher.deliverBrowserSwitchResult(activity) } returns null
@@ -299,7 +299,7 @@ class CardClientUnitTest {
     fun `presentAuthChallenge() presents an approve order auth challenge using auth launcher`() =
         runTest {
             val sut = createCardClient(testScheduler)
-            sut.approveOrderListener = approveOrderListener
+            sut.approveOrderListener = cardApproveOrderListener
 
             val url = Uri.parse("https://fake.com/url")
             val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
@@ -307,13 +307,13 @@ class CardClientUnitTest {
 
             sut.presentAuthChallenge(activity, authChallenge)
             verify { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) }
-            verify(exactly = 0) { approveOrderListener.onApproveOrderFailure(any()) }
+            verify(exactly = 0) { cardApproveOrderListener.onApproveOrderFailure(any()) }
         }
 
     @Test
     fun `presentAuthChallenge() propagates error to approve order listener`() = runTest {
         val sut = createCardClient(testScheduler)
-        sut.approveOrderListener = approveOrderListener
+        sut.approveOrderListener = cardApproveOrderListener
 
         val url = Uri.parse("https://fake.com/url")
         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
@@ -322,7 +322,7 @@ class CardClientUnitTest {
         every { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) } returns error
 
         sut.presentAuthChallenge(activity, authChallenge)
-        verify { approveOrderListener.onApproveOrderFailure(error) }
+        verify { cardApproveOrderListener.onApproveOrderFailure(error) }
     }
 
     @Test
@@ -362,7 +362,7 @@ class CardClientUnitTest {
             analyticsService,
             dispatcher
         )
-        sut.approveOrderListener = approveOrderListener
+        sut.approveOrderListener = cardApproveOrderListener
         sut.cardVaultListener = cardVaultListener
         return sut
     }

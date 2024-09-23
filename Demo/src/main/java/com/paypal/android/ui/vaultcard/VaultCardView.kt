@@ -34,6 +34,8 @@ import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnNewIntentEffect
+import com.paypal.android.utils.OnResumeEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
@@ -49,6 +51,15 @@ fun VaultCardView(
     LaunchedEffect(scrollState.maxValue) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
+    }
+
+    val context = LocalContext.current
+    OnResumeEffect {
+        context.getActivityOrNull()?.intent?.let { intent -> viewModel.checkIntentForResult(intent) }
+    }
+
+    OnNewIntentEffect { newIntent ->
+        context.getActivityOrNull()?.let { viewModel.checkIntentForResult(newIntent) }
     }
 
     val contentPadding = UIConstants.paddingMedium
@@ -85,7 +96,7 @@ fun VaultCardView(
 }
 
 @Composable
-fun VaultSuccessView(cardVaultResult: CardVaultResult) {
+fun VaultSuccessView(cardVaultResult: CardVaultResult.Success) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)

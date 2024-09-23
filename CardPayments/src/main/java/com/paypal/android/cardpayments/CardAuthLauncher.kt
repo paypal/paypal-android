@@ -3,9 +3,7 @@ package com.paypal.android.cardpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchFinalResult
-import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchAuthChallenge
 import com.paypal.android.corepayments.PayPalSDKError
@@ -43,72 +41,50 @@ class CardAuthLauncher internal constructor(
             is BrowserSwitchStartResult.Started -> CardAuthChallengeResult.Success(result.pendingRequest)
         }
 
-//        return launchBrowserSwitch(activity, authChallenge.options)
-//        val metadata = when (authChallenge) {
-//            is CardAuthChallenge.ApproveOrder -> {
-//                val request = authChallenge.request
-//                JSONObject()
-//                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
-//                    .put(METADATA_KEY_ORDER_ID, request.orderId)
-//            }
-//
-//            is CardAuthChallenge.Vault -> {
-//                val request = authChallenge.request
-//                JSONObject()
-//                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-//                    .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-//            }
-//        }
-//
-//        // launch the 3DS flow
-//        val browserSwitchOptions = BrowserSwitchOptions()
-//            .url(authChallenge.url)
-//            .returnUrlScheme(authChallenge.returnUrlScheme)
-//            .metadata(metadata)
-//        return launchBrowserSwitch(activity, browserSwitchOptions)
+    fun parseApproveOrderAuthResponse(
+        intent: Intent,
+        state: String
+    ): CardApproveOrderAuthResponse =
+        when (val result = browserSwitchClient.completeRequest(intent, state)) {
+            is BrowserSwitchFinalResult.Success -> {
+                val requestType = result.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
+                if (requestType == REQUEST_TYPE_APPROVE_ORDER) {
+                    parseApproveOrderResult(result)
+                } else {
+                    CardApproveOrderAuthResponse.NoResult
+                }
+            }
 
-    fun parseAuthState(intent: Intent, state: String): CardApproveOrderResult? =
+            is BrowserSwitchFinalResult.Failure -> CardApproveOrderAuthResponse.Failure(
+                PayPalSDKError(123, "broser switch error", reason = result.error)
+            )
+
+            BrowserSwitchFinalResult.NoResult -> CardApproveOrderAuthResponse.NoResult
+        }
+
+    fun parseVaultAuthResponse(intent: Intent, state: String): CardVaultAuthResponse =
         when (val result = browserSwitchClient.completeRequest(intent, state)) {
             is BrowserSwitchFinalResult.Success -> {
                 val requestType = result.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
                 if (requestType == REQUEST_TYPE_VAULT) {
-                    // TODO: implement
-                    null
+                    parseVaultResult(result)
                 } else {
-                    // Assume REQUEST_TYPE_APPROVE_ORDER
-                    CardApproveOrderResult.Success(
-                        orderId = "fake-order-id",
-                        status = "fake-status",
-                        didAttemptThreeDSecureAuthentication = false
-                    )
+                    CardVaultAuthResponse.NoResult
                 }
             }
 
-            is BrowserSwitchFinalResult.Failure ->
-                CardApproveOrderResult.Failure(
-                    PayPalSDKError(
-                        123,
-                        "broser switch error",
-                        reason = result.error
-                    )
-                )
+            is BrowserSwitchFinalResult.Failure -> CardVaultAuthResponse.Failure(
+                PayPalSDKError(123, "browser switch error", reason = result.error)
+            )
 
-            BrowserSwitchFinalResult.NoResult -> null
+            BrowserSwitchFinalResult.NoResult -> CardVaultAuthResponse.NoResult
         }
 
-//    fun deliverBrowserSwitchResult(activity: FragmentActivity) =
-//        browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
-//            val requestType =
-//                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-//            if (requestType == REQUEST_TYPE_VAULT) {
-//                parseVaultResult(browserSwitchResult)
-//            } else {
-//                // Assume REQUEST_TYPE_APPROVE_ORDER
-//                parseApproveOrderResult(browserSwitchResult)
-//            }
-//        }
-
-    private fun parseVaultResult(browserSwitchResult: BrowserSwitchFinalResult): CardStatus? {
+    private fun parseVaultResult(browserSwitchResult: BrowserSwitchFinalResult): CardVaultAuthResponse {
+        // TODO: use real data instead of mock
+        return CardVaultAuthResponse.Success(
+            CardVaultResult.Success("fake-setup-token", "fake-status")
+        )
 //        val setupTokenId =
 //            browserSwitchResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
 //        return when (browserSwitchResult.status) {
@@ -116,10 +92,11 @@ class CardAuthLauncher internal constructor(
 //            BrowserSwitchStatus.CANCELED -> CardStatus.VaultCanceled(setupTokenId)
 //            else -> null
 //        }
-        return null
     }
 
-    private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchFinalResult): CardStatus? {
+    private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchFinalResult): CardApproveOrderAuthResponse {
+        // TODO: use real data instead of mock
+        return CardApproveOrderAuthResponse.Success(CardApproveOrderResult.Success(orderId = "fake-order-id"))
 //        val orderId = browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
 //        return if (orderId == null) {
 //            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
@@ -132,7 +109,6 @@ class CardAuthLauncher internal constructor(
 //                else -> null
 //            }
 //        }
-        return null
     }
 
     private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchFinalResult): CardStatus {

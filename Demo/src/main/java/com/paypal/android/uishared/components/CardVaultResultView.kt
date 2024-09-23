@@ -8,7 +8,7 @@ import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CardVaultResultView(result: CardVaultResult) {
+fun CardVaultResultView(result: CardVaultResult.Success) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)

@@ -11,7 +11,7 @@ import org.json.JSONObject
  * Pass this object to [CardClient.presentAuthChallenge] to present an authentication challenge
  * that was received in response to a [CardClient.approveOrder] or [CardClient.vault] call.
  */
-sealed class CardAuthChallenge: BrowserSwitchAuthChallenge {
+sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
     // Ref: https://stackoverflow.com/a/44420084
     internal abstract val url: Uri
     internal abstract val returnUrlScheme: String?
@@ -46,10 +46,9 @@ sealed class CardAuthChallenge: BrowserSwitchAuthChallenge {
         override val options: BrowserSwitchOptions
 
         init {
-            // TODO: implement
             val metadata = JSONObject()
-//                .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
-//                .put(METADATA_KEY_ORDER_ID, request.orderId)
+                .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+                .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
 
             // launch the 3DS flow
             options = BrowserSwitchOptions()

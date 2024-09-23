@@ -1,5 +1,7 @@
 package com.paypal.android.cardpayments
 
+import com.paypal.android.corepayments.PayPalSDKError
+
 /**
  * @suppress
  *
@@ -11,8 +13,12 @@ package com.paypal.android.cardpayments
  * is required to complete a vault
  */
 // NEXT MAJOR VERSION: make `CardVaultResult` constructor private
-data class CardVaultResult(
-    val setupTokenId: String,
-    val status: String,
-    val authChallenge: CardAuthChallenge? = null
-)
+sealed class CardVaultResult {
+
+    data class Success(val setupTokenId: String, val status: String) : CardVaultResult()
+
+    data class AuthorizationRequired(val authChallenge: CardAuthChallenge) : CardVaultResult()
+
+    data class Failure(val error: PayPalSDKError) : CardVaultResult()
+}
+

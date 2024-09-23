@@ -12,6 +12,7 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardAuthLauncher
+import com.paypal.android.cardpayments.CardApproveOrderAuthResponse
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
@@ -103,7 +104,8 @@ class ApproveOrderViewModel @Inject constructor(
                                 is CardAuthChallengeResult.Success -> {
                                     authState = launchResult.authState
                                 }
-                                is CardAuthChallengeResult.Failure ->  {
+
+                                is CardAuthChallengeResult.Failure -> {
                                     approveOrderState = ActionState.Failure(launchResult.error)
                                 }
                             }
@@ -122,20 +124,18 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun handleActivityResume(intent: Intent) = authState?.let { state ->
-        cardAuthLauncher.parseAuthState(intent, state)?.let { result ->
-            when (result) {
-                is CardApproveOrderResult.AuthorizationRequired -> {
-                    // NOTE: this shouldn't happen
-                }
+    fun checkIntentForResult(intent: Intent) = authState?.let { state ->
+        when (val result = cardAuthLauncher.parseApproveOrderAuthResponse(intent, state)) {
+            is CardApproveOrderAuthResponse.Success -> {
+                approveOrderState = ActionState.Success(result.result)
+            }
 
-                is CardApproveOrderResult.Failure -> {
-                    approveOrderState = ActionState.Failure(result.error)
-                }
+            is CardApproveOrderAuthResponse.Failure -> {
+                approveOrderState = ActionState.Failure(result.error)
+            }
 
-                is CardApproveOrderResult.Success -> {
-                    approveOrderState = ActionState.Success(result)
-                }
+            is CardApproveOrderAuthResponse.NoResult -> {
+                // do nothing
             }
         }
     }

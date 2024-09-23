@@ -30,6 +30,7 @@ import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnNewIntentEffect
+import com.paypal.android.utils.OnResumeEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
@@ -48,20 +49,13 @@ fun ApproveOrderView(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    // Ref: https://stackoverflow.com/a/66549433
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
-
     val context = LocalContext.current
-    LaunchedEffect(lifecycleState) {
-        if (lifecycleState == Lifecycle.State.RESUMED) {
-            context.getActivityOrNull()
-                ?.let { activity -> viewModel.handleActivityResume(activity.intent) }
-        }
+    OnResumeEffect {
+        context.getActivityOrNull()?.intent?.let { intent -> viewModel.checkIntentForResult(intent) }
     }
 
     OnNewIntentEffect { newIntent ->
-        context.getActivityOrNull()?.let { viewModel.handleActivityResume(newIntent) }
+        context.getActivityOrNull()?.let { viewModel.checkIntentForResult(newIntent) }
     }
 
     val contentPadding = UIConstants.paddingMedium
