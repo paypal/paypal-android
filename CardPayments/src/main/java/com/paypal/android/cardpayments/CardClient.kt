@@ -33,14 +33,6 @@ class CardClient internal constructor(
 
     private var approveOrderId: String? = null
 
-    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        notifyApproveOrderFailure(error, approveOrderId)
-    }
-
-    private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        cardVaultListener?.onVaultFailure(error)
-    }
-
     /**
      *  CardClient constructor
      *
@@ -67,7 +59,7 @@ class CardClient internal constructor(
         approveOrderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
 
-        CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
+        CoroutineScope(dispatcher).launch {
             // TODO: migrate away from throwing exceptions to result objects
             try {
                 val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
@@ -123,7 +115,7 @@ class CardClient internal constructor(
      */
     fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
         val applicationContext = context.applicationContext
-        CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
+        CoroutineScope(dispatcher).launch {
             val updateSetupTokenResult = cardVaultRequest.run {
                 paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
             }
