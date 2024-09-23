@@ -94,19 +94,19 @@ class PayPalWebCheckoutClient internal constructor(
     @Suppress("NestedBlockDepth")
     internal fun handleBrowserSwitchResult() {
         activityReference.get()?.let { activity ->
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-                when (status) {
-                    is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
-                    is PayPalWebStatus.CheckoutError -> status.run {
-                        notifyWebCheckoutFailure(error, orderId)
-                    }
-
-                    is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
-                    is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                    is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
-                    PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
-                }
-            }
+//            payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+//                when (status) {
+//                    is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
+//                    is PayPalWebStatus.CheckoutError -> status.run {
+//                        notifyWebCheckoutFailure(error, orderId)
+//                    }
+//
+//                    is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
+//                    is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+//                    is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
+//                    PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+//                }
+//            }
         }
     }
 

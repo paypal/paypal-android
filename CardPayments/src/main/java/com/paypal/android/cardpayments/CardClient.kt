@@ -3,7 +3,6 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
@@ -13,7 +12,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.lang.ref.WeakReference
 
 /**
@@ -170,18 +168,18 @@ class CardClient internal constructor(
     }
 
     internal fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        authChallengeLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-            when (status) {
-                is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                is CardStatus.VaultError -> notifyVaultFailure(status.error)
-                is CardStatus.VaultCanceled -> notifyVaultCancelation()
-                is CardStatus.ApproveOrderError ->
-                    notifyApproveOrderFailure(status.error, status.orderId)
-
-                is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
-                is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
-            }
-        }
+//        authChallengeLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+//            when (status) {
+//                is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+//                is CardStatus.VaultError -> notifyVaultFailure(status.error)
+//                is CardStatus.VaultCanceled -> notifyVaultCancelation()
+//                is CardStatus.ApproveOrderError ->
+//                    notifyApproveOrderFailure(status.error, status.orderId)
+//
+//                is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
+//                is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
+//            }
+//        }
     }
 
     private fun notifyApproveOrderCanceled(orderId: String?) {

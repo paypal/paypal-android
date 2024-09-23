@@ -22,9 +22,4 @@ class MainActivity : AppCompatActivity() {
             DemoApp()
         }
     }
-
-    override fun onNewIntent(newIntent: Intent) {
-        super.onNewIntent(newIntent)
-        intent = newIntent
-    }
 }

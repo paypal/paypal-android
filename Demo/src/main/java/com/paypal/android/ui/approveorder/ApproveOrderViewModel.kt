@@ -1,6 +1,7 @@
 package com.paypal.android.ui.approveorder
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,6 +10,7 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardApproveOrderResult
+import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
@@ -46,6 +48,8 @@ class ApproveOrderViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var authState: String? = null
 
     private var cardClient: CardClient? = null
     private lateinit var payPalDataCollector: PayPalDataCollector
@@ -90,8 +94,20 @@ class ApproveOrderViewModel @Inject constructor(
                 cardClient?.approveOrder(cardRequest) { result ->
                     when (result) {
 
-                        is CardApproveOrderResult.AuthorizationRequired ->
-                            cardAuthLauncher.presentAuthChallenge(activity, result.authChallenge)
+                        is CardApproveOrderResult.AuthorizationRequired -> {
+                            val launchResult = cardAuthLauncher.presentAuthChallenge(
+                                activity,
+                                result.authChallenge
+                            )
+                            when (launchResult) {
+                                is CardAuthChallengeResult.Success -> {
+                                    authState = launchResult.authState
+                                }
+                                is CardAuthChallengeResult.Failure ->  {
+                                    approveOrderState = ActionState.Failure(launchResult.error)
+                                }
+                            }
+                        }
 
                         is CardApproveOrderResult.Success -> {
                             approveOrderState = ActionState.Success(result)
@@ -106,8 +122,8 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun handleActivityResume(activity: AppCompatActivity) {
-        cardAuthLauncher.parseAuthState(activity)?.let { result ->
+    fun handleActivityResume(intent: Intent) = authState?.let { state ->
+        cardAuthLauncher.parseAuthState(intent, state)?.let { result ->
             when (result) {
                 is CardApproveOrderResult.AuthorizationRequired -> {
                     // NOTE: this shouldn't happen

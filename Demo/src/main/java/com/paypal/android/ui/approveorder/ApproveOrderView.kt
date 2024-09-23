@@ -1,6 +1,5 @@
 package com.paypal.android.ui.approveorder
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.core.util.Consumer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.api.model.OrderIntent
@@ -58,12 +55,13 @@ fun ApproveOrderView(
     val context = LocalContext.current
     LaunchedEffect(lifecycleState) {
         if (lifecycleState == Lifecycle.State.RESUMED) {
-            context.getActivityOrNull()?.let { viewModel.handleActivityResume(it) }
+            context.getActivityOrNull()
+                ?.let { activity -> viewModel.handleActivityResume(activity.intent) }
         }
     }
 
-    OnNewIntentEffect {
-        context.getActivityOrNull()?.let { viewModel.handleActivityResume(it) }
+    OnNewIntentEffect { newIntent ->
+        context.getActivityOrNull()?.let { viewModel.handleActivityResume(newIntent) }
     }
 
     val contentPadding = UIConstants.paddingMedium
