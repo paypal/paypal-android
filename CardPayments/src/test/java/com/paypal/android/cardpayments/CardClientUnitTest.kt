@@ -359,8 +359,7 @@ class CardClientUnitTest {
         val sut = CardClient(
             checkoutOrdersAPI,
             paymentMethodTokensAPI,
-            analyticsService,
-            dispatcher
+            analyticsService
         )
         sut.approveOrderListener = cardApproveOrderListener
         sut.cardVaultListener = cardVaultListener

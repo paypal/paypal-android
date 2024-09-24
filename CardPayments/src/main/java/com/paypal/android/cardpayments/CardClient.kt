@@ -7,10 +7,6 @@ import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * Use this client to approve an order with a [Card].
@@ -19,8 +15,7 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
-    private val analyticsService: AnalyticsService,
-    private val dispatcher: CoroutineDispatcher
+    private val analyticsService: AnalyticsService
 ) {
 
     // NEXT MAJOR VERSION: rename to vaultListener
@@ -36,8 +31,7 @@ class CardClient internal constructor(
             this(
                 CheckoutOrdersAPI(configuration),
                 DataVaultPaymentMethodTokensAPI(configuration),
-                AnalyticsService(context.applicationContext, configuration),
-                Dispatchers.Main
+                AnalyticsService(context.applicationContext, configuration)
             )
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
