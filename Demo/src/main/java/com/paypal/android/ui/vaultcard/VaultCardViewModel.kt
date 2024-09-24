@@ -165,6 +165,7 @@ class VaultCardViewModel @Inject constructor(
 
                         is CardVaultResult.AuthorizationRequired -> {
                             authChallenge = result.authChallenge
+                            updateSetupTokenState = ActionState.Failure(Exception("Authorization Required."))
                         }
 
                         is CardVaultResult.Failure -> {

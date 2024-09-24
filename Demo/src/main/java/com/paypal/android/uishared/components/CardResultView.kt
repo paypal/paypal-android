@@ -12,17 +12,15 @@ import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CardResultView(result: CardApproveOrderResult.Success) {
+fun CardResultView(orderId: String, status: String?) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
             .fillMaxWidth()
             .padding(UIConstants.paddingMedium)
     ) {
-        PropertyView(name = "Order ID", value = result.orderId)
-        PropertyView(name = "Order Status", value = result.status)
-        val didAttemptText = if (result.didAttemptThreeDSecureAuthentication) "YES" else "NO"
-        PropertyView(name = "Did Attempt 3DS Authentication", value = didAttemptText)
+        PropertyView(name = "Order ID", value = orderId)
+        PropertyView(name = "Order Status", value = status)
     }
 }
 
@@ -31,27 +29,7 @@ fun CardResultView(result: CardApproveOrderResult.Success) {
 fun CardResultViewWith3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            val result = CardApproveOrderResult.Success(
-                orderId = "fake-order-id",
-                status = "fake-status",
-                didAttemptThreeDSecureAuthentication = true
-            )
-            CardResultView(result)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun CardResultViewWithout3DSAuth() {
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxWidth()) {
-            val result = CardApproveOrderResult.Success(
-                orderId = "fake-order-id",
-                status = "fake-status",
-                didAttemptThreeDSecureAuthentication = false
-            )
-            CardResultView(result)
+            CardResultView(orderId = "fake-order-id", status = "fake-status")
         }
     }
 }

@@ -3,16 +3,18 @@ package com.paypal.android.ui.approveorder
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.CardApproveOrderAuthResult
 import com.paypal.android.cardpayments.CardApproveOrderResult
+import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardAuthLauncher
-import com.paypal.android.cardpayments.CardApproveOrderAuthResult
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
@@ -95,24 +97,14 @@ class ApproveOrderViewModel @Inject constructor(
                 cardClient?.approveOrder(cardRequest) { result ->
                     when (result) {
 
-                        is CardApproveOrderResult.AuthorizationRequired -> {
-                            val launchResult = cardAuthLauncher.presentAuthChallenge(
-                                activity,
-                                result.authChallenge
-                            )
-                            when (launchResult) {
-                                is CardAuthChallengeResult.Success -> {
-                                    authState = launchResult.authState
-                                }
-
-                                is CardAuthChallengeResult.Failure -> {
-                                    approveOrderState = ActionState.Failure(launchResult.error)
-                                }
-                            }
-                        }
-
                         is CardApproveOrderResult.Success -> {
                             approveOrderState = ActionState.Success(result)
+                        }
+
+                        is CardApproveOrderResult.AuthorizationRequired -> {
+                            authChallenge = result.authChallenge
+                            approveOrderState =
+                                ActionState.Failure(Exception("Authorization Required."))
                         }
 
                         is CardApproveOrderResult.Failure -> {
@@ -127,12 +119,11 @@ class ApproveOrderViewModel @Inject constructor(
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
         when (val result = cardAuthLauncher.checkIfApproveOrderAuthComplete(intent, state)) {
             is CardApproveOrderAuthResult.Success -> {
-                // TODO: use separate view model state for this
-//                approveOrderState = ActionState.Success(result)
+                authChallengeState = ActionState.Success(result)
             }
 
             is CardApproveOrderAuthResult.Failure -> {
-                approveOrderState = ActionState.Failure(result.error)
+                authChallengeState = ActionState.Failure(result.error)
             }
 
             is CardApproveOrderAuthResult.NoResult -> {
@@ -169,6 +160,19 @@ class ApproveOrderViewModel @Inject constructor(
         CardRequest(orderId, card, APP_RETURN_URL, scaOption)
     }
 
+    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
+        authChallengeState = ActionState.Loading
+        when (val launchResult = cardAuthLauncher.presentAuthChallenge(activity, authChallenge)) {
+            is CardAuthChallengeResult.Success -> {
+                authState = launchResult.authState
+            }
+
+            is CardAuthChallengeResult.Failure -> {
+                authChallengeState = ActionState.Failure(launchResult.error)
+            }
+        }
+    }
+
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
@@ -188,6 +192,18 @@ class ApproveOrderViewModel @Inject constructor(
         get() = _uiState.value.completeOrderState
         set(value) {
             _uiState.update { it.copy(completeOrderState = value) }
+        }
+
+    private var authChallenge
+        get() = _uiState.value.authChallenge
+        set(value) {
+            _uiState.update { it.copy(authChallenge = value) }
+        }
+
+    private var authChallengeState
+        get() = _uiState.value.authChallengeState
+        set(value) {
+            _uiState.update { it.copy(authChallengeState = value) }
         }
 
     var scaOption: SCA

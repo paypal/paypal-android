@@ -11,17 +11,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardResultView
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
@@ -69,23 +67,36 @@ fun ApproveOrderView(
                 testTagsAsResourceId = true
             }
     ) {
-        Step1_CreateOrder(uiState, viewModel)
+        Step1_CreateOrder(stepNumber = 1, uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
-            Step2_ApproveOrder(uiState, viewModel, onUseTestCardClick)
+            Step2_ApproveOrder(stepNumber = 2, uiState, viewModel, onUseTestCardClick)
         }
-        if (uiState.isApproveOrderSuccessful) {
-            Step3_CompleteOrder(uiState, viewModel)
+
+        val authChallenge = uiState.authChallenge
+        if (authChallenge != null) {
+            Step_PresentAuthChallenge(stepNumber = 3, authChallenge, uiState, viewModel)
+        } else if (uiState.isApproveOrderSuccessful) {
+            Step3_CompleteOrder(stepNumber = 3, uiState, viewModel)
         }
+
+        if (uiState.isApproveOrderWith3DSSuccessful) {
+            Step3_CompleteOrder(stepNumber = 4, uiState, viewModel)
+        }
+
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+private fun Step1_CreateOrder(
+    stepNumber: Int,
+    uiState: ApproveOrderUiState,
+    viewModel: ApproveOrderViewModel
+) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create Order")
+        StepHeader(stepNumber = stepNumber, title = "Create Order")
         CreateOrderWithVaultOptionForm(
             orderIntent = uiState.intentOption,
             shouldVault = uiState.shouldVault,
@@ -110,6 +121,7 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
 
 @Composable
 private fun Step2_ApproveOrder(
+    stepNumber: Int,
     uiState: ApproveOrderUiState,
     viewModel: ApproveOrderViewModel,
     onUseTestCardClick: () -> Unit
@@ -118,7 +130,7 @@ private fun Step2_ApproveOrder(
     Column(
         verticalArrangement = UIConstants.spacingMedium
     ) {
-        StepHeader(stepNumber = 2, title = "Approve Order")
+        StepHeader(stepNumber = stepNumber, title = "Approve Order")
         ApproveOrderForm(
             uiState = uiState,
             onCardNumberChange = { value -> viewModel.cardNumber = value },
@@ -138,19 +150,25 @@ private fun Step2_ApproveOrder(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> CardResultView(result = state.value)
+                is CompletedActionState.Success -> state.value.run {
+                    CardResultView(orderId = orderId, status = status)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: ApproveOrderViewModel) {
+private fun Step3_CompleteOrder(
+    stepNumber: Int,
+    uiState: ApproveOrderUiState,
+    viewModel: ApproveOrderViewModel
+) {
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium
     ) {
-        StepHeader(stepNumber = 3, title = "Complete Order")
+        StepHeader(stepNumber = stepNumber, title = "Complete Order")
         val successTitle = when (uiState.intentOption) {
             OrderIntent.CAPTURE -> "ORDER CAPTURED"
             OrderIntent.AUTHORIZE -> "ORDER AUTHORIZED"
@@ -165,6 +183,38 @@ private fun Step3_CompleteOrder(uiState: ApproveOrderUiState, viewModel: Approve
             when (state) {
                 is CompletedActionState.Success -> OrderView(order = state.value)
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
+            }
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun Step_PresentAuthChallenge(
+    stepNumber: Int,
+    authChallenge: CardAuthChallenge,
+    uiState: ApproveOrderUiState,
+    viewModel: ApproveOrderViewModel
+) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = stepNumber, title = "Complete Auth Challenge")
+        ActionButtonColumn(
+            defaultTitle = "PRESENT AUTH CHALLENGE",
+            successTitle = "AUTH CHALLENGE COMPLETE",
+            state = uiState.authChallengeState,
+            onClick = {
+                context.getActivityOrNull()
+                    ?.let { viewModel.presentAuthChallenge(it, authChallenge) }
+            }
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> state.value.run {
+                    CardResultView(orderId = orderId, status = status)
+                }
             }
         }
     }
