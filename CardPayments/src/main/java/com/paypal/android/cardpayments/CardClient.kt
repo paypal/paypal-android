@@ -47,55 +47,48 @@ class CardClient internal constructor(
      * @param cardRequest [CardRequest] for requesting an order approval
      * @param callback [CardApproveOrderListener] callback used to return a result to the caller
      */
-    fun approveOrder(cardRequest: CardRequest, callback: CardApproveOrderListener) {
+    suspend fun approveOrder(cardRequest: CardRequest): CardApproveOrderResult = try {
+        // TODO: migrate away from throwing exceptions to result objects
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
 
-        CoroutineScope(dispatcher).launch {
-            // TODO: migrate away from throwing exceptions to result objects
-            try {
-                val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:confirm-payment-source:succeeded",
-                    cardRequest.orderId
-                )
+        val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
+        analyticsService.sendAnalyticsEvent(
+            "card-payments:3ds:confirm-payment-source:succeeded",
+            cardRequest.orderId
+        )
 
-                val authChallengeUrl = response.payerActionHref
-                if (authChallengeUrl == null) {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:succeeded",
-                        response.orderId
-                    )
-                    val result = CardApproveOrderResult.Success(
-                        orderId = response.orderId,
-                        status = response.status?.name,
-                        didAttemptThreeDSecureAuthentication = false
-                    )
-                    callback.onCardApproveOrderResult(result)
-                } else {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:confirm-payment-source:challenge-required",
-                        cardRequest.orderId
-                    )
-                    val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
-                    val authChallenge = CardAuthChallenge.ApproveOrder(
-                        url = Uri.parse(authChallengeUrl),
-                        request = cardRequest,
-                        returnUrlScheme = returnUrlScheme
-                    )
-                    val result = CardApproveOrderResult.AuthorizationRequired(authChallenge)
-                    callback.onCardApproveOrderResult(result)
-                }
-            } catch (error: PayPalSDKError) {
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:confirm-payment-source:failed",
-                    cardRequest.orderId
-                )
-                val result = CardApproveOrderResult.Failure(error)
-                callback.onCardApproveOrderResult(result)
-            }
+        val authChallengeUrl = response.payerActionHref
+        if (authChallengeUrl == null) {
+            analyticsService.sendAnalyticsEvent(
+                "card-payments:3ds:succeeded",
+                response.orderId
+            )
+            CardApproveOrderResult.Success(
+                orderId = response.orderId,
+                status = response.status?.name,
+                didAttemptThreeDSecureAuthentication = false
+            )
+        } else {
+            analyticsService.sendAnalyticsEvent(
+                "card-payments:3ds:confirm-payment-source:challenge-required",
+                cardRequest.orderId
+            )
+            val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
+            val authChallenge = CardAuthChallenge.ApproveOrder(
+                url = Uri.parse(authChallengeUrl),
+                request = cardRequest,
+                returnUrlScheme = returnUrlScheme
+            )
+            CardApproveOrderResult.AuthorizationRequired(authChallenge)
         }
+    } catch (error: PayPalSDKError) {
+        analyticsService.sendAnalyticsEvent(
+            "card-payments:3ds:confirm-payment-source:failed",
+            cardRequest.orderId
+        )
+        CardApproveOrderResult.Failure(error)
     }
 
     /**
@@ -107,28 +100,26 @@ class CardClient internal constructor(
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    fun vault(context: Context, cardVaultRequest: CardVaultRequest, callback: CardVaultListener) {
+    suspend fun vault(context: Context, cardVaultRequest: CardVaultRequest): CardVaultResult {
         val applicationContext = context.applicationContext
-        CoroutineScope(dispatcher).launch {
-            val updateSetupTokenResult = cardVaultRequest.run {
-                paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
-            }
+        val updateSetupTokenResult = cardVaultRequest.run {
+            paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+        }
 
-            val authChallengeUrl = updateSetupTokenResult.approveHref
-            if (authChallengeUrl == null) {
-                val result =
-                    updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
-                callback.onCardVaultResult(result)
+        val authChallengeUrl = updateSetupTokenResult.approveHref
+        if (authChallengeUrl == null) {
+            val result =
+                updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
+            return result
 
-            } else {
-                val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
-                val authChallenge = CardAuthChallenge.Vault(
-                    url = Uri.parse(authChallengeUrl),
-                    request = cardVaultRequest,
-                    returnUrlScheme = returnUrlScheme
-                )
-                callback.onCardVaultResult(CardVaultResult.AuthorizationRequired(authChallenge))
-            }
+        } else {
+            val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
+            val authChallenge = CardAuthChallenge.Vault(
+                url = Uri.parse(authChallengeUrl),
+                request = cardVaultRequest,
+                returnUrlScheme = returnUrlScheme
+            )
+            return CardVaultResult.AuthorizationRequired(authChallenge)
         }
     }
 

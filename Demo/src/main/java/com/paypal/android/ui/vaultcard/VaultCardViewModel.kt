@@ -39,7 +39,7 @@ class VaultCardViewModel @Inject constructor(
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
-    private var cardClient: CardClient? = null
+    private lateinit var cardClient: CardClient
     private val cardAuthLauncher = CardAuthLauncher()
 
     private var authState: String? = null
@@ -157,20 +157,19 @@ class VaultCardViewModel @Inject constructor(
                 val card = parseCard(_uiState.value)
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
                 val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
-                cardClient?.vault(activity, cardVaultRequest) { result ->
-                    when (result) {
-                        is CardVaultResult.Success -> {
-                            updateSetupTokenState = ActionState.Success(result)
-                        }
+                when (val result = cardClient.vault(activity, cardVaultRequest)) {
+                    is CardVaultResult.Success -> {
+                        updateSetupTokenState = ActionState.Success(result)
+                    }
 
-                        is CardVaultResult.AuthorizationRequired -> {
-                            authChallenge = result.authChallenge
-                            updateSetupTokenState = ActionState.Failure(Exception("Authorization Required."))
-                        }
+                    is CardVaultResult.AuthorizationRequired -> {
+                        authChallenge = result.authChallenge
+                        updateSetupTokenState =
+                            ActionState.Failure(Exception("Authorization Required."))
+                    }
 
-                        is CardVaultResult.Failure -> {
-                            updateSetupTokenState = ActionState.Failure(result.error)
-                        }
+                    is CardVaultResult.Failure -> {
+                        updateSetupTokenState = ActionState.Failure(result.error)
                     }
                 }
             }

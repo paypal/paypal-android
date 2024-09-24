@@ -1,9 +1,11 @@
 package com.paypal.android.ui.approveorder
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -37,10 +39,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApproveOrderViewModel @Inject constructor(
+    application: Application,
     private val createOrderUseCase: CreateOrderUseCase,
     private val getClientIdUseCase: GetClientIdUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     companion object {
         const val TAG = "CardFragment"
@@ -54,7 +57,7 @@ class ApproveOrderViewModel @Inject constructor(
 
     private var authState: String? = null
 
-    private var cardClient: CardClient? = null
+    private lateinit var cardClient: CardClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     fun createOrder() {
@@ -94,22 +97,19 @@ class ApproveOrderViewModel @Inject constructor(
                 cardClient = CardClient(activity, coreConfig)
 
                 val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
-                cardClient?.approveOrder(cardRequest) { result ->
-                    when (result) {
+                when (val result = cardClient.approveOrder(cardRequest)) {
+                    is CardApproveOrderResult.Success -> {
+                        approveOrderState = ActionState.Success(result)
+                    }
 
-                        is CardApproveOrderResult.Success -> {
-                            approveOrderState = ActionState.Success(result)
-                        }
+                    is CardApproveOrderResult.AuthorizationRequired -> {
+                        authChallenge = result.authChallenge
+                        approveOrderState =
+                            ActionState.Failure(Exception("Authorization Required."))
+                    }
 
-                        is CardApproveOrderResult.AuthorizationRequired -> {
-                            authChallenge = result.authChallenge
-                            approveOrderState =
-                                ActionState.Failure(Exception("Authorization Required."))
-                        }
-
-                        is CardApproveOrderResult.Failure -> {
-                            approveOrderState = ActionState.Failure(result.error)
-                        }
+                    is CardApproveOrderResult.Failure -> {
+                        approveOrderState = ActionState.Failure(result.error)
                     }
                 }
             }
