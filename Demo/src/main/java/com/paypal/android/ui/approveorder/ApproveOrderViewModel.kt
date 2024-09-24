@@ -12,7 +12,7 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardAuthLauncher
-import com.paypal.android.cardpayments.CardApproveOrderAuthResponse
+import com.paypal.android.cardpayments.CardApproveOrderAuthResult
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
@@ -125,16 +125,17 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = cardAuthLauncher.parseApproveOrderAuthResponse(intent, state)) {
-            is CardApproveOrderAuthResponse.Success -> {
-                approveOrderState = ActionState.Success(result.result)
+        when (val result = cardAuthLauncher.checkIfApproveOrderAuthComplete(intent, state)) {
+            is CardApproveOrderAuthResult.Success -> {
+                // TODO: use separate view model state for this
+//                approveOrderState = ActionState.Success(result)
             }
 
-            is CardApproveOrderAuthResponse.Failure -> {
+            is CardApproveOrderAuthResult.Failure -> {
                 approveOrderState = ActionState.Failure(result.error)
             }
 
-            is CardApproveOrderAuthResponse.NoResult -> {
+            is CardApproveOrderAuthResult.NoResult -> {
                 // do nothing
             }
         }

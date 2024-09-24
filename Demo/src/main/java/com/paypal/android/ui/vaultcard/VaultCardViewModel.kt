@@ -12,7 +12,7 @@ import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.cardpayments.CardVaultAuthResponse
+import com.paypal.android.cardpayments.CardVaultAuthResult
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.cardpayments.threedsecure.SCA
@@ -201,26 +201,27 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = cardAuthLauncher.parseVaultAuthResponse(intent, state)) {
-            is CardVaultAuthResponse.Success -> {
-                refreshSetupToken(result.result)
+        when (val result = cardAuthLauncher.checkIfVaultAuthComplete(intent, state)) {
+            is CardVaultAuthResult.Success -> {
+                refreshSetupToken(result)
             }
 
-            is CardVaultAuthResponse.Failure -> {
+            is CardVaultAuthResult.Failure -> {
                 authChallengeState = ActionState.Failure(result.error)
             }
 
-            is CardVaultAuthResponse.NoResult -> {
+            is CardVaultAuthResult.NoResult -> {
                 // do nothing
             }
         }
     }
 
-    private fun refreshSetupToken(result: CardVaultResult.Success) {
+    private fun refreshSetupToken(result: CardVaultAuthResult.Success) {
         viewModelScope.launch {
             refreshSetupTokenState =
                 getSetupTokenUseCase(result.setupTokenId).mapToActionState()
-            authChallengeState = ActionState.Success(result)
+            // TODO: use separate view model state for this
+//            authChallengeState = ActionState.Success(result)
         }
     }
 
