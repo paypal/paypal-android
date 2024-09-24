@@ -197,7 +197,9 @@ private fun Step_PresentAuthChallenge(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> CardVaultResultView(result = state.value)
+                is CompletedActionState.Success -> state.value.run {
+                    CardVaultResultView(setupTokenId = setupTokenId, status = status)
+                }
             }
         }
     }

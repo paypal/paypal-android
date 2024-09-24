@@ -220,8 +220,7 @@ class VaultCardViewModel @Inject constructor(
         viewModelScope.launch {
             refreshSetupTokenState =
                 getSetupTokenUseCase(result.setupTokenId).mapToActionState()
-            // TODO: use separate view model state for this
-//            authChallengeState = ActionState.Success(result)
+            authChallengeState = ActionState.Success(result)
         }
     }
 

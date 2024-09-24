@@ -8,12 +8,12 @@ import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CardVaultResultView(result: CardVaultResult.Success) {
+fun CardVaultResultView(setupTokenId: String, status: String) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)
     ) {
-        PropertyView(name = "Setup Token ID", value = result.setupTokenId)
-        PropertyView(name = "Status", value = result.status)
+        PropertyView(name = "Setup Token ID", value = setupTokenId)
+        PropertyView(name = "Status", value = status)
     }
 }
