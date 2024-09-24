@@ -17,7 +17,6 @@ class CardClient internal constructor(
     private val analyticsService: AnalyticsService
 ) {
 
-    // NEXT MAJOR VERSION: rename to vaultListener
     private var approveOrderId: String? = null
 
     /**
@@ -42,7 +41,6 @@ class CardClient internal constructor(
      */
     suspend fun approveOrder(cardRequest: CardRequest): CardApproveOrderResult = try {
         // TODO: migrate away from throwing exceptions to result objects
-        // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent(
             "card-payments:3ds:started",
