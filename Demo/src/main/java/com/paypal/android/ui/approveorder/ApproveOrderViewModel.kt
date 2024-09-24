@@ -14,9 +14,8 @@ import com.paypal.android.cardpayments.CardApproveOrderAuthResult
 import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
-import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.CardApproveOrderRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -50,8 +49,6 @@ class ApproveOrderViewModel @Inject constructor(
 
     private val cardClient = CardClient(application.applicationContext)
     private val payPalDataCollector = PayPalDataCollector(application.applicationContext)
-
-    private val cardAuthLauncher = CardAuthLauncher()
 
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
@@ -113,7 +110,7 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = cardAuthLauncher.checkIfApproveOrderAuthComplete(intent, state)) {
+        when (val result = cardClient.checkIfApproveOrderAuthComplete(intent, state)) {
             is CardApproveOrderAuthResult.Success -> {
                 authChallengeState = ActionState.Success(result)
             }
@@ -157,12 +154,12 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            CardRequest(config, orderId, card, APP_RETURN_URL, scaOption)
+            CardApproveOrderRequest(config, orderId, card, APP_RETURN_URL, scaOption)
         }
 
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
         authChallengeState = ActionState.Loading
-        when (val launchResult = cardAuthLauncher.presentAuthChallenge(activity, authChallenge)) {
+        when (val launchResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
             is CardAuthChallengeResult.Success -> {
                 authState = launchResult.authState
             }

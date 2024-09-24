@@ -75,7 +75,7 @@ class CheckoutOrdersAPIUnitTest {
     private val correlationId = "expected correlation ID"
     private val headers = mapOf("Paypal-Debug-Id" to correlationId)
 
-    private val cardRequest = CardRequest(
+    private val cardRequest = CardApproveOrderRequest(
         orderId,
         card,
         "return_url"

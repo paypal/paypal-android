@@ -14,7 +14,7 @@ import kotlinx.parcelize.Parcelize
  * @property sca Specify to always launch 3DS or only when required. Defaults to `SCA.SCA_WHEN_REQUIRED`.
  */
 @Parcelize
-data class CardRequest @JvmOverloads constructor(
+data class CardApproveOrderRequest @JvmOverloads constructor(
     val config: CoreConfig,
     val orderId: String,
     val card: Card,

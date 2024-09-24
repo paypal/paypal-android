@@ -40,7 +40,7 @@ class CardClientUnitTest {
     private val card = Card("4111111111111111", "01", "24", "123")
     private val orderId = "sample-order-id"
 
-    private val cardRequest = CardRequest(orderId, card, "merchant.app://return_url")
+    private val cardRequest = CardApproveOrderRequest(orderId, card, "merchant.app://return_url")
     private val cardVaultRequest =
         CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
 

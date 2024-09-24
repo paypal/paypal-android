@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.content.Intent
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult

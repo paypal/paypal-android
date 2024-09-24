@@ -12,6 +12,37 @@ import org.json.JSONObject
  * that was received in response to a [CardClient.approveOrder] or [CardClient.vault] call.
  */
 sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
+
+    companion object {
+        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
+        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
+        private const val REQUEST_TYPE_VAULT = "vault"
+
+        private const val METADATA_KEY_ORDER_ID = "order_id"
+        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
+
+        fun create(cardRequest: CardApproveOrderRequest, authChallengeUrl: String): CardAuthChallenge {
+            val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
+            return ApproveOrder(
+                url = Uri.parse(authChallengeUrl),
+                request = cardRequest,
+                returnUrlScheme = returnUrlScheme
+            )
+        }
+
+        fun create(
+            cardVaultRequest: CardVaultRequest,
+            authChallengeUrl: String
+        ): CardAuthChallenge {
+            val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
+            return Vault(
+                url = Uri.parse(authChallengeUrl),
+                request = cardVaultRequest,
+                returnUrlScheme = returnUrlScheme
+            )
+        }
+    }
+
     // Ref: https://stackoverflow.com/a/44420084
     internal abstract val url: Uri
     internal abstract val returnUrlScheme: String?
@@ -19,7 +50,7 @@ sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
     @Parcelize
     internal class ApproveOrder(
         override val url: Uri,
-        val request: CardRequest,
+        val request: CardApproveOrderRequest,
         override val returnUrlScheme: String? = Uri.parse(request.returnUrl).scheme
     ) : CardAuthChallenge(), Parcelable {
         override val options: BrowserSwitchOptions
@@ -56,14 +87,5 @@ sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
                 .returnUrlScheme(returnUrlScheme)
                 .metadata(metadata)
         }
-    }
-
-    companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
-        private const val REQUEST_TYPE_VAULT = "vault"
-
-        private const val METADATA_KEY_ORDER_ID = "order_id"
-        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
 }

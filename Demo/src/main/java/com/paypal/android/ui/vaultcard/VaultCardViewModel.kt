@@ -5,14 +5,12 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
-import com.paypal.android.cardpayments.CardAuthLauncher
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardVaultAuthResult
 import com.paypal.android.cardpayments.CardVaultRequest
@@ -43,8 +41,6 @@ class VaultCardViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     private val cardClient: CardClient = CardClient(application.applicationContext)
-
-    private val cardAuthLauncher = CardAuthLauncher()
 
     private var authState: String? = null
 
@@ -205,7 +201,7 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = cardAuthLauncher.checkIfVaultAuthComplete(intent, state)) {
+        when (val result = cardClient.checkIfVaultAuthComplete(intent, state)) {
             is CardVaultAuthResult.Success -> {
                 refreshSetupToken(result)
             }
@@ -230,7 +226,7 @@ class VaultCardViewModel @Inject constructor(
 
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
         authChallengeState = ActionState.Loading
-        when (val launchResult = cardAuthLauncher.presentAuthChallenge(activity, authChallenge)) {
+        when (val launchResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
             is CardAuthChallengeResult.Success -> {
                 authState = launchResult.authState
             }

@@ -55,7 +55,7 @@ class CardAuthLauncherUnitTest {
         every { browserSwitchClient.start(any(), any()) } throws browserSwitchException
 
         val returnUrl = "merchant.app://return.com/deep-link"
-        val cardRequest = CardRequest("fake-order-id", card, returnUrl)
+        val cardRequest = CardApproveOrderRequest("fake-order-id", card, returnUrl)
         val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
 
         sut = CardAuthLauncher(browserSwitchClient)
@@ -69,7 +69,7 @@ class CardAuthLauncherUnitTest {
         every { browserSwitchClient.start(activity, capture(slot)) } just runs
 
         val returnUrl = "merchant.app://return.com/deep-link"
-        val cardRequest = CardRequest("fake-order-id", card, returnUrl)
+        val cardRequest = CardApproveOrderRequest("fake-order-id", card, returnUrl)
         val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
 
         sut = CardAuthLauncher(browserSwitchClient)
