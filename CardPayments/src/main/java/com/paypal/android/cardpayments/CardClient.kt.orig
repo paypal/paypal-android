@@ -5,9 +5,11 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchOptions
+import com.paypal.android.cardpayments.CardAuthChallenge.Companion.METADATA_KEY_ORDER_ID
+import com.paypal.android.cardpayments.CardAuthChallenge.Companion.METADATA_KEY_REQUEST_TYPE
+import com.paypal.android.cardpayments.CardAuthChallenge.Companion.REQUEST_TYPE_APPROVE_ORDER
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.Base64Utils
-import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -61,17 +63,20 @@ class CardClient internal constructor(
             } else {
                 analytics.notify3DSChallengeRequired()
 
+<<<<<<< Updated upstream
+                val authChallenge = CardAuthChallenge.create(cardRequest, authChallengeUrl)
+=======
                 val metadata = JSONObject()
                     .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
                     .put(METADATA_KEY_ORDER_ID, cardRequest.orderId)
                 val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
                 val options = BrowserSwitchOptions()
-                    .url(Uri.parse(authChallengeUrl))
+                    .url(Uri.parse(payerActionHref))
                     .returnUrlScheme(returnUrlScheme)
-                    .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
                     .metadata(metadata)
 
-                val authChallenge = CardAuthChallenge(options, analytics)
+                val authChallenge = CardAuthChallenge.create(cardRequest, payerActionHref)
+>>>>>>> Stashed changes
                 CardApproveOrderResult.AuthorizationRequired(authChallenge)
             }
         } catch (error: PayPalSDKError) {
@@ -91,8 +96,6 @@ class CardClient internal constructor(
      * and card to use for vaulting.
      */
     suspend fun vault(context: Context, cardVaultRequest: CardVaultRequest): CardVaultResult {
-        val analytics = cardAnalytics.createAnalyticsContext(cardVaultRequest)
-
         val applicationContext = context.applicationContext
         val updateSetupTokenResult = cardVaultRequest.run {
             paymentMethodTokensAPI.updateSetupToken(
@@ -105,67 +108,15 @@ class CardClient internal constructor(
 
         val authChallengeUrl = updateSetupTokenResult.approveHref
         if (authChallengeUrl == null) {
-            analytics.notifyCardVault3DSSuccess()
             return updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
         } else {
-            analytics.notify3DSChallengeRequired()
-
-            val metadata = JSONObject()
-                .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-                .put(METADATA_KEY_SETUP_TOKEN_ID, cardVaultRequest.setupTokenId)
-
-            val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
-            val options = BrowserSwitchOptions()
-                .url(Uri.parse(authChallengeUrl))
-                .returnUrlScheme(returnUrlScheme)
-                .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
-                .metadata(metadata)
-
-            val authChallenge = CardAuthChallenge(options, analytics)
+            val authChallenge = authLauncher.createAuthChallenge(cardVaultRequest, authChallengeUrl)
             return CardVaultResult.AuthorizationRequired(authChallenge)
         }
     }
 
-    fun checkIfApproveOrderAuthComplete(intent: Intent, state: String): CardApproveOrderAuthResult {
-        val authStateJSON =
-            decodeCardAuthStateJSON(state) ?: return CardApproveOrderAuthResult.NoResult
-        val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
-        val result = authLauncher.checkIfApproveOrderAuthComplete(intent, state)
-        when (result) {
-            is CardApproveOrderAuthResult.Success -> analytics?.notify3DSSucceeded()
-            is CardApproveOrderAuthResult.Failure -> analytics?.notify3DSFailed()
-            CardApproveOrderAuthResult.NoResult -> {
-                // do nothing
-            }
-        }
-        return result
-    }
-
-    fun checkIfVaultAuthComplete(intent: Intent, state: String): CardVaultAuthResult {
-        val authStateJSON = decodeCardAuthStateJSON(state) ?: return CardVaultAuthResult.NoResult
-        val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
-        val result = authLauncher.checkIfVaultAuthComplete(intent, state)
-        when (result) {
-            is CardVaultAuthResult.Success -> analytics?.notifyCardVault3DSSuccess()
-            is CardVaultAuthResult.Failure -> analytics?.notifyCardVault3DSFailure()
-            CardVaultAuthResult.NoResult -> {
-                // do nothing
-            }
-        }
-        return result
-    }
-
-    private fun decodeCardAuthStateJSON(state: String): JSONObject? {
-        val authStateJSON = Base64Utils.parseBase64EncodedJSON(state)
-        val requestCode = authStateJSON?.optInt("requestCode", -1) ?: -1
-        if (requestCode != BrowserSwitchRequestCodes.CARD.intValue) {
-            // not a card result
-            return null
-        }
-        return authStateJSON
-    }
-
-    private fun restoreAnalyticsContextFromAuthState(stateJSON: JSONObject): CardAnalyticsContext? {
+    private fun parseTrackingContextFromAuthChallengeState(state: String): CardAnalyticsContext? {
+        val stateJSON = Base64Utils.parseBase64EncodedJSON(state) ?: return null
         val metadata = stateJSON.optJSONObject("metadata")
         val clientId = metadata?.optString("client_id")
         val environmentName = metadata?.optString("environment_name")
@@ -182,6 +133,32 @@ class CardClient internal constructor(
         }
         val coreConfig = CoreConfig(clientId, environment)
         return cardAnalytics.createAnalyticsContext(coreConfig, orderId, setupTokenId)
+    }
+
+    fun checkIfApproveOrderAuthComplete(intent: Intent, state: String): CardApproveOrderAuthResult {
+        val analytics = parseTrackingContextFromAuthChallengeState(state)
+        val result = authLauncher.checkIfApproveOrderAuthComplete(intent, state)
+        when (result) {
+            is CardApproveOrderAuthResult.Success -> analytics?.notify3DSSucceeded()
+            is CardApproveOrderAuthResult.Failure -> analytics?.notify3DSFailed()
+            CardApproveOrderAuthResult.NoResult -> {
+                // do nothing
+            }
+        }
+        return result
+    }
+
+    fun checkIfVaultAuthComplete(intent: Intent, state: String): CardVaultAuthResult {
+        val analytics = parseTrackingContextFromAuthChallengeState(state)
+        val result = authLauncher.checkIfVaultAuthComplete(intent, state)
+        when (result) {
+            is CardVaultAuthResult.Success -> analytics?.notifyCardVault3DSSuccess()
+            is CardVaultAuthResult.Failure -> analytics?.notifyCardVault3DSFailure()
+            CardVaultAuthResult.NoResult -> {
+                // do nothing
+            }
+        }
+        return result
     }
 
     /**

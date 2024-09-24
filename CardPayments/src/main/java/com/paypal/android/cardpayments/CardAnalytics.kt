@@ -4,7 +4,7 @@ import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
-class CardAnalytics(
+internal class CardAnalytics(
     private val analyticsService: AnalyticsService
 ) {
     constructor(context: Context) : this(AnalyticsService(context.applicationContext))

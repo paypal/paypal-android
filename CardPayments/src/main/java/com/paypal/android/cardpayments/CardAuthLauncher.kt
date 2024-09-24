@@ -1,12 +1,10 @@
 package com.paypal.android.cardpayments
 
 import android.content.Intent
-import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchStartResult
-import com.paypal.android.corepayments.BrowserSwitchAuthChallenge
 import com.paypal.android.corepayments.PayPalSDKError
 
 sealed class CardAuthChallengeResult {
@@ -32,15 +30,22 @@ class CardAuthLauncher internal constructor(
 
     fun presentAuthChallenge(
         activity: FragmentActivity,
-        authChallenge: BrowserSwitchAuthChallenge
-    ): CardAuthChallengeResult =
-        when (val result = browserSwitchClient.start(activity, authChallenge.options)) {
-            is BrowserSwitchStartResult.Failure -> CardAuthChallengeResult.Failure(
-                PayPalSDKError(123, "auth challenge failed", reason = result.error)
-            )
+        authChallenge: CardAuthChallenge
+    ): CardAuthChallengeResult {
+        val analytics = authChallenge.analytics
+        return when (val result = browserSwitchClient.start(activity, authChallenge.options)) {
+            is BrowserSwitchStartResult.Failure -> {
+                analytics.notify3DSFailed()
+                val message = "auth challenge failed"
+                CardAuthChallengeResult.Failure(PayPalSDKError(123, message, reason = result.error))
+            }
 
-            is BrowserSwitchStartResult.Started -> CardAuthChallengeResult.Success(result.pendingRequest)
+            is BrowserSwitchStartResult.Started -> {
+                analytics.notify3DSSucceeded()
+                CardAuthChallengeResult.Success(result.pendingRequest)
+            }
         }
+    }
 
     fun checkIfApproveOrderAuthComplete(
         intent: Intent,
