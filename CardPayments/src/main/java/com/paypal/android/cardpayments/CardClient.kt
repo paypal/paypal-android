@@ -192,19 +192,4 @@ class CardClient internal constructor(
         // TODO: consider either adding a listener method or next major version returning a result type
 //        cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
     }
-
-    /**
-     * Call this method at the end of the card flow to clear out all observers and listeners
-     */
-    fun removeObservers() {
-    }
-
-    companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
-        private const val REQUEST_TYPE_VAULT = "vault"
-
-        private const val METADATA_KEY_ORDER_ID = "order_id"
-        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
-    }
 }
