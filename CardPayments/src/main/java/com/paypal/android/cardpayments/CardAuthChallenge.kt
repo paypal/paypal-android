@@ -21,10 +21,7 @@ sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
         private const val METADATA_KEY_ORDER_ID = "order_id"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
 
-        fun create(
-            cardRequest: CardRequest.ApproveOrder,
-            authChallengeUrl: String
-        ): CardAuthChallenge {
+        fun create(cardRequest: CardApproveOrderRequest, authChallengeUrl: String): CardAuthChallenge {
             val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
             return ApproveOrder(
                 url = Uri.parse(authChallengeUrl),
@@ -34,7 +31,7 @@ sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
         }
 
         fun create(
-            cardVaultRequest: CardRequest.Vault,
+            cardVaultRequest: CardVaultRequest,
             authChallengeUrl: String
         ): CardAuthChallenge {
             val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
@@ -53,7 +50,7 @@ sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
     @Parcelize
     internal class ApproveOrder(
         override val url: Uri,
-        val request: CardRequest.ApproveOrder,
+        val request: CardApproveOrderRequest,
         override val returnUrlScheme: String? = Uri.parse(request.returnUrl).scheme
     ) : CardAuthChallenge(), Parcelable {
         override val options: BrowserSwitchOptions
@@ -74,7 +71,7 @@ sealed class CardAuthChallenge : BrowserSwitchAuthChallenge {
     @Parcelize
     internal class Vault(
         override val url: Uri,
-        val request: CardRequest.Vault,
+        val request: CardVaultRequest,
         override val returnUrlScheme: String? = Uri.parse(request.returnUrl).scheme
     ) : CardAuthChallenge(), Parcelable {
         override val options: BrowserSwitchOptions

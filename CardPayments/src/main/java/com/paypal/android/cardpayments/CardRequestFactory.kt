@@ -6,7 +6,7 @@ import org.json.JSONObject
 
 internal class CardRequestFactory {
 
-    fun createConfirmPaymentSourceRequest(cardRequest: CardRequest.ApproveOrder): APIRequest {
+    fun createConfirmPaymentSourceRequest(cardRequest: CardApproveOrderRequest): APIRequest {
         val card = cardRequest.card
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"

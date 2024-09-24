@@ -12,8 +12,8 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardVaultAuthResult
+import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
@@ -156,7 +156,7 @@ class VaultCardViewModel @Inject constructor(
                 val card = parseCard(_uiState.value)
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
                 val cardVaultRequest =
-                    CardRequest.Vault(configuration, setupTokenId, card, returnUrl)
+                    CardVaultRequest(configuration, setupTokenId, card, returnUrl)
                 when (val result = cardClient.vault(activity, cardVaultRequest)) {
                     is CardVaultResult.Success -> {
                         updateSetupTokenState = ActionState.Success(result)

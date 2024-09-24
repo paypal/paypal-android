@@ -38,7 +38,7 @@ class CardClient internal constructor(
      *
      * @param cardRequest [CardApproveOrderRequest] for requesting an order approval
      */
-    suspend fun approveOrder(cardRequest: CardRequest.ApproveOrder): CardApproveOrderResult {
+    suspend fun approveOrder(cardRequest: CardApproveOrderRequest): CardApproveOrderResult {
         val analytics = cardAnalytics.createAnalyticsContext(cardRequest)
 
         return try {
@@ -46,8 +46,8 @@ class CardClient internal constructor(
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
             analytics.notifyConfirmPaymentSourceSucceeded()
 
-            val payerActionHref = response.payerActionHref
-            if (payerActionHref == null) {
+            val authChallengeUrl = response.payerActionHref
+            if (authChallengeUrl == null) {
                 analytics.notify3DSSucceeded()
                 CardApproveOrderResult.Success(
                     orderId = response.orderId,
@@ -57,7 +57,7 @@ class CardClient internal constructor(
             } else {
                 analytics.notify3DSChallengeRequired()
 
-                val authChallenge = CardAuthChallenge.create(cardRequest, payerActionHref)
+                val authChallenge = CardAuthChallenge.create(cardRequest, authChallengeUrl)
                 CardApproveOrderResult.AuthorizationRequired(authChallenge)
             }
         } catch (error: PayPalSDKError) {
@@ -76,7 +76,7 @@ class CardClient internal constructor(
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    suspend fun vault(context: Context, cardVaultRequest: CardRequest.Vault): CardVaultResult {
+    suspend fun vault(context: Context, cardVaultRequest: CardVaultRequest): CardVaultResult {
         val applicationContext = context.applicationContext
         val updateSetupTokenResult = cardVaultRequest.run {
             paymentMethodTokensAPI.updateSetupToken(
@@ -87,11 +87,11 @@ class CardClient internal constructor(
             )
         }
 
-        val approveHref = updateSetupTokenResult.approveHref
-        if (approveHref == null) {
+        val authChallengeUrl = updateSetupTokenResult.approveHref
+        if (authChallengeUrl == null) {
             return updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
         } else {
-            val authChallenge = CardAuthChallenge.create(cardVaultRequest, approveHref)
+            val authChallenge = authLauncher.createAuthChallenge(cardVaultRequest, authChallengeUrl)
             return CardVaultResult.AuthorizationRequired(authChallenge)
         }
     }

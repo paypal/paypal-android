@@ -15,7 +15,7 @@ import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.cardpayments.CardRequest
+import com.paypal.android.cardpayments.CardApproveOrderRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -154,7 +154,7 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            CardRequest.ApproveOrder(config, orderId, card, APP_RETURN_URL, scaOption)
+            CardApproveOrderRequest(config, orderId, card, APP_RETURN_URL, scaOption)
         }
 
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
