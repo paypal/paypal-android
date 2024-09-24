@@ -1,6 +1,6 @@
 package com.paypal.android.cardpayments.api
 
-import com.paypal.android.cardpayments.CardApproveOrderRequest
+import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardRequestFactory
 import com.paypal.android.cardpayments.CardResponseParser
 import com.paypal.android.corepayments.RestClient
@@ -12,7 +12,7 @@ internal class CheckoutOrdersAPI(
 ) {
     constructor() : this(RestClient())
 
-    suspend fun confirmPaymentSource(cardRequest: CardApproveOrderRequest): ConfirmPaymentSourceResponse {
+    suspend fun confirmPaymentSource(cardRequest: CardRequest.ApproveOrder): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
         val httpResponse = restClient.send(apiRequest, cardRequest.config)
 

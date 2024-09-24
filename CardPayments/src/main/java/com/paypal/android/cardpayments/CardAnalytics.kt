@@ -17,7 +17,7 @@ class CardAnalytics(
         return CardAnalyticsContext(config, analyticsService, orderId, setupTokenId)
     }
 
-    fun createAnalyticsContext(cardRequest: CardApproveOrderRequest): CardAnalyticsContext {
+    fun createAnalyticsContext(cardRequest: CardRequest.ApproveOrder): CardAnalyticsContext {
         return CardAnalyticsContext(
             cardRequest.config,
             analyticsService,
@@ -25,7 +25,7 @@ class CardAnalytics(
         )
     }
 
-    fun createAnalyticsContext(vaultRequest: CardVaultRequest): CardAnalyticsContext {
+    fun createAnalyticsContext(vaultRequest: CardRequest.Vault): CardAnalyticsContext {
         return CardAnalyticsContext(
             vaultRequest.config,
             analyticsService,
