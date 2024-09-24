@@ -9,14 +9,13 @@ import java.util.Locale
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RestClient internal constructor(
-    private val configuration: CoreConfig,
     private val http: Http = Http(),
     private val language: String = Locale.getDefault().language
 ) {
 
-    constructor(configuration: CoreConfig) : this(configuration, Http())
+    constructor() : this(Http())
 
-    suspend fun send(apiRequest: APIRequest): HttpResponse {
+    suspend fun send(apiRequest: APIRequest, configuration: CoreConfig): HttpResponse {
         val httpRequest = createHttpRequestFromAPIRequest(apiRequest, configuration)
         return http.send(httpRequest)
     }

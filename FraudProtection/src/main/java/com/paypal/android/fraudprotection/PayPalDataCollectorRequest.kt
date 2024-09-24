@@ -1,5 +1,7 @@
 package com.paypal.android.fraudprotection
 
+import com.paypal.android.corepayments.CoreConfig
+
 /**
  * Request object containing parameters to configure fraud protection data collection.
  *
@@ -12,6 +14,7 @@ package com.paypal.android.fraudprotection
  * @property [additionalData] additional metadata to link with data collection
  */
 data class PayPalDataCollectorRequest @JvmOverloads constructor(
+    val config: CoreConfig,
     val hasUserLocationConsent: Boolean,
     val clientMetadataId: String? = null,
     val additionalData: Map<String, String>? = null,

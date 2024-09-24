@@ -12,14 +12,16 @@ import lib.android.paypal.com.magnessdk.MagnesSource
  * Enables you to collect data about a customer's device and correlate it with a session identifier on your server.
  */
 class PayPalDataCollector internal constructor(
-    coreConfig: CoreConfig,
+    private val applicationContext: Context,
     private val magnesSDK: MagnesSDK,
     private val uuidHelper: UUIDHelper
 ) {
 
-    private val environment = coreConfig.magnesEnvironment
-
-    constructor(config: CoreConfig) : this(config, MagnesSDK.getInstance(), UUIDHelper())
+    constructor(context: Context) : this(
+        context.applicationContext,
+        MagnesSDK.getInstance(),
+        UUIDHelper()
+    )
 
     /**
      * Collects device data at the time of payment activity. Once a user initiates a payment
@@ -38,16 +40,17 @@ class PayPalDataCollector internal constructor(
     @Deprecated("This method is no longer supported.")
     @JvmOverloads
     fun collectDeviceData(
-        context: Context,
+        config: CoreConfig,
         clientMetadataId: String? = null,
         additionalData: HashMap<String, String>? = null
     ): String {
         val request = PayPalDataCollectorRequest(
+            config = config,
             hasUserLocationConsent = false,
             clientMetadataId = clientMetadataId,
             additionalData = additionalData
         )
-        return collectDeviceData(context, request)
+        return collectDeviceData(request)
     }
 
     /**
@@ -61,18 +64,19 @@ class PayPalDataCollector internal constructor(
      * @param context Android Context
      * @param request Request object containing parameters to configure data collection
      */
-    fun collectDeviceData(context: Context, request: PayPalDataCollectorRequest): String {
-        val appContext = context.applicationContext
+    fun collectDeviceData(request: PayPalDataCollectorRequest): String {
+        val environment = request.config.magnesEnvironment
+
         return try {
-            val magnesSettingsBuilder = MagnesSettings.Builder(appContext)
+            val magnesSettingsBuilder = MagnesSettings.Builder(applicationContext)
                 .setMagnesSource(MagnesSource.PAYPAL)
                 .disableBeacon(false)
                 .setMagnesEnvironment(environment)
-                .setAppGuid(uuidHelper.getInstallationGUID(context))
+                .setAppGuid(uuidHelper.getInstallationGUID(applicationContext))
                 .setHasUserLocationConsent(request.hasUserLocationConsent)
             magnesSDK.setUp(magnesSettingsBuilder.build())
             val result = magnesSDK.collectAndSubmit(
-                appContext,
+                applicationContext,
                 request.clientMetadataId,
                 HashMap(request.additionalData ?: emptyMap())
             )

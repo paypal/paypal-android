@@ -17,8 +17,6 @@ import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
 
@@ -35,7 +33,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var shapeHasChanged = false
 
     internal val analyticsService: AnalyticsService =
-        AnalyticsService(context, CoreConfig(clientId = "N/A", environment = Environment.LIVE))
+        AnalyticsService(context)
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
@@ -231,11 +229,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     override fun setOnClickListener(listener: OnClickListener?) {
         super.setOnClickListener { view ->
             listener?.onClick(view)
-            analyticsService.sendAnalyticsEvent(
-                "payment-button:tapped",
-                orderId = null,
-                buttonType = fundingType.buttonType
-            )
+//            analyticsService.sendAnalyticsEvent(
+//                "payment-button:tapped",
+//                orderId = null,
+//                buttonType = fundingType.buttonType
+//            )
         }
     }
 

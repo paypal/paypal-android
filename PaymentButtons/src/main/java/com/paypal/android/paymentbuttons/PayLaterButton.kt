@@ -68,11 +68,11 @@ class PayLaterButton @JvmOverloads constructor(
             updateColorFrom(typedArray)
         }
         updateLabel(PayPalButtonLabel.PAY_LATER)
-        analyticsService.sendAnalyticsEvent(
-            "payment-button:initialized",
-            orderId = null,
-            buttonType = PaymentButtonFundingType.PAY_LATER.buttonType
-        )
+//        analyticsService.sendAnalyticsEvent(
+//            "payment-button:initialized",
+//            orderId = null,
+//            buttonType = PaymentButtonFundingType.PAY_LATER.buttonType
+//        )
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {

@@ -1,12 +1,10 @@
 package com.paypal.android.ui.approveorder
 
 import android.app.Application
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
@@ -50,15 +48,16 @@ class ApproveOrderViewModel @Inject constructor(
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
+    private val cardClient = CardClient(application.applicationContext)
+    private val payPalDataCollector = PayPalDataCollector(application.applicationContext)
+
     private val cardAuthLauncher = CardAuthLauncher()
 
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var coreConfig: CoreConfig? = null
     private var authState: String? = null
-
-    private lateinit var cardClient: CardClient
-    private lateinit var payPalDataCollector: PayPalDataCollector
 
     fun createOrder() {
         viewModelScope.launch {
@@ -76,12 +75,12 @@ class ApproveOrderViewModel @Inject constructor(
             approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
             viewModelScope.launch {
-                approveOrderWithId(activity, orderId)
+                approveOrderWithId(orderId)
             }
         }
     }
 
-    private suspend fun approveOrderWithId(activity: AppCompatActivity, orderId: String) {
+    private suspend fun approveOrderWithId(orderId: String) {
         approveOrderState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -91,12 +90,9 @@ class ApproveOrderViewModel @Inject constructor(
 
             is SDKSampleServerResult.Success -> {
                 val clientId = clientIdResult.value
-                val coreConfig = CoreConfig(clientId = clientId)
-                payPalDataCollector = PayPalDataCollector(coreConfig)
+                coreConfig = CoreConfig(clientId = clientId)
+                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId, coreConfig!!)
 
-                cardClient = CardClient(activity, coreConfig)
-
-                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
                 when (val result = cardClient.approveOrder(cardRequest)) {
                     is CardApproveOrderResult.Success -> {
                         approveOrderState = ActionState.Success(result)
@@ -132,7 +128,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun completeOrder(context: Context) {
+    fun completeOrder() {
         val orderId = createdOrder?.id
         if (orderId == null) {
             completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
@@ -140,25 +136,29 @@ class ApproveOrderViewModel @Inject constructor(
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
                 val dataCollectorRequest =
-                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
-                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
+                    PayPalDataCollectorRequest(
+                        config = coreConfig!!,
+                        hasUserLocationConsent = false
+                    )
+                val cmid = payPalDataCollector.collectDeviceData(dataCollectorRequest)
                 completeOrderState =
                     completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }
 
-    private fun mapUIStateToCardRequestWithOrderId(orderId: String) = uiState.value.run {
-        // expiration date in UI State needs to be formatted because it uses a visual transformation
-        val dateString = DateString(cardExpirationDate)
-        val card = Card(
-            number = cardNumber,
-            expirationMonth = dateString.formattedMonth,
-            expirationYear = dateString.formattedYear,
-            securityCode = cardSecurityCode
-        )
-        CardRequest(orderId, card, APP_RETURN_URL, scaOption)
-    }
+    private fun mapUIStateToCardRequestWithOrderId(orderId: String, config: CoreConfig) =
+        uiState.value.run {
+            // expiration date in UI State needs to be formatted because it uses a visual transformation
+            val dateString = DateString(cardExpirationDate)
+            val card = Card(
+                number = cardNumber,
+                expirationMonth = dateString.formattedMonth,
+                expirationYear = dateString.formattedYear,
+                securityCode = cardSecurityCode
+            )
+            CardRequest(config, orderId, card, APP_RETURN_URL, scaOption)
+        }
 
     fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
         authChallengeState = ActionState.Loading

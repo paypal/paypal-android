@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.os.Parcelable
 import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.corepayments.CoreConfig
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -14,6 +15,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class CardRequest @JvmOverloads constructor(
+    val config: CoreConfig,
     val orderId: String,
     val card: Card,
     val returnUrl: String,

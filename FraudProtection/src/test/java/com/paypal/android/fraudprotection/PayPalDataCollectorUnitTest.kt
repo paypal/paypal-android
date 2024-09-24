@@ -42,7 +42,7 @@ class PayPalDataCollectorUnitTest {
 
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
-        sut.collectDeviceData(context, PayPalDataCollectorRequest(hasUserLocationConsent = false))
+        sut.collectDeviceData(PayPalDataCollectorRequest(hasUserLocationConsent = false))
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
         val magnesSettings = magnesSettingsSlot.captured
@@ -65,7 +65,7 @@ class PayPalDataCollectorUnitTest {
         every { mockUUIDHelper.getInstallationGUID(any()) } returns appGUID
 
         val sut = PayPalDataCollector(liveConfig, mockMagnesSDK, mockUUIDHelper)
-        sut.collectDeviceData(context, PayPalDataCollectorRequest(hasUserLocationConsent = false))
+        sut.collectDeviceData(PayPalDataCollectorRequest(hasUserLocationConsent = false))
 
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 
@@ -94,7 +94,6 @@ class PayPalDataCollectorUnitTest {
 
         val sut = PayPalDataCollector(sandboxConfig, mockMagnesSDK, mockUUIDHelper)
         val result = sut.collectDeviceData(
-            context,
             PayPalDataCollectorRequest(hasUserLocationConsent = false)
         )
 
@@ -123,7 +122,7 @@ class PayPalDataCollectorUnitTest {
             hasUserLocationConsent = false,
             clientMetadataId = clientMetadataId
         )
-        val result = sut.collectDeviceData(mockContext, request)
+        val result = sut.collectDeviceData(request)
         assertEquals(result, clientMetadataId)
     }
 
@@ -146,7 +145,7 @@ class PayPalDataCollectorUnitTest {
 
         val sut = PayPalDataCollector(liveConfig, mockMagnesSDK, mockUUIDHelper)
         val request = PayPalDataCollectorRequest(hasUserLocationConsent = true)
-        sut.collectDeviceData(context, request)
+        sut.collectDeviceData(request)
 
         verify { mockMagnesSDK.setUp(capture(magnesSettingsSlot)) }
 

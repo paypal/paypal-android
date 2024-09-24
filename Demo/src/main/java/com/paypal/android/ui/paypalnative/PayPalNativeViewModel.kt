@@ -155,7 +155,6 @@ class PayPalNativeViewModel @Inject constructor(
                 payPalClient.listener = payPalListener
                 payPalClient.shippingListener = shippingListener
 
-                payPalDataCollector = PayPalDataCollector(coreConfig)
                 payPalClient.startCheckout(PayPalNativeCheckoutRequest(orderId))
             }
         }
@@ -168,9 +167,12 @@ class PayPalNativeViewModel @Inject constructor(
                 completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
             } else {
                 completeOrderState = ActionState.Loading
-                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
-                val cmid = payPalDataCollector.collectDeviceData(getApplication(), dataCollectorRequest)
-                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+                // TODO: fix once data collector semantics are determined
+//                val dataCollectorRequest =
+//                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
+//                val cmid = payPalDataCollector.collectDeviceData(dataCollectorRequest)
+//                completeOrderState =
+//                    completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }

@@ -1,8 +1,10 @@
 package com.paypal.android.ui.vaultcard
 
+import android.app.Application
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
@@ -33,13 +35,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
+    application: Application,
     val getClientIdUseCase: GetClientIdUseCase,
     val getSetupTokenUseCase: GetSetupTokenUseCase,
     val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
-    private lateinit var cardClient: CardClient
+    private val cardClient: CardClient = CardClient(application.applicationContext)
+
     private val cardAuthLauncher = CardAuthLauncher()
 
     private var authState: String? = null
@@ -152,11 +156,11 @@ class VaultCardViewModel @Inject constructor(
             is SDKSampleServerResult.Success -> {
                 val clientId = clientIdResult.value
                 val configuration = CoreConfig(clientId = clientId)
-                cardClient = CardClient(activity, configuration)
 
                 val card = parseCard(_uiState.value)
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
-                val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
+                val cardVaultRequest =
+                    CardVaultRequest(configuration, setupTokenId, card, returnUrl)
                 when (val result = cardClient.vault(activity, cardVaultRequest)) {
                     is CardVaultResult.Success -> {
                         updateSetupTokenState = ActionState.Success(result)

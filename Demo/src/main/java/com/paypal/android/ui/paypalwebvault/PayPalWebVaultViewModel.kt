@@ -91,7 +91,8 @@ class PayPalWebVaultViewModel @Inject constructor(
 
             is SDKSampleServerResult.Success -> {
                 val coreConfig = CoreConfig(clientIdResult.value)
-                payPalDataCollector = PayPalDataCollector(coreConfig)
+                // TODO: fix once data collector semantics are determined
+//                payPalDataCollector = PayPalDataCollector()
 
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
                 paypalClient?.vaultListener = this@PayPalWebVaultViewModel

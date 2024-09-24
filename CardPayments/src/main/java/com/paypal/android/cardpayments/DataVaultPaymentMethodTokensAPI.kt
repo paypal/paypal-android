@@ -9,18 +9,21 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
-    private val coreConfig: CoreConfig,
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader
 ) {
 
-    constructor(coreConfig: CoreConfig) : this(
-        coreConfig,
-        GraphQLClient(coreConfig),
+    constructor() : this(
+        GraphQLClient(),
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): UpdateSetupTokenResult {
+    suspend fun updateSetupToken(
+        context: Context,
+        setupTokenId: String,
+        card: Card,
+        coreConfig: CoreConfig
+    ): UpdateSetupTokenResult {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
@@ -56,7 +59,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             .put("query", query)
             .put("variables", variables)
         val graphQLResponse =
-            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
+            graphQLClient.send(graphQLRequest, coreConfig, queryName = "UpdateVaultSetupToken")
         graphQLResponse.data?.let { responseJSON ->
             val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
             val status = setupTokenJSON.getString("status")

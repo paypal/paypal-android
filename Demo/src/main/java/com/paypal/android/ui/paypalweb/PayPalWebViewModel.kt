@@ -111,7 +111,6 @@ class PayPalWebViewModel @Inject constructor(
 
             is SDKSampleServerResult.Success -> {
                 val coreConfig = CoreConfig(clientIdResult.value)
-                payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 paypalClient =
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
@@ -148,9 +147,10 @@ class PayPalWebViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
-                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
-                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
-                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+                // TODO: fix once data collector semantics are determined
+//                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
+//                val cmid = payPalDataCollector.collectDeviceData(dataCollectorRequest)
+//                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }

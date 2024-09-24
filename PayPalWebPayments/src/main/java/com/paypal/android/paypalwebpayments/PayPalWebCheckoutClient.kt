@@ -32,7 +32,7 @@ class PayPalWebCheckoutClient internal constructor(
         urlScheme: String
     ) : this(
         activity,
-        AnalyticsService(activity.applicationContext, configuration),
+        AnalyticsService(activity.applicationContext),
         PayPalWebLauncher(urlScheme, configuration),
     )
 
@@ -61,7 +61,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
 
         activityReference.get()?.let { activity ->
             payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
@@ -79,7 +79,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
     fun vault(request: PayPalWebVaultRequest) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
 
         activityReference.get()?.let { activity ->
             payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
@@ -111,32 +111,32 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)
         listener?.onPayPalWebSuccess(result)
     }
 
     private fun notifyWebCheckoutFailure(error: PayPalSDKError, orderId: String?) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
         listener?.onPayPalWebFailure(error)
     }
 
     private fun notifyWebCheckoutCancelation(orderId: String?) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
         listener?.onPayPalWebCanceled()
     }
 
     private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:succeeded")
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:succeeded")
         vaultListener?.onPayPalWebVaultSuccess(result)
     }
 
     private fun notifyVaultFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed")
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed")
         vaultListener?.onPayPalWebVaultFailure(error)
     }
 
     private fun notifyVaultCancelation() {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
         vaultListener?.onPayPalWebVaultCanceled()
     }
 

@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.os.Parcelable
+import com.paypal.android.corepayments.CoreConfig
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -14,6 +15,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class CardVaultRequest(
+    val config: CoreConfig,
     val setupTokenId: String,
     val card: Card,
     val returnUrl: String? = "",

@@ -177,7 +177,7 @@ private fun Step3_CompleteOrder(
             defaultTitle = "${uiState.intentOption.name} ORDER",
             successTitle = successTitle,
             state = uiState.completeOrderState,
-            onClick = { viewModel.completeOrder(context) },
+            onClick = { viewModel.completeOrder() },
             modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {

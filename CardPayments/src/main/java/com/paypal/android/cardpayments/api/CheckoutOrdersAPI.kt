@@ -11,11 +11,11 @@ internal class CheckoutOrdersAPI(
     private val requestFactory: CardRequestFactory = CardRequestFactory(),
     private val responseParser: CardResponseParser = CardResponseParser()
 ) {
-    constructor(coreConfig: CoreConfig) : this(RestClient(coreConfig))
+    constructor() : this(RestClient())
 
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
-        val httpResponse = restClient.send(apiRequest)
+        val httpResponse = restClient.send(apiRequest, cardRequest.config)
 
         val error = responseParser.parseError(httpResponse)
         if (error != null) {

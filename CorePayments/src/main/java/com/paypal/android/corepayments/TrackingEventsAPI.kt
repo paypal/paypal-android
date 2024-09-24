@@ -5,20 +5,19 @@ import com.paypal.android.corepayments.analytics.DeviceData
 import org.json.JSONObject
 
 internal class TrackingEventsAPI constructor(
-    private val coreConfig: CoreConfig,
     private val restClient: RestClient
 ) {
-    constructor(coreConfig: CoreConfig) :
-            this(coreConfig, RestClient(coreConfig))
+    constructor() : this(RestClient())
 
-    suspend fun sendEvent(event: AnalyticsEventData, deviceData: DeviceData): HttpResponse {
-        val apiRequest = createAPIRequestForEvent(event, deviceData)
-        return restClient.send(apiRequest)
+    suspend fun sendEvent(event: AnalyticsEventData, deviceData: DeviceData, config: CoreConfig): HttpResponse {
+        val apiRequest = createAPIRequestForEvent(event, deviceData, config)
+        return restClient.send(apiRequest, config)
     }
 
     private fun createAPIRequestForEvent(
         event: AnalyticsEventData,
-        deviceData: DeviceData
+        deviceData: DeviceData,
+        config: CoreConfig
     ): APIRequest {
 
         val appId = deviceData.appId
@@ -33,7 +32,7 @@ internal class TrackingEventsAPI constructor(
         val eventParams = JSONObject()
             .put(KEY_APP_ID, appId)
             .put(KEY_APP_NAME, appName)
-            .put(KEY_CLIENT_ID, coreConfig.clientId)
+            .put(KEY_CLIENT_ID, config.clientId)
             .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
             .put(KEY_CLIENT_OS, clientOS)
             .put(KEY_COMPONENT, "ppcpclientsdk")

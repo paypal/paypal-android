@@ -19,28 +19,22 @@ import kotlinx.coroutines.launch
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsService internal constructor(
     private val deviceInspector: DeviceInspector,
-    private val environment: Environment,
     private val trackingEventsAPI: TrackingEventsAPI,
     private val scope: CoroutineScope
 ) {
 
-    constructor(context: Context, coreConfig: CoreConfig) :
-            this(context, coreConfig, Dispatchers.IO)
+    constructor(context: Context) : this(context, Dispatchers.IO)
 
     @VisibleForTesting
-    internal constructor(
-        context: Context,
-        coreConfig: CoreConfig,
-        dispatcher: CoroutineDispatcher
-    ) :
-            this(
-                DeviceInspector(context),
-                coreConfig.environment,
-                TrackingEventsAPI(coreConfig),
-                CoroutineScope(dispatcher)
-            )
+    internal constructor(context: Context, dispatcher: CoroutineDispatcher) :
+            this(DeviceInspector(context), TrackingEventsAPI(), CoroutineScope(dispatcher))
 
-    fun sendAnalyticsEvent(name: String, orderId: String? = null, buttonType: String? = null) {
+    fun sendAnalyticsEvent(
+        name: String,
+        config: CoreConfig,
+        orderId: String? = null,
+        buttonType: String? = null
+    ) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
@@ -48,13 +42,13 @@ class AnalyticsService internal constructor(
             try {
                 val deviceData = deviceInspector.inspect()
                 val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
+                    config.environment.name.lowercase(),
                     name,
                     timestamp,
                     orderId = orderId,
                     buttonType = buttonType
                 )
-                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
+                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData, config)
                 response.error?.message?.let { errorMessage ->
                     Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
                 }

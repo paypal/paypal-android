@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
-import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
@@ -27,11 +26,11 @@ class CardClient internal constructor(
      *  @param [context] Activity that launches the card client
      *  @param [configuration] Configuration parameters for client
      */
-    constructor(context: Context, configuration: CoreConfig) :
+    constructor(context: Context) :
             this(
-                CheckoutOrdersAPI(configuration),
-                DataVaultPaymentMethodTokensAPI(configuration),
-                AnalyticsService(context.applicationContext, configuration)
+                CheckoutOrdersAPI(),
+                DataVaultPaymentMethodTokensAPI(),
+                AnalyticsService(context.applicationContext)
             )
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
@@ -45,11 +44,16 @@ class CardClient internal constructor(
         // TODO: migrate away from throwing exceptions to result objects
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
+        analyticsService.sendAnalyticsEvent(
+            "card-payments:3ds:started",
+            cardRequest.config,
+            cardRequest.orderId,
+        )
 
         val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
         analyticsService.sendAnalyticsEvent(
             "card-payments:3ds:confirm-payment-source:succeeded",
+            cardRequest.config,
             cardRequest.orderId
         )
 
@@ -57,6 +61,7 @@ class CardClient internal constructor(
         if (authChallengeUrl == null) {
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:succeeded",
+                cardRequest.config,
                 response.orderId
             )
             CardApproveOrderResult.Success(
@@ -67,6 +72,7 @@ class CardClient internal constructor(
         } else {
             analyticsService.sendAnalyticsEvent(
                 "card-payments:3ds:confirm-payment-source:challenge-required",
+                cardRequest.config,
                 cardRequest.orderId
             )
             val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
@@ -80,6 +86,7 @@ class CardClient internal constructor(
     } catch (error: PayPalSDKError) {
         analyticsService.sendAnalyticsEvent(
             "card-payments:3ds:confirm-payment-source:failed",
+            cardRequest.config,
             cardRequest.orderId
         )
         CardApproveOrderResult.Failure(error)
@@ -97,7 +104,12 @@ class CardClient internal constructor(
     suspend fun vault(context: Context, cardVaultRequest: CardVaultRequest): CardVaultResult {
         val applicationContext = context.applicationContext
         val updateSetupTokenResult = cardVaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+            paymentMethodTokensAPI.updateSetupToken(
+                applicationContext,
+                setupTokenId,
+                card,
+                cardVaultRequest.config
+            )
         }
 
         val authChallengeUrl = updateSetupTokenResult.approveHref
@@ -148,17 +160,17 @@ class CardClient internal constructor(
     }
 
     private fun notifyApproveOrderCanceled(orderId: String?) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
+//        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
 //        approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", result.orderId)
+//        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", result.orderId)
 //        approveOrderListener?.onApproveOrderSuccess(result)
     }
 
     private fun notifyApproveOrderFailure(error: PayPalSDKError, orderId: String?) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+//        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
 //        approveOrderListener?.onApproveOrderFailure(error)
     }
 
@@ -168,12 +180,12 @@ class CardClient internal constructor(
     }
 
     private fun notifyVaultFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("card:failed", null)
+//        analyticsService.sendAnalyticsEvent("card:failed", null)
 //        cardVaultListener?.onVaultFailure(error)
     }
 
     private fun notifyVaultCancelation() {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
+//        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
         // TODO: consider either adding a listener method or next major version returning a result type
 //        cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
     }

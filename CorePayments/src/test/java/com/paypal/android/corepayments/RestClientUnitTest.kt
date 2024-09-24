@@ -44,7 +44,7 @@ class RestClientUnitTest {
     fun `send() should properly format the url for the sandbox environment`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(sandboxConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiGETRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -55,7 +55,7 @@ class RestClientUnitTest {
     fun `send() should properly format the url for the live environment`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiGETRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -66,7 +66,7 @@ class RestClientUnitTest {
     fun `send() should forward the http method`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -77,7 +77,7 @@ class RestClientUnitTest {
     fun `send() should forward the http body`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -88,7 +88,7 @@ class RestClientUnitTest {
     fun `send() should set accept encoding default header`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -99,7 +99,7 @@ class RestClientUnitTest {
     fun `send() should set accept language default header`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -110,7 +110,7 @@ class RestClientUnitTest {
     fun `send() should add basic authorization header using client id from config`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -121,7 +121,7 @@ class RestClientUnitTest {
     fun `send() should add content type json header for POST requests`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiPOSTRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -132,7 +132,7 @@ class RestClientUnitTest {
     fun `send() should add content type json header for GET requests`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         sut.send(apiGETRequest)
 
         val httpRequest = httpRequestSlot.captured
@@ -143,7 +143,7 @@ class RestClientUnitTest {
     fun `send() should send http request and forward result to caller`() = runTest {
         coEvery { http.send(capture(httpRequestSlot)) } returns httpSuccessResponse
 
-        sut = RestClient(liveConfig, http, "en_US")
+        sut = RestClient(http, "en_US")
         val result = sut.send(apiGETRequest)
 
         assertSame(httpSuccessResponse, result)

@@ -15,7 +15,6 @@ import java.net.URL
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GraphQLClient internal constructor(
-    coreConfig: CoreConfig,
     private val http: Http = Http(),
 ) {
 
@@ -23,21 +22,26 @@ class GraphQLClient internal constructor(
         const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
     }
 
-    constructor(coreConfig: CoreConfig) : this(coreConfig, Http())
+    constructor() : this(Http())
 
-    private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
-    private val graphQLURL = "$graphQLEndpoint/graphql"
+    suspend fun send(
+        graphQLRequestBody: JSONObject,
+        config: CoreConfig,
+        queryName: String? = null
+    ): GraphQLResponse {
+        val graphQLEndpoint = config.environment.graphQLEndpoint
+        val graphQLURL = "$graphQLEndpoint/graphql"
 
-    private val httpRequestHeaders = mutableMapOf(
-        "Content-Type" to "application/json",
-        "Accept" to "application/json",
-        "x-app-name" to "nativecheckout",
-        "Origin" to coreConfig.environment.graphQLEndpoint
-    )
-
-    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
+
+        val httpRequestHeaders = mutableMapOf(
+            "Content-Type" to "application/json",
+            "Accept" to "application/json",
+            "x-app-name" to "nativecheckout",
+            "Origin" to config.environment.graphQLEndpoint
+        )
+
         val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
 
         val httpResponse = http.send(httpRequest)
