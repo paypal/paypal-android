@@ -7,14 +7,21 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
+import com.braintreepayments.api.BrowserSwitchStartResult
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
-// TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 
+sealed class PayPalAuthChallengeResult {
+    data class Success(val authState: String) : PayPalAuthChallengeResult()
+    data class Failure(val error: PayPalSDKError) : PayPalAuthChallengeResult()
+}
+
+// TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 internal class PayPalWebLauncher(
     private val urlScheme: String,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
@@ -32,6 +39,32 @@ internal class PayPalWebLauncher(
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
 
+    fun presentAuthChallenge(
+        activity: FragmentActivity,
+        authChallenge: PayPalAuthChallenge,
+    ): PayPalAuthChallengeResult {
+        val analytics = authChallenge.analytics
+        return when (val result = browserSwitchClient.start(activity, authChallenge.options)) {
+            is BrowserSwitchStartResult.Failure -> {
+                analytics.notifyWebCheckoutFailure()
+                val message = "auth challenge failed"
+                PayPalAuthChallengeResult.Failure(
+                    PayPalSDKError(
+                        123,
+                        message,
+                        reason = result.error
+                    )
+                )
+            }
+
+            is BrowserSwitchStartResult.Started -> {
+                analytics.notifyWebCheckoutStarted()
+                PayPalAuthChallengeResult.Success(result.pendingRequest)
+            }
+        }
+
+    }
+
     fun launchPayPalWebCheckout(
         activity: FragmentActivity,
         request: PayPalWebCheckoutRequest,
@@ -42,6 +75,7 @@ internal class PayPalWebLauncher(
         val url = request.run { buildPayPalCheckoutUri(orderId, request.config, fundingSource) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
 

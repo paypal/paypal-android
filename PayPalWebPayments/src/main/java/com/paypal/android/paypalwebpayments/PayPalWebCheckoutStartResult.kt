@@ -4,7 +4,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 
 sealed class PayPalWebCheckoutStartResult {
 
-    object DidLaunchAuth : PayPalWebCheckoutStartResult()
+    data class DidLaunchAuth(val authState: String) : PayPalWebCheckoutStartResult()
 
     data class Failure(val error: PayPalSDKError) : PayPalWebCheckoutStartResult()
 }

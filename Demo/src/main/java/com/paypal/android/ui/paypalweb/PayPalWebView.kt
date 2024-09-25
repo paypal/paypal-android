@@ -62,7 +62,7 @@ fun PayPalWebView(
         if (uiState.isCreateOrderSuccessful) {
             Step2_StartPayPalWebCheckout(uiState, viewModel)
         }
-        if (uiState.isPayPalWebCheckoutSuccessful) {
+        if (uiState.isAuthSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
@@ -109,7 +109,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
         ActionButtonColumn(
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
-            state = uiState.payPalWebCheckoutState,
+            state = uiState.authChallengeState,
             onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
             modifier = Modifier
                 .fillMaxWidth()
@@ -117,8 +117,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
                 is CompletedActionState.Success -> state.value.run {
-                    // TODO: fix when auth result type is created
-//                    PayPalWebCheckoutResultView(orderId, payerId)
+                    PayPalWebCheckoutResultView(orderId, payerId)
                 }
             }
         }
