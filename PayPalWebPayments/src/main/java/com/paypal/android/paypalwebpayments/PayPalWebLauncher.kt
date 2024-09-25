@@ -16,11 +16,6 @@ import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
 
-sealed class PayPalAuthChallengeResult {
-    data class Success(val authState: String) : PayPalAuthChallengeResult()
-    data class Failure(val error: PayPalSDKError) : PayPalAuthChallengeResult()
-}
-
 // TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 internal class PayPalWebLauncher(
     private val urlScheme: String,

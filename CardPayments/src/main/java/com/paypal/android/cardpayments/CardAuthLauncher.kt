@@ -7,11 +7,6 @@ import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.PayPalSDKError
 
-sealed class CardAuthChallengeResult {
-    data class Success(val authState: String) : CardAuthChallengeResult()
-    data class Failure(val error: PayPalSDKError) : CardAuthChallengeResult()
-}
-
 class CardAuthLauncher internal constructor(
     private val browserSwitchClient: BrowserSwitchClient
 ) {
