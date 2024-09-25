@@ -1,6 +1,8 @@
 package com.paypal.android.ui.paypalwebvault
 
+import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
@@ -25,10 +27,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalWebVaultViewModel @Inject constructor(
+    application: Application,
     val getClientIdUseCase: GetClientIdUseCase,
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
-) : ViewModel(), PayPalWebVaultListener {
+) : AndroidViewModel(application), PayPalWebVaultListener {
 
     companion object {
         const val URL_SCHEME = "com.paypal.android.demo"
@@ -37,7 +40,8 @@ class PayPalWebVaultViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var paypalClient: PayPalWebCheckoutClient? = null
+    private val paypalClient = PayPalWebCheckoutClient(application.applicationContext, URL_SCHEME)
+
     private lateinit var payPalDataCollector: PayPalDataCollector
     private var createSetupTokenState
         get() = _uiState.value.createSetupTokenState
@@ -93,11 +97,10 @@ class PayPalWebVaultViewModel @Inject constructor(
                 // TODO: fix once data collector semantics are determined
 //                payPalDataCollector = PayPalDataCollector()
 
-                paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
-                paypalClient?.vaultListener = this@PayPalWebVaultViewModel
+                paypalClient.vaultListener = this@PayPalWebVaultViewModel
 
                 val request = PayPalWebVaultRequest(coreConfig, setupTokenId)
-                paypalClient?.vault(activity, request)
+                paypalClient.vault(activity, request)
             }
         }
     }

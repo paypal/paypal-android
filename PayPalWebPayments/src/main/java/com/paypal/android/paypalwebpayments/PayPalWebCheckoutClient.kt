@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
@@ -13,8 +14,6 @@ import java.lang.ref.WeakReference
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
-    // NEXT MAJOR VERSION: remove hardcoded activity reference
-    private val activity: FragmentActivity,
     private val payPalAnalytics: PayPalAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
@@ -26,14 +25,9 @@ class PayPalWebCheckoutClient internal constructor(
      * @param configuration a [CoreConfig] object
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
-    constructor(
-        activity: FragmentActivity,
-        configuration: CoreConfig,
-        urlScheme: String
-    ) : this(
-        activity,
-        PayPalAnalytics(activity.applicationContext),
-        PayPalWebLauncher(urlScheme, configuration),
+    constructor(context: Context, urlScheme: String) : this(
+        PayPalAnalytics(context.applicationContext),
+        PayPalWebLauncher(urlScheme),
     )
 
     /**
@@ -46,14 +40,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     var vaultListener: PayPalWebVaultListener? = null
 
-    private val activityReference = WeakReference(activity)
-
     internal var observer = PayPalWebCheckoutLifeCycleObserver(this)
-
-    init {
-        activity.lifecycle.addObserver(observer)
-        // NEXT MAJOR VERSION: remove hardcoded activity reference
-    }
 
     /**
      * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
@@ -98,7 +85,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     @Suppress("NestedBlockDepth")
     internal fun handleBrowserSwitchResult() {
-        activityReference.get()?.let { activity ->
+//        activityReference.get()?.let { activity ->
 //            payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
 //                when (status) {
 //                    is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
@@ -112,7 +99,7 @@ class PayPalWebCheckoutClient internal constructor(
 //                    PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
 //                }
 //            }
-        }
+//        }
     }
 
     private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
@@ -144,7 +131,7 @@ class PayPalWebCheckoutClient internal constructor(
      * Call this method at the end of the web checkout flow to clear out all observers and listeners
      */
     fun removeObservers() {
-        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
+//        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
         vaultListener = null
         listener = null
     }

@@ -1,9 +1,11 @@
 package com.paypal.android.ui.paypalweb
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -31,16 +33,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalWebViewModel @Inject constructor(
+    application: Application,
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase
-) : ViewModel(), PayPalWebCheckoutListener {
+) : AndroidViewModel(application), PayPalWebCheckoutListener {
 
     companion object {
         private val TAG = PayPalWebViewModel::class.qualifiedName
     }
 
-    private var paypalClient: PayPalWebCheckoutClient? = null
+    private val paypalClient =
+        PayPalWebCheckoutClient(application.applicationContext, "com.paypal.android.demo")
+
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
@@ -111,8 +116,6 @@ class PayPalWebViewModel @Inject constructor(
             is SDKSampleServerResult.Success -> {
                 val coreConfig = CoreConfig(clientIdResult.value)
 
-                paypalClient =
-                    PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
                 paypalClient?.listener = this@PayPalWebViewModel
 
                 val request = PayPalWebCheckoutRequest(coreConfig, orderId, fundingSource)

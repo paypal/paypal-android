@@ -16,7 +16,6 @@ import org.json.JSONObject
 
 internal class PayPalWebLauncher(
     private val urlScheme: String,
-    private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
 ) {
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
@@ -39,7 +38,7 @@ internal class PayPalWebLauncher(
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
             .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
-        val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
+        val url = request.run { buildPayPalCheckoutUri(orderId, request.config, fundingSource) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
             .returnUrlScheme(urlScheme)
@@ -55,7 +54,7 @@ internal class PayPalWebLauncher(
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
             .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-        val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
+        val url = request.run { buildPayPalVaultUri(request.setupTokenId, request.config) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
             .returnUrlScheme(urlScheme)
