@@ -3,17 +3,19 @@ package com.paypal.android.ui.paypalweb
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutAuthResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
@@ -23,7 +25,6 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.api.services.SDKSampleServerResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,6 +51,9 @@ class PayPalWebViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var coreConfig: CoreConfig? = null
+    private var authState: String? = null
 
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
@@ -114,12 +118,33 @@ class PayPalWebViewModel @Inject constructor(
             }
 
             is SDKSampleServerResult.Success -> {
-                val coreConfig = CoreConfig(clientIdResult.value)
+                coreConfig = CoreConfig(clientIdResult.value)
 
-                paypalClient?.listener = this@PayPalWebViewModel
+                val request = PayPalWebCheckoutRequest(coreConfig!!, orderId, fundingSource)
+                paypalClient.start(activity, request)
+            }
+        }
+    }
 
-                val request = PayPalWebCheckoutRequest(coreConfig, orderId, fundingSource)
-                paypalClient?.start(activity, request)
+    fun checkIntentForResult(intent: Intent) = authState?.let { state ->
+        when (val result = paypalClient.checkIfCheckoutAuthComplete(intent, state)) {
+            is PayPalWebCheckoutAuthResult.Success -> {
+                // TODO: implement
+//                authChallengeState = ActionState.Success(result)
+            }
+
+            is PayPalWebCheckoutAuthResult.Failure -> {
+                // TODO: implement
+//                authChallengeState = ActionState.Failure(result.error)
+            }
+
+            PayPalWebCheckoutAuthResult.NoResult -> {
+                // do nothing
+            }
+
+            PayPalWebCheckoutAuthResult.Canceled -> {
+                // TODO: implement
+//                authChallengeState = ActionState.Failure(Exception("User canceled"))
             }
         }
     }

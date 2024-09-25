@@ -1,10 +1,15 @@
 package com.paypal.android.paypalwebpayments
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
+import com.paypal.android.corepayments.Base64Utils
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import org.json.JSONObject
 import java.lang.ref.WeakReference
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
@@ -15,14 +20,13 @@ import java.lang.ref.WeakReference
  */
 class PayPalWebCheckoutClient internal constructor(
     private val payPalAnalytics: PayPalAnalytics,
-    private val payPalWebLauncher: PayPalWebLauncher
+    private val payPalWebLauncher: PayPalWebLauncher,
 ) {
 
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
      *
-     * @param activity a [FragmentActivity]
-     * @param configuration a [CoreConfig] object
+     * @param context an Android [Context]
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, urlScheme: String) : this(
@@ -33,7 +37,7 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Sets a listener to receive notifications when a PayPal Checkout event occurs.
      */
-    var listener: PayPalWebCheckoutListener? = null
+//    var listener: PayPalWebCheckoutListener? = null
 
     /**
      * Sets a listener to receive notifications when a Paypal Vault event occurs.
@@ -104,12 +108,12 @@ class PayPalWebCheckoutClient internal constructor(
 
     private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
 //        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)
-        listener?.onPayPalWebSuccess(result)
+//        listener?.onPayPalWebSuccess(result)
     }
 
     private fun notifyWebCheckoutCancelation(orderId: String?) {
 //        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
-        listener?.onPayPalWebCanceled()
+//        listener?.onPayPalWebCanceled()
     }
 
     private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
@@ -133,6 +137,50 @@ class PayPalWebCheckoutClient internal constructor(
     fun removeObservers() {
 //        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
         vaultListener = null
-        listener = null
+//        listener = null
+    }
+
+    fun checkIfCheckoutAuthComplete(intent: Intent, state: String): PayPalWebCheckoutAuthResult {
+        val authStateJSON =
+            decodeCardAuthStateJSON(state) ?: return PayPalWebCheckoutAuthResult.NoResult
+        val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
+        val result = payPalWebLauncher.checkIfCheckoutAuthComplete(intent, state)
+        when (result) {
+            is PayPalWebCheckoutAuthResult.Success -> analytics?.notifyWebCheckoutSucceeded()
+            is PayPalWebCheckoutAuthResult.Failure -> analytics?.notifyWebCheckoutFailure()
+            PayPalWebCheckoutAuthResult.Canceled -> analytics?.notifyWebCheckoutUserCanceled()
+            PayPalWebCheckoutAuthResult.NoResult -> {
+                // do nothing
+            }
+        }
+        return result
+    }
+
+    private fun restoreAnalyticsContextFromAuthState(stateJSON: JSONObject): PayPalAnalyticsContext? {
+        val metadata = stateJSON.optJSONObject("metadata")
+        val clientId = metadata?.optString("client_id")
+        val environmentName = metadata?.optString("environment_name")
+        val environment = try {
+            Environment.valueOf(environmentName ?: "")
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+
+        if (clientId.isNullOrEmpty() || environment == null) {
+            return null
+        }
+        val coreConfig = CoreConfig(clientId, environment)
+        val orderId = metadata.optString("order_id")
+        return payPalAnalytics.createAnalyticsContext(coreConfig, orderId)
+    }
+
+    private fun decodeCardAuthStateJSON(state: String): JSONObject? {
+        val authStateJSON = Base64Utils.parseBase64EncodedJSON(state)
+        val requestCode = authStateJSON?.optInt("requestCode", -1) ?: -1
+        if (requestCode != BrowserSwitchRequestCodes.PAYPAL.intValue) {
+            // not a card result
+            return null
+        }
+        return authStateJSON
     }
 }

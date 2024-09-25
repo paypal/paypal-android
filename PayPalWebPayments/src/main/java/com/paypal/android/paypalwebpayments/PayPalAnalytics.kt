@@ -11,8 +11,7 @@ internal class PayPalAnalytics(
 
     fun createAnalyticsContext(
         config: CoreConfig,
-        orderId: String? = null,
-        setupTokenId: String? = null
+        orderId: String? = null
     ): PayPalAnalyticsContext {
         return PayPalAnalyticsContext(config, analyticsService)
     }

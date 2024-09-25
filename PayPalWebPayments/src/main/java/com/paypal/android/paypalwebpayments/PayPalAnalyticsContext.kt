@@ -27,4 +27,16 @@ class PayPalAnalyticsContext(
     fun notifyVaultFailure() {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed", config)
     }
+
+    fun notifyWebCheckoutSucceeded() {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", config, orderId)
+    }
+
+    fun notifyWebCheckoutUserCanceled() {
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:browser-login:canceled",
+            config,
+            orderId
+        )
+    }
 }
