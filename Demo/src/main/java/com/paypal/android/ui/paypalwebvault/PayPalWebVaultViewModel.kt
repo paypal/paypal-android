@@ -73,15 +73,14 @@ class PayPalWebVaultViewModel @Inject constructor(
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
-                val request = PayPalWebVaultRequest(setupTokenId)
-                vaultSetupTokenWithRequest(activity, request)
+                vaultSetupTokenWithRequest(activity, setupTokenId)
             }
         }
     }
 
     private suspend fun vaultSetupTokenWithRequest(
         activity: AppCompatActivity,
-        request: PayPalWebVaultRequest
+        setupTokenId: String
     ) {
         vaultPayPalState = ActionState.Loading
         when (val clientIdResult = getClientIdUseCase()) {
@@ -97,7 +96,8 @@ class PayPalWebVaultViewModel @Inject constructor(
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
                 paypalClient?.vaultListener = this@PayPalWebVaultViewModel
 
-                paypalClient?.vault(request)
+                val request = PayPalWebVaultRequest(coreConfig, setupTokenId)
+                paypalClient?.vault(activity, request)
             }
         }
     }
@@ -105,7 +105,8 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun createPaymentToken() {
         val setupToken = createdSetupToken
         if (setupToken == null) {
-            createPaymentTokenState = ActionState.Failure(Exception("Create a setup token to continue."))
+            createPaymentTokenState =
+                ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             createPaymentTokenState = ActionState.Loading
             viewModelScope.launch {

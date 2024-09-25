@@ -115,15 +115,16 @@ class PayPalWebViewModel @Inject constructor(
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
                 paypalClient?.listener = this@PayPalWebViewModel
 
-                paypalClient?.start(, PayPalWebCheckoutRequest(orderId, fundingSource))
+                val request = PayPalWebCheckoutRequest(coreConfig, orderId, fundingSource)
+                paypalClient?.start(activity, request)
             }
         }
     }
 
     @SuppressLint("SetTextI18n")
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
-        payPalWebCheckoutState = ActionState.Success(result)
+//        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
+//        payPalWebCheckoutState = ActionState.Success(result)
     }
 
     @SuppressLint("SetTextI18n")

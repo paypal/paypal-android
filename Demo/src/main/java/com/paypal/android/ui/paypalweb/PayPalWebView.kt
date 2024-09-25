@@ -104,7 +104,8 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
                 is CompletedActionState.Success -> state.value.run {
-                    PayPalWebCheckoutResultView(orderId, payerId)
+                    // TODO: fix when auth result type is created
+//                    PayPalWebCheckoutResultView(orderId, payerId)
                 }
             }
         }
