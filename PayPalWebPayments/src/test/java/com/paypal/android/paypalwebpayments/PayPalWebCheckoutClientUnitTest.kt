@@ -44,7 +44,7 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns null
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(request)
+        sut.start(, request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
         verify(exactly = 0) { checkoutListener.onPayPalWebFailure(any()) }
     }
@@ -57,7 +57,7 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns sdkError
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(request)
+        sut.start(, request)
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { checkoutListener.onPayPalWebFailure(capture(slot)) }

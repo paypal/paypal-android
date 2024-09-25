@@ -1,9 +1,9 @@
 package com.paypal.android.paypalwebpayments
 
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.analytics.AnalyticsService
 import java.lang.ref.WeakReference
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
@@ -15,7 +15,7 @@ import java.lang.ref.WeakReference
 class PayPalWebCheckoutClient internal constructor(
     // NEXT MAJOR VERSION: remove hardcoded activity reference
     private val activity: FragmentActivity,
-    private val analyticsService: AnalyticsService,
+    private val payPalAnalytics: PayPalAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
 
@@ -32,7 +32,7 @@ class PayPalWebCheckoutClient internal constructor(
         urlScheme: String
     ) : this(
         activity,
-        AnalyticsService(activity.applicationContext),
+        PayPalAnalytics(activity.applicationContext),
         PayPalWebLauncher(urlScheme, configuration),
     )
 
@@ -60,16 +60,18 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(request: PayPalWebCheckoutRequest) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-
-        activityReference.get()?.let { activity ->
-            payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
-                notifyWebCheckoutFailure(launchError, request.orderId)
-            }
-        } ?: {
-            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
-            notifyWebCheckoutFailure(error, request.orderId)
+    fun start(
+        activity: AppCompatActivity,
+        request: PayPalWebCheckoutRequest
+    ): PayPalWebCheckoutStartResult {
+        val analytics = payPalAnalytics.createAnalyticsContext(request)
+        val launchError = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+        return if (launchError == null) {
+            analytics.notifyWebCheckoutStarted()
+            PayPalWebCheckoutStartResult.DidLaunchAuth
+        } else {
+            analytics.notifyWebCheckoutFailure()
+            PayPalWebCheckoutStartResult.Failure(launchError)
         }
     }
 
@@ -78,16 +80,19 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    fun vault(request: PayPalWebVaultRequest) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
+    fun vault(
+        activity: AppCompatActivity,
+        request: PayPalWebVaultRequest
+    ): PayPalWebCheckoutVaultResult {
+        val analytics = payPalAnalytics.createAnalyticsContext(request)
 
-        activityReference.get()?.let { activity ->
-            payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
-                notifyVaultFailure(launchError)
-            }
-        } ?: {
-            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
-            notifyVaultFailure(error)
+        val launchError = payPalWebLauncher.launchPayPalWebVault(activity, request)
+        return if (launchError == null) {
+            analytics.notifyWebVaultStarted()
+            PayPalWebCheckoutVaultResult.DidLaunchAuth
+        } else {
+            analytics.notifyVaultFailure()
+            PayPalWebCheckoutVaultResult.Failure(launchError)
         }
     }
 
@@ -113,11 +118,6 @@ class PayPalWebCheckoutClient internal constructor(
     private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
 //        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)
         listener?.onPayPalWebSuccess(result)
-    }
-
-    private fun notifyWebCheckoutFailure(error: PayPalSDKError, orderId: String?) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
-        listener?.onPayPalWebFailure(error)
     }
 
     private fun notifyWebCheckoutCancelation(orderId: String?) {

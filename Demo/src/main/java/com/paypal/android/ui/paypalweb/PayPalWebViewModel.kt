@@ -22,7 +22,6 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,7 +115,7 @@ class PayPalWebViewModel @Inject constructor(
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
                 paypalClient?.listener = this@PayPalWebViewModel
 
-                paypalClient?.start(PayPalWebCheckoutRequest(orderId, fundingSource))
+                paypalClient?.start(, PayPalWebCheckoutRequest(orderId, fundingSource))
             }
         }
     }

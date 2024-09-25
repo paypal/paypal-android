@@ -1,5 +1,7 @@
 package com.paypal.android.paypalwebpayments
 
+import com.paypal.android.corepayments.CoreConfig
+
 /**
  * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
  *
@@ -8,6 +10,7 @@ package com.paypal.android.paypalwebpayments
  */
 data class PayPalWebVaultRequest @Deprecated("Use PayPalWebVaultRequest(setupTokenId) instead.")
 constructor(
+    val config: CoreConfig,
     val setupTokenId: String,
     @Deprecated("The approveVaultHref property is no longer required and will be ignored.")
     val approveVaultHref: String? // NEXT_MAJOR_VERSION: - Remove this property
@@ -18,5 +21,5 @@ constructor(
      *
      * @property [setupTokenId] ID for the setup token associated with the vault approval
      */
-    constructor(setupTokenId: String) : this(setupTokenId, null)
+    constructor(config: CoreConfig, setupTokenId: String) : this(config, setupTokenId, null)
 }
