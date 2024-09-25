@@ -181,7 +181,6 @@ class PayPalWebViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
-                // TODO: fix once data collector semantics are determined
                 val dataCollectorRequest = PayPalDataCollectorRequest(
                     config = coreConfig!!,
                     hasUserLocationConsent = false
@@ -191,10 +190,5 @@ class PayPalWebViewModel @Inject constructor(
                     completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        paypalClient?.removeObservers()
     }
 }

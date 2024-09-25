@@ -141,11 +141,6 @@ class PayPalWebVaultViewModel @Inject constructor(
 //        vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        paypalClient?.removeObservers()
-    }
-
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
         when (val result = paypalClient.checkIfVaultAuthComplete(intent, state)) {
             is PayPalWebVaultAuthResult.Success -> {
