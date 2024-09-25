@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
@@ -22,6 +21,8 @@ import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnNewIntentEffect
+import com.paypal.android.utils.OnResumeEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
@@ -34,6 +35,16 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+
+    val context = LocalContext.current
+    OnResumeEffect {
+        context.getActivityOrNull()?.intent?.let { intent -> viewModel.checkIntentForResult(intent) }
+    }
+
+    OnNewIntentEffect { newIntent ->
+        context.getActivityOrNull()?.let { viewModel.checkIntentForResult(newIntent) }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -46,7 +57,7 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
         if (uiState.isCreateSetupTokenSuccessful) {
             Step2_VaultPayPal(uiState, viewModel)
         }
-        if (uiState.isVaultPayPalSuccessful) {
+        if (uiState.isAuthSuccessful) {
             Step3_CreatePaymentToken(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
@@ -89,7 +100,7 @@ private fun Step2_VaultPayPal(
         ActionButtonColumn(
             defaultTitle = "VAULT PAYPAL",
             successTitle = "PAYPAL VAULTED",
-            state = uiState.vaultPayPalState,
+            state = uiState.authChallengeState,
             onClick = {
                 context.getActivityOrNull()?.let { activity ->
                     viewModel.vaultSetupToken(activity)
@@ -98,7 +109,7 @@ private fun Step2_VaultPayPal(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> PayPalWebVaultResultView(result = state.value)
+                is CompletedActionState.Success -> PayPalWebVaultResultView(state.value.approvalSessionId)
             }
         }
     }
@@ -128,11 +139,11 @@ private fun Step3_CreatePaymentToken(
 }
 
 @Composable
-fun PayPalWebVaultResultView(result: PayPalWebVaultResult) {
+fun PayPalWebVaultResultView(approvalSessionId: String) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)
     ) {
-        PropertyView(name = "Approval Session ID", value = result.approvalSessionId)
+        PropertyView(name = "Approval Session ID", value = approvalSessionId)
     }
 }

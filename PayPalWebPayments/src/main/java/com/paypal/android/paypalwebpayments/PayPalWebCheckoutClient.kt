@@ -10,6 +10,7 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalwebpayments.PayPalWebLauncher.Companion
 import org.json.JSONObject
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
@@ -35,18 +36,6 @@ class PayPalWebCheckoutClient internal constructor(
         PayPalAnalytics(context.applicationContext),
         PayPalWebLauncher(urlScheme),
     )
-
-    /**
-     * Sets a listener to receive notifications when a PayPal Checkout event occurs.
-     */
-//    var listener: PayPalWebCheckoutListener? = null
-
-    /**
-     * Sets a listener to receive notifications when a Paypal Vault event occurs.
-     */
-    var vaultListener: PayPalWebVaultListener? = null
-
-    internal var observer = PayPalWebCheckoutLifeCycleObserver(this)
 
     /**
      * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
@@ -94,13 +83,27 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalWebCheckoutVaultResult {
         val analytics = payPalAnalytics.createAnalyticsContext(request)
 
-        val launchError = payPalWebLauncher.launchPayPalWebVault(activity, request)
-        return if (launchError == null) {
-            analytics.notifyWebVaultStarted()
-            PayPalWebCheckoutVaultResult.DidLaunchAuth
-        } else {
-            analytics.notifyVaultFailure()
-            PayPalWebCheckoutVaultResult.Failure(launchError)
+        val metadata = JSONObject()
+            .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+        val url = request.run { buildPayPalVaultUri(request.setupTokenId, request.config) }
+        val options = BrowserSwitchOptions()
+            .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
+            .returnUrlScheme(urlScheme)
+            .metadata(metadata)
+        val authChallenge = PayPalAuthChallenge(options, analytics)
+        val authChallengeResult = payPalWebLauncher.presentAuthChallenge(activity, authChallenge)
+        return when (authChallengeResult) {
+            is PayPalAuthChallengeResult.Success -> {
+                analytics.notifyWebVaultStarted()
+                PayPalWebCheckoutVaultResult.DidLaunchAuth(authChallengeResult.authState)
+            }
+
+            is PayPalAuthChallengeResult.Failure -> {
+                analytics.notifyVaultFailure()
+                PayPalWebCheckoutVaultResult.Failure(authChallengeResult.error)
+            }
         }
     }
 
@@ -123,37 +126,12 @@ class PayPalWebCheckoutClient internal constructor(
 //        }
     }
 
-    private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)
-//        listener?.onPayPalWebSuccess(result)
-    }
-
-    private fun notifyWebCheckoutCancelation(orderId: String?) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
-//        listener?.onPayPalWebCanceled()
-    }
-
-    private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:succeeded")
-        vaultListener?.onPayPalWebVaultSuccess(result)
-    }
-
-    private fun notifyVaultFailure(error: PayPalSDKError) {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed")
-        vaultListener?.onPayPalWebVaultFailure(error)
-    }
-
-    private fun notifyVaultCancelation() {
-//        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
-        vaultListener?.onPayPalWebVaultCanceled()
-    }
-
     /**
      * Call this method at the end of the web checkout flow to clear out all observers and listeners
      */
     fun removeObservers() {
 //        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
-        vaultListener = null
+//        vaultListener = null
 //        listener = null
     }
 
@@ -172,6 +150,23 @@ class PayPalWebCheckoutClient internal constructor(
         }
         return result
     }
+
+    fun checkIfVaultAuthComplete(intent: Intent, state: String): PayPalWebVaultAuthResult {
+        val authStateJSON =
+            decodeCardAuthStateJSON(state) ?: return PayPalWebVaultAuthResult.NoResult
+        val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
+        val result = payPalWebLauncher.checkIfVaultAuthComplete(intent, state)
+        when (result) {
+            is PayPalWebVaultAuthResult.Success -> analytics?.notifyWebVaultSucceeded()
+            is PayPalWebVaultAuthResult.Failure -> analytics?.notifyWebVaultFailure()
+            PayPalWebVaultAuthResult.Canceled -> analytics?.notifyWebVaultUserCanceled()
+            PayPalWebVaultAuthResult.NoResult -> {
+                // do nothing
+            }
+        }
+        return result
+    }
+
 
     private fun restoreAnalyticsContextFromAuthState(stateJSON: JSONObject): PayPalAnalyticsContext? {
         val metadata = stateJSON.optJSONObject("metadata")
@@ -218,6 +213,20 @@ class PayPalWebCheckoutClient internal constructor(
             .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
+            .build()
+    }
+
+    private fun buildPayPalVaultUri(
+        setupTokenId: String,
+        config: CoreConfig
+    ): Uri {
+        val baseURL = when (config.environment) {
+            Environment.LIVE -> "https://paypal.com/agreements/approve"
+            Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
+        }
+        return Uri.parse(baseURL)
+            .buildUpon()
+            .appendQueryParameter("approval_session_id", setupTokenId)
             .build()
     }
 

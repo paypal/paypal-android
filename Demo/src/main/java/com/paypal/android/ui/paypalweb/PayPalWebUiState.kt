@@ -2,11 +2,8 @@ package com.paypal.android.ui.paypalweb
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.cardpayments.CardApproveOrderAuthResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutAuthResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutStartResult
 import com.paypal.android.uishared.state.ActionState
 
 data class PayPalWebUiState(

@@ -209,6 +209,24 @@ internal class PayPalWebLauncher(
             BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutAuthResult.NoResult
         }
 
+    fun checkIfVaultAuthComplete(intent: Intent, state: String): PayPalWebVaultAuthResult =
+        when (val result = browserSwitchClient.completeRequest(intent, state)) {
+            is BrowserSwitchFinalResult.Success -> {
+                val requestType = result.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
+                if (requestType == REQUEST_TYPE_VAULT) {
+                    parseVaultSuccessResult(result)
+                } else {
+                    PayPalWebVaultAuthResult.NoResult
+                }
+            }
+
+            is BrowserSwitchFinalResult.Failure -> PayPalWebVaultAuthResult.Failure(
+                PayPalSDKError(123, "browser switch error", reason = result.error)
+            )
+
+            BrowserSwitchFinalResult.NoResult -> PayPalWebVaultAuthResult.NoResult
+        }
+
 //    private fun parseVaultResult(browserSwitchResult: BrowserSwitchResult) =
 //        when (browserSwitchResult.status) {
 //            BrowserSwitchStatus.SUCCESS -> parseVaultSuccessResult(browserSwitchResult)
@@ -216,20 +234,18 @@ internal class PayPalWebLauncher(
 //            else -> null
 //        }
 
-//    private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchResult): PayPalWebStatus {
-//        val deepLinkUrl = browserSwitchResult.deepLinkUrl
-//        val requestMetadata = browserSwitchResult.requestMetadata
-//
-//        return if (deepLinkUrl == null || requestMetadata == null) {
-//            PayPalWebStatus.VaultError(PayPalWebCheckoutError.unknownError)
-//        } else {
-//            val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-//            if (approvalSessionId.isNullOrEmpty()) {
-//                PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
-//            } else {
-//                val result = PayPalWebVaultResult(approvalSessionId)
-//                PayPalWebStatus.VaultSuccess(result)
-//            }
-//        }
-//    }
+    private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchFinalResult.Success): PayPalWebVaultAuthResult {
+        val deepLinkUrl = browserSwitchResult.returnUrl
+        val requestMetadata = browserSwitchResult.requestMetadata
+        return if (requestMetadata == null) {
+            PayPalWebVaultAuthResult.Failure(PayPalWebCheckoutError.unknownError)
+        } else {
+            val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
+            if (approvalSessionId.isNullOrEmpty()) {
+                PayPalWebVaultAuthResult.Failure(PayPalWebCheckoutError.malformedResultError)
+            } else {
+                PayPalWebVaultAuthResult.Success(approvalSessionId)
+            }
+        }
+    }
 }

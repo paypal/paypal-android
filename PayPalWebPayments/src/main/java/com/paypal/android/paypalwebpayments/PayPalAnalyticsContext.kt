@@ -39,4 +39,22 @@ class PayPalAnalyticsContext(
             orderId
         )
     }
+
+    fun notifyWebVaultSucceeded() {
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:vault-wo-purchase:succeeded",
+            config
+        )
+    }
+
+    fun notifyWebVaultFailure() {
+        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed", config)
+    }
+
+    fun notifyWebVaultUserCanceled() {
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:vault-wo-purchase:canceled",
+            config
+        )
+    }
 }
