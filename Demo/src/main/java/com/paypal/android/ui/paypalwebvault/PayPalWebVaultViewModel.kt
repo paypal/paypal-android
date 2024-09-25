@@ -33,7 +33,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
-) : AndroidViewModel(application), PayPalWebVaultListener {
+) : AndroidViewModel(application) {
 
     companion object {
         const val URL_SCHEME = "com.paypal.android.demo"
@@ -127,18 +127,6 @@ class PayPalWebVaultViewModel @Inject constructor(
                     createPayPalPaymentTokenUseCase(setupToken).mapToActionState()
             }
         }
-    }
-
-    override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-//        vaultPayPalState = ActionState.Success(result)
-    }
-
-    override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-//        vaultPayPalState = ActionState.Failure(error)
-    }
-
-    override fun onPayPalWebVaultCanceled() {
-//        vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
     }
 
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
