@@ -15,6 +15,7 @@ import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardApproveOrderRequest
+import com.paypal.android.cardpayments.CardVaultAuthResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -108,18 +109,24 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = cardClient.checkIfApproveOrderAuthComplete(intent, state)) {
-            is CardApproveOrderAuthResult.Success -> {
-                authChallengeState = ActionState.Success(result)
-            }
+    fun checkIntentForResult(intent: Intent) {
+        if (authChallengeState.isComplete) return
+        authState?.let { state ->
+            when (val result = cardClient.checkIfApproveOrderAuthComplete(intent, state)) {
+                is CardApproveOrderAuthResult.Success -> {
+                    authChallengeState = ActionState.Success(result)
+                    authState = null
+                }
 
-            is CardApproveOrderAuthResult.Failure -> {
-                authChallengeState = ActionState.Failure(result.error)
-            }
+                is CardApproveOrderAuthResult.Failure -> {
+                    authChallengeState = ActionState.Failure(result.error)
+                    authState = null
+                }
 
-            is CardApproveOrderAuthResult.NoResult -> {
-                // do nothing
+                is CardApproveOrderAuthResult.NoResult -> {
+                    // reset loader
+                    authChallengeState = ActionState.Idle
+                }
             }
         }
     }

@@ -199,18 +199,24 @@ class VaultCardViewModel @Inject constructor(
         )
     }
 
-    fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = cardClient.checkIfVaultAuthComplete(intent, state)) {
-            is CardVaultAuthResult.Success -> {
-                refreshSetupToken(result)
-            }
+    fun checkIntentForResult(intent: Intent) {
+        if (authChallengeState.isComplete) return
+        authState?.let { state ->
+            when (val result = cardClient.checkIfVaultAuthComplete(intent, state)) {
+                is CardVaultAuthResult.Success -> {
+                    refreshSetupToken(result)
+                    authState = null
+                }
 
-            is CardVaultAuthResult.Failure -> {
-                authChallengeState = ActionState.Failure(result.error)
-            }
+                is CardVaultAuthResult.Failure -> {
+                    authChallengeState = ActionState.Failure(result.error)
+                    authState = null
+                }
 
-            is CardVaultAuthResult.NoResult -> {
-                // do nothing
+                is CardVaultAuthResult.NoResult -> {
+                    // reset loader
+                    authChallengeState = ActionState.Idle
+                }
             }
         }
     }
