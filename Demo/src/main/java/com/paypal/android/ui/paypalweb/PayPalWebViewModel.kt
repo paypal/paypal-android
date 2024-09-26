@@ -1,10 +1,8 @@
 package com.paypal.android.ui.paypalweb
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +10,6 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
@@ -21,7 +18,6 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutStartResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
@@ -40,16 +36,14 @@ class PayPalWebViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase
-) : AndroidViewModel(application), PayPalWebCheckoutListener {
+) : AndroidViewModel(application) {
 
     companion object {
         private val TAG = PayPalWebViewModel::class.qualifiedName
         private const val APP_URL_SCHEME = "com.paypal.android.demo"
     }
 
-    private val paypalClient =
-        PayPalWebCheckoutClient(application.applicationContext)
-
+    private val paypalClient = PayPalWebCheckoutClient(application.applicationContext)
     private var payPalDataCollector = PayPalDataCollector(application.applicationContext)
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
@@ -156,25 +150,6 @@ class PayPalWebViewModel @Inject constructor(
                 authChallengeState = ActionState.Failure(Exception("User canceled"))
             }
         }
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-//        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
-//        payPalWebCheckoutState = ActionState.Success(result)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPayPalWebFailure(error: PayPalSDKError) {
-        Log.i(TAG, "Checkout Error: ${error.errorDescription}")
-//        payPalWebCheckoutState = ActionState.Failure(error)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPayPalWebCanceled() {
-        Log.i(TAG, "User cancelled")
-        val error = Exception("USER CANCELED")
-//        payPalWebCheckoutState = ActionState.Failure(error)
     }
 
     fun completeOrder(context: Context) {
