@@ -27,6 +27,43 @@ class CardAuthLauncher internal constructor(
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
 
+    fun createAuthChallenge(
+        cardRequest: CardApproveOrderRequest,
+        challengeUrl: String,
+        analytics: CardAnalyticsContext
+    ): CardAuthChallenge {
+        val metadata = JSONObject()
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
+            .put(METADATA_KEY_ORDER_ID, cardRequest.orderId)
+        val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
+        val options = BrowserSwitchOptions()
+            .url(Uri.parse(challengeUrl))
+            .returnUrlScheme(returnUrlScheme)
+            .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
+            .metadata(metadata)
+
+        return CardAuthChallenge(options, analytics)
+    }
+
+    fun createAuthChallenge(
+        cardVaultRequest: CardVaultRequest,
+        challengeUrl: String,
+        analytics: CardAnalyticsContext
+    ): CardAuthChallenge {
+        val metadata = JSONObject()
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+            .put(METADATA_KEY_SETUP_TOKEN_ID, cardVaultRequest.setupTokenId)
+
+        val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
+        val options = BrowserSwitchOptions()
+            .url(Uri.parse(challengeUrl))
+            .returnUrlScheme(returnUrlScheme)
+            .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
+            .metadata(metadata)
+
+        return CardAuthChallenge(options, analytics)
+    }
+
     fun presentAuthChallenge(
         activity: FragmentActivity,
         authChallenge: CardAuthChallenge
@@ -135,42 +172,5 @@ class CardAuthLauncher internal constructor(
                 )
             }
         }
-    }
-
-    fun createAuthChallenge(
-        cardRequest: CardApproveOrderRequest,
-        challengeUrl: String,
-        analytics: CardAnalyticsContext
-    ): CardAuthChallenge {
-        val metadata = JSONObject()
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
-            .put(METADATA_KEY_ORDER_ID, cardRequest.orderId)
-        val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
-        val options = BrowserSwitchOptions()
-            .url(Uri.parse(challengeUrl))
-            .returnUrlScheme(returnUrlScheme)
-            .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
-            .metadata(metadata)
-
-        return CardAuthChallenge(options, analytics)
-    }
-
-    fun createAuthChallenge(
-        cardVaultRequest: CardVaultRequest,
-        challengeUrl: String,
-        analytics: CardAnalyticsContext
-    ): CardAuthChallenge {
-        val metadata = JSONObject()
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-            .put(METADATA_KEY_SETUP_TOKEN_ID, cardVaultRequest.setupTokenId)
-
-        val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
-        val options = BrowserSwitchOptions()
-            .url(Uri.parse(challengeUrl))
-            .returnUrlScheme(returnUrlScheme)
-            .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
-            .metadata(metadata)
-
-        return CardAuthChallenge(options, analytics)
     }
 }
