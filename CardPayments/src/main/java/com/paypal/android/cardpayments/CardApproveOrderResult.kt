@@ -17,7 +17,6 @@ sealed class CardApproveOrderResult {
         @Deprecated("Use didAttemptThreeDSecureAuthentication instead.")
         val liabilityShift: String? = null,
         val status: String? = null,
-        val didAttemptThreeDSecureAuthentication: Boolean = false
     ) : CardApproveOrderResult()
 
     data class AuthorizationRequired(val authChallenge: CardAuthChallenge) :

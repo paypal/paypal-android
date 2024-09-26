@@ -2,9 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchOptions
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.Base64Utils
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
@@ -50,28 +48,17 @@ class CardClient internal constructor(
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
             analytics.notifyConfirmPaymentSourceSucceeded()
 
-            val authChallengeUrl = response.payerActionHref
-            if (authChallengeUrl == null) {
+            val challengeUrl = response.payerActionHref
+            if (challengeUrl == null) {
                 analytics.notify3DSSucceeded()
                 CardApproveOrderResult.Success(
                     orderId = response.orderId,
                     status = response.status?.name,
-                    didAttemptThreeDSecureAuthentication = false
                 )
             } else {
                 analytics.notify3DSChallengeRequired()
-
-                val metadata = JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
-                    .put(METADATA_KEY_ORDER_ID, cardRequest.orderId)
-                val returnUrlScheme: String? = Uri.parse(cardRequest.returnUrl).scheme
-                val options = BrowserSwitchOptions()
-                    .url(Uri.parse(authChallengeUrl))
-                    .returnUrlScheme(returnUrlScheme)
-                    .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
-                    .metadata(metadata)
-
-                val authChallenge = CardAuthChallenge(options, analytics)
+                val authChallenge =
+                    authLauncher.createAuthChallenge(cardRequest, challengeUrl, analytics)
                 CardApproveOrderResult.AuthorizationRequired(authChallenge)
             }
         } catch (error: PayPalSDKError) {
@@ -103,25 +90,14 @@ class CardClient internal constructor(
             )
         }
 
-        val authChallengeUrl = updateSetupTokenResult.approveHref
-        if (authChallengeUrl == null) {
+        val challengeUrl = updateSetupTokenResult.approveHref
+        if (challengeUrl == null) {
             analytics.notifyCardVault3DSSuccess()
             return updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
         } else {
             analytics.notify3DSChallengeRequired()
-
-            val metadata = JSONObject()
-                .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-                .put(METADATA_KEY_SETUP_TOKEN_ID, cardVaultRequest.setupTokenId)
-
-            val returnUrlScheme: String? = Uri.parse(cardVaultRequest.returnUrl).scheme
-            val options = BrowserSwitchOptions()
-                .url(Uri.parse(authChallengeUrl))
-                .returnUrlScheme(returnUrlScheme)
-                .requestCode(BrowserSwitchRequestCodes.CARD.intValue)
-                .metadata(metadata)
-
-            val authChallenge = CardAuthChallenge(options, analytics)
+            val authChallenge =
+                authLauncher.createAuthChallenge(cardVaultRequest, challengeUrl, analytics)
             return CardVaultResult.AuthorizationRequired(authChallenge)
         }
     }
@@ -140,6 +116,12 @@ class CardClient internal constructor(
         }
         return result
     }
+
+    /**
+     * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
+     */
+    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) =
+        authLauncher.presentAuthChallenge(activity, authChallenge)
 
     fun checkIfVaultAuthComplete(intent: Intent, state: String): CardVaultAuthResult {
         val authStateJSON = decodeCardAuthStateJSON(state) ?: return CardVaultAuthResult.NoResult
@@ -182,20 +164,5 @@ class CardClient internal constructor(
         }
         val coreConfig = CoreConfig(clientId, environment)
         return cardAnalytics.createAnalyticsContext(coreConfig, orderId, setupTokenId)
-    }
-
-    /**
-     * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
-     */
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) =
-        authLauncher.presentAuthChallenge(activity, authChallenge)
-
-    companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
-        private const val REQUEST_TYPE_VAULT = "vault"
-
-        private const val METADATA_KEY_ORDER_ID = "order_id"
-        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
 }
