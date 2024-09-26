@@ -16,7 +16,6 @@ import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutAuthResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutStartResult
 import com.paypal.android.uishared.state.ActionState

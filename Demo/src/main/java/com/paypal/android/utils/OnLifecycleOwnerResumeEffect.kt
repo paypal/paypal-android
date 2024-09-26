@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 
 @Composable
-fun OnResumeEffect(callback: () -> Unit) {
+fun OnLifecycleOwnerResumeEffect(callback: () -> Unit) {
     // Ref: https://stackoverflow.com/a/66549433
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()

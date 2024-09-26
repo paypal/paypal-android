@@ -28,7 +28,7 @@ import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnNewIntentEffect
-import com.paypal.android.utils.OnResumeEffect
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
@@ -48,13 +48,11 @@ fun ApproveOrderView(
     }
 
     val context = LocalContext.current
-    OnResumeEffect {
+    OnLifecycleOwnerResumeEffect {
         context.getActivityOrNull()?.intent?.let { intent -> viewModel.checkIntentForResult(intent) }
     }
 
-    OnNewIntentEffect { newIntent ->
-        context.getActivityOrNull()?.let { viewModel.checkIntentForResult(newIntent) }
-    }
+    OnNewIntentEffect { newIntent -> viewModel.checkIntentForResult(newIntent) }
 
     val contentPadding = UIConstants.paddingMedium
     Column(
@@ -143,9 +141,7 @@ private fun Step2_ApproveOrder(
             defaultTitle = "APPROVE ORDER",
             successTitle = "ORDER APPROVED",
             state = uiState.approveOrderState,
-            onClick = {
-                context.getActivityOrNull()?.let { viewModel.approveOrder(it) }
-            },
+            onClick = { viewModel.approveOrder() },
             modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {

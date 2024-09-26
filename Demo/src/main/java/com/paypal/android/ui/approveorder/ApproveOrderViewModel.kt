@@ -2,7 +2,6 @@ package com.paypal.android.ui.approveorder
 
 import android.app.Application
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -66,7 +65,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun approveOrder(activity: AppCompatActivity) {
+    fun approveOrder() {
         val orderId = createdOrder?.id
         if (orderId == null) {
             approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
