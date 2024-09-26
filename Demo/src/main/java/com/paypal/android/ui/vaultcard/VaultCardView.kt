@@ -144,7 +144,6 @@ private fun Step_VaultCard(
     viewModel: VaultCardViewModel,
     onUseTestCardClick: () -> Unit
 ) {
-    val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -162,9 +161,7 @@ private fun Step_VaultCard(
             defaultTitle = "VAULT CARD",
             successTitle = "CARD VAULTED",
             state = uiState.updateSetupTokenState,
-            onClick = {
-                context.getActivityOrNull()?.let { viewModel.updateSetupToken(it) }
-            }
+            onClick = { viewModel.updateSetupToken() }
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
@@ -192,7 +189,8 @@ private fun Step_PresentAuthChallenge(
             successTitle = "AUTH CHALLENGE COMPLETE",
             state = uiState.authChallengeState,
             onClick = {
-                context.getActivityOrNull()?.let { viewModel.presentAuthChallenge(it, authChallenge) }
+                context.getActivityOrNull()
+                    ?.let { viewModel.presentAuthChallenge(it, authChallenge) }
             }
         ) { state ->
             when (state) {

@@ -29,7 +29,7 @@ class CardClient internal constructor(
      */
     constructor(context: Context) : this(
         CheckoutOrdersAPI(),
-        DataVaultPaymentMethodTokensAPI(),
+        DataVaultPaymentMethodTokensAPI(context.applicationContext),
         CardAnalytics(context.applicationContext),
         CardAuthLauncher()
     )
@@ -73,21 +73,13 @@ class CardClient internal constructor(
      *
      * Call this method to attach a payment source to a setup token.
      *
-     * @param context [Context] Android context reference
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
      */
-    suspend fun vault(context: Context, cardVaultRequest: CardVaultRequest): CardVaultResult {
+    suspend fun vault(cardVaultRequest: CardVaultRequest): CardVaultResult {
         val analytics = cardAnalytics.createAnalyticsContext(cardVaultRequest)
-
-        val applicationContext = context.applicationContext
         val updateSetupTokenResult = cardVaultRequest.run {
-            paymentMethodTokensAPI.updateSetupToken(
-                applicationContext,
-                setupTokenId,
-                card,
-                cardVaultRequest.config
-            )
+            paymentMethodTokensAPI.updateSetupToken(setupTokenId, card, cardVaultRequest.config)
         }
 
         val challengeUrl = updateSetupTokenResult.approveHref

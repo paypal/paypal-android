@@ -9,22 +9,26 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
+    private val applicationContext: Context,
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader
 ) {
 
-    constructor() : this(
+    constructor(context: Context) : this(
+        context.applicationContext,
         GraphQLClient(),
         ResourceLoader()
     )
 
     suspend fun updateSetupToken(
-        context: Context,
         setupTokenId: String,
         card: Card,
         coreConfig: CoreConfig
     ): UpdateSetupTokenResult {
-        val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
+        val query = resourceLoader.loadRawResource(
+            applicationContext,
+            R.raw.graphql_query_update_setup_token
+        )
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"

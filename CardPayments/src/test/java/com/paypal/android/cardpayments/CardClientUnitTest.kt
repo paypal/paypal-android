@@ -150,7 +150,7 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        sut.vault(activity, cardVaultRequest)
+        sut.vault(cardVaultRequest)
         advanceUntilIdle()
 
         val resultSlot = slot<CardVaultResult>()
@@ -171,7 +171,7 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
         } throws error
 
-        sut.vault(activity, cardVaultRequest)
+        sut.vault(cardVaultRequest)
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()

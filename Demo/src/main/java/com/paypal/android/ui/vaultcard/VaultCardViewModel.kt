@@ -2,7 +2,6 @@ package com.paypal.android.ui.vaultcard
 
 import android.app.Application
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -129,19 +128,19 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    fun updateSetupToken(activity: AppCompatActivity) {
+    fun updateSetupToken() {
         val setupToken = createdSetupToken
         if (setupToken == null) {
             updateSetupTokenState =
                 ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
-                updateSetupTokenWithId(activity, setupToken.id)
+                updateSetupTokenWithId(setupToken.id)
             }
         }
     }
 
-    private suspend fun updateSetupTokenWithId(activity: AppCompatActivity, setupTokenId: String) {
+    private suspend fun updateSetupTokenWithId(setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -157,7 +156,7 @@ class VaultCardViewModel @Inject constructor(
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
                 val cardVaultRequest =
                     CardVaultRequest(configuration, setupTokenId, card, returnUrl)
-                when (val result = cardClient.vault(activity, cardVaultRequest)) {
+                when (val result = cardClient.vault(cardVaultRequest)) {
                     is CardVaultResult.Success -> {
                         updateSetupTokenState = ActionState.Success(result)
                     }
