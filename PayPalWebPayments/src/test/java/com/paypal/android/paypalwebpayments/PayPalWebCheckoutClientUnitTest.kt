@@ -34,7 +34,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(activity, analyticsService, payPalWebLauncher)
+        sut = PayPalWebCheckoutClient(analyticsService, payPalWebLauncher)
     }
 
     @Test
@@ -201,7 +201,7 @@ class PayPalWebCheckoutClientUnitTest {
         val lifeCycle = mockk<Lifecycle>(relaxed = true)
         every { activity.lifecycle } returns lifeCycle
 
-        PayPalWebCheckoutClient(activity, coreConfig, "")
+        PayPalWebCheckoutClient(coreConfig, "")
         verify { lifeCycle.addObserver(ofType(PayPalWebCheckoutLifeCycleObserver::class)) }
     }
 

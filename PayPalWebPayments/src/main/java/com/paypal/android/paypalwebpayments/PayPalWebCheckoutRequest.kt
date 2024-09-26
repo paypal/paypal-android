@@ -11,5 +11,6 @@ import com.paypal.android.corepayments.CoreConfig
 data class PayPalWebCheckoutRequest @JvmOverloads constructor(
     val config: CoreConfig,
     val orderId: String,
+    val urlScheme: String,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
 )

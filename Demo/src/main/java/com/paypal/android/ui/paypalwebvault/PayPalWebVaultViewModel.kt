@@ -8,14 +8,11 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultAuthResult
-import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
-import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
@@ -36,13 +33,13 @@ class PayPalWebVaultViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     companion object {
-        const val URL_SCHEME = "com.paypal.android.demo"
+        const val APP_URL_SCHEME = "com.paypal.android.demo"
     }
 
     private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val paypalClient = PayPalWebCheckoutClient(application.applicationContext, URL_SCHEME)
+    private val paypalClient = PayPalWebCheckoutClient(application.applicationContext)
     private val payPalDataCollector = PayPalDataCollector(application.applicationContext)
 
     private var coreConfig: CoreConfig? = null
@@ -101,7 +98,7 @@ class PayPalWebVaultViewModel @Inject constructor(
             is SDKSampleServerResult.Success -> {
 
                 coreConfig = CoreConfig(clientIdResult.value)
-                val request = PayPalWebVaultRequest(coreConfig!!, setupTokenId)
+                val request = PayPalWebVaultRequest(coreConfig!!, APP_URL_SCHEME, setupTokenId)
                 when (val vaultResult = paypalClient.vault(activity, request)) {
                     is PayPalWebCheckoutVaultResult.DidLaunchAuth -> {
                         authState = vaultResult.authState

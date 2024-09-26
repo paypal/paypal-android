@@ -44,10 +44,11 @@ class PayPalWebViewModel @Inject constructor(
 
     companion object {
         private val TAG = PayPalWebViewModel::class.qualifiedName
+        private const val APP_URL_SCHEME = "com.paypal.android.demo"
     }
 
     private val paypalClient =
-        PayPalWebCheckoutClient(application.applicationContext, "com.paypal.android.demo")
+        PayPalWebCheckoutClient(application.applicationContext)
 
     private var payPalDataCollector = PayPalDataCollector(application.applicationContext)
 
@@ -121,7 +122,9 @@ class PayPalWebViewModel @Inject constructor(
             is SDKSampleServerResult.Success -> {
                 coreConfig = CoreConfig(clientIdResult.value)
 
-                val request = PayPalWebCheckoutRequest(coreConfig!!, orderId, fundingSource)
+                val request =
+                    PayPalWebCheckoutRequest(coreConfig!!, orderId, APP_URL_SCHEME, fundingSource)
+
                 when (val startResult = paypalClient.start(activity, request)) {
                     is PayPalWebCheckoutStartResult.DidLaunchAuth -> {
                         authState = startResult.authState

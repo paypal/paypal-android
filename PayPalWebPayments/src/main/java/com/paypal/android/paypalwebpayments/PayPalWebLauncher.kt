@@ -18,11 +18,8 @@ import org.json.JSONObject
 
 // TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 internal class PayPalWebLauncher(
-    private val urlScheme: String,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
 ) {
-    private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
-
     companion object {
         private const val METADATA_KEY_REQUEST_TYPE = "request_type"
         private const val METADATA_KEY_ORDER_ID = "order_id"
@@ -32,6 +29,38 @@ internal class PayPalWebLauncher(
         private const val REQUEST_TYPE_VAULT = "vault"
 
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
+    }
+
+    fun createAuthChallenge(
+        request: PayPalWebCheckoutRequest,
+        analytics: PayPalAnalyticsContext
+    ): PayPalAuthChallenge {
+        val metadata = JSONObject()
+            .put(METADATA_KEY_ORDER_ID, request.orderId)
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
+        val url = buildPayPalCheckoutUri(request)
+        val options = BrowserSwitchOptions()
+            .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
+            .returnUrlScheme(request.urlScheme)
+            .metadata(metadata)
+        return PayPalAuthChallenge(options, analytics)
+    }
+
+    fun createAuthChallenge(
+        request: PayPalWebVaultRequest,
+        analytics: PayPalAnalyticsContext
+    ): PayPalAuthChallenge {
+        val metadata = JSONObject()
+            .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
+            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+        val url = request.run { buildPayPalVaultUri(request) }
+        val options = BrowserSwitchOptions()
+            .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
+            .returnUrlScheme(request.urlScheme)
+            .metadata(metadata)
+        return PayPalAuthChallenge(options, analytics)
     }
 
     fun presentAuthChallenge(
@@ -67,11 +96,11 @@ internal class PayPalWebLauncher(
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
             .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
-        val url = request.run { buildPayPalCheckoutUri(orderId, request.config, fundingSource) }
+        val url = request.run { buildPayPalCheckoutUri(request) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
             .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
-            .returnUrlScheme(urlScheme)
+            .returnUrlScheme(request.urlScheme)
             .metadata(metadata)
 
         return launchBrowserSwitch(activity, browserSwitchOptions)
@@ -84,10 +113,10 @@ internal class PayPalWebLauncher(
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
             .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-        val url = request.run { buildPayPalVaultUri(request.setupTokenId, request.config) }
+        val url = request.run { buildPayPalVaultUri(request) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
-            .returnUrlScheme(urlScheme)
+            .returnUrlScheme(request.urlScheme)
             .metadata(metadata)
         return launchBrowserSwitch(activity, browserSwitchOptions)
     }
@@ -105,36 +134,33 @@ internal class PayPalWebLauncher(
         return error
     }
 
-    private fun buildPayPalCheckoutUri(
-        orderId: String?,
-        config: CoreConfig,
-        funding: PayPalWebCheckoutFundingSource
-    ): Uri {
+    private fun buildPayPalCheckoutUri(request: PayPalWebCheckoutRequest): Uri {
+        val config = request.config
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
         }
+        val urlScheme = request.urlScheme
+        val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
         return Uri.parse(baseURL)
             .buildUpon()
             .appendPath("checkoutnow")
-            .appendQueryParameter("token", orderId)
+            .appendQueryParameter("token", request.orderId)
             .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
             .appendQueryParameter("native_xo", "1")
-            .appendQueryParameter("fundingSource", funding.value)
+            .appendQueryParameter("fundingSource", request.fundingSource.value)
             .build()
     }
 
-    private fun buildPayPalVaultUri(
-        setupTokenId: String,
-        config: CoreConfig
-    ): Uri {
+    private fun buildPayPalVaultUri(request: PayPalWebVaultRequest): Uri {
+        val config = request.config
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://paypal.com/agreements/approve"
             Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
         }
         return Uri.parse(baseURL)
             .buildUpon()
-            .appendQueryParameter("approval_session_id", setupTokenId)
+            .appendQueryParameter("approval_session_id", request.setupTokenId)
             .build()
     }
 
