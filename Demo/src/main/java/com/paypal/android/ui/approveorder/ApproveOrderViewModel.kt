@@ -10,12 +10,11 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardApproveOrderAuthResult
+import com.paypal.android.cardpayments.CardApproveOrderRequest
 import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardAuthChallengeResult
 import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.cardpayments.CardApproveOrderRequest
-import com.paypal.android.cardpayments.CardVaultAuthResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
