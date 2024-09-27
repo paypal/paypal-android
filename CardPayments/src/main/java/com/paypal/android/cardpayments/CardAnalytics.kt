@@ -3,24 +3,29 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import java.util.UUID
 
 internal class CardAnalytics(
     private val analyticsService: AnalyticsService
 ) {
     constructor(context: Context) : this(AnalyticsService(context.applicationContext))
 
+    private fun createNewTrackingId() = UUID.randomUUID().toString()
+
     fun createAnalyticsContext(
         config: CoreConfig,
+        trackingId: String,
         orderId: String? = null,
         setupTokenId: String? = null
     ): CardAnalyticsContext {
-        return CardAnalyticsContext(config, analyticsService, orderId, setupTokenId)
+        return CardAnalyticsContext(config, analyticsService, trackingId, orderId, setupTokenId)
     }
 
     fun createAnalyticsContext(cardRequest: CardApproveOrderRequest): CardAnalyticsContext {
         return CardAnalyticsContext(
             cardRequest.config,
             analyticsService,
+            createNewTrackingId(),
             orderId = cardRequest.orderId
         )
     }
@@ -29,6 +34,7 @@ internal class CardAnalytics(
         return CardAnalyticsContext(
             vaultRequest.config,
             analyticsService,
+            createNewTrackingId(),
             setupTokenId = vaultRequest.setupTokenId
         )
     }
@@ -41,11 +47,11 @@ internal class CardAnalytics(
 
     fun restoreFromMetadata(metadata: CardAuthMetadata): CardAnalyticsContext = when (metadata) {
         is CardAuthMetadata.ApproveOrder -> metadata.run {
-            createAnalyticsContext( config, orderId = orderId )
+            createAnalyticsContext( config, trackingId, orderId = orderId )
         }
 
         is CardAuthMetadata.Vault -> metadata.run {
-            createAnalyticsContext(config, setupTokenId = setupTokenId)
+            createAnalyticsContext(config, trackingId, setupTokenId = setupTokenId)
         }
     }
 }

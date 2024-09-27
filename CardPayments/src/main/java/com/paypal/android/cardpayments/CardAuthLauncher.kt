@@ -1,7 +1,6 @@
 package com.paypal.android.cardpayments
 
 import android.content.Intent
-import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
@@ -20,13 +19,15 @@ internal class CardAuthLauncher(
 
     fun createAuthChallenge(
         cardRequest: CardApproveOrderRequest,
-        challengeUrl: String
+        challengeUrl: String,
+        trackingId: String
     ): CardAuthChallenge {
-        val metadata = cardRequest.run { CardAuthMetadata.ApproveOrder(config, orderId) }
+        val metadata =
+            cardRequest.run { CardAuthMetadata.ApproveOrder(config, orderId, trackingId) }
         val options = BrowserSwitchOptions(
             code = BrowserSwitchRequestCode.CARD_APPROVE_ORDER,
-            urlToOpen = Uri.parse(challengeUrl),
-            returnUrl = Uri.parse(cardRequest.returnUrl),
+            urlToOpen = challengeUrl,
+            returnUrl = cardRequest.returnUrl,
             metadata = metadata.encodeToString()
         )
         return CardAuthChallenge(options)
@@ -34,13 +35,15 @@ internal class CardAuthLauncher(
 
     fun createAuthChallenge(
         cardVaultRequest: CardVaultRequest,
-        challengeUrl: String
+        challengeUrl: String,
+        trackingId: String
     ): CardAuthChallenge {
-        val metadata = cardVaultRequest.run { CardAuthMetadata.ApproveOrder(config, setupTokenId) }
+        val metadata =
+            cardVaultRequest.run { CardAuthMetadata.ApproveOrder(config, setupTokenId, trackingId) }
         val options = BrowserSwitchOptions(
             code = BrowserSwitchRequestCode.CARD_VAULT,
-            urlToOpen = Uri.parse(challengeUrl),
-            returnUrl = Uri.parse(cardVaultRequest.returnUrl),
+            urlToOpen = challengeUrl,
+            returnUrl = cardVaultRequest.returnUrl,
             metadata = metadata.encodeToString()
         )
         return CardAuthChallenge(options)
@@ -51,14 +54,28 @@ internal class CardAuthLauncher(
         authChallenge: CardAuthChallenge
     ): CardAuthChallengeResult {
         val analytics = analytics.restoreFromAuthChallenge(authChallenge)
+        val requestCode = authChallenge.options.code
+
         return when (val result = browserSwitchClient.launch(activity, authChallenge.options)) {
             BrowserSwitchLaunchResult.Success -> {
-                analytics?.notify3DSSucceeded()
+                when (requestCode) {
+                    BrowserSwitchRequestCode.CARD_APPROVE_ORDER -> analytics?.notifyConfirmPaymentSourceSCADidLaunch()
+                    BrowserSwitchRequestCode.CARD_VAULT -> analytics?.notifyVaultSCADidLaunch()
+                    else -> {
+                        // do nothing
+                    }
+                }
                 CardAuthChallengeResult.Success(authChallenge.options.encodeToString())
             }
 
             is BrowserSwitchLaunchResult.Failure -> {
-                analytics?.notify3DSFailed()
+                when (requestCode) {
+                    BrowserSwitchRequestCode.CARD_APPROVE_ORDER -> analytics?.notifyConfirmPaymentSourceSCALaunchFailed()
+                    BrowserSwitchRequestCode.CARD_VAULT -> analytics?.notifyVaultSCALaunchFailed()
+                    else -> {
+                        // do nothing
+                    }
+                }
                 val error = PayPalSDKError(123, "auth challenge failed", reason = result.error)
                 CardAuthChallengeResult.Failure(error)
             }
@@ -138,16 +155,16 @@ internal class CardAuthLauncher(
         val orderId = metadata.orderId
 
         return if (deepLinkUrl.getQueryParameter("error") != null) {
-            analytics.notify3DSFailed()
+            analytics.notifyConfirmPaymentSourceSCAFailed()
             CardApproveOrderAuthResult.Failure(CardError.threeDSVerificationError, orderId)
         } else {
             val state = deepLinkUrl.getQueryParameter("state")
             val code = deepLinkUrl.getQueryParameter("code")
             if (state == null || code == null) {
-                analytics.notify3DSFailed()
+                analytics.notifyConfirmPaymentSourceSCAResponseInvalid()
                 CardApproveOrderAuthResult.Failure(CardError.malformedDeepLinkError, orderId)
             } else {
-                analytics.notify3DSSucceeded()
+                analytics.notifyConfirmPaymentSourceSCASucceeded()
                 val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
                 CardApproveOrderAuthResult.Success(
                     orderId = orderId,

@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'com.dicedmelon.gradle.jacoco-android'
     id 'kotlin-parcelize'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 android {
@@ -47,7 +48,7 @@ dependencies {
     implementation deps.kotlinxAndroidCoroutines
 
 //    implementation deps.browserSwitch
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1'
 
     testImplementation deps.junit
     testImplementation deps.mockk

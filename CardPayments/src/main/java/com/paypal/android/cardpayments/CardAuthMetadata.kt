@@ -7,19 +7,23 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Serializable
-sealed class CardAuthMetadata(val config: CoreConfig) {
+sealed class CardAuthMetadata {
+
+    abstract val config: CoreConfig
+    abstract val trackingId: String
 
     @Serializable
-    class ApproveOrder(config: CoreConfig, val orderId: String) : CardAuthMetadata(config)
+    class ApproveOrder(override val config: CoreConfig, override val trackingId: String, val orderId: String) :
+        CardAuthMetadata()
 
     @Serializable
-    class Vault(config: CoreConfig, val setupTokenId: String) : CardAuthMetadata(config)
+    class Vault(override val config: CoreConfig, override val trackingId: String, val setupTokenId: String) :
+        CardAuthMetadata()
 
     fun encodeToString(): String = Json.encodeToString(this)
 
     companion object {
-        fun decodeFromString(input: String): CardAuthMetadata? =
-            tryDecodeFromString<ApproveOrder>(input) ?: tryDecodeFromString<Vault>(input)
+        fun decodeFromString(input: String) = tryDecodeFromString<CardAuthMetadata>(input)
 
         private inline fun <reified T> tryDecodeFromString(input: String): T? = try {
             Json.decodeFromString<T>(input)

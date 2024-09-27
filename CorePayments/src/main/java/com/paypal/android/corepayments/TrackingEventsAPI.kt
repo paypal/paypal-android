@@ -35,7 +35,7 @@ internal class TrackingEventsAPI constructor(
             .put(KEY_CLIENT_ID, config.clientId)
             .put(KEY_CLIENT_SDK_VERSION, clientSDKVersion)
             .put(KEY_CLIENT_OS, clientOS)
-            .put(KEY_COMPONENT, "ppcpclientsdk")
+            .put(KEY_COMPONENT, "ppcpclientsdk2")
             .put(KEY_DEVICE_MANUFACTURER, deviceManufacturer)
             .put(KEY_DEVICE_MODEL, deviceModel)
             .put(KEY_ENVIRONMENT, event.environment)
@@ -48,6 +48,7 @@ internal class TrackingEventsAPI constructor(
             .putOpt(KEY_BUTTON_TYPE, event.buttonType)
             .put(KEY_TIMESTAMP, event.timestamp.toString())
             .put(KEY_TENANT_NAME, "PayPal")
+            .putOpt(KEY_TRACKING_ID, event.trackingId)
 
         val events = JSONObject()
             .put(KEY_EVENT_PARAMETERS, eventParams)
@@ -75,6 +76,7 @@ internal class TrackingEventsAPI constructor(
         const val KEY_PLATFORM = "platform"
         const val KEY_TIMESTAMP = "t"
         const val KEY_TENANT_NAME = "tenant_name"
+        const val KEY_TRACKING_ID = "tracking_id"
 
         const val KEY_EVENT_PARAMETERS = "event_params"
         const val KEY_EVENTS = "events"

@@ -18,5 +18,5 @@ data class CardVaultRequest(
     val config: CoreConfig,
     val setupTokenId: String,
     val card: Card,
-    val returnUrl: String? = "",
+    val returnUrl: String,
 ) : Parcelable

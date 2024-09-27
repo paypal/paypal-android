@@ -33,7 +33,8 @@ class AnalyticsService internal constructor(
         name: String,
         config: CoreConfig,
         orderId: String? = null,
-        buttonType: String? = null
+        buttonType: String? = null,
+        trackingId: String? = null
     ) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
@@ -46,9 +47,12 @@ class AnalyticsService internal constructor(
                     name,
                     timestamp,
                     orderId = orderId,
-                    buttonType = buttonType
+                    buttonType = buttonType,
+                    trackingId = trackingId
                 )
-                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData, config)
+                // from iOS: api-m.sandbox.paypal.com does not currently send FPTI events to BigQuery/Looker
+                val analyticsConfig = CoreConfig(config.clientId, environment = Environment.LIVE)
+                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData, analyticsConfig)
                 response.error?.message?.let { errorMessage ->
                     Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
                 }

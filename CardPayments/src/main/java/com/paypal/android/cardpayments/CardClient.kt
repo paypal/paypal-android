@@ -36,21 +36,20 @@ class CardClient internal constructor(
         val analytics = cardAnalytics.createAnalyticsContext(cardRequest)
 
         return try {
-            analytics.notifyApproveOrderStarted()
+            analytics.notifyConfirmPaymentSourceStarted()
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-            analytics.notifyConfirmPaymentSourceSucceeded()
 
             val challengeUrl = response.payerActionHref
             if (challengeUrl == null) {
-                analytics.notify3DSSucceeded()
+                analytics.notifyConfirmPaymentSourceSucceeded()
                 CardApproveOrderResult.Success(
                     orderId = response.orderId,
                     status = response.status?.name,
                 )
             } else {
-                analytics.notify3DSChallengeRequired()
+                analytics.notifyConfirmPaymentSourceSCARequired()
                 val authChallenge =
-                    authLauncher.createAuthChallenge(cardRequest, challengeUrl)
+                    authLauncher.createAuthChallenge(cardRequest, challengeUrl, analytics.trackingId)
                 CardApproveOrderResult.AuthorizationRequired(authChallenge)
             }
         } catch (error: PayPalSDKError) {
@@ -79,9 +78,9 @@ class CardClient internal constructor(
             analytics.notifyCardVault3DSSuccess()
             return updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
         } else {
-            analytics.notify3DSChallengeRequired()
+            analytics.notifyConfirmPaymentSourceSCARequired()
             val authChallenge =
-                authLauncher.createAuthChallenge(cardVaultRequest, challengeUrl)
+                authLauncher.createAuthChallenge(cardVaultRequest, challengeUrl, analytics.trackingId)
             return CardVaultResult.AuthorizationRequired(authChallenge)
         }
     }

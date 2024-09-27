@@ -1,6 +1,5 @@
 package com.paypal.android.cardpayments
 
-import com.braintreepayments.api.BrowserSwitchException
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal object CardError {
@@ -24,8 +23,8 @@ internal object CardError {
     )
 
     // 3. An unknown error occurred.
-    fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
-        code = CardErrorCode.BROWSER_SWITCH.ordinal,
-        errorDescription = cause.message ?: "Unable to Browser Switch"
-    )
+//    fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
+//        code = CardErrorCode.BROWSER_SWITCH.ordinal,
+//        errorDescription = cause.message ?: "Unable to Browser Switch"
+//    )
 }

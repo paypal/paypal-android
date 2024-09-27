@@ -12,8 +12,8 @@ import kotlinx.serialization.json.Json
 @Parcelize
 data class BrowserSwitchOptions(
     val code: BrowserSwitchRequestCode,
-    val urlToOpen: Uri,
-    val returnUrl: Uri,
+    val urlToOpen: String,
+    val returnUrl: String,
     val metadata: String
 ) : Parcelable {
     fun encodeToString(): String = Json.encodeToString(this)
