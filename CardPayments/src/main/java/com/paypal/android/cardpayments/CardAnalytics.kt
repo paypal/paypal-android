@@ -32,4 +32,20 @@ internal class CardAnalytics(
             setupTokenId = vaultRequest.setupTokenId
         )
     }
+
+    fun restoreFromAuthChallenge(authChallenge: CardAuthChallenge): CardAnalyticsContext? {
+        val metadata =
+            CardAuthMetadata.decodeFromString(authChallenge.options.metadata) ?: return null
+        return restoreFromMetadata(metadata)
+    }
+
+    fun restoreFromMetadata(metadata: CardAuthMetadata): CardAnalyticsContext = when (metadata) {
+        is CardAuthMetadata.ApproveOrder -> metadata.run {
+            createAnalyticsContext( config, orderId = orderId )
+        }
+
+        is CardAuthMetadata.Vault -> metadata.run {
+            createAnalyticsContext(config, setupTokenId = setupTokenId)
+        }
+    }
 }

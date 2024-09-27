@@ -10,7 +10,7 @@ import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStatus
 
-internal class CardAuthLauncher constructor(
+internal class CardAuthLauncher(
     private val analytics: CardAnalytics,
     private val browserSwitchClient: BrowserSwitchClient
 ) {
@@ -50,15 +50,15 @@ internal class CardAuthLauncher constructor(
         activity: FragmentActivity,
         authChallenge: CardAuthChallenge
     ): CardAuthChallengeResult {
-        val analytics = analytics.createAnalyticsContext()
+        val analytics = analytics.restoreFromAuthChallenge(authChallenge)
         return when (val result = browserSwitchClient.launch(activity, authChallenge.options)) {
             BrowserSwitchLaunchResult.Success -> {
-                analytics.notify3DSSucceeded()
+                analytics?.notify3DSSucceeded()
                 CardAuthChallengeResult.Success(authChallenge.options.encodeToString())
             }
 
             is BrowserSwitchLaunchResult.Failure -> {
-                analytics.notify3DSFailed()
+                analytics?.notify3DSFailed()
                 val error = PayPalSDKError(123, "auth challenge failed", reason = result.error)
                 CardAuthChallengeResult.Failure(error)
             }
@@ -84,19 +84,26 @@ internal class CardAuthLauncher constructor(
 
     fun checkIfVaultAuthComplete(intent: Intent, state: String): CardVaultAuthResult {
         val requestCode = BrowserSwitchRequestCode.CARD_VAULT
-        val status = browserSwitchClient.parseStatus(intent, requestCode, state)
+        val options = BrowserSwitchOptions.decodeIfRequestCodeMatches(state, requestCode)
             ?: return CardVaultAuthResult.NoResult
 
-        return when (status) {
-            is BrowserSwitchStatus.Complete -> parseVaultAuthResult(status)
-            is BrowserSwitchStatus.NoResult -> CardVaultAuthResult.NoResult
+        return when (val metadata = CardAuthMetadata.decodeFromString(options.metadata)) {
+            is CardAuthMetadata.Vault -> {
+                when (val status = browserSwitchClient.parseStatus(intent, options)) {
+                    is BrowserSwitchStatus.Complete -> parseVaultAuthResult(status, metadata)
+                    else -> CardVaultAuthResult.NoResult
+                }
+            }
+
+            else -> CardVaultAuthResult.NoResult
         }
     }
 
-    private fun parseVaultAuthResult(status: BrowserSwitchStatus.Complete): CardVaultAuthResult {
-        val metadata =
-            CardAuthMetadata.decodeFromString(status.options.metadata) as? CardAuthMetadata.Vault
-                ?: return CardVaultAuthResult.Failure(CardError.unknownError)
+    private fun parseVaultAuthResult(
+        status: BrowserSwitchStatus.Complete,
+        metadata: CardAuthMetadata.Vault
+    ): CardVaultAuthResult {
+        val analytics = analytics.restoreFromMetadata(metadata)
 
         val deepLinkUrl = status.deepLinkUri
 
@@ -108,12 +115,15 @@ internal class CardAuthLauncher constructor(
         val deepLinkUrlString = deepLinkUrl.toString()
         val didSucceed = deepLinkUrlString.contains("success")
         return if (didSucceed) {
+            analytics.notify3DSSucceeded()
             CardVaultAuthResult.Success(metadata.setupTokenId, "SCA_COMPLETE")
         } else {
             val didCancel = deepLinkUrlString.contains("cancel")
             if (didCancel) {
+                analytics.notify3DSFailed()
                 CardVaultAuthResult.Failure(PayPalSDKError(123, "user canceled"))
             } else {
+                analytics.notify3DSFailed()
                 CardVaultAuthResult.Failure(CardError.unknownError)
             }
         }
@@ -123,17 +133,21 @@ internal class CardAuthLauncher constructor(
         status: BrowserSwitchStatus.Complete,
         metadata: CardAuthMetadata.ApproveOrder
     ): CardApproveOrderAuthResult {
+        val analytics = analytics.restoreFromMetadata(metadata)
         val deepLinkUrl = status.deepLinkUri
         val orderId = metadata.orderId
 
         return if (deepLinkUrl.getQueryParameter("error") != null) {
+            analytics.notify3DSFailed()
             CardApproveOrderAuthResult.Failure(CardError.threeDSVerificationError, orderId)
         } else {
             val state = deepLinkUrl.getQueryParameter("state")
             val code = deepLinkUrl.getQueryParameter("code")
             if (state == null || code == null) {
+                analytics.notify3DSFailed()
                 CardApproveOrderAuthResult.Failure(CardError.malformedDeepLinkError, orderId)
             } else {
+                analytics.notify3DSSucceeded()
                 val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
                 CardApproveOrderAuthResult.Success(
                     orderId = orderId,
