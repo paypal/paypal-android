@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import com.paypal.android.corepayments.Base64Utils
-import com.paypal.android.corepayments.BrowserSwitchRequestCodes
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import org.json.JSONObject
@@ -131,7 +131,7 @@ class PayPalWebCheckoutClient internal constructor(
     private fun decodeCardAuthStateJSON(state: String): JSONObject? {
         val authStateJSON = Base64Utils.parseBase64EncodedJSON(state)
         val requestCode = authStateJSON?.optInt("requestCode", -1) ?: -1
-        if (requestCode != BrowserSwitchRequestCodes.PAYPAL.intValue) {
+        if (requestCode != BrowserSwitchRequestCode.PAYPAL.intValue) {
             // not a card result
             return null
         }

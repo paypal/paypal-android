@@ -3,13 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchException
-import com.braintreepayments.api.BrowserSwitchFinalResult
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchStartResult
-import com.paypal.android.corepayments.BrowserSwitchRequestCodes
-import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
@@ -41,7 +35,7 @@ internal class PayPalWebLauncher(
         val url = buildPayPalCheckoutUri(request)
         val options = BrowserSwitchOptions()
             .url(url)
-            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
+            .requestCode(BrowserSwitchRequestCode.PAYPAL.intValue)
             .returnUrlScheme(request.urlScheme)
             .metadata(metadata)
         return PayPalAuthChallenge(options, analytics)
@@ -57,7 +51,7 @@ internal class PayPalWebLauncher(
         val url = request.run { buildPayPalVaultUri(request) }
         val options = BrowserSwitchOptions()
             .url(url)
-            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
+            .requestCode(BrowserSwitchRequestCode.PAYPAL.intValue)
             .returnUrlScheme(request.urlScheme)
             .metadata(metadata)
         return PayPalAuthChallenge(options, analytics)
@@ -99,7 +93,7 @@ internal class PayPalWebLauncher(
         val url = request.run { buildPayPalCheckoutUri(request) }
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(url)
-            .requestCode(BrowserSwitchRequestCodes.PAYPAL.intValue)
+            .requestCode(BrowserSwitchRequestCode.PAYPAL.intValue)
             .returnUrlScheme(request.urlScheme)
             .metadata(metadata)
 

@@ -1,7 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.paypal.android.corepayments.BrowserSwitchAuthChallenge
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 
 data class PayPalAuthChallenge(
     override val options: BrowserSwitchOptions,

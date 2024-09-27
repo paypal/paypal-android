@@ -31,13 +31,15 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    implementation deps.browserSwitch
+//    implementation deps.browserSwitch
 
     implementation deps.kotlinStdLib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
     implementation deps.material
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
 
     testImplementation deps.junit
     testImplementation deps.mockk

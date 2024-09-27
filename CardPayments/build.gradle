@@ -46,7 +46,8 @@ dependencies {
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
 
-    implementation deps.browserSwitch
+//    implementation deps.browserSwitch
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
 
     testImplementation deps.junit
     testImplementation deps.mockk

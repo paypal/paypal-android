@@ -1,5 +1,8 @@
 package com.paypal.android.corepayments
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class Environment(internal val url: String, internal val graphQLEndpoint: String) {
     LIVE(
         "https://api-m.paypal.com",

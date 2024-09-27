@@ -1,8 +1,6 @@
 package com.paypal.android.cardpayments
 
 import android.net.Uri
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.paypal.android.corepayments.BrowserSwitchAuthChallenge
 import com.paypal.android.corepayments.PayPalSDKError
 
 sealed class CardApproveOrderResult {

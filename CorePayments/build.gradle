@@ -61,7 +61,9 @@ dependencies {
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
-    implementation deps.browserSwitch
+//    implementation deps.browserSwitch
+    implementation 'androidx.browser:browser:1.7.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
 
     testImplementation deps.jsonAssert
     testImplementation deps.junit

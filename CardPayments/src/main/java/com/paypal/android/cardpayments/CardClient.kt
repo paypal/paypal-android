@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
-import com.paypal.android.corepayments.Base64Utils
-import com.paypal.android.corepayments.BrowserSwitchRequestCodes
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import org.json.JSONObject
 
 /**
@@ -22,17 +22,15 @@ class CardClient internal constructor(
     private val authLauncher: CardAuthLauncher
 ) {
 
-    /**
-     *  CardClient constructor
-     *
-     *  @param [context] Activity that launches the card client
-     */
-    constructor(context: Context) : this(
+    constructor(context: Context) : this(context, CardAnalytics(context.applicationContext))
+
+    internal constructor(context: Context, cardAnalytics: CardAnalytics) : this(
         CheckoutOrdersAPI(),
         DataVaultPaymentMethodTokensAPI(context.applicationContext),
-        CardAnalytics(context.applicationContext),
-        CardAuthLauncher()
+        cardAnalytics,
+        CardAuthLauncher(cardAnalytics)
     )
+
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
     /**
@@ -58,7 +56,7 @@ class CardClient internal constructor(
             } else {
                 analytics.notify3DSChallengeRequired()
                 val authChallenge =
-                    authLauncher.createAuthChallenge(cardRequest, challengeUrl, analytics)
+                    authLauncher.createAuthChallenge(cardRequest, challengeUrl)
                 CardApproveOrderResult.AuthorizationRequired(authChallenge)
             }
         } catch (error: PayPalSDKError) {
@@ -89,12 +87,26 @@ class CardClient internal constructor(
         } else {
             analytics.notify3DSChallengeRequired()
             val authChallenge =
-                authLauncher.createAuthChallenge(cardVaultRequest, challengeUrl, analytics)
+                authLauncher.createAuthChallenge(cardVaultRequest, challengeUrl)
             return CardVaultResult.AuthorizationRequired(authChallenge)
         }
     }
 
     fun checkIfApproveOrderAuthComplete(intent: Intent, state: String): CardApproveOrderAuthResult {
+        authLauncher.checkIfApproveOrderAuthComplete(intent, state)
+
+        val requestCode = BrowserSwitchRequestCode.CARD_APPROVE_ORDER
+        val options = BrowserSwitchOptions.decodeIfRequestCodeMatches(state, requestCode)
+            ?: return CardApproveOrderAuthResult.NoResult
+
+        when (val metadata = CardAuthMetadata.decodeFromString(options.metadata)) {
+            is CardAuthMetadata.ApproveOrder -> {
+
+            }
+
+            else -> CardApproveOrderAuthResult.NoResult
+        }
+
         val authStateJSON =
             decodeCardAuthStateJSON(state) ?: return CardApproveOrderAuthResult.NoResult
         val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
@@ -107,6 +119,13 @@ class CardClient internal constructor(
             }
         }
         return result
+    }
+
+    private fun parseApproveOrderResult(
+        options: BrowserSwitchOptions,
+        metadata: CardAuthMetadata.ApproveOrder
+    ) {
+
     }
 
     /**
@@ -127,16 +146,6 @@ class CardClient internal constructor(
             }
         }
         return result
-    }
-
-    private fun decodeCardAuthStateJSON(state: String): JSONObject? {
-        val authStateJSON = Base64Utils.parseBase64EncodedJSON(state)
-        val requestCode = authStateJSON?.optInt("requestCode", -1) ?: -1
-        if (requestCode != BrowserSwitchRequestCodes.CARD.intValue) {
-            // not a card result
-            return null
-        }
-        return authStateJSON
     }
 
     private fun restoreAnalyticsContextFromAuthState(stateJSON: JSONObject): CardAnalyticsContext? {
