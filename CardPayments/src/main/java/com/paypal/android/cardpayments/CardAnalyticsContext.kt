@@ -85,7 +85,7 @@ class CardAnalyticsContext(
 
     fun notifyConfirmPaymentSourceSCAFailed() {
         analyticsService.sendAnalyticsEvent(
-            "card:vault:sca-failed",
+            "card:confirm-payment-source:sca-failed",
             config = config,
             orderId = orderId,
             trackingId = trackingId

@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 
 class BrowserSwitchClient internal constructor(
@@ -17,7 +18,21 @@ class BrowserSwitchClient internal constructor(
         return BrowserSwitchLaunchResult.Success
     }
 
-    fun parseStatus(intent: Intent, options: BrowserSwitchOptions): BrowserSwitchStatus? {
-        return null
+    fun parseStatus(intent: Intent, options: BrowserSwitchOptions): BrowserSwitchStatus? =
+        intent.data?.let { returnUrl ->
+            return if (checkForMatchingDeepLinkUrl(returnUrl, options)) {
+                BrowserSwitchStatus.Complete(returnUrl, options)
+            } else {
+                BrowserSwitchStatus.NoResult
+            }
+        }
+
+    private fun checkForMatchingDeepLinkUrl(url: Uri, options: BrowserSwitchOptions): Boolean {
+        val actualScheme = url.scheme
+        val targetScheme = Uri.parse(options.returnUrl).scheme
+        if (actualScheme == null && targetScheme == null) {
+            return false
+        }
+        return actualScheme.equals(targetScheme, ignoreCase = true)
     }
 }

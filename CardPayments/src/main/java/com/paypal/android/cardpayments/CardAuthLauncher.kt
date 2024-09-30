@@ -22,8 +22,13 @@ internal class CardAuthLauncher(
         challengeUrl: String,
         trackingId: String
     ): CardAuthChallenge {
-        val metadata =
-            cardRequest.run { CardAuthMetadata.ApproveOrder(config, orderId, trackingId) }
+        val metadata = cardRequest.run {
+            CardAuthMetadata.ApproveOrder(
+                config = config,
+                trackingId = trackingId,
+                orderId = orderId
+            )
+        }
         val options = BrowserSwitchOptions(
             code = BrowserSwitchRequestCode.CARD_APPROVE_ORDER,
             urlToOpen = challengeUrl,
@@ -38,8 +43,13 @@ internal class CardAuthLauncher(
         challengeUrl: String,
         trackingId: String
     ): CardAuthChallenge {
-        val metadata =
-            cardVaultRequest.run { CardAuthMetadata.ApproveOrder(config, setupTokenId, trackingId) }
+        val metadata = cardVaultRequest.run {
+            CardAuthMetadata.Vault(
+                config = config,
+                trackingId = trackingId,
+                setupTokenId = setupTokenId
+            )
+        }
         val options = BrowserSwitchOptions(
             code = BrowserSwitchRequestCode.CARD_VAULT,
             urlToOpen = challengeUrl,

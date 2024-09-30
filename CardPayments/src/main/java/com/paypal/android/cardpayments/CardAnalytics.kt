@@ -25,7 +25,7 @@ internal class CardAnalytics(
         return CardAnalyticsContext(
             cardRequest.config,
             analyticsService,
-            createNewTrackingId(),
+            trackingId = createNewTrackingId(),
             orderId = cardRequest.orderId
         )
     }
@@ -34,7 +34,7 @@ internal class CardAnalytics(
         return CardAnalyticsContext(
             vaultRequest.config,
             analyticsService,
-            createNewTrackingId(),
+            trackingId = createNewTrackingId(),
             setupTokenId = vaultRequest.setupTokenId
         )
     }
@@ -47,11 +47,11 @@ internal class CardAnalytics(
 
     fun restoreFromMetadata(metadata: CardAuthMetadata): CardAnalyticsContext = when (metadata) {
         is CardAuthMetadata.ApproveOrder -> metadata.run {
-            createAnalyticsContext( config, trackingId, orderId = orderId )
+            createAnalyticsContext(config, trackingId = trackingId, orderId = orderId)
         }
 
         is CardAuthMetadata.Vault -> metadata.run {
-            createAnalyticsContext(config, trackingId, setupTokenId = setupTokenId)
+            createAnalyticsContext(config, trackingId = trackingId, setupTokenId = setupTokenId)
         }
     }
 }
