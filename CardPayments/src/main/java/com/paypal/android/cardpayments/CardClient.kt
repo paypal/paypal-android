@@ -34,11 +34,10 @@ class CardClient internal constructor(
      */
     suspend fun approveOrder(cardRequest: CardApproveOrderRequest): CardApproveOrderResult {
         val analytics = cardAnalytics.createAnalyticsContext(cardRequest)
+        analytics.notifyConfirmPaymentSourceStarted()
 
         return try {
-            analytics.notifyConfirmPaymentSourceStarted()
             val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-
             val challengeUrl = response.payerActionHref
             if (challengeUrl == null) {
                 analytics.notifyConfirmPaymentSourceSucceeded()
@@ -69,16 +68,19 @@ class CardClient internal constructor(
      */
     suspend fun vault(cardVaultRequest: CardVaultRequest): CardVaultResult {
         val analytics = cardAnalytics.createAnalyticsContext(cardVaultRequest)
+        analytics.notifyVaultStarted()
+
         val updateSetupTokenResult = cardVaultRequest.run {
             paymentMethodTokensAPI.updateSetupToken(setupTokenId, card, cardVaultRequest.config)
         }
+        analytics.notifyVaultUpdateSetupTokenSucceeded()
 
         val challengeUrl = updateSetupTokenResult.approveHref
         if (challengeUrl == null) {
-            analytics.notifyCardVault3DSSuccess()
+            analytics.notifyVaultSucceeded()
             return updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
         } else {
-            analytics.notifyConfirmPaymentSourceSCARequired()
+            analytics.notifyVaultSCARequired()
             val authChallenge =
                 authLauncher.createAuthChallenge(cardVaultRequest, challengeUrl, analytics.trackingId)
             return CardVaultResult.AuthorizationRequired(authChallenge)

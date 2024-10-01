@@ -11,7 +11,6 @@ class CardAnalyticsContext(
     private val setupTokenId: String? = null
 ) {
     fun notifyConfirmPaymentSourceStarted() {
-//        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", config, orderId)
         analyticsService.sendAnalyticsEvent(
             "card:confirm-payment-source:started",
             config = config,
@@ -92,6 +91,39 @@ class CardAnalyticsContext(
         )
     }
 
+    fun notifyVaultStarted() {
+        analyticsService.sendAnalyticsEvent(
+            "card:vault:started",
+            config = config,
+            trackingId = trackingId,
+        )
+    }
+
+    fun notifyVaultUpdateSetupTokenSucceeded() {
+        analyticsService.sendAnalyticsEvent(
+            "card:vault:update-setup-token-succeeded",
+            config = config,
+            trackingId = trackingId,
+        )
+    }
+
+    fun notifyVaultSucceeded() {
+        analyticsService.sendAnalyticsEvent(
+            "card:vault:succeeded",
+            config = config,
+            trackingId = trackingId,
+        )
+    }
+
+    fun notifyVaultSCARequired() {
+        analyticsService.sendAnalyticsEvent(
+            "card:confirm-payment-source:sca-required",
+            config = config,
+            orderId = orderId,
+            trackingId = trackingId
+        )
+    }
+
     fun notifyVaultSCADidLaunch() {
         analyticsService.sendAnalyticsEvent(
             "card:vault:sca-did-launch",
@@ -121,10 +153,6 @@ class CardAnalyticsContext(
             "card-payments:3ds:failed",
             config = config, orderId = orderId
         )
-    }
-
-    fun notifyCardVault3DSSuccess() {
-//        analyticsService.sendAnalyticsEvent("card:browser-login:canceled", config = config, setupTokenId = setupTokenId)
     }
 
     fun notifyCardVault3DSFailure() {
