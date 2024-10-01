@@ -3,11 +3,6 @@ package com.paypal.android.paypalwebpayments
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import com.paypal.android.corepayments.Base64Utils
-import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
-import org.json.JSONObject
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -25,8 +20,10 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param context an Android [Context]
      */
-    constructor(context: Context) :
-            this(PayPalAnalytics(context.applicationContext), PayPalWebLauncher())
+    constructor(context: Context) : this(PayPalAnalytics(context.applicationContext))
+
+    internal constructor(payPalAnalytics: PayPalAnalytics) :
+            this(payPalAnalytics, PayPalWebLauncher(payPalAnalytics))
 
     /**
      * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
@@ -38,7 +35,7 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebCheckoutRequest
     ): PayPalWebCheckoutStartResult {
         val analytics = payPalAnalytics.createAnalyticsContext(request)
-        val authChallenge = payPalWebLauncher.createAuthChallenge(request, analytics)
+        val authChallenge = payPalWebLauncher.createAuthChallenge(request, analytics.trackingId)
         val authChallengeResult = payPalWebLauncher.presentAuthChallenge(activity, authChallenge)
         return when (authChallengeResult) {
             is PayPalAuthChallengeResult.Success -> {
@@ -63,7 +60,7 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest
     ): PayPalWebCheckoutVaultResult {
         val analytics = payPalAnalytics.createAnalyticsContext(request)
-        val authChallenge = payPalWebLauncher.createAuthChallenge(request, analytics)
+        val authChallenge = payPalWebLauncher.createAuthChallenge(request, analytics.trackingId)
         val authChallengeResult = payPalWebLauncher.presentAuthChallenge(activity, authChallenge)
         return when (authChallengeResult) {
             is PayPalAuthChallengeResult.Success -> {
@@ -78,64 +75,9 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
-    fun checkIfCheckoutAuthComplete(intent: Intent, state: String): PayPalWebCheckoutAuthResult {
-        val authStateJSON =
-            decodeCardAuthStateJSON(state) ?: return PayPalWebCheckoutAuthResult.NoResult
-        val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
-        val result = payPalWebLauncher.checkIfCheckoutAuthComplete(intent, state)
-        when (result) {
-            is PayPalWebCheckoutAuthResult.Success -> analytics?.notifyWebCheckoutSucceeded()
-            is PayPalWebCheckoutAuthResult.Failure -> analytics?.notifyWebCheckoutFailure()
-            PayPalWebCheckoutAuthResult.Canceled -> analytics?.notifyWebCheckoutUserCanceled()
-            PayPalWebCheckoutAuthResult.NoResult -> {
-                // do nothing
-            }
-        }
-        return result
-    }
+    fun getCheckoutAuthResult(intent: Intent, state: String): PayPalWebCheckoutAuthResult =
+        payPalWebLauncher.getCheckoutAuthResult(intent, state)
 
-    fun checkIfVaultAuthComplete(intent: Intent, state: String): PayPalWebVaultAuthResult {
-        val authStateJSON =
-            decodeCardAuthStateJSON(state) ?: return PayPalWebVaultAuthResult.NoResult
-        val analytics = restoreAnalyticsContextFromAuthState(authStateJSON)
-        val result = payPalWebLauncher.checkIfVaultAuthComplete(intent, state)
-        when (result) {
-            is PayPalWebVaultAuthResult.Success -> analytics?.notifyWebVaultSucceeded()
-            is PayPalWebVaultAuthResult.Failure -> analytics?.notifyWebVaultFailure()
-            PayPalWebVaultAuthResult.Canceled -> analytics?.notifyWebVaultUserCanceled()
-            PayPalWebVaultAuthResult.NoResult -> {
-                // do nothing
-            }
-        }
-        return result
-    }
-
-    private fun restoreAnalyticsContextFromAuthState(stateJSON: JSONObject): PayPalAnalyticsContext? {
-        val metadata = stateJSON.optJSONObject("metadata")
-        val clientId = metadata?.optString("client_id")
-        val environmentName = metadata?.optString("environment_name")
-        val environment = try {
-            Environment.valueOf(environmentName ?: "")
-        } catch (e: IllegalArgumentException) {
-            null
-        }
-
-        if (clientId.isNullOrEmpty() || environment == null) {
-            return null
-        }
-        val coreConfig = CoreConfig(clientId, environment)
-        val orderId = metadata.optString("order_id")
-        return payPalAnalytics.createAnalyticsContext(coreConfig, orderId)
-    }
-
-    private fun decodeCardAuthStateJSON(state: String): JSONObject? {
-        return null
-//        val authStateJSON = Base64Utils.parseBase64EncodedJSON(state)
-//        val requestCode = authStateJSON?.optInt("requestCode", -1) ?: -1
-//        if (requestCode != BrowserSwitchRequestCode.PAYPAL.intValue) {
-//            // not a card result
-//            return null
-//        }
-//        return authStateJSON
-    }
+    fun getVaultAuthResult(intent: Intent, state: String): PayPalWebVaultAuthResult =
+        payPalWebLauncher.getVaultAuthResult(intent, state)
 }

@@ -6,7 +6,9 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 class PayPalAnalyticsContext(
     private val config: CoreConfig,
     private val analyticsService: AnalyticsService,
-    private val orderId: String? = null
+    val trackingId: String,
+    private val orderId: String? = null,
+    private val setupTokenId: String? = null
 ) {
     fun notifyWebCheckoutFailure() {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", config, orderId = orderId)

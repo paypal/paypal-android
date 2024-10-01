@@ -132,7 +132,7 @@ class PayPalWebViewModel @Inject constructor(
     }
 
     fun checkIntentForResult(intent: Intent) = authState?.let { state ->
-        when (val result = paypalClient.checkIfCheckoutAuthComplete(intent, state)) {
+        when (val result = paypalClient.getCheckoutAuthResult(intent, state)) {
             is PayPalWebCheckoutAuthResult.Success -> {
                 authChallengeState = ActionState.Success(result)
             }

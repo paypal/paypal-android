@@ -3,10 +3,12 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
+import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchLaunchResult
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStatus
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
@@ -15,126 +17,84 @@ import org.json.JSONObject
 
 // TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 internal class PayPalWebLauncher(
+    private val analytics: PayPalAnalytics,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
 ) {
-    companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val METADATA_KEY_ORDER_ID = "order_id"
-        private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
-
-        private const val REQUEST_TYPE_CHECKOUT = "checkout"
-        private const val REQUEST_TYPE_VAULT = "vault"
-
-        private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
-    }
 
     fun createAuthChallenge(
         request: PayPalWebCheckoutRequest,
-        analytics: PayPalAnalyticsContext
+        trackingId: String
     ): PayPalAuthChallenge {
-        val metadata = JSONObject()
-            .put(METADATA_KEY_ORDER_ID, request.orderId)
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
+        val metadata = request.run {
+            PayPalAuthMetadata.Checkout(
+                config = config,
+                trackingId = trackingId,
+                orderId = orderId
+            )
+        }
         val url = buildPayPalCheckoutUri(request)
         val options = BrowserSwitchOptions(
             code = BrowserSwitchRequestCode.PAYPAL_CHECKOUT,
             urlToOpen = url,
             returnUrl = request.urlScheme,
-            metadata = metadata.toString()
+            metadata = metadata.encodeToString()
         )
-        return PayPalAuthChallenge(options, analytics)
+        return PayPalAuthChallenge(options)
     }
 
     fun createAuthChallenge(
         request: PayPalWebVaultRequest,
-        analytics: PayPalAnalyticsContext
+        trackingId: String
     ): PayPalAuthChallenge {
-        val metadata = JSONObject()
-            .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
+        val metadata = request.run {
+            PayPalAuthMetadata.Vault(
+                config = config,
+                trackingId = trackingId,
+                setupTokenId = setupTokenId
+            )
+        }
         val url = request.run { buildPayPalVaultUri(request) }
         val options = BrowserSwitchOptions(
             code = BrowserSwitchRequestCode.PAYPAL_VAULT,
             urlToOpen = url,
             returnUrl = request.urlScheme,
-            metadata = metadata.toString()
+            metadata = metadata.encodeToString()
         )
-        return PayPalAuthChallenge(options, analytics)
+        return PayPalAuthChallenge(options)
     }
 
     fun presentAuthChallenge(
         activity: FragmentActivity,
         authChallenge: PayPalAuthChallenge,
     ): PayPalAuthChallengeResult {
-        val analytics = authChallenge.analytics
-        // TODO: implement
-        return PayPalAuthChallengeResult.Success("")
-//        return when (val result = browserSwitchClient.start(activity, authChallenge.options)) {
-//            is BrowserSwitchStartResult.Failure -> {
-//                analytics.notifyWebCheckoutFailure()
-//                val message = "auth challenge failed"
-//                PayPalAuthChallengeResult.Failure(
-//                    PayPalSDKError(
-//                        123,
-//                        message,
-//                        reason = result.error
-//                    )
-//                )
-//            }
-//
-//            is BrowserSwitchStartResult.Started -> {
-//                analytics.notifyWebCheckoutStarted()
-//                PayPalAuthChallengeResult.Success(result.pendingRequest)
-//            }
-//        }
-    }
+        val analytics = analytics.restoreFromAuthChallenge(authChallenge)
+        val requestCode = authChallenge.options.code
 
-    fun launchPayPalWebCheckout(
-        activity: FragmentActivity,
-        request: PayPalWebCheckoutRequest,
-    ): PayPalSDKError? {
-        return null
-//        val metadata = JSONObject()
-//            .put(METADATA_KEY_ORDER_ID, request.orderId)
-//            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
-//        val url = request.run { buildPayPalCheckoutUri(request) }
-//        val browserSwitchOptions = BrowserSwitchOptions()
-//            .url(url)
-//            .requestCode(BrowserSwitchRequestCode.PAYPAL.intValue)
-//            .returnUrlScheme(request.urlScheme)
-//            .metadata(metadata)
-//
-//        return launchBrowserSwitch(activity, browserSwitchOptions)
-    }
+        return when (val result = browserSwitchClient.launch(activity, authChallenge.options)) {
+            BrowserSwitchLaunchResult.Success -> {
+//                when (requestCode) {
+//                    BrowserSwitchRequestCode.CARD_APPROVE_ORDER -> analytics?.notifyConfirmPaymentSourceSCADidLaunch()
+//                    BrowserSwitchRequestCode.CARD_VAULT -> analytics?.notifyVaultSCADidLaunch()
+//                    else -> {
+//                        // do nothing
+//                    }
+//                }
+                PayPalAuthChallengeResult.Success(authChallenge.options.encodeToString())
+            }
 
-    fun launchPayPalWebVault(
-        activity: FragmentActivity,
-        request: PayPalWebVaultRequest
-    ): PayPalSDKError? {
-        return null
-//        val metadata = JSONObject()
-//            .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-//            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
-//        val url = request.run { buildPayPalVaultUri(request) }
-//        val browserSwitchOptions = BrowserSwitchOptions()
-//            .url(url)
-//            .returnUrlScheme(request.urlScheme)
-//            .metadata(metadata)
-//        return launchBrowserSwitch(activity, browserSwitchOptions)
+            is BrowserSwitchLaunchResult.Failure -> {
+//                when (requestCode) {
+//                    BrowserSwitchRequestCode.CARD_APPROVE_ORDER -> analytics?.notifyConfirmPaymentSourceSCALaunchFailed()
+//                    BrowserSwitchRequestCode.CARD_VAULT -> analytics?.notifyVaultSCALaunchFailed()
+//                    else -> {
+//                        // do nothing
+//                    }
+//                }
+                val error = PayPalSDKError(123, "auth challenge failed", reason = result.error)
+                PayPalAuthChallengeResult.Failure(error)
+            }
+        }
     }
-
-//    private fun launchBrowserSwitch(
-//        activity: FragmentActivity,
-//        options: BrowserSwitchOptions
-//    ): PayPalSDKError? {
-//        var error: PayPalSDKError? = null
-//        try {
-//            browserSwitchClient.start(activity, options)
-//        } catch (e: BrowserSwitchException) {
-//            error = PayPalWebCheckoutError.browserSwitchError(e)
-//        }
-//        return error
-//    }
 
     private fun buildPayPalCheckoutUri(request: PayPalWebCheckoutRequest): String {
         val config = request.config
@@ -168,82 +128,75 @@ internal class PayPalWebLauncher(
             .toString()
     }
 
-    private fun parseWebCheckoutSuccessResult(
-        browserSwitchResult: BrowserSwitchStatus.Complete,
-        orderId: String?
+    fun getCheckoutAuthResult(intent: Intent, state: String): PayPalWebCheckoutAuthResult {
+        val requestCode = BrowserSwitchRequestCode.PAYPAL_CHECKOUT
+        val options = BrowserSwitchOptions.decodeIfRequestCodeMatches(state, requestCode)
+            ?: return PayPalWebCheckoutAuthResult.NoResult
+
+        return when (val metadata = PayPalAuthMetadata.decodeFromString(options.metadata)) {
+            is PayPalAuthMetadata.Checkout -> {
+                when (val status = browserSwitchClient.parseStatus(intent, options)) {
+                    is BrowserSwitchStatus.Complete ->
+                        parseCheckoutAuthResultFromDeepLink(status, metadata)
+
+                    else -> PayPalWebCheckoutAuthResult.NoResult
+                }
+            }
+
+            else -> PayPalWebCheckoutAuthResult.NoResult
+        }
+    }
+
+    private fun parseCheckoutAuthResultFromDeepLink(
+        status: BrowserSwitchStatus.Complete,
+        metadata: PayPalAuthMetadata.Checkout
     ): PayPalWebCheckoutAuthResult {
-        return PayPalWebCheckoutAuthResult.NoResult
-//        val deepLinkUrl = browserSwitchResult.returnUrl
-//        val metadata = browserSwitchResult.requestMetadata
-//
-//        return if (metadata == null) {
-//            PayPalWebCheckoutAuthResult.Failure(PayPalWebCheckoutError.unknownError, orderId)
-//        } else {
-//            // TODO: check for canceled status
-//            val payerId = deepLinkUrl.getQueryParameter("PayerID")
-//            val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
-//            if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
-//                val error = PayPalWebCheckoutError.malformedResultError
-//                PayPalWebCheckoutAuthResult.Failure(error, orderId)
-//            } else {
-//                PayPalWebCheckoutAuthResult.Success(orderId, payerId)
-//            }
-//        }
+        val deepLinkUrl = status.deepLinkUri
+
+        // TODO: check for canceled status
+        val payerId = deepLinkUrl.getQueryParameter("PayerID")
+        val orderId = metadata.orderId
+        return if (orderId.isBlank() || payerId.isNullOrBlank()) {
+            val error = PayPalWebCheckoutError.malformedResultError
+            PayPalWebCheckoutAuthResult.Failure(error, orderId)
+        } else {
+            PayPalWebCheckoutAuthResult.Success(orderId, payerId)
+        }
     }
 
-    fun checkIfCheckoutAuthComplete(intent: Intent, state: String): PayPalWebCheckoutAuthResult {
-        return PayPalWebCheckoutAuthResult.NoResult
-//        when (val result = browserSwitchClient.completeRequest(intent, state)) {
-//            is BrowserSwitchFinalResult.Success -> {
-//                val requestType = result.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-//                if (requestType == REQUEST_TYPE_CHECKOUT) {
-//                    val orderId = result.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-//                    parseWebCheckoutSuccessResult(result, orderId)
-//                } else {
-//                    PayPalWebCheckoutAuthResult.NoResult
-//                }
-//            }
-//
-//            is BrowserSwitchFinalResult.Failure -> PayPalWebCheckoutAuthResult.Failure(
-//                PayPalSDKError(123, "browser switch error", reason = result.error)
-//            )
-//
-//            BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutAuthResult.NoResult
-//        }
+    fun getVaultAuthResult(intent: Intent, state: String): PayPalWebVaultAuthResult {
+        val requestCode = BrowserSwitchRequestCode.PAYPAL_VAULT
+        val options = BrowserSwitchOptions.decodeIfRequestCodeMatches(state, requestCode)
+            ?: return PayPalWebVaultAuthResult.NoResult
+
+        return when (val metadata = PayPalAuthMetadata.decodeFromString(options.metadata)) {
+            is PayPalAuthMetadata.Vault -> {
+                when (val status = browserSwitchClient.parseStatus(intent, options)) {
+                    is BrowserSwitchStatus.Complete ->
+                        parseVaultAuthResultFromDeepLink(status, metadata)
+
+                    else -> PayPalWebVaultAuthResult.NoResult
+                }
+            }
+
+            else -> PayPalWebVaultAuthResult.NoResult
+        }
     }
 
-    fun checkIfVaultAuthComplete(intent: Intent, state: String): PayPalWebVaultAuthResult {
-        return PayPalWebVaultAuthResult.NoResult
-//        when (val result = browserSwitchClient.completeRequest(intent, state)) {
-//            is BrowserSwitchFinalResult.Success -> {
-//                val requestType = result.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-//                if (requestType == REQUEST_TYPE_VAULT) {
-//                    parseVaultSuccessResult(result)
-//                } else {
-//                    PayPalWebVaultAuthResult.NoResult
-//                }
-//            }
-//
-//            is BrowserSwitchFinalResult.Failure -> PayPalWebVaultAuthResult.Failure(
-//                PayPalSDKError(123, "browser switch error", reason = result.error)
-//            )
-//
-//            BrowserSwitchFinalResult.NoResult -> PayPalWebVaultAuthResult.NoResult
-//        }
+    private fun parseVaultAuthResultFromDeepLink(
+        status: BrowserSwitchStatus.Complete,
+        metadata: PayPalAuthMetadata.Vault
+    ): PayPalWebVaultAuthResult {
+        val deepLinkUrl = status.deepLinkUri
+        return if (metadata == null) {
+            PayPalWebVaultAuthResult.Failure(PayPalWebCheckoutError.unknownError)
+        } else {
+            val approvalSessionId = deepLinkUrl.getQueryParameter("approval_session_id")
+            if (approvalSessionId.isNullOrEmpty()) {
+                PayPalWebVaultAuthResult.Failure(PayPalWebCheckoutError.malformedResultError)
+            } else {
+                PayPalWebVaultAuthResult.Success(approvalSessionId)
+            }
+        }
     }
-
-//    private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchFinalResult.Success): PayPalWebVaultAuthResult {
-//        val deepLinkUrl = browserSwitchResult.returnUrl
-//        val requestMetadata = browserSwitchResult.requestMetadata
-//        return if (requestMetadata == null) {
-//            PayPalWebVaultAuthResult.Failure(PayPalWebCheckoutError.unknownError)
-//        } else {
-//            val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-//            if (approvalSessionId.isNullOrEmpty()) {
-//                PayPalWebVaultAuthResult.Failure(PayPalWebCheckoutError.malformedResultError)
-//            } else {
-//                PayPalWebVaultAuthResult.Success(approvalSessionId)
-//            }
-//        }
-//    }
 }
