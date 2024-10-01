@@ -2,6 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchRequestCode
@@ -64,7 +65,7 @@ internal class PayPalWebLauncher(
     }
 
     fun presentAuthChallenge(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         authChallenge: PayPalAuthChallenge,
     ): PayPalAuthChallengeResult {
         val analytics = analytics.restoreFromAuthChallenge(authChallenge)

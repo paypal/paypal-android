@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
@@ -60,7 +61,7 @@ internal class CardAuthLauncher(
     }
 
     fun presentAuthChallenge(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         authChallenge: CardAuthChallenge
     ): CardAuthChallengeResult {
         val analytics = analytics.restoreFromAuthChallenge(authChallenge)

@@ -2,6 +2,7 @@ package com.paypal.android.ui.vaultcard
 
 import android.app.Application
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -229,7 +230,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
+    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) {
         authChallengeState = ActionState.Loading
         when (val launchResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
             is CardAuthChallengeResult.Success -> {

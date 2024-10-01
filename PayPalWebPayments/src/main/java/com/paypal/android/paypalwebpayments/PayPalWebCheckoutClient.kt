@@ -2,6 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
@@ -31,7 +32,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(
-        activity: AppCompatActivity,
+        activity: ComponentActivity,
         request: PayPalWebCheckoutRequest
     ): PayPalWebCheckoutStartResult {
         val analytics = payPalAnalytics.createAnalyticsContext(request)
@@ -56,7 +57,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
     fun vault(
-        activity: AppCompatActivity,
+        activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalWebCheckoutVaultResult {
         val analytics = payPalAnalytics.createAnalyticsContext(request)

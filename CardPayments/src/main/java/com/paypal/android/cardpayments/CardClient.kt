@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.PayPalSDKError
@@ -90,7 +91,7 @@ class CardClient internal constructor(
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
      */
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) =
+    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) =
         authLauncher.presentAuthChallenge(activity, authChallenge)
 
     fun checkIfApproveOrderAuthComplete(intent: Intent, state: String): CardApproveOrderAuthResult =

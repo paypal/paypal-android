@@ -3,6 +3,7 @@ package com.paypal.android.ui.paypalweb
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -94,7 +95,7 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun startWebCheckout(activity: AppCompatActivity) {
+    fun startWebCheckout(activity: ComponentActivity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             authChallengeState = ActionState.Failure(Exception("Create an order to continue."))
@@ -105,7 +106,7 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: AppCompatActivity, orderId: String) {
+    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
 
         when (val clientIdResult = getClientIdUseCase()) {
             is SDKSampleServerResult.Failure -> {

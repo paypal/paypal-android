@@ -2,6 +2,7 @@ package com.paypal.android.ui.paypalwebvault
 
 import android.app.Application
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -73,7 +74,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     private val createdSetupToken: PayPalSetupToken?
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
-    fun vaultSetupToken(activity: AppCompatActivity) {
+    fun vaultSetupToken(activity: ComponentActivity) {
         val setupTokenId = createdSetupToken?.id
         if (setupTokenId == null) {
             authChallengeState = ActionState.Failure(Exception("Create a setup token to continue."))
@@ -85,7 +86,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     }
 
     private suspend fun vaultSetupTokenWithRequest(
-        activity: AppCompatActivity,
+        activity: ComponentActivity,
         setupTokenId: String
     ) {
         authChallengeState = ActionState.Loading
