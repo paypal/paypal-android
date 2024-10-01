@@ -142,15 +142,15 @@ internal class CardAuthLauncher(
         val deepLinkUrlString = deepLinkUrl.toString()
         val didSucceed = deepLinkUrlString.contains("success")
         return if (didSucceed) {
-            analytics.notify3DSSucceeded()
+            analytics.notifyVaultSCASucceeded()
             CardVaultAuthResult.Success(metadata.setupTokenId, "SCA_COMPLETE")
         } else {
             val didCancel = deepLinkUrlString.contains("cancel")
             if (didCancel) {
-                analytics.notify3DSFailed()
+                analytics.notifyVaultSCAUserCanceled()
                 CardVaultAuthResult.Failure(PayPalSDKError(123, "user canceled"))
             } else {
-                analytics.notify3DSFailed()
+                analytics.notifyVaultSCAFailed()
                 CardVaultAuthResult.Failure(CardError.unknownError)
             }
         }

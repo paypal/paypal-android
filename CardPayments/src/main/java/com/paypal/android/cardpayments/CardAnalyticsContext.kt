@@ -119,7 +119,6 @@ class CardAnalyticsContext(
         analyticsService.sendAnalyticsEvent(
             "card:confirm-payment-source:sca-required",
             config = config,
-            orderId = orderId,
             trackingId = trackingId
         )
     }
@@ -128,7 +127,7 @@ class CardAnalyticsContext(
         analyticsService.sendAnalyticsEvent(
             "card:vault:sca-did-launch",
             config = config,
-            orderId = orderId
+            trackingId = trackingId
         )
     }
 
@@ -136,30 +135,31 @@ class CardAnalyticsContext(
         analyticsService.sendAnalyticsEvent(
             "card:vault:sca-launch-failed",
             config = config,
-            orderId = orderId
+            trackingId = trackingId
         )
     }
 
-    fun notify3DSSucceeded() {
+    fun notifyVaultSCASucceeded() {
         analyticsService.sendAnalyticsEvent(
-            "card-payments:3ds:succeeded",
+            "card:vault:sca-succeeded",
             config = config,
-            orderId = orderId
+            trackingId = trackingId
         )
     }
 
-    fun notify3DSFailed() {
+    fun notifyVaultSCAUserCanceled() {
         analyticsService.sendAnalyticsEvent(
-            "card-payments:3ds:failed",
-            config = config, orderId = orderId
-        )
-    }
-
-    fun notifyCardVault3DSFailure() {
-        analyticsService.sendAnalyticsEvent(
-            "card-payments:3ds:failed",
+            "card:vault:sca-user-canceled",
             config = config,
-            orderId = orderId
+            trackingId = trackingId
+        )
+    }
+
+    fun notifyVaultSCAFailed() {
+        analyticsService.sendAnalyticsEvent(
+            "card:vault:sca-failed",
+            config = config,
+            trackingId = trackingId
         )
     }
 }
