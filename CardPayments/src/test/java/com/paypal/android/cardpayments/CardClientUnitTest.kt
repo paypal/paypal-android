@@ -80,12 +80,6 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `register lifecycle observer on init`() = runTest {
-        createCardClient(testScheduler)
-        verify(exactly = 1) { activityLifecycle.addObserver(any<CardLifeCycleObserver>()) }
-    }
-
-    @Test
     fun `approve order notifies listener of confirm payment source success`() = runTest {
         val sut = createCardClient(testScheduler)
 
@@ -357,7 +351,6 @@ class CardClientUnitTest {
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val sut = CardClient(
-            activity,
             checkoutOrdersAPI,
             paymentMethodTokensAPI,
             analyticsService,
@@ -370,7 +363,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `when client is complete, lifecycle observer is removed`() = runTest {
+    fun `when client is complete, all listeners are removed`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val lifeCycle = mockk<Lifecycle>(relaxed = true)
@@ -378,7 +371,6 @@ class CardClientUnitTest {
 
         sut.removeObservers()
 
-        verify { lifeCycle.removeObserver(sut.lifeCycleObserver) }
         expectThat(sut.approveOrderListener).isNull()
         expectThat(sut.cardVaultListener).isNull()
     }
