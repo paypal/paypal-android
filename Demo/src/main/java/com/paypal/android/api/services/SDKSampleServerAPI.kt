@@ -8,7 +8,6 @@ import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
-import com.paypal.android.usecase.UpdateOrderUseCase
 import com.paypal.checkout.order.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -19,7 +18,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
@@ -58,12 +56,6 @@ class SDKSampleServerAPI {
 
         @GET("/client_id")
         suspend fun fetchClientId(): ClientId
-
-        @PATCH("/orders/{orderId}")
-        suspend fun patchOrder(
-            @Path("orderId") orderId: String,
-            @Body body: List<UpdateOrderUseCase.PatchRequestBody>
-        ): ResponseBody
 
         @POST("/orders/{orderId}/capture")
         suspend fun captureOrder(
@@ -148,15 +140,6 @@ class SDKSampleServerAPI {
         DEFAULT_ORDER_ID?.let {
             Order(it, "CREATED")
         } ?: findService(merchantIntegration).createOrder(orderRequest)
-    }
-
-    suspend fun patchOrder(
-        orderId: String,
-        body: List<UpdateOrderUseCase.PatchRequestBody>,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ) = safeApiCall {
-        findService(merchantIntegration).patchOrder(orderId, body)
-        true
     }
 
     suspend fun captureOrder(

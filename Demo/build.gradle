@@ -95,7 +95,6 @@ kapt {
 dependencies {
     debugImplementation project(':CardPayments')
     debugImplementation project(':FraudProtection')
-    debugImplementation project(':PayPalNativePayments')
     debugImplementation project(':PayPalWebPayments')
     debugImplementation project(':PaymentButtons')
     debugImplementation project(':Venmo')
@@ -103,7 +102,6 @@ dependencies {
     releaseImplementation deps.cardPayments
     releaseImplementation deps.paymentButtons
     releaseImplementation deps.paypalWebPayments
-    releaseImplementation deps.paypalNativePayments
     releaseImplementation deps.fraudProtection
 
     implementation deps.kotlinStdLib

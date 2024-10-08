@@ -83,7 +83,6 @@ buildscript {
             "cardPayments"                : "com.paypal.android:card-payments:${modules.sdkVersionName}",
             "paymentButtons"              : "com.paypal.android:payment-buttons:${modules.sdkVersionName}",
             "paypalWebPayments"           : "com.paypal.android:paypal-web-payments:${modules.sdkVersionName}",
-            "paypalNativePayments"        : "com.paypal.android:paypal-native-payments:${modules.sdkVersionName}",
             "fraudProtection"             : "com.paypal.android:fraud-protection:${modules.sdkVersionName}",
 
     ]
@@ -158,7 +157,6 @@ detekt {
             "CorePayments/src",
             "CardPayments/src",
             "PayPalWebPayments/src",
-            "PayPalNativePayments/src",
             "FraudProtection/src",
             "Demo/src"
     )
