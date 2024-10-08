@@ -23,7 +23,7 @@ import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 @Composable
 fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
@@ -91,7 +91,7 @@ private fun Step2_VaultPayPal(
             successTitle = "PAYPAL VAULTED",
             state = uiState.vaultPayPalState,
             onClick = {
-                context.getActivity()?.let { activity ->
+                context.getActivityOrNull()?.let { activity ->
                     viewModel.vaultSetupToken(activity)
                 }
             }

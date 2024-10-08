@@ -25,7 +25,7 @@ import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 @Composable
 fun PayPalWebView(
@@ -97,7 +97,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivity()?.let { viewModel.startWebCheckout(it) } },
+            onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
@@ -122,7 +122,7 @@ private fun Step3_CompleteOrder(uiState: PayPalWebUiState, viewModel: PayPalWebV
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",
             state = uiState.completeOrderState,
-            onClick = { context.getActivity()?.let { viewModel.completeOrder(it) } },
+            onClick = { context.getActivityOrNull()?.let { viewModel.completeOrder(it) } },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

@@ -209,4 +209,8 @@ class VaultCardViewModel @Inject constructor(
         super.onCleared()
         cardClient?.removeObservers()
     }
+
+    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+        cardClient?.handleBrowserSwitchResult(activity)
+    }
 }

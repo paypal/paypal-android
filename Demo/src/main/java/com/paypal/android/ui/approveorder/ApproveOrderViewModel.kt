@@ -3,6 +3,7 @@ package com.paypal.android.ui.approveorder
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -211,5 +212,9 @@ class ApproveOrderViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         cardClient?.removeObservers()
+    }
+
+    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+        cardClient?.handleBrowserSwitchResult(activity)
     }
 }
