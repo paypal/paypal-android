@@ -26,8 +26,9 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 @ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
@@ -43,6 +44,12 @@ fun ApproveOrderView(
         // continuously scroll to bottom of the list when scroll bounds change
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        context.getActivityOrNull()?.let { viewModel.handleBrowserSwitchResult(it) }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -117,7 +124,7 @@ private fun Step2_ApproveOrder(
             successTitle = "ORDER APPROVED",
             state = uiState.approveOrderState,
             onClick = {
-                context.getActivity()?.let { viewModel.approveOrder(it) }
+                context.getActivityOrNull()?.let { viewModel.approveOrder(it) }
             },
             modifier = Modifier.fillMaxWidth()
         ) { state ->
