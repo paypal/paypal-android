@@ -8,7 +8,7 @@ import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
-import com.paypal.checkout.order.OrderRequest
+import com.paypal.android.models.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -128,7 +128,7 @@ class SDKSampleServerAPI {
         if (DEFAULT_ORDER_ID != null) {
             Order(DEFAULT_ORDER_ID, "CREATED")
         } else {
-            val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
+            val body = JsonParser().parse(orderRequest.toString()) as JsonObject
             findService(merchantIntegration).createOrder(body)
         }
     }

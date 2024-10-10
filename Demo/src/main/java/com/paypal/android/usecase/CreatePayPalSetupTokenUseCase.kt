@@ -34,7 +34,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             // Ref: https://stackoverflow.com/a/19610814
             val body = request.replace("\\/", "/")
 
-            val jsonOrder = JsonParser.parseString(body) as JsonObject
+            val jsonOrder = JsonParser().parse(body) as JsonObject
             sdkSampleServerAPI.createPayPalSetupToken(jsonOrder)
         }
 }

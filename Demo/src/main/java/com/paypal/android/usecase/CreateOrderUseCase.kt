@@ -24,7 +24,7 @@ class CreateOrderUseCase @Inject constructor(
                 .put("amount", amountJSON)
 
             val orderRequest = JSONObject()
-                .put("intent", request.orderIntent)
+                .put("intent", request.intent)
                 .put("purchase_units", JSONArray().put(purchaseUnitJSON))
 
             if (request.shouldVault) {

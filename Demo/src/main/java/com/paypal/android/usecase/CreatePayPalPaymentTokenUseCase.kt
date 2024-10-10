@@ -27,7 +27,7 @@ class CreatePayPalPaymentTokenUseCase @Inject constructor(
             }
             """
 
-            val requestJson = JsonParser.parseString(request) as JsonObject
+            val requestJson = JsonParser().parse(request) as JsonObject
             sdkSampleServerAPI.createPayPalPaymentToken(requestJson)
         }
 }
