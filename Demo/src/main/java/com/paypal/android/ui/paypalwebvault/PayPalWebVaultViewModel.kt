@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypalwebvault
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
@@ -96,7 +97,7 @@ class PayPalWebVaultViewModel @Inject constructor(
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
                 paypalClient?.vaultListener = this@PayPalWebVaultViewModel
 
-                paypalClient?.vault(request)
+                paypalClient?.vault(activity, request)
             }
         }
     }
@@ -129,5 +130,9 @@ class PayPalWebVaultViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         paypalClient?.removeObservers()
+    }
+
+    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+        paypalClient?.handleBrowserSwitchResult(activity)
     }
 }
