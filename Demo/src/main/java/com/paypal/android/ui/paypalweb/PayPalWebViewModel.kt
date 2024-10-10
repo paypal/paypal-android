@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -117,7 +118,7 @@ class PayPalWebViewModel @Inject constructor(
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
                 paypalClient?.listener = this@PayPalWebViewModel
 
-                paypalClient?.start(PayPalWebCheckoutRequest(orderId, fundingSource))
+                paypalClient?.start(activity, PayPalWebCheckoutRequest(orderId, fundingSource))
             }
         }
     }
@@ -158,5 +159,9 @@ class PayPalWebViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         paypalClient?.removeObservers()
+    }
+
+    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+        paypalClient?.handleBrowserSwitchResult(activity)
     }
 }

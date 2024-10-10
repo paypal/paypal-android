@@ -1,10 +1,10 @@
 package com.paypal.android.paypalwebpayments
 
+import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import java.lang.ref.WeakReference
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -13,8 +13,6 @@ import java.lang.ref.WeakReference
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
-    // NEXT MAJOR VERSION: remove hardcoded activity reference
-    private val activity: FragmentActivity,
     private val analyticsService: AnalyticsService,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
@@ -26,13 +24,8 @@ class PayPalWebCheckoutClient internal constructor(
      * @param configuration a [CoreConfig] object
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
-    constructor(
-        activity: FragmentActivity,
-        configuration: CoreConfig,
-        urlScheme: String
-    ) : this(
-        activity,
-        AnalyticsService(activity.applicationContext, configuration),
+    constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
+        AnalyticsService(context.applicationContext, configuration),
         PayPalWebLauncher(urlScheme, configuration),
     )
 
@@ -46,30 +39,15 @@ class PayPalWebCheckoutClient internal constructor(
      */
     var vaultListener: PayPalWebVaultListener? = null
 
-    private val activityReference = WeakReference(activity)
-
-    internal var observer = PayPalWebCheckoutLifeCycleObserver(this)
-
-    init {
-        activity.lifecycle.addObserver(observer)
-        // NEXT MAJOR VERSION: remove hardcoded activity reference
-    }
-
     /**
      * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(request: PayPalWebCheckoutRequest) {
+    fun start(activity: FragmentActivity, request: PayPalWebCheckoutRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-
-        activityReference.get()?.let { activity ->
-            payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
-                notifyWebCheckoutFailure(launchError, request.orderId)
-            }
-        } ?: {
-            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
-            notifyWebCheckoutFailure(error, request.orderId)
+        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
+            notifyWebCheckoutFailure(launchError, request.orderId)
         }
     }
 
@@ -78,34 +56,26 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    fun vault(request: PayPalWebVaultRequest) {
+    fun vault(activity: FragmentActivity, request: PayPalWebVaultRequest) {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
-
-        activityReference.get()?.let { activity ->
-            payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
-                notifyVaultFailure(launchError)
-            }
-        } ?: {
-            val error = PayPalSDKError(errorDescription = "No activity found.", code = 0)
-            notifyVaultFailure(error)
+        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
+            notifyVaultFailure(launchError)
         }
     }
 
     @Suppress("NestedBlockDepth")
-    internal fun handleBrowserSwitchResult() {
-        activityReference.get()?.let { activity ->
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-                when (status) {
-                    is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
-                    is PayPalWebStatus.CheckoutError -> status.run {
-                        notifyWebCheckoutFailure(error, orderId)
-                    }
-
-                    is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
-                    is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                    is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
-                    PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
+            when (status) {
+                is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
+                is PayPalWebStatus.CheckoutError -> status.run {
+                    notifyWebCheckoutFailure(error, orderId)
                 }
+
+                is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
+                is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+                is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
+                PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
             }
         }
     }
@@ -144,7 +114,6 @@ class PayPalWebCheckoutClient internal constructor(
      * Call this method at the end of the web checkout flow to clear out all observers and listeners
      */
     fun removeObservers() {
-        activityReference.get()?.let { it.lifecycle.removeObserver(observer) }
         vaultListener = null
         listener = null
     }
