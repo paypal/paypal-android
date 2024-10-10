@@ -14,5 +14,4 @@ enum class Feature(@StringRes val stringRes: Int, val routeName: String) {
         R.string.feature_paypal_static_buttons,
         DemoAppDestinations.PAYPAL_STATIC_BUTTONS
     ),
-    PAYPAL_NATIVE(R.string.feature_paypal_native, DemoAppDestinations.PAYPAL_NATIVE)
 }

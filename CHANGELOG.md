@@ -2,6 +2,9 @@
 
 ## unreleased
 
+* Breaking Changes
+  * PayPalNativePayments
+    * Remove entire PayPalNativePayments module
 * All Modules
   * Upgrade compileSdkVersion and targetSdkVersion to API 35
 * CardPayments

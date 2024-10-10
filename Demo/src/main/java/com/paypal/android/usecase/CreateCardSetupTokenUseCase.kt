@@ -32,7 +32,7 @@ class CreateCardSetupTokenUseCase @Inject constructor(
                 }
             }
             """
-            val jsonOrder = JsonParser.parseString(request) as JsonObject
+            val jsonOrder = JsonParser().parse(request) as JsonObject
             sdkSampleServerAPI.createSetupToken(jsonOrder)
         }
 }
