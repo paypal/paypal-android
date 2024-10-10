@@ -112,11 +112,6 @@ dependencies {
     implementation deps.androidxLifecycleRuntimeKtx
     implementation deps.fragmentKtx
 
-    // TODO: remove dependency when we don't relay on nxo models anymore
-    implementation(deps.nativeCheckout) {
-        exclude module: 'data-collector'
-    }
-
     // Compose Bill of Materials (BOM) dependency manages compose dependency versions without
     // us having to explicitly state versions of individual compose dependencies; the BOM project
     // selects dependency versions for each compose dependency that are known by the JetPack team
