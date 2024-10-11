@@ -128,7 +128,7 @@ class SDKSampleServerAPI {
         if (DEFAULT_ORDER_ID != null) {
             Order(DEFAULT_ORDER_ID, "CREATED")
         } else {
-            val body = JsonParser().parse(orderRequest.toString()) as JsonObject
+            val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
             findService(merchantIntegration).createOrder(body)
         }
     }
