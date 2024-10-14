@@ -3,7 +3,6 @@ include ':CorePayments'
 include ':Demo'
 rootProject.name = "AndroidSDK"
 include ':FraudProtection'
-include ':PayPalNativePayments'
 include ':PayPalWebPayments'
 include ':PaymentButtons'
 include ':Venmo'

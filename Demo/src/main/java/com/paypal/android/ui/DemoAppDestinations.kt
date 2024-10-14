@@ -8,7 +8,6 @@ object DemoAppDestinations {
     const val PAYPAL_WEB_VAULT = "paypal_web_vault"
     const val PAYPAL_BUTTONS = "paypal_buttons"
     const val PAYPAL_STATIC_BUTTONS = "paypal_static_buttons"
-    const val PAYPAL_NATIVE = "paypal_native"
     const val SELECT_TEST_CARD = "select_test_card"
 
     fun titleForDestination(destination: String?): String = when (destination) {
@@ -18,7 +17,6 @@ object DemoAppDestinations {
         PAYPAL_WEB -> "PayPal Web"
         PAYPAL_BUTTONS -> "PayPal Buttons"
         PAYPAL_STATIC_BUTTONS -> "PayPal Static Buttons"
-        PAYPAL_NATIVE -> "PayPal Native"
         SELECT_TEST_CARD -> "Select a Test Card"
         PAYPAL_WEB_VAULT -> "PayPal Web Vault"
         else -> "Demo"

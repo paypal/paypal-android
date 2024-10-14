@@ -41,10 +41,6 @@ private val payPalWebFeatures = listOf(
     Feature.PAYPAL_WEB_VAULT
 )
 
-private val payPalNativeFeatures = listOf(
-    Feature.PAYPAL_NATIVE
-)
-
 @ExperimentalFoundationApi
 @Composable
 fun FeaturesView(
@@ -67,12 +63,6 @@ fun FeaturesView(
         }
         item {
             FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
-        }
-        stickyHeader {
-            FeatureGroupHeader("PayPal Native")
-        }
-        item {
-            FeatureOptions(payPalNativeFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
     }
 }
