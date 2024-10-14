@@ -63,6 +63,14 @@ class CheckoutViewModel @Inject constructor(
         }
     }
 
+    fun showCardFormModal() {
+        isCardFormModalVisible = true
+    }
+
+    fun hideCardFormModal() {
+        isCardFormModalVisible = false
+    }
+
     fun checkoutWithCard(activity: FragmentActivity) {
         isLoading = true
         viewModelScope.launch {
@@ -113,6 +121,12 @@ class CheckoutViewModel @Inject constructor(
             }
         }
     }
+
+    private var isCardFormModalVisible
+        get() = _uiState.value.isCardFormModalVisible
+        set(value) {
+            _uiState.update { it.copy(isCardFormModalVisible = value) }
+        }
 
     private var isLoading
         get() = _uiState.value.isLoading

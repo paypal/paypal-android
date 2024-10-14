@@ -7,25 +7,17 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import com.paypal.android.R
-import com.paypal.android.ui.approveorder.CardNumberVisualTransformation
-import com.paypal.android.ui.approveorder.DateVisualTransformation
 import com.paypal.android.utils.UIConstants
 
 @ExperimentalMaterial3Api
@@ -96,54 +88,6 @@ fun CardForm(
             }
         }
     }
-}
-
-@Composable
-private fun CardNumberTextField(
-    cardNumber: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = cardNumber,
-        label = { Text(stringResource(id = R.string.card_field_card_number)) },
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        visualTransformation = CardNumberVisualTransformation(),
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun ExpirationDateTextField(
-    expirationDate: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = expirationDate,
-        label = { Text(stringResource(id = R.string.card_field_expiration)) },
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        visualTransformation = DateVisualTransformation(),
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun SecurityCodeTextField(
-    securityCode: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = securityCode,
-        label = { Text(stringResource(id = R.string.card_field_security_code)) },
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        visualTransformation = PasswordVisualTransformation(),
-        onValueChange = onValueChange,
-        modifier = modifier
-    )
 }
 
 @ExperimentalMaterial3Api

@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,11 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -33,13 +40,16 @@ import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalButtonLabel
 import com.paypal.android.paymentbuttons.PaymentButtonShape
 import com.paypal.android.paymentbuttons.PaymentButtonSize
+import com.paypal.android.uishared.components.CardNumberTextField
+import com.paypal.android.uishared.components.ExpirationDateTextField
+import com.paypal.android.uishared.components.SecurityCodeTextField
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivity
 
 @Composable
+@ExperimentalMaterial3Api
 fun CheckoutView(viewModel: CheckoutViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
@@ -72,29 +82,19 @@ fun CheckoutView(viewModel: CheckoutViewModel = hiltViewModel()) {
                     .weight(1f)
             )
         }
-        PayPalButton(
+        PayWithCardButton(
+            onClick = {
+                viewModel.showCardFormModal()
+            },
+        )
+        PayWithPayPalButton(
             onClick = {
                 context.getActivity()?.let { viewModel.checkoutWithPayPal(it) }
             }
         )
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(4.dp),
-            onClick = {
-                context.getActivity()?.let { viewModel.checkoutWithCard(it) }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            Text(
-                text = "Pay with Card",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
+    }
+    if (uiState.isCardFormModalVisible) {
+        CardFormModalBottomSheet(viewModel)
     }
     if (uiState.isLoading) {
         LoadingDialog()
@@ -102,7 +102,27 @@ fun CheckoutView(viewModel: CheckoutViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun PayPalButton(onClick: () -> Unit) {
+fun PayWithCardButton(onClick: () -> Unit) {
+    Button(
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Black,
+            contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(4.dp),
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Text(
+            text = "Pay with Card",
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+fun PayWithPayPalButton(onClick: () -> Unit) {
     AndroidView(
         factory = { context ->
             PayPalButton(context).apply {
@@ -120,8 +140,55 @@ fun PayPalButton(onClick: () -> Unit) {
     )
 }
 
+@Composable
+@ExperimentalMaterial3Api
+fun CardFormModalBottomSheet(viewModel: CheckoutViewModel) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var cardNumber by remember { mutableStateOf("") }
+    var expirationDate by remember { mutableStateOf("") }
+    var securityCode by remember { mutableStateOf("") }
+
+    ModalBottomSheet(
+        modifier = Modifier.fillMaxHeight(0.8f),
+        sheetState = sheetState,
+        onDismissRequest = { viewModel.hideCardFormModal() },
+    ) {
+        Column(
+            verticalArrangement = UIConstants.spacingSmall,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = "Enter Card Details",
+                style = MaterialTheme.typography.displaySmall
+            )
+            Column(
+                verticalArrangement = UIConstants.spacingSmall
+            ) {
+                CardNumberTextField(
+                    cardNumber = cardNumber,
+                    onValueChange = { value -> cardNumber = value },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(horizontalArrangement = UIConstants.spacingMedium) {
+                    ExpirationDateTextField(
+                        expirationDate = expirationDate,
+                        onValueChange = { value -> expirationDate = value },
+                        modifier = Modifier.weight(weight = 1.5f)
+                    )
+                    SecurityCodeTextField(
+                        securityCode = securityCode,
+                        onValueChange = { value -> securityCode = value },
+                        modifier = Modifier.weight(1.0f)
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
+@ExperimentalMaterial3Api
 fun CheckoutPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
