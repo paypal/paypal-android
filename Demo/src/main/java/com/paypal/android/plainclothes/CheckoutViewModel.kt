@@ -149,15 +149,19 @@ class CheckoutViewModel @Inject constructor(
         }
 
     override fun onApproveOrderSuccess(result: CardResult) {
-        TODO("Not yet implemented")
+        hideCardFormModal()
+        isLoading = false
     }
 
     override fun onApproveOrderFailure(error: PayPalSDKError) {
-        TODO("Not yet implemented")
+        hideCardFormModal()
+        isLoading = false
+        // TODO: display error
     }
 
     override fun onApproveOrderCanceled() {
-        TODO("Not yet implemented")
+        hideCardFormModal()
+        isLoading = false
     }
 
     override fun onApproveOrderThreeDSecureWillLaunch() {
@@ -165,7 +169,7 @@ class CheckoutViewModel @Inject constructor(
     }
 
     override fun onApproveOrderThreeDSecureDidFinish() {
-        TODO("Not yet implemented")
+        // do nothing
     }
 
     override fun onVaultSuccess(result: CardVaultResult) {
