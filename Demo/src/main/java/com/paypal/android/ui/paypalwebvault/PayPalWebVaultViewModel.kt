@@ -17,6 +17,7 @@ import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +36,7 @@ class PayPalWebVaultViewModel @Inject constructor(
         const val URL_SCHEME = "com.paypal.android.demo"
     }
 
+    private var authState: String? = null
     private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -97,7 +99,16 @@ class PayPalWebVaultViewModel @Inject constructor(
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
                 paypalClient?.vaultListener = this@PayPalWebVaultViewModel
 
-                paypalClient?.vault(activity, request)
+                paypalClient?.vault(activity, request)?.let { result ->
+                    when (result) {
+                        is PayPalPresentAuthChallengeResult.Success -> {
+                            authState = result.authState
+                        }
+                        is PayPalPresentAuthChallengeResult.Failure -> {
+                            vaultPayPalState = ActionState.Failure(result.error)
+                        }
+                    }
+                }
             }
         }
     }
@@ -133,6 +144,8 @@ class PayPalWebVaultViewModel @Inject constructor(
     }
 
     fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        paypalClient?.handleBrowserSwitchResult(activity)
+        authState?.let {
+            paypalClient?.completeAuthChallenge(activity.intent, it)
+        }
     }
 }
