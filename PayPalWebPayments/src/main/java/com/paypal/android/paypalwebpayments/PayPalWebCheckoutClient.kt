@@ -1,6 +1,7 @@
 package com.paypal.android.paypalwebpayments
 
 import android.content.Context
+import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -44,11 +45,22 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(activity: FragmentActivity, request: PayPalWebCheckoutRequest) {
+    fun start(
+        activity: FragmentActivity,
+        request: PayPalWebCheckoutRequest
+    ): PayPalPresentAuthChallengeResult {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
-        payPalWebLauncher.launchPayPalWebCheckout(activity, request)?.let { launchError ->
-            notifyWebCheckoutFailure(launchError, request.orderId)
+        val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                notifyWebCheckoutFailure(result.error, request.orderId)
+            }
+
+            is PayPalPresentAuthChallengeResult.Success -> {
+                // TODO: track success with analytics
+            }
         }
+        return result
     }
 
     /**
@@ -56,28 +68,41 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    fun vault(activity: FragmentActivity, request: PayPalWebVaultRequest) {
+    fun vault(
+        activity: FragmentActivity,
+        request: PayPalWebVaultRequest
+    ): PayPalPresentAuthChallengeResult {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
-        payPalWebLauncher.launchPayPalWebVault(activity, request)?.let { launchError ->
-            notifyVaultFailure(launchError)
-        }
-    }
+        val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                notifyVaultFailure(result.error)
+            }
 
-    @Suppress("NestedBlockDepth")
-    fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        payPalWebLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-            when (status) {
-                is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
-                is PayPalWebStatus.CheckoutError -> status.run {
-                    notifyWebCheckoutFailure(error, orderId)
-                }
-
-                is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
-                is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
-                PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+            is PayPalPresentAuthChallengeResult.Success -> {
+                // TODO: track success with analytics
             }
         }
+        return result
+    }
+
+    fun completeAuthChallenge(intent: Intent, authState: String): PayPalWebStatus {
+        val status = payPalWebLauncher.completeBrowserSwitchRequest(intent, authState)
+        when (status) {
+            is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
+            is PayPalWebStatus.CheckoutError -> status.run {
+                notifyWebCheckoutFailure(error, orderId)
+            }
+
+            is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
+            is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+            is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
+            PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+            PayPalWebStatus.NoResult -> {
+                // ignore
+            }
+        }
+        return status
     }
 
     private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {

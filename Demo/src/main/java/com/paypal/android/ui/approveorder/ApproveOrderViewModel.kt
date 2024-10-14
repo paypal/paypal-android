@@ -11,7 +11,9 @@ import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
@@ -50,6 +52,8 @@ class ApproveOrderViewModel @Inject constructor(
 
     private var cardClient: CardClient? = null
     private lateinit var payPalDataCollector: PayPalDataCollector
+
+    private var authState: String? = null
 
     fun createOrder() {
         viewModelScope.launch {
@@ -91,6 +95,22 @@ class ApproveOrderViewModel @Inject constructor(
                         approveOrderState = ActionState.Success(result)
                     }
 
+                    override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
+                        cardClient?.presentAuthChallenge(activity, authChallenge)
+                            ?.let { presentAuthResult ->
+                                when (presentAuthResult) {
+                                    is CardPresentAuthChallengeResult.Success -> {
+                                        authState = presentAuthResult.authState
+                                    }
+
+                                    is CardPresentAuthChallengeResult.Failure -> {
+                                        approveOrderState =
+                                            ActionState.Failure(presentAuthResult.error)
+                                    }
+                                }
+                            }
+                    }
+
                     override fun onApproveOrderFailure(error: PayPalSDKError) {
                         approveOrderState = ActionState.Failure(error)
                     }
@@ -121,7 +141,8 @@ class ApproveOrderViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
-                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val dataCollectorRequest =
+                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
                 val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
                 completeOrderState =
                     completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
@@ -215,6 +236,6 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        cardClient?.handleBrowserSwitchResult(activity)
+        authState?.let { cardClient?.completeAuthChallenge(activity.intent, it) }
     }
 }
