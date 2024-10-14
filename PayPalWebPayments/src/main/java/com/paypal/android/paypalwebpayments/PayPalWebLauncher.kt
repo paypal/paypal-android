@@ -137,29 +137,6 @@ internal class PayPalWebLauncher(
             BrowserSwitchFinalResult.NoResult -> PayPalWebStatus.NoResult
         }
 
-//    fun deliverBrowserSwitchResult(activity: FragmentActivity) =
-//        browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
-//            val requestType =
-//                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-//            if (requestType == REQUEST_TYPE_VAULT) {
-//                parseVaultResult(browserSwitchResult)
-//            } else {
-//                parseWebCheckoutResult(browserSwitchResult)
-//            }
-//        }
-
-//    private fun parseWebCheckoutResult(browserSwitchResult: BrowserSwitchResult) =
-//        when (browserSwitchResult.status) {
-//            BrowserSwitchStatus.SUCCESS -> parseWebCheckoutSuccessResult(browserSwitchResult)
-//            BrowserSwitchStatus.CANCELED -> {
-//                val orderId =
-//                    browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-//                PayPalWebStatus.CheckoutCanceled(orderId)
-//            }
-//
-//            else -> null
-//        }
-
     private fun parseWebCheckoutSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebStatus {
         val deepLinkUrl = finalResult.returnUrl
         val metadata = finalResult.requestMetadata
@@ -176,13 +153,6 @@ internal class PayPalWebLauncher(
             }
         }
     }
-
-//    private fun parseVaultResult(browserSwitchResult: BrowserSwitchResult) =
-//        when (browserSwitchResult.status) {
-//            BrowserSwitchStatus.SUCCESS -> parseVaultSuccessResult(browserSwitchResult)
-//            BrowserSwitchStatus.CANCELED -> PayPalWebStatus.VaultCanceled
-//            else -> null
-//        }
 
     private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebStatus {
         val deepLinkUrl = finalResult.returnUrl
