@@ -1,3 +1,6 @@
 package com.paypal.android.plainclothes
 
-data class CheckoutUiState(val isLoading: Boolean = false)
+data class CheckoutUiState(
+    val isLoading: Boolean = false,
+    val checkoutError: Throwable? = null
+)
