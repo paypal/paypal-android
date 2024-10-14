@@ -14,6 +14,9 @@
   * Update Demo app to use Java 17 to fix kapt build errors
 * GitHub Actions
   * Bump Java Version to 17 for all build actions
+* Breaking Changes
+  * PayPalNativePayments
+    * Remove entire PayPalNativePayments module
 
 ## 1.6.0 (2024-10-24)
 * All Modules

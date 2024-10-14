@@ -57,7 +57,6 @@ detekt {
             "CorePayments/src",
             "CardPayments/src",
             "PayPalWebPayments/src",
-            "PayPalNativePayments/src",
             "FraudProtection/src",
             "Demo/src"
     )
