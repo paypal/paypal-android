@@ -94,6 +94,10 @@ class CheckoutViewModel @Inject constructor(
     private suspend fun finishCheckoutWithPayPal(activity: FragmentActivity, order: Order) {
         initializePaymentsSDK(activity)
         val request = PayPalWebCheckoutRequest(order.id!!)
+
+        // clear loader since we won't know much about the state of the PayPal flow after
+        // the customer leaves the app
+        isLoading = false
         payPalClient.start(request)
     }
 
