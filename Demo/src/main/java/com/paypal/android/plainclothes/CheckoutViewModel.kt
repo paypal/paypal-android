@@ -7,10 +7,13 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.ApproveOrderListener
+import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultResult
+import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
@@ -51,6 +54,14 @@ class CheckoutViewModel @Inject constructor(
     private lateinit var payPalClient: PayPalWebCheckoutClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
+    fun showCardFormModal() {
+        isCardFormModalVisible = true
+    }
+
+    fun hideCardFormModal() {
+        isCardFormModalVisible = false
+    }
+
     fun checkoutWithPayPal(activity: FragmentActivity) {
         isLoading = true
         viewModelScope.launch {
@@ -63,20 +74,12 @@ class CheckoutViewModel @Inject constructor(
         }
     }
 
-    fun showCardFormModal() {
-        isCardFormModalVisible = true
-    }
-
-    fun hideCardFormModal() {
-        isCardFormModalVisible = false
-    }
-
-    fun checkoutWithCard(activity: FragmentActivity) {
+    fun checkoutWithCard(activity: FragmentActivity, card: Card) {
         isLoading = true
         viewModelScope.launch {
             when (val orderResult = createOrder()) {
                 is SDKSampleServerResult.Success ->
-                    finishCheckoutWithCard(activity, orderResult.value)
+                    finishCheckoutWithCard(activity, orderResult.value, card)
 
                 is SDKSampleServerResult.Failure -> checkoutError = orderResult.value
             }
@@ -94,9 +97,14 @@ class CheckoutViewModel @Inject constructor(
         payPalClient.start(request)
     }
 
-    private suspend fun finishCheckoutWithCard(activity: FragmentActivity, order: Order) {
+    private suspend fun finishCheckoutWithCard(
+        activity: FragmentActivity,
+        order: Order,
+        card: Card
+    ) {
         initializePaymentsSDK(activity)
-        // TODO: confirm Card payment source
+        val request = CardRequest(order.id!!, card, APP_RETURN_URL, sca = SCA.SCA_ALWAYS)
+        cardClient.approveOrder(activity, request)
     }
 
     private suspend fun initializePaymentsSDK(activity: FragmentActivity) {
@@ -153,7 +161,7 @@ class CheckoutViewModel @Inject constructor(
     }
 
     override fun onApproveOrderThreeDSecureWillLaunch() {
-        TODO("Not yet implemented")
+        // do nothing
     }
 
     override fun onApproveOrderThreeDSecureDidFinish() {

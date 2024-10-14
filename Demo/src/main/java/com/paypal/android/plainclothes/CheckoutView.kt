@@ -36,10 +36,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
+import com.paypal.android.cardpayments.Card
 import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalButtonLabel
 import com.paypal.android.paymentbuttons.PaymentButtonShape
 import com.paypal.android.paymentbuttons.PaymentButtonSize
+import com.paypal.android.ui.approveorder.DateString
+import com.paypal.android.uishared.components.ActionButton
 import com.paypal.android.uishared.components.CardNumberTextField
 import com.paypal.android.uishared.components.ExpirationDateTextField
 import com.paypal.android.uishared.components.SecurityCodeTextField
@@ -94,9 +97,14 @@ fun CheckoutView(viewModel: CheckoutViewModel = hiltViewModel()) {
         )
     }
     if (uiState.isCardFormModalVisible) {
-        CardFormModalBottomSheet(viewModel)
-    }
-    if (uiState.isLoading) {
+        CardFormModalBottomSheet(
+            isLoading = uiState.isLoading,
+            onDismissed = { viewModel.hideCardFormModal() },
+            onSubmit = { card ->
+                context.getActivity()?.let { viewModel.checkoutWithCard(it, card) }
+            }
+        )
+    } else if (uiState.isLoading) {
         LoadingDialog()
     }
 }
@@ -142,7 +150,11 @@ fun PayWithPayPalButton(onClick: () -> Unit) {
 
 @Composable
 @ExperimentalMaterial3Api
-fun CardFormModalBottomSheet(viewModel: CheckoutViewModel) {
+fun CardFormModalBottomSheet(
+    isLoading: Boolean,
+    onDismissed: () -> Unit,
+    onSubmit: (card: Card) -> Unit
+) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var cardNumber by remember { mutableStateOf("") }
     var expirationDate by remember { mutableStateOf("") }
@@ -151,7 +163,7 @@ fun CardFormModalBottomSheet(viewModel: CheckoutViewModel) {
     ModalBottomSheet(
         modifier = Modifier.fillMaxHeight(0.8f),
         sheetState = sheetState,
-        onDismissRequest = { viewModel.hideCardFormModal() },
+        onDismissRequest = onDismissed,
     ) {
         Column(
             verticalArrangement = UIConstants.spacingSmall,
@@ -182,6 +194,20 @@ fun CardFormModalBottomSheet(viewModel: CheckoutViewModel) {
                     )
                 }
             }
+            ActionButton(
+                text = "SUBMIT",
+                isLoading = isLoading,
+                onClick = {
+                    val dateString = DateString(expirationDate)
+                    val card = Card(
+                        number = cardNumber,
+                        expirationMonth = dateString.formattedMonth,
+                        expirationYear = dateString.formattedYear,
+                        securityCode = securityCode
+                    )
+                    onSubmit(card)
+                }
+            )
         }
     }
 }
