@@ -6,6 +6,7 @@
     <string name="feature_vault">Vault</string>
     <string name="feature_paypal_web">PayPal Web</string>
     <string name="feature_paypal_web_vault">PayPal Web Vault</string>
+    <string name="feature_paypal_native">PayPal Native</string>
     <string name="feature_paypal_buttons">PayPal Buttons</string>
     <string name="feature_paypal_static_buttons">PayPal Buttons - XML</string>
 
@@ -13,6 +14,13 @@
     <string name="card_field_card_number">CARD NUMBER</string>
     <string name="card_field_expiration">EXP. DATE</string>
     <string name="card_field_security_code">SEC. CODE</string>
+
+    <string name="pay_pal_shipping_preference_title">SHIPPING PREFERENCE</string>
+    <string-array name="pay_pal_shipping_preference_options">
+        <item>GET_FROM_FILE</item>
+        <item>NO_SHIPPING</item>
+        <item>SET_PROVIDED_ADDRESS</item>
+    </string-array>
 
     <string name="sca_title">SCA</string>
     <string-array name="sca_options">
@@ -46,5 +54,7 @@
         <item>PAY_LATER</item>
         <item>PAYPAL</item>
     </string-array>
+
+    <string name="plain_tshirt_description">A plain t-shirt</string>
 
 </resources>
