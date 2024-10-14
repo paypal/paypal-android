@@ -95,7 +95,6 @@ kapt {
 dependencies {
     implementation project(':CardPayments')
     implementation project(':FraudProtection')
-    implementation project(':PayPalNativePayments')
     implementation project(':PayPalWebPayments')
     implementation project(':PaymentButtons')
     implementation project(':Venmo')
@@ -107,11 +106,6 @@ dependencies {
     implementation libs.androidx.constraintLayout
     implementation libs.lifecycle.runtimeKtx
     implementation libs.androidx.fragmentKtx
-
-    // TODO: remove dependency when we don't relay on nxo models anymore
-    implementation(libs.paypal.nativeCheckout) {
-        exclude module: 'data-collector'
-    }
 
     // Compose Bill of Materials (BOM) dependency manages compose dependency versions without
     // us having to explicitly state versions of individual compose dependencies; the BOM project
