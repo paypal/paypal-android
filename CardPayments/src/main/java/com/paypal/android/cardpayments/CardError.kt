@@ -24,7 +24,7 @@ internal object CardError {
     )
 
     // 3. An unknown error occurred.
-    fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
+    fun browserSwitchError(cause: Exception) = PayPalSDKError(
         code = CardErrorCode.BROWSER_SWITCH.ordinal,
         errorDescription = cause.message ?: "Unable to Browser Switch"
     )

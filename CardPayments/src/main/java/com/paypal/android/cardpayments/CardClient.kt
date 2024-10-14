@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
@@ -96,7 +97,7 @@ class CardClient internal constructor(
 
                     val url = Uri.parse(response.payerActionHref)
                     val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                    authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
+                    approveOrderListener?.onAuthorizationRequired(authChallenge)
                 }
             } catch (error: PayPalSDKError) {
                 analyticsService.sendAnalyticsEvent(
@@ -136,31 +137,25 @@ class CardClient internal constructor(
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
      */
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
-        authChallengeLauncher.presentAuthChallenge(activity, authChallenge)?.let { launchError ->
-            when (authChallenge) {
-                is CardAuthChallenge.ApproveOrder ->
-                    approveOrderListener?.onApproveOrderFailure(launchError)
+    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) =
+        authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
 
-                is CardAuthChallenge.Vault ->
-                    cardVaultListener?.onVaultFailure(launchError)
+    fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
+        val status = authChallengeLauncher.completeRequest(intent, authState)
+        when (status) {
+            is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
+            is CardStatus.VaultError -> notifyVaultFailure(status.error)
+            is CardStatus.VaultCanceled -> notifyVaultCancelation()
+            is CardStatus.ApproveOrderError ->
+                notifyApproveOrderFailure(status.error, status.orderId)
+
+            is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
+            is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
+            CardStatus.NoResult -> {
+                // ignore
             }
         }
-    }
-
-    fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        authChallengeLauncher.deliverBrowserSwitchResult(activity)?.let { status ->
-            when (status) {
-                is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-                is CardStatus.VaultError -> notifyVaultFailure(status.error)
-                is CardStatus.VaultCanceled -> notifyVaultCancelation()
-                is CardStatus.ApproveOrderError ->
-                    notifyApproveOrderFailure(status.error, status.orderId)
-
-                is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
-                is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
-            }
-        }
+        return status
     }
 
     private fun notifyApproveOrderCanceled(orderId: String?) {

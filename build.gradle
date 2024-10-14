@@ -3,7 +3,7 @@ buildscript {
     ext.modules = [
             "sdkVersionName"      : "1.5.1-SNAPSHOT",
             "demoAppVersionCode"  : 4,
-            "androidMinSdkVersion": 21,
+            "androidMinSdkVersion": 23,
             "androidTargetVersion": 35
     ]
 
@@ -58,7 +58,7 @@ buildscript {
             "hiltKapt"                    : "com.google.dagger:hilt-compiler:${versions.hilt}",
 
             // Browser Switch
-            "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.3.1",
+            "browserSwitch"               : "com.braintreepayments.api:browser-switch:3.0.0-beta1",
 
             // Testing
             "junit"                       : "junit:junit:4.13.2",

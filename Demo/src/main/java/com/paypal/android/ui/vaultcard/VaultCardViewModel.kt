@@ -9,6 +9,7 @@ import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
@@ -37,6 +38,7 @@ class VaultCardViewModel @Inject constructor(
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
+    private var authState: String? = null
     private var cardClient: CardClient? = null
 
     private val _uiState = MutableStateFlow(VaultCardUiState())
@@ -202,7 +204,17 @@ class VaultCardViewModel @Inject constructor(
                 authChallengeState = ActionState.Failure(error)
             }
         }
-        cardClient?.presentAuthChallenge(activity, authChallenge)
+
+        cardClient?.presentAuthChallenge(activity, authChallenge)?.let { result ->
+            when (result) {
+                is CardPresentAuthChallengeResult.Success -> {
+                    authState = result.authState
+                }
+                is CardPresentAuthChallengeResult.Failure -> {
+                    authChallengeState = ActionState.Failure(result.error)
+                }
+            }
+        }
     }
 
     override fun onCleared() {
@@ -211,6 +223,6 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun handleBrowserSwitchResult(activity: FragmentActivity) {
-        cardClient?.handleBrowserSwitchResult(activity)
+        authState?.let { cardClient?.completeAuthChallenge(activity.intent, it) }
     }
 }
