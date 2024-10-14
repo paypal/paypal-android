@@ -87,43 +87,6 @@ internal class CardAuthLauncher(
             BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
         }
 
-//    fun deliverBrowserSwitchResult(activity: FragmentActivity) =
-//        browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
-//            val requestType =
-//                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-//            if (requestType == REQUEST_TYPE_VAULT) {
-//                parseVaultResult(browserSwitchResult)
-//            } else {
-//                // Assume REQUEST_TYPE_APPROVE_ORDER
-//                parseApproveOrderResult(browserSwitchResult)
-//            }
-//        }
-
-//    private fun parseVaultResult(finalResult: BrowserSwitchFinalResult.Success): CardStatus? {
-//        val setupTokenId =
-//            finalResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
-//        return when (finalResult.status) {
-//            BrowserSwitchStatus.SUCCESS -> parseVaultSuccessResult(finalResult)
-//            BrowserSwitchStatus.CANCELED -> CardStatus.VaultCanceled(setupTokenId)
-//            else -> null
-//        }
-//    }
-
-//    private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
-//        val orderId = browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-//        return if (orderId == null) {
-//            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
-//        } else {
-//            when (browserSwitchResult.status) {
-//                BrowserSwitchStatus.SUCCESS ->
-//                    parseApproveOrderSuccessResult(browserSwitchResult, orderId)
-//
-//                BrowserSwitchStatus.CANCELED -> CardStatus.ApproveOrderCanceled(orderId)
-//                else -> null
-//            }
-//        }
-//    }
-
     private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): CardStatus {
         val deepLinkUrl = finalResult.returnUrl
         val requestMetadata = finalResult.requestMetadata
