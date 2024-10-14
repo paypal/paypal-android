@@ -52,6 +52,7 @@ class CheckoutViewModel @Inject constructor(
     private lateinit var payPalDataCollector: PayPalDataCollector
 
     fun checkoutWithPayPal(activity: FragmentActivity) {
+        isLoading = true
         viewModelScope.launch {
             when (val orderResult = createOrder()) {
                 is SDKSampleServerResult.Success ->
@@ -63,6 +64,7 @@ class CheckoutViewModel @Inject constructor(
     }
 
     fun checkoutWithCard(activity: FragmentActivity) {
+        isLoading = true
         viewModelScope.launch {
             when (val orderResult = createOrder()) {
                 is SDKSampleServerResult.Success ->
@@ -111,6 +113,12 @@ class CheckoutViewModel @Inject constructor(
             }
         }
     }
+
+    private var isLoading
+        get() = _uiState.value.isLoading
+        set(value) {
+            _uiState.update { it.copy(isLoading = value) }
+        }
 
     private var checkoutError
         get() = _uiState.value.checkoutError
