@@ -33,7 +33,6 @@ import com.paypal.android.utils.UIConstants
 @Composable
 fun PlainClothesApp() {
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
     var shouldDisplayBackButton by remember { mutableStateOf(false) }
 
     NavDestinationChangeDisposableEffect(navController) { controller ->
@@ -54,12 +53,17 @@ fun PlainClothesApp() {
                 composable(PlainClothesAppDestinations.CHECKOUT) {
                     CheckoutView(
                         onCheckoutSuccess = { orderId ->
-                            navController.navigate(PlainClothesAppDestinations.CHECKOUT_SUCCESS)
+                            // TODO: Migrate to serialized route data classes after migrating to latest
+                            // version of Gradle
+                            // Ref: https://developer.android.com/guide/navigation/design#compose-arguments
+                            navController.navigate("checkout_success/$orderId")
                         }
                     )
                 }
-                composable(PlainClothesAppDestinations.CHECKOUT_SUCCESS) {
-                    CheckoutSuccessView()
+                composable(PlainClothesAppDestinations.CHECKOUT_SUCCESS) { navBackStackEntry ->
+                    navBackStackEntry.arguments?.getString("orderId")?.let { orderId ->
+                        CheckoutSuccessView(orderId)
+                    }
                 }
             }
         }

@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CheckoutSuccessView(orderId: String = "123") {
+fun CheckoutSuccessView(orderId: String) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
@@ -26,12 +26,12 @@ fun CheckoutSuccessView(orderId: String = "123") {
         Row {
             Text(
                 text = "Order ID",
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineSmall
             )
             Text(
                 text = orderId,
                 textAlign = TextAlign.End,
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier
                     .weight(1f)
             )
