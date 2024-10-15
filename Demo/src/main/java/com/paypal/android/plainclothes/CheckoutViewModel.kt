@@ -13,8 +13,6 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardResult
-import com.paypal.android.cardpayments.CardVaultListener
-import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -26,8 +24,6 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
-import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
-import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
@@ -44,12 +40,11 @@ class CheckoutViewModel @Inject constructor(
     private val createOrderUseCase: CreateOrderUseCase,
     private val getClientIdUseCase: GetClientIdUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
-) : AndroidViewModel(application), ApproveOrderListener, CardVaultListener,
-    PayPalWebCheckoutListener,
-    PayPalWebVaultListener {
+) : AndroidViewModel(application), ApproveOrderListener, PayPalWebCheckoutListener {
 
     companion object {
-        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
+        const val CARD_RETURN_URL = "com.paypal.android.demo://"
+        const val PAYPAL_RETURN_URL_SCHEME = "com.paypal.android.demo"
     }
 
     private val applicationContext: Context = application.applicationContext
@@ -139,7 +134,7 @@ class CheckoutViewModel @Inject constructor(
         card: Card
     ) {
         initializePaymentsSDK(activity)
-        val request = CardRequest(order.id!!, card, APP_RETURN_URL, sca = SCA.SCA_ALWAYS)
+        val request = CardRequest(order.id!!, card, CARD_RETURN_URL, sca = SCA.SCA_ALWAYS)
         cardClient.approveOrder(activity, request)
     }
 
@@ -155,11 +150,9 @@ class CheckoutViewModel @Inject constructor(
 
                 cardClient = CardClient(activity, coreConfig)
                 cardClient.approveOrderListener = this
-                cardClient.cardVaultListener = this
 
-                payPalClient = PayPalWebCheckoutClient(activity, coreConfig, APP_RETURN_URL)
+                payPalClient = PayPalWebCheckoutClient(activity, coreConfig, PAYPAL_RETURN_URL_SCHEME)
                 payPalClient.listener = this
-                payPalClient.vaultListener = this
 
                 payPalDataCollector = PayPalDataCollector(coreConfig)
             }
@@ -188,7 +181,9 @@ class CheckoutViewModel @Inject constructor(
 
     override fun onApproveOrderCanceled() {
         hideCardFormModal()
-        checkoutError = Exception("User Canceled")
+        // NOTE: the SDK cannot accurately determine implicit cancellations i.e. user returns to app
+        // without completing 3DS; for this reason the canceled event type was removed in BT v5 and
+        // it will also be removed in PPCP v2
         isLoading = false
     }
 
@@ -198,14 +193,6 @@ class CheckoutViewModel @Inject constructor(
 
     override fun onApproveOrderThreeDSecureDidFinish() {
         // do nothing
-    }
-
-    override fun onVaultSuccess(result: CardVaultResult) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onVaultFailure(error: PayPalSDKError) {
-        TODO("Not yet implemented")
     }
 
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
@@ -228,20 +215,10 @@ class CheckoutViewModel @Inject constructor(
     }
 
     override fun onPayPalWebCanceled() {
-        checkoutError = Exception("User Canceled")
+        // NOTE: the SDK cannot accurately determine implicit cancellations i.e. user returns to app
+        // without completing PayPal authorization; for this reason the canceled event type was
+        // removed in BT v5 and it will also be removed in PPCP v2
         isLoading = false
-    }
-
-    override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPayPalWebVaultCanceled() {
-        TODO("Not yet implemented")
     }
 
     private suspend fun completeOrder(orderId: String): SDKSampleServerResult<Order, Exception> {
