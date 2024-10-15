@@ -1,7 +1,6 @@
 package com.paypal.android.ui.vaultcard
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
@@ -120,7 +119,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    fun updateSetupToken(activity: AppCompatActivity) {
+    fun updateSetupToken(activity: ComponentActivity) {
         val setupToken = createdSetupToken
         if (setupToken == null) {
             updateSetupTokenState =
@@ -132,7 +131,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateSetupTokenWithId(activity: AppCompatActivity, setupTokenId: String) {
+    private suspend fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -187,7 +186,7 @@ class VaultCardViewModel @Inject constructor(
         )
     }
 
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
+    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) {
         authChallengeState = ActionState.Loading
 
         // change listener behavior to handle auth result
@@ -222,7 +221,7 @@ class VaultCardViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
-    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+    fun handleBrowserSwitchResult(activity: ComponentActivity) {
         authState?.let { cardClient?.completeAuthChallenge(activity.intent, it) }
     }
 }

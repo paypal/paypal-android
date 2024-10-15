@@ -2,7 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Intent
 import android.net.Uri
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -32,7 +32,7 @@ internal class PayPalWebLauncher(
     }
 
     fun launchPayPalWebCheckout(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         request: PayPalWebCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -47,7 +47,7 @@ internal class PayPalWebLauncher(
     }
 
     fun launchPayPalWebVault(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -62,7 +62,7 @@ internal class PayPalWebLauncher(
     }
 
     private fun launchBrowserSwitch(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         options: BrowserSwitchOptions
     ): PayPalPresentAuthChallengeResult =
         when (val startResult = browserSwitchClient.start(activity, options)) {

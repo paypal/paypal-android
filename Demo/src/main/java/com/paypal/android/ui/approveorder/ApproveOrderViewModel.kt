@@ -2,8 +2,7 @@ package com.paypal.android.ui.approveorder
 
 import android.content.Context
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -65,7 +64,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun approveOrder(activity: AppCompatActivity) {
+    fun approveOrder(activity: ComponentActivity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
@@ -76,7 +75,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    private suspend fun approveOrderWithId(activity: AppCompatActivity, orderId: String) {
+    private suspend fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -129,7 +128,7 @@ class ApproveOrderViewModel @Inject constructor(
                 }
 
                 val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
-                cardClient?.approveOrder(activity, cardRequest)
+                cardClient?.approveOrder(cardRequest)
             }
         }
     }
@@ -235,7 +234,7 @@ class ApproveOrderViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
-    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+    fun handleBrowserSwitchResult(activity: ComponentActivity) {
         authState?.let { cardClient?.completeAuthChallenge(activity.intent, it) }
     }
 }

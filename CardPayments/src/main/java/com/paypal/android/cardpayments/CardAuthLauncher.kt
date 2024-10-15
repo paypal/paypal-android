@@ -1,7 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.content.Intent
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -22,7 +22,7 @@ internal class CardAuthLauncher(
     }
 
     fun presentAuthChallenge(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         authChallenge: CardAuthChallenge
     ): CardPresentAuthChallengeResult {
         val metadata = when (authChallenge) {
