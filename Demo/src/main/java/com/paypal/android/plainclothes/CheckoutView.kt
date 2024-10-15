@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,8 +52,16 @@ import com.paypal.android.utils.getActivity
 
 @Composable
 @ExperimentalMaterial3Api
-fun CheckoutView(viewModel: CheckoutViewModel = hiltViewModel()) {
+fun CheckoutView(
+    onCheckoutSuccess: (orderId: String) -> Unit,
+    viewModel: CheckoutViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(uiState.checkoutSuccessOrderId) {
+        // notify checkout success
+        uiState.checkoutSuccessOrderId?.let { orderId -> onCheckoutSuccess(orderId) }
+    }
+
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
@@ -103,6 +112,11 @@ fun CheckoutView(viewModel: CheckoutViewModel = hiltViewModel()) {
             onSubmit = { card ->
                 context.getActivity()?.let { viewModel.checkoutWithCard(it, card) }
             }
+        )
+    } else if (uiState.checkoutError != null) {
+        ErrorDialog(
+            error = uiState.checkoutError as Throwable,
+            onDismissRequest = { viewModel.clearCheckoutError() }
         )
     } else if (uiState.isLoading) {
         LoadingDialog()
@@ -218,7 +232,7 @@ fun CardFormModalBottomSheet(
 fun CheckoutPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            CheckoutView()
+            CheckoutView(onCheckoutSuccess = {})
         }
     }
 }

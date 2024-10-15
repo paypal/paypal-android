@@ -52,7 +52,14 @@ fun PlainClothesApp() {
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(PlainClothesAppDestinations.CHECKOUT) {
-                    CheckoutView()
+                    CheckoutView(
+                        onCheckoutSuccess = { orderId ->
+                            navController.navigate(PlainClothesAppDestinations.CHECKOUT_SUCCESS)
+                        }
+                    )
+                }
+                composable(PlainClothesAppDestinations.CHECKOUT_SUCCESS) {
+                    CheckoutSuccessView()
                 }
             }
         }

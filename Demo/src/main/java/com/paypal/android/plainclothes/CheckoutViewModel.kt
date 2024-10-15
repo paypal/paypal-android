@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
@@ -53,7 +52,7 @@ class CheckoutViewModel @Inject constructor(
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
-    val applicationContext: Context = application.applicationContext
+    private val applicationContext: Context = application.applicationContext
 
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState = _uiState.asStateFlow()
@@ -154,6 +153,12 @@ class CheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = value) }
         }
 
+    private var checkoutSuccessOrderId
+        get() = _uiState.value.checkoutSuccessOrderId
+        set(value) {
+            _uiState.update { it.copy(checkoutSuccessOrderId = value) }
+        }
+
     private var checkoutError
         get() = _uiState.value.checkoutError
         set(value) {
@@ -165,7 +170,7 @@ class CheckoutViewModel @Inject constructor(
         viewModelScope.launch {
             when (val completeOrderResult = completeOrder(result.orderId)) {
                 is SDKSampleServerResult.Success -> {
-                    // TODO: navigate to checkout success view
+                    checkoutSuccessOrderId = completeOrderResult.value.id
                 }
 
                 is SDKSampleServerResult.Failure -> checkoutError = completeOrderResult.value
@@ -230,5 +235,9 @@ class CheckoutViewModel @Inject constructor(
         val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
         val cmid = payPalDataCollector.collectDeviceData(applicationContext, dataCollectorRequest)
         return completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid)
+    }
+
+    fun clearCheckoutError() {
+        checkoutError = null
     }
 }
