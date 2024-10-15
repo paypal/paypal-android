@@ -85,7 +85,7 @@ class CardClientUnitTest {
 
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns confirmPaymentSourceResponse
 
-        sut.approveOrder(activity, cardRequest)
+        sut.approveOrder(cardRequest)
         advanceUntilIdle()
 
         val resultSlot = slot<CardResult>()
@@ -104,7 +104,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(0, "mock_error_message")
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } throws error
 
-        sut.approveOrder(activity, cardRequest)
+        sut.approveOrder(cardRequest)
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()
@@ -122,7 +122,7 @@ class CardClientUnitTest {
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
 
         val sut = createCardClient(testScheduler)
-        sut.approveOrder(activity, cardRequest)
+        sut.approveOrder(cardRequest)
         advanceUntilIdle()
 
         val authChallengeSlot = slot<CardAuthChallenge>()

@@ -3,7 +3,7 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
@@ -64,10 +64,9 @@ class CardClient internal constructor(
     /**
      * Confirm [Card] payment source for an order.
      *
-     * @param activity [FragmentActivity] activity used to start 3DS flow (if requested)
      * @param cardRequest [CardRequest] for requesting an order approval
      */
-    fun approveOrder(activity: FragmentActivity, cardRequest: CardRequest) {
+    fun approveOrder(cardRequest: CardRequest) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
@@ -137,7 +136,7 @@ class CardClient internal constructor(
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
      */
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) =
+    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) =
         authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
 
     fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {

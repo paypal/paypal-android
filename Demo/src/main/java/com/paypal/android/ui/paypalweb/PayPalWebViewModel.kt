@@ -3,8 +3,7 @@ package com.paypal.android.ui.paypalweb
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -94,7 +93,7 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun startWebCheckout(activity: AppCompatActivity) {
+    fun startWebCheckout(activity: ComponentActivity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
@@ -105,7 +104,7 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: AppCompatActivity, orderId: String) {
+    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -173,7 +172,7 @@ class PayPalWebViewModel @Inject constructor(
         paypalClient?.removeObservers()
     }
 
-    fun handleBrowserSwitchResult(activity: FragmentActivity) {
+    fun handleBrowserSwitchResult(activity: ComponentActivity) {
         authState?.let { paypalClient?.completeAuthChallenge(activity.intent, it) }
     }
 }

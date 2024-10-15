@@ -2,7 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Context
 import android.content.Intent
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -21,7 +21,7 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
      *
-     * @param activity a [FragmentActivity]
+     * @param context an Android context
      * @param configuration a [CoreConfig] object
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
@@ -46,7 +46,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
@@ -69,7 +69,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
     fun vault(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
