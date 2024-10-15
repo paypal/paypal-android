@@ -6,13 +6,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
-import com.paypal.android.corepayments.PayPalSDKError
 import org.json.JSONObject
-
-sealed class CardPresentAuthChallengeResult {
-    data class Success(val authState: String) : CardPresentAuthChallengeResult()
-    data class Failure(val error: PayPalSDKError) : CardPresentAuthChallengeResult()
-}
 
 internal class CardAuthLauncher(
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
@@ -91,7 +85,7 @@ internal class CardAuthLauncher(
         val deepLinkUrl = finalResult.returnUrl
         val requestMetadata = finalResult.requestMetadata
 
-        return if (deepLinkUrl == null || requestMetadata == null) {
+        return if (requestMetadata == null) {
             CardStatus.VaultError(CardError.unknownError)
         } else {
             // TODO: see if there's a way that we can require the merchant to make their
