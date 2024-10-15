@@ -43,8 +43,8 @@ class CheckoutViewModel @Inject constructor(
 ) : AndroidViewModel(application), ApproveOrderListener, PayPalWebCheckoutListener {
 
     companion object {
-        const val CARD_RETURN_URL = "com.paypal.android.demo://"
-        const val PAYPAL_RETURN_URL_SCHEME = "com.paypal.android.demo"
+        const val CARD_RETURN_URL = "com.paypal.android.demo.card://"
+        const val PAYPAL_RETURN_URL_SCHEME = "com.paypal.android.demo.paypal"
     }
 
     private val applicationContext: Context = application.applicationContext
@@ -52,9 +52,9 @@ class CheckoutViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState = _uiState.asStateFlow()
 
-    private lateinit var cardClient: CardClient
-    private lateinit var payPalClient: PayPalWebCheckoutClient
-    private lateinit var payPalDataCollector: PayPalDataCollector
+    private var cardClient: CardClient? = null
+    private var payPalClient: PayPalWebCheckoutClient? = null
+    private var payPalDataCollector: PayPalDataCollector? = null
 
     private var isCardFormModalVisible
         get() = _uiState.value.isCardFormModalVisible
@@ -119,13 +119,13 @@ class CheckoutViewModel @Inject constructor(
     }
 
     private suspend fun finishCheckoutWithPayPal(activity: FragmentActivity, order: Order) {
-        initializePaymentsSDK(activity)
+        initializePayPalClient(activity)
         val request = PayPalWebCheckoutRequest(order.id!!)
 
         // clear loader since we won't know much about the state of the PayPal flow after
         // the customer leaves the app
         isLoading = false
-        payPalClient.start(request)
+        payPalClient?.start(request)
     }
 
     private suspend fun finishCheckoutWithCard(
@@ -133,12 +133,12 @@ class CheckoutViewModel @Inject constructor(
         order: Order,
         card: Card
     ) {
-        initializePaymentsSDK(activity)
+        initializeCardClient(activity)
         val request = CardRequest(order.id!!, card, CARD_RETURN_URL, sca = SCA.SCA_ALWAYS)
-        cardClient.approveOrder(activity, request)
+        cardClient?.approveOrder(activity, request)
     }
 
-    private suspend fun initializePaymentsSDK(activity: FragmentActivity) {
+    private suspend fun initializeCardClient(activity: FragmentActivity) {
         when (val clientIdResult = getClientIdUseCase()) {
             is SDKSampleServerResult.Failure -> {
                 checkoutError = clientIdResult.value
@@ -149,10 +149,25 @@ class CheckoutViewModel @Inject constructor(
                 val coreConfig = CoreConfig(clientId = clientId, environment = Environment.SANDBOX)
 
                 cardClient = CardClient(activity, coreConfig)
-                cardClient.approveOrderListener = this
+                cardClient?.approveOrderListener = this
+                payPalDataCollector = PayPalDataCollector(coreConfig)
+            }
+        }
+    }
 
-                payPalClient = PayPalWebCheckoutClient(activity, coreConfig, PAYPAL_RETURN_URL_SCHEME)
-                payPalClient.listener = this
+    private suspend fun initializePayPalClient(activity: FragmentActivity) {
+        when (val clientIdResult = getClientIdUseCase()) {
+            is SDKSampleServerResult.Failure -> {
+                checkoutError = clientIdResult.value
+            }
+
+            is SDKSampleServerResult.Success -> {
+                val clientId = clientIdResult.value
+                val coreConfig = CoreConfig(clientId = clientId, environment = Environment.SANDBOX)
+
+                payPalClient =
+                    PayPalWebCheckoutClient(activity, coreConfig, PAYPAL_RETURN_URL_SCHEME)
+                payPalClient?.listener = this
 
                 payPalDataCollector = PayPalDataCollector(coreConfig)
             }
@@ -223,8 +238,8 @@ class CheckoutViewModel @Inject constructor(
 
     private suspend fun completeOrder(orderId: String): SDKSampleServerResult<Order, Exception> {
         val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
-        val cmid = payPalDataCollector.collectDeviceData(applicationContext, dataCollectorRequest)
-        return completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid)
+        val cmid = payPalDataCollector?.collectDeviceData(applicationContext, dataCollectorRequest)
+        return completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid ?: "")
     }
 
     fun clearCheckoutError() {
