@@ -61,6 +61,31 @@ class CheckoutViewModel @Inject constructor(
     private lateinit var payPalClient: PayPalWebCheckoutClient
     private lateinit var payPalDataCollector: PayPalDataCollector
 
+    private var isCardFormModalVisible
+        get() = _uiState.value.isCardFormModalVisible
+        set(value) {
+            _uiState.update { it.copy(isCardFormModalVisible = value) }
+        }
+
+    private var isLoading
+        get() = _uiState.value.isLoading
+        set(value) {
+            _uiState.update { it.copy(isLoading = value) }
+        }
+
+    private var checkoutSuccessOrderId
+        get() = _uiState.value.checkoutSuccessOrderId
+        set(value) {
+            _uiState.update { it.copy(checkoutSuccessOrderId = value) }
+        }
+
+    private var checkoutError
+        get() = _uiState.value.checkoutError
+        set(value) {
+            _uiState.update { it.copy(checkoutError = value) }
+        }
+
+
     fun showCardFormModal() {
         isCardFormModalVisible = true
     }
@@ -141,30 +166,6 @@ class CheckoutViewModel @Inject constructor(
         }
     }
 
-    private var isCardFormModalVisible
-        get() = _uiState.value.isCardFormModalVisible
-        set(value) {
-            _uiState.update { it.copy(isCardFormModalVisible = value) }
-        }
-
-    private var isLoading
-        get() = _uiState.value.isLoading
-        set(value) {
-            _uiState.update { it.copy(isLoading = value) }
-        }
-
-    private var checkoutSuccessOrderId
-        get() = _uiState.value.checkoutSuccessOrderId
-        set(value) {
-            _uiState.update { it.copy(checkoutSuccessOrderId = value) }
-        }
-
-    private var checkoutError
-        get() = _uiState.value.checkoutError
-        set(value) {
-            _uiState.update { it.copy(checkoutError = value) }
-        }
-
     override fun onApproveOrderSuccess(result: CardResult) {
         hideCardFormModal()
         viewModelScope.launch {
@@ -208,15 +209,27 @@ class CheckoutViewModel @Inject constructor(
     }
 
     override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-        TODO("Not yet implemented")
+        isLoading = true
+        viewModelScope.launch {
+            when (val completeOrderResult = completeOrder(result.orderId!!)) {
+                is SDKSampleServerResult.Success -> {
+                    checkoutSuccessOrderId = completeOrderResult.value.id
+                }
+
+                is SDKSampleServerResult.Failure -> checkoutError = completeOrderResult.value
+            }
+            isLoading = false
+        }
     }
 
     override fun onPayPalWebFailure(error: PayPalSDKError) {
-        TODO("Not yet implemented")
+        checkoutError = error
+        isLoading = false
     }
 
     override fun onPayPalWebCanceled() {
-        TODO("Not yet implemented")
+        checkoutError = Exception("User Canceled")
+        isLoading = false
     }
 
     override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
