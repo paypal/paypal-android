@@ -9,16 +9,10 @@ import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
 // TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
-sealed class PayPalPresentAuthChallengeResult {
-    data class Success(val authState: String) : PayPalPresentAuthChallengeResult()
-    data class Failure(val error: PayPalSDKError) : PayPalPresentAuthChallengeResult()
-}
-
 internal class PayPalWebLauncher(
     private val urlScheme: String,
     private val coreConfig: CoreConfig,
