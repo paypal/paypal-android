@@ -1,6 +1,9 @@
 package com.paypal.android.plainclothes
 
+import android.app.Application
+import android.content.Context
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -18,6 +21,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
@@ -37,15 +41,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CheckoutViewModel @Inject constructor(
+    application: Application,
     private val createOrderUseCase: CreateOrderUseCase,
     private val getClientIdUseCase: GetClientIdUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
-) : ViewModel(), ApproveOrderListener, CardVaultListener, PayPalWebCheckoutListener,
+) : AndroidViewModel(application), ApproveOrderListener, CardVaultListener,
+    PayPalWebCheckoutListener,
     PayPalWebVaultListener {
 
     companion object {
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
+
+    val applicationContext: Context = application.applicationContext
 
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState = _uiState.asStateFlow()
@@ -154,17 +162,27 @@ class CheckoutViewModel @Inject constructor(
 
     override fun onApproveOrderSuccess(result: CardResult) {
         hideCardFormModal()
-        isLoading = false
+        viewModelScope.launch {
+            when (val completeOrderResult = completeOrder(result.orderId)) {
+                is SDKSampleServerResult.Success -> {
+                    // TODO: navigate to checkout success view
+                }
+
+                is SDKSampleServerResult.Failure -> checkoutError = completeOrderResult.value
+            }
+            isLoading = false
+        }
     }
 
     override fun onApproveOrderFailure(error: PayPalSDKError) {
         hideCardFormModal()
+        checkoutError = error
         isLoading = false
-        // TODO: display error
     }
 
     override fun onApproveOrderCanceled() {
         hideCardFormModal()
+        checkoutError = Exception("User Canceled")
         isLoading = false
     }
 
@@ -206,5 +224,11 @@ class CheckoutViewModel @Inject constructor(
 
     override fun onPayPalWebVaultCanceled() {
         TODO("Not yet implemented")
+    }
+
+    private suspend fun completeOrder(orderId: String): SDKSampleServerResult<Order, Exception> {
+        val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
+        val cmid = payPalDataCollector.collectDeviceData(applicationContext, dataCollectorRequest)
+        return completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid)
     }
 }
