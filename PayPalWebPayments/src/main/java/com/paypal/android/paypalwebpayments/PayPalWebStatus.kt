@@ -12,5 +12,5 @@ sealed class PayPalWebStatus {
     class VaultSuccess(val result: PayPalWebVaultResult) : PayPalWebStatus()
     object VaultCanceled : PayPalWebStatus()
 
-    object NoResult: PayPalWebStatus()
+    object NoResult : PayPalWebStatus()
 }
