@@ -121,7 +121,7 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeRequest(intent, "pending request")
+        val status = sut.completeAuthRequest(intent, "pending request")
                 as CardStatus.ApproveOrderSuccess
 
         val cardResult = status.result
@@ -145,7 +145,7 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeRequest(intent, "pending request") as CardStatus.ApproveOrderError
+        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
         val error = status.error
         assertEquals(0, error.code)
         assertEquals("3DS Verification is returning an error.", error.errorDescription)
@@ -165,7 +165,7 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeRequest(intent, "pending request") as CardStatus.ApproveOrderError
+        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
         val error = status.error
         assertEquals(1, error.code)
         assertEquals("Malformed deeplink URL.", error.errorDescription)
@@ -185,7 +185,7 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeRequest(intent, "pending request") as CardStatus.ApproveOrderError
+        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
         val error = status.error
         assertEquals(1, error.code)
         assertEquals("Malformed deeplink URL.", error.errorDescription)
@@ -205,7 +205,7 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeRequest(intent, "pending request") as CardStatus.VaultSuccess
+        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.VaultSuccess
         val vaultResult = status.result
         assertEquals("fake-setup-token-id", vaultResult.setupTokenId)
         assertEquals("SCA_COMPLETE", vaultResult.status)
@@ -225,7 +225,7 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeRequest(intent, "pending request") as CardStatus.VaultCanceled
+        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.VaultCanceled
         assertEquals("fake-setup-token-id", status.setupTokenId)
     }
 
