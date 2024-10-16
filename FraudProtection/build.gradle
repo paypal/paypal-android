@@ -20,17 +20,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
+
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = modules.kotlinJvmTarget
     }
 
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    namespace 'com.paypal.android.fraudprotection'
 }
 
 dependencies {
