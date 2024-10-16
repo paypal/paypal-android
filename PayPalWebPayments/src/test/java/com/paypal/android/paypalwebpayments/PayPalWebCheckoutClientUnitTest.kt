@@ -1,32 +1,32 @@
 package com.paypal.android.paypalwebpayments
 
+import android.content.Intent
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Lifecycle
-import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import io.mockk.*
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import junit.framework.TestCase.assertSame
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import strikt.api.expectThat
-import strikt.assertions.isNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
 
     private val activity: FragmentActivity = mockk(relaxed = true)
-    private val coreConfig: CoreConfig = mockk(relaxed = true)
-
     private val analyticsService = mockk<AnalyticsService>(relaxed = true)
 
     private val checkoutListener = mockk<PayPalWebCheckoutListener>(relaxed = true)
     private val vaultListener = mockk<PayPalWebVaultListener>(relaxed = true)
+
+    private val intent = Intent()
 
     private lateinit var payPalWebLauncher: PayPalWebLauncher
     private lateinit var sut: PayPalWebCheckoutClient
@@ -34,17 +34,18 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(activity, analyticsService, payPalWebLauncher)
+        sut = PayPalWebCheckoutClient(analyticsService, payPalWebLauncher)
     }
 
     @Test
     fun `start() launches PayPal web checkout`() {
         sut.listener = checkoutListener
 
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns null
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(request)
+        sut.start(activity, request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
         verify(exactly = 0) { checkoutListener.onPayPalWebFailure(any()) }
     }
@@ -54,10 +55,11 @@ class PayPalWebCheckoutClientUnitTest {
         sut.listener = checkoutListener
 
         val sdkError = PayPalSDKError(123, "fake error description")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns sdkError
+        val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(request)
+        sut.start(activity, request)
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { checkoutListener.onPayPalWebFailure(capture(slot)) }
@@ -69,11 +71,12 @@ class PayPalWebCheckoutClientUnitTest {
     fun `vault() launches PayPal web checkout`() {
         sut.vaultListener = vaultListener
 
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns null
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
 
         val request =
             PayPalWebVaultRequest("fake-setup-token-id")
-        sut.vault(request)
+        sut.vault(activity, request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebVault(activity, request) }
         verify(exactly = 0) { vaultListener.onPayPalWebVaultFailure(any()) }
     }
@@ -83,11 +86,12 @@ class PayPalWebCheckoutClientUnitTest {
         sut.vaultListener = vaultListener
 
         val sdkError = PayPalSDKError(123, "fake error description")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns sdkError
+        val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
+        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
 
         val request =
             PayPalWebVaultRequest("fake-setup-token-id")
-        sut.vault(request)
+        sut.vault(activity, request)
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { vaultListener.onPayPalWebVaultFailure(capture(slot)) }
@@ -96,15 +100,15 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of Checkout success`() {
+    fun `completeAuthChallenge notifies merchant of Checkout success`() {
         sut.listener = checkoutListener
 
         val successResult = PayPalWebCheckoutResult("fake-order-id", "fake-payer-id")
         every {
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
         } returns PayPalWebStatus.CheckoutSuccess(successResult)
 
-        sut.handleBrowserSwitchResult()
+        sut.completeAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalWebCheckoutResult>()
         verify(exactly = 1) { checkoutListener.onPayPalWebSuccess(capture(slot)) }
@@ -112,15 +116,15 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of Checkout failure`() {
+    fun `completeAuthChallenge notifies merchant of Checkout failure`() {
         sut.listener = checkoutListener
 
         val error = PayPalSDKError(123, "fake-error-description")
         every {
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
         } returns PayPalWebStatus.CheckoutError(error, null)
 
-        sut.handleBrowserSwitchResult()
+        sut.completeAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { checkoutListener.onPayPalWebFailure(capture(slot)) }
@@ -128,29 +132,29 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of Checkout cancelation`() {
+    fun `completeAuthChallenge notifies merchant of Checkout cancelation`() {
         sut.listener = checkoutListener
 
         val status = PayPalWebStatus.CheckoutCanceled("fake-order_id")
         every {
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
         } returns status
 
-        sut.handleBrowserSwitchResult()
+        sut.completeAuthChallenge(intent, "auth state")
 
         verify(exactly = 1) { checkoutListener.onPayPalWebCanceled() }
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of vault success`() {
+    fun `completeAuthChallenge notifies merchant of vault success`() {
         sut.vaultListener = vaultListener
 
         val successResult = PayPalWebVaultResult("fake-approval-session-id")
         every {
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
         } returns PayPalWebStatus.VaultSuccess(successResult)
 
-        sut.handleBrowserSwitchResult()
+        sut.completeAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalWebVaultResult>()
         verify(exactly = 1) { vaultListener.onPayPalWebVaultSuccess(capture(slot)) }
@@ -158,15 +162,15 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of vault failure`() {
+    fun `completeAuthChallenge notifies merchant of vault failure`() {
         sut.vaultListener = vaultListener
 
         val error = PayPalSDKError(123, "fake-error-description")
         every {
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
         } returns PayPalWebStatus.VaultError(error)
 
-        sut.handleBrowserSwitchResult()
+        sut.completeAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { vaultListener.onPayPalWebVaultFailure(capture(slot)) }
@@ -174,46 +178,29 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult notifies merchant of vault cancelation`() {
+    fun `completeAuthChallenge notifies merchant of vault cancelation`() {
         sut.vaultListener = vaultListener
 
         every {
-            payPalWebLauncher.deliverBrowserSwitchResult(activity)
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
         } returns PayPalWebStatus.VaultCanceled
 
-        sut.handleBrowserSwitchResult()
+        sut.completeAuthChallenge(intent, "auth state")
         verify(exactly = 1) { vaultListener.onPayPalWebVaultCanceled() }
     }
 
     @Test
-    fun `handleBrowserSwitchResult doesn't deliver result when browserSwitchResult is null`() {
+    fun `completeAuthChallenge doesn't deliver result when browserSwitchResult is null`() {
         sut.listener = checkoutListener
         sut.vaultListener = vaultListener
-        every { payPalWebLauncher.deliverBrowserSwitchResult(activity) } returns null
 
-        sut.handleBrowserSwitchResult()
+        every {
+            payPalWebLauncher.completeAuthRequest(intent, "auth state")
+        } returns PayPalWebStatus.NoResult
+
+        sut.completeAuthChallenge(intent, "auth state")
+
         verify { checkoutListener.wasNot(Called) }
         verify { vaultListener.wasNot(Called) }
-    }
-
-    @Test
-    fun `when client is created, lifecycle observer is added`() {
-        val lifeCycle = mockk<Lifecycle>(relaxed = true)
-        every { activity.lifecycle } returns lifeCycle
-
-        PayPalWebCheckoutClient(activity, coreConfig, "")
-        verify { lifeCycle.addObserver(ofType(PayPalWebCheckoutLifeCycleObserver::class)) }
-    }
-
-    @Test
-    fun `when client is complete, lifecycle observer is removed`() {
-        val lifeCycle = mockk<Lifecycle>(relaxed = true)
-        every { activity.lifecycle } returns lifeCycle
-
-        sut.removeObservers()
-
-        verify { lifeCycle.removeObserver(sut.observer) }
-        expectThat(sut.listener).isNull()
-        expectThat(sut.vaultListener).isNull()
     }
 }
