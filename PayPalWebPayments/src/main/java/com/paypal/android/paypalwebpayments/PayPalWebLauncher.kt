@@ -109,7 +109,7 @@ internal class PayPalWebLauncher(
             .build()
     }
 
-    fun completeBrowserSwitchRequest(intent: Intent, authState: String): PayPalWebStatus =
+    fun completeAuthRequest(intent: Intent, authState: String): PayPalWebStatus =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> {
                 val requestType =

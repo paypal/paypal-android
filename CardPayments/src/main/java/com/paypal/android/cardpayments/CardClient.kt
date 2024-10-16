@@ -140,7 +140,7 @@ class CardClient internal constructor(
         authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
 
     fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
-        val status = authChallengeLauncher.completeRequest(intent, authState)
+        val status = authChallengeLauncher.completeAuthRequest(intent, authState)
         when (status) {
             is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
             is CardStatus.VaultError -> notifyVaultFailure(status.error)

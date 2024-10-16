@@ -59,7 +59,7 @@ internal class CardAuthLauncher(
         }
     }
 
-    fun completeRequest(intent: Intent, authState: String): CardStatus =
+    fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> {
                 val requestType = finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)

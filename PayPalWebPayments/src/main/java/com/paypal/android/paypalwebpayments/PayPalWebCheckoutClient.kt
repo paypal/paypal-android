@@ -87,7 +87,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     fun completeAuthChallenge(intent: Intent, authState: String): PayPalWebStatus {
-        val status = payPalWebLauncher.completeBrowserSwitchRequest(intent, authState)
+        val status = payPalWebLauncher.completeAuthRequest(intent, authState)
         when (status) {
             is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
             is PayPalWebStatus.CheckoutError -> status.run {

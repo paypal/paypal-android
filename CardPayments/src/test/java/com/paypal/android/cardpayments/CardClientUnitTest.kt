@@ -181,7 +181,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() notifies merchant of approve order success`() = runTest {
+    fun `completeAuthChallenge() notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
@@ -191,7 +191,7 @@ class CardClientUnitTest {
             didAttemptThreeDSecureAuthentication = false
         )
         every {
-            cardAuthLauncher.completeRequest(intent, "auth state")
+            cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.ApproveOrderSuccess(successResult)
 
         sut.completeAuthChallenge(intent, "auth state")
@@ -202,13 +202,13 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() notifies merchant of approve order failure`() = runTest {
+    fun `completeAuthChallenge() notifies merchant of approve order failure`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
         val error = PayPalSDKError(123, "fake-error-description")
         every {
-            cardAuthLauncher.completeRequest(intent, "auth state")
+            cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.ApproveOrderError(error, "fake-order-id")
 
         sut.completeAuthChallenge(intent, "auth state")
@@ -219,12 +219,12 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() notifies merchant of approve order cancelation`() = runTest {
+    fun `completeAuthChallenge() notifies merchant of approve order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
         every {
-            cardAuthLauncher.completeRequest(intent, "auth state")
+            cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.ApproveOrderCanceled("fake-order-id")
 
         sut.completeAuthChallenge(intent, "auth state")
@@ -232,13 +232,13 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() notifies merchant of vault success`() = runTest {
+    fun `completeAuthChallenge() notifies merchant of vault success`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.cardVaultListener = cardVaultListener
 
         val successResult = CardVaultResult("fake-setup-token-id", "fake-status")
         every {
-            cardAuthLauncher.completeRequest(intent, "auth state")
+            cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultSuccess(successResult)
 
         sut.completeAuthChallenge(intent, "auth state")
@@ -249,13 +249,13 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() notifies merchant of vault failure`() = runTest {
+    fun `completeAuthChallenge() notifies merchant of vault failure`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.cardVaultListener = cardVaultListener
 
         val error = PayPalSDKError(123, "fake-error-description")
         every {
-            cardAuthLauncher.completeRequest(intent, "auth state")
+            cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultError(error)
 
         sut.completeAuthChallenge(intent, "auth state")
@@ -266,12 +266,12 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() notifies merchant of vault order cancelation`() = runTest {
+    fun `completeAuthChallenge() notifies merchant of vault order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
         sut.cardVaultListener = cardVaultListener
 
         every {
-            cardAuthLauncher.completeRequest(intent, "auth state")
+            cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultCanceled("fake-setup-token-id")
 
         sut.completeAuthChallenge(intent, "auth state")
@@ -281,14 +281,14 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `handleBrowserSwitchResult() doesn't deliver result when browserSwitchResult is null`() =
+    fun `completeAuthChallenge() doesn't deliver result when browserSwitchResult is null`() =
         runTest {
             val sut = createCardClient(testScheduler)
             sut.approveOrderListener = approveOrderListener
             sut.cardVaultListener = cardVaultListener
 
             every {
-                cardAuthLauncher.completeRequest(intent, "auth state")
+                cardAuthLauncher.completeAuthRequest(intent, "auth state")
             } returns CardStatus.NoResult
 
             sut.completeAuthChallenge(intent, "auth state")
