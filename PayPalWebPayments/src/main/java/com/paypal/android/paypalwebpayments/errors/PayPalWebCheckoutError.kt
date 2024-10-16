@@ -1,6 +1,5 @@
 package com.paypal.android.paypalwebpayments.errors
 
-import com.braintreepayments.api.BrowserSwitchException
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal object PayPalWebCheckoutError {
