@@ -1,5 +1,6 @@
 package com.paypal.android.ui.vaultcard
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -206,12 +207,9 @@ class VaultCardViewModel @Inject constructor(
 
         cardClient?.presentAuthChallenge(activity, authChallenge)?.let { result ->
             when (result) {
-                is CardPresentAuthChallengeResult.Success -> {
-                    authState = result.authState
-                }
-                is CardPresentAuthChallengeResult.Failure -> {
+                is CardPresentAuthChallengeResult.Success -> authState = result.authState
+                is CardPresentAuthChallengeResult.Failure ->
                     authChallengeState = ActionState.Failure(result.error)
-                }
             }
         }
     }
@@ -221,7 +219,7 @@ class VaultCardViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
-    fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        authState?.let { cardClient?.completeAuthChallenge(activity.intent, it) }
+    fun completeAuthChallenge(intent: Intent) {
+        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }

@@ -1,6 +1,7 @@
 package com.paypal.android.ui.approveorder
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
@@ -234,7 +235,7 @@ class ApproveOrderViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
-    fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        authState?.let { cardClient?.completeAuthChallenge(activity.intent, it) }
+    fun completeAuthChallenge(intent: Intent) {
+        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }

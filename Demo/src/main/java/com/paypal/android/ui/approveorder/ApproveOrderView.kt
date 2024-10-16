@@ -47,7 +47,8 @@ fun ApproveOrderView(
 
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
-        context.getActivityOrNull()?.let { viewModel.handleBrowserSwitchResult(it) }
+        val intent = context.getActivityOrNull()?.intent
+        intent?.let { viewModel.completeAuthChallenge(intent) }
     }
 
     val contentPadding = UIConstants.paddingMedium
