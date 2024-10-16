@@ -73,8 +73,8 @@ class CardAuthLauncherUnitTest {
         val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
 
         sut = CardAuthLauncher(browserSwitchClient)
-        val error = sut.presentAuthChallenge(activity, authChallenge = cardAuthChallenge)
-        assertNull(error)
+        val status = sut.presentAuthChallenge(activity, authChallenge = cardAuthChallenge)
+        assertTrue(status is CardPresentAuthChallengeResult.Success)
 
         val browserSwitchOptions = slot.captured
         val metadata = browserSwitchOptions.metadata
@@ -95,8 +95,8 @@ class CardAuthLauncherUnitTest {
         val vaultAuthRequest = CardAuthChallenge.Vault(url, vaultRequest)
 
         sut = CardAuthLauncher(browserSwitchClient)
-        val error = sut.presentAuthChallenge(activity, authChallenge = vaultAuthRequest)
-        assertNull(error)
+        val status = sut.presentAuthChallenge(activity, authChallenge = vaultAuthRequest)
+        assertTrue(status is CardPresentAuthChallengeResult.Success)
 
         val browserSwitchOptions = slot.captured
         val metadata = browserSwitchOptions.metadata
