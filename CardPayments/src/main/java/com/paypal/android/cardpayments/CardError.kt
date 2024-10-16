@@ -1,6 +1,5 @@
 package com.paypal.android.cardpayments
 
-import com.braintreepayments.api.BrowserSwitchException
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal object CardError {
