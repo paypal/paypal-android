@@ -4,7 +4,7 @@ buildscript {
             "sdkVersionName"      : "1.5.1-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
-            "androidTargetVersion": 35
+            "androidTargetVersion": 34
     ]
 
     ext.versions = [
@@ -88,7 +88,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.4.1"
+        classpath "com.android.tools.build:gradle:7.4.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"
