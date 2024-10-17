@@ -13,7 +13,7 @@ buildscript {
     ext.versions = [
             "kotlin" : "1.8.21",
             "compose": "1.4.7",
-            "hilt"   : "2.44"
+            "hilt"   : "2.51.1"
     ]
 
     ext.deps = [
@@ -57,8 +57,8 @@ buildscript {
             "loggingInterceptor"          : "com.squareup.okhttp3:logging-interceptor:4.9.2",
 
             // Dependency Injection
-            "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
-            "hiltKapt"                    : "com.google.dagger:hilt-compiler:${versions.hilt}",
+            "hilt"                        : "com.google.dagger:hilt-android:2.51.1",
+            "hiltKapt"                    : "com.google.dagger:hilt-compiler:2.51.1",
 
             // Browser Switch
             "browserSwitch"               : "com.braintreepayments.api:browser-switch:3.0.0-beta1",
@@ -87,20 +87,23 @@ buildscript {
 
     ]
 
-    repositories {
-        google()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
-        classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"
-    }
+//    repositories {
+//        google()
+//        mavenCentral()
+//    }
+//    dependencies {
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+//        classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"
+//    }
 }
 
 plugins {
+    id 'com.android.application' version '8.5.2' apply false
+    id 'com.android.library' version '8.5.2' apply false
     id "io.gitlab.arturbosch.detekt" version "${detektVersion}"
-    id 'org.jetbrains.kotlin.android' version '1.6.21' apply false
+    id 'org.jetbrains.kotlin.android' version '1.8.21' apply false
     id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+    id 'com.google.dagger.hilt.android' version '2.51.1' apply false
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo
@@ -120,21 +123,21 @@ nexusPublishing {
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        mavenLocal()
+//allprojects {
+//    repositories {
+//        google()
+//        mavenCentral()
+//        mavenLocal()
+//
+//        maven {
+//            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        }
+//    }
+//}
 
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+//task clean(type: Delete) {
+//    delete rootProject.buildDir
+//}
 
 dependencies {
     detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}"
