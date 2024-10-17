@@ -58,7 +58,7 @@ android {
 
 dependencies {
     implementation libs.kotlin.std.lib
-    implementation deps.androidxCoreKtx
+    implementation libs.androidx.core.ktx
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines
 

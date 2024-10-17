@@ -107,7 +107,7 @@ dependencies {
     releaseImplementation deps.fraudProtection
 
     implementation libs.kotlin.std.lib
-    implementation deps.androidxCoreKtx
+    implementation libs.androidx.core.ktx
     implementation deps.androidxAppcompat
     implementation deps.material
     implementation deps.constraintLayout

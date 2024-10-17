@@ -30,7 +30,7 @@ android {
 }
 
 dependencies {
-    implementation deps.androidxCoreKtx
+    implementation libs.androidx.core.ktx
     implementation deps.material
 
     implementation project(':CorePayments')
