@@ -42,13 +42,13 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.preference.ktx
 
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.jsonAssert
-    testImplementation deps.robolectric
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.json.assert
+    testImplementation libs.robolectric
 
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
 }
 
 

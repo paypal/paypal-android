@@ -15,22 +15,6 @@ buildscript {
 
     ext.deps = [
 
-            // Testing
-            "junit"                       : "junit:junit:4.13.2",
-            "androidxJUnit"               : "androidx.test.ext:junit:1.1.5",
-            "androidxEspressoCore"        : "androidx.test.espresso:espresso-core:3.4.0",
-            "androidxTestCore"            : "androidx.test:core:1.5.0",
-            "androidxTestRunner"          : "androidx.test:runner:1.5.2",
-            "androidxTestRules"           : "androidx.test:rules:1.5.0",
-            "androidxTestUiAutomator"     : "androidx.test.uiautomator:uiautomator:2.2.0",
-            "mockk"                       : "io.mockk:mockk:1.13.5",
-            "kotlinxAndroidCoroutinesTest": "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.1",
-            "robolectric"                 : "org.robolectric:robolectric:4.13",
-            "jsonAssert"                  : "org.skyscreamer:jsonassert:1.4.0",
-            "striktMockk"                 : "io.strikt:strikt-mockk:0.30.1",
-            "striktCore"                  : "io.strikt:strikt-core:0.30.1",
-            "json"                        : "org.json:json:20220320",
-
             // PayPal
             "nativeCheckout"              : "com.paypal.checkout:android-sdk:1.3.2",
 
@@ -40,7 +24,6 @@ buildscript {
             "paypalWebPayments"           : "com.paypal.android:paypal-web-payments:${modules.sdkVersionName}",
             "paypalNativePayments"        : "com.paypal.android:paypal-native-payments:${modules.sdkVersionName}",
             "fraudProtection"             : "com.paypal.android:fraud-protection:${modules.sdkVersionName}",
-
     ]
 
     repositories {

@@ -148,13 +148,13 @@ dependencies {
     implementation libs.androidx.navigation.compose
     implementation libs.hilt.navigation.compose
 
-    testImplementation deps.junit
+    testImplementation libs.junit
 
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
-    androidTestImplementation deps.androidxTestRunner
-    androidTestImplementation deps.androidxTestRules
-    androidTestImplementation deps.androidxTestUiAutomator
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.test.rules
+    androidTestImplementation libs.androidx.test.ui.automator
 
     // compose ui-test
     androidTestImplementation libs.androidx.compose.ui.test.junit4

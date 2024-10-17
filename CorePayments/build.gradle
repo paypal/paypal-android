@@ -62,17 +62,17 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.kotlinx.coroutines.android
 
-    testImplementation deps.jsonAssert
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.robolectric
-    testImplementation deps.json
-    testImplementation deps.kotlinxAndroidCoroutinesTest
-    testImplementation deps.androidxTestCore
+    testImplementation libs.json.assert
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.robolectric
+    testImplementation libs.json
+    testImplementation libs.kotlinx.android.coroutines.test
+    testImplementation libs.androidx.test.core
 
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
-    androidTestImplementation deps.kotlinxAndroidCoroutinesTest
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.kotlinx.android.coroutines.test
 }
 
 project.ext.name = "core-payments"
