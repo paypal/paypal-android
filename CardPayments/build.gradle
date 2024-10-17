@@ -46,7 +46,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.kotlinx.coroutines.android
 
-    implementation deps.browserSwitch
+    implementation libs.browser.switch
 
     testImplementation deps.junit
     testImplementation deps.mockk

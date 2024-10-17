@@ -18,6 +18,7 @@ squareRetrofit2 = "2.9.0"
 squareConverterGson = "2.3.0"
 squareLoggingInterceptor = "4.9.2"
 hiltVersion = "2.44"
+browserSwitch = "2.3.1"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
@@ -56,5 +57,7 @@ square-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 
 google-dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion" }
 google-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion" }
+
+browser-switch = { group = "com.braintreepayments.api", name = "browser-switch", version.ref = "browserSwitch" }
 
 [plugins]
