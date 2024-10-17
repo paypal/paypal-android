@@ -1,0 +1,7 @@
+[versions]
+kotlin = "1.8.21"
+
+[libraries]
+kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+
+[plugins]

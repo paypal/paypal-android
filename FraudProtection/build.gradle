@@ -37,7 +37,7 @@ dependencies {
     implementation files('libs/android-magnessdk-5.5.1.jar')
 
     api project(':CorePayments')
-    implementation deps.kotlinStdLib
+    implementation libs.kotlin.std.lib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
     implementation deps.preference

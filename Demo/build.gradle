@@ -106,7 +106,7 @@ dependencies {
     releaseImplementation deps.paypalNativePayments
     releaseImplementation deps.fraudProtection
 
-    implementation deps.kotlinStdLib
+    implementation libs.kotlin.std.lib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
     implementation deps.material

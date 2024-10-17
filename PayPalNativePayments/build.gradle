@@ -44,7 +44,7 @@ dependencies {
         exclude module: 'data-collector'
     }
 
-    implementation deps.kotlinStdLib
+    implementation libs.kotlin.std.lib
     implementation deps.androidxCoreKtx
     implementation deps.androidxAppcompat
     implementation deps.kotlinxAndroidCoroutines

@@ -14,8 +14,6 @@ buildscript {
     ]
 
     ext.deps = [
-            // Kotlin
-            "kotlinStdLib"                : "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}",
 
             // Android
             "androidxCoreKtx"             : "androidx.core:core-ktx:1.6.0",
