@@ -136,7 +136,7 @@ dependencies {
     implementation libs.androidx.lifecycle.view.model.compose
     implementation libs.androidx.lifecycle.runtime.compose
 
-    implementation deps.preference
+    implementation libs.androidx.preference.ktx
 
     implementation deps.retrofit
     implementation deps.gson

@@ -13,6 +13,7 @@ lifecycleViewModelCompose = "2.5.1"
 lifecycleRuntimeCompose = "2.6.1"
 navigationCompose = "2.7.5"
 hiltNavigationCompose = "1.1.0"
+androidxPreferenceKtx = "1.1.1"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -42,5 +43,7 @@ androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lif
 
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreferenceKtx" }
 
 [plugins]

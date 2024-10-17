@@ -15,9 +15,6 @@ buildscript {
 
     ext.deps = [
 
-            // Jetpack
-            "preference"                  : "androidx.preference:preference-ktx:1.1.1",
-
             // Networking
             "retrofit"                    : "com.squareup.retrofit2:retrofit:2.9.0",
             "gson"                        : "com.squareup.retrofit2:converter-gson:2.3.0",
