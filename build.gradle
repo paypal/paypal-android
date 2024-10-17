@@ -15,9 +15,6 @@ buildscript {
 
     ext.deps = [
 
-            // PayPal
-            "nativeCheckout"              : "com.paypal.checkout:android-sdk:1.3.2",
-
             // Release modules
             "cardPayments"                : "com.paypal.android:card-payments:${modules.sdkVersionName}",
             "paymentButtons"              : "com.paypal.android:payment-buttons:${modules.sdkVersionName}",

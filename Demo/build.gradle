@@ -115,7 +115,7 @@ dependencies {
     implementation libs.androidx.fragment.ktx
 
     // TODO: remove dependency when we don't relay on nxo models anymore
-    implementation(deps.nativeCheckout) {
+    implementation(libs.native.checkout) {
         exclude module: 'data-collector'
     }
 

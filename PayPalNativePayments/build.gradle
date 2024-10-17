@@ -40,7 +40,7 @@ dependencies {
     api project(':CorePayments')
     implementation project(':FraudProtection')
 
-    implementation (deps.nativeCheckout) {
+    implementation (libs.native.checkout) {
         exclude module: 'data-collector'
     }
 
