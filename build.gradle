@@ -15,26 +15,7 @@ buildscript {
 
     ext.deps = [
 
-            // Android
-            "material"                    : "com.google.android.material:material:1.4.0",
-            "constraintLayout"            : "androidx.constraintlayout:constraintlayout:2.1.0",
-            "kotlinxAndroidCoroutines"    : "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1",
-            "androidxLifecycleRuntimeKtx" : "androidx.lifecycle:lifecycle-runtime-ktx:2.4.1",
-            "androidxLifecycleCommonJava" : "androidx.lifecycle:lifecycle-common-java8:2.4.1",
-            "fragmentKtx"                 : "androidx.fragment:fragment-ktx:1.6.0",
-
             // Jetpack Compose
-            // Ref: https://developer.android.com/jetpack/compose/setup#setup-compose
-            "composeMaterial3"            : "androidx.compose.material3:material3",
-            "composeUi"                   : "androidx.compose.ui:ui",
-            "composeUiTestJUnit4"         : "androidx.compose.ui:ui-test-junit4",
-            "composeUiTestManifest"       : "androidx.compose.ui:ui-test-manifest",
-            "composeUiTooling"            : "androidx.compose.ui:ui-tooling",
-            "composeUiToolingPreview"     : "androidx.compose.ui:ui-tooling-preview",
-            "composeRuntimeLivedata"      : "androidx.compose.runtime:runtime-livedata",
-            "composeFoundation"           : "androidx.compose.foundation:foundation",
-            "composeMaterial"             : "androidx.compose.material:material",
-            "composeConstraintLayout"     : "androidx.constraintlayout:constraintlayout-compose",
             "lifecycleViewModelCompose"   : "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1",
             "lifecycleRuntimeCompose"     : "androidx.lifecycle:lifecycle-runtime-compose:2.6.1",
             "navigationCompose"           : "androidx.navigation:navigation-compose:2.7.5",

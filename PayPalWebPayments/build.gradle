@@ -36,8 +36,8 @@ dependencies {
     implementation libs.kotlin.std.lib
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
-    implementation deps.kotlinxAndroidCoroutines
-    implementation deps.material
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.google.android.material
 
     testImplementation deps.junit
     testImplementation deps.mockk

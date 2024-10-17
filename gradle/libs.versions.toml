@@ -1,11 +1,37 @@
 [versions]
-kotlin = "1.8.21"
-androidxCoreKtx = "1.6.0"
 androidxAppcompat = "1.3.1"
+androidxComposeBom = "2023.05.01"
+androidxCoreKtx = "1.6.0"
+androidxFragmentKtx = "1.6.0"
+androidxLifecycleRuntimeKtx = "2.4.1"
+androidxLifecycleCommonJava = "2.4.1"
+constraintLayout = "2.1.0"
+googleMaterial = "1.4.0"
+kotlin = "1.8.21"
+kotlinxCoroutinesAndroid = "1.6.1"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
-androidx-core-ktx = { group = "androidx.core", name ="core-ktx", version.ref = "androidxCoreKtx" }
-androidx-appcompat = { group = "androidx.appcompat", name ="appcompat", version.ref = "androidxAppcompat" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
+androidx-constraint-layout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
+androidx-lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidxFragmentKtx" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+google-android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
+
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+# Ref: https://developer.android.com/jetpack/compose/setup#setup-compose
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-material = { group = "androidx.compose.material", name = "material" }
 
 [plugins]
