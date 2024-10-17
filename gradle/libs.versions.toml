@@ -9,6 +9,10 @@ constraintLayout = "2.1.0"
 googleMaterial = "1.4.0"
 kotlin = "1.8.21"
 kotlinxCoroutinesAndroid = "1.6.1"
+lifecycleViewModelCompose = "2.5.1"
+lifecycleRuntimeCompose = "2.6.1"
+navigationCompose = "2.7.5"
+hiltNavigationCompose = "1.1.0"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -24,7 +28,6 @@ google-android-material = { group = "com.google.android.material", name = "mater
 
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
-# Ref: https://developer.android.com/jetpack/compose/setup#setup-compose
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
@@ -33,5 +36,11 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material" }
+
+androidx-lifecycle-view-model-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 [plugins]

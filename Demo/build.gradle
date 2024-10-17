@@ -125,6 +125,7 @@ dependencies {
     // to be compatible with one another. The set of dependencies output by the bom have been tested
     // and are known to be compatible by the Jetpack Team
     // More info: https://developer.android.com/jetpack/compose/bom
+    // Another ref: https://developer.android.com/jetpack/compose/setup#setup-compose
     implementation platform(libs.androidx.compose.bom)
     androidTestImplementation platform(libs.androidx.compose.bom)
 
@@ -132,8 +133,8 @@ dependencies {
     implementation libs.androidx.compose.ui.tooling.preview
     debugImplementation libs.androidx.compose.ui.tooling
 
-    implementation deps.lifecycleViewModelCompose
-    implementation deps.lifecycleRuntimeCompose
+    implementation libs.androidx.lifecycle.view.model.compose
+    implementation libs.androidx.lifecycle.runtime.compose
 
     implementation deps.preference
 
@@ -144,8 +145,8 @@ dependencies {
     implementation deps.hilt
     kapt deps.hiltKapt
 
-    implementation deps.navigationCompose
-    implementation deps.hiltNavigationCompose
+    implementation libs.androidx.navigation.compose
+    implementation libs.hilt.navigation.compose
 
     testImplementation deps.junit
 
