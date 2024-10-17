@@ -33,7 +33,7 @@ android {
 dependencies {
 
     implementation libs.androidx.core.ktx
-    implementation deps.androidxAppcompat
+    implementation libs.androidx.appcompat
     implementation deps.material
     testImplementation deps.junit
     androidTestImplementation deps.androidxJUnit
