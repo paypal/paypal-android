@@ -20,8 +20,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'microsoft'
-      - name: Generate Code Coverage Reports
-        run: ./gradlew jacocoTestReport
       - name: Upload Core coverage to Codecov
         run: |
           curl -Os https://uploader.codecov.io/latest/macos/codecov
