@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id 'dagger.hilt.android.plugin'
+    id 'com.google.dagger.hilt.android'
     id 'kotlin-parcelize'
     id 'com.github.triplet.play' version '3.8.4'
 }
@@ -10,11 +10,12 @@ plugins {
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
+    compileSdk modules.androidTargetVersion
+
     defaultConfig {
         applicationId "com.paypal.android"
-        minSdkVersion 21
-        compileSdk 34
-        targetSdkVersion 34
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
         versionCode modules.demoAppVersionCode
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -40,14 +41,6 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
-    }
-
     lintOptions {
         lintConfig file('../lint.xml')
         abortOnError true
@@ -69,6 +62,7 @@ android {
             keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'android'
         }
     }
+    namespace 'com.paypal.android'
     buildTypes {
         release {
             debuggable false
@@ -77,6 +71,15 @@ android {
         debug {
             debuggable true
         }
+    }
+
+    compileOptions {
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
+    }
+
+    kotlinOptions {
+        jvmTarget = modules.kotlinJvmTarget
     }
 }
 

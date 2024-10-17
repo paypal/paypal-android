@@ -2,7 +2,7 @@ package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.PayPalSDKError
 
-internal sealed class CardStatus {
+sealed class CardStatus {
 
     class ApproveOrderError(val error: PayPalSDKError, val orderId: String?) : CardStatus()
     class ApproveOrderSuccess(val result: CardResult) : CardStatus()
@@ -11,4 +11,6 @@ internal sealed class CardStatus {
     class VaultError(val error: PayPalSDKError) : CardStatus()
     class VaultSuccess(val result: CardVaultResult) : CardStatus()
     class VaultCanceled(val setupTokenId: String?) : CardStatus()
+
+    object NoResult : CardStatus()
 }

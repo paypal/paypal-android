@@ -10,10 +10,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Set up Java 11
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'microsoft'
       - name: Run Detekt
         run: ./gradlew detekt
@@ -24,10 +24,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Set up Java 11
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'microsoft'
       - name: Lint
         run: ./gradlew lint
@@ -37,10 +37,10 @@ jobs:
     runs-on: macOS-13
     steps:
       # Set up environment to assemble SDK
-      - name: Set up Java 11
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'microsoft'
 
       # Assemble artifacts from main branch
@@ -82,11 +82,11 @@ jobs:
         run: brew install JakeWharton/repo/diffuse
       - name: Download Workflow Artifacts 
         uses: actions/download-artifact@v4
-      - name: Set up Java 11
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
-          java-version: '11'
+          java-version: '17'
 
       # Run Diffuse analysis
       - name: Run Diffuse Analysis - CardPayments

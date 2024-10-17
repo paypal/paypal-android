@@ -1,12 +1,11 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'com.dicedmelon.gradle.jacoco-android'
     id 'kotlin-parcelize'
 }
 
 android {
-    compileSdkVersion 31
+    compileSdk modules.androidTargetVersion
 
     defaultConfig {
         minSdkVersion modules.androidMinSdkVersion
@@ -22,12 +21,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
+
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = modules.kotlinJvmTarget
     }
 
     lintOptions {
@@ -37,6 +38,7 @@ android {
     }
 
     testOptions.unitTests.includeAndroidResources true
+    namespace 'com.paypal.android.cardpayments'
 }
 
 dependencies {

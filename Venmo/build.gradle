@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk modules.androidTargetVersion
 
     defaultConfig {
-        minSdk 21
-        targetSdk 31
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -16,18 +16,22 @@ android {
 
     buildTypes {
         release {
-            version = android.defaultConfig.versionName // had to add this to get the version in the build
+            version = android.defaultConfig.versionName
+            // had to add this to get the version in the build
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
+
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = modules.kotlinJvmTarget
     }
+    namespace 'com.paypal.android.venmo'
 }
 
 dependencies {

@@ -1,12 +1,11 @@
 package com.paypal.android.cardpayments
 
-import androidx.fragment.app.FragmentActivity
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchException
+import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchResult
-import com.braintreepayments.api.BrowserSwitchStatus
-import com.paypal.android.corepayments.PayPalSDKError
+import com.braintreepayments.api.BrowserSwitchStartResult
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
@@ -23,9 +22,9 @@ internal class CardAuthLauncher(
     }
 
     fun presentAuthChallenge(
-        activity: FragmentActivity,
+        activity: ComponentActivity,
         authChallenge: CardAuthChallenge
-    ): PayPalSDKError? {
+    ): CardPresentAuthChallengeResult {
         val metadata = when (authChallenge) {
             is CardAuthChallenge.ApproveOrder -> {
                 val request = authChallenge.request
@@ -47,64 +46,46 @@ internal class CardAuthLauncher(
             .url(authChallenge.url)
             .returnUrlScheme(authChallenge.returnUrlScheme)
             .metadata(metadata)
-        return launchBrowserSwitch(activity, browserSwitchOptions)
-    }
 
-    private fun launchBrowserSwitch(
-        activity: FragmentActivity,
-        options: BrowserSwitchOptions
-    ): PayPalSDKError? {
-        var error: PayPalSDKError? = null
-        try {
-            browserSwitchClient.start(activity, options)
-        } catch (e: BrowserSwitchException) {
-            error = CardError.browserSwitchError(e)
-        }
-        return error
-    }
-
-    fun deliverBrowserSwitchResult(activity: FragmentActivity) =
-        browserSwitchClient.deliverResult(activity)?.let { browserSwitchResult ->
-            val requestType =
-                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-            if (requestType == REQUEST_TYPE_VAULT) {
-                parseVaultResult(browserSwitchResult)
-            } else {
-                // Assume REQUEST_TYPE_APPROVE_ORDER
-                parseApproveOrderResult(browserSwitchResult)
+        return when (val startResult = browserSwitchClient.start(activity, browserSwitchOptions)) {
+            is BrowserSwitchStartResult.Started -> {
+                CardPresentAuthChallengeResult.Success(startResult.pendingRequest)
             }
-        }
 
-    private fun parseVaultResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
-        val setupTokenId =
-            browserSwitchResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
-        return when (browserSwitchResult.status) {
-            BrowserSwitchStatus.SUCCESS -> parseVaultSuccessResult(browserSwitchResult)
-            BrowserSwitchStatus.CANCELED -> CardStatus.VaultCanceled(setupTokenId)
-            else -> null
-        }
-    }
-
-    private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
-        val orderId = browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-        return if (orderId == null) {
-            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
-        } else {
-            when (browserSwitchResult.status) {
-                BrowserSwitchStatus.SUCCESS ->
-                    parseApproveOrderSuccessResult(browserSwitchResult, orderId)
-
-                BrowserSwitchStatus.CANCELED -> CardStatus.ApproveOrderCanceled(orderId)
-                else -> null
+            is BrowserSwitchStartResult.Failure -> {
+                val error = CardError.browserSwitchError(startResult.error)
+                CardPresentAuthChallengeResult.Failure(error)
             }
         }
     }
 
-    private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchResult): CardStatus {
-        val deepLinkUrl = browserSwitchResult.deepLinkUrl
-        val requestMetadata = browserSwitchResult.requestMetadata
+    fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
+        when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+            is BrowserSwitchFinalResult.Success -> {
+                val requestType = finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
+                if (requestType == REQUEST_TYPE_VAULT) {
+                    parseVaultSuccessResult(finalResult)
+                } else {
+                    // assume REQUEST_TYPE_APPROVE_ORDER
+                    parseApproveOrderSuccessResult(finalResult)
+                }
+            }
 
-        return if (deepLinkUrl == null || requestMetadata == null) {
+            is BrowserSwitchFinalResult.Failure -> {
+                val error = CardError.browserSwitchError(finalResult.error)
+                // TODO: fix this bug; this could also be a vault error but we don't have access
+                // to metadata to check
+                CardStatus.ApproveOrderError(error, null)
+            }
+
+            BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
+        }
+
+    private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): CardStatus {
+        val deepLinkUrl = finalResult.returnUrl
+        val requestMetadata = finalResult.requestMetadata
+
+        return if (requestMetadata == null) {
             CardStatus.VaultError(CardError.unknownError)
         } else {
             // TODO: see if there's a way that we can require the merchant to make their
@@ -113,7 +94,7 @@ internal class CardAuthLauncher(
             // NOTE: this assumes that when the merchant created a setup token, they used a
             // return_url with word "success" in it (or a cancel_url with the word "cancel" in it)
             val setupTokenId =
-                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
+                finalResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
             val deepLinkUrlString = deepLinkUrl.toString()
             val didSucceed = deepLinkUrlString.contains("success")
             if (didSucceed) {
@@ -131,12 +112,14 @@ internal class CardAuthLauncher(
     }
 
     private fun parseApproveOrderSuccessResult(
-        browserSwitchResult: BrowserSwitchResult,
-        orderId: String
+        finalResult: BrowserSwitchFinalResult.Success,
     ): CardStatus {
-        val deepLinkUrl = browserSwitchResult.deepLinkUrl
+        val deepLinkUrl = finalResult.returnUrl
+        val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
 
-        return if (deepLinkUrl == null || deepLinkUrl.getQueryParameter("error") != null) {
+        return if (orderId == null) {
+            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
+        } else if (deepLinkUrl.getQueryParameter("error") != null) {
             CardStatus.ApproveOrderError(CardError.threeDSVerificationError, orderId)
         } else {
             val state = deepLinkUrl.getQueryParameter("state")
