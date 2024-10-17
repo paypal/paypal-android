@@ -138,9 +138,9 @@ dependencies {
 
     implementation libs.androidx.preference.ktx
 
-    implementation deps.retrofit
-    implementation deps.gson
-    implementation deps.loggingInterceptor
+    implementation libs.square.retrofit2
+    implementation libs.square.converter.gson
+    implementation libs.square.logging.interceptor
 
     implementation deps.hilt
     kapt deps.hiltKapt
