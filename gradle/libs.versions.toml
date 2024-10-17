@@ -7,7 +7,7 @@ androidxLifecycleRuntimeKtx = "2.4.1"
 androidxLifecycleCommonJava = "2.4.1"
 constraintLayout = "2.1.0"
 googleMaterial = "1.4.0"
-kotlin = "1.8.21"
+kotlinVersion = "1.8.21"
 kotlinxCoroutinesAndroid = "1.6.1"
 lifecycleViewModelCompose = "2.5.1"
 lifecycleRuntimeCompose = "2.6.1"
@@ -17,9 +17,10 @@ androidxPreferenceKtx = "1.1.1"
 squareRetrofit2 = "2.9.0"
 squareConverterGson = "2.3.0"
 squareLoggingInterceptor = "4.9.2"
+hiltVersion = "2.44"
 
 [libraries]
-kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
@@ -53,5 +54,7 @@ square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", versio
 square-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
 square-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 
+google-dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion" }
+google-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion" }
 
 [plugins]

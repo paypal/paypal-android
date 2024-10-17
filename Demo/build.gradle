@@ -142,8 +142,8 @@ dependencies {
     implementation libs.square.converter.gson
     implementation libs.square.logging.interceptor
 
-    implementation deps.hilt
-    kapt deps.hiltKapt
+    implementation libs.google.dagger.hilt.android
+    kapt libs.google.dagger.hilt.compiler
 
     implementation libs.androidx.navigation.compose
     implementation libs.hilt.navigation.compose

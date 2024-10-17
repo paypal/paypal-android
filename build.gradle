@@ -15,10 +15,6 @@ buildscript {
 
     ext.deps = [
 
-            // Dependency Injection
-            "hilt"                        : "com.google.dagger:hilt-android:${versions.hilt}",
-            "hiltKapt"                    : "com.google.dagger:hilt-compiler:${versions.hilt}",
-
             // Browser Switch
             "browserSwitch"               : "com.braintreepayments.api:browser-switch:2.3.1",
 
