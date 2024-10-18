@@ -38,6 +38,7 @@ detektVersion = "1.22.0"
 gradleNexusPublishPlugin = "1.1.0"
 androidGradlePlugin = "7.4.1"
 daggerHilt = "2.44"
+jacocoAndroid = "0.1.5"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
@@ -97,3 +98,4 @@ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = 
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
 gradle-nexus-publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
+jacoco-android = { id = "com.dicedmelon.gradle.jacoco-android", version.ref = "jacocoAndroid" }

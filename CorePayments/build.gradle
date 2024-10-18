@@ -1,8 +1,7 @@
 plugins {
     alias libs.plugins.android.library
     alias libs.plugins.jetbrains.kotlin.android
-
-    id 'com.dicedmelon.gradle.jacoco-android'
+    alias libs.plugins.jacoco.android
     id 'kotlin-parcelize'
 }
 
