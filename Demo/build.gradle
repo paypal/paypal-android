@@ -1,10 +1,10 @@
 plugins {
     alias libs.plugins.android.application
-    alias libs.plugins.jetbrains.kotlin.android
     alias libs.plugins.dagger.hilt
-    alias libs.plugins.kotlin.parcelize
-    alias libs.plugins.gradle.play.publisher
-    alias libs.plugins.kotlin.kapt
+    alias libs.plugins.gradlePlayPublisher
+    alias libs.plugins.kotlinAndroid
+    alias libs.plugins.kotlinKapt
+    alias libs.plugins.kotlinParcelize
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")

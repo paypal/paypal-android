@@ -10,14 +10,14 @@ buildscript {
 plugins {
     alias libs.plugins.android.application apply false
     alias libs.plugins.android.library apply false
-    alias libs.plugins.jetbrains.kotlin.android apply false
     alias libs.plugins.dagger.hilt apply false
-    alias libs.plugins.jacoco.android apply false
-    alias libs.plugins.kotlin.parcelize apply false
-    alias libs.plugins.gradle.play.publisher apply false
-    alias libs.plugins.kotlin.kapt apply false
     alias libs.plugins.detekt
-    alias libs.plugins.gradle.nexus.publish.plugin
+    alias libs.plugins.gradlePlayPublisher apply false
+    alias libs.plugins.jacocoAndroid apply false
+    alias libs.plugins.kotlinAndroid apply false
+    alias libs.plugins.kotlinParcelize apply false
+    alias libs.plugins.kotlinKapt apply false
+    alias libs.plugins.nexus.publishPlugin
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo
