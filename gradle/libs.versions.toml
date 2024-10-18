@@ -20,7 +20,7 @@ squareLoggingInterceptor = "4.9.2"
 hiltVersion = "2.44"
 browserSwitch = "2.3.1"
 junit = "4.13.2"
-androidxJUnit= "1.1.5"
+androidxJUnit = "1.1.5"
 androidxEspressoCore = "3.4.0"
 androidxTestCore = "1.5.0"
 androidxTestRunner = "1.5.2"
@@ -34,6 +34,9 @@ striktMockk = "0.30.1"
 striktCore = "0.30.1"
 json = "20220320"
 nativeCheckout = "1.3.2"
+detektVersion = "1.22.0"
+gradleNexusPublishPlugin = "1.1.0"
+androidGradlePlugin = "7.4.1"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
@@ -87,3 +90,8 @@ json = { group = "org.json", name = "json", version.ref = "json" }
 native-checkout = { group = "com.paypal.checkout", name = "android-sdk", version.ref = "nativeCheckout" }
 
 [plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
+gradle-nexus-publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
