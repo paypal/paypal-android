@@ -39,6 +39,7 @@ gradleNexusPublishPlugin = "1.1.0"
 androidGradlePlugin = "7.4.1"
 daggerHilt = "2.44"
 jacocoAndroid = "0.1.5"
+gradlePlayPublisher = "3.8.4"
 
 [libraries]
 kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
@@ -100,3 +101,5 @@ gradle-nexus-publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", ve
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 jacoco-android = { id = "com.dicedmelon.gradle.jacoco-android", version.ref = "jacocoAndroid" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
+gradle-play-publisher = { id = "com.github.triplet.play", version.ref = "gradlePlayPublisher" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
