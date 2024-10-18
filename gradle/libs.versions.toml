@@ -65,7 +65,7 @@ dagger-hiltAndroid = { group = "com.google.dagger", name = "hilt-android", versi
 dagger-hiltCompiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion" }
 hilt-navigationCompose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 json = { group = "org.json", name = "json", version.ref = "json" }
-json-assert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonAssert" }
+jsonAssert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonAssert" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }

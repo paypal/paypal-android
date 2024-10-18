@@ -63,7 +63,7 @@ dependencies {
     implementation libs.kotlinx.coroutinesAndroid
 
     testImplementation libs.json
-    testImplementation libs.json.assert
+    testImplementation libs.jsonAssert
     testImplementation libs.junit
     testImplementation libs.mockk
     testImplementation libs.robolectric

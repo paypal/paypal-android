@@ -44,7 +44,7 @@ dependencies {
 
     testImplementation libs.junit
     testImplementation libs.mockk
-    testImplementation libs.json.assert
+    testImplementation libs.jsonAssert
     testImplementation libs.robolectric
 
     androidTestImplementation libs.androidx.test.junit
