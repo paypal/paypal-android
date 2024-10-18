@@ -1,8 +1,8 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
+    alias libs.plugins.android.library
+    alias libs.plugins.jetbrains.kotlin.android
     alias libs.plugins.jacoco.android
-    id 'kotlin-parcelize'
+    alias libs.plugins.kotlin.parcelize
 }
 
 android {

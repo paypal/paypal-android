@@ -99,3 +99,4 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
 gradle-nexus-publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 jacoco-android = { id = "com.dicedmelon.gradle.jacoco-android", version.ref = "jacocoAndroid" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
