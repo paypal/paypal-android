@@ -51,7 +51,7 @@ jobs:
       - name: Assemble Release AAR on Main Branch
         run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Main Branch Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: main-aar
           path: |
@@ -68,7 +68,7 @@ jobs:
       - name: Assemble Release AAR on Current Branch
         run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Current Branch Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: current-aar
           path: |
@@ -83,7 +83,7 @@ jobs:
       - name: Install Diffuse
         run: brew install JakeWharton/repo/diffuse
       - name: Download Workflow Artifacts 
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
