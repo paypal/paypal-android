@@ -31,23 +31,23 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    implementation libs.browser.switch
+    implementation libs.braintree.browserSwitch
 
-    implementation libs.kotlin.std.lib
-    implementation libs.androidx.core.ktx
+    implementation libs.kotlin.stdLib
+    implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
-    implementation libs.kotlinx.coroutines.android
-    implementation libs.google.android.material
+    implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.android.material
 
     testImplementation libs.junit
     testImplementation libs.mockk
     testImplementation libs.robolectric
-    testImplementation libs.kotlinx.android.coroutines.test
+    testImplementation libs.kotlinx.coroutinesTest
     testImplementation libs.strikt.core
     testImplementation libs.strikt.mockk
 
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
 }
 
 project.ext.name = "paypal-web-payments"

@@ -100,16 +100,16 @@ dependencies {
     implementation project(':PaymentButtons')
     implementation project(':Venmo')
 
-    implementation libs.kotlin.std.lib
-    implementation libs.androidx.core.ktx
+    implementation libs.kotlin.stdLib
+    implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
-    implementation libs.google.android.material
-    implementation libs.androidx.constraint.layout
-    implementation libs.androidx.lifecycle.runtime.ktx
-    implementation libs.androidx.fragment.ktx
+    implementation libs.android.material
+    implementation libs.androidx.constraintLayout
+    implementation libs.lifecycle.runtimeKtx
+    implementation libs.androidx.fragmentKtx
 
     // TODO: remove dependency when we don't relay on nxo models anymore
-    implementation(libs.native.checkout) {
+    implementation(libs.paypal.nativeCheckout) {
         exclude module: 'data-collector'
     }
 
@@ -120,39 +120,38 @@ dependencies {
     // and are known to be compatible by the Jetpack Team
     // More info: https://developer.android.com/jetpack/compose/bom
     // Another ref: https://developer.android.com/jetpack/compose/setup#setup-compose
-    implementation platform(libs.androidx.compose.bom)
-    androidTestImplementation platform(libs.androidx.compose.bom)
+    implementation platform(libs.compose.bom)
+    androidTestImplementation platform(libs.compose.bom)
 
-    implementation libs.androidx.compose.material3
-    implementation libs.androidx.compose.ui.tooling.preview
-    debugImplementation libs.androidx.compose.ui.tooling
+    implementation libs.compose.material3
+    implementation libs.compose.uiToolingPreview
+    debugImplementation libs.compose.uiTooling
 
-    implementation libs.androidx.lifecycle.view.model.compose
-    implementation libs.androidx.lifecycle.runtime.compose
-
-    implementation libs.androidx.preference.ktx
+    implementation libs.lifecycle.viewModelCompose
+    implementation libs.lifecycle.runtimeCompose
+    implementation libs.androidx.preferenceKtx
 
     implementation libs.square.retrofit2
-    implementation libs.square.converter.gson
-    implementation libs.square.logging.interceptor
+    implementation libs.square.converterGson
+    implementation libs.square.loggingInterceptor
 
-    implementation libs.google.dagger.hilt.android
-    kapt libs.google.dagger.hilt.compiler
+    implementation libs.dagger.hiltAndroid
+    kapt libs.dagger.hiltCompiler
 
-    implementation libs.androidx.navigation.compose
-    implementation libs.hilt.navigation.compose
+    implementation libs.navigation.compose
+    implementation libs.hilt.navigationCompose
 
     testImplementation libs.junit
 
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.test.rules
-    androidTestImplementation libs.androidx.test.ui.automator
+    androidTestImplementation libs.androidx.test.uiAutomator
 
     // compose ui-test
-    androidTestImplementation libs.androidx.compose.ui.test.junit4
-    debugImplementation libs.androidx.compose.ui.test.manifest
+    androidTestImplementation libs.compose.uiTestJunit4
+    debugImplementation libs.compose.uiTestManifest
 }
 
 /**

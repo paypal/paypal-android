@@ -31,10 +31,12 @@ android {
 }
 
 dependencies {
-    implementation libs.androidx.core.ktx
+    implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
-    implementation libs.google.android.material
+    implementation libs.android.material
+
     testImplementation libs.junit
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.espresso.core
+
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
 }

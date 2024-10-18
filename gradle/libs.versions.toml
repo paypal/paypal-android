@@ -42,44 +42,44 @@ striktCore = "0.30.1"
 striktMockk = "0.30.1"
 
 [libraries]
+android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-constraint-layout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspressoCore" }
-androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidxFragmentKtx" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJUnit" }
-androidx-lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
-androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
-androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
-androidx-lifecycle-view-model-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreferenceKtx" }
+androidx-constraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
+androidx-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
+androidx-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidxFragmentKtx" }
+androidx-preferenceKtx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreferenceKtx" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspressoCore" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJUnit" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
-androidx-test-ui-automator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "androidxTestUiAutomator" }
-browser-switch = { group = "com.braintreepayments.api", name = "browser-switch", version.ref = "browserSwitch" }
-google-android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
-google-dagger-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion" }
-google-dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-test-uiAutomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "androidxTestUiAutomator" }
+braintree-browserSwitch = { group = "com.braintreepayments.api", name = "browser-switch", version.ref = "browserSwitch" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-uiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-uiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+compose-uiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+dagger-hiltAndroid = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion" }
+dagger-hiltCompiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion" }
+hilt-navigationCompose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 json = { group = "org.json", name = "json", version.ref = "json" }
 json-assert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonAssert" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-kotlin-std-lib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
-kotlinx-android-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
+kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
+lifecycle-commonJava8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
+lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
+lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-native-checkout = { group = "com.paypal.checkout", name = "android-sdk", version.ref = "nativeCheckout" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+paypal-nativeCheckout = { group = "com.paypal.checkout", name = "android-sdk", version.ref = "nativeCheckout" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
-square-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
-square-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
+square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
+square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
