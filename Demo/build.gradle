@@ -30,7 +30,7 @@ android {
 
     composeOptions {
         // Ref: https://developer.android.com/jetpack/androidx/releases/compose-kotlin#pre-release_kotlin_compatibility
-        kotlinCompilerExtensionVersion "${versions.compose}"
+        kotlinCompilerExtensionVersion "1.4.7"
     }
 
     buildTypes {
