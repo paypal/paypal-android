@@ -1,8 +1,8 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'com.dicedmelon.gradle.jacoco-android'
-    id 'kotlin-parcelize'
+    alias libs.plugins.android.library
+    alias libs.plugins.kotlinAndroid
+    alias libs.plugins.jacocoAndroid
+    alias libs.plugins.kotlinParcelize
 }
 
 android {
@@ -57,22 +57,22 @@ android {
 }
 
 dependencies {
-    implementation deps.kotlinStdLib
-    implementation deps.androidxCoreKtx
-    implementation deps.androidxAppcompat
-    implementation deps.kotlinxAndroidCoroutines
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.appcompat
+    implementation libs.kotlin.stdLib
+    implementation libs.kotlinx.coroutinesAndroid
 
-    testImplementation deps.jsonAssert
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.robolectric
-    testImplementation deps.json
-    testImplementation deps.kotlinxAndroidCoroutinesTest
-    testImplementation deps.androidxTestCore
+    testImplementation libs.json
+    testImplementation libs.jsonAssert
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.robolectric
+    testImplementation libs.kotlinx.coroutinesTest
+    testImplementation libs.androidx.test.core
 
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
-    androidTestImplementation deps.kotlinxAndroidCoroutinesTest
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
+    androidTestImplementation libs.kotlinx.coroutinesTest
 }
 
 project.ext.name = "core-payments"

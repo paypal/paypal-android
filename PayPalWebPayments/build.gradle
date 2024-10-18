@@ -1,6 +1,6 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
+    alias libs.plugins.android.library
+    alias libs.plugins.kotlinAndroid
 }
 
 android {
@@ -31,23 +31,23 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    implementation deps.browserSwitch
+    implementation libs.braintree.browserSwitch
 
-    implementation deps.kotlinStdLib
-    implementation deps.androidxCoreKtx
-    implementation deps.androidxAppcompat
-    implementation deps.kotlinxAndroidCoroutines
-    implementation deps.material
+    implementation libs.kotlin.stdLib
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.appcompat
+    implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.android.material
 
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.robolectric
-    testImplementation deps.kotlinxAndroidCoroutinesTest
-    testImplementation deps.striktCore
-    testImplementation deps.striktMockk
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.robolectric
+    testImplementation libs.kotlinx.coroutinesTest
+    testImplementation libs.strikt.core
+    testImplementation libs.strikt.mockk
 
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
 }
 
 project.ext.name = "paypal-web-payments"
