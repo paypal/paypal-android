@@ -15,7 +15,6 @@ buildscript {
 
     dependencies {
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
-        classpath "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}"
     }
 }
 
@@ -23,6 +22,7 @@ plugins {
     alias libs.plugins.android.application apply false
     alias libs.plugins.android.library apply false
     alias libs.plugins.jetbrains.kotlin.android apply false
+    alias libs.plugins.dagger.hilt apply false
     alias libs.plugins.gradle.nexus.publish.plugin
     alias libs.plugins.detekt
 }
