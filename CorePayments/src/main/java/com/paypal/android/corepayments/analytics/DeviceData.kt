@@ -5,7 +5,7 @@ internal data class DeviceData(
     val appName: String,
     val clientOS: String,
     val clientSDKVersion: String,
-    val merchantAppVersion: String,
+    val merchantAppVersion: String?,
     val deviceManufacturer: String,
     val deviceModel: String,
     val isSimulator: Boolean,

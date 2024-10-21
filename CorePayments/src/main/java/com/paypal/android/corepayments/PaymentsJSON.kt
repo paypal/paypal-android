@@ -27,7 +27,7 @@ class PaymentsJSON(val json: JSONObject) {
         var node: JSONObject? = json
         while (keys.size > 1) {
             node = node?.optJSONObject(keys[0])
-            keys.removeFirst()
+            keys.removeAt(0)
         }
 
         return node?.optString(keys[0])
@@ -39,7 +39,7 @@ class PaymentsJSON(val json: JSONObject) {
         var node: JSONObject? = json
         while (keys.size > 0) {
             node = node?.optJSONObject(keys[0])
-            keys.removeFirst()
+            keys.removeAt(0)
         }
         return node?.let { PaymentsJSON(it) }
     }
@@ -50,7 +50,7 @@ class PaymentsJSON(val json: JSONObject) {
         val keys = keyPath.split(".").toMutableList()
         while (keys.size > 1) {
             node = node.getJSONObject(keys[0])
-            keys.removeFirst()
+            keys.removeAt(0)
         }
         return NodeResult(node, keys)
     }
@@ -69,7 +69,7 @@ class PaymentsJSON(val json: JSONObject) {
         var node: JSONObject? = json
         while (keys.size > 1) {
             node = node?.optJSONObject(keys[0])
-            keys.removeFirst()
+            keys.removeAt(0)
         }
 
         return node?.optJSONArray(keys[0])

@@ -15,6 +15,9 @@ interface ApproveOrderListener {
     @MainThread
     fun onApproveOrderSuccess(result: CardResult)
 
+    @MainThread
+    fun onAuthorizationRequired(authChallenge: CardAuthChallenge)
+
     /**
      * Called when the approval fails.
      * @param error [PayPalSDKError] explaining the reason for failure.

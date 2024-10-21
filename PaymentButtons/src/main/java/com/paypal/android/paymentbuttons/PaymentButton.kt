@@ -214,7 +214,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         visibility = VISIBLE
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         if (shape == PaymentButtonShape.PILL && shapeHasChanged) {
             shape = PaymentButtonShape.PILL // force update since PILL is dependent on view height.
         }
