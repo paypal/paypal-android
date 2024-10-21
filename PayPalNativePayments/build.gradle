@@ -4,7 +4,6 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
 
     defaultConfig {
         // TODO: revert once Native XO supports minSdk 21
