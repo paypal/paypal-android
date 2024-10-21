@@ -53,7 +53,7 @@ publishing {
 
     signing {
         required { gradle.taskGraph.hasTask("publish") }
-        sign publishing.publications
-        sign configurations.archives
+        sign publishing.publications.release
+//        sign configurations.archives
     }
 }
