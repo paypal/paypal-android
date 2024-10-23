@@ -1,8 +1,8 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'com.dicedmelon.gradle.jacoco-android'
-    id 'kotlin-parcelize'
+    alias libs.plugins.android.library
+    alias libs.plugins.kotlinAndroid
+    alias libs.plugins.jacocoAndroid
+    alias libs.plugins.kotlinParcelize
 }
 
 android {
@@ -41,28 +41,25 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    implementation deps.kotlinStdLib
-    implementation deps.androidxCoreKtx
-    implementation deps.androidxAppcompat
-    implementation deps.kotlinxAndroidCoroutines
+    implementation libs.kotlin.stdLib
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.appcompat
+    implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.braintree.browserSwitch
+    implementation libs.lifecycle.commonJava8
+    implementation libs.lifecycle.runtimeKtx
 
-    implementation deps.browserSwitch
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.jsonAssert
+    testImplementation libs.robolectric
+    testImplementation libs.kotlinx.coroutinesTest
+    testImplementation libs.androidx.test.core
+    testImplementation libs.strikt.core
+    testImplementation libs.strikt.mockk
 
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.jsonAssert
-    testImplementation deps.robolectric
-    testImplementation deps.kotlinxAndroidCoroutinesTest
-    testImplementation deps.androidxTestCore
-    testImplementation deps.striktCore
-    testImplementation deps.striktMockk
-
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
-
-    implementation deps.androidxLifecycleCommonJava
-    implementation deps.androidxLifecycleRuntimeKtx
-
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
 }
 
 project.ext.name = "card-payments"

@@ -1,10 +1,10 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-kapt'
-    id 'dagger.hilt.android.plugin'
-    id 'kotlin-parcelize'
-    id 'com.github.triplet.play' version '3.8.4'
+    alias libs.plugins.android.application
+    alias libs.plugins.dagger.hilt
+    alias libs.plugins.gradlePlayPublisher
+    alias libs.plugins.kotlinAndroid
+    alias libs.plugins.kotlinKapt
+    alias libs.plugins.kotlinParcelize
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
@@ -30,7 +30,7 @@ android {
 
     composeOptions {
         // Ref: https://developer.android.com/jetpack/androidx/releases/compose-kotlin#pre-release_kotlin_compatibility
-        kotlinCompilerExtensionVersion "${versions.compose}"
+        kotlinCompilerExtensionVersion "1.4.7"
     }
 
     buildTypes {
@@ -93,29 +93,23 @@ kapt {
 }
 
 dependencies {
-    debugImplementation project(':CardPayments')
-    debugImplementation project(':FraudProtection')
-    debugImplementation project(':PayPalNativePayments')
-    debugImplementation project(':PayPalWebPayments')
-    debugImplementation project(':PaymentButtons')
-    debugImplementation project(':Venmo')
+    implementation project(':CardPayments')
+    implementation project(':FraudProtection')
+    implementation project(':PayPalNativePayments')
+    implementation project(':PayPalWebPayments')
+    implementation project(':PaymentButtons')
+    implementation project(':Venmo')
 
-    releaseImplementation deps.cardPayments
-    releaseImplementation deps.paymentButtons
-    releaseImplementation deps.paypalWebPayments
-    releaseImplementation deps.paypalNativePayments
-    releaseImplementation deps.fraudProtection
-
-    implementation deps.kotlinStdLib
-    implementation deps.androidxCoreKtx
-    implementation deps.androidxAppcompat
-    implementation deps.material
-    implementation deps.constraintLayout
-    implementation deps.androidxLifecycleRuntimeKtx
-    implementation deps.fragmentKtx
+    implementation libs.kotlin.stdLib
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.appcompat
+    implementation libs.android.material
+    implementation libs.androidx.constraintLayout
+    implementation libs.lifecycle.runtimeKtx
+    implementation libs.androidx.fragmentKtx
 
     // TODO: remove dependency when we don't relay on nxo models anymore
-    implementation(deps.nativeCheckout) {
+    implementation(libs.paypal.nativeCheckout) {
         exclude module: 'data-collector'
     }
 
@@ -125,40 +119,39 @@ dependencies {
     // to be compatible with one another. The set of dependencies output by the bom have been tested
     // and are known to be compatible by the Jetpack Team
     // More info: https://developer.android.com/jetpack/compose/bom
-    def composeBom = platform('androidx.compose:compose-bom:2023.05.01')
-    implementation composeBom
-    androidTestImplementation composeBom
+    // Another ref: https://developer.android.com/jetpack/compose/setup#setup-compose
+    implementation platform(libs.compose.bom)
+    androidTestImplementation platform(libs.compose.bom)
 
-    implementation deps.composeMaterial3
-    implementation deps.composeUiToolingPreview
-    debugImplementation deps.composeUiTooling
+    implementation libs.compose.material3
+    implementation libs.compose.uiToolingPreview
+    debugImplementation libs.compose.uiTooling
 
-    implementation deps.lifecycleViewModelCompose
-    implementation deps.lifecycleRuntimeCompose
+    implementation libs.lifecycle.viewModelCompose
+    implementation libs.lifecycle.runtimeCompose
+    implementation libs.androidx.preferenceKtx
 
-    implementation deps.preference
+    implementation libs.square.retrofit2
+    implementation libs.square.converterGson
+    implementation libs.square.loggingInterceptor
 
-    implementation deps.retrofit
-    implementation deps.gson
-    implementation deps.loggingInterceptor
+    implementation libs.dagger.hiltAndroid
+    kapt libs.dagger.hiltCompiler
 
-    implementation deps.hilt
-    kapt deps.hiltKapt
+    implementation libs.navigation.compose
+    implementation libs.hilt.navigationCompose
 
-    implementation deps.navigationCompose
-    implementation deps.hiltNavigationCompose
+    testImplementation libs.junit
 
-    testImplementation deps.junit
-
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
-    androidTestImplementation deps.androidxTestRunner
-    androidTestImplementation deps.androidxTestRules
-    androidTestImplementation deps.androidxTestUiAutomator
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.test.rules
+    androidTestImplementation libs.androidx.test.uiAutomator
 
     // compose ui-test
-    androidTestImplementation deps.composeUiTestJUnit4
-    debugImplementation deps.composeUiTestManifest
+    androidTestImplementation libs.compose.uiTestJunit4
+    debugImplementation libs.compose.uiTestManifest
 }
 
 /**

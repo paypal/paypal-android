@@ -1,0 +1,97 @@
+[versions]
+androidGradlePlugin = "7.4.1"
+androidxAppcompat = "1.3.1"
+androidxComposeBom = "2023.05.01"
+androidxCoreKtx = "1.6.0"
+androidxEspressoCore = "3.4.0"
+androidxFragmentKtx = "1.6.0"
+androidxJUnit = "1.1.5"
+androidxLifecycleCommonJava = "2.4.1"
+androidxLifecycleRuntimeKtx = "2.4.1"
+androidxPreferenceKtx = "1.1.1"
+androidxTestCore = "1.5.0"
+androidxTestRules = "1.5.0"
+androidxTestRunner = "1.5.2"
+androidxTestUiAutomator = "2.2.0"
+browserSwitch = "2.3.1"
+constraintLayout = "2.1.0"
+daggerHilt = "2.44"
+detektVersion = "1.22.0"
+googleMaterial = "1.4.0"
+gradleNexusPublishPlugin = "1.1.0"
+gradlePlayPublisher = "3.8.4"
+hiltNavigationCompose = "1.1.0"
+hiltVersion = "2.44"
+jacocoAndroid = "0.1.5"
+json = "20220320"
+jsonAssert = "1.4.0"
+junit = "4.13.2"
+kotlinVersion = "1.8.21"
+kotlinxAndroidCoroutinesTest = "1.6.1"
+kotlinxCoroutinesAndroid = "1.6.1"
+lifecycleRuntimeCompose = "2.6.1"
+lifecycleViewModelCompose = "2.5.1"
+mockk = "1.13.5"
+nativeCheckout = "1.3.2"
+navigationCompose = "2.7.5"
+robolectric = "4.13"
+squareConverterGson = "2.3.0"
+squareLoggingInterceptor = "4.9.2"
+squareRetrofit2 = "2.9.0"
+striktCore = "0.30.1"
+striktMockk = "0.30.1"
+
+[libraries]
+android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
+androidx-constraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
+androidx-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
+androidx-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidxFragmentKtx" }
+androidx-preferenceKtx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreferenceKtx" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspressoCore" }
+androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJUnit" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+androidx-test-uiAutomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "androidxTestUiAutomator" }
+braintree-browserSwitch = { group = "com.braintreepayments.api", name = "browser-switch", version.ref = "browserSwitch" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-uiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-uiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+compose-uiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+dagger-hiltAndroid = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion" }
+dagger-hiltCompiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltVersion" }
+hilt-navigationCompose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+json = { group = "org.json", name = "json", version.ref = "json" }
+jsonAssert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonAssert" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
+kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
+lifecycle-commonJava8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
+lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
+lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+paypal-nativeCheckout = { group = "com.paypal.checkout", name = "android-sdk", version.ref = "nativeCheckout" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
+square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
+square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
+strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
+strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
+nexus-publishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
+gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePlayPublisher" }
+jacocoAndroid = { id = "com.dicedmelon.gradle.jacoco-android", version.ref = "jacocoAndroid" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
+kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }

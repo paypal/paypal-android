@@ -1,6 +1,6 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
+    alias libs.plugins.android.library
+    alias libs.plugins.kotlinAndroid
 }
 
 android {
@@ -37,18 +37,18 @@ dependencies {
     implementation files('libs/android-magnessdk-5.5.1.jar')
 
     api project(':CorePayments')
-    implementation deps.kotlinStdLib
-    implementation deps.androidxCoreKtx
-    implementation deps.androidxAppcompat
-    implementation deps.preference
+    implementation libs.kotlin.stdLib
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.preferenceKtx
 
-    testImplementation deps.junit
-    testImplementation deps.mockk
-    testImplementation deps.jsonAssert
-    testImplementation deps.robolectric
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.jsonAssert
+    testImplementation libs.robolectric
 
-    androidTestImplementation deps.androidxJUnit
-    androidTestImplementation deps.androidxEspressoCore
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.espresso
 }
 
 
