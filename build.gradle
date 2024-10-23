@@ -46,12 +46,12 @@ task clean(type: Delete) {
 }
 
 dependencies {
-    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:${detektVersion}"
-    detektPlugins "io.gitlab.arturbosch.detekt:detekt-rules-libraries:${detektVersion}"
+    detektPlugins libs.detekt.formatting
+    detektPlugins libs.detekt.rulesLibraries
 }
 
 detekt {
-    toolVersion = detektVersion
+    toolVersion = libs.versions.detektVersion.get()
     config = files("detekt/detekt-config.yml")
     input = files(
             "CorePayments/src",

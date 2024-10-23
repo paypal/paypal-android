@@ -75,13 +75,14 @@ lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime
 lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-paypal-nativeCheckout = { group = "com.paypal.checkout", name = "android-sdk", version.ref = "nativeCheckout" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
 square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt:detekt-formatting", name = "detektVersion" }
+detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt:detekt-rules-libraries", name = "detektVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
