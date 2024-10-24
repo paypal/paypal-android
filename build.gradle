@@ -3,7 +3,8 @@ buildscript {
             "sdkVersionName"      : "1.6.1-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 21,
-            "androidTargetVersion": 35
+            "androidTargetVersion": 35,
+            "androidCompileSdk": 35
     ]
 }
 

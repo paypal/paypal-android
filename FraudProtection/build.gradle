@@ -7,6 +7,7 @@ android {
     compileSdk 31
 
     defaultConfig {
+        compileSdk modules.androidCompileSdk
         minSdkVersion modules.androidMinSdkVersion
         targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

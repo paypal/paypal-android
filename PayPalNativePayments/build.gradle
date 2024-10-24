@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
 
     defaultConfig {
         // TODO: revert once Native XO supports minSdk 21
         //minSdkVersion 21
         minSdkVersion 23
+        compileSdk modules.androidCompileSdk
         targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

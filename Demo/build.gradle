@@ -12,9 +12,9 @@ def paypalProperties = loadPropertiesFromFile("paypal.properties")
 android {
     defaultConfig {
         applicationId "com.paypal.android"
-        minSdkVersion 21
-        compileSdk 34
-        targetSdkVersion 34
+        compileSdk modules.androidCompileSdk
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
         versionCode modules.demoAppVersionCode
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
