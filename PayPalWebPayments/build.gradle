@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'com.paypal.android.paypalwebpayments'
 
     defaultConfig {
         compileSdk modules.androidCompileSdk
@@ -21,11 +22,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
+    }
+    kotlin {
+        jvmToolchain(modules.kotlinJvmToolchain)
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = modules.kotlinJvmTarget
     }
 }
 
