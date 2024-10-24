@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 1.6.0 (2024-10-24)
 
 * All Modules
   * Upgrade compileSdkVersion and targetSdkVersion to API 35
