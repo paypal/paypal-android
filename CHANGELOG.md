@@ -1,7 +1,13 @@
 # PayPal Android SDK Release Notes
 
-## 1.6.0 (2024-10-24)
+## unreleased
+* Gradle
+  * Update Android Gradle Plugin (AGP) to version `8.5.2`
+  * Remove jacoco code coverage integration that was causing build failures after upgrading to latest AGP version
+  * Remove hardcoded compileSdk version from each module's `build.gradle` file
+  * Explicitly declare target JVM toolchain for all modules
 
+## 1.6.0 (2024-10-24)
 * All Modules
   * Upgrade compileSdkVersion and targetSdkVersion to API 35
 * CardPayments
