@@ -43,11 +43,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = modules.kotlinJvmTarget
     }
 
     lintOptions {
