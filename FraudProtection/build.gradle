@@ -25,9 +25,6 @@ android {
         sourceCompatibility modules.sourceCompatibility
         targetCompatibility modules.targetCompatibility
     }
-    kotlin {
-        jvmToolchain(modules.kotlinJvmToolchain)
-    }
     kotlinOptions {
         jvmTarget = modules.kotlinJvmTarget
     }
