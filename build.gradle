@@ -7,7 +7,7 @@ buildscript {
             "androidCompileSdk": 35,
             "sourceCompatibility": JavaVersion.VERSION_1_8,
             "targetCompatibility": JavaVersion.VERSION_1_8,
-            "kotlinJvmToolchain": 8,
+            "kotlinJvmToolchain": 17,
             "kotlinJvmTarget": JavaVersion.VERSION_1_8.toString()
     ]
 }
