@@ -5,6 +5,7 @@
   * Update Android Gradle Plugin (AGP) to version `8.5.2`
   * Remove jacoco code coverage integration that was causing build failures after upgrading to latest AGP version
   * Remove hardcoded compileSdk version from each module's `build.gradle` file
+  * Update Demo app to use Java 17 to fix kapt build errors
 * GitHub Actions
   * Bump Java Version to 17 for all build actions
 
