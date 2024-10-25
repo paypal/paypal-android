@@ -22,7 +22,6 @@ gradleNexusPublishPlugin = "1.1.0"
 gradlePlayPublisher = "3.8.4"
 hiltNavigationCompose = "1.1.0"
 hiltVersion = "2.51.1"
-jacocoAndroid = "0.1.5"
 json = "20220320"
 jsonAssert = "1.4.0"
 junit = "4.13.2"
@@ -91,7 +90,6 @@ dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
 nexus-publishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
 gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePlayPublisher" }
-jacocoAndroid = { id = "com.dicedmelon.gradle.jacoco-android", version.ref = "jacocoAndroid" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
