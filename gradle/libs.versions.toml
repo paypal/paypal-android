@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "7.4.1"
+androidGradlePlugin = "8.5.2"
 androidxAppcompat = "1.3.1"
 androidxComposeBom = "2023.05.01"
 androidxCoreKtx = "1.6.0"
@@ -15,14 +15,13 @@ androidxTestRunner = "1.5.2"
 androidxTestUiAutomator = "2.2.0"
 browserSwitch = "2.3.1"
 constraintLayout = "2.1.0"
-daggerHilt = "2.44"
+daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
 googleMaterial = "1.4.0"
 gradleNexusPublishPlugin = "1.1.0"
 gradlePlayPublisher = "3.8.4"
 hiltNavigationCompose = "1.1.0"
-hiltVersion = "2.44"
-jacocoAndroid = "0.1.5"
+hiltVersion = "2.51.1"
 json = "20220320"
 jsonAssert = "1.4.0"
 junit = "4.13.2"
@@ -91,7 +90,6 @@ dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detektVersion" }
 nexus-publishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradleNexusPublishPlugin" }
 gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePlayPublisher" }
-jacocoAndroid = { id = "com.dicedmelon.gradle.jacoco-android", version.ref = "jacocoAndroid" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }

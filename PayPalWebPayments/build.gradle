@@ -4,9 +4,10 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    namespace 'com.paypal.android.paypalwebpayments'
 
     defaultConfig {
+        compileSdk modules.androidCompileSdk
         minSdkVersion modules.androidMinSdkVersion
         targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -21,11 +22,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = modules.kotlinJvmTarget
     }
 }
 

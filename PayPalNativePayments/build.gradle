@@ -4,12 +4,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    namespace 'com.paypal.android.paypalnativepayments'
 
     defaultConfig {
         // TODO: revert once Native XO supports minSdk 21
         //minSdkVersion 21
         minSdkVersion 23
+        compileSdk modules.androidCompileSdk
         targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -23,11 +24,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = modules.kotlinJvmTarget
     }
     lintOptions {
         lintConfig file('../lint.xml')

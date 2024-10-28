@@ -61,7 +61,7 @@ internal class DeviceInspector @VisibleForTesting constructor(
             deviceManufacturer = deviceManufacturer,
             deviceModel = deviceModel,
             isSimulator = isSimulator,
-            merchantAppVersion = merchantAppVersion,
+            merchantAppVersion = merchantAppVersion ?: "",
         )
     }
 }

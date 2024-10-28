@@ -4,4 +4,6 @@
     <issue id="AllowBackup" severity="ignore" />
     // TODO: Remove this ignore when SDK has been tested against API 31
     <issue id="OldTargetApi" severity="ignore" />
+    // TODO: Remove this once Self Service Android Studio Version has been updated
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
 </lint>

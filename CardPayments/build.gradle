@@ -1,14 +1,14 @@
 plugins {
     alias libs.plugins.android.library
     alias libs.plugins.kotlinAndroid
-    alias libs.plugins.jacocoAndroid
     alias libs.plugins.kotlinParcelize
 }
 
 android {
-    compileSdkVersion 31
+    namespace 'com.paypal.android.cardpayments'
 
     defaultConfig {
+        compileSdk modules.androidCompileSdk
         minSdkVersion modules.androidMinSdkVersion
         targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -23,11 +23,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility modules.sourceCompatibility
+        targetCompatibility modules.targetCompatibility
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = modules.kotlinJvmTarget
     }
 
     lintOptions {

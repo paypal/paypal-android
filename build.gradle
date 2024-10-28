@@ -3,7 +3,11 @@ buildscript {
             "sdkVersionName"      : "1.6.1-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 21,
-            "androidTargetVersion": 35
+            "androidTargetVersion": 35,
+            "androidCompileSdk": 35,
+            "sourceCompatibility": JavaVersion.VERSION_1_8,
+            "targetCompatibility": JavaVersion.VERSION_1_8,
+            "kotlinJvmTarget": JavaVersion.VERSION_1_8.toString()
     ]
 }
 
@@ -13,7 +17,6 @@ plugins {
     alias libs.plugins.dagger.hilt apply false
     alias libs.plugins.detekt
     alias libs.plugins.gradlePlayPublisher apply false
-    alias libs.plugins.jacocoAndroid apply false
     alias libs.plugins.kotlinAndroid apply false
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false

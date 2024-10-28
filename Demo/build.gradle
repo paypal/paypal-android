@@ -10,11 +10,13 @@ plugins {
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
+    namespace 'com.paypal.android'
+
     defaultConfig {
         applicationId "com.paypal.android"
-        minSdkVersion 21
-        compileSdk 34
-        targetSdkVersion 34
+        compileSdk modules.androidCompileSdk
+        minSdkVersion modules.androidMinSdkVersion
+        targetSdkVersion modules.androidTargetVersion
         versionCode modules.demoAppVersionCode
         versionName modules.sdkVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -41,11 +43,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     lintOptions {
