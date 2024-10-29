@@ -80,8 +80,8 @@ square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-in
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
-detekt-formatting = { group = "io.gitlab.arturbosch.detekt:detekt-formatting", name = "detektVersion" }
-detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt:detekt-rules-libraries", name = "detektVersion" }
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-formatting", version.ref = "detektVersion" }
+detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
