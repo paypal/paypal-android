@@ -157,6 +157,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
       - name: Set github user
         uses: ./.github/actions/set_github_user
       - name: Update Version
