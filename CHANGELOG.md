@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 1.7.1 (2024-10-29)
 * Gradle
   * Update Android Gradle Plugin (AGP) to version `8.5.2`
   * Remove jacoco code coverage integration that was causing build failures after upgrading to latest AGP version
