@@ -14,7 +14,7 @@ We have refactored the `CardClient` API to improve the developer experience.
 
 #### Activity Reference no Longer Required in CardClient Constructor
 
-The `CardClient` constructor no longer requires an activity reference. In v2, the SDK will require an activity reference _only_ when it needs to launch a Chrome Custom Tab.
+The `CardClient` constructor no longer requires an activity reference. In v2, the SDK will only require an activity reference when it needs to launch a Chrome Custom Tab.
 
 ##### The Old Way: Version 1
 
