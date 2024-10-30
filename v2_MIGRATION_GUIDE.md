@@ -24,8 +24,7 @@ val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 ```
 
 <details>
-
-<summary><b>Explanation: The Old Way (v1)</b></summary>
+<summary><b>Explanation: CardClient Version 1</b></summary>
 
 The old `CardClient` constructor requires an activity reference to register lifecycle observers so the SDK can parse incoming deep links internally when the host application comes to the foregound.
 
@@ -34,8 +33,7 @@ Automatic parsing of deep links can have a positive affect on the developer expe
 </details>
 
 <details>
-
-<summary><b>Explanation: The New Way (v2)</b></summary>
+<summary><b>Explanation: CardClient Version 2</b></summary>
 
 The new `CardClient` constructor is less restrictive. For example, it should now be easier to create a `CardClient` instance from within a Jetpack `ViewModel`.
 
