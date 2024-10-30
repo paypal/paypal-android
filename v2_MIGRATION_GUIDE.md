@@ -23,16 +23,12 @@ val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
 val cardClient = CardClient(requireContext(), config)
 ```
 
-<details>
-
-<summary>The Old Way (v1)</summary>
+##### The Old Way (v1)
 
 ```kotlin
 val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
 val cardClient = CardClient(requireActivity(), config)
 ```
-
-</details>
 
 This should make constructing `CardClient` instances less restrictive e.g. it should easier to construct a `CardClient` within a Jetpack `ViewModel`.
 
