@@ -16,14 +16,11 @@ We have refactored the `CardClient` API to improve the developer experience.
 
 The `CardClient` constructor no longer requires an activity reference. In v2, the SDK will only require an activity reference when it needs to launch a Chrome Custom Tab.
 
-```kotlin
-val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
+```diff
+val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 
-// BAD: v1
-val cardClient = CardClient(requireActivity(), config)
-
-// GOOD: v2
-val cardClient = CardClient(requireContext(), config)
+-val cardClient = CardClient(requireActivity(), config)
++val cardClient = CardClient(requireContext(), config)
 ```
 
 ##### Explanation: The Old Way (v1)
