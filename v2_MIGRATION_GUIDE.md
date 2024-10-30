@@ -110,7 +110,7 @@ Making these steps explicit gives the host application integration more flexibil
 <details>
 <summary><b>Details: Approve Order v1</b></summary>
 
-In v1, the PayPal SDK encapsulates a lot of Chrome Custom Tabs launching and deep link parsing behavior in an effort to streamline the developer experience. We've found in practice that too much encapsulation can lead to highly coupled components that are opinionated about how the host application should be architected. We've decided to give merchants more control in v2 to allow app architects to build with fewer restrictions.
+In v1, the PayPal SDK encapsulates a lot of Chrome Custom Tabs launching and deep link parsing behavior in an effort to streamline the developer experience. We've found in practice that too much encapsulation can lead to highly opinionated components that prevent developers from building apps their own way. We've decided to give merchants more control in v2 to allow app architects to build with fewer restrictions.
 
 </details>
 
