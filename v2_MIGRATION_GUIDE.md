@@ -64,14 +64,12 @@ class Activity: ComponentActivity(), ApproveOrderListener {
 + // v2
 + override fun onResume() {
 +   super.onResume()
-+   // in v1, completeAuthChallenge() is called internally to handle deep links
 +   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
 + }
 
   fun approveOrder() {
     val cardRequest = ...
 -   // v1
--   // in this version, presentAuthChallenge() is called internally by the SDK
 -   cardClient.approveOrder(this, cardRequest)
 +   // v2
 +   cardClient.approveOrder(cardRequest)
@@ -79,6 +77,7 @@ class Activity: ComponentActivity(), ApproveOrderListener {
 
   override fun onApproveOrderSuccess(result: CardResult) {
     // capture order on your server
+    authState = null
   }
 
   override fun onApproveOrderFailure(error: PayPalSDKError) {
@@ -96,6 +95,21 @@ class Activity: ComponentActivity(), ApproveOrderListener {
 + }
 }
 ```
+
+<details>
+<summary><b>Details: Approve Order v2</b></summary>
+</details>
+
+TODO: add notes on approve order v2
+
+<details>
+
+<summary><b>Details: Approve Order v1</b></summary>
+
+// in this version, presentAuthChallenge() is called internally by the SDK
+// in v1, completeAuthChallenge() is called internally to handle deep links
+
+</details>
 
 ### PayPalWebPayments
 
