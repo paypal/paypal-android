@@ -88,7 +88,7 @@ class Activity: ComponentActivity(), ApproveOrderListener {
 + override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
 +   val result = cardClient.presentAuthChallenge(this, authChallenge)
 +   when (result) {
-+     // capture auth state in a variable for later
++     // preserve auth state for balancing call to completeAuthChallenge() in onResume()
 +     is CardPresentAuthChallengeResult.Success -> authState = result.authState
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
