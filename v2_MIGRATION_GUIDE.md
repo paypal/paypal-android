@@ -98,12 +98,12 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 
 <details>
 <summary><b>Details: Approve Order v2</b></summary>
-</details>
 
 TODO: add notes on approve order v2
 
-<details>
+</details>
 
+<details>
 <summary><b>Details: Approve Order v1</b></summary>
 
 // in this version, presentAuthChallenge() is called internally by the SDK
