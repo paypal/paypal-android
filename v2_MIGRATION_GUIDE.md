@@ -118,6 +118,8 @@ In v1, the PayPal SDK encapsulates a lot of Chrome Custom Tabs launching and dee
 
 We have refactored the `PayPalWebClient` API to improve the developer experience.
 
+TODO: Implement migration guide for PayPalWebPayments.
+
 ### PayPalNativePayments
 
 We have removed `PayPalNativeClient` and all associated classes because the PayPal Native Checkout dependency this module uses has been sunset.
