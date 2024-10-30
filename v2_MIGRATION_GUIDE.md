@@ -25,10 +25,12 @@ val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 +val cardClient = CardClient(requireContext(), config)
 ```
 
-<details open>
+<details>
 <summary><b>Details: CardClient v2</b></summary>
 
-The new `CardClient` constructor is less restrictive. For example, it should now be easier to create a `CardClient` instance from within a Jetpack `ViewModel`.
+The new `CardClient` constructor is less restrictive.
+
+For example, it should now be easier to create a `CardClient` instance from within a Jetpack `ViewModel`.
 
 </details>
 
