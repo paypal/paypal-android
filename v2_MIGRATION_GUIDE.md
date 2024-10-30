@@ -18,9 +18,7 @@ The `CardClient` constructor no longer requires an activity reference. We requir
 
 <details open>
 
-<summary><h5>Version 2</h5></summary>
-
-##### The New Way
+<summary><b>Version 2: The New Way</b></summary>
 
 The updated `CardClient` constructor is less restrictive. For example, it should now be easier to construct a `CardClient` within a Jetpack `ViewModel`:
 
@@ -34,9 +32,7 @@ val cardClient = CardClient(requireContext(), config)
 
 <details>
 
-<summary>Version 1</summary>
-
-##### The Old Way
+<summary>Version 1: The Old Way</summary>
 
 The v1 `CardClient` constructor requires an activity reference to register a lifecycle observer for the SDK to parse incoming deep links internally.
 
