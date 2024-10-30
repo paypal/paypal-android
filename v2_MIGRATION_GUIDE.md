@@ -16,16 +16,6 @@ We have refactored the `CardClient` API to improve the developer experience.
 
 The `CardClient` constructor no longer requires an activity reference. We require an activity reference only when we're launching a Chrome Custom Tab, e.g. `CardClient.presentAuthChallenge()`.
 
-##### The New Way: Version 2
-
-The new `CardClient` constructor is less restrictive, e.g. it should now be easier to construct a `CardClient` within a Jetpack `ViewModel`:
-
-```kotlin
-// GOOD: v2
-val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
-val cardClient = CardClient(requireContext(), config)
-```
-
 ##### The Old Way: Version 1
 
 The old `CardClient` constructor requires an activity reference to register lifecycle observers so the SDK can parse incoming deep links internally when the host application comes to the foregound.
@@ -36,6 +26,16 @@ Automatic parsing of deep links can have a positive affect on the developer expe
 // BAD: v1
 val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
 val cardClient = CardClient(requireActivity(), config)
+```
+
+##### The New Way: Version 2
+
+The new `CardClient` constructor is less restrictive, e.g. it should now be easier to create a `CardClient` instance from within a Jetpack `ViewModel`:
+
+```kotlin
+// GOOD: v2
+val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
+val cardClient = CardClient(requireContext(), config)
 ```
 
 ### PayPalWebPayments
