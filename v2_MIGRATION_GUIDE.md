@@ -48,7 +48,7 @@ Automatic parsing of deep links can have a positive affect on the developer expe
 The new `CardClient` gives more control to the host application when presenting Chrome Custom Tabs for authentication and responding to deep links.
 
 ```diff
-class Activity: ComponentActivity(), ApproveOrderListener {
+class SampleActivity: ComponentActivity(), ApproveOrderListener {
 
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 - // v1
