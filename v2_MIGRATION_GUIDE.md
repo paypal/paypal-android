@@ -18,7 +18,7 @@ The `CardClient` constructor no longer requires an activity reference. We requir
 
 <details open>
 
-<summary>Version 2</summary>
+<summary><h5>Version 2</h5></summary>
 
 ##### The New Way
 
