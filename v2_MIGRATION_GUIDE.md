@@ -18,7 +18,7 @@ The `CardClient` constructor no longer requires an activity reference. We requir
 
 This should make constructing `CardClient` instances less restrictive e.g. it should easier to construct a `CardClient` within a Jetpack `ViewModel`:
 
-```kotlin
+```diff
 val config = CoreConfig("<CLIENT_ID>", Environment.LIVE)
 -val cardClient = CardClient(requireActivity(), config)
 +val cardClient = CardClient(requireContext(), config)
