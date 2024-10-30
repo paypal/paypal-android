@@ -99,7 +99,11 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 <details>
 <summary><b>Details: Approve Order v2</b></summary>
 
-TODO: add notes on approve order v2
+In v2, the PayPal SDK requires more explicit direction from the host application to successfully complete an authorization challenge. The host app is also responsible for preserving the auth state while the application enters the background.
+
+Once the user has successfully completed the auth challenge via Chrome Custom Tabs, a deep link back into the host app will bring it back into the foreground. The host application can then complete the auth challenge using the deep link intent and the auth state captured when the auth challenge was initially launched.
+
+Making these steps explicit gives the host application integration more flexibility. This added flexibility makes it easier for the SDK to work alongside more modern Jetpack architectures that use ViewModels and Compose UI.
 
 </details>
 
