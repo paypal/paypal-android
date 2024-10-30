@@ -43,6 +43,60 @@ Automatic parsing of deep links can have a positive affect on the developer expe
 
 </details>
 
+#### Explicit Launch of Auth Challenge
+
+The new `CardClient` gives more control to the host application when presenting Chrome Custom Tabs for authentication and responding to deep links.
+
+```diff
+class Activity: ComponentActivity(), ApproveOrderListener {
+
+  val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
+- // v1
+- val cardClient = CardClient(requireActivity(), config)
++ // v2
++ val cardClient = CardClient(requireContext(), config)
++ var authState: String? = null
+
+  init {
+    cardClient.approveOrderListener = this
+  }
+
++ // v2
++ override fun onResume() {
++   super.onResume()
++   // in v1, completeAuthChallenge() is called internally to handle deep links
++   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
++ }
+
+  fun approveOrder() {
+    val cardRequest = ...
+-   // v1
+-   // in this version, presentAuthChallenge() is called internally by the SDK
+-   cardClient.approveOrder(this, cardRequest)
++   // v2
++   cardClient.approveOrder(cardRequest)
+  }
+
+  override fun onApproveOrderSuccess(result: CardResult) {
+    // capture order on your server
+  }
+
+  override fun onApproveOrderFailure(error: PayPalSDKError) {
+    TODO("Handle Approve Order Failure")
+  }
+
++ // v2
++ override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
++   val result = cardClient.presentAuthChallenge(this, authChallenge)
++   when (result) {
++     // capture auth state in a variable for later
++     is CardPresentAuthChallengeResult.Success -> authState = result.authState
++     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
++   }
++ }
+}
+```
+
 ### PayPalWebPayments
 
 We have refactored the `PayPalWebClient` API to improve the developer experience.
