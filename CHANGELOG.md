@@ -4,6 +4,26 @@
 * Breaking Changes
   * PayPalNativePayments
     * Remove entire PayPalNativePayments module
+  * CardPayments
+    * Remove `CardClient(FragmentActivity, Config)` constructor
+    * Add `CardClient(Context, Config)` constructor
+    * Remove `CardClient.approveOrder(FragmentActivity, CardRequest)` method
+    * Add `CardClient.approveOrder(CardRequest)` method
+    * Remove `CardClient.presentAuthChallenge(FragmentActivity, CardAuthChallenge)` method
+    * Add `CardClient.presentAuthChallenge(ComponentActivity, CardAuthChallenge)` method
+    * Add `CardPresentAuthChallengeResult` type
+    * Add `CardClient.completeAuthChallenge(Intent, String)` method
+    * Add `CardStatus` type
+  * PayPalWebPayments
+    * Remove `PayPalWebCheckoutClient(FragmentActivity, CoreConfig, String)` constructor
+    * Add `PayPalWebCheckoutClient(Context, CoreConfig, String)` constructor
+    * Remove `PayPalWebCheckoutClient.start(PayPalWebCheckoutRequest)` method
+    * Add `PayPalWebCheckoutClient.start(ComponentActivity, PayPalWebCheckoutRequest)` method
+    * Remove `PayPalWebCheckoutClient.vault(PayPalWebVaultRequest)` method
+    * Add `PayPalWebCheckoutClient.vault(ComponentActivity, PayPalWebVaultRequest)` method
+    * Add `CardClient.completeAuthChallenge(Intent, String)` method
+    * Add `PayPalPresentAuthChallengeResult` type
+    * Add `PayPalWebStatus` type
 
 # unreleased
 * Gradle
