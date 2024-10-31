@@ -1,5 +1,11 @@
 # PayPal Android SDK Release Notes
 
+# unreleased
+* Gradle
+  * Update Kotlin version to `1.9.24`
+  * Update Android Gradle Plugin (AGP) to version `8.7.1`
+  * Explicitly declare Java 17 version as the target JVM toolchain
+
 ## 1.7.1 (2024-10-29)
 * Gradle
   * Update Android Gradle Plugin (AGP) to version `8.5.2`
