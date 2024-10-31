@@ -5,6 +5,11 @@ plugins {
 
 android {
     namespace 'com.paypal.android.paypalnativepayments'
+    java {
+        toolchain {
+            languageVersion = modules.kotlinToolchainLanguageVersion
+        }
+    }
 
     defaultConfig {
         // TODO: revert once Native XO supports minSdk 21

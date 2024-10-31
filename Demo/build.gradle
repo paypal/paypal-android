@@ -11,10 +11,9 @@ def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
     namespace 'com.paypal.android'
-
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = modules.kotlinToolchainLanguageVersion
         }
     }
 

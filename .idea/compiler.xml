@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="17">
-      <module name="AndroidSDK.CardPayments" target="21" />
-      <module name="AndroidSDK.CorePayments" target="21" />
-      <module name="AndroidSDK.FraudProtection" target="21" />
-      <module name="AndroidSDK.PaymentButtons" target="21" />
-      <module name="AndroidSDK.PayPalNativePayments" target="21" />
-      <module name="AndroidSDK.PayPalWebPayments" target="21" />
-      <module name="AndroidSDK.Venmo" target="21" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>
