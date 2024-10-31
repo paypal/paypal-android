@@ -5,6 +5,11 @@ plugins {
 
 android {
     namespace 'com.paypal.android.ui'
+    java {
+        toolchain {
+            languageVersion = modules.kotlinToolchainLanguageVersion
+        }
+    }
 
     defaultConfig {
         compileSdk modules.androidCompileSdk

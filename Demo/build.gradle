@@ -11,6 +11,11 @@ def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
     namespace 'com.paypal.android'
+    java {
+        toolchain {
+            languageVersion = modules.kotlinToolchainLanguageVersion
+        }
+    }
 
     defaultConfig {
         applicationId "com.paypal.android"
@@ -32,7 +37,7 @@ android {
 
     composeOptions {
         // Ref: https://developer.android.com/jetpack/androidx/releases/compose-kotlin#pre-release_kotlin_compatibility
-        kotlinCompilerExtensionVersion "1.4.7"
+        kotlinCompilerExtensionVersion "1.5.14"
     }
 
     buildTypes {
