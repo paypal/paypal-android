@@ -12,5 +12,5 @@ sealed class CardStatus {
     class VaultSuccess(val result: CardVaultResult) : CardStatus()
     class VaultCanceled(val setupTokenId: String?) : CardStatus()
 
-    object NoResult : CardStatus()
+    data object NoResult : CardStatus()
 }

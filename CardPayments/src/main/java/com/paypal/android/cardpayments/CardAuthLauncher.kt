@@ -42,9 +42,15 @@ internal class CardAuthLauncher(
             }
         }
 
+        val requestCode = when (authChallenge) {
+            is CardAuthChallenge.ApproveOrder -> BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
+            is CardAuthChallenge.Vault -> BrowserSwitchRequestCodes.CARD_VAULT
+        }
+
         // launch the 3DS flow
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(authChallenge.url)
+            .requestCode(requestCode)
             .returnUrlScheme(authChallenge.returnUrlScheme)
             .metadata(metadata)
 
@@ -60,30 +66,19 @@ internal class CardAuthLauncher(
         }
     }
 
-    fun completeAuthRequest(intent: Intent, authState: String): CardStatus {
-        val requestCode = BrowserSwitchRequestCodes.CARD
-        return when (val finalResult =
-            browserSwitchClient.completeRequest(intent, requestCode, authState)) {
-            is BrowserSwitchFinalResult.Success -> {
-                val requestType = finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-                if (requestType == REQUEST_TYPE_VAULT) {
-                    parseVaultSuccessResult(finalResult)
-                } else {
-                    // assume REQUEST_TYPE_APPROVE_ORDER
-                    parseApproveOrderSuccessResult(finalResult)
-                }
-            }
-
-            is BrowserSwitchFinalResult.Failure -> {
-                val error = CardError.browserSwitchError(finalResult.error)
-                // TODO: fix this bug; this could also be a vault error but we don't have access
-                // to metadata to check
-                CardStatus.ApproveOrderError(error, null)
-            }
-
+    fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
+        when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+            is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
+            is BrowserSwitchFinalResult.Failure -> TODO("Return an unknown error")
             BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
         }
-    }
+
+    private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success): CardStatus =
+        when (result.requestCode) {
+            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER -> parseApproveOrderSuccessResult(result)
+            BrowserSwitchRequestCodes.CARD_VAULT -> parseVaultSuccessResult(result)
+            else -> CardStatus.NoResult
+        }
 
     private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): CardStatus {
         val deepLinkUrl = finalResult.returnUrl
