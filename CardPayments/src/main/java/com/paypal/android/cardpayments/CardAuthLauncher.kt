@@ -6,6 +6,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
@@ -59,8 +60,10 @@ internal class CardAuthLauncher(
         }
     }
 
-    fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
-        when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+    fun completeAuthRequest(intent: Intent, authState: String): CardStatus {
+        val requestCode = BrowserSwitchRequestCodes.CARD
+        return when (val finalResult =
+            browserSwitchClient.completeRequest(intent, requestCode, authState)) {
             is BrowserSwitchFinalResult.Success -> {
                 val requestType = finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
                 if (requestType == REQUEST_TYPE_VAULT) {
@@ -80,6 +83,7 @@ internal class CardAuthLauncher(
 
             BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
         }
+    }
 
     private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): CardStatus {
         val deepLinkUrl = finalResult.returnUrl

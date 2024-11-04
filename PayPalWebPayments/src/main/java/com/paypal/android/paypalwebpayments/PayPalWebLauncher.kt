@@ -7,6 +7,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
@@ -109,8 +110,9 @@ internal class PayPalWebLauncher(
             .build()
     }
 
-    fun completeAuthRequest(intent: Intent, authState: String): PayPalWebStatus =
-        when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+    fun completeAuthRequest(intent: Intent, authState: String): PayPalWebStatus {
+        val requestCode = BrowserSwitchRequestCodes.PAY_PAL
+        return when (val finalResult = browserSwitchClient.completeRequest(intent, requestCode, authState)) {
             is BrowserSwitchFinalResult.Success -> {
                 val requestType =
                     finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
@@ -130,6 +132,7 @@ internal class PayPalWebLauncher(
 
             BrowserSwitchFinalResult.NoResult -> PayPalWebStatus.NoResult
         }
+    }
 
     private fun parseWebCheckoutSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebStatus {
         val deepLinkUrl = finalResult.returnUrl
