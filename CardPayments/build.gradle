@@ -27,10 +27,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility modules.sourceCompatibility
         targetCompatibility modules.targetCompatibility
     }
+
     kotlinOptions {
         jvmTarget = modules.kotlinJvmTarget
     }

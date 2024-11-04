@@ -13,7 +13,7 @@ androidxTestCore = "1.5.0"
 androidxTestRules = "1.5.0"
 androidxTestRunner = "1.5.2"
 androidxTestUiAutomator = "2.2.0"
-browserSwitch = "2.3.1"
+browserSwitch = "3.0.0-beta1"
 constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
@@ -28,7 +28,7 @@ junit = "4.13.2"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
 kotlinxCoroutinesAndroid = "1.6.1"
-lifecycleRuntimeCompose = "2.6.1"
+lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
 navigationCompose = "2.7.5"
@@ -80,8 +80,8 @@ square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-in
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
-detekt-formatting = { group = "io.gitlab.arturbosch.detekt:detekt-formatting", name = "detektVersion" }
-detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt:detekt-rules-libraries", name = "detektVersion" }
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-formatting", version.ref = "detektVersion" }
+detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

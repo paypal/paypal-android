@@ -2,7 +2,7 @@ buildscript {
     ext.modules = [
             "sdkVersionName"      : "1.7.2-SNAPSHOT",
             "demoAppVersionCode"  : 4,
-            "androidMinSdkVersion": 21,
+            "androidMinSdkVersion": 23,
             "androidTargetVersion": 35,
             "androidCompileSdk": 35,
             "sourceCompatibility": JavaVersion.VERSION_1_8,

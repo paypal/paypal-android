@@ -2,7 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import com.paypal.android.corepayments.PayPalSDKError
 
-internal sealed class PayPalWebStatus {
+sealed class PayPalWebStatus {
 
     class CheckoutError(val error: PayPalSDKError, val orderId: String?) : PayPalWebStatus()
     class CheckoutSuccess(val result: PayPalWebCheckoutResult) : PayPalWebStatus()
@@ -11,4 +11,6 @@ internal sealed class PayPalWebStatus {
     class VaultError(val error: PayPalSDKError) : PayPalWebStatus()
     class VaultSuccess(val result: PayPalWebVaultResult) : PayPalWebStatus()
     object VaultCanceled : PayPalWebStatus()
+
+    object NoResult : PayPalWebStatus()
 }
