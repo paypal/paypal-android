@@ -69,7 +69,7 @@ internal class CardAuthLauncher(
     fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
-            is BrowserSwitchFinalResult.Failure -> TODO("Return an unknown error")
+            is BrowserSwitchFinalResult.Failure -> CardStatus.UnknownError(finalResult.error)
             BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
         }
 
@@ -117,7 +117,7 @@ internal class CardAuthLauncher(
         val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
 
         return if (orderId == null) {
-            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
+            CardStatus.ApproveOrderError(CardError.unknownError, null)
         } else if (deepLinkUrl.getQueryParameter("error") != null) {
             CardStatus.ApproveOrderError(CardError.threeDSVerificationError, orderId)
         } else {
