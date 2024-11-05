@@ -14,10 +14,6 @@ internal class CardAuthLauncher(
 ) {
 
     companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
-        private const val REQUEST_TYPE_VAULT = "vault"
-
         private const val METADATA_KEY_ORDER_ID = "order_id"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
@@ -30,14 +26,12 @@ internal class CardAuthLauncher(
             is CardAuthChallenge.ApproveOrder -> {
                 val request = authChallenge.request
                 JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
                     .put(METADATA_KEY_ORDER_ID, request.orderId)
             }
 
             is CardAuthChallenge.Vault -> {
                 val request = authChallenge.request
                 JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
                     .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
             }
         }

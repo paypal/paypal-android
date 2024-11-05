@@ -37,11 +37,9 @@ class CardAuthLauncherUnitTest {
     private val card = Card("4111111111111111", "01", "25", "123")
 
     private val approveOrderMetadata = JSONObject()
-        .put("request_type", "approve_order")
         .put("order_id", "fake-order-id")
 
     private val vaultMetadata = JSONObject()
-        .put("request_type", "vault")
         .put("setup_token_id", "fake-setup-token-id")
 
     @Before
@@ -81,7 +79,6 @@ class CardAuthLauncherUnitTest {
 
         val browserSwitchOptions = slot.captured
         val metadata = browserSwitchOptions.metadata
-        assertEquals("approve_order", metadata?.getString("request_type"))
         assertEquals("fake-order-id", metadata?.getString("order_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
         assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
@@ -104,7 +101,6 @@ class CardAuthLauncherUnitTest {
 
         val browserSwitchOptions = slot.captured
         val metadata = browserSwitchOptions.metadata
-        assertEquals("vault", metadata?.getString("request_type"))
         assertEquals("fake-setup-token-id", metadata?.getString("setup_token_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
         assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
