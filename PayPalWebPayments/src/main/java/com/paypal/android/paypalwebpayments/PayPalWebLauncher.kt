@@ -22,12 +22,8 @@ internal class PayPalWebLauncher(
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
     companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
         private const val METADATA_KEY_ORDER_ID = "order_id"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
-
-        private const val REQUEST_TYPE_CHECKOUT = "checkout"
-        private const val REQUEST_TYPE_VAULT = "vault"
 
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
@@ -38,7 +34,6 @@ internal class PayPalWebLauncher(
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_CHECKOUT)
         val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
         val options = BrowserSwitchOptions()
             .url(url)
@@ -54,7 +49,6 @@ internal class PayPalWebLauncher(
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-            .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
         val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
         val options = BrowserSwitchOptions()
             .url(url)
