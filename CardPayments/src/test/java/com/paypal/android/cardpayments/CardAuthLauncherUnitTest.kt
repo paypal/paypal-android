@@ -83,6 +83,7 @@ class CardAuthLauncherUnitTest {
         assertEquals("fake-order-id", metadata?.getString("order_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
         assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
+        assertEquals(BrowserSwitchRequestCodes.CARD_APPROVE_ORDER, browserSwitchOptions.requestCode)
     }
 
     @Test
@@ -105,6 +106,7 @@ class CardAuthLauncherUnitTest {
         assertEquals("fake-setup-token-id", metadata?.getString("setup_token_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
         assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
+        assertEquals(BrowserSwitchRequestCodes.CARD_VAULT, browserSwitchOptions.requestCode)
     }
 
     @Test
