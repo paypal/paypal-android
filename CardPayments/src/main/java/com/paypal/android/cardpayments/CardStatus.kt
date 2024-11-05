@@ -12,6 +12,6 @@ sealed class CardStatus {
     class VaultSuccess(val result: CardVaultResult) : CardStatus()
     class VaultCanceled(val setupTokenId: String?) : CardStatus()
 
-    class UnknownError(val error: Throwable): CardStatus()
+    class UnknownError(val error: Throwable) : CardStatus()
     data object NoResult : CardStatus()
 }

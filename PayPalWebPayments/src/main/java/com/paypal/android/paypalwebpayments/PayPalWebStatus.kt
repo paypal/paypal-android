@@ -12,6 +12,6 @@ sealed class PayPalWebStatus {
     class VaultSuccess(val result: PayPalWebVaultResult) : PayPalWebStatus()
     data object VaultCanceled : PayPalWebStatus()
 
-    class UnknownError(val error: Throwable): PayPalWebStatus()
+    class UnknownError(val error: Throwable) : PayPalWebStatus()
     data object NoResult : PayPalWebStatus()
 }
