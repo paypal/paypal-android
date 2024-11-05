@@ -7,6 +7,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import io.mockk.every
@@ -65,6 +66,7 @@ class PayPalWebLauncherUnitTest {
             get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
@@ -93,6 +95,7 @@ class PayPalWebLauncherUnitTest {
             get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
@@ -121,6 +124,7 @@ class PayPalWebLauncherUnitTest {
             get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
@@ -149,6 +153,7 @@ class PayPalWebLauncherUnitTest {
             get { metadata?.get("request_type") }.isEqualTo("checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
@@ -188,6 +193,7 @@ class PayPalWebLauncherUnitTest {
             get { metadata?.get("request_type") }.isEqualTo("vault")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_VAULT)
         }
     }
 
@@ -212,6 +218,7 @@ class PayPalWebLauncherUnitTest {
             get { metadata?.get("request_type") }.isEqualTo("vault")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_VAULT)
         }
     }
 
@@ -236,6 +243,7 @@ class PayPalWebLauncherUnitTest {
     @Test
     fun `deliverBrowserSwitchResult() parses successful checkout result`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "fake-order-id",
             payerId = "fake-payer-id"
         )
@@ -254,8 +262,11 @@ class PayPalWebLauncherUnitTest {
 
     @Test
     fun `deliverBrowserSwitchResult() parses checkout failure when Payer Id is blank`() {
-        val browserSwitchResult =
-            createCheckoutSuccessBrowserSwitchResult(orderId = "fake-order-id", payerId = "")
+        val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
+            orderId = "fake-order-id",
+            payerId = ""
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
@@ -270,8 +281,11 @@ class PayPalWebLauncherUnitTest {
 
     @Test
     fun `deliverBrowserSwitchResult() parses checkout failure when Order Id is blank`() {
-        val browserSwitchResult =
-            createCheckoutSuccessBrowserSwitchResult(orderId = "", payerId = "fake-payer-id")
+        val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
+            orderId = "",
+            payerId = "fake-payer-id"
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
@@ -286,8 +300,11 @@ class PayPalWebLauncherUnitTest {
 
     @Test
     fun `deliverBrowserSwitchResult() parses checkout failure when metadata is null`() {
-        val browserSwitchResult =
-            createCheckoutSuccessBrowserSwitchResult(payerId = "fake-payer-id", metadata = null)
+        val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
+            payerId = "fake-payer-id",
+            metadata = null
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
@@ -303,6 +320,7 @@ class PayPalWebLauncherUnitTest {
     @Test
     fun `deliverBrowserSwitchResult() parses successful vault result`() {
         val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT,
             setupTokenId = "fake-setup-token-id",
             approvalSessionId = "fake-approval-session-id",
         )
@@ -319,6 +337,7 @@ class PayPalWebLauncherUnitTest {
     @Test
     fun `deliverBrowserSwitchResult() parses vault failure when approval session id is blank`() {
         val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT,
             setupTokenId = "fake-setup-token-id",
             approvalSessionId = "",
         )
@@ -342,11 +361,12 @@ class PayPalWebLauncherUnitTest {
         Uri.parse("http://testurl.com/checkout?PayerID=$payerId")
 
     private fun createCheckoutSuccessBrowserSwitchResult(
+        requestCode: Int,
         orderId: String? = null,
         payerId: String? = null,
         metadata: JSONObject? = createCheckoutMetadata(orderId!!),
         deepLinkUrl: Uri = createCheckoutDeepLinkUrl(payerId!!)
-    ) = createBrowserSwitchSuccessFinalResult(metadata, deepLinkUrl)
+    ) = createBrowserSwitchSuccessFinalResult(requestCode, metadata, deepLinkUrl)
 
     private fun createVaultMetadata(setupTokenId: String) = JSONObject()
         .put("setup_token_id", setupTokenId)
@@ -356,20 +376,22 @@ class PayPalWebLauncherUnitTest {
         Uri.parse("http://testurl.com/checkout?approval_session_id=$approvalSessionId")
 
     private fun createVaultSuccessBrowserSwitchResult(
+        requestCode: Int,
         setupTokenId: String? = null,
         approvalSessionId: String? = null,
         metadata: JSONObject? = createVaultMetadata(setupTokenId!!),
         deepLinkUrl: Uri = createVaultDeepLinkUrl(approvalSessionId!!)
-    ) = createBrowserSwitchSuccessFinalResult(metadata, deepLinkUrl)
+    ) = createBrowserSwitchSuccessFinalResult(requestCode, metadata, deepLinkUrl)
 
     private fun createBrowserSwitchSuccessFinalResult(
+        requestCode: Int,
         metadata: JSONObject?,
         deepLinkUrl: Uri
     ): BrowserSwitchFinalResult.Success {
         val finalResult = mockk<BrowserSwitchFinalResult.Success>(relaxed = true)
         every { finalResult.returnUrl } returns deepLinkUrl
         every { finalResult.requestMetadata } returns metadata
-        every { finalResult.requestCode } returns 123
+        every { finalResult.requestCode } returns requestCode
         every { finalResult.requestUrl } returns Uri.parse("https://example.com/url")
         return finalResult
     }
