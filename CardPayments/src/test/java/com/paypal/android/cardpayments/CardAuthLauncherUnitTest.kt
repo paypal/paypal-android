@@ -7,6 +7,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -115,8 +116,11 @@ class CardAuthLauncherUnitTest {
         val successDeepLink =
             "$scheme://$domain/return_url?state=undefined&code=undefined&liability_shift=NO"
 
-        val finalResult =
-            createBrowserSwitchSuccessFinalResult(approveOrderMetadata, Uri.parse(successDeepLink))
+        val finalResult = createBrowserSwitchSuccessFinalResult(
+            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
+            approveOrderMetadata,
+            Uri.parse(successDeepLink)
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
@@ -139,13 +143,17 @@ class CardAuthLauncherUnitTest {
         val domain = "example.com"
         val successDeepLink = "$scheme://$domain/return_url?error=error"
 
-        val finalResult =
-            createBrowserSwitchSuccessFinalResult(approveOrderMetadata, Uri.parse(successDeepLink))
+        val finalResult = createBrowserSwitchSuccessFinalResult(
+            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
+            approveOrderMetadata,
+            Uri.parse(successDeepLink)
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
+        val status =
+            sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
         val error = status.error
         assertEquals(0, error.code)
         assertEquals("3DS Verification is returning an error.", error.errorDescription)
@@ -159,13 +167,17 @@ class CardAuthLauncherUnitTest {
         val domain = "example.com"
         val successDeepLink = "$scheme://$domain/return_url?state=undefined&liability_shift=NO"
 
-        val finalResult =
-            createBrowserSwitchSuccessFinalResult(approveOrderMetadata, Uri.parse(successDeepLink))
+        val finalResult = createBrowserSwitchSuccessFinalResult(
+            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
+            approveOrderMetadata,
+            Uri.parse(successDeepLink)
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
+        val status =
+            sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
         val error = status.error
         assertEquals(1, error.code)
         assertEquals("Malformed deeplink URL.", error.errorDescription)
@@ -179,13 +191,17 @@ class CardAuthLauncherUnitTest {
         val domain = "example.com"
         val successDeepLink = "$scheme://$domain/return_url?code=undefined&liability_shift=NO"
 
-        val finalResult =
-            createBrowserSwitchSuccessFinalResult(approveOrderMetadata, Uri.parse(successDeepLink))
+        val finalResult = createBrowserSwitchSuccessFinalResult(
+            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
+            approveOrderMetadata,
+            Uri.parse(successDeepLink)
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
+        val status =
+            sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
         val error = status.error
         assertEquals(1, error.code)
         assertEquals("Malformed deeplink URL.", error.errorDescription)
@@ -199,8 +215,11 @@ class CardAuthLauncherUnitTest {
         val domain = "example.com"
         val successDeepLink = "$scheme://$domain/success"
 
-        val finalResult =
-            createBrowserSwitchSuccessFinalResult(vaultMetadata, Uri.parse(successDeepLink))
+        val finalResult = createBrowserSwitchSuccessFinalResult(
+            BrowserSwitchRequestCodes.CARD_VAULT,
+            vaultMetadata,
+            Uri.parse(successDeepLink)
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
@@ -219,8 +238,11 @@ class CardAuthLauncherUnitTest {
         val domain = "example.com"
         val successDeepLink = "$scheme://$domain/canceled"
 
-        val finalResult =
-            createBrowserSwitchSuccessFinalResult(vaultMetadata, Uri.parse(successDeepLink))
+        val finalResult = createBrowserSwitchSuccessFinalResult(
+            BrowserSwitchRequestCodes.CARD_VAULT,
+            vaultMetadata,
+            Uri.parse(successDeepLink)
+        )
         every {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
@@ -230,13 +252,14 @@ class CardAuthLauncherUnitTest {
     }
 
     private fun createBrowserSwitchSuccessFinalResult(
+        requestCode: Int,
         metadata: JSONObject,
         deepLinkUrl: Uri
     ): BrowserSwitchFinalResult.Success {
         val finalResult = mockk<BrowserSwitchFinalResult.Success>(relaxed = true)
         every { finalResult.returnUrl } returns deepLinkUrl
         every { finalResult.requestMetadata } returns metadata
-        every { finalResult.requestCode } returns 123
+        every { finalResult.requestCode } returns requestCode
         every { finalResult.requestUrl } returns Uri.parse("https://example.com/url")
         return finalResult
     }
