@@ -3,6 +3,7 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -150,6 +151,10 @@ class CardClient internal constructor(
 
             is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
             is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
+            is CardStatus.UnknownError -> {
+                Log.d("PayPalSDK", "An unknown error occurred: ${status.error.message}")
+            }
+
             CardStatus.NoResult -> {
                 // ignore
             }
