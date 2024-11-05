@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
+import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
@@ -15,6 +16,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import org.json.JSONObject
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -241,7 +244,41 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses successful checkout result`() {
+    fun `completeAuthRequest() returns unknown error when browser switch fails`() {
+        val browserSwitchError = BrowserSwitchException("browser switch error")
+        val finalResult = mockk<BrowserSwitchFinalResult.Failure>(relaxed = true)
+        every { finalResult.error } returns browserSwitchError
+        every {
+            browserSwitchClient.completeRequest(intent, "pending request")
+        } returns finalResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val status = sut.completeAuthRequest(intent, "pending request")
+                as PayPalWebStatus.UnknownError
+        assertSame(browserSwitchError, status.error)
+    }
+
+    @Test
+    fun `completeAuthRequest() returns no result when request code is not for PayPal`() {
+        val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
+            orderId = "fake-order-id",
+            payerId = "fake-payer-id"
+        )
+
+        every {
+            browserSwitchClient.completeRequest(intent, "pending request")
+        } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val status = sut.completeAuthRequest(intent, "pending request")
+        assertTrue(status is PayPalWebStatus.NoResult)
+    }
+
+    @Test
+    fun `completeRequest() parses successful checkout result`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "fake-order-id",
@@ -261,7 +298,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses checkout failure when Payer Id is blank`() {
+    fun `completeRequest() parses checkout failure when Payer Id is blank`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "fake-order-id",
@@ -280,7 +317,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses checkout failure when Order Id is blank`() {
+    fun `completeRequest() parses checkout failure when Order Id is blank`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "",
@@ -299,7 +336,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses checkout failure when metadata is null`() {
+    fun `completeRequest() parses checkout failure when metadata is null`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             payerId = "fake-payer-id",
@@ -318,7 +355,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses successful vault result`() {
+    fun `completeRequest() parses successful vault result`() {
         val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT,
             setupTokenId = "fake-setup-token-id",
@@ -335,7 +372,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `deliverBrowserSwitchResult() parses vault failure when approval session id is blank`() {
+    fun `completeRequest() parses vault failure when approval session id is blank`() {
         val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT,
             setupTokenId = "fake-setup-token-id",
