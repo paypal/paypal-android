@@ -42,6 +42,7 @@ internal class PayPalWebLauncher(
         val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
         val options = BrowserSwitchOptions()
             .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
         return launchBrowserSwitch(activity, options)
@@ -57,6 +58,7 @@ internal class PayPalWebLauncher(
         val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
         val options = BrowserSwitchOptions()
             .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL_VAULT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
         return launchBrowserSwitch(activity, options)
@@ -111,28 +113,19 @@ internal class PayPalWebLauncher(
     }
 
     fun completeAuthRequest(intent: Intent, authState: String): PayPalWebStatus {
-        val requestCode = BrowserSwitchRequestCodes.PAY_PAL
-        return when (val finalResult = browserSwitchClient.completeRequest(intent, requestCode, authState)) {
-            is BrowserSwitchFinalResult.Success -> {
-                val requestType =
-                    finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-                if (requestType == REQUEST_TYPE_VAULT) {
-                    parseVaultSuccessResult(finalResult)
-                } else {
-                    parseWebCheckoutSuccessResult(finalResult)
-                }
-            }
-
-            is BrowserSwitchFinalResult.Failure -> {
-                val error = PayPalWebCheckoutError.browserSwitchError(finalResult.error)
-                // TODO: fix this bug; this could also be a vault error but we don't have access
-                // to metadata to check
-                PayPalWebStatus.CheckoutError(error, null)
-            }
-
+        return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+            is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
+            is BrowserSwitchFinalResult.Failure -> PayPalWebStatus.UnknownError(finalResult.error)
             BrowserSwitchFinalResult.NoResult -> PayPalWebStatus.NoResult
         }
     }
+
+    private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success) =
+        when (result.requestCode) {
+            BrowserSwitchRequestCodes.PAYPAL_CHECKOUT -> parseWebCheckoutSuccessResult(result)
+            BrowserSwitchRequestCodes.PAYPAL_VAULT -> parseVaultSuccessResult(result)
+            else -> PayPalWebStatus.NoResult
+        }
 
     private fun parseWebCheckoutSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebStatus {
         val deepLinkUrl = finalResult.returnUrl
