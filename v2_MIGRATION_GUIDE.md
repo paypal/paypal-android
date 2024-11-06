@@ -4,11 +4,11 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 ## Table of Contents
 
-1. [Card Payments Module](#card-payments-module)
-1. [PayPal Web Payments Module](#paypal-web-payments-module)
-1. [PayPal Native Payments Module](#paypal-web-payments-module)
+1. [Card Payments](#card-payments)
+1. [PayPal Web Payments](#paypal-web-payments)
+1. [PayPal Native Payments](#paypal-web-payments)
 
-### Card Payments Module
+### Card Payments
 
 We have refactored the `CardClient` API to improve the developer experience.
 
@@ -114,12 +114,12 @@ In v1, the PayPal SDK encapsulates a lot of Chrome Custom Tabs launching and dee
 
 </details>
 
-### PayPal Web Payments Module
+### PayPal Web Payments
 
 We have refactored the `PayPalWebClient` API to improve the developer experience.
 
 TODO: Implement migration guide for PayPalWebPayments.
 
-### PayPal Native Payments Module
+### PayPal Native Payments
 
 We have removed `PayPalNativeClient` and all associated classes because the PayPal Native Checkout dependency this module uses has been sunset.
