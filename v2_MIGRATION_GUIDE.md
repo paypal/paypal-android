@@ -42,22 +42,25 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 
   override fun onApproveOrderSuccess(result: CardResult) {
     TODO("Capture or authorize order on your server.")
-+   // discard auth state when done
++   // Discard auth state when done
 +   authState = null
   }
 
   override fun onApproveOrderFailure(error: PayPalSDKError) {
     TODO("Handle approve order failure.")
-+   // discard auth state when done
++   // Discard auth state when done
 +   authState = null
   }
 
 + // v2
 + override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
++   // Manually present auth challenge
 +   val result = cardClient.presentAuthChallenge(this, authChallenge)
 +   when (result) {
-+     // Preserve authState for balancing call to completeAuthChallenge() in onResume()
-+     is CardPresentAuthChallengeResult.Success -> authState = result.authState
++     // Preserve auth state for balancing call to completeAuthChallenge() in onResume()
++     is CardPresentAuthChallengeResult.Success -> {
++       authState = result.authState
++     }
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
 + }
