@@ -29,6 +29,7 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 + // v2
 + override fun onResume() {
 +   super.onResume()
++   // Manually attempt auth challenge completion (via deep link)
 +   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
 + }
 
