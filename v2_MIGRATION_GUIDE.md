@@ -10,7 +10,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 ### Card Payments
 
-Reference the code diff below to guide your migration from v1 to v2:
+Reference the following code diff to guide your migration from `v1` to `v2`:
 
 ```diff
 class SampleActivity: ComponentActivity(), ApproveOrderListener {
