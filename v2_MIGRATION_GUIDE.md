@@ -10,6 +10,60 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 ### Card Payments
 
+Reference the code diff below to guide your migration from v1 to v2:
+
+```diff
+class SampleActivity: ComponentActivity(), ApproveOrderListener {
+
+  val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
+- // v1
+- val cardClient = CardClient(requireActivity(), config)
++ // v2
++ val cardClient = CardClient(requireContext(), config)
++ var authState: String? = null
+
+  init {
+    cardClient.approveOrderListener = this
+  }
+
++ // v2
++ override fun onResume() {
++   super.onResume()
++   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
++ }
+
+  fun approveOrder() {
+    val cardRequest: CardRequest = TODO("Create a card request.")
+-   // v1
+-   cardClient.approveOrder(this, cardRequest)
++   // v2
++   cardClient.approveOrder(cardRequest)
+  }
+
+  override fun onApproveOrderSuccess(result: CardResult) {
+    TODO("Capture or authorize order on your server.")
++   // discard auth state when done
++   authState = null
+  }
+
+  override fun onApproveOrderFailure(error: PayPalSDKError) {
+    TODO("Handle approve order failure.")
++   // discard auth state when done
++   authState = null
+  }
+
++ // v2
++ override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
++   val result = cardClient.presentAuthChallenge(this, authChallenge)
++   when (result) {
++     // Preserve authState for balancing call to completeAuthChallenge() in onResume()
++     is CardPresentAuthChallengeResult.Success -> authState = result.authState
++     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
++   }
++ }
+}
+```
+
 We have refactored the `CardClient` API to improve the developer experience.
 
 #### Activity Reference no Longer Required in CardClient Constructor
