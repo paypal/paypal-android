@@ -10,7 +10,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 ### Card Payments
 
-We have refactored the `CardClient` API to improve the developer experience. Use the following code diffs to guide your migration from `v1` to `v2`:
+We have refactored the `CardClient` API to improve the developer experience. Use these diffs to guide your migration from `v1` to `v2`:
 
 #### CardClient#approveOrder()
 
