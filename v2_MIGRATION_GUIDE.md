@@ -10,7 +10,11 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 ### Card Payments
 
-Reference the following code diff to guide your migration from `v1` to `v2`:
+We have refactored the `CardClient` API to improve the developer experience.
+
+Use the following code diffs to guide your migration from `v1` to `v2`:
+
+#### CardClient: Approve Order
 
 ```diff
 class SampleActivity: ComponentActivity(), ApproveOrderListener {
@@ -68,107 +72,24 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 }
 ```
 
-We have refactored the `CardClient` API to improve the developer experience.
-
-#### Activity Reference no Longer Required in CardClient Constructor
-
-The `CardClient` constructor no longer requires an activity reference. In v2, the SDK will only require an activity reference when it needs to launch a Chrome Custom Tab.
-
-```diff
-val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
-
--// v1
--val cardClient = CardClient(requireActivity(), config)
-+// v2
-+val cardClient = CardClient(requireContext(), config)
-```
-
 <details>
-<summary><b>Details: CardClient v2</b></summary>
+<summary><b>Details: v2 Notes on Changes to Card Payments</b></summary>
 
-The new `CardClient` constructor is less restrictive.
+#### Card Client: Approve Order Changes Explained
 
-For example, it should now be easier to create a `CardClient` instance from within a Jetpack `ViewModel`.
+We have refactored the `CardClient` API to improve the developer experience. Here are some detailed notes on the changes:
 
-</details>
+##### Activity Reference no Longer Required in CardClient Constructor
 
-<details>
-<summary><b>Details: CardClient v1</b></summary>
+- We noticed in `v1` that the activity reference is only needed when the call to `CardClient#approveOrder()` or `CardClient#vault()` is made (to open a Chrome Custom Tab in the current Task).
+- In `v2`, the `CardClient` constructor no longer requires an activity reference.
+- The goal of this change is to increase flexibility of `CardClient` instantiation.
 
-The old `CardClient` constructor requires an activity reference to register lifecycle observers so the SDK can parse incoming deep links internally when the host application comes to the foregound.
+##### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
 
-Automatic parsing of deep links can have a positive affect on the developer experience, but we've found that internal deep link parsing can be problematic for some app architectures.
-
-</details>
-
-#### Explicit Launch of Auth Challenge
-
-The new `CardClient` gives more control to the host application when presenting Chrome Custom Tabs for authentication and responding to deep links.
-
-```diff
-class SampleActivity: ComponentActivity(), ApproveOrderListener {
-
-  val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
-- // v1
-- val cardClient = CardClient(requireActivity(), config)
-+ // v2
-+ val cardClient = CardClient(requireContext(), config)
-+ var authState: String? = null
-
-  init {
-    cardClient.approveOrderListener = this
-  }
-
-+ // v2
-+ override fun onResume() {
-+   super.onResume()
-+   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
-+ }
-
-  fun approveOrder() {
-    val cardRequest = ...
--   // v1
--   cardClient.approveOrder(this, cardRequest)
-+   // v2
-+   cardClient.approveOrder(cardRequest)
-  }
-
-  override fun onApproveOrderSuccess(result: CardResult) {
-    // capture order on your server
-    authState = null
-  }
-
-  override fun onApproveOrderFailure(error: PayPalSDKError) {
-    TODO("Handle Approve Order Failure")
-  }
-
-+ // v2
-+ override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
-+   val result = cardClient.presentAuthChallenge(this, authChallenge)
-+   when (result) {
-+     // Preserve authState for balancing call to completeAuthChallenge() in onResume()
-+     is CardPresentAuthChallengeResult.Success -> authState = result.authState
-+     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
-+   }
-+ }
-}
-```
-
-<details>
-<summary><b>Details: Approve Order v2</b></summary>
-
-In v2, the PayPal SDK requires more explicit direction from the host application to successfully complete an authorization challenge. The host app is also responsible for preserving the auth state while the application enters the background.
-
-Once the user has successfully completed the auth challenge via Chrome Custom Tabs, a deep link back into the host app will bring it back into the foreground. The host application can then complete the auth challenge using the deep link intent and the auth state captured when the auth challenge was initially launched.
-
-Making these steps explicit gives the host application integration more flexibility. This added flexibility makes it easier for the SDK to work alongside more modern Jetpack architectures that use ViewModels and Compose UI.
-
-</details>
-
-<details>
-<summary><b>Details: Approve Order v1</b></summary>
-
-In v1, the PayPal SDK encapsulates a lot of Chrome Custom Tabs launching and deep link parsing behavior in an effort to streamline the developer experience. We've found in practice that too much encapsulation can lead to highly opinionated components that prevent developers from building apps their own way. We've decided to give merchants more control in v2 to allow app architects to build with fewer restrictions.
+- In `v1`, the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
+- In `v2`, the host application is responsible for calling `CardClient#completeAuthChallenge()` to attempt completion of an auth challenge.
+- The goal of this change is to make the SDK less opinionated and give host applications more control over the auth challenge user experience.
 
 </details>
 
