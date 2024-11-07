@@ -69,14 +69,14 @@ We have refactored the `CardClient` API to improve the developer experience. Her
 
 ##### Activity Reference no Longer Required in CardClient Constructor
 
-- We noticed in `v1` that the activity reference is only needed when the call to `CardClient#approveOrder()` or `CardClient#vault()` is made (to open a Chrome Custom Tab in the current Task).
-- In `v2`, the `CardClient` constructor no longer requires an activity reference.
+- In `v1` the activity reference is only truly needed when the call to `CardClient#approveOrder()` or `CardClient#vault()` is made (to open a Chrome Custom Tab in the current Task).
+- In `v2` the `CardClient` constructor no longer requires an activity reference.
 - The goal of this change is to increase flexibility of `CardClient` instantiation.
 
 ##### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
 
-- In `v1`, the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
-- In `v2`, the host application is responsible for calling `CardClient#completeAuthChallenge()` to attempt completion of an auth challenge.
+- In `v1` the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
+- In `v2` the host application is responsible for calling `CardClient#completeAuthChallenge()` to attempt completion of an auth challenge.
 - The goal of this change is to make the SDK less opinionated and give host applications more control over the auth challenge user experience.
 
 </details>
