@@ -31,10 +31,21 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 +   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
 + }
 
+  override fun onDestroy() {
+    super.onDestroy()
+    cardClient.removeObservers()
+  }
+
   private fun approveOrder() {
     val cardRequest: CardRequest = TODO("Create a card request.")
 -   cardClient.approveOrder(this, cardRequest)
 +   cardClient.approveOrder(cardRequest)
+  }
+  
+  private fun vaultCard() {
+    val cardVaultRequest: CardVaultRequest = TODO("Create a card vault request.")
+-   cardClient.vault(this, cardVaultRequest)
++   cardClient.vault(cardVaultRequest)
   }
 
   override fun onApproveOrderSuccess(result: CardResult) {
@@ -89,11 +100,6 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
 + }
-
-  override fun onDestroy() {
-    super.onDestroy()
-    cardClient.removeObservers()
-  }
 }
 ```
 
