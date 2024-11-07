@@ -89,6 +89,11 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
 + }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    cardClient.removeObservers()
+  }
 }
 ```
 
