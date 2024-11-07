@@ -14,5 +14,4 @@ package com.paypal.android.cardpayments
 data class CardVaultResult(
     val setupTokenId: String,
     val status: String,
-    val authChallenge: CardAuthChallenge? = null
 )

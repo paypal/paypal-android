@@ -10,7 +10,6 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
-import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
@@ -23,7 +22,6 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.usecase.GetSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +32,6 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
-    val getSetupTokenUseCase: GetSetupTokenUseCase,
     val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
@@ -60,22 +57,10 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(updateSetupTokenState = value) }
         }
 
-    private var authChallengeState
-        get() = _uiState.value.authChallengeState
-        set(value) {
-            _uiState.update { it.copy(authChallengeState = value) }
-        }
-
     private var createPaymentTokenState
         get() = _uiState.value.createPaymentTokenState
         set(value) {
             _uiState.update { it.copy(createPaymentTokenState = value) }
-        }
-
-    private var refreshSetupTokenState
-        get() = _uiState.value.refreshSetupTokenState
-        set(value) {
-            _uiState.update { it.copy(refreshSetupTokenState = value) }
         }
 
     var cardNumber: String
@@ -148,14 +133,11 @@ class VaultCardViewModel @Inject constructor(
                 cardClient?.cardVaultListener = object : CardVaultListener {
 
                     override fun onVaultSuccess(result: CardVaultResult) {
-                        val authChallenge = result.authChallenge
-                        if (authChallenge != null) {
-                            cardClient?.presentAuthChallenge(activity, authChallenge)
-                        } else {
-                            TODO("Create payment token on your server.")
-                        }
-
                         updateSetupTokenState = ActionState.Success(result)
+                    }
+
+                    override fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge) {
+                        presentAuthChallenge(activity, authChallenge)
                     }
 
                     override fun onVaultFailure(error: PayPalSDKError) {
@@ -196,28 +178,11 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) {
-        authChallengeState = ActionState.Loading
-
-        // change listener behavior to handle auth result
-        cardClient?.cardVaultListener = object : CardVaultListener {
-            override fun onVaultSuccess(result: CardVaultResult) {
-                viewModelScope.launch {
-                    refreshSetupTokenState =
-                        getSetupTokenUseCase(result.setupTokenId).mapToActionState()
-                    authChallengeState = ActionState.Success(result)
-                }
-            }
-
-            override fun onVaultFailure(error: PayPalSDKError) {
-                authChallengeState = ActionState.Failure(error)
-            }
-        }
-
         cardClient?.presentAuthChallenge(activity, authChallenge)?.let { result ->
             when (result) {
                 is CardPresentAuthChallengeResult.Success -> authState = result.authState
                 is CardPresentAuthChallengeResult.Failure ->
-                    authChallengeState = ActionState.Failure(result.error)
+                    updateSetupTokenState = ActionState.Failure(result.error)
             }
         }
     }
