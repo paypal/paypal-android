@@ -16,9 +16,7 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 class SampleActivity: ComponentActivity(), ApproveOrderListener {
 
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
-- // v1
 - val cardClient = CardClient(requireActivity(), config)
-+ // v2
 + val cardClient = CardClient(requireContext(), config)
 + var authState: String? = null
 
@@ -26,18 +24,15 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
     cardClient.approveOrderListener = this
   }
 
-+ // v2
 + override fun onResume() {
 +   super.onResume()
 +   // Manually attempt auth challenge completion (via deep link)
 +   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
 + }
 
-  fun approveOrder() {
+  private fun approveOrder() {
     val cardRequest: CardRequest = TODO("Create a card request.")
--   // v1
 -   cardClient.approveOrder(this, cardRequest)
-+   // v2
 +   cardClient.approveOrder(cardRequest)
   }
 
@@ -53,7 +48,6 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 +   authState = null
   }
 
-+ // v2
 + override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
 +   // Manually present auth challenge
 +   val result = cardClient.presentAuthChallenge(this, authChallenge)
