@@ -97,7 +97,7 @@ class CardClient internal constructor(
 
                     val url = Uri.parse(response.payerActionHref)
                     val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                    approveOrderListener?.onAuthorizationRequired(authChallenge)
+                    approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
                 }
             } catch (error: PayPalSDKError) {
                 analyticsService.sendAnalyticsEvent(

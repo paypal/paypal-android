@@ -131,7 +131,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val authChallengeSlot = slot<CardAuthChallenge>()
-        verify { approveOrderListener.onAuthorizationRequired(capture(authChallengeSlot)) }
+        verify { approveOrderListener.onApproveOrderAuthorizationRequired(capture(authChallengeSlot)) }
 
         val authChallenge = authChallengeSlot.captured as CardAuthChallenge.ApproveOrder
         assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)

@@ -95,7 +95,7 @@ class ApproveOrderViewModel @Inject constructor(
                         approveOrderState = ActionState.Success(result)
                     }
 
-                    override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
+                    override fun onApproveOrderAuthorizationRequired(authChallenge: CardAuthChallenge) {
                         cardClient?.presentAuthChallenge(activity, authChallenge)
                             ?.let { presentAuthResult ->
                                 when (presentAuthResult) {

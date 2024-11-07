@@ -10,6 +10,7 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
+import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
@@ -147,6 +148,13 @@ class VaultCardViewModel @Inject constructor(
                 cardClient?.cardVaultListener = object : CardVaultListener {
 
                     override fun onVaultSuccess(result: CardVaultResult) {
+                        val authChallenge = result.authChallenge
+                        if (authChallenge != null) {
+                            cardClient?.presentAuthChallenge(activity, authChallenge)
+                        } else {
+                            TODO("Create payment token on your server.")
+                        }
+
                         updateSetupTokenState = ActionState.Success(result)
                     }
 

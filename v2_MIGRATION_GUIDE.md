@@ -13,7 +13,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 We refactored the `CardClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
 ```diff
-class SampleActivity: ComponentActivity(), ApproveOrderListener {
+class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListener {
 
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 - val cardClient = CardClient(requireActivity(), config)
@@ -22,6 +22,7 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 
   init {
     cardClient.approveOrderListener = this
+    cardClient.vaultListener = this
   }
 
 + override fun onResume() {
@@ -48,7 +49,7 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 +   authState = null
   }
 
-+ override fun onAuthorizationRequired(authChallenge: CardAuthChallenge) {
++ override fun onApproveOrderAuthorizationRequired(authChallenge: CardAuthChallenge) {
 +   // Manually present auth challenge
 +   val result = cardClient.presentAuthChallenge(this, authChallenge)
 +   when (result) {
@@ -59,6 +60,19 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
 + }
+
+  override fun onVaultSuccess(result: CardVaultResult) {
+-   val authChallenge = result.authChallenge
+-   if (authChallenge != null) {
+-     cardClient?.presentAuthChallenge(activity, authChallenge)
+-   } else {
+      TODO("Create payment token on your server.")
+-   }
+  }
+  
+  override fun onVaultFailure(error: PayPalSDKError) {
+    updateSetupTokenState = ActionState.Failure(error)
+  }
 }
 ```
 

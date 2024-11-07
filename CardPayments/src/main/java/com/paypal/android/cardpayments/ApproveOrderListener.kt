@@ -16,7 +16,7 @@ interface ApproveOrderListener {
     fun onApproveOrderSuccess(result: CardResult)
 
     @MainThread
-    fun onAuthorizationRequired(authChallenge: CardAuthChallenge)
+    fun onApproveOrderAuthorizationRequired(authChallenge: CardAuthChallenge)
 
     /**
      * Called when the approval fails.
