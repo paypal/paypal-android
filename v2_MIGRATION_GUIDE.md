@@ -52,8 +52,8 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 +   // Manually present auth challenge
 +   val result = cardClient.presentAuthChallenge(this, authChallenge)
 +   when (result) {
-+     // Preserve auth state for balancing call to completeAuthChallenge() in onResume()
 +     is CardPresentAuthChallengeResult.Success -> {
++       // Capture auth state for balancing call to completeAuthChallenge() in onResume()
 +       authState = result.authState
 +     }
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
