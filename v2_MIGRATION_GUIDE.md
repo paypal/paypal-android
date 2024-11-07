@@ -65,7 +65,7 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 <details>
 <summary><b>Notes on Changes to Card Payments in v2</b></summary>
 
-We have refactored the `CardClient` API to improve the developer experience. Here are some detailed notes on the changes:
+Here are some detailed notes on the changes made to Card Payments in v2:
 
 ##### Activity Reference no Longer Required in CardClient Constructor
 
