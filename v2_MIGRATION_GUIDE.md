@@ -10,9 +10,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 ### Card Payments
 
-We have refactored the `CardClient` API to improve the developer experience. Use these diffs to guide your migration from `v1` to `v2`:
-
-#### CardClient#approveOrder()
+We refactored the `CardClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
 ```diff
 class SampleActivity: ComponentActivity(), ApproveOrderListener {
@@ -72,8 +70,6 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 
 <details>
 <summary><b>Details: v2 Notes on Changes to Card Payments</b></summary>
-
-#### Card Client: Approve Order Changes Explained
 
 We have refactored the `CardClient` API to improve the developer experience. Here are some detailed notes on the changes:
 
