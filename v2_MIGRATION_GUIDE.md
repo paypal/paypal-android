@@ -68,11 +68,27 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 -   } else {
       TODO("Create payment token on your server.")
 -   }
++   // Discard auth state when done
++   authState = null
   }
   
   override fun onVaultFailure(error: PayPalSDKError) {
     updateSetupTokenState = ActionState.Failure(error)
++   // Discard auth state when done
++   authState = null
   }
+  
++ override fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge) {
++   // Manually present auth challenge
++   val result = cardClient.presentAuthChallenge(this, authChallenge)
++   when (result) {
++     is CardPresentAuthChallengeResult.Success -> {
++       // Capture auth state for balancing call to completeAuthChallenge() in onResume()
++       authState = result.authState
++     }
++     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
++   }
++ }
 }
 ```
 
