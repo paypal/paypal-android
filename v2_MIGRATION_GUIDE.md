@@ -63,7 +63,7 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener {
 ```
 
 <details>
-<summary><b>Details: v2 Notes on Changes to Card Payments</b></summary>
+<summary><b>Notes on Changes to Card Payments in v2</b></summary>
 
 We have refactored the `CardClient` API to improve the developer experience. Here are some detailed notes on the changes:
 
