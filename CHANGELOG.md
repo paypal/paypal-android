@@ -24,6 +24,8 @@
     * Add `CardClient.completeAuthChallenge(Intent, String)` method
     * Add `PayPalPresentAuthChallengeResult` type
     * Add `PayPalWebStatus` type
+  * Gradle
+    * Update `browser-switch` version to `3.0.0-beta`
 
 # unreleased
 * Gradle

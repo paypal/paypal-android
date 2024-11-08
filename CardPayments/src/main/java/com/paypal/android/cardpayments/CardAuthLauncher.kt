@@ -6,6 +6,7 @@ import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
+import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
@@ -13,10 +14,6 @@ internal class CardAuthLauncher(
 ) {
 
     companion object {
-        private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
-        private const val REQUEST_TYPE_VAULT = "vault"
-
         private const val METADATA_KEY_ORDER_ID = "order_id"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
     }
@@ -29,21 +26,25 @@ internal class CardAuthLauncher(
             is CardAuthChallenge.ApproveOrder -> {
                 val request = authChallenge.request
                 JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_APPROVE_ORDER)
                     .put(METADATA_KEY_ORDER_ID, request.orderId)
             }
 
             is CardAuthChallenge.Vault -> {
                 val request = authChallenge.request
                 JSONObject()
-                    .put(METADATA_KEY_REQUEST_TYPE, REQUEST_TYPE_VAULT)
                     .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
             }
+        }
+
+        val requestCode = when (authChallenge) {
+            is CardAuthChallenge.ApproveOrder -> BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
+            is CardAuthChallenge.Vault -> BrowserSwitchRequestCodes.CARD_VAULT
         }
 
         // launch the 3DS flow
         val browserSwitchOptions = BrowserSwitchOptions()
             .url(authChallenge.url)
+            .requestCode(requestCode)
             .returnUrlScheme(authChallenge.returnUrlScheme)
             .metadata(metadata)
 
@@ -61,24 +62,16 @@ internal class CardAuthLauncher(
 
     fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
-            is BrowserSwitchFinalResult.Success -> {
-                val requestType = finalResult.requestMetadata?.optString(METADATA_KEY_REQUEST_TYPE)
-                if (requestType == REQUEST_TYPE_VAULT) {
-                    parseVaultSuccessResult(finalResult)
-                } else {
-                    // assume REQUEST_TYPE_APPROVE_ORDER
-                    parseApproveOrderSuccessResult(finalResult)
-                }
-            }
-
-            is BrowserSwitchFinalResult.Failure -> {
-                val error = CardError.browserSwitchError(finalResult.error)
-                // TODO: fix this bug; this could also be a vault error but we don't have access
-                // to metadata to check
-                CardStatus.ApproveOrderError(error, null)
-            }
-
+            is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
+            is BrowserSwitchFinalResult.Failure -> CardStatus.UnknownError(finalResult.error)
             BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
+        }
+
+    private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success): CardStatus =
+        when (result.requestCode) {
+            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER -> parseApproveOrderSuccessResult(result)
+            BrowserSwitchRequestCodes.CARD_VAULT -> parseVaultSuccessResult(result)
+            else -> CardStatus.NoResult
         }
 
     private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): CardStatus {
@@ -118,7 +111,7 @@ internal class CardAuthLauncher(
         val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
 
         return if (orderId == null) {
-            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
+            CardStatus.ApproveOrderError(CardError.unknownError, null)
         } else if (deepLinkUrl.getQueryParameter("error") != null) {
             CardStatus.ApproveOrderError(CardError.threeDSVerificationError, orderId)
         } else {

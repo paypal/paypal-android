@@ -2,6 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -98,6 +99,9 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
             is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
             PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+            is PayPalWebStatus.UnknownError -> {
+                Log.d("PayPalSDK", "An unknown error occurred: ${status.error.message}")
+            }
             PayPalWebStatus.NoResult -> {
                 // ignore
             }
