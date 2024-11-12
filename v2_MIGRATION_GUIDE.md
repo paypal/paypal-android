@@ -8,7 +8,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 1. [PayPal Web Payments](#paypal-web-payments)
 1. [PayPal Native Payments](#paypal-native-payments)
 
-### :black_circle: Card Payments
+## Card Payments
 
 We refactored the `CardClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
@@ -108,13 +108,13 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 
 Here are some detailed notes on the changes made to Card Payments in v2:
 
-##### Activity Reference no Longer Required in CardClient Constructor
+### Activity Reference no Longer Required in CardClient Constructor
 
 - In `v1` the activity reference is only truly needed when the call to `CardClient#approveOrder()` or `CardClient#vault()` is made (to open a Chrome Custom Tab in the current Task).
 - In `v2` the `CardClient` constructor no longer requires an activity reference.
 - The goal of this change is to increase flexibility of `CardClient` instantiation.
 
-##### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
+### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
 
 - In `v1` the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
 - In `v2` the host application is responsible for calling `CardClient#completeAuthChallenge()` to attempt completion of an auth challenge.
@@ -122,7 +122,7 @@ Here are some detailed notes on the changes made to Card Payments in v2:
 
 </details>
 
-### :black_circle: PayPal Web Payments
+## PayPal Web Payments
 
 We refactored the `PayPalWebClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
@@ -205,13 +205,13 @@ class SampleActivity: ComponentActivity(), PayPalWebCheckoutListener, PayPalWebV
 
 Here are some detailed notes on the changes made to PayPal Web Payments in v2:
 
-##### Activity Reference no Longer Required in PayPalWebCheckoutClient Constructor
+### Activity Reference no Longer Required in PayPalWebCheckoutClient Constructor
 
 - In `v1` the activity reference is only truly needed when the call to `PayPalWebCheckoutClient#start()` or `PayPalWebCheckoutClient#vault()` is made (to open a Chrome Custom Tab in the current Task).
 - In `v2` the `PayPalWebCheckoutClient` constructor no longer requires an activity reference.
 - The goal of this change is to increase flexibility of `PayPalWebCheckoutClient` instantiation.
 
-##### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
+### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
 
 - In `v1` the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
 - In `v2` the host application is responsible for calling `PayPalWebCheckoutClient#completeAuthChallenge()` to attempt completion of an auth challenge.
@@ -219,6 +219,6 @@ Here are some detailed notes on the changes made to PayPal Web Payments in v2:
 
 </details>
 
-### :black_circle: PayPal Native Payments
+## PayPal Native Payments
 
 We have removed `PayPalNativeClient` and all associated classes. The PayPal Native Checkout dependency this module uses has been sunset.
