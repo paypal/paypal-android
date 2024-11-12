@@ -6,7 +6,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 
 1. [Card Payments](#card-payments)
 1. [PayPal Web Payments](#paypal-web-payments)
-1. [PayPal Native Payments](#paypal-web-payments)
+1. [PayPal Native Payments](#paypal-native-payments)
 
 ### Card Payments
 
