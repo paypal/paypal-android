@@ -221,4 +221,4 @@ Here are some detailed notes on the changes made to PayPal Web Payments in v2:
 
 ## PayPal Native Payments
 
-We have removed `PayPalNativeClient` and all associated classes. The PayPal Native Checkout dependency this module uses has been sunset.
+We have removed `PayPalNativeClient` and all associated classes. The PayPal Native Checkout dependency this module uses has been discontinued.
