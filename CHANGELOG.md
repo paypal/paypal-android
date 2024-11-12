@@ -14,6 +14,8 @@
     * Add `CardPresentAuthChallengeResult` type
     * Add `CardClient.completeAuthChallenge(Intent, String)` method
     * Add `CardStatus` type
+    * Add `ApproveOrderListener.onApproveOrderAuthorizationRequired(CardAuthChallenge)` method
+    * Add `CardVaultListener.onVaultAuthorizationRequired(CardAuthChallenge)` method
   * PayPalWebPayments
     * Remove `PayPalWebCheckoutClient(FragmentActivity, CoreConfig, String)` constructor
     * Add `PayPalWebCheckoutClient(Context, CoreConfig, String)` constructor
