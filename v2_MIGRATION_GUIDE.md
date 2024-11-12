@@ -200,6 +200,25 @@ class SampleActivity: ComponentActivity(), PayPalWebCheckoutListener, PayPalWebV
 }
 ```
 
+<details>
+<summary><b>Notes on Changes to PayPal Web Payments in v2</b></summary>
+
+Here are some detailed notes on the changes made to PayPal Web Payments in v2:
+
+##### Activity Reference no Longer Required in PayPalWebCheckoutClient Constructor
+
+- In `v1` the activity reference is only truly needed when the call to `PayPalWebCheckoutClient#start()` or `PayPalWebCheckoutClient#vault()` is made (to open a Chrome Custom Tab in the current Task).
+- In `v2` the `PayPalWebCheckoutClient` constructor no longer requires an activity reference.
+- The goal of this change is to increase flexibility of `PayPalWebCheckoutClient` instantiation.
+
+##### Moving from Implicit (Automatic) to Manual Completion of Auth Challenges
+
+- In `v1` the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
+- In `v2` the host application is responsible for calling `PayPalWebCheckoutClient#completeAuthChallenge()` to attempt completion of an auth challenge.
+- The goal of this change is to make the SDK less opinionated and give host applications more control over the auth challenge user experience.
+
+</details>
+
 ### PayPal Native Payments
 
-We have removed `PayPalNativeClient` and all associated classes because the PayPal Native Checkout dependency this module uses has been sunset.
+We have removed `PayPalNativeClient` and all associated classes. The PayPal Native Checkout dependency this module uses has been sunset.
