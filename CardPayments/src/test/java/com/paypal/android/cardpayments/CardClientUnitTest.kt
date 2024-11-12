@@ -30,7 +30,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
@@ -48,7 +47,11 @@ class CardClientUnitTest {
 
     private val cardRequest = CardRequest(orderId, card, "merchant.app://return_url")
     private val cardVaultRequest =
-        CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card, returnUrl = "merchant.app://return_url")
+        CardVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            card = card,
+            returnUrl = "merchant.app://return_url"
+        )
 
     private val cardAuthLauncher = mockk<CardAuthLauncher>(relaxed = true)
 
@@ -196,7 +199,13 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val authChallengeSlot = slot<CardAuthChallenge>()
-        verify(exactly = 1) { cardVaultListener.onVaultAuthorizationRequired(capture(authChallengeSlot)) }
+        verify(exactly = 1) {
+            cardVaultListener.onVaultAuthorizationRequired(
+                capture(
+                    authChallengeSlot
+                )
+            )
+        }
 
         val authChallenge = authChallengeSlot.captured as CardAuthChallenge.Vault
         assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)
