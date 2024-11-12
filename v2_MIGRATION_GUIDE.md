@@ -8,7 +8,7 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 1. [PayPal Web Payments](#paypal-web-payments)
 1. [PayPal Native Payments](#paypal-native-payments)
 
-### Card Payments
+### :black_circle: Card Payments
 
 We refactored the `CardClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
@@ -122,7 +122,7 @@ Here are some detailed notes on the changes made to Card Payments in v2:
 
 </details>
 
-### PayPal Web Payments
+### :black_circle: PayPal Web Payments
 
 We refactored the `PayPalWebClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
@@ -219,6 +219,6 @@ Here are some detailed notes on the changes made to PayPal Web Payments in v2:
 
 </details>
 
-### PayPal Native Payments
+### :black_circle: PayPal Native Payments
 
 We have removed `PayPalNativeClient` and all associated classes. The PayPal Native Checkout dependency this module uses has been sunset.
