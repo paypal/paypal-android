@@ -30,7 +30,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
@@ -48,7 +47,11 @@ class CardClientUnitTest {
 
     private val cardRequest = CardRequest(orderId, card, "merchant.app://return_url")
     private val cardVaultRequest =
-        CardVaultRequest(setupTokenId = "fake-setup-token-id", card = card)
+        CardVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            card = card,
+            returnUrl = "merchant.app://return_url"
+        )
 
     private val cardAuthLauncher = mockk<CardAuthLauncher>(relaxed = true)
 
@@ -120,7 +123,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `approveOrder() presents auth challenge when payer action is required`() = runTest {
+    fun `approveOrder() notifies listener when authorization is required`() = runTest {
         val threeDSecureAuthChallengeResponse =
             ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED, "/payer/action/href")
 
@@ -131,7 +134,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val authChallengeSlot = slot<CardAuthChallenge>()
-        verify { approveOrderListener.onAuthorizationRequired(capture(authChallengeSlot)) }
+        verify { approveOrderListener.onApproveOrderAuthorizationRequired(capture(authChallengeSlot)) }
 
         val authChallenge = authChallengeSlot.captured as CardAuthChallenge.ApproveOrder
         assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)
@@ -158,7 +161,6 @@ class CardClientUnitTest {
         val actual = resultSlot.captured
         assertEquals("fake-setup-token-id-from-result", actual.setupTokenId)
         assertEquals("fake-status", actual.status)
-        assertNull(actual.authChallenge)
     }
 
     @Test
@@ -178,6 +180,37 @@ class CardClientUnitTest {
 
         val capturedError = errorSlot.captured
         assertEquals("mock_error_message", capturedError.errorDescription)
+    }
+
+    @Test
+    fun `vault notifies listener when authorization is required`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        val updateSetupTokenResult = UpdateSetupTokenResult(
+            "fake-setup-token-id-from-result",
+            "fake-status",
+            "/payer/action/href"
+        )
+        coEvery {
+            paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
+        } returns updateSetupTokenResult
+
+        sut.vault(activity, cardVaultRequest)
+        advanceUntilIdle()
+
+        val authChallengeSlot = slot<CardAuthChallenge>()
+        verify(exactly = 1) {
+            cardVaultListener.onVaultAuthorizationRequired(
+                capture(
+                    authChallengeSlot
+                )
+            )
+        }
+
+        val authChallenge = authChallengeSlot.captured as CardAuthChallenge.Vault
+        assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)
+        assertEquals(cardVaultRequest, authChallenge.request)
+        assertEquals("merchant.app", authChallenge.returnUrlScheme)
     }
 
     @Test
@@ -349,22 +382,23 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `presentAuthChallenge() forwards vault auth challenge presentation result to caller`() = runTest {
-        val sut = createCardClient(testScheduler)
-        sut.cardVaultListener = cardVaultListener
+    fun `presentAuthChallenge() forwards vault auth challenge presentation result to caller`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            sut.cardVaultListener = cardVaultListener
 
-        val url = Uri.parse("https://fake.com/url")
-        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
 
-        val error = PayPalSDKError(123, "fake-error-description")
-        val internalResult = CardPresentAuthChallengeResult.Failure(error)
-        every {
-            cardAuthLauncher.presentAuthChallenge(activity, authChallenge)
-        } returns internalResult
+            val error = PayPalSDKError(123, "fake-error-description")
+            val internalResult = CardPresentAuthChallengeResult.Failure(error)
+            every {
+                cardAuthLauncher.presentAuthChallenge(activity, authChallenge)
+            } returns internalResult
 
-        val resultReceivedByCaller = sut.presentAuthChallenge(activity, authChallenge)
-        assertSame(internalResult, resultReceivedByCaller)
-    }
+            val resultReceivedByCaller = sut.presentAuthChallenge(activity, authChallenge)
+            assertSame(internalResult, resultReceivedByCaller)
+        }
 
     private fun createCardClient(testScheduler: TestCoroutineScheduler): CardClient {
         val dispatcher = StandardTestDispatcher(testScheduler)

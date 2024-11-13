@@ -97,7 +97,7 @@ class CardClient internal constructor(
 
                     val url = Uri.parse(response.payerActionHref)
                     val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                    approveOrderListener?.onAuthorizationRequired(authChallenge)
+                    approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
                 }
             } catch (error: PayPalSDKError) {
                 analyticsService.sendAnalyticsEvent(
@@ -124,13 +124,17 @@ class CardClient internal constructor(
             val updateSetupTokenResult = cardVaultRequest.run {
                 paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
             }
-            val authChallenge = updateSetupTokenResult.approveHref?.let { approveHref ->
+
+            val approveHref = updateSetupTokenResult.approveHref
+            if (approveHref == null) {
+                val result =
+                    updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
+                cardVaultListener?.onVaultSuccess(result)
+            } else {
                 val url = Uri.parse(approveHref)
-                CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
+                val authChallenge = CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
+                cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
             }
-            val result =
-                updateSetupTokenResult.run { CardVaultResult(setupTokenId, status, authChallenge) }
-            cardVaultListener?.onVaultSuccess(result)
         }
     }
 
