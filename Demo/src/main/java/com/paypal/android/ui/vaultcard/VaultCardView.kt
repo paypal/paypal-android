@@ -20,22 +20,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.R
-import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.CardSetupTokenView
-import com.paypal.android.uishared.components.CardVaultResultView
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
-import com.paypal.android.uishared.components.InfoColumn
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 // TODO: Rename to CardVaultView
 @ExperimentalMaterial3Api
@@ -51,6 +48,12 @@ fun VaultCardView(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        val intent = context.getActivityOrNull()?.intent
+        intent?.let { viewModel.completeAuthChallenge(it) }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -59,27 +62,13 @@ fun VaultCardView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step_CreateSetupToken(stepNumber = 1, uiState, viewModel)
+        Step_CreateSetupToken(uiState, viewModel)
         if (uiState.isCreateSetupTokenSuccessful) {
-            Step_VaultCard(stepNumber = 2, uiState, viewModel, onUseTestCardClick)
+            Step_VaultCard(uiState, viewModel, onUseTestCardClick)
         }
-
-        val authChallenge = uiState.authChallenge
-        if (authChallenge != null) {
-            Step_PresentAuthChallenge(stepNumber = 3, authChallenge, uiState, viewModel)
-        } else if (uiState.isVaultCardSuccessful) {
-            Step_CreatePaymentToken(stepNumber = 3, uiState, viewModel)
+        if (uiState.isVaultCardSuccessful) {
+            Step_CreatePaymentToken(uiState, viewModel)
         }
-
-        if (uiState.isVaultWith3DSSuccessful) {
-            (uiState.refreshSetupTokenState as? ActionState.Success)?.value?.let { setupToken ->
-                InfoColumn(title = "UPDATED SETUP TOKEN") {
-                    CardSetupTokenView(setupToken = setupToken)
-                }
-            }
-            Step_CreatePaymentToken(stepNumber = 4, uiState, viewModel)
-        }
-
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
@@ -97,14 +86,13 @@ fun VaultSuccessView(cardVaultResult: CardVaultResult) {
 
 @Composable
 private fun Step_CreateSetupToken(
-    stepNumber: Int,
     uiState: VaultCardUiState,
     viewModel: VaultCardViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = stepNumber, title = "Create Setup Token")
+        StepHeader(stepNumber = 1, title = "Create Setup Token")
         EnumOptionList(
             title = stringResource(id = R.string.sca_title),
             stringArrayResId = R.array.sca_options,
@@ -128,7 +116,6 @@ private fun Step_CreateSetupToken(
 @ExperimentalMaterial3Api
 @Composable
 private fun Step_VaultCard(
-    stepNumber: Int,
     uiState: VaultCardUiState,
     viewModel: VaultCardViewModel,
     onUseTestCardClick: () -> Unit
@@ -137,7 +124,7 @@ private fun Step_VaultCard(
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = stepNumber, title = "Vault Card")
+        StepHeader(stepNumber = 2, title = "Vault Card")
         CardForm(
             cardNumber = uiState.cardNumber,
             expirationDate = uiState.cardExpirationDate,
@@ -152,7 +139,7 @@ private fun Step_VaultCard(
             successTitle = "CARD VAULTED",
             state = uiState.updateSetupTokenState,
             onClick = {
-                context.getActivity()?.let { viewModel.updateSetupToken(it) }
+                context.getActivityOrNull()?.let { viewModel.updateSetupToken(it) }
             }
         ) { state ->
             when (state) {
@@ -165,44 +152,14 @@ private fun Step_VaultCard(
 
 @ExperimentalMaterial3Api
 @Composable
-private fun Step_PresentAuthChallenge(
-    stepNumber: Int,
-    authChallenge: CardAuthChallenge,
-    uiState: VaultCardUiState,
-    viewModel: VaultCardViewModel
-) {
-    val context = LocalContext.current
-    Column(
-        verticalArrangement = UIConstants.spacingMedium,
-    ) {
-        StepHeader(stepNumber = stepNumber, title = "Complete Auth Challenge")
-        ActionButtonColumn(
-            defaultTitle = "PRESENT AUTH CHALLENGE",
-            successTitle = "AUTH CHALLENGE COMPLETE",
-            state = uiState.authChallengeState,
-            onClick = {
-                context.getActivity()?.let { viewModel.presentAuthChallenge(it, authChallenge) }
-            }
-        ) { state ->
-            when (state) {
-                is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> CardVaultResultView(result = state.value)
-            }
-        }
-    }
-}
-
-@ExperimentalMaterial3Api
-@Composable
 private fun Step_CreatePaymentToken(
-    stepNumber: Int,
     uiState: VaultCardUiState,
     viewModel: VaultCardViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = stepNumber, title = "Create Payment Token")
+        StepHeader(stepNumber = 3, title = "Create Payment Token")
         ActionButtonColumn(
             defaultTitle = "CREATE PAYMENT TOKEN",
             successTitle = "PAYMENT TOKEN CREATED",

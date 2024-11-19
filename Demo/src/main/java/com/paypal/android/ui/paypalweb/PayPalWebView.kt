@@ -24,8 +24,9 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 @Composable
 fun PayPalWebView(
@@ -37,6 +38,12 @@ fun PayPalWebView(
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        context.getActivityOrNull()?.let { viewModel.handleBrowserSwitchResult(it) }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -97,7 +104,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivity()?.let { viewModel.startWebCheckout(it) } },
+            onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
@@ -122,7 +129,7 @@ private fun Step3_CompleteOrder(uiState: PayPalWebUiState, viewModel: PayPalWebV
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",
             state = uiState.completeOrderState,
-            onClick = { context.getActivity()?.let { viewModel.completeOrder(it) } },
+            onClick = { context.getActivityOrNull()?.let { viewModel.completeOrder(it) } },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

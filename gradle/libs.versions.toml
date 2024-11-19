@@ -1,7 +1,7 @@
 [versions]
 androidGradlePlugin = "8.7.1"
 androidxAppcompat = "1.3.1"
-androidxComposeBom = "2023.05.01"
+androidxComposeBom = "2024.10.01"
 androidxCoreKtx = "1.6.0"
 androidxEspressoCore = "3.4.0"
 androidxFragmentKtx = "1.6.0"
@@ -13,7 +13,7 @@ androidxTestCore = "1.5.0"
 androidxTestRules = "1.5.0"
 androidxTestRunner = "1.5.2"
 androidxTestUiAutomator = "2.2.0"
-browserSwitch = "2.3.1"
+browserSwitch = "3.0.0-beta1"
 constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
@@ -28,13 +28,12 @@ junit = "4.13.2"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
 kotlinxCoroutinesAndroid = "1.6.1"
-lifecycleRuntimeCompose = "2.6.1"
+lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
-nativeCheckout = "1.3.2"
 navigationCompose = "2.7.5"
 robolectric = "4.13"
-squareConverterGson = "2.3.0"
+squareConverterGson = "2.11.0"
 squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
@@ -75,13 +74,14 @@ lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime
 lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-paypal-nativeCheckout = { group = "com.paypal.checkout", name = "android-sdk", version.ref = "nativeCheckout" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
 square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-formatting", version.ref = "detektVersion" }
+detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

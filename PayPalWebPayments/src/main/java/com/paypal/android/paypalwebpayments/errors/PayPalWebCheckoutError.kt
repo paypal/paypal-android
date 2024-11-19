@@ -1,6 +1,5 @@
 package com.paypal.android.paypalwebpayments.errors
 
-import com.braintreepayments.api.BrowserSwitchException
 import com.paypal.android.corepayments.PayPalSDKError
 
 internal object PayPalWebCheckoutError {
@@ -18,7 +17,7 @@ internal object PayPalWebCheckoutError {
     )
 
     // 2. An error occurred while browser switching
-    fun browserSwitchError(cause: BrowserSwitchException) = PayPalSDKError(
+    fun browserSwitchError(cause: Exception) = PayPalSDKError(
         code = PayPalWebCheckoutErrorCode.BROWSER_SWITCH.ordinal,
         errorDescription = cause.message ?: "Unable to Browser Switch"
     )

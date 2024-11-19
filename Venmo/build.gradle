@@ -21,18 +21,22 @@ android {
 
     buildTypes {
         release {
-            version = android.defaultConfig.versionName // had to add this to get the version in the build
+            version = android.defaultConfig.versionName
+            // had to add this to get the version in the build
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility modules.sourceCompatibility
         targetCompatibility modules.targetCompatibility
     }
+
     kotlinOptions {
         jvmTarget = modules.kotlinJvmTarget
     }
+    namespace 'com.paypal.android.venmo'
 }
 
 dependencies {

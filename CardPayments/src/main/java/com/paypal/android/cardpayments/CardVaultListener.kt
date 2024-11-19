@@ -17,6 +17,12 @@ interface CardVaultListener {
     fun onVaultSuccess(result: CardVaultResult)
 
     /**
+     * Called when authorization is required to continue.
+     */
+    @MainThread
+    fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge)
+
+    /**
      * Called when a vault failure has occurred.
      */
     @MainThread

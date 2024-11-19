@@ -80,21 +80,6 @@ jobs:
         uses: ./.github/actions/unit_test_module
         with:
           module: PayPalWebPayments
-  unit_test_paypal_native:
-    name: PayPal Native Payments Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'microsoft'
-      - name: Run Unit Tests
-        uses: ./.github/actions/unit_test_module
-        with:
-          module: PayPalNativePayments
   unit_test_fraud_protection:
     name: Fraud Protection Unit Tests
     runs-on: ubuntu-latest
@@ -112,7 +97,7 @@ jobs:
           module: FraudProtection
 
   unit_test_finished:
-    needs: [unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_paypal_native, unit_test_fraud_protection]
+    needs: [unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_fraud_protection]
     name: All Unit Test finished
     runs-on: ubuntu-latest
     steps:

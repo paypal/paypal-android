@@ -1,7 +1,7 @@
 package com.paypal.android.ui.vaultcard
 
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
@@ -9,6 +9,7 @@ import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
@@ -21,7 +22,6 @@ import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.usecase.GetSetupTokenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,11 +32,11 @@ import javax.inject.Inject
 @HiltViewModel
 class VaultCardViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
-    val getSetupTokenUseCase: GetSetupTokenUseCase,
     val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
+    private var authState: String? = null
     private var cardClient: CardClient? = null
 
     private val _uiState = MutableStateFlow(VaultCardUiState())
@@ -57,22 +57,10 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(updateSetupTokenState = value) }
         }
 
-    private var authChallengeState
-        get() = _uiState.value.authChallengeState
-        set(value) {
-            _uiState.update { it.copy(authChallengeState = value) }
-        }
-
     private var createPaymentTokenState
         get() = _uiState.value.createPaymentTokenState
         set(value) {
             _uiState.update { it.copy(createPaymentTokenState = value) }
-        }
-
-    private var refreshSetupTokenState
-        get() = _uiState.value.refreshSetupTokenState
-        set(value) {
-            _uiState.update { it.copy(refreshSetupTokenState = value) }
         }
 
     var cardNumber: String
@@ -118,7 +106,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    fun updateSetupToken(activity: AppCompatActivity) {
+    fun updateSetupToken(activity: ComponentActivity) {
         val setupToken = createdSetupToken
         if (setupToken == null) {
             updateSetupTokenState =
@@ -130,7 +118,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateSetupTokenWithId(activity: AppCompatActivity, setupTokenId: String) {
+    private suspend fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -146,6 +134,10 @@ class VaultCardViewModel @Inject constructor(
 
                     override fun onVaultSuccess(result: CardVaultResult) {
                         updateSetupTokenState = ActionState.Success(result)
+                    }
+
+                    override fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge) {
+                        presentAuthChallenge(activity, authChallenge)
                     }
 
                     override fun onVaultFailure(error: PayPalSDKError) {
@@ -185,28 +177,22 @@ class VaultCardViewModel @Inject constructor(
         )
     }
 
-    fun presentAuthChallenge(activity: FragmentActivity, authChallenge: CardAuthChallenge) {
-        authChallengeState = ActionState.Loading
-
-        // change listener behavior to handle auth result
-        cardClient?.cardVaultListener = object : CardVaultListener {
-            override fun onVaultSuccess(result: CardVaultResult) {
-                viewModelScope.launch {
-                    refreshSetupTokenState =
-                        getSetupTokenUseCase(result.setupTokenId).mapToActionState()
-                    authChallengeState = ActionState.Success(result)
-                }
-            }
-
-            override fun onVaultFailure(error: PayPalSDKError) {
-                authChallengeState = ActionState.Failure(error)
+    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) {
+        cardClient?.presentAuthChallenge(activity, authChallenge)?.let { result ->
+            when (result) {
+                is CardPresentAuthChallengeResult.Success -> authState = result.authState
+                is CardPresentAuthChallengeResult.Failure ->
+                    updateSetupTokenState = ActionState.Failure(result.error)
             }
         }
-        cardClient?.presentAuthChallenge(activity, authChallenge)
     }
 
     override fun onCleared() {
         super.onCleared()
         cardClient?.removeObservers()
+    }
+
+    fun completeAuthChallenge(intent: Intent) {
+        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }

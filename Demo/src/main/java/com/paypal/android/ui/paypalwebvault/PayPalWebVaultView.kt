@@ -22,8 +22,9 @@ import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.UIConstants
-import com.paypal.android.utils.getActivity
+import com.paypal.android.utils.getActivityOrNull
 
 @Composable
 fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
@@ -34,6 +35,12 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
     }
+
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        context.getActivityOrNull()?.let { viewModel.handleBrowserSwitchResult(it) }
+    }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -91,7 +98,7 @@ private fun Step2_VaultPayPal(
             successTitle = "PAYPAL VAULTED",
             state = uiState.vaultPayPalState,
             onClick = {
-                context.getActivity()?.let { activity ->
+                context.getActivityOrNull()?.let { activity ->
                     viewModel.vaultSetupToken(activity)
                 }
             }
