@@ -18,7 +18,7 @@
     * Add `CardVaultListener.onVaultAuthorizationRequired(CardAuthChallenge)` method
     * Remove `authChallenge` property from `CardVaultResult`
     * Remove `deepLinkUrl` and `liabilityShift` properties from `CardResult`
-    * Make `CardResult` and `CardVaultResult` constructors internal
+    * Annotate `CardResult` and `CardVaultResult` constructors as restricted to the library group
     * Add `didAttemptThreeDSecureAuthentication` property to `CardVaultResult`
   * PayPalWebPayments
     * Remove `PayPalWebCheckoutClient(FragmentActivity, CoreConfig, String)` constructor
