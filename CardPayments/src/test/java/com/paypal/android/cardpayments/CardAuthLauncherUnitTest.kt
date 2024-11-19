@@ -147,7 +147,7 @@ class CardAuthLauncherUnitTest {
     }
 
     @Test
-    fun `completeAuthRequest() returns approve order success when liability shift available`() {
+    fun `completeAuthRequest() returns approve order success`() {
         sut = CardAuthLauncher(browserSwitchClient)
 
         val scheme = "com.paypal.android.demo"
@@ -169,85 +169,12 @@ class CardAuthLauncherUnitTest {
 
         val cardResult = status.result
         assertEquals("fake-order-id", cardResult.orderId)
-        assertEquals("NO", cardResult.liabilityShift)
         assertTrue(cardResult.didAttemptThreeDSecureAuthentication)
         assertNull(cardResult.status)
     }
 
     @Test
-    fun `completeAuthRequest() returns approve order error when deep link contains an error`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val scheme = "com.paypal.android.demo"
-        val domain = "example.com"
-        val successDeepLink = "$scheme://$domain/return_url?error=error"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
-            approveOrderMetadata,
-            Uri.parse(successDeepLink)
-        )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status =
-            sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
-        val error = status.error
-        assertEquals(0, error.code)
-        assertEquals("3DS Verification is returning an error.", error.errorDescription)
-    }
-
-    @Test
-    fun `completeAuthRequest() returns approve order error when deep link is missing code parameter`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val scheme = "com.paypal.android.demo"
-        val domain = "example.com"
-        val successDeepLink = "$scheme://$domain/return_url?state=undefined&liability_shift=NO"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
-            approveOrderMetadata,
-            Uri.parse(successDeepLink)
-        )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status =
-            sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
-        val error = status.error
-        assertEquals(1, error.code)
-        assertEquals("Malformed deeplink URL.", error.errorDescription)
-    }
-
-    @Test
-    fun `completeAuthRequest() returns approve order error when deep link is missing state parameter`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val scheme = "com.paypal.android.demo"
-        val domain = "example.com"
-        val successDeepLink = "$scheme://$domain/return_url?code=undefined&liability_shift=NO"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
-            approveOrderMetadata,
-            Uri.parse(successDeepLink)
-        )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status =
-            sut.completeAuthRequest(intent, "pending request") as CardStatus.ApproveOrderError
-        val error = status.error
-        assertEquals(1, error.code)
-        assertEquals("Malformed deeplink URL.", error.errorDescription)
-    }
-
-    @Test
-    fun `completeAuthRequest() returns vault success when deep link url contains the word success`() {
+    fun `completeAuthRequest() returns vault success`() {
         sut = CardAuthLauncher(browserSwitchClient)
 
         val scheme = "com.paypal.android.demo"
@@ -266,28 +193,7 @@ class CardAuthLauncherUnitTest {
         val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.VaultSuccess
         val vaultResult = status.result
         assertEquals("fake-setup-token-id", vaultResult.setupTokenId)
-        assertEquals("SCA_COMPLETE", vaultResult.status)
-    }
-
-    @Test
-    fun `completeAuthRequest() returns vault canceled when deep link url contains the word cancel`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val scheme = "com.paypal.android.demo"
-        val domain = "example.com"
-        val successDeepLink = "$scheme://$domain/canceled"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.CARD_VAULT,
-            vaultMetadata,
-            Uri.parse(successDeepLink)
-        )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.VaultCanceled
-        assertEquals("fake-setup-token-id", status.setupTokenId)
+        assertNull(vaultResult.status)
     }
 
     private fun createBrowserSwitchSuccessFinalResult(

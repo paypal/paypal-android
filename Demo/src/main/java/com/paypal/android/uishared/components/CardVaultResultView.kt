@@ -15,5 +15,7 @@ fun CardVaultResultView(result: CardVaultResult) {
     ) {
         PropertyView(name = "Setup Token ID", value = result.setupTokenId)
         PropertyView(name = "Status", value = result.status)
+        val didAttemptText = if (result.didAttemptThreeDSecureAuthentication) "YES" else "NO"
+        PropertyView(name = "Did Attempt 3DS Authentication", value = didAttemptText)
     }
 }

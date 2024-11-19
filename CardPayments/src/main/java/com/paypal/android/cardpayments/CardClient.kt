@@ -82,11 +82,8 @@ class CardClient internal constructor(
                 )
 
                 if (response.payerActionHref == null) {
-                    val result = CardResult(
-                        orderId = response.orderId,
-                        status = response.status?.name,
-                        didAttemptThreeDSecureAuthentication = false
-                    )
+                    val result =
+                        response.run { CardResult(orderId = orderId, status = status?.name) }
                     notifyApproveOrderSuccess(result)
                 } else {
                     analyticsService.sendAnalyticsEvent(
@@ -127,8 +124,7 @@ class CardClient internal constructor(
 
             val approveHref = updateSetupTokenResult.approveHref
             if (approveHref == null) {
-                val result =
-                    updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
+                val result = updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
                 cardVaultListener?.onVaultSuccess(result)
             } else {
                 val url = Uri.parse(approveHref)

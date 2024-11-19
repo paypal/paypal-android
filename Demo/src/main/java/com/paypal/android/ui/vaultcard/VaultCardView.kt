@@ -20,14 +20,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.R
-import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardForm
 import com.paypal.android.uishared.components.CardPaymentTokenView
 import com.paypal.android.uishared.components.CardSetupTokenView
+import com.paypal.android.uishared.components.CardVaultResultView
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
-import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
@@ -70,17 +69,6 @@ fun VaultCardView(
             Step_CreatePaymentToken(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
-    }
-}
-
-@Composable
-fun VaultSuccessView(cardVaultResult: CardVaultResult) {
-    Column(
-        verticalArrangement = UIConstants.spacingMedium,
-        modifier = Modifier.padding(UIConstants.paddingMedium)
-    ) {
-        PropertyView(name = "Setup Token Id", value = cardVaultResult.setupTokenId)
-        PropertyView(name = "Status", value = cardVaultResult.status)
     }
 }
 
@@ -144,7 +132,7 @@ private fun Step_VaultCard(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> VaultSuccessView(cardVaultResult = state.value)
+                is CompletedActionState.Success -> CardVaultResultView(result = state.value)
             }
         }
     }
