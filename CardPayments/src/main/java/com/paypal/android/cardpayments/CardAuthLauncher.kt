@@ -88,11 +88,14 @@ internal class CardAuthLauncher(
     private fun parseApproveOrderResult(browserSwitchResult: BrowserSwitchResult): CardStatus? {
         val orderId = browserSwitchResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
         return if (orderId == null) {
-            CardStatus.ApproveOrderError(CardError.unknownError, orderId)
+            CardStatus.ApproveOrderError(CardError.unknownError, null)
         } else {
             when (browserSwitchResult.status) {
-                BrowserSwitchStatus.SUCCESS ->
-                    parseApproveOrderSuccessResult(browserSwitchResult, orderId)
+                BrowserSwitchStatus.SUCCESS -> {
+                    val result =
+                        CardResult(orderId = orderId, didAttemptThreeDSecureAuthentication = true)
+                    CardStatus.ApproveOrderSuccess(result)
+                }
 
                 BrowserSwitchStatus.CANCELED -> CardStatus.ApproveOrderCanceled(orderId)
                 else -> null
@@ -101,57 +104,15 @@ internal class CardAuthLauncher(
     }
 
     private fun parseVaultSuccessResult(browserSwitchResult: BrowserSwitchResult): CardStatus {
-        val deepLinkUrl = browserSwitchResult.deepLinkUrl
         val requestMetadata = browserSwitchResult.requestMetadata
-
-        return if (deepLinkUrl == null || requestMetadata == null) {
+        val setupTokenId = requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
+        return if (setupTokenId == null) {
             CardStatus.VaultError(CardError.unknownError)
         } else {
             // TODO: see if there's a way that we can require the merchant to make their
             // return and cancel urls conform to a strict schema
-
-            // NOTE: this assumes that when the merchant created a setup token, they used a
-            // return_url with word "success" in it (or a cancel_url with the word "cancel" in it)
-            val setupTokenId =
-                browserSwitchResult.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
-            val deepLinkUrlString = deepLinkUrl.toString()
-            val didSucceed = deepLinkUrlString.contains("success")
-            if (didSucceed) {
-                val result = CardVaultResult(setupTokenId!!, "SCA_COMPLETE")
-                CardStatus.VaultSuccess(result)
-            } else {
-                val didCancel = deepLinkUrlString.contains("cancel")
-                if (didCancel) {
-                    CardStatus.VaultCanceled(setupTokenId)
-                } else {
-                    CardStatus.VaultError(CardError.unknownError)
-                }
-            }
-        }
-    }
-
-    private fun parseApproveOrderSuccessResult(
-        browserSwitchResult: BrowserSwitchResult,
-        orderId: String
-    ): CardStatus {
-        val deepLinkUrl = browserSwitchResult.deepLinkUrl
-
-        return if (deepLinkUrl == null || deepLinkUrl.getQueryParameter("error") != null) {
-            CardStatus.ApproveOrderError(CardError.threeDSVerificationError, orderId)
-        } else {
-            val state = deepLinkUrl.getQueryParameter("state")
-            val code = deepLinkUrl.getQueryParameter("code")
-            if (state == null || code == null) {
-                CardStatus.ApproveOrderError(CardError.malformedDeepLinkError, orderId)
-            } else {
-                val liabilityShift = deepLinkUrl.getQueryParameter("liability_shift")
-                val result = CardResult(
-                    orderId = orderId,
-                    liabilityShift = liabilityShift,
-                    didAttemptThreeDSecureAuthentication = true
-                )
-                CardStatus.ApproveOrderSuccess(result)
-            }
+            val result = CardVaultResult(setupTokenId, "SCA_COMPLETE")
+            CardStatus.VaultSuccess(result)
         }
     }
 }
