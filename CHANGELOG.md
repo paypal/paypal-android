@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-# beta - unreleased
+## unreleased
 * Breaking Changes
   * PayPalNativePayments
     * Remove entire PayPalNativePayments module
@@ -29,12 +29,9 @@
     * Add `PayPalWebStatus` type
   * Gradle
     * Update `browser-switch` version to `3.0.0-beta`
-
-# unreleased
-* Gradle
-  * Update Kotlin version to `1.9.24`
-  * Update Android Gradle Plugin (AGP) to version `8.7.1`
-  * Explicitly declare Java 17 version as the target JVM toolchain
+    * Update Kotlin version to `1.9.24`
+    * Update Android Gradle Plugin (AGP) to version `8.7.1`
+    * Explicitly declare Java 17 version as the target JVM toolchain
 
 ## 1.7.1 (2024-10-29)
 * Gradle
