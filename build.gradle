@@ -81,12 +81,26 @@ task incrementSnapshotVersion {
         def versionString = matcher[0][1]
 
         def (major, minor, patch) = versionString.tokenize('.')
-        def patchInteger = (patch.endsWith('-SNAPSHOT') ? patch - '-SNAPSHOT' : patch).toInteger()
 
-        def newVersion = "$major.$minor.${patchInteger + 1}-SNAPSHOT"
-        def updatedScript =
-                topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
-        topLevelGradleFile.write(updatedScript, 'UTF-8')
+        // check if patch version ends with beta and a single/multi-digit number
+        def isBetaVersion = patch.matches(/[0-9]+-beta\d+$/)
+        if (isBetaVersion) {
+            def betaMatcher = patch =~ /[0-9]+-beta(\d+)$/
+            def betaVersion = betaMatcher[0][1].toInteger()
+            // capture beginning of beta patch string and increment beta version
+            def newBeta = patch.replaceFirst(/([0-9.]+-beta)\d+$/, '$1' + (betaVersion + 1))
+            def newVersion = "$major.$minor.${newBeta}-SNAPSHOT"
+            def updatedScript =
+                    topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
+            topLevelGradleFile.write(updatedScript, 'UTF-8')
+
+        } else {
+            def patchInteger = (patch.endsWith('-SNAPSHOT') ? patch - '-SNAPSHOT' : patch).toInteger()
+            def newVersion = "$major.$minor.${patchInteger + 1}-SNAPSHOT"
+            def updatedScript =
+                    topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
+            topLevelGradleFile.write(updatedScript, 'UTF-8')
+        }
     }
 }
 
