@@ -96,7 +96,6 @@ task incrementSnapshotVersion {
 
         } else {
             def patchInteger = (patch.endsWith('-SNAPSHOT') ? patch - '-SNAPSHOT' : patch).toInteger()
-
             def newVersion = "$major.$minor.${patchInteger + 1}-SNAPSHOT"
             def updatedScript =
                     topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + newVersion + '",')
