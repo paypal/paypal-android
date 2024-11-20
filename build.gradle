@@ -83,9 +83,9 @@ task incrementSnapshotVersion {
         def (major, minor, patch) = versionString.tokenize('.')
 
         // check if patch version ends with beta and a single/multi-digit number
-        def isBetaVersion = patch.matches(/-beta\d+$/)
+        def isBetaVersion = patch.matches(/[0-9]+-beta\d+$/)
         if (isBetaVersion) {
-            def betaMatcher = patch =~ /[0-9.]+-beta(\d+)$/
+            def betaMatcher = patch =~ /[0-9]+-beta(\d+)$/
             def betaVersion = betaMatcher[0][1].toInteger()
             // capture beginning of beta patch string and increment beta version
             def newBeta = patch.replaceFirst(/([0-9.]+-beta)\d+$/, '$1' + (betaVersion + 1))
