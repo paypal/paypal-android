@@ -1,10 +1,12 @@
 # PayPal Android SDK Release Notes
 
-# unreleased
+## unreleased
 * Gradle
   * Update Kotlin version to `1.9.24`
   * Update Android Gradle Plugin (AGP) to version `8.7.1`
   * Explicitly declare Java 17 version as the target JVM toolchain
+* CardPayments
+  * Skip deep link URL parsing in `CardClient` for `approveOrder()` and `vault()` 3DS authentication flows
 
 ## 1.7.1 (2024-10-29)
 * Gradle
