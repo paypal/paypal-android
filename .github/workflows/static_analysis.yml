@@ -43,17 +43,17 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      # Assemble artifacts from main branch
-      - name: Checkout Main Branch
+      # Assemble artifacts from Release branch
+      - name: Checkout Release Branch
         uses: actions/checkout@v4
         with:
-          ref: main
-      - name: Assemble Release AAR on Main Branch
+          ref: 1.x
+      - name: Assemble Release AAR on Release Branch
         run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
-      - name: Upload Main Branch Artifacts
+      - name: Upload Release Branch Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: main-aar
+          name: 1.x-aar
           path: |
             CorePayments/build/outputs/aar/CorePayments-release.aar
             CardPayments/build/outputs/aar/CardPayments-release.aar
@@ -70,7 +70,7 @@ jobs:
       - name: Upload Current Branch Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: current-aar
+          name: 1.x-current-aar
           path: |
             CorePayments/build/outputs/aar/CorePayments-release.aar
             CardPayments/build/outputs/aar/CardPayments-release.aar
@@ -92,14 +92,14 @@ jobs:
 
       # Run Diffuse analysis
       - name: Run Diffuse Analysis - CardPayments
-        run: diffuse diff --aar main-aar/CardPayments/build/outputs/aar/CardPayments-release.aar current-aar/CardPayments/build/outputs/aar/CardPayments-release.aar
+        run: diffuse diff --aar 1.x-aar/CardPayments/build/outputs/aar/CardPayments-release.aar 1.x-current-aar/CardPayments/build/outputs/aar/CardPayments-release.aar
       - name: Run Diffuse Analysis - CorePayments
-        run: diffuse diff --aar main-aar/CorePayments/build/outputs/aar/CorePayments-release.aar current-aar/CorePayments/build/outputs/aar/CorePayments-release.aar
+        run: diffuse diff --aar 1.x-aar/CorePayments/build/outputs/aar/CorePayments-release.aar 1.x-current-aar/CorePayments/build/outputs/aar/CorePayments-release.aar
       - name: Run Diffuse Analysis - PayPalWebPayments
-        run: diffuse diff --aar main-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar current-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
+        run: diffuse diff --aar 1.x-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar 1.x-current-aar/PayPalWebPayments/build/outputs/aar/PayPalWebPayments-release.aar
       - name: Run Diffuse Analysis - PayPalNativePayments
-        run: diffuse diff --aar main-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar current-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
+        run: diffuse diff --aar 1.x-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar 1.x-current-aar/PayPalNativePayments/build/outputs/aar/PayPalNativePayments-release.aar
       - name: Run Diffuse Analysis - PaymentButtons
-        run: diffuse diff --aar main-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar current-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
+        run: diffuse diff --aar 1.x-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar 1.x-current-aar/PaymentButtons/build/outputs/aar/PaymentButtons-release.aar
       - name: Run Diffuse Analysis - FraudProtection
-        run: diffuse diff --aar main-aar/FraudProtection/build/outputs/aar/FraudProtection-release.aar current-aar/FraudProtection/build/outputs/aar/FraudProtection-release.aar
+        run: diffuse diff --aar 1.x-aar/FraudProtection/build/outputs/aar/FraudProtection-release.aar 1.x-current-aar/FraudProtection/build/outputs/aar/FraudProtection-release.aar
