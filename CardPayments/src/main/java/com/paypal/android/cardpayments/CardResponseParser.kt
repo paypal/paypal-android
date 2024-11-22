@@ -4,6 +4,7 @@ import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.CoreSDKResult
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.OrderErrorDetail
 import com.paypal.android.corepayments.OrderStatus
@@ -13,8 +14,7 @@ import org.json.JSONException
 
 internal class CardResponseParser {
 
-    @Throws(PayPalSDKError::class)
-    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResponse =
+    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): CoreSDKResult<ConfirmPaymentSourceResponse> =
         try {
             val bodyResponse = httpResponse.body!!
 
@@ -24,16 +24,16 @@ internal class CardResponseParser {
 
             // this section is for 3DS
             val payerActionHref = json.getLinkHref("payer-action")
-            ConfirmPaymentSourceResponse(
+            CoreSDKResult.Success(ConfirmPaymentSourceResponse(
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
                 json.optMapObject("payment_source.card") { PaymentSource(it) },
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
-            )
+            ))
         } catch (ignored: JSONException) {
             val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-            throw APIClientError.dataParsingError(correlationId)
+            CoreSDKResult.Failure(APIClientError.dataParsingError(correlationId))
         }
 
     fun parseError(httpResponse: HttpResponse): PayPalSDKError? {
@@ -51,12 +51,15 @@ internal class CardResponseParser {
                     HttpResponse.STATUS_UNKNOWN_HOST -> {
                         APIClientError.unknownHost(correlationId)
                     }
+
                     HttpResponse.STATUS_UNDETERMINED -> {
                         APIClientError.unknownError(correlationId)
                     }
+
                     HttpResponse.SERVER_ERROR -> {
                         APIClientError.serverResponseError(correlationId)
                     }
+
                     else -> {
                         val json = PaymentsJSON(bodyResponse)
                         val message = json.getString("message")

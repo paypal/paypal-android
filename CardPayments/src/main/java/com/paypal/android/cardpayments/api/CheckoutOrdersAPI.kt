@@ -23,9 +23,11 @@ internal class CheckoutOrdersAPI(
                 if (error != null) {
                     CoreSDKResult.Failure(error)
                 } else {
-                    val successResult =
-                        responseParser.parseConfirmPaymentSourceResponse(httpResponse)
-                    CoreSDKResult.Success(successResult)
+                    when (val parseResult =
+                        responseParser.parseConfirmPaymentSourceResponse(httpResponse)) {
+                        is CoreSDKResult.Success -> CoreSDKResult.Success(parseResult.value)
+                        is CoreSDKResult.Failure -> parseResult
+                    }
                 }
             }
 

@@ -25,9 +25,18 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         context: Context,
         setupTokenId: String,
         card: Card
-    ): CoreSDKResult<UpdateSetupTokenResult> {
-        val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
+    ): CoreSDKResult<UpdateSetupTokenResult> = when (
+        val result =
+            resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)) {
+        is CoreSDKResult.Success -> sendUpdateSetupTokenRequest(result.value, setupTokenId, card)
+        is CoreSDKResult.Failure -> result
+    }
 
+    private suspend fun sendUpdateSetupTokenRequest(
+        graphQLQueryString: String,
+        setupTokenId: String,
+        card: Card
+    ): CoreSDKResult<UpdateSetupTokenResult> {
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
 
@@ -58,7 +67,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             .put("paymentSource", paymentSourceJSON)
 
         val graphQLRequest = JSONObject()
-            .put("query", query)
+            .put("query", graphQLQueryString)
             .put("variables", variables)
         return when (val result =
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")) {
