@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.CoreSDKResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
@@ -20,7 +21,11 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): UpdateSetupTokenResult {
+    suspend fun updateSetupToken(
+        context: Context,
+        setupTokenId: String,
+        card: Card
+    ): CoreSDKResult<UpdateSetupTokenResult> {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
@@ -55,27 +60,38 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         val graphQLRequest = JSONObject()
             .put("query", query)
             .put("variables", variables)
-        val graphQLResponse =
-            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
-        graphQLResponse.data?.let { responseJSON ->
-            val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
-            val status = setupTokenJSON.getString("status")
-            val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
-                findLinkHref(setupTokenJSON, "approve")
-            } else {
-                null
+        return when (val result =
+            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")) {
+            is CoreSDKResult.Success -> {
+                val responseJSON = result.value.data
+                if (responseJSON != null) {
+                    val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
+                    val status = setupTokenJSON.getString("status")
+                    val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
+                        findLinkHref(setupTokenJSON, "approve")
+                    } else {
+                        null
+                    }
+                    CoreSDKResult.Success(
+                        UpdateSetupTokenResult(
+                            setupTokenId = setupTokenJSON.getString("id"),
+                            status = status, approveHref = approveHref
+                        )
+                    )
+                } else {
+                    CoreSDKResult.Failure(
+                        PayPalSDKError(
+                            0,
+                            "Error updating setup token: ${result.value.errors}",
+                            result.value.correlationId
+                        )
+                    )
+                }
             }
-            return UpdateSetupTokenResult(
-                setupTokenId = setupTokenJSON.getString("id"),
-                status = status,
-                approveHref = approveHref
-            )
+
+            // forward all failure results
+            is CoreSDKResult.Failure -> result
         }
-        throw PayPalSDKError(
-            0,
-            "Error updating setup token: ${graphQLResponse.errors}",
-            graphQLResponse.correlationId
-        )
     }
 
     private fun findLinkHref(responseJSON: JSONObject, rel: String): String? {

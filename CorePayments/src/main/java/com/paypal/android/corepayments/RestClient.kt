@@ -16,7 +16,7 @@ class RestClient internal constructor(
 
     constructor(configuration: CoreConfig) : this(configuration, Http())
 
-    suspend fun send(apiRequest: APIRequest): HttpResponse {
+    suspend fun send(apiRequest: APIRequest): CoreSDKResult<HttpResponse>  {
         val httpRequest = createHttpRequestFromAPIRequest(apiRequest, configuration)
         return http.send(httpRequest)
     }

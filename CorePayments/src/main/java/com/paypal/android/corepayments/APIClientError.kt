@@ -80,4 +80,16 @@ object APIClientError {
         errorDescription = "Error fetching clientId. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
+
+    fun httpError(reason: Throwable) = PayPalSDKError(
+        code = PayPalSDKErrorCode.UNKNOWN.ordinal,
+        errorDescription = "An unknown error occurred. Contact developer.paypal.com/support.",
+        reason = reason
+    )
+
+    fun unknownGraphQLError(correlationId: String?) = PayPalSDKError(
+        code = PayPalSDKErrorCode.UNKNOWN.ordinal,
+        errorDescription = "An unknown GraphQL error occurred. Contact developer.paypal.com/support.",
+        correlationId = correlationId
+    )
 }

@@ -3,6 +3,7 @@ package com.paypal.android.corepayments.graphql
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.CoreSDKResult
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
@@ -35,23 +36,35 @@ class GraphQLClient internal constructor(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
+    suspend fun send(
+        graphQLRequestBody: JSONObject,
+        queryName: String? = null
+    ): CoreSDKResult<GraphQLResponse> {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
         val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
-
-        val httpResponse = http.send(httpRequest)
-        val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
-        val status = httpResponse.status
-        return if (status == HttpURLConnection.HTTP_OK) {
-            if (httpResponse.body.isNullOrBlank()) {
-                throw APIClientError.noResponseData(correlationId)
-            } else {
-                val responseAsJSON = JSONObject(httpResponse.body)
-                GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+        return when (val result = http.send(httpRequest)) {
+            is CoreSDKResult.Success -> {
+                val httpResponse = result.value
+                val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
+                val status = httpResponse.status
+                if (status == HttpURLConnection.HTTP_OK) {
+                    return if (httpResponse.body.isNullOrBlank()) {
+                        CoreSDKResult.Failure(APIClientError.noResponseData(correlationId))
+                    } else {
+                        val responseAsJSON = JSONObject(httpResponse.body)
+                        val data = responseAsJSON.getJSONObject("data")
+                        val graphQLResponse = GraphQLResponse(data, correlationId = correlationId)
+                        CoreSDKResult.Success(graphQLResponse)
+                    }
+                } else {
+                    return CoreSDKResult.Failure(APIClientError.unknownGraphQLError(correlationId))
+                }
             }
-        } else {
-            GraphQLResponse(null, correlationId = correlationId)
+
+            is CoreSDKResult.Failure -> {
+                CoreSDKResult.Failure(APIClientError.httpError(result.value))
+            }
         }
     }
 }

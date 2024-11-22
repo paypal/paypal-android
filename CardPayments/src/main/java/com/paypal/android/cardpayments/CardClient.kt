@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
+import com.paypal.android.corepayments.CoreSDKResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
@@ -73,35 +74,39 @@ class CardClient internal constructor(
         analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
 
         CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
-            // TODO: migrate away from throwing exceptions to result objects
-            try {
-                val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:confirm-payment-source:succeeded",
-                    cardRequest.orderId
-                )
+            val result = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
+            analyticsService.sendAnalyticsEvent(
+                "card-payments:3ds:confirm-payment-source:succeeded",
+                cardRequest.orderId
+            )
 
-                if (response.payerActionHref == null) {
-                    val result =
-                        response.run { CardResult(orderId = orderId, status = status?.name) }
-                    notifyApproveOrderSuccess(result)
-                } else {
+            when (result) {
+                is CoreSDKResult.Success -> {
+                    if (result.value.payerActionHref == null) {
+                        val cardResult = result.value.run {
+                            CardResult(orderId = orderId, status = status?.name)
+                        }
+                        notifyApproveOrderSuccess(cardResult)
+                    } else {
+                        analyticsService.sendAnalyticsEvent(
+                            "card-payments:3ds:confirm-payment-source:challenge-required",
+                            cardRequest.orderId
+                        )
+                        approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
+
+                        val url = Uri.parse(result.value.payerActionHref)
+                        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+                        approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
+                    }
+                }
+
+                is CoreSDKResult.Failure -> {
                     analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:confirm-payment-source:challenge-required",
+                        "card-payments:3ds:confirm-payment-source:failed",
                         cardRequest.orderId
                     )
-                    approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
-
-                    val url = Uri.parse(response.payerActionHref)
-                    val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                    approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
+                    approveOrderListener?.onApproveOrderFailure(result.value)
                 }
-            } catch (error: PayPalSDKError) {
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:confirm-payment-source:failed",
-                    cardRequest.orderId
-                )
-                throw error
             }
         }
     }
@@ -122,14 +127,25 @@ class CardClient internal constructor(
                 paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
             }
 
-            val approveHref = updateSetupTokenResult.approveHref
-            if (approveHref == null) {
-                val result = updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
-                cardVaultListener?.onVaultSuccess(result)
-            } else {
-                val url = Uri.parse(approveHref)
-                val authChallenge = CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
-                cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
+            when (updateSetupTokenResult) {
+                is CoreSDKResult.Success -> {
+                    val approveHref = updateSetupTokenResult.value.approveHref
+                    if (approveHref == null) {
+                        val result = updateSetupTokenResult.value.run {
+                            CardVaultResult(setupTokenId, status)
+                        }
+                        cardVaultListener?.onVaultSuccess(result)
+                    } else {
+                        val url = Uri.parse(approveHref)
+                        val authChallenge =
+                            CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
+                        cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
+                    }
+                }
+
+                is CoreSDKResult.Failure -> {
+                    cardVaultListener?.onVaultFailure(updateSetupTokenResult.value)
+                }
             }
         }
     }

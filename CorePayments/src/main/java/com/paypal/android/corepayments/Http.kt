@@ -18,9 +18,9 @@ internal class Http(
         private val TAG = Http::class.qualifiedName
     }
 
-    suspend fun send(httpRequest: HttpRequest): HttpResponse =
+    suspend fun send(httpRequest: HttpRequest): CoreSDKResult<HttpResponse> =
         withContext(dispatcher) {
-            runCatching {
+            val result = runCatching {
                 val url = httpRequest.url
                 val connection = url.openConnection() as HttpURLConnection
 
@@ -44,14 +44,15 @@ internal class Http(
                 }
 
                 connection.connect()
-                httpResponseParser.parse(connection)
+                CoreSDKResult.Success(httpResponseParser.parse(connection))
             }.recover {
-                val status = when (it) {
-                    is UnknownHostException -> HttpResponse.STATUS_UNKNOWN_HOST
-                    is IllegalStateException -> HttpResponse.SERVER_ERROR
-                    else -> HttpResponse.STATUS_UNDETERMINED
+                val error = when (it) {
+                    is UnknownHostException -> CoreSDKError.unknownHost(it)
+                    is IllegalStateException -> CoreSDKError.illegalState(it)
+                    else -> CoreSDKError.unknown(it)
                 }
-                HttpResponse(status = status, error = it)
-            }.getOrNull()!!
+                CoreSDKResult.Failure(error)
+            }
+            result.getOrNull() ?: CoreSDKResult.Failure(CoreSDKError.unknown())
         }
 }

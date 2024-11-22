@@ -11,7 +11,7 @@ internal class TrackingEventsAPI constructor(
     constructor(coreConfig: CoreConfig) :
             this(coreConfig, RestClient(coreConfig))
 
-    suspend fun sendEvent(event: AnalyticsEventData, deviceData: DeviceData): HttpResponse {
+    suspend fun sendEvent(event: AnalyticsEventData, deviceData: DeviceData): CoreSDKResult<HttpResponse> {
         val apiRequest = createAPIRequestForEvent(event, deviceData)
         return restClient.send(apiRequest)
     }

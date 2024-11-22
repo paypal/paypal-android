@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.CoreSDKResult
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.TrackingEventsAPI
@@ -45,24 +46,23 @@ class AnalyticsService internal constructor(
         // thrown because we don't use the Deferred result
         scope.launch {
             val timestamp = System.currentTimeMillis()
-            try {
-                val deviceData = deviceInspector.inspect()
-                val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
-                    name,
-                    timestamp,
-                    orderId = orderId,
-                    buttonType = buttonType
-                )
-                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
-                response.error?.message?.let { errorMessage ->
-                    Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
+            val deviceData = deviceInspector.inspect()
+            val analyticsEventData = AnalyticsEventData(
+                environment.name.lowercase(),
+                name,
+                timestamp,
+                orderId = orderId,
+                buttonType = buttonType
+            )
+            when (val result = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)) {
+                is CoreSDKResult.Failure -> {
+                    val message = result.value.message
+                    Log.d("[PayPal SDK]", "Failed to send analytics: $message")
                 }
-            } catch (e: PayPalSDKError) {
-                Log.d(
-                    "[PayPal SDK]",
-                    "Failed to send analytics due to missing clientId: ${e.message}"
-                )
+
+                is CoreSDKResult.Success -> {
+                    // success! do nothing
+                }
             }
         }
     }
