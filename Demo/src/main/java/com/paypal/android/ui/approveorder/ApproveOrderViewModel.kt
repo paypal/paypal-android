@@ -18,6 +18,7 @@ import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
@@ -236,6 +237,7 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun completeAuthChallenge(intent: Intent) {
+        val environment = Environment("", "")
         authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }
