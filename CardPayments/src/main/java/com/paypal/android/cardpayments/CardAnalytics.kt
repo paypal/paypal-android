@@ -11,27 +11,44 @@ class CardAnalytics(
         analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
-    fun notifyConfirmPaymentSourceAuthChallengeReceived(orderId: String) {
-        val eventName = "card-payments:approve-order:confirm-payment-auth-challenge-received"
+    fun notifyApproveOrderSucceeded(orderId: String) {
+        val eventName = "card-payments:approve-order:succeeded"
         analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
-    fun notifyConfirmPaymentSourceFailed(orderId: String) {
-        val eventName = "card-payments:approve-order:confirm-payment-source-failed"
+    fun notifyApproveOrderFailed(orderId: String) {
+        val eventName = "card-payments:approve-order:failed"
         analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
-    fun notifyApproveOrder3DSCanceled(orderId: String?) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
-    }
-
-    fun notifyApproveOrderSucceededWithout3DS(orderId: String) {
-        val eventName = "card-payments:approve-order:succeeded-without-3ds"
+    fun notifyApproveOrderAuthChallengeReceived(orderId: String) {
+        val eventName = "card-payments:approve-order:auth-challenge-received"
         analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
-    fun notifyApproveOrder3DSFailed(orderId: String?) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+    fun notifyApproveOrderAuthChallengeStarted(orderId: String?) {
+        val eventName = "card-payments:approve-order:auth-challenge-started"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
+    }
+
+    fun notifyApproveOrderAuthChallengeSucceeded(orderId: String) {
+        val eventName = "card-payments:approve-order:auth-challenge-succeeded"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
+    }
+
+    fun notifyApproveOrderAuthChallengeCanceled(orderId: String?) {
+        val eventName = "card-payments:approve-order:auth-challenge-canceled"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
+    }
+
+    fun notifyApproveOrderAuthChallengeFailed(orderId: String?) {
+        val eventName = "card-payments:approve-order:auth-challenge-failed"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
+    }
+
+    fun notifyApproveOrderUnknownError(orderId: String?) {
+        val eventName = "card-payments:approve-order:unknown-error"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
     fun notifyVaultStarted(setupTokenId: String) {
@@ -41,6 +58,16 @@ class CardAnalytics(
 
     fun notifyVaultAuthChallengeReceived(setupTokenId: String) {
         val eventName = "card-payments:vault:auth-challenge-received"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
+    fun notifyVaultAuthChallengeStarted(setupTokenId: String?) {
+        val eventName = "card-payments:vault:auth-challenge-started"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
+    fun notifyVaultAuthChallengeFailed(setupTokenId: String?) {
+        val eventName = "card-payments:vault:auth-challenge-failed"
         analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
 

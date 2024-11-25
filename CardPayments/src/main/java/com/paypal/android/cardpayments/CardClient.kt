@@ -39,8 +39,10 @@ class CardClient internal constructor(
 
     private var approveOrderId: String? = null
 
+    // TODO: remove once try-catch is removed
     private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        notifyApproveOrderFailure(error, approveOrderId)
+        analytics.notifyApproveOrderUnknownError(null)
+        approveOrderListener?.onApproveOrderFailure(error)
     }
 
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
@@ -77,12 +79,12 @@ class CardClient internal constructor(
             try {
                 val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
                 if (response.payerActionHref == null) {
-                    analytics.notifyApproveOrderSucceededWithout3DS(response.orderId)
+                    analytics.notifyApproveOrderSucceeded(response.orderId)
                     val result =
                         response.run { CardResult(orderId = orderId, status = status?.name) }
                     approveOrderListener?.onApproveOrderSuccess(result)
                 } else {
-                    analytics.notifyConfirmPaymentSourceAuthChallengeReceived(cardRequest.orderId)
+                    analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
                     approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
                     val url = Uri.parse(response.payerActionHref)
@@ -90,7 +92,7 @@ class CardClient internal constructor(
                     approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
                 }
             } catch (error: PayPalSDKError) {
-                analytics.notifyConfirmPaymentSourceFailed(cardRequest.orderId)
+                analytics.notifyApproveOrderFailed(cardRequest.orderId)
                 throw error
             }
         }
@@ -131,8 +133,33 @@ class CardClient internal constructor(
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
      */
-    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) =
-        authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
+    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) {
+        when (authChallengeLauncher.presentAuthChallenge(activity, authChallenge)) {
+            is CardPresentAuthChallengeResult.Success -> {
+                when (authChallenge) {
+                    // TODO: see if we can get order id from somewhere
+                    is CardAuthChallenge.ApproveOrder ->
+                        analytics.notifyApproveOrderAuthChallengeStarted(null)
+
+                    // TODO: see if we can get setup token from somewhere
+                    is CardAuthChallenge.Vault ->
+                        analytics.notifyVaultAuthChallengeStarted(null)
+                }
+            }
+
+            is CardPresentAuthChallengeResult.Failure -> {
+                when (authChallenge) {
+                    // TODO: see if we can get order id from somewhere
+                    is CardAuthChallenge.ApproveOrder ->
+                        analytics.notifyApproveOrderAuthChallengeFailed(null)
+
+                    // TODO: see if we can get setup token id from somewhere
+                    is CardAuthChallenge.Vault ->
+                        analytics.notifyVaultAuthChallengeFailed(null)
+                }
+            }
+        }
+    }
 
     fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
         val status = authChallengeLauncher.completeAuthRequest(intent, authState)
@@ -140,11 +167,21 @@ class CardClient internal constructor(
             is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
             is CardStatus.VaultError -> notifyVaultFailure(status.error)
             is CardStatus.VaultCanceled -> notifyVaultCancellation()
-            is CardStatus.ApproveOrderError ->
-                notifyApproveOrderFailure(status.error, status.orderId)
+            is CardStatus.ApproveOrderError -> {
+                analytics.notifyApproveOrderAuthChallengeFailed(status.orderId)
+                approveOrderListener?.onApproveOrderFailure(status.error)
+            }
 
-            is CardStatus.ApproveOrderSuccess -> notifyApproveOrderSuccess(status.result)
-            is CardStatus.ApproveOrderCanceled -> notifyApproveOrderCanceled(status.orderId)
+            is CardStatus.ApproveOrderSuccess -> {
+                analytics.notifyApproveOrderAuthChallengeSucceeded(status.result.orderId)
+                approveOrderListener?.onApproveOrderSuccess(status.result)
+            }
+
+            is CardStatus.ApproveOrderCanceled -> {
+                analytics.notifyApproveOrderAuthChallengeCanceled(status.orderId)
+                approveOrderListener?.onApproveOrderCanceled()
+            }
+
             is CardStatus.UnknownError -> {
                 Log.d("PayPalSDK", "An unknown error occurred: ${status.error.message}")
             }
@@ -154,21 +191,6 @@ class CardClient internal constructor(
             }
         }
         return status
-    }
-
-    private fun notifyApproveOrderCanceled(orderId: String?) {
-        analytics.notifyApproveOrder3DSCanceled(orderId)
-        approveOrderListener?.onApproveOrderCanceled()
-    }
-
-    private fun notifyApproveOrderSuccess(result: CardResult) {
-        analytics.notifyApproveOrder3DSSuccess(result.orderId)
-        approveOrderListener?.onApproveOrderSuccess(result)
-    }
-
-    private fun notifyApproveOrderFailure(error: PayPalSDKError, orderId: String?) {
-        analytics.notifyApproveOrder3DSFailed(orderId)
-        approveOrderListener?.onApproveOrderFailure(error)
     }
 
     private fun notifyVaultSuccess(result: CardVaultResult) {
