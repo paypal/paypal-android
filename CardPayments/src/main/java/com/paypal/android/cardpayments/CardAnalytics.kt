@@ -6,6 +6,7 @@ class CardAnalytics(
     private val analyticsService: AnalyticsService
 ) {
 
+    // region Approve Order
     fun notifyApproveOrderStarted(orderId: String) {
         val eventName = "card-payments:approve-order:started"
         analyticsService.sendAnalyticsEvent(eventName, orderId)
@@ -50,9 +51,21 @@ class CardAnalytics(
         val eventName = "card-payments:approve-order:unknown-error"
         analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
+    // endregion
 
+    // region Vault
     fun notifyVaultStarted(setupTokenId: String) {
         val eventName = "card-payments:vault:started"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
+    fun notifyVaultSucceeded(setupTokenId: String) {
+        val eventName = "card-payments:vault:succeeded"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
+    fun notifyVaultFailed(setupTokenId: String?) {
+        val eventName = "card-payments:vault:failed"
         analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
 
@@ -66,21 +79,24 @@ class CardAnalytics(
         analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
 
+    fun notifyVaultAuthChallengeSucceeded(setupTokenId: String) {
+        val eventName = "card-payments:vault:auth-challenge-succeeded"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
+    fun notifyVaultAuthChallengeCanceled(setupTokenId: String?) {
+        val eventName = "card-payments:vault:auth-challenge-canceled"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
     fun notifyVaultAuthChallengeFailed(setupTokenId: String?) {
         val eventName = "card-payments:vault:auth-challenge-failed"
         analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
 
-    fun notifyVaultSuccess(setupTokenId: String) {
-        analyticsService.sendAnalyticsEvent("card:browser-login:canceled", setupTokenId)
-    }
-
-    fun notifyVaultFailure(setupTokenId: String?) {
-        analyticsService.sendAnalyticsEvent("card:failed", setupTokenId)
-    }
-
-    fun notifyVaultCancellation(setupTokenId: String?) {
-        val eventName = "paypal-web-payments:browser-login:canceled"
+    fun notifyVaultUnknownError(setupTokenId: String?) {
+        val eventName = "card-payments:vault:unknown-error"
         analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
+    // endregion
 }
