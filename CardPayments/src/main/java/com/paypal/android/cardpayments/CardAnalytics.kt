@@ -11,11 +11,6 @@ class CardAnalytics(
         analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
-    fun notifyConfirmPaymentSourceSucceeded(orderId: String) {
-        val eventName = "card-payments:approve-order:confirm-payment-source-succeeded"
-        analyticsService.sendAnalyticsEvent(eventName, orderId)
-    }
-
     fun notifyConfirmPaymentSourceAuthChallengeReceived(orderId: String) {
         val eventName = "card-payments:approve-order:confirm-payment-auth-challenge-received"
         analyticsService.sendAnalyticsEvent(eventName, orderId)
@@ -30,8 +25,9 @@ class CardAnalytics(
         analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
     }
 
-    fun notifyApproveOrder3DSSuccess(orderId: String) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", orderId)
+    fun notifyApproveOrderSucceededWithout3DS(orderId: String) {
+        val eventName = "card-payments:approve-order:succeeded-without-3ds"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
     fun notifyApproveOrder3DSFailed(orderId: String?) {

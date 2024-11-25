@@ -76,12 +76,11 @@ class CardClient internal constructor(
             // TODO: migrate away from throwing exceptions to result objects
             try {
                 val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-                analytics.notifyConfirmPaymentSourceSucceeded(cardRequest.orderId)
-
                 if (response.payerActionHref == null) {
+                    analytics.notifyApproveOrderSucceededWithout3DS(response.orderId)
                     val result =
                         response.run { CardResult(orderId = orderId, status = status?.name) }
-                    notifyApproveOrderSuccess(result)
+                    approveOrderListener?.onApproveOrderSuccess(result)
                 } else {
                     analytics.notifyConfirmPaymentSourceAuthChallengeReceived(cardRequest.orderId)
                     approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
