@@ -70,7 +70,7 @@ class CardClient internal constructor(
     fun approveOrder(cardRequest: CardRequest) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
-        analytics.notify3DSStarted(cardRequest.orderId)
+        analytics.notifyApproveOrderStarted(cardRequest.orderId)
 
         CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
             // TODO: migrate away from throwing exceptions to result objects
@@ -83,7 +83,7 @@ class CardClient internal constructor(
                         response.run { CardResult(orderId = orderId, status = status?.name) }
                     notifyApproveOrderSuccess(result)
                 } else {
-                    analytics.notifyConfirmPaymentSourceChallengeRequired(cardRequest.orderId)
+                    analytics.notifyConfirmPaymentSourceAuthChallengeReceived(cardRequest.orderId)
                     approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
                     val url = Uri.parse(response.payerActionHref)

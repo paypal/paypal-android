@@ -6,29 +6,24 @@ class CardAnalytics(
     private val analyticsService: AnalyticsService
 ) {
 
-    fun notify3DSStarted(orderId: String) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", orderId)
+    fun notifyApproveOrderStarted(orderId: String) {
+        val eventName = "card-payments:approve-order:started"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
     fun notifyConfirmPaymentSourceSucceeded(orderId: String) {
-        analyticsService.sendAnalyticsEvent(
-            "card-payments:3ds:confirm-payment-source:succeeded",
-            orderId
-        )
+        val eventName = "card-payments:approve-order:confirm-payment-source-succeeded"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
-    fun notifyConfirmPaymentSourceChallengeRequired(orderId: String) {
-        analyticsService.sendAnalyticsEvent(
-            "card-payments:3ds:confirm-payment-source:challenge-required",
-            orderId
-        )
+    fun notifyConfirmPaymentSourceAuthChallengeReceived(orderId: String) {
+        val eventName = "card-payments:approve-order:confirm-payment-auth-challenge-received"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
     fun notifyConfirmPaymentSourceFailed(orderId: String) {
-        analyticsService.sendAnalyticsEvent(
-            "card-payments:3ds:confirm-payment-source:failed",
-            orderId
-        )
+        val eventName = "card-payments:approve-order:confirm-payment-source-failed"
+        analyticsService.sendAnalyticsEvent(eventName, orderId)
     }
 
     fun notifyApproveOrder3DSCanceled(orderId: String?) {
@@ -52,6 +47,9 @@ class CardAnalytics(
     }
 
     fun notifyVaultCancellation(setupTokenId: String?) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", setupTokenId)
+        analyticsService.sendAnalyticsEvent(
+            "paypal-web-payments:browser-login:canceled",
+            setupTokenId
+        )
     }
 }
