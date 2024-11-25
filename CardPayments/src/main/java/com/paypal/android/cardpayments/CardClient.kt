@@ -107,6 +107,8 @@ class CardClient internal constructor(
      * and card to use for vaulting.
      */
     fun vault(context: Context, cardVaultRequest: CardVaultRequest) {
+        analytics.notifyVaultStarted(cardVaultRequest.setupTokenId)
+
         val applicationContext = context.applicationContext
         CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
             val updateSetupTokenResult = cardVaultRequest.run {
@@ -115,9 +117,11 @@ class CardClient internal constructor(
 
             val approveHref = updateSetupTokenResult.approveHref
             if (approveHref == null) {
+                analytics.notifyVaultSuccess(updateSetupTokenResult.setupTokenId)
                 val result = updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
                 cardVaultListener?.onVaultSuccess(result)
             } else {
+                analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
                 val url = Uri.parse(approveHref)
                 val authChallenge = CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
                 cardVaultListener?.onVaultAuthorizationRequired(authChallenge)

@@ -38,6 +38,16 @@ class CardAnalytics(
         analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
     }
 
+    fun notifyVaultStarted(setupTokenId: String) {
+        val eventName = "card-payments:vault:started"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
+    fun notifyVaultAuthChallengeReceived(setupTokenId: String) {
+        val eventName = "card-payments:vault:auth-challenge-received"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
+    }
+
     fun notifyVaultSuccess(setupTokenId: String) {
         analyticsService.sendAnalyticsEvent("card:browser-login:canceled", setupTokenId)
     }
@@ -47,9 +57,7 @@ class CardAnalytics(
     }
 
     fun notifyVaultCancellation(setupTokenId: String?) {
-        analyticsService.sendAnalyticsEvent(
-            "paypal-web-payments:browser-login:canceled",
-            setupTokenId
-        )
+        val eventName = "paypal-web-payments:browser-login:canceled"
+        analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
 }
