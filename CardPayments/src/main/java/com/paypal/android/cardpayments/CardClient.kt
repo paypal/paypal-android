@@ -132,7 +132,6 @@ class CardClient internal constructor(
                         CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
                     cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
                 }
-
             } catch (error: PayPalSDKError) {
                 analytics.notifyVaultFailed(cardVaultRequest.setupTokenId)
                 throw error

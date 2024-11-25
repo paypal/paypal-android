@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
+@Suppress("TooManyFunctions")
 class CardAnalytics(
     private val analyticsService: AnalyticsService
 ) {
