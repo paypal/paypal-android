@@ -122,12 +122,14 @@ class CardClient internal constructor(
                 val approveHref = updateSetupTokenResult.approveHref
                 if (approveHref == null) {
                     analytics.notifyVaultSucceeded(updateSetupTokenResult.setupTokenId)
-                    val result = updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
+                    val result =
+                        updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
                     cardVaultListener?.onVaultSuccess(result)
                 } else {
                     analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
                     val url = Uri.parse(approveHref)
-                    val authChallenge = CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
+                    val authChallenge =
+                        CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
                     cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
                 }
 
@@ -141,30 +143,40 @@ class CardClient internal constructor(
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
      */
-    fun presentAuthChallenge(activity: ComponentActivity, authChallenge: CardAuthChallenge) {
-        when (authChallengeLauncher.presentAuthChallenge(activity, authChallenge)) {
-            is CardPresentAuthChallengeResult.Success -> {
-                when (authChallenge) {
-                    // TODO: see if we can get order id from somewhere
-                    is CardAuthChallenge.ApproveOrder ->
-                        analytics.notifyApproveOrderAuthChallengeStarted(null)
+    fun presentAuthChallenge(
+        activity: ComponentActivity,
+        authChallenge: CardAuthChallenge
+    ): CardPresentAuthChallengeResult {
+        val result = authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
+        captureAuthChallengePresentationAnalytics(result, authChallenge)
+        return result
+    }
 
-                    // TODO: see if we can get setup token from somewhere
-                    is CardAuthChallenge.Vault ->
-                        analytics.notifyVaultAuthChallengeStarted(null)
-                }
+    private fun captureAuthChallengePresentationAnalytics(
+        result: CardPresentAuthChallengeResult,
+        authChallenge: CardAuthChallenge
+    ) = when (result) {
+        is CardPresentAuthChallengeResult.Success -> {
+            when (authChallenge) {
+                // TODO: see if we can get order id from somewhere
+                is CardAuthChallenge.ApproveOrder ->
+                    analytics.notifyApproveOrderAuthChallengeStarted(null)
+
+                // TODO: see if we can get setup token from somewhere
+                is CardAuthChallenge.Vault ->
+                    analytics.notifyVaultAuthChallengeStarted(null)
             }
+        }
 
-            is CardPresentAuthChallengeResult.Failure -> {
-                when (authChallenge) {
-                    // TODO: see if we can get order id from somewhere
-                    is CardAuthChallenge.ApproveOrder ->
-                        analytics.notifyApproveOrderAuthChallengeFailed(null)
+        is CardPresentAuthChallengeResult.Failure -> {
+            when (authChallenge) {
+                // TODO: see if we can get order id from somewhere
+                is CardAuthChallenge.ApproveOrder ->
+                    analytics.notifyApproveOrderAuthChallengeFailed(null)
 
-                    // TODO: see if we can get setup token id from somewhere
-                    is CardAuthChallenge.Vault ->
-                        analytics.notifyVaultAuthChallengeFailed(null)
-                }
+                // TODO: see if we can get setup token id from somewhere
+                is CardAuthChallenge.Vault ->
+                    analytics.notifyVaultAuthChallengeFailed(null)
             }
         }
     }
@@ -176,17 +188,20 @@ class CardClient internal constructor(
                 analytics.notifyVaultAuthChallengeSucceeded(status.result.setupTokenId)
                 cardVaultListener?.onVaultSuccess(status.result)
             }
+
             is CardStatus.VaultError -> {
                 // TODO: see if we can access setup token id for analytics tracking
                 analytics.notifyVaultAuthChallengeFailed(null)
                 cardVaultListener?.onVaultFailure(status.error)
             }
+
             is CardStatus.VaultCanceled -> {
                 // TODO: see if we can access setup token id for analytics tracking
                 analytics.notifyVaultAuthChallengeCanceled(null)
                 // TODO: consider either adding a listener method or next major version returning a result type
                 cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
             }
+
             is CardStatus.ApproveOrderError -> {
                 analytics.notifyApproveOrderAuthChallengeFailed(status.orderId)
                 approveOrderListener?.onApproveOrderFailure(status.error)
