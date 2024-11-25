@@ -10,7 +10,6 @@ import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.every
@@ -58,7 +57,7 @@ class CardClientUnitTest {
     private val checkoutOrdersAPI = mockk<CheckoutOrdersAPI>(relaxed = true)
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
 
-    private val analyticsService = mockk<AnalyticsService>(relaxed = true)
+    private val cardAnalytics = mockk<CardAnalytics>(relaxed = true)
     private val confirmPaymentSourceResponse =
         ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED)
 
@@ -405,7 +404,7 @@ class CardClientUnitTest {
         val sut = CardClient(
             checkoutOrdersAPI,
             paymentMethodTokensAPI,
-            analyticsService,
+            cardAnalytics,
             cardAuthLauncher,
             dispatcher
         )
