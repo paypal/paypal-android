@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class CardClient internal constructor(
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
-    private val analyticsService: AnalyticsService,
+    private val analytics: CardAnalytics,
     private val authChallengeLauncher: CardAuthLauncher,
     private val dispatcher: CoroutineDispatcher
 ) {
@@ -56,7 +56,7 @@ class CardClient internal constructor(
     constructor(context: Context, configuration: CoreConfig) : this(
         CheckoutOrdersAPI(configuration),
         DataVaultPaymentMethodTokensAPI(configuration),
-        AnalyticsService(context.applicationContext, configuration),
+        CardAnalytics(AnalyticsService(context.applicationContext, configuration)),
         CardAuthLauncher(),
         Dispatchers.Main
     )
@@ -70,26 +70,20 @@ class CardClient internal constructor(
     fun approveOrder(cardRequest: CardRequest) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:started", cardRequest.orderId)
+        analytics.notify3DSStarted(cardRequest.orderId)
 
         CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
             // TODO: migrate away from throwing exceptions to result objects
             try {
                 val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:confirm-payment-source:succeeded",
-                    cardRequest.orderId
-                )
+                analytics.notifyConfirmPaymentSourceSucceeded(cardRequest.orderId)
 
                 if (response.payerActionHref == null) {
                     val result =
                         response.run { CardResult(orderId = orderId, status = status?.name) }
                     notifyApproveOrderSuccess(result)
                 } else {
-                    analyticsService.sendAnalyticsEvent(
-                        "card-payments:3ds:confirm-payment-source:challenge-required",
-                        cardRequest.orderId
-                    )
+                    analytics.notifyConfirmPaymentSourceChallengeRequired(cardRequest.orderId)
                     approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
                     val url = Uri.parse(response.payerActionHref)
@@ -97,10 +91,7 @@ class CardClient internal constructor(
                     approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
                 }
             } catch (error: PayPalSDKError) {
-                analyticsService.sendAnalyticsEvent(
-                    "card-payments:3ds:confirm-payment-source:failed",
-                    cardRequest.orderId
-                )
+                analytics.notifyConfirmPaymentSourceFailed(cardRequest.orderId)
                 throw error
             }
         }
@@ -145,7 +136,7 @@ class CardClient internal constructor(
         when (status) {
             is CardStatus.VaultSuccess -> notifyVaultSuccess(status.result)
             is CardStatus.VaultError -> notifyVaultFailure(status.error)
-            is CardStatus.VaultCanceled -> notifyVaultCancelation()
+            is CardStatus.VaultCanceled -> notifyVaultCancellation()
             is CardStatus.ApproveOrderError ->
                 notifyApproveOrderFailure(status.error, status.orderId)
 
@@ -163,32 +154,34 @@ class CardClient internal constructor(
     }
 
     private fun notifyApproveOrderCanceled(orderId: String?) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:challenge:user-canceled", orderId)
+        analytics.notifyApproveOrder3DSCanceled(orderId)
         approveOrderListener?.onApproveOrderCanceled()
     }
 
     private fun notifyApproveOrderSuccess(result: CardResult) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:succeeded", result.orderId)
+        analytics.notifyApproveOrder3DSSuccess(result.orderId)
         approveOrderListener?.onApproveOrderSuccess(result)
     }
 
     private fun notifyApproveOrderFailure(error: PayPalSDKError, orderId: String?) {
-        analyticsService.sendAnalyticsEvent("card-payments:3ds:failed", orderId)
+        analytics.notifyApproveOrder3DSFailed(orderId)
         approveOrderListener?.onApproveOrderFailure(error)
     }
 
     private fun notifyVaultSuccess(result: CardVaultResult) {
-        analyticsService.sendAnalyticsEvent("card:browser-login:canceled", result.setupTokenId)
+        analytics.notifyVaultSuccess(result.setupTokenId)
         cardVaultListener?.onVaultSuccess(result)
     }
 
     private fun notifyVaultFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("card:failed", null)
+        // TODO: see if we can access setup token id for analytics tracking
+        analytics.notifyVaultFailure(null)
         cardVaultListener?.onVaultFailure(error)
     }
 
-    private fun notifyVaultCancelation() {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", null)
+    private fun notifyVaultCancellation() {
+        // TODO: see if we can access setup token id for analytics tracking
+        analytics.notifyVaultCancellation(null)
         // TODO: consider either adding a listener method or next major version returning a result type
         cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
     }
