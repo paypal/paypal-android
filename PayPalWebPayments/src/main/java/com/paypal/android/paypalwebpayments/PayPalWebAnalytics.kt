@@ -3,7 +3,7 @@ package com.paypal.android.paypalwebpayments
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
 @Suppress("TooManyFunctions")
-class PayPalWebAnalytics(private val analyticsService: AnalyticsService) {
+internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService) {
 
     fun notifyCheckoutStarted(orderId: String) {
         val eventName = "paypal-web-payments:checkout:started"

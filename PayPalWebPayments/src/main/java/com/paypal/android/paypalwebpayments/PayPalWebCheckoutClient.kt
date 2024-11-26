@@ -15,7 +15,6 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
-    private val analyticsService: AnalyticsService,
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
@@ -28,7 +27,6 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
-        AnalyticsService(context.applicationContext, configuration),
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
     )
