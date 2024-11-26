@@ -5,7 +5,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
