@@ -16,6 +16,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analyticsService: AnalyticsService,
+    private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
 
@@ -28,6 +29,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         AnalyticsService(context.applicationContext, configuration),
+        PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
     )
 
@@ -50,16 +52,16 @@ class PayPalWebCheckoutClient internal constructor(
         activity: ComponentActivity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:started", request.orderId)
+        analytics.notifyCheckoutStarted(request.orderId)
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Failure -> {
-                notifyWebCheckoutFailure(result.error, request.orderId)
+                analytics.notifyCheckoutAuthChallengeFailed(request.orderId)
+                listener?.onPayPalWebFailure(result.error)
             }
 
-            is PayPalPresentAuthChallengeResult.Success -> {
-                // TODO: track success with analytics
-            }
+            is PayPalPresentAuthChallengeResult.Success ->
+                analytics.notifyCheckoutAuthChallengeStarted(request.orderId)
         }
         return result
     }
@@ -73,16 +75,16 @@ class PayPalWebCheckoutClient internal constructor(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:started")
+        analytics.notifyVaultStarted(request.setupTokenId)
         val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Failure -> {
-                notifyVaultFailure(result.error)
+                analytics.notifyVaultAuthChallengeFailed(request.setupTokenId)
+                vaultListener?.onPayPalWebVaultFailure(result.error)
             }
 
-            is PayPalPresentAuthChallengeResult.Success -> {
-                // TODO: track success with analytics
-            }
+            is PayPalPresentAuthChallengeResult.Success ->
+                analytics.notifyVaultAuthChallengeStarted(request.setupTokenId)
         }
         return result
     }
@@ -90,53 +92,45 @@ class PayPalWebCheckoutClient internal constructor(
     fun completeAuthChallenge(intent: Intent, authState: String): PayPalWebStatus {
         val status = payPalWebLauncher.completeAuthRequest(intent, authState)
         when (status) {
-            is PayPalWebStatus.CheckoutSuccess -> notifyWebCheckoutSuccess(status.result)
-            is PayPalWebStatus.CheckoutError -> status.run {
-                notifyWebCheckoutFailure(error, orderId)
+            is PayPalWebStatus.CheckoutSuccess -> {
+                analytics.notifyCheckoutAuthChallengeSucceeded(status.result.orderId)
+                listener?.onPayPalWebSuccess(status.result)
             }
 
-            is PayPalWebStatus.CheckoutCanceled -> notifyWebCheckoutCancelation(status.orderId)
-            is PayPalWebStatus.VaultSuccess -> notifyVaultSuccess(status.result)
-            is PayPalWebStatus.VaultError -> notifyVaultFailure(status.error)
-            PayPalWebStatus.VaultCanceled -> notifyVaultCancelation()
+            is PayPalWebStatus.CheckoutError -> {
+                analytics.notifyCheckoutAuthChallengeFailed(status.orderId)
+                listener?.onPayPalWebFailure(status.error)
+            }
+
+            is PayPalWebStatus.CheckoutCanceled -> {
+                analytics.notifyCheckoutAuthChallengeCanceled(status.orderId)
+                listener?.onPayPalWebCanceled()
+            }
+
+            is PayPalWebStatus.VaultSuccess -> {
+                // TODO: see if we can get setup token id from somewhere
+                analytics.notifyVaultAuthChallengeSucceeded(null)
+                vaultListener?.onPayPalWebVaultSuccess(status.result)
+            }
+            is PayPalWebStatus.VaultError -> {
+                // TODO: see if we can get setup token id from somewhere
+                analytics.notifyVaultAuthChallengeFailed(null)
+                vaultListener?.onPayPalWebVaultFailure(status.error)
+            }
+            PayPalWebStatus.VaultCanceled -> {
+                // TODO: see if we can get setup token id from somewhere
+                analytics.notifyVaultAuthChallengeCanceled(null)
+                vaultListener?.onPayPalWebVaultCanceled()
+            }
             is PayPalWebStatus.UnknownError -> {
                 Log.d("PayPalSDK", "An unknown error occurred: ${status.error.message}")
             }
+
             PayPalWebStatus.NoResult -> {
                 // ignore
             }
         }
         return status
-    }
-
-    private fun notifyWebCheckoutSuccess(result: PayPalWebCheckoutResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:succeeded", result.orderId)
-        listener?.onPayPalWebSuccess(result)
-    }
-
-    private fun notifyWebCheckoutFailure(error: PayPalSDKError, orderId: String?) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:failed", orderId)
-        listener?.onPayPalWebFailure(error)
-    }
-
-    private fun notifyWebCheckoutCancelation(orderId: String?) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:browser-login:canceled", orderId)
-        listener?.onPayPalWebCanceled()
-    }
-
-    private fun notifyVaultSuccess(result: PayPalWebVaultResult) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:succeeded")
-        vaultListener?.onPayPalWebVaultSuccess(result)
-    }
-
-    private fun notifyVaultFailure(error: PayPalSDKError) {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:failed")
-        vaultListener?.onPayPalWebVaultFailure(error)
-    }
-
-    private fun notifyVaultCancelation() {
-        analyticsService.sendAnalyticsEvent("paypal-web-payments:vault-wo-purchase:canceled")
-        vaultListener?.onPayPalWebVaultCanceled()
     }
 
     /**
