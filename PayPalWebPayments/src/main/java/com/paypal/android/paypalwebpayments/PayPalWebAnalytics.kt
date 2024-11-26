@@ -51,7 +51,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
     }
 
     fun notifyVaultAuthChallengeCanceled(setupTokenId: String?) {
-        val eventName = "paypal-web-payments:checkout:auth-challenge-canceled"
+        val eventName = "paypal-web-payments:vault:auth-challenge-canceled"
         analyticsService.sendAnalyticsEvent(eventName, setupTokenId)
     }
 }
