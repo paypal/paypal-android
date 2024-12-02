@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
@@ -25,8 +26,19 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         context: Context,
         setupTokenId: String,
         card: Card
+    ): UpdateSetupTokenResult = when (val result =
+        resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)) {
+        is LoadRawResourceResult.Success ->
+            sendUpdateSetupTokenGraphQLRequest(result.value, setupTokenId, card)
+
+        is LoadRawResourceResult.Failure -> UpdateSetupTokenResult.Failure(result.error)
+    }
+
+    private suspend fun sendUpdateSetupTokenGraphQLRequest(
+        query: String,
+        setupTokenId: String,
+        card: Card
     ): UpdateSetupTokenResult {
-        val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"

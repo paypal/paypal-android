@@ -21,19 +21,22 @@ class ResourceLoader {
      * @param context Android context
      * @param resId ID of the resource that will be loaded
      */
-    suspend fun loadRawResource(context: Context, @RawRes resId: Int): String = withContext(Dispatchers.IO) {
-        try {
-            val resInputStream = context.resources.openRawResource(resId)
-            val resAsBytes = ByteArray(resInputStream.available())
-            resInputStream.read(resAsBytes)
-            resInputStream.close()
-            String(resAsBytes)
-        } catch (e: Resources.NotFoundException) {
-            val errorDescription = "Resource with id $resId not found."
-            throw PayPalSDKError(0, errorDescription, reason = e)
-        } catch (e: IOException) {
-            val errorDescription = "Error loading resource with id $resId."
-            throw PayPalSDKError(0, errorDescription, reason = e)
+    suspend fun loadRawResource(context: Context, @RawRes resId: Int): LoadRawResourceResult =
+        withContext(Dispatchers.IO) {
+            try {
+                val resInputStream = context.resources.openRawResource(resId)
+                val resAsBytes = ByteArray(resInputStream.available())
+                resInputStream.read(resAsBytes)
+                resInputStream.close()
+                LoadRawResourceResult.Success(String(resAsBytes))
+            } catch (e: Resources.NotFoundException) {
+                val errorDescription = "Resource with id $resId not found."
+                val resourceNotFoundError = PayPalSDKError(0, errorDescription, reason = e)
+                LoadRawResourceResult.Failure(resourceNotFoundError)
+            } catch (e: IOException) {
+                val errorDescription = "Error loading resource with id $resId."
+                val ioError = PayPalSDKError(0, errorDescription, reason = e)
+                LoadRawResourceResult.Failure(ioError)
+            }
         }
-    }
 }
