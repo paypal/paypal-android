@@ -13,7 +13,7 @@ internal class CheckoutOrdersAPI(
 ) {
     constructor(coreConfig: CoreConfig) : this(RestClient(coreConfig))
 
-    suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResponse {
+    suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
         val httpResponse = restClient.send(apiRequest)
 
