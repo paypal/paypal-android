@@ -6,7 +6,6 @@ import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -153,19 +152,20 @@ internal class GraphQLClientUnitTest {
     }
 
     @Test
-    fun `send returns an error when GraphQL response is successful with an invalid JSON body`() = runTest {
-        val invalidJSON = """{ invalid: """
-        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
-        val successHttpResponse = HttpResponse(200, successHeaders, invalidJSON)
-        coEvery { http.send(any()) } returns successHttpResponse
+    fun `send returns an error when GraphQL response is successful with an invalid JSON body`() =
+        runTest {
+            val invalidJSON = """{ invalid: """
+            val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+            val successHttpResponse = HttpResponse(200, successHeaders, invalidJSON)
+            coEvery { http.send(any()) } returns successHttpResponse
 
-        sut = GraphQLClient(sandboxConfig, http)
-        val result = sut.send(graphQLRequestBody) as GraphQLResult.Failure
-        assertEquals(PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal, result.error.code)
+            sut = GraphQLClient(sandboxConfig, http)
+            val result = sut.send(graphQLRequestBody) as GraphQLResult.Failure
+            assertEquals(PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal, result.error.code)
 
-        val expectedErrorMessage =
-            "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support."
-        assertEquals(expectedErrorMessage, result.error.errorDescription)
-        assertEquals("fake-debug-id", result.error.correlationId)
-    }
+            val expectedErrorMessage =
+                "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support."
+            assertEquals(expectedErrorMessage, result.error.errorDescription)
+            assertEquals("fake-debug-id", result.error.correlationId)
+        }
 }

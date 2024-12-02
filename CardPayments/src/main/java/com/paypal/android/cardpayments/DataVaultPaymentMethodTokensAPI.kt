@@ -74,7 +74,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             .put("variables", variables)
         val graphQLResponse =
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
-        when (graphQLResponse) {
+        return when (graphQLResponse) {
             is GraphQLResult.Success -> {
                 graphQLResponse.data?.let { responseJSON ->
                     val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
@@ -84,7 +84,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
                     } else {
                         null
                     }
-                    return UpdateSetupTokenResult.Success(
+                    UpdateSetupTokenResult.Success(
                         setupTokenId = setupTokenJSON.getString("id"),
                         status = status,
                         approveHref = approveHref
@@ -95,11 +95,11 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
                     "Error updating setup token: ${graphQLResponse.errors}",
                     graphQLResponse.correlationId
                 )
-                return UpdateSetupTokenResult.Failure(error)
+                UpdateSetupTokenResult.Failure(error)
             }
 
             is GraphQLResult.Failure -> {
-                return UpdateSetupTokenResult.Failure(graphQLResponse.error)
+                UpdateSetupTokenResult.Failure(graphQLResponse.error)
             }
         }
     }

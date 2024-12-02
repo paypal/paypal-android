@@ -80,10 +80,15 @@ object APIClientError {
         correlationId = correlationId
     )
 
-    fun graphQLJSONParseError(correlationId: String?, reason: Exception) = PayPalSDKError(
-        code = PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal,
-        errorDescription = "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support.",
-        correlationId = correlationId,
-        reason = reason
-    )
+    fun graphQLJSONParseError(correlationId: String?, reason: Exception): PayPalSDKError {
+        val message =
+            "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support."
+        val error = PayPalSDKError(
+            code = PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal,
+            errorDescription = message,
+            correlationId = correlationId,
+            reason = reason
+        )
+        return error
+    }
 }

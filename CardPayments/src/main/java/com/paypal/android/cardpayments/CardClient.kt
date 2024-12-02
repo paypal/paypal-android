@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,12 +38,6 @@ class CardClient internal constructor(
     var cardVaultListener: CardVaultListener? = null
 
     private var approveOrderId: String? = null
-
-    // TODO: remove once try-catch is removed
-    private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        analytics.notifyVaultUnknownError(null)
-        cardVaultListener?.onVaultFailure(error)
-    }
 
     /**
      *  CardClient constructor
