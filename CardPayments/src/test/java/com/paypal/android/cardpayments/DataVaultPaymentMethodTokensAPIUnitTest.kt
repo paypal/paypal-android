@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.Address
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
@@ -56,12 +57,15 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         coVerify { graphQLClient.send(capture(requestBodySlot), "UpdateVaultSetupToken") }
         val actualRequestBody = requestBodySlot.captured
 
-        val expectedQuery =
-            resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
+        val expectedQuery = resourceLoader.loadRawResource(
+            context,
+            R.raw.graphql_query_update_setup_token
+        ) as LoadRawResourceResult.Success
+
         // language=JSON
         val expectedRequestBody = """
         {
-            "query": "$expectedQuery",
+            "query": "${expectedQuery.value}",
             "variables": {
                 "clientId": "fake-client-id",
                 "vaultSetupToken": "fake-setup-token-id",
@@ -105,12 +109,15 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         coVerify { graphQLClient.send(capture(requestBodySlot), "UpdateVaultSetupToken") }
         val actualRequestBody = requestBodySlot.captured
 
-        val expectedQuery =
-            resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
+        val expectedQuery = resourceLoader.loadRawResource(
+            context,
+            R.raw.graphql_query_update_setup_token
+        ) as LoadRawResourceResult.Success
+
         // language=JSON
         val expectedRequestBody = """
         {
-            "query": "$expectedQuery",
+            "query": "${expectedQuery.value}",
             "variables": {
                 "clientId": "fake-client-id",
                 "vaultSetupToken": "fake-setup-token-id",
