@@ -7,7 +7,7 @@ import org.json.JSONObject
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class GraphQLResponse(
+data class GraphQLResult(
     val data: JSONObject? = null,
     val extensions: List<GraphQLExtension>? = null,
     val errors: List<GraphQLError>? = null,

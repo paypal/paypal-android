@@ -35,7 +35,7 @@ class GraphQLClient internal constructor(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
+    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResult {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
         val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
@@ -48,10 +48,10 @@ class GraphQLClient internal constructor(
                 throw APIClientError.noResponseData(correlationId)
             } else {
                 val responseAsJSON = JSONObject(httpResponse.body)
-                GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+                GraphQLResult(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
             }
         } else {
-            GraphQLResponse(null, correlationId = correlationId)
+            GraphQLResult(null, correlationId = correlationId)
         }
     }
 }

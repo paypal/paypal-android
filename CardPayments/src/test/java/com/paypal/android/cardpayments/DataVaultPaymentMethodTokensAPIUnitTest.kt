@@ -7,7 +7,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
-import com.paypal.android.corepayments.graphql.GraphQLResponse
+import com.paypal.android.corepayments.graphql.GraphQLResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -152,8 +152,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
               }
             }
         """.trimIndent()
-        val graphQLResponse = GraphQLResponse(JSONObject(json))
-        coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResponse
+        val graphQLResult = GraphQLResult(JSONObject(json))
+        coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
         val card = Card(
             number = "4111111111111111",
@@ -185,8 +185,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
                 }
             }
         """.trimIndent()
-        val graphQLResponse = GraphQLResponse(JSONObject(json))
-        coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResponse
+        val graphQLResult = GraphQLResult(JSONObject(json))
+        coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
         val card = Card(
             number = "4111111111111111",
