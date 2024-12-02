@@ -152,7 +152,7 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
               }
             }
         """.trimIndent()
-        val graphQLResult = GraphQLResult(JSONObject(json))
+        val graphQLResult = GraphQLResult.Success(JSONObject(json))
         coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
         val card = Card(
@@ -185,7 +185,7 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
                 }
             }
         """.trimIndent()
-        val graphQLResult = GraphQLResult(JSONObject(json))
+        val graphQLResult = GraphQLResult.Success(JSONObject(json))
         coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
         val card = Card(
