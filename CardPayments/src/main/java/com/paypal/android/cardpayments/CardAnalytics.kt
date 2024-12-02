@@ -3,9 +3,7 @@ package com.paypal.android.cardpayments
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
 @Suppress("TooManyFunctions")
-class CardAnalytics(
-    private val analyticsService: AnalyticsService
-) {
+internal class CardAnalytics(private val analyticsService: AnalyticsService) {
 
     // region Approve Order
     fun notifyApproveOrderStarted(orderId: String) {

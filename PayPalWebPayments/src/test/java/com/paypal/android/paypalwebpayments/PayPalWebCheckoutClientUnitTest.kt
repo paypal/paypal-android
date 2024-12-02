@@ -3,7 +3,6 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
@@ -21,7 +20,7 @@ import org.robolectric.RobolectricTestRunner
 class PayPalWebCheckoutClientUnitTest {
 
     private val activity: FragmentActivity = mockk(relaxed = true)
-    private val analyticsService = mockk<AnalyticsService>(relaxed = true)
+    private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
 
     private val checkoutListener = mockk<PayPalWebCheckoutListener>(relaxed = true)
     private val vaultListener = mockk<PayPalWebVaultListener>(relaxed = true)
@@ -34,7 +33,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(analyticsService, payPalWebLauncher)
+        sut = PayPalWebCheckoutClient(analytics, payPalWebLauncher)
     }
 
     @Test
