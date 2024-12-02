@@ -53,7 +53,8 @@ class GraphQLClient internal constructor(
                     val responseAsJSON = JSONObject(httpResponse.body)
                     GraphQLResult.Success(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
                 } catch (jsonParseError: JSONException) {
-                    TODO("Return JSON parse failure.")
+                    val error = APIClientError.graphQLJSONParseError(correlationId, jsonParseError)
+                    GraphQLResult.Failure(error)
                 }
             }
         } else {

@@ -1,7 +1,6 @@
 package com.paypal.android.corepayments
 
 import androidx.annotation.RestrictTo
-import java.lang.Exception
 
 /**
  * @suppress
@@ -79,5 +78,12 @@ object APIClientError {
         code = code,
         errorDescription = "Error fetching clientId. Contact developer.paypal.com/support.",
         correlationId = correlationId
+    )
+
+    fun graphQLJSONParseError(correlationId: String?, reason: Exception) = PayPalSDKError(
+        code = PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal,
+        errorDescription = "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support.",
+        correlationId = correlationId,
+        reason = reason
     )
 }
