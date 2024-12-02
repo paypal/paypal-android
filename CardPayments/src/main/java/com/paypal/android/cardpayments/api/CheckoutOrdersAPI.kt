@@ -18,10 +18,10 @@ internal class CheckoutOrdersAPI(
         val httpResponse = restClient.send(apiRequest)
 
         val error = responseParser.parseError(httpResponse)
-        if (error != null) {
-            return ConfirmPaymentSourceResult.Failure(error)
+        return if (error == null) {
+            responseParser.parseConfirmPaymentSourceResponse(httpResponse)
         } else {
-            return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
+            ConfirmPaymentSourceResult.Failure(error)
         }
     }
 }
