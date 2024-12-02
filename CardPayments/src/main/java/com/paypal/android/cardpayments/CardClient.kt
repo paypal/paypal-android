@@ -41,12 +41,6 @@ class CardClient internal constructor(
     private var approveOrderId: String? = null
 
     // TODO: remove once try-catch is removed
-    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        analytics.notifyApproveOrderUnknownError(null)
-        approveOrderListener?.onApproveOrderFailure(error)
-    }
-
-    // TODO: remove once try-catch is removed
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
         analytics.notifyVaultUnknownError(null)
         cardVaultListener?.onVaultFailure(error)
@@ -77,7 +71,7 @@ class CardClient internal constructor(
         approveOrderId = cardRequest.orderId
         analytics.notifyApproveOrderStarted(cardRequest.orderId)
 
-        CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
+        CoroutineScope(dispatcher).launch {
             when (val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)) {
                 is ConfirmPaymentSourceResult.Success -> {
                     if (response.payerActionHref == null) {
