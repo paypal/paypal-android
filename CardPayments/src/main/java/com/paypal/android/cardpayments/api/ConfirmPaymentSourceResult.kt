@@ -1,6 +1,5 @@
 package com.paypal.android.cardpayments.api
 
-import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.OrderStatus

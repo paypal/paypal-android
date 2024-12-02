@@ -6,7 +6,6 @@ import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.OrderStatus
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.RestClient
 import io.mockk.coEvery
