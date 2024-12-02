@@ -5,6 +5,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLResult
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -59,31 +60,35 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         val graphQLRequest = JSONObject()
             .put("query", query)
             .put("variables", variables)
-        try {
-            val graphQLResponse =
-                graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
-            graphQLResponse.data?.let { responseJSON ->
-                val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
-                val status = setupTokenJSON.getString("status")
-                val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
-                    findLinkHref(setupTokenJSON, "approve")
-                } else {
-                    null
+        val graphQLResponse =
+            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
+        when (graphQLResponse) {
+            is GraphQLResult.Success -> {
+                graphQLResponse.data?.let { responseJSON ->
+                    val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
+                    val status = setupTokenJSON.getString("status")
+                    val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
+                        findLinkHref(setupTokenJSON, "approve")
+                    } else {
+                        null
+                    }
+                    return UpdateSetupTokenResult.Success(
+                        setupTokenId = setupTokenJSON.getString("id"),
+                        status = status,
+                        approveHref = approveHref
+                    )
                 }
-                return UpdateSetupTokenResult.Success(
-                    setupTokenId = setupTokenJSON.getString("id"),
-                    status = status,
-                    approveHref = approveHref
+                val error = PayPalSDKError(
+                    0,
+                    "Error updating setup token: ${graphQLResponse.errors}",
+                    graphQLResponse.correlationId
                 )
+                return UpdateSetupTokenResult.Failure(error)
             }
-            val error = PayPalSDKError(
-                0,
-                "Error updating setup token: ${graphQLResponse.errors}",
-                graphQLResponse.correlationId
-            )
-            return UpdateSetupTokenResult.Failure(error)
-        } catch (graphQLError: PayPalSDKError) {
-            return UpdateSetupTokenResult.Failure(graphQLError)
+
+            is GraphQLResult.Failure -> {
+                return UpdateSetupTokenResult.Failure(graphQLResponse.error)
+            }
         }
     }
 

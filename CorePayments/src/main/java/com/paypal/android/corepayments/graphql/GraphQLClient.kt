@@ -6,6 +6,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
+import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -45,13 +46,18 @@ class GraphQLClient internal constructor(
         val status = httpResponse.status
         return if (status == HttpURLConnection.HTTP_OK) {
             if (httpResponse.body.isNullOrBlank()) {
-                throw APIClientError.noResponseData(correlationId)
+                val error = APIClientError.noResponseData(correlationId)
+                GraphQLResult.Failure(error)
             } else {
-                val responseAsJSON = JSONObject(httpResponse.body)
-                GraphQLResult(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+                try {
+                    val responseAsJSON = JSONObject(httpResponse.body)
+                    GraphQLResult.Success(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+                } catch (jsonParseError: JSONException) {
+                    TODO("Return JSON parse failure.")
+                }
             }
         } else {
-            GraphQLResult(null, correlationId = correlationId)
+            GraphQLResult.Success(null, correlationId = correlationId)
         }
     }
 }
