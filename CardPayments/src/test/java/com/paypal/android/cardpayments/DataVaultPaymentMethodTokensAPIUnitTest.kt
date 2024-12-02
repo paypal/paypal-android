@@ -163,6 +163,7 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         )
         sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
         val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+                as UpdateSetupTokenResult.Success
 
         assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
         assertEquals("APPROVED", result.status)
@@ -195,6 +196,7 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         )
         sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
         val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+                as UpdateSetupTokenResult.Success
 
         assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
         assertEquals("PAYER_ACTION_REQUIRED", result.status)

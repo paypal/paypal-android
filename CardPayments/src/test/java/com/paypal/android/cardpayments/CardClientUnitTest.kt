@@ -148,7 +148,7 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
 
         val updateSetupTokenResult =
-            UpdateSetupTokenResult("fake-setup-token-id-from-result", "fake-status", null)
+            UpdateSetupTokenResult.Success("fake-setup-token-id-from-result", "fake-status", null)
         coEvery {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
         } returns updateSetupTokenResult
@@ -171,7 +171,7 @@ class CardClientUnitTest {
         val error = PayPalSDKError(0, "mock_error_message")
         coEvery {
             paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
-        } throws error
+        } returns UpdateSetupTokenResult.Failure(error)
 
         sut.vault(activity, cardVaultRequest)
         advanceUntilIdle()
@@ -187,7 +187,7 @@ class CardClientUnitTest {
     fun `vault notifies listener when authorization is required`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val updateSetupTokenResult = UpdateSetupTokenResult(
+        val updateSetupTokenResult = UpdateSetupTokenResult.Success(
             "fake-setup-token-id-from-result",
             "fake-status",
             "/payer/action/href"
