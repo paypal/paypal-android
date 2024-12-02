@@ -7,7 +7,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
-import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
+import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
 import io.mockk.Called
@@ -58,8 +58,8 @@ class CardClientUnitTest {
     private val paymentMethodTokensAPI = mockk<DataVaultPaymentMethodTokensAPI>(relaxed = true)
 
     private val cardAnalytics = mockk<CardAnalytics>(relaxed = true)
-    private val confirmPaymentSourceResponse =
-        ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED)
+    private val confirmPaymentSourceResult =
+        ConfirmPaymentSourceResult.Success(orderId, OrderStatus.APPROVED)
 
     private val activity = mockk<FragmentActivity>(relaxed = true)
 
@@ -90,7 +90,7 @@ class CardClientUnitTest {
     fun `approve order notifies listener of confirm payment source success`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns confirmPaymentSourceResponse
+        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns confirmPaymentSourceResult
 
         sut.approveOrder(cardRequest)
         advanceUntilIdle()
@@ -109,7 +109,9 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(0, "mock_error_message")
-        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } throws error
+        coEvery {
+            checkoutOrdersAPI.confirmPaymentSource(cardRequest)
+        } returns ConfirmPaymentSourceResult.Failure(error)
 
         sut.approveOrder(cardRequest)
         advanceUntilIdle()
@@ -124,7 +126,7 @@ class CardClientUnitTest {
     @Test
     fun `approveOrder() notifies listener when authorization is required`() = runTest {
         val threeDSecureAuthChallengeResponse =
-            ConfirmPaymentSourceResponse(orderId, OrderStatus.APPROVED, "/payer/action/href")
+            ConfirmPaymentSourceResult.Success(orderId, OrderStatus.APPROVED, "/payer/action/href")
 
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
 

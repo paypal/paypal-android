@@ -1,6 +1,6 @@
 package com.paypal.android.cardpayments
 
-import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResponse
+import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.cardpayments.model.PaymentSource
 import com.paypal.android.cardpayments.model.PurchaseUnit
 import com.paypal.android.corepayments.APIClientError
@@ -13,8 +13,7 @@ import org.json.JSONException
 
 internal class CardResponseParser {
 
-    @Throws(PayPalSDKError::class)
-    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResponse =
+    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResult =
         try {
             val bodyResponse = httpResponse.body!!
 
@@ -24,7 +23,7 @@ internal class CardResponseParser {
 
             // this section is for 3DS
             val payerActionHref = json.getLinkHref("payer-action")
-            ConfirmPaymentSourceResponse(
+            ConfirmPaymentSourceResult.Success(
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
@@ -33,7 +32,8 @@ internal class CardResponseParser {
             )
         } catch (ignored: JSONException) {
             val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-            throw APIClientError.dataParsingError(correlationId)
+            val error = APIClientError.dataParsingError(correlationId)
+            ConfirmPaymentSourceResult.Failure(error)
         }
 
     fun parseError(httpResponse: HttpResponse): PayPalSDKError? {

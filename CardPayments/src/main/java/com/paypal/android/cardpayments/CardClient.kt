@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
+import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.CoreCoroutineExceptionHandler
 import com.paypal.android.corepayments.PayPalSDKError
@@ -40,12 +41,6 @@ class CardClient internal constructor(
     private var approveOrderId: String? = null
 
     // TODO: remove once try-catch is removed
-    private val approveOrderExceptionHandler = CoreCoroutineExceptionHandler { error ->
-        analytics.notifyApproveOrderUnknownError(null)
-        approveOrderListener?.onApproveOrderFailure(error)
-    }
-
-    // TODO: remove once try-catch is removed
     private val vaultExceptionHandler = CoreCoroutineExceptionHandler { error ->
         analytics.notifyVaultUnknownError(null)
         cardVaultListener?.onVaultFailure(error)
@@ -76,26 +71,28 @@ class CardClient internal constructor(
         approveOrderId = cardRequest.orderId
         analytics.notifyApproveOrderStarted(cardRequest.orderId)
 
-        CoroutineScope(dispatcher).launch(approveOrderExceptionHandler) {
-            // TODO: migrate away from throwing exceptions to result objects
-            try {
-                val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)
-                if (response.payerActionHref == null) {
-                    analytics.notifyApproveOrderSucceeded(response.orderId)
-                    val result =
-                        response.run { CardResult(orderId = orderId, status = status?.name) }
-                    approveOrderListener?.onApproveOrderSuccess(result)
-                } else {
-                    analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
-                    approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
+        CoroutineScope(dispatcher).launch {
+            when (val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)) {
+                is ConfirmPaymentSourceResult.Success -> {
+                    if (response.payerActionHref == null) {
+                        analytics.notifyApproveOrderSucceeded(response.orderId)
+                        val result =
+                            response.run { CardResult(orderId = orderId, status = status?.name) }
+                        approveOrderListener?.onApproveOrderSuccess(result)
+                    } else {
+                        analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
+                        approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
-                    val url = Uri.parse(response.payerActionHref)
-                    val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                    approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
+                        val url = Uri.parse(response.payerActionHref)
+                        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+                        approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
+                    }
                 }
-            } catch (error: PayPalSDKError) {
-                analytics.notifyApproveOrderFailed(cardRequest.orderId)
-                throw error
+
+                is ConfirmPaymentSourceResult.Failure -> {
+                    analytics.notifyApproveOrderFailed(cardRequest.orderId)
+                    approveOrderListener?.onApproveOrderFailure(response.error)
+                }
             }
         }
     }
