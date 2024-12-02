@@ -13,7 +13,6 @@ import org.json.JSONException
 
 internal class CardResponseParser {
 
-    @Throws(PayPalSDKError::class)
     fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResult =
         try {
             val bodyResponse = httpResponse.body!!
@@ -24,7 +23,7 @@ internal class CardResponseParser {
 
             // this section is for 3DS
             val payerActionHref = json.getLinkHref("payer-action")
-            ConfirmPaymentSourceResult(
+            ConfirmPaymentSourceResult.Success(
                 id,
                 OrderStatus.valueOf(status),
                 payerActionHref,
@@ -33,7 +32,8 @@ internal class CardResponseParser {
             )
         } catch (ignored: JSONException) {
             val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-            throw APIClientError.dataParsingError(correlationId)
+            val error = APIClientError.dataParsingError(correlationId)
+            ConfirmPaymentSourceResult.Failure(error)
         }
 
     fun parseError(httpResponse: HttpResponse): PayPalSDKError? {

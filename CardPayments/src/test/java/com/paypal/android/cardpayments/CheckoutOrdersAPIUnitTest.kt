@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
+import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
@@ -103,7 +104,7 @@ class CheckoutOrdersAPIUnitTest {
         val httpResponse = HttpResponse(200, headers, successBody)
         coEvery { restClient.send(apiRequest) } returns httpResponse
 
-        val result = sut.confirmPaymentSource(cardRequest)
+        val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Success
 
         assertEquals("test-order-id", result.orderId)
         assertEquals(OrderStatus.APPROVED, result.status)
@@ -114,17 +115,11 @@ class CheckoutOrdersAPIUnitTest {
         val httpResponse = HttpResponse(404, headers, errorBody)
         coEvery { restClient.send(apiRequest) } returns httpResponse
 
-        lateinit var capturedError: PayPalSDKError
-        try {
-            sut.confirmPaymentSource(cardRequest)
-        } catch (e: PayPalSDKError) {
-            capturedError = e
-        }
-
+        val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
         assertEquals(
             "The specified resource does not exist. -> [Issue: INVALID_RESOURCE_ID.\n" +
                     "Error description: Specified resource ID does not exist.]",
-            capturedError.errorDescription
+            result.error.errorDescription
         )
     }
 
@@ -135,16 +130,10 @@ class CheckoutOrdersAPIUnitTest {
             val httpResponse = HttpResponse(-1, headers, errorBody)
             coEvery { restClient.send(apiRequest) } returns httpResponse
 
-            lateinit var capturedError: PayPalSDKError
-            try {
-                sut.confirmPaymentSource(cardRequest)
-            } catch (e: PayPalSDKError) {
-                capturedError = e
-            }
-
+            val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
             assertEquals(
                 "An unknown error occurred. Contact developer.paypal.com/support.",
-                capturedError.errorDescription
+                result.error.errorDescription
             )
         }
 
@@ -155,16 +144,10 @@ class CheckoutOrdersAPIUnitTest {
             val httpResponse = HttpResponse(-10, headers, emptyErrorBody)
             coEvery { restClient.send(apiRequest) } returns httpResponse
 
-            lateinit var capturedError: PayPalSDKError
-            try {
-                sut.confirmPaymentSource(cardRequest)
-            } catch (e: PayPalSDKError) {
-                capturedError = e
-            }
-
+            val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
             assertEquals(
                 "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support.",
-                capturedError.errorDescription
+                result.error.errorDescription
             )
         }
 
@@ -177,16 +160,10 @@ class CheckoutOrdersAPIUnitTest {
             coEvery { restClient.send(apiRequest) } returns httpResponse
             every { paymentsJSON.getString(any()) } throws parsingException
 
-            lateinit var capturedError: PayPalSDKError
-            try {
-                sut.confirmPaymentSource(cardRequest)
-            } catch (e: PayPalSDKError) {
-                capturedError = e
-            }
-
+            val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
             assertEquals(
                 "An error occurred parsing HTTP response data. Contact developer.paypal.com/support.",
-                capturedError.errorDescription
+                result.error.errorDescription
             )
         }
 
@@ -196,16 +173,10 @@ class CheckoutOrdersAPIUnitTest {
         val httpResponse = HttpResponse(-2, headers, errorBody)
         coEvery { restClient.send(apiRequest) } returns httpResponse
 
-        lateinit var capturedError: PayPalSDKError
-        try {
-            sut.confirmPaymentSource(cardRequest)
-        } catch (e: PayPalSDKError) {
-            capturedError = e
-        }
-
+        val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
         assertEquals(
             "An error occurred due to an invalid HTTP response. Contact developer.paypal.com/support.",
-            capturedError.errorDescription
+            result.error.errorDescription
         )
     }
 
@@ -215,48 +186,29 @@ class CheckoutOrdersAPIUnitTest {
         val httpResponse = HttpResponse(-3, headers, errorBody)
         coEvery { restClient.send(apiRequest) } returns httpResponse
 
-        lateinit var capturedError: PayPalSDKError
-        try {
-            sut.confirmPaymentSource(cardRequest)
-        } catch (e: PayPalSDKError) {
-            capturedError = e
-        }
-
+        val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
         assertEquals(
             "A server error occurred. Contact developer.paypal.com/support.",
-            capturedError.errorDescription
+            result.error.errorDescription
         )
     }
 
     @Test
     fun `when confirmPaymentSource fails to parse response, correlation ID is set in Error`() =
         runTest {
-            coEvery { restClient.send(apiRequest) } returns HttpResponse(
-                200,
-                headers,
-                unexpectedBody
-            )
+            coEvery {
+                restClient.send(apiRequest)
+            } returns HttpResponse(200, headers, unexpectedBody)
 
-            lateinit var capturedError: PayPalSDKError
-            try {
-                sut.confirmPaymentSource(cardRequest)
-            } catch (e: PayPalSDKError) {
-                capturedError = e
-            }
-            assertEquals(correlationId, capturedError.correlationId)
+            val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
+            assertEquals(correlationId, result.error.correlationId)
         }
 
     @Test
     fun `when confirmPaymentSource is errors, correlation ID is set in Error`() = runTest {
         coEvery { restClient.send(apiRequest) } returns HttpResponse(400, headers, errorBody)
 
-        lateinit var capturedError: PayPalSDKError
-        try {
-            sut.confirmPaymentSource(cardRequest)
-        } catch (e: PayPalSDKError) {
-            capturedError = e
-        }
-
-        assertEquals(correlationId, capturedError.correlationId)
+        val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
+        assertEquals(correlationId, result.error.correlationId)
     }
 }

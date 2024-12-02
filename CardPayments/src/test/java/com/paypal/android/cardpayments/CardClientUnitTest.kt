@@ -59,7 +59,7 @@ class CardClientUnitTest {
 
     private val cardAnalytics = mockk<CardAnalytics>(relaxed = true)
     private val confirmPaymentSourceResult =
-        ConfirmPaymentSourceResult(orderId, OrderStatus.APPROVED)
+        ConfirmPaymentSourceResult.Success(orderId, OrderStatus.APPROVED)
 
     private val activity = mockk<FragmentActivity>(relaxed = true)
 
@@ -109,7 +109,9 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(0, "mock_error_message")
-        coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } throws error
+        coEvery {
+            checkoutOrdersAPI.confirmPaymentSource(cardRequest)
+        } returns ConfirmPaymentSourceResult.Failure(error)
 
         sut.approveOrder(cardRequest)
         advanceUntilIdle()
@@ -124,7 +126,7 @@ class CardClientUnitTest {
     @Test
     fun `approveOrder() notifies listener when authorization is required`() = runTest {
         val threeDSecureAuthChallengeResponse =
-            ConfirmPaymentSourceResult(orderId, OrderStatus.APPROVED, "/payer/action/href")
+            ConfirmPaymentSourceResult.Success(orderId, OrderStatus.APPROVED, "/payer/action/href")
 
         coEvery { checkoutOrdersAPI.confirmPaymentSource(cardRequest) } returns threeDSecureAuthChallengeResponse
 
