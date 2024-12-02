@@ -20,7 +20,11 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): UpdateSetupTokenResult {
+    suspend fun updateSetupToken(
+        context: Context,
+        setupTokenId: String,
+        card: Card
+    ): UpdateSetupTokenResult {
         val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
@@ -55,27 +59,32 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         val graphQLRequest = JSONObject()
             .put("query", query)
             .put("variables", variables)
-        val graphQLResponse =
-            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
-        graphQLResponse.data?.let { responseJSON ->
-            val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
-            val status = setupTokenJSON.getString("status")
-            val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
-                findLinkHref(setupTokenJSON, "approve")
-            } else {
-                null
+        try {
+            val graphQLResponse =
+                graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
+            graphQLResponse.data?.let { responseJSON ->
+                val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
+                val status = setupTokenJSON.getString("status")
+                val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
+                    findLinkHref(setupTokenJSON, "approve")
+                } else {
+                    null
+                }
+                return UpdateSetupTokenResult.Success(
+                    setupTokenId = setupTokenJSON.getString("id"),
+                    status = status,
+                    approveHref = approveHref
+                )
             }
-            return UpdateSetupTokenResult(
-                setupTokenId = setupTokenJSON.getString("id"),
-                status = status,
-                approveHref = approveHref
+            val error = PayPalSDKError(
+                0,
+                "Error updating setup token: ${graphQLResponse.errors}",
+                graphQLResponse.correlationId
             )
+            return UpdateSetupTokenResult.Failure(error)
+        } catch (graphQLError: PayPalSDKError) {
+            return UpdateSetupTokenResult.Failure(graphQLError)
         }
-        throw PayPalSDKError(
-            0,
-            "Error updating setup token: ${graphQLResponse.errors}",
-            graphQLResponse.correlationId
-        )
     }
 
     private fun findLinkHref(responseJSON: JSONObject, rel: String): String? {

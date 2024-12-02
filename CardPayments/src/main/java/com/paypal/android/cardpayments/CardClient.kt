@@ -110,28 +110,31 @@ class CardClient internal constructor(
         analytics.notifyVaultStarted(cardVaultRequest.setupTokenId)
 
         val applicationContext = context.applicationContext
-        CoroutineScope(dispatcher).launch(vaultExceptionHandler) {
-            try {
-                val updateSetupTokenResult = cardVaultRequest.run {
-                    paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+        CoroutineScope(dispatcher).launch {
+            val updateSetupTokenResult = cardVaultRequest.run {
+                paymentMethodTokensAPI.updateSetupToken(applicationContext, setupTokenId, card)
+            }
+            when (updateSetupTokenResult) {
+                is UpdateSetupTokenResult.Success -> {
+                    val approveHref = updateSetupTokenResult.approveHref
+                    if (approveHref == null) {
+                        analytics.notifyVaultSucceeded(updateSetupTokenResult.setupTokenId)
+                        val result =
+                            updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
+                        cardVaultListener?.onVaultSuccess(result)
+                    } else {
+                        analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
+                        val url = Uri.parse(approveHref)
+                        val authChallenge =
+                            CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
+                        cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
+                    }
                 }
 
-                val approveHref = updateSetupTokenResult.approveHref
-                if (approveHref == null) {
-                    analytics.notifyVaultSucceeded(updateSetupTokenResult.setupTokenId)
-                    val result =
-                        updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
-                    cardVaultListener?.onVaultSuccess(result)
-                } else {
-                    analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
-                    val url = Uri.parse(approveHref)
-                    val authChallenge =
-                        CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
-                    cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
+                is UpdateSetupTokenResult.Failure -> {
+                    analytics.notifyVaultFailed(cardVaultRequest.setupTokenId)
+                    cardVaultListener?.onVaultFailure(updateSetupTokenResult.error)
                 }
-            } catch (error: PayPalSDKError) {
-                analytics.notifyVaultFailed(cardVaultRequest.setupTokenId)
-                throw error
             }
         }
     }
