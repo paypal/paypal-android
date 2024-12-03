@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.graphql.GraphQLError
 
 internal object CardError {
 
@@ -26,5 +27,11 @@ internal object CardError {
     fun browserSwitchError(cause: Exception) = PayPalSDKError(
         code = CardErrorCode.BROWSER_SWITCH.ordinal,
         errorDescription = cause.message ?: "Unable to Browser Switch"
+    )
+
+    fun updateSetupTokenResponseBodyMissing(errors: List<GraphQLError>?, correlationId: String?) = PayPalSDKError(
+        0,
+        "Error updating setup token: $errors",
+        correlationId
     )
 }
