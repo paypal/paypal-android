@@ -18,7 +18,7 @@ android {
         targetSdkVersion modules.androidTargetVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        buildConfigField "String", "CLIENT_SDK_VERSION", "\"${rootProject.version}\""
+        buildConfigField "String", "CLIENT_SDK_VERSION", "\"${requireExists(rootProject.version)}\""
     }
 
     buildTypes {
@@ -80,6 +80,11 @@ dependencies {
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
     androidTestImplementation libs.kotlinx.coroutinesTest
+}
+
+static def requireExists(String value) {
+    if (value) return value
+    throw new Exception("Error in CorePayments/build.gradle: Variable does not exist.")
 }
 
 project.ext.name = "core-payments"
