@@ -207,7 +207,7 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
                 as UpdateSetupTokenResult.Failure
 
-        val expectedMessage = "Update Setup Token Failed: GraphQL JSON body was invalid.";
+        val expectedMessage = "Update Setup Token Failed: GraphQL JSON body was invalid."
         assertEquals(expectedMessage, result.error.errorDescription)
         assertEquals("fake-correlation-id", result.error.correlationId)
         assertTrue(result.error.cause is JSONException)
@@ -231,7 +231,7 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
                 as UpdateSetupTokenResult.Failure
 
-        val expectedMessage = "Update Setup Token Failed: GraphQL JSON body was invalid.";
+        val expectedMessage = "Update Setup Token Failed: GraphQL JSON body was invalid."
         assertEquals(expectedMessage, result.error.errorDescription)
         assertEquals("fake-correlation-id", result.error.correlationId)
         assertTrue(result.error.cause is JSONException)
