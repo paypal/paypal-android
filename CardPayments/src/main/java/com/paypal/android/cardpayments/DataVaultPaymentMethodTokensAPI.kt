@@ -8,6 +8,7 @@ import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
@@ -83,7 +84,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
                     }
                     UpdateSetupTokenResult.Failure(error)
                 } else {
-                    parseSuccessfulUpdateSuccessJSON(responseJSON)
+                    parseSuccessfulUpdateSuccessJSON(responseJSON, graphQLResponse.correlationId)
                 }
             }
 
@@ -93,27 +94,36 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         }
     }
 
-    private fun parseSuccessfulUpdateSuccessJSON(responseBody: JSONObject): UpdateSetupTokenResult {
-        val setupTokenJSON = responseBody.getJSONObject("updateVaultSetupToken")
-        val status = setupTokenJSON.getString("status")
-        val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
-            findLinkHref(setupTokenJSON, "approve")
-        } else {
-            null
+    private fun parseSuccessfulUpdateSuccessJSON(
+        responseBody: JSONObject,
+        correlationId: String?
+    ): UpdateSetupTokenResult {
+        return try {
+            val setupTokenJSON = responseBody.getJSONObject("updateVaultSetupToken")
+            val status = setupTokenJSON.getString("status")
+            val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
+                findLinkHref(setupTokenJSON, "approve")
+            } else {
+                null
+            }
+            UpdateSetupTokenResult.Success(
+                setupTokenId = setupTokenJSON.getString("id"),
+                status = status,
+                approveHref = approveHref
+            )
+        } catch (jsonError: JSONException) {
+            val message = "Update Setup Token Failed: GraphQL JSON body was invalid."
+            val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
+            UpdateSetupTokenResult.Failure(error)
         }
-        return UpdateSetupTokenResult.Success(
-            setupTokenId = setupTokenJSON.getString("id"),
-            status = status,
-            approveHref = approveHref
-        )
     }
 
     private fun findLinkHref(responseJSON: JSONObject, rel: String): String? {
         val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
         for (i in 0 until linksJSON.length()) {
             val link = linksJSON.getJSONObject(i)
-            if (link.getString("rel") == rel) {
-                return link.getString("href")
+            if (link.optString("rel") == rel) {
+                return link.optString("href")
             }
         }
         return null
