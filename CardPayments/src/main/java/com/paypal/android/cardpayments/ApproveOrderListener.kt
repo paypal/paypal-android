@@ -10,10 +10,10 @@ interface ApproveOrderListener {
 
     /**
      * Called when the order is approved.
-     * @param result [CardResult] with order information.
+     * @param result [LegacyCardResult] with order information.
      */
     @MainThread
-    fun onApproveOrderSuccess(result: CardResult)
+    fun onApproveOrderSuccess(result: LegacyCardResult)
 
     /**
      * Called when authorization is required to continue.

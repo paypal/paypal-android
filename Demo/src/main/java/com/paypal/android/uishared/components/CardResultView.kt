@@ -8,11 +8,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.cardpayments.LegacyCardResult
 import com.paypal.android.utils.UIConstants
 
 @Composable
-fun CardResultView(result: CardResult) {
+fun CardResultView(result: LegacyCardResult) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier
@@ -31,7 +31,7 @@ fun CardResultView(result: CardResult) {
 fun CardResultViewWith3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            val result = CardResult(
+            val result = LegacyCardResult(
                 orderId = "fake-order-id",
                 status = "fake-status",
                 didAttemptThreeDSecureAuthentication = true
@@ -46,7 +46,7 @@ fun CardResultViewWith3DSAuth() {
 fun CardResultViewWithout3DSAuth() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            val result = CardResult(
+            val result = LegacyCardResult(
                 orderId = "fake-order-id",
                 status = "fake-status",
                 didAttemptThreeDSecureAuthentication = false

@@ -95,7 +95,7 @@ class CardClientUnitTest {
         sut.approveOrder(cardRequest)
         advanceUntilIdle()
 
-        val resultSlot = slot<CardResult>()
+        val resultSlot = slot<LegacyCardResult>()
         verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
@@ -219,7 +219,7 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
         sut.approveOrderListener = approveOrderListener
 
-        val successResult = CardResult(
+        val successResult = LegacyCardResult(
             orderId = "fake-order-id",
             status = OrderStatus.APPROVED.name,
             didAttemptThreeDSecureAuthentication = false
@@ -230,7 +230,7 @@ class CardClientUnitTest {
 
         sut.completeAuthChallenge(intent, "auth state")
 
-        val slot = slot<CardResult>()
+        val slot = slot<LegacyCardResult>()
         verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(slot)) }
         assertSame(successResult, slot.captured)
     }

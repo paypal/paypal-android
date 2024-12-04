@@ -94,7 +94,7 @@ internal class CardAuthLauncher(
         return if (orderId == null) {
             CardStatus.ApproveOrderError(CardError.unknownError, null)
         } else {
-            val result = CardResult(orderId = orderId, didAttemptThreeDSecureAuthentication = true)
+            val result = LegacyCardResult(orderId = orderId, didAttemptThreeDSecureAuthentication = true)
             CardStatus.ApproveOrderSuccess(result)
         }
     }

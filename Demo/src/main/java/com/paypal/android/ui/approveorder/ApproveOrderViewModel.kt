@@ -15,7 +15,7 @@ import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.CardResult
+import com.paypal.android.cardpayments.LegacyCardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -91,7 +91,7 @@ class ApproveOrderViewModel @Inject constructor(
 
                 cardClient = CardClient(activity, coreConfig)
                 cardClient?.approveOrderListener = object : ApproveOrderListener {
-                    override fun onApproveOrderSuccess(result: CardResult) {
+                    override fun onApproveOrderSuccess(result: LegacyCardResult) {
                         approveOrderState = ActionState.Success(result)
                     }
 
