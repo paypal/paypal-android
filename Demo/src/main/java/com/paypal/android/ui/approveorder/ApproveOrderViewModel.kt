@@ -2,23 +2,20 @@ package com.paypal.android.ui.approveorder
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.cardpayments.ApproveOrderListener
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.LegacyCardResult
+import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
@@ -76,6 +73,24 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
+    private fun presentAuthChallenge(
+        activity: ComponentActivity,
+        authChallenge: CardAuthChallenge
+    ) {
+        cardClient?.presentAuthChallenge(activity, authChallenge)?.let { presentAuthResult ->
+            when (presentAuthResult) {
+                is CardPresentAuthChallengeResult.Success -> {
+                    authState = presentAuthResult.authState
+                }
+
+                is CardPresentAuthChallengeResult.Failure -> {
+                    approveOrderState =
+                        ActionState.Failure(presentAuthResult.error)
+                }
+            }
+        }
+    }
+
     private suspend fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
@@ -89,47 +104,26 @@ class ApproveOrderViewModel @Inject constructor(
                 val coreConfig = CoreConfig(clientId = clientId)
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
+                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
                 cardClient = CardClient(activity, coreConfig)
-                cardClient?.approveOrderListener = object : ApproveOrderListener {
-                    override fun onApproveOrderSuccess(result: LegacyCardResult) {
-                        approveOrderState = ActionState.Success(result)
-                    }
-
-                    override fun onApproveOrderAuthorizationRequired(authChallenge: CardAuthChallenge) {
-                        cardClient?.presentAuthChallenge(activity, authChallenge)
-                            ?.let { presentAuthResult ->
-                                when (presentAuthResult) {
-                                    is CardPresentAuthChallengeResult.Success -> {
-                                        authState = presentAuthResult.authState
-                                    }
-
-                                    is CardPresentAuthChallengeResult.Failure -> {
-                                        approveOrderState =
-                                            ActionState.Failure(presentAuthResult.error)
-                                    }
-                                }
+                cardClient?.approveOrder(cardRequest) { result ->
+                    when (result) {
+                        is CardResult.ApproveOrder.Success -> {
+                            val orderInfo = result.run {
+                                OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                             }
-                    }
+                            approveOrderState = ActionState.Success(orderInfo)
+                        }
 
-                    override fun onApproveOrderFailure(error: PayPalSDKError) {
-                        approveOrderState = ActionState.Failure(error)
-                    }
+                        is CardResult.ApproveOrder.AuthorizationRequired -> {
+                            presentAuthChallenge(activity, result.authChallenge)
+                        }
 
-                    override fun onApproveOrderCanceled() {
-                        approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
-                    }
-
-                    override fun onApproveOrderThreeDSecureWillLaunch() {
-                        Log.d(TAG, "3DS Auth Requested")
-                    }
-
-                    override fun onApproveOrderThreeDSecureDidFinish() {
-                        Log.d(TAG, "3DS Success")
+                        is CardResult.ApproveOrder.Failure -> {
+                            approveOrderState = ActionState.Failure(result.error)
+                        }
                     }
                 }
-
-                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
-                cardClient?.approveOrder(cardRequest)
             }
         }
     }
@@ -236,6 +230,29 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun completeAuthChallenge(intent: Intent) {
-        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
+        authState?.let { cardClient?.finishApproveOrder(intent, it) }?.let { result ->
+            when (result) {
+                is CardResult.FinishApproveOrder.Success -> {
+                    val orderInfo = result.run {
+                        OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
+                    }
+                    approveOrderState = ActionState.Success(orderInfo)
+                }
+
+                is CardResult.FinishApproveOrder.Failure -> {
+                    approveOrderState = ActionState.Failure(result.error)
+                }
+
+                CardResult.FinishApproveOrder.Canceled -> {
+                    approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
+                }
+
+                CardResult.FinishApproveOrder.NoResult -> {
+                    // ignore
+                }
+            }
+        }
+
+        authState?.let { cardClient?.legacyCompleteAuthChallenge(intent, it) }
     }
 }
