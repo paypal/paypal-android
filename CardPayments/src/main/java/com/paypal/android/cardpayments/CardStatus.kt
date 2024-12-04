@@ -5,7 +5,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 sealed class CardStatus {
 
     class ApproveOrderError(val error: PayPalSDKError, val orderId: String?) : CardStatus()
-    class ApproveOrderSuccess(val result: CardResult) : CardStatus()
+    class ApproveOrderSuccess(val result: LegacyCardResult) : CardStatus()
     class ApproveOrderCanceled(val orderId: String?) : CardStatus()
 
     class VaultError(val error: PayPalSDKError) : CardStatus()

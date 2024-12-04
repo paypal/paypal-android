@@ -10,7 +10,7 @@ import androidx.annotation.RestrictTo
  * @property [didAttemptThreeDSecureAuthentication] 3DS verification was attempted.
  * Use v2/checkout/orders/{orderId} in your server to get verification results.
  */
-data class CardResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+data class LegacyCardResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     val orderId: String,
     val status: String? = null,
     val didAttemptThreeDSecureAuthentication: Boolean = false

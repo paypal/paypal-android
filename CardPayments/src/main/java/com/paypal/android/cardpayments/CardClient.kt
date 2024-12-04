@@ -54,6 +54,10 @@ class CardClient internal constructor(
     )
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
+    fun approveOrder(cardRequest: CardRequest, callback: CardCallback.ApproveOrder) {
+
+    }
+
     /**
      * Confirm [Card] payment source for an order.
      *
@@ -70,7 +74,7 @@ class CardClient internal constructor(
                     if (response.payerActionHref == null) {
                         analytics.notifyApproveOrderSucceeded(response.orderId)
                         val result =
-                            response.run { CardResult(orderId = orderId, status = status?.name) }
+                            response.run { LegacyCardResult(orderId = orderId, status = status?.name) }
                         approveOrderListener?.onApproveOrderSuccess(result)
                     } else {
                         analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
