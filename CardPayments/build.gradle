@@ -22,7 +22,7 @@ android {
 
     buildTypes {
         release {
-            version = android.defaultConfig.versionName // had to add this to get the version in the build
+            version = rootProject.version
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

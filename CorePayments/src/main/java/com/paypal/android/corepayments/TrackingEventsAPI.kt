@@ -8,8 +8,10 @@ internal class TrackingEventsAPI constructor(
     private val coreConfig: CoreConfig,
     private val restClient: RestClient
 ) {
+
+    // api-m.sandbox.paypal.com does not currently send FPTI events to BigQuery/Looker
     constructor(coreConfig: CoreConfig) :
-            this(coreConfig, RestClient(coreConfig))
+            this(coreConfig, RestClient(toLiveConfig(coreConfig)))
 
     suspend fun sendEvent(event: AnalyticsEventData, deviceData: DeviceData): HttpResponse {
         val apiRequest = createAPIRequestForEvent(event, deviceData)
@@ -79,5 +81,8 @@ internal class TrackingEventsAPI constructor(
 
         const val KEY_EVENT_PARAMETERS = "event_params"
         const val KEY_EVENTS = "events"
+
+        fun toLiveConfig(config: CoreConfig): CoreConfig =
+            CoreConfig(config.clientId, environment = Environment.LIVE)
     }
 }
