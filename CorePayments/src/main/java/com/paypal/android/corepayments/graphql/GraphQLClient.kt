@@ -6,6 +6,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
+import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -35,7 +36,7 @@ class GraphQLClient internal constructor(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResponse {
+    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResult {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
         val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
@@ -45,13 +46,19 @@ class GraphQLClient internal constructor(
         val status = httpResponse.status
         return if (status == HttpURLConnection.HTTP_OK) {
             if (httpResponse.body.isNullOrBlank()) {
-                throw APIClientError.noResponseData(correlationId)
+                val error = APIClientError.noResponseData(correlationId)
+                GraphQLResult.Failure(error)
             } else {
-                val responseAsJSON = JSONObject(httpResponse.body)
-                GraphQLResponse(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+                try {
+                    val responseAsJSON = JSONObject(httpResponse.body)
+                    GraphQLResult.Success(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+                } catch (jsonParseError: JSONException) {
+                    val error = APIClientError.graphQLJSONParseError(correlationId, jsonParseError)
+                    GraphQLResult.Failure(error)
+                }
             }
         } else {
-            GraphQLResponse(null, correlationId = correlationId)
+            GraphQLResult.Success(null, correlationId = correlationId)
         }
     }
 }

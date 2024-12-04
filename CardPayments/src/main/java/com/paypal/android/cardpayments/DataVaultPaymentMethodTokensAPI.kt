@@ -2,10 +2,13 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLResult
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
@@ -20,8 +23,23 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(context: Context, setupTokenId: String, card: Card): UpdateSetupTokenResult {
-        val query = resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)
+    suspend fun updateSetupToken(
+        context: Context,
+        setupTokenId: String,
+        card: Card
+    ): UpdateSetupTokenResult = when (val result =
+        resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)) {
+        is LoadRawResourceResult.Success ->
+            sendUpdateSetupTokenGraphQLRequest(result.value, setupTokenId, card)
+
+        is LoadRawResourceResult.Failure -> UpdateSetupTokenResult.Failure(result.error)
+    }
+
+    private suspend fun sendUpdateSetupTokenGraphQLRequest(
+        query: String,
+        setupTokenId: String,
+        card: Card
+    ): UpdateSetupTokenResult {
 
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
@@ -57,33 +75,55 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
             .put("variables", variables)
         val graphQLResponse =
             graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
-        graphQLResponse.data?.let { responseJSON ->
-            val setupTokenJSON = responseJSON.getJSONObject("updateVaultSetupToken")
+        return when (graphQLResponse) {
+            is GraphQLResult.Success -> {
+                val responseJSON = graphQLResponse.data
+                if (responseJSON == null) {
+                    val error = graphQLResponse.run {
+                        CardError.updateSetupTokenResponseBodyMissing(errors, correlationId)
+                    }
+                    UpdateSetupTokenResult.Failure(error)
+                } else {
+                    parseSuccessfulUpdateSuccessJSON(responseJSON, graphQLResponse.correlationId)
+                }
+            }
+
+            is GraphQLResult.Failure -> {
+                UpdateSetupTokenResult.Failure(graphQLResponse.error)
+            }
+        }
+    }
+
+    private fun parseSuccessfulUpdateSuccessJSON(
+        responseBody: JSONObject,
+        correlationId: String?
+    ): UpdateSetupTokenResult {
+        return try {
+            val setupTokenJSON = responseBody.getJSONObject("updateVaultSetupToken")
             val status = setupTokenJSON.getString("status")
             val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
                 findLinkHref(setupTokenJSON, "approve")
             } else {
                 null
             }
-            return UpdateSetupTokenResult(
+            UpdateSetupTokenResult.Success(
                 setupTokenId = setupTokenJSON.getString("id"),
                 status = status,
                 approveHref = approveHref
             )
+        } catch (jsonError: JSONException) {
+            val message = "Update Setup Token Failed: GraphQL JSON body was invalid."
+            val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
+            UpdateSetupTokenResult.Failure(error)
         }
-        throw PayPalSDKError(
-            0,
-            "Error updating setup token: ${graphQLResponse.errors}",
-            graphQLResponse.correlationId
-        )
     }
 
     private fun findLinkHref(responseJSON: JSONObject, rel: String): String? {
         val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
         for (i in 0 until linksJSON.length()) {
             val link = linksJSON.getJSONObject(i)
-            if (link.getString("rel") == rel) {
-                return link.getString("href")
+            if (link.optString("rel") == rel) {
+                return link.optString("href")
             }
         }
         return null

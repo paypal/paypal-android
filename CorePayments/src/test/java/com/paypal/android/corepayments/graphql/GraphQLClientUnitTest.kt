@@ -6,7 +6,6 @@ import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -128,14 +127,14 @@ internal class GraphQLClientUnitTest {
         coEvery { http.send(any()) } returns successHttpResponse
 
         sut = GraphQLClient(sandboxConfig, http)
-        val response = sut.send(graphQLRequestBody)
+        val result = sut.send(graphQLRequestBody) as GraphQLResult.Success
 
-        assertEquals("""{"fake":"success_data"}""", response.data?.toString())
-        assertEquals("fake-debug-id", response.correlationId)
+        assertEquals("""{"fake":"success_data"}""", result.data?.toString())
+        assertEquals("fake-debug-id", result.correlationId)
     }
 
     @Test
-    fun `send throws an error when GraphQL response is successful with an empty body`() = runTest {
+    fun `send returns an error when GraphQL response is successful with an empty body`() = runTest {
         // language=JSON
         val emptyBody = ""
         val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
@@ -143,14 +142,30 @@ internal class GraphQLClientUnitTest {
         coEvery { http.send(any()) } returns successHttpResponse
 
         sut = GraphQLClient(sandboxConfig, http)
-        try {
-            sut.send(graphQLRequestBody)
-        } catch (e: PayPalSDKError) {
-            assertEquals(PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal, e.code)
-            val expectedErrorMessage =
-                "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support."
-            assertEquals(expectedErrorMessage, e.errorDescription)
-            assertEquals("fake-debug-id", e.correlationId)
-        }
+        val result = sut.send(graphQLRequestBody) as GraphQLResult.Failure
+        assertEquals(PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal, result.error.code)
+
+        val expectedErrorMessage =
+            "An error occurred due to missing HTTP response data. Contact developer.paypal.com/support."
+        assertEquals(expectedErrorMessage, result.error.errorDescription)
+        assertEquals("fake-debug-id", result.error.correlationId)
     }
+
+    @Test
+    fun `send returns an error when GraphQL response is successful with an invalid JSON body`() =
+        runTest {
+            val invalidJSON = """{ invalid: """
+            val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+            val successHttpResponse = HttpResponse(200, successHeaders, invalidJSON)
+            coEvery { http.send(any()) } returns successHttpResponse
+
+            sut = GraphQLClient(sandboxConfig, http)
+            val result = sut.send(graphQLRequestBody) as GraphQLResult.Failure
+            assertEquals(PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal, result.error.code)
+
+            val expectedErrorMessage =
+                "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support."
+            assertEquals(expectedErrorMessage, result.error.errorDescription)
+            assertEquals("fake-debug-id", result.error.correlationId)
+        }
 }
