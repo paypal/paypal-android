@@ -228,7 +228,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.ApproveOrderSuccess(successResult)
 
-        sut.completeAuthChallenge(intent, "auth state")
+        sut.legacyCompleteAuthChallenge(intent, "auth state")
 
         val slot = slot<LegacyCardResult>()
         verify(exactly = 1) { approveOrderListener.onApproveOrderSuccess(capture(slot)) }
@@ -245,7 +245,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.ApproveOrderError(error, "fake-order-id")
 
-        sut.completeAuthChallenge(intent, "auth state")
+        sut.legacyCompleteAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { approveOrderListener.onApproveOrderFailure(capture(slot)) }
@@ -261,7 +261,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.ApproveOrderCanceled("fake-order-id")
 
-        sut.completeAuthChallenge(intent, "auth state")
+        sut.legacyCompleteAuthChallenge(intent, "auth state")
         verify(exactly = 1) { approveOrderListener.onApproveOrderCanceled() }
     }
 
@@ -275,7 +275,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultSuccess(successResult)
 
-        sut.completeAuthChallenge(intent, "auth state")
+        sut.legacyCompleteAuthChallenge(intent, "auth state")
 
         val slot = slot<CardVaultResult>()
         verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(slot)) }
@@ -292,7 +292,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultError(error)
 
-        sut.completeAuthChallenge(intent, "auth state")
+        sut.legacyCompleteAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(slot)) }
@@ -308,7 +308,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultCanceled("fake-setup-token-id")
 
-        sut.completeAuthChallenge(intent, "auth state")
+        sut.legacyCompleteAuthChallenge(intent, "auth state")
         // BREAKING CHANGE CALLOUT: if we introduce an "onVaultCanceled()" listener method, it could
         // break existing merchant integrations
         verify(exactly = 1) { cardVaultListener.onVaultFailure(any()) }
@@ -325,7 +325,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeAuthRequest(intent, "auth state")
             } returns CardStatus.NoResult
 
-            sut.completeAuthChallenge(intent, "auth state")
+            sut.legacyCompleteAuthChallenge(intent, "auth state")
             verify { sut.approveOrderListener?.wasNot(Called) }
             verify { sut.cardVaultListener?.wasNot(Called) }
         }

@@ -8,6 +8,6 @@ object CardCallback {
          * Called when the order is approved.
          */
         @MainThread
-        fun onApproveOrderResult()
+        fun onApproveOrderResult(result: CardResult.ApproveOrder)
     }
 }
