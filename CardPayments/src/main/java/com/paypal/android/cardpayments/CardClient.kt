@@ -171,30 +171,22 @@ class CardClient internal constructor(
     }
 
     fun finishApproveOrder(intent: Intent, authState: String): CardResult.FinishApproveOrder {
-        return when (val result = authChallengeLauncher.completeAuthRequest(intent, authState)) {
-            is CardStatus.ApproveOrderSuccess -> {
-                analytics.notifyApproveOrderAuthChallengeSucceeded(result.result.orderId)
-                result.result.run { CardResult.FinishApproveOrder.Success(orderId, status) }
-            }
+        val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
+        when (result) {
+            is CardResult.FinishApproveOrder.Success ->
+                analytics.notifyApproveOrderAuthChallengeSucceeded(result.orderId)
 
-            is CardStatus.ApproveOrderError -> {
-                analytics.notifyApproveOrderAuthChallengeFailed(result.orderId)
-                CardResult.FinishApproveOrder.Failure(result.error)
-            }
+            is CardResult.FinishApproveOrder.Failure ->
+                analytics.notifyApproveOrderAuthChallengeFailed(null)
 
-            is CardStatus.ApproveOrderCanceled -> {
-                analytics.notifyApproveOrderAuthChallengeCanceled(result.orderId)
-                CardResult.FinishApproveOrder.Canceled
-            }
+            CardResult.FinishApproveOrder.Canceled ->
+                analytics.notifyApproveOrderAuthChallengeCanceled(null)
 
-            is CardStatus.UnknownError -> {
-                val description = "An unknown error occurred: ${result.error.message}"
-                val error = PayPalSDKError(0, description, reason = result.error)
-                CardResult.FinishApproveOrder.Failure(error)
+            else -> {
+                // no analytics tracking required at the moment
             }
-
-            else -> CardResult.FinishApproveOrder.NoResult
         }
+        return result
     }
 
     fun legacyCompleteAuthChallenge(intent: Intent, authState: String): CardStatus {

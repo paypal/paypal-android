@@ -229,18 +229,21 @@ class ApproveOrderViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
+    private fun checkIfApproveOrderFinished(intent: Intent): CardResult.FinishApproveOrder?
+        = authState?.let { cardClient?.finishApproveOrder(intent, it) }
+
     fun completeAuthChallenge(intent: Intent) {
-        authState?.let { cardClient?.finishApproveOrder(intent, it) }?.let { result ->
-            when (result) {
+        checkIfApproveOrderFinished(intent)?.let { approveOrderResult ->
+            when (approveOrderResult) {
                 is CardResult.FinishApproveOrder.Success -> {
-                    val orderInfo = result.run {
+                    val orderInfo = approveOrderResult.run {
                         OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                     }
                     approveOrderState = ActionState.Success(orderInfo)
                 }
 
                 is CardResult.FinishApproveOrder.Failure -> {
-                    approveOrderState = ActionState.Failure(result.error)
+                    approveOrderState = ActionState.Failure(approveOrderResult.error)
                 }
 
                 CardResult.FinishApproveOrder.Canceled -> {
