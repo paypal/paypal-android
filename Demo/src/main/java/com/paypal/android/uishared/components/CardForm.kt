@@ -98,54 +98,6 @@ fun CardForm(
     }
 }
 
-@Composable
-private fun CardNumberTextField(
-    cardNumber: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = cardNumber,
-        label = { Text(stringResource(id = R.string.card_field_card_number)) },
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        visualTransformation = CardNumberVisualTransformation(),
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun ExpirationDateTextField(
-    expirationDate: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = expirationDate,
-        label = { Text(stringResource(id = R.string.card_field_expiration)) },
-        onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        visualTransformation = DateVisualTransformation(),
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun SecurityCodeTextField(
-    securityCode: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = securityCode,
-        label = { Text(stringResource(id = R.string.card_field_security_code)) },
-        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        visualTransformation = PasswordVisualTransformation(),
-        onValueChange = onValueChange,
-        modifier = modifier
-    )
-}
-
 @ExperimentalMaterial3Api
 @Preview
 @Composable

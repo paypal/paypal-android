@@ -47,4 +47,6 @@
         <item>PAYPAL</item>
     </string-array>
 
+    <string name="plain_tshirt_description">A plain t-shirt</string>
+
 </resources>
