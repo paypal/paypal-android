@@ -6,7 +6,7 @@ fun interface CardApproveOrderCallback {
     /**
      * Called when the order is approved.
      *
-     * @param result [CardResult.ApproveOrder] result with details
+     * @param result [CardApproveOrderResult] result with details
      */
     @MainThread
     fun onApproveOrderResult(result: CardApproveOrderResult)
