@@ -62,7 +62,10 @@ class CardClient internal constructor(
                     if (response.payerActionHref == null) {
                         analytics.notifyApproveOrderSucceeded(response.orderId)
                         val result = response.run {
-                            CardResult.ApproveOrder.Success(orderId, status = status?.name)
+                            CardResult.ApproveOrder.Success(
+                                orderId = orderId,
+                                status = status?.name
+                            )
                         }
                         callback.onApproveOrderResult(result)
                     } else {
