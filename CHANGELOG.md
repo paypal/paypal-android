@@ -13,6 +13,7 @@
     * Add `CardClient.finishApproveOrder(Intent, String)` method
     * Add `CardFinishApproveOrderResult` type
     * Remove `CardResult` type
+    * Remove `CardClient.vault(Context, CardRequest) method`
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes

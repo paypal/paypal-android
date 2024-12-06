@@ -152,10 +152,10 @@ class CardClientUnitTest {
         val updateSetupTokenResult =
             UpdateSetupTokenResult.Success("fake-setup-token-id-from-result", "fake-status", null)
         coEvery {
-            paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
+            paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        sut.vault(activity, cardVaultRequest)
+        sut.vault(cardVaultRequest)
         advanceUntilIdle()
 
         val resultSlot = slot<CardVaultResult>()
@@ -172,10 +172,10 @@ class CardClientUnitTest {
 
         val error = PayPalSDKError(0, "mock_error_message")
         coEvery {
-            paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
+            paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns UpdateSetupTokenResult.Failure(error)
 
-        sut.vault(activity, cardVaultRequest)
+        sut.vault(cardVaultRequest)
         advanceUntilIdle()
 
         val errorSlot = slot<PayPalSDKError>()
@@ -195,10 +195,10 @@ class CardClientUnitTest {
             "/payer/action/href"
         )
         coEvery {
-            paymentMethodTokensAPI.updateSetupToken(applicationContext, "fake-setup-token-id", card)
+            paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        sut.vault(activity, cardVaultRequest)
+        sut.vault(cardVaultRequest)
         advanceUntilIdle()
 
         val authChallengeSlot = slot<CardAuthChallenge>()

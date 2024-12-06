@@ -54,8 +54,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
 
     @Test
     fun updateSetupToken_forCardWithRequiredFieldsSet_sendsGraphQLRequest() = runTest {
-        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
-        sut.updateSetupToken(context, "fake-setup-token-id", card)
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, context, graphQLClient, resourceLoader)
+        sut.updateSetupToken("fake-setup-token-id", card)
 
         val requestBodySlot = slot<JSONObject>()
         coVerify { graphQLClient.send(capture(requestBodySlot), "UpdateVaultSetupToken") }
@@ -99,8 +99,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
             countryCode = "US"
         )
 
-        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
-        sut.updateSetupToken(context, "fake-setup-token-id", card)
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, context, graphQLClient, resourceLoader)
+        sut.updateSetupToken("fake-setup-token-id", card)
 
         val requestBodySlot = slot<JSONObject>()
         coVerify { graphQLClient.send(capture(requestBodySlot), "UpdateVaultSetupToken") }
@@ -159,8 +159,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         val graphQLResult = GraphQLResult.Success(JSONObject(json))
         coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
-        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, context, graphQLClient, resourceLoader)
+        val result = sut.updateSetupToken("fake-setup-token-id", card)
                 as UpdateSetupTokenResult.Success
 
         assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
@@ -186,8 +186,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
         val graphQLResult = GraphQLResult.Success(JSONObject(json))
         coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
-        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, context, graphQLClient, resourceLoader)
+        val result = sut.updateSetupToken("fake-setup-token-id", card)
                 as UpdateSetupTokenResult.Success
 
         assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
@@ -203,8 +203,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
             GraphQLResult.Success(JSONObject(emptyJSON), correlationId = "fake-correlation-id")
         coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
-        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, context, graphQLClient, resourceLoader)
+        val result = sut.updateSetupToken("fake-setup-token-id", card)
                 as UpdateSetupTokenResult.Failure
 
         val expectedMessage = "Update Setup Token Failed: GraphQL JSON body was invalid."
@@ -227,8 +227,8 @@ class DataVaultPaymentMethodTokensAPIUnitTest {
             GraphQLResult.Success(JSONObject(json), correlationId = "fake-correlation-id")
         coEvery { graphQLClient.send(any(), "UpdateVaultSetupToken") } returns graphQLResult
 
-        sut = DataVaultPaymentMethodTokensAPI(coreConfig, graphQLClient, resourceLoader)
-        val result = sut.updateSetupToken(context, "fake-setup-token-id", card)
+        sut = DataVaultPaymentMethodTokensAPI(coreConfig, context, graphQLClient, resourceLoader)
+        val result = sut.updateSetupToken("fake-setup-token-id", card)
                 as UpdateSetupTokenResult.Failure
 
         val expectedMessage = "Update Setup Token Failed: GraphQL JSON body was invalid."
