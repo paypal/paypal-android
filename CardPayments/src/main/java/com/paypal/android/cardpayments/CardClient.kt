@@ -51,6 +51,13 @@ class CardClient internal constructor(
     )
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
+
+    /**
+     * Confirm [Card] payment source for an order.
+     *
+     * @param cardRequest [CardRequest] for requesting an order approval
+     * @param callback [CardApproveOrderCallback] callback for receiving result asynchronously
+     */
     fun approveOrder(cardRequest: CardRequest, callback: CardApproveOrderCallback) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
@@ -131,6 +138,8 @@ class CardClient internal constructor(
 
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
+     * @param activity [ComponentActivity] activity reference used to present a Chrome Custom Tab.
+     * @param authChallenge [CardAuthChallenge] auth challenge to present (see [CardResult.ApproveOrder.AuthorizationRequired])
      */
     fun presentAuthChallenge(
         activity: ComponentActivity,
