@@ -179,16 +179,16 @@ class CardClient internal constructor(
         }
     }
 
-    fun finishApproveOrder(intent: Intent, authState: String): CardResult.FinishApproveOrder {
+    fun finishApproveOrder(intent: Intent, authState: String): CardFinishApproveOrderResult {
         val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
         when (result) {
-            is CardResult.FinishApproveOrder.Success ->
+            is CardFinishApproveOrderResult.Success ->
                 analytics.notifyApproveOrderAuthChallengeSucceeded(result.orderId)
 
-            is CardResult.FinishApproveOrder.Failure ->
+            is CardFinishApproveOrderResult.Failure ->
                 analytics.notifyApproveOrderAuthChallengeFailed(null)
 
-            CardResult.FinishApproveOrder.Canceled ->
+            CardFinishApproveOrderResult.Canceled ->
                 analytics.notifyApproveOrderAuthChallengeCanceled(null)
 
             else -> {

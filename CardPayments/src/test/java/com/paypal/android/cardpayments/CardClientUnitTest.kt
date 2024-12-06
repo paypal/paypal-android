@@ -220,7 +220,7 @@ class CardClientUnitTest {
     fun `completeApproveOrderAuthRequest() notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val successResult = CardResult.FinishApproveOrder.Success(
+        val successResult = CardFinishApproveOrderResult.Success(
             orderId = "fake-order-id",
             status = OrderStatus.APPROVED.name,
             didAttemptThreeDSecureAuthentication = false
@@ -238,7 +238,7 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = CardResult.FinishApproveOrder.Failure(error)
+        val failureResult = CardFinishApproveOrderResult.Failure(error)
         every {
             cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
         } returns failureResult
@@ -251,7 +251,7 @@ class CardClientUnitTest {
     fun `completeAuthChallenge() notifies merchant of approve order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
 
-        val canceledResult = CardResult.FinishApproveOrder.Canceled
+        val canceledResult = CardFinishApproveOrderResult.Canceled
         every {
             cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
         } returns canceledResult

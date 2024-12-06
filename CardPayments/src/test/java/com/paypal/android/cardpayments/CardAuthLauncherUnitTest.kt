@@ -165,7 +165,7 @@ class CardAuthLauncherUnitTest {
         } returns finalResult
 
         val result = sut.completeApproveOrderAuthRequest(intent, "pending request")
-            as CardResult.FinishApproveOrder.Success
+            as CardFinishApproveOrderResult.Success
 
         assertEquals("fake-order-id", result.orderId)
         assertTrue(result.didAttemptThreeDSecureAuthentication)

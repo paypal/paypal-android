@@ -64,7 +64,7 @@ internal class CardAuthLauncher(
     fun completeApproveOrderAuthRequest(
         intent: Intent,
         authState: String
-    ): CardResult.FinishApproveOrder =
+    ): CardFinishApproveOrderResult =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> parseApproveOrderSuccessResult(finalResult)
 
@@ -74,10 +74,10 @@ internal class CardAuthLauncher(
                 // for iOS Error protocol conformance
                 val message = "Browser switch failed"
                 val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
-                CardResult.FinishApproveOrder.Failure(browserSwitchError)
+                CardFinishApproveOrderResult.Failure(browserSwitchError)
             }
 
-            BrowserSwitchFinalResult.NoResult -> CardResult.FinishApproveOrder.NoResult
+            BrowserSwitchFinalResult.NoResult -> CardFinishApproveOrderResult.NoResult
         }
 
     fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
@@ -108,18 +108,18 @@ internal class CardAuthLauncher(
 
     private fun parseApproveOrderSuccessResult(
         finalResult: BrowserSwitchFinalResult.Success
-    ): CardResult.FinishApproveOrder =
+    ): CardFinishApproveOrderResult =
         if (finalResult.requestCode == BrowserSwitchRequestCodes.CARD_APPROVE_ORDER) {
             val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
             if (orderId == null) {
-                CardResult.FinishApproveOrder.Failure(CardError.unknownError)
+                CardFinishApproveOrderResult.Failure(CardError.unknownError)
             } else {
-                CardResult.FinishApproveOrder.Success(
+                CardFinishApproveOrderResult.Success(
                     orderId = orderId,
                     didAttemptThreeDSecureAuthentication = true
                 )
             }
         } else {
-            CardResult.FinishApproveOrder.NoResult
+            CardFinishApproveOrderResult.NoResult
         }
 }

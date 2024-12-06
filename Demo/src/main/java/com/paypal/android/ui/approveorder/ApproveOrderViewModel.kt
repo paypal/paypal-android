@@ -12,9 +12,9 @@ import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardFinishApproveOrderResult
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.CardResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
@@ -229,28 +229,28 @@ class ApproveOrderViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
-    private fun checkIfApproveOrderFinished(intent: Intent): CardResult.FinishApproveOrder? =
+    private fun checkIfApproveOrderFinished(intent: Intent): CardFinishApproveOrderResult? =
         authState?.let { cardClient?.finishApproveOrder(intent, it) }
 
     fun completeAuthChallenge(intent: Intent) {
         checkIfApproveOrderFinished(intent)?.let { approveOrderResult ->
             when (approveOrderResult) {
-                is CardResult.FinishApproveOrder.Success -> {
+                is CardFinishApproveOrderResult.Success -> {
                     val orderInfo = approveOrderResult.run {
                         OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                     }
                     approveOrderState = ActionState.Success(orderInfo)
                 }
 
-                is CardResult.FinishApproveOrder.Failure -> {
+                is CardFinishApproveOrderResult.Failure -> {
                     approveOrderState = ActionState.Failure(approveOrderResult.error)
                 }
 
-                CardResult.FinishApproveOrder.Canceled -> {
+                CardFinishApproveOrderResult.Canceled -> {
                     approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
                 }
 
-                CardResult.FinishApproveOrder.NoResult -> {
+                CardFinishApproveOrderResult.NoResult -> {
                     // ignore
                 }
             }
