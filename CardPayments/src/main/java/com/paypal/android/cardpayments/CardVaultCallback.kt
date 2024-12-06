@@ -8,5 +8,5 @@ fun interface CardVaultCallback {
      * Called when a successful vault has occurred.
      */
     @MainThread
-    fun onCardVaultResult(result: LegacyCardVaultResult)
+    fun onCardVaultResult(result: CardVaultResult)
 }

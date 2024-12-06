@@ -101,36 +101,36 @@ class CardClient internal constructor(
      *
      * @param cardVaultRequest [CardVaultRequest] request containing details about the setup token
      * and card to use for vaulting.
+     * @param callback [CardVaultCallback] callback for receiving a [CardVaultResult] asynchronously
      */
-    fun vault(cardVaultRequest: CardVaultRequest) {
+    fun vault(cardVaultRequest: CardVaultRequest, callback: CardVaultCallback) {
         analytics.notifyVaultStarted(cardVaultRequest.setupTokenId)
 
         CoroutineScope(dispatcher).launch {
             val updateSetupTokenResult = cardVaultRequest.run {
                 paymentMethodTokensAPI.updateSetupToken(setupTokenId, card)
             }
-            when (updateSetupTokenResult) {
+            val result = when (updateSetupTokenResult) {
                 is UpdateSetupTokenResult.Success -> {
                     val approveHref = updateSetupTokenResult.approveHref
                     if (approveHref == null) {
                         analytics.notifyVaultSucceeded(updateSetupTokenResult.setupTokenId)
-                        val result =
-                            updateSetupTokenResult.run { LegacyCardVaultResult(setupTokenId, status) }
-                        cardVaultListener?.onVaultSuccess(result)
+                        updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
                     } else {
                         analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
                         val url = Uri.parse(approveHref)
                         val authChallenge =
                             CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
-                        cardVaultListener?.onVaultAuthorizationRequired(authChallenge)
+                        CardVaultResult.AuthorizationRequired(authChallenge)
                     }
                 }
 
                 is UpdateSetupTokenResult.Failure -> {
                     analytics.notifyVaultFailed(cardVaultRequest.setupTokenId)
-                    cardVaultListener?.onVaultFailure(updateSetupTokenResult.error)
+                    CardVaultResult.Failure(updateSetupTokenResult.error)
                 }
             }
+            callback.onCardVaultResult(result)
         }
     }
 
