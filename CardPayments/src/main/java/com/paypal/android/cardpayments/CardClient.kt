@@ -3,12 +3,10 @@ package com.paypal.android.cardpayments
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.ComponentActivity
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +16,6 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to approve an order with a [Card].
  *
- * @property cardVaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
     private val checkoutOrdersAPI: CheckoutOrdersAPI,
@@ -27,12 +24,6 @@ class CardClient internal constructor(
     private val authChallengeLauncher: CardAuthLauncher,
     private val dispatcher: CoroutineDispatcher
 ) {
-
-    // NEXT MAJOR VERSION: rename to vaultListener
-    /**
-     * @suppress
-     */
-    var cardVaultListener: CardVaultListener? = null
 
     private var approveOrderId: String? = null
 
@@ -197,31 +188,30 @@ class CardClient internal constructor(
         return result
     }
 
+    fun finishVault(intent: Intent, authState: String): CardFinishVaultResult {
+        val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
+        when (result) {
+            is CardFinishVaultResult.Success ->
+                analytics.notifyVaultAuthChallengeSucceeded(result.setupTokenId)
+
+            // TODO: see if we can access setup token id for analytics tracking
+            is CardFinishVaultResult.Failure ->
+                analytics.notifyVaultAuthChallengeFailed(null)
+
+            // TODO: see if we can access setup token id for analytics tracking
+            CardFinishVaultResult.Canceled ->
+                analytics.notifyVaultAuthChallengeCanceled(null)
+
+            else -> {
+                // no analytics tracking required at the moment
+            }
+        }
+        return result
+    }
+
     fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
         val status = authChallengeLauncher.completeAuthRequest(intent, authState)
         when (status) {
-            is CardStatus.VaultSuccess -> {
-                analytics.notifyVaultAuthChallengeSucceeded(status.result.setupTokenId)
-                cardVaultListener?.onVaultSuccess(status.result)
-            }
-
-            is CardStatus.VaultError -> {
-                // TODO: see if we can access setup token id for analytics tracking
-                analytics.notifyVaultAuthChallengeFailed(null)
-                cardVaultListener?.onVaultFailure(status.error)
-            }
-
-            is CardStatus.VaultCanceled -> {
-                // TODO: see if we can access setup token id for analytics tracking
-                analytics.notifyVaultAuthChallengeCanceled(null)
-                // TODO: consider either adding a listener method or next major version returning a result type
-                cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
-            }
-
-            is CardStatus.UnknownError -> {
-                Log.d("PayPalSDK", "An unknown error occurred: ${status.error.message}")
-            }
-
             else -> {
                 // ignore
             }
@@ -233,6 +223,5 @@ class CardClient internal constructor(
      * Call this method at the end of the card flow to clear out all observers and listeners
      */
     fun removeObservers() {
-        cardVaultListener = null
     }
 }

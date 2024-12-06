@@ -11,5 +11,7 @@ sealed class CardFinishVaultResult {
     ): CardFinishVaultResult()
 
     data class Failure(val error: PayPalSDKError) : CardFinishVaultResult()
+
+    data object Canceled : CardFinishVaultResult()
     data object NoResult : CardFinishVaultResult()
 }
