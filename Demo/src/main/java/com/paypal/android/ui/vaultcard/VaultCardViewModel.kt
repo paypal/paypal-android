@@ -12,7 +12,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
-import com.paypal.android.cardpayments.CardVaultResult
+import com.paypal.android.cardpayments.LegacyCardVaultResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
@@ -132,7 +132,7 @@ class VaultCardViewModel @Inject constructor(
                 cardClient = CardClient(activity, configuration)
                 cardClient?.cardVaultListener = object : CardVaultListener {
 
-                    override fun onVaultSuccess(result: CardVaultResult) {
+                    override fun onVaultSuccess(result: LegacyCardVaultResult) {
                         updateSetupTokenState = ActionState.Success(result)
                     }
 
