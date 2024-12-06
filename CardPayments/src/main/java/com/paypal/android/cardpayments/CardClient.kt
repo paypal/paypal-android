@@ -139,7 +139,8 @@ class CardClient internal constructor(
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
      * @param activity [ComponentActivity] activity reference used to present a Chrome Custom Tab.
-     * @param authChallenge [CardAuthChallenge] auth challenge to present (see [CardApproveOrderResult.AuthorizationRequired])
+     * @param authChallenge [CardAuthChallenge] auth challenge to present
+     * (see [CardApproveOrderResult.AuthorizationRequired])
      */
     fun presentAuthChallenge(
         activity: ComponentActivity,
