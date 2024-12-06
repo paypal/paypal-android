@@ -96,7 +96,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val resultSlot = slot<CardApproveOrderResult>()
-        verify(exactly = 1) { approveOrderCallback.onApproveOrderResult(capture(resultSlot)) }
+        verify(exactly = 1) { approveOrderCallback.onCardApproveOrderResult(capture(resultSlot)) }
 
         val result = resultSlot.captured as CardApproveOrderResult.Success
         assertEquals("sample-order-id", result.orderId)
@@ -117,7 +117,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val resultSlot = slot<CardApproveOrderResult>()
-        verify(exactly = 1) { approveOrderCallback.onApproveOrderResult(capture(resultSlot)) }
+        verify(exactly = 1) { approveOrderCallback.onCardApproveOrderResult(capture(resultSlot)) }
 
         val result = resultSlot.captured as CardApproveOrderResult.Failure
         assertEquals("mock_error_message", result.error.errorDescription)
@@ -135,7 +135,7 @@ class CardClientUnitTest {
         advanceUntilIdle()
 
         val resultSlot = slot<CardApproveOrderResult>()
-        verify(exactly = 1) { approveOrderCallback.onApproveOrderResult(capture(resultSlot)) }
+        verify(exactly = 1) { approveOrderCallback.onCardApproveOrderResult(capture(resultSlot)) }
 
         val result = resultSlot.captured as CardApproveOrderResult.AuthorizationRequired
         val authChallenge = result.authChallenge as CardAuthChallenge.ApproveOrder
