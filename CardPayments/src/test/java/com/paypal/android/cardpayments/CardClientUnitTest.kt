@@ -270,7 +270,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultSuccess(successResult)
 
-        sut.legacyCompleteAuthChallenge(intent, "auth state")
+        sut.completeAuthChallenge(intent, "auth state")
 
         val slot = slot<CardVaultResult>()
         verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(slot)) }
@@ -287,7 +287,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultError(error)
 
-        sut.legacyCompleteAuthChallenge(intent, "auth state")
+        sut.completeAuthChallenge(intent, "auth state")
 
         val slot = slot<PayPalSDKError>()
         verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(slot)) }
@@ -303,7 +303,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultCanceled("fake-setup-token-id")
 
-        sut.legacyCompleteAuthChallenge(intent, "auth state")
+        sut.completeAuthChallenge(intent, "auth state")
         // BREAKING CHANGE CALLOUT: if we introduce an "onVaultCanceled()" listener method, it could
         // break existing merchant integrations
         verify(exactly = 1) { cardVaultListener.onVaultFailure(any()) }
@@ -319,7 +319,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeAuthRequest(intent, "auth state")
             } returns CardStatus.NoResult
 
-            sut.legacyCompleteAuthChallenge(intent, "auth state")
+            sut.completeAuthChallenge(intent, "auth state")
             verify { sut.cardVaultListener?.wasNot(Called) }
         }
 

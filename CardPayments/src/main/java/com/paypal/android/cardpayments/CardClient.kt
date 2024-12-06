@@ -189,7 +189,7 @@ class CardClient internal constructor(
         return result
     }
 
-    fun legacyCompleteAuthChallenge(intent: Intent, authState: String): CardStatus {
+    fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
         val status = authChallengeLauncher.completeAuthRequest(intent, authState)
         when (status) {
             is CardStatus.VaultSuccess -> {

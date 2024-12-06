@@ -73,24 +73,6 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    private fun presentAuthChallenge(
-        activity: ComponentActivity,
-        authChallenge: CardAuthChallenge
-    ) {
-        cardClient?.presentAuthChallenge(activity, authChallenge)?.let { presentAuthResult ->
-            when (presentAuthResult) {
-                is CardPresentAuthChallengeResult.Success -> {
-                    authState = presentAuthResult.authState
-                }
-
-                is CardPresentAuthChallengeResult.Failure -> {
-                    approveOrderState =
-                        ActionState.Failure(presentAuthResult.error)
-                }
-            }
-        }
-    }
-
     private suspend fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
@@ -123,6 +105,23 @@ class ApproveOrderViewModel @Inject constructor(
                             approveOrderState = ActionState.Failure(result.error)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun presentAuthChallenge(
+        activity: ComponentActivity,
+        authChallenge: CardAuthChallenge
+    ) {
+        cardClient?.presentAuthChallenge(activity, authChallenge)?.let { presentAuthResult ->
+            when (presentAuthResult) {
+                is CardPresentAuthChallengeResult.Success -> {
+                    authState = presentAuthResult.authState
+                }
+
+                is CardPresentAuthChallengeResult.Failure -> {
+                    approveOrderState = ActionState.Failure(presentAuthResult.error)
                 }
             }
         }
@@ -256,6 +255,6 @@ class ApproveOrderViewModel @Inject constructor(
             }
         }
 
-        authState?.let { cardClient?.legacyCompleteAuthChallenge(intent, it) }
+        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }

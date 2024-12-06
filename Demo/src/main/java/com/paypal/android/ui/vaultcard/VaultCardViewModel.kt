@@ -193,6 +193,6 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun completeAuthChallenge(intent: Intent) {
-        authState?.let { cardClient?.legacyCompleteAuthChallenge(intent, it) }
+        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }
