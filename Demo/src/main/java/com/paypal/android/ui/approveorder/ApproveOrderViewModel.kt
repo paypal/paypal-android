@@ -229,8 +229,8 @@ class ApproveOrderViewModel @Inject constructor(
         cardClient?.removeObservers()
     }
 
-    private fun checkIfApproveOrderFinished(intent: Intent): CardResult.FinishApproveOrder?
-        = authState?.let { cardClient?.finishApproveOrder(intent, it) }
+    private fun checkIfApproveOrderFinished(intent: Intent): CardResult.FinishApproveOrder? =
+        authState?.let { cardClient?.finishApproveOrder(intent, it) }
 
     fun completeAuthChallenge(intent: Intent) {
         checkIfApproveOrderFinished(intent)?.let { approveOrderResult ->
