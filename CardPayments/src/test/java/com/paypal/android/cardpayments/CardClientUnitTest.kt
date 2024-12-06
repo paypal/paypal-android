@@ -63,7 +63,7 @@ class CardClientUnitTest {
 
     private val activity = mockk<FragmentActivity>(relaxed = true)
 
-    private val approveOrderCallback = mockk<CardCallback.ApproveOrder>()
+    private val approveOrderCallback = mockk<CardApproveOrderCallback>()
     private val cardVaultListener = mockk<CardVaultListener>(relaxed = true)
 
     private val intent = Intent()

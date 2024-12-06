@@ -51,7 +51,7 @@ class CardClient internal constructor(
     )
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
-    fun approveOrder(cardRequest: CardRequest, callback: CardCallback.ApproveOrder) {
+    fun approveOrder(cardRequest: CardRequest, callback: CardApproveOrderCallback) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
         analytics.notifyApproveOrderStarted(cardRequest.orderId)
