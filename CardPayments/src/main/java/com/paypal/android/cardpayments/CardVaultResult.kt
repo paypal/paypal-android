@@ -1,5 +1,7 @@
 package com.paypal.android.cardpayments
 
+import com.paypal.android.corepayments.PayPalSDKError
+
 sealed class CardVaultResult {
 
     /**
@@ -14,5 +16,8 @@ sealed class CardVaultResult {
         val setupTokenId: String,
         val status: String? = null,
         val didAttemptThreeDSecureAuthentication: Boolean = false
-    )
+    ): CardVaultResult()
+
+    data class AuthorizationRequired(val authChallenge: CardAuthChallenge): CardVaultResult()
+    data class Failure(val error: PayPalSDKError) : CardVaultResult()
 }

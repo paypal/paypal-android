@@ -12,6 +12,7 @@ import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
+import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.cardpayments.LegacyCardVaultResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
@@ -130,25 +131,22 @@ class VaultCardViewModel @Inject constructor(
                 val clientId = clientIdResult.value
                 val configuration = CoreConfig(clientId = clientId)
                 cardClient = CardClient(activity, configuration)
-                cardClient?.cardVaultListener = object : CardVaultListener {
-
-                    override fun onVaultSuccess(result: LegacyCardVaultResult) {
-                        updateSetupTokenState = ActionState.Success(result)
-                    }
-
-                    override fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge) {
-                        presentAuthChallenge(activity, authChallenge)
-                    }
-
-                    override fun onVaultFailure(error: PayPalSDKError) {
-                        updateSetupTokenState = ActionState.Failure(error)
-                    }
-                }
 
                 val card = parseCard(_uiState.value)
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
                 val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
-                cardClient?.vault(cardVaultRequest)
+                cardClient?.vault(cardVaultRequest) { result ->
+                    when (result) {
+                        is CardVaultResult.Success ->
+                            updateSetupTokenState = ActionState.Success(result)
+
+                        is CardVaultResult.AuthorizationRequired ->
+                            presentAuthChallenge(activity, result.authChallenge)
+
+                        is CardVaultResult.Failure ->
+                            updateSetupTokenState = ActionState.Failure(result.error)
+                    }
+                }
             }
         }
     }
