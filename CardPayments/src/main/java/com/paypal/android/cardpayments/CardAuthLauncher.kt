@@ -101,7 +101,7 @@ internal class CardAuthLauncher(
             // TODO: see if there's a way that we can require the merchant to make their
             // return and cancel urls conform to a strict schema
             val result =
-                CardVaultResult(setupTokenId, null, didAttemptThreeDSecureAuthentication = true)
+                LegacyCardVaultResult(setupTokenId, null, didAttemptThreeDSecureAuthentication = true)
             CardStatus.VaultSuccess(result)
         }
     }

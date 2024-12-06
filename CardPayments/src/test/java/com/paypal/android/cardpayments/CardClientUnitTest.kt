@@ -158,7 +158,7 @@ class CardClientUnitTest {
         sut.vault(cardVaultRequest)
         advanceUntilIdle()
 
-        val resultSlot = slot<CardVaultResult>()
+        val resultSlot = slot<LegacyCardVaultResult>()
         verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(resultSlot)) }
 
         val actual = resultSlot.captured
@@ -265,14 +265,14 @@ class CardClientUnitTest {
         val sut = createCardClient(testScheduler)
         sut.cardVaultListener = cardVaultListener
 
-        val successResult = CardVaultResult("fake-setup-token-id", "fake-status")
+        val successResult = LegacyCardVaultResult("fake-setup-token-id", "fake-status")
         every {
             cardAuthLauncher.completeAuthRequest(intent, "auth state")
         } returns CardStatus.VaultSuccess(successResult)
 
         sut.completeAuthChallenge(intent, "auth state")
 
-        val slot = slot<CardVaultResult>()
+        val slot = slot<LegacyCardVaultResult>()
         verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(slot)) }
         assertSame(successResult, slot.captured)
     }

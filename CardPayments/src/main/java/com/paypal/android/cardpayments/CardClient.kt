@@ -115,7 +115,7 @@ class CardClient internal constructor(
                     if (approveHref == null) {
                         analytics.notifyVaultSucceeded(updateSetupTokenResult.setupTokenId)
                         val result =
-                            updateSetupTokenResult.run { CardVaultResult(setupTokenId, status) }
+                            updateSetupTokenResult.run { LegacyCardVaultResult(setupTokenId, status) }
                         cardVaultListener?.onVaultSuccess(result)
                     } else {
                         analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
