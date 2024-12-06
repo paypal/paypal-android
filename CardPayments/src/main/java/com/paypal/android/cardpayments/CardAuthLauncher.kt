@@ -69,6 +69,9 @@ internal class CardAuthLauncher(
             is BrowserSwitchFinalResult.Success -> parseApproveOrderSuccessResult(finalResult)
 
             is BrowserSwitchFinalResult.Failure -> {
+                // TODO: remove error codes and error description from project; the built in
+                // Throwable type already has a message property and error codes are only required
+                // for iOS Error protocol conformance
                 val message = "Browser switch failed"
                 val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
                 CardResult.FinishApproveOrder.Failure(browserSwitchError)
