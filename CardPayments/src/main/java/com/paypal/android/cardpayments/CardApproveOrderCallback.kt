@@ -9,5 +9,5 @@ fun interface CardApproveOrderCallback {
      * @param result [CardResult.ApproveOrder] result with details
      */
     @MainThread
-    fun onApproveOrderResult(result: CardResult.ApproveOrder)
+    fun onApproveOrderResult(result: CardApproveOrderResult)
 }

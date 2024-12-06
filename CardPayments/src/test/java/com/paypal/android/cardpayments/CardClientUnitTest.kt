@@ -95,10 +95,10 @@ class CardClientUnitTest {
         sut.approveOrder(cardRequest, approveOrderCallback)
         advanceUntilIdle()
 
-        val resultSlot = slot<CardResult.ApproveOrder>()
+        val resultSlot = slot<CardApproveOrderResult>()
         verify(exactly = 1) { approveOrderCallback.onApproveOrderResult(capture(resultSlot)) }
 
-        val result = resultSlot.captured as CardResult.ApproveOrder.Success
+        val result = resultSlot.captured as CardApproveOrderResult.Success
         assertEquals("sample-order-id", result.orderId)
         assertEquals(OrderStatus.APPROVED.name, result.status)
         assertFalse(result.didAttemptThreeDSecureAuthentication)
@@ -116,10 +116,10 @@ class CardClientUnitTest {
         sut.approveOrder(cardRequest, approveOrderCallback)
         advanceUntilIdle()
 
-        val resultSlot = slot<CardResult.ApproveOrder>()
+        val resultSlot = slot<CardApproveOrderResult>()
         verify(exactly = 1) { approveOrderCallback.onApproveOrderResult(capture(resultSlot)) }
 
-        val result = resultSlot.captured as CardResult.ApproveOrder.Failure
+        val result = resultSlot.captured as CardApproveOrderResult.Failure
         assertEquals("mock_error_message", result.error.errorDescription)
     }
 
@@ -134,10 +134,10 @@ class CardClientUnitTest {
         sut.approveOrder(cardRequest, approveOrderCallback)
         advanceUntilIdle()
 
-        val resultSlot = slot<CardResult.ApproveOrder>()
+        val resultSlot = slot<CardApproveOrderResult>()
         verify(exactly = 1) { approveOrderCallback.onApproveOrderResult(capture(resultSlot)) }
 
-        val result = resultSlot.captured as CardResult.ApproveOrder.AuthorizationRequired
+        val result = resultSlot.captured as CardApproveOrderResult.AuthorizationRequired
         val authChallenge = result.authChallenge as CardAuthChallenge.ApproveOrder
 
         assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)

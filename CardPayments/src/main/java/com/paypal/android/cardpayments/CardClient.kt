@@ -69,7 +69,7 @@ class CardClient internal constructor(
                     if (response.payerActionHref == null) {
                         analytics.notifyApproveOrderSucceeded(response.orderId)
                         val result = response.run {
-                            CardResult.ApproveOrder.Success(
+                            CardApproveOrderResult.Success(
                                 orderId = orderId,
                                 status = status?.name
                             )
@@ -80,14 +80,14 @@ class CardClient internal constructor(
 
                         val url = Uri.parse(response.payerActionHref)
                         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                        val result = CardResult.ApproveOrder.AuthorizationRequired(authChallenge)
+                        val result = CardApproveOrderResult.AuthorizationRequired(authChallenge)
                         callback.onApproveOrderResult(result)
                     }
                 }
 
                 is ConfirmPaymentSourceResult.Failure -> {
                     analytics.notifyApproveOrderFailed(cardRequest.orderId)
-                    val result = CardResult.ApproveOrder.Failure(response.error)
+                    val result = CardApproveOrderResult.Failure(response.error)
                     callback.onApproveOrderResult(result)
                 }
             }

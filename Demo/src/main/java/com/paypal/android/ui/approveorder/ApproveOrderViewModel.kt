@@ -9,6 +9,7 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
+import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
@@ -90,18 +91,18 @@ class ApproveOrderViewModel @Inject constructor(
                 cardClient = CardClient(activity, coreConfig)
                 cardClient?.approveOrder(cardRequest) { result ->
                     when (result) {
-                        is CardResult.ApproveOrder.Success -> {
+                        is CardApproveOrderResult.Success -> {
                             val orderInfo = result.run {
                                 OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                             }
                             approveOrderState = ActionState.Success(orderInfo)
                         }
 
-                        is CardResult.ApproveOrder.AuthorizationRequired -> {
+                        is CardApproveOrderResult.AuthorizationRequired -> {
                             presentAuthChallenge(activity, result.authChallenge)
                         }
 
-                        is CardResult.ApproveOrder.Failure -> {
+                        is CardApproveOrderResult.Failure -> {
                             approveOrderState = ActionState.Failure(result.error)
                         }
                     }
