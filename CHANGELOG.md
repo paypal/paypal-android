@@ -3,6 +3,9 @@
 ## unreleased
 * CorePayments
   * Fix issue that causes analytics version number to always be `null`
+* BreakingChanges
+  * CardPayments
+    * Remove `CardClient.vault(Context, CardRequest) method`
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes
