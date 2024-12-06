@@ -66,21 +66,7 @@ internal class CardAuthLauncher(
         authState: String
     ): CardResult.FinishApproveOrder =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
-            is BrowserSwitchFinalResult.Success -> {
-                if (finalResult.requestCode == BrowserSwitchRequestCodes.CARD_APPROVE_ORDER) {
-                    val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-                    if (orderId == null) {
-                        CardResult.FinishApproveOrder.Failure(CardError.unknownError)
-                    } else {
-                        CardResult.FinishApproveOrder.Success(
-                            orderId = orderId,
-                            didAttemptThreeDSecureAuthentication = true
-                        )
-                    }
-                } else {
-                    CardResult.FinishApproveOrder.NoResult
-                }
-            }
+            is BrowserSwitchFinalResult.Success -> parseApproveOrderSuccessResult(finalResult)
 
             is BrowserSwitchFinalResult.Failure -> {
                 val message = "Browser switch failed"
@@ -116,4 +102,21 @@ internal class CardAuthLauncher(
             CardStatus.VaultSuccess(result)
         }
     }
+
+    private fun parseApproveOrderSuccessResult(
+        finalResult: BrowserSwitchFinalResult.Success
+    ): CardResult.FinishApproveOrder =
+        if (finalResult.requestCode == BrowserSwitchRequestCodes.CARD_APPROVE_ORDER) {
+            val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
+            if (orderId == null) {
+                CardResult.FinishApproveOrder.Failure(CardError.unknownError)
+            } else {
+                CardResult.FinishApproveOrder.Success(
+                    orderId = orderId,
+                    didAttemptThreeDSecureAuthentication = true
+                )
+            }
+        } else {
+            CardResult.FinishApproveOrder.NoResult
+        }
 }
