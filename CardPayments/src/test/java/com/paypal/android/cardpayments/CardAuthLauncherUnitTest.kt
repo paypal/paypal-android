@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
@@ -15,7 +14,6 @@ import io.mockk.slot
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -126,7 +124,7 @@ class CardAuthLauncherUnitTest {
         } returns finalResult
 
         val result = sut.completeApproveOrderAuthRequest(intent, "pending request")
-            as CardFinishApproveOrderResult.Success
+                as CardFinishApproveOrderResult.Success
 
         assertEquals("fake-order-id", result.orderId)
         assertTrue(result.didAttemptThreeDSecureAuthentication)
