@@ -269,18 +269,6 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `completeAuthChallenge() doesn't deliver result when browserSwitchResult is null`() =
-        runTest {
-            val sut = createCardClient(testScheduler)
-
-            every {
-                cardAuthLauncher.completeAuthRequest(intent, "auth state")
-            } returns CardStatus.NoResult
-
-            sut.completeAuthChallenge(intent, "auth state")
-        }
-
-    @Test
     fun `presentAuthChallenge() presents an approve order auth challenge using auth launcher`() =
         runTest {
             val sut = createCardClient(testScheduler)
@@ -355,15 +343,5 @@ class CardClientUnitTest {
             dispatcher
         )
         return sut
-    }
-
-    @Test
-    fun `when client is complete, all listeners are removed`() = runTest {
-        val sut = createCardClient(testScheduler)
-
-        val lifeCycle = mockk<Lifecycle>(relaxed = true)
-        every { activity.lifecycle } returns lifeCycle
-
-        sut.removeObservers()
     }
 }
