@@ -1,4 +1,4 @@
-package com.paypal.android.cardpayments
+package com.paypal.android.ui.approveorder
 
 data class SetupTokenInfo(
     val setupTokenId: String,
