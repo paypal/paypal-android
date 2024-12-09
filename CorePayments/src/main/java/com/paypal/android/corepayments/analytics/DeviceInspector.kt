@@ -25,7 +25,7 @@ internal class DeviceInspector @VisibleForTesting constructor(
         deviceModel = Build.MODEL,
         deviceProduct = Build.PRODUCT,
         deviceFingerprint = Build.FINGERPRINT,
-        context = context
+        context = context.applicationContext
     )
 
     fun inspect(): DeviceData {

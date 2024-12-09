@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchException
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
@@ -15,7 +14,6 @@ import io.mockk.slot
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -108,45 +106,6 @@ class CardAuthLauncherUnitTest {
     }
 
     @Test
-    fun `completeAuthRequest() returns unknown error when browser switch fails`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val browserSwitchError = BrowserSwitchException("browser switch error")
-        val finalResult = mockk<BrowserSwitchFinalResult.Failure>(relaxed = true)
-        every { finalResult.error } returns browserSwitchError
-
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as CardStatus.UnknownError
-        assertSame(browserSwitchError, status.error)
-    }
-
-    @Test
-    fun `completeAuthRequest() returns no result when request code is not for card`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val scheme = "com.paypal.android.demo"
-        val domain = "example.com"
-        val successDeepLink =
-            "$scheme://$domain/return_url?state=undefined&code=undefined&liability_shift=NO"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
-            approveOrderMetadata,
-            Uri.parse(successDeepLink)
-        )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status = sut.completeAuthRequest(intent, "pending request")
-        assertTrue(status is CardStatus.NoResult)
-    }
-
-    @Test
     fun `completeApproveOrderAuthRequest() returns approve order success`() {
         sut = CardAuthLauncher(browserSwitchClient)
 
@@ -165,7 +124,7 @@ class CardAuthLauncherUnitTest {
         } returns finalResult
 
         val result = sut.completeApproveOrderAuthRequest(intent, "pending request")
-            as CardFinishApproveOrderResult.Success
+                as CardFinishApproveOrderResult.Success
 
         assertEquals("fake-order-id", result.orderId)
         assertTrue(result.didAttemptThreeDSecureAuthentication)
@@ -189,10 +148,10 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.VaultSuccess
-        val vaultResult = status.result
-        assertEquals("fake-setup-token-id", vaultResult.setupTokenId)
-        assertNull(vaultResult.status)
+        val result =
+            sut.completeVaultAuthRequest(intent, "pending request") as CardFinishVaultResult.Success
+        assertEquals("fake-setup-token-id", result.setupTokenId)
+        assertNull(result.status)
     }
 
     private fun createBrowserSwitchSuccessFinalResult(

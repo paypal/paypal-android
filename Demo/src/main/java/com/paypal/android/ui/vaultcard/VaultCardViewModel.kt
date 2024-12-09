@@ -9,13 +9,13 @@ import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardAuthChallenge
 import com.paypal.android.cardpayments.CardClient
+import com.paypal.android.cardpayments.CardFinishVaultResult
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
-import com.paypal.android.cardpayments.CardVaultListener
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
+import com.paypal.android.ui.approveorder.SetupTokenInfo
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.uishared.state.ActionState
@@ -130,25 +130,30 @@ class VaultCardViewModel @Inject constructor(
                 val clientId = clientIdResult.value
                 val configuration = CoreConfig(clientId = clientId)
                 cardClient = CardClient(activity, configuration)
-                cardClient?.cardVaultListener = object : CardVaultListener {
-
-                    override fun onVaultSuccess(result: CardVaultResult) {
-                        updateSetupTokenState = ActionState.Success(result)
-                    }
-
-                    override fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge) {
-                        presentAuthChallenge(activity, authChallenge)
-                    }
-
-                    override fun onVaultFailure(error: PayPalSDKError) {
-                        updateSetupTokenState = ActionState.Failure(error)
-                    }
-                }
 
                 val card = parseCard(_uiState.value)
                 val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
                 val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
-                cardClient?.vault(activity, cardVaultRequest)
+                cardClient?.vault(cardVaultRequest) { result ->
+                    when (result) {
+                        is CardVaultResult.Success -> {
+                            val setupTokenInfo = result.run {
+                                SetupTokenInfo(
+                                    setupTokenId,
+                                    status,
+                                    didAttemptThreeDSecureAuthentication
+                                )
+                            }
+                            updateSetupTokenState = ActionState.Success(setupTokenInfo)
+                        }
+
+                        is CardVaultResult.AuthorizationRequired ->
+                            presentAuthChallenge(activity, result.authChallenge)
+
+                        is CardVaultResult.Failure ->
+                            updateSetupTokenState = ActionState.Failure(result.error)
+                    }
+                }
             }
         }
     }
@@ -187,12 +192,35 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        cardClient?.removeObservers()
-    }
+    private fun checkIfVaultFinished(intent: Intent): CardFinishVaultResult? =
+        authState?.let { cardClient?.finishVault(intent, it) }
 
     fun completeAuthChallenge(intent: Intent) {
-        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
+        checkIfVaultFinished(intent)?.let { vaultResult ->
+            when (vaultResult) {
+                is CardFinishVaultResult.Success -> {
+                    val setupTokenInfo = vaultResult.run {
+                        SetupTokenInfo(
+                            setupTokenId,
+                            status,
+                            didAttemptThreeDSecureAuthentication
+                        )
+                    }
+                    updateSetupTokenState = ActionState.Success(setupTokenInfo)
+                }
+
+                CardFinishVaultResult.Canceled -> {
+                    updateSetupTokenState = ActionState.Failure(Exception("USER CANCELED"))
+                }
+
+                is CardFinishVaultResult.Failure -> {
+                    updateSetupTokenState = ActionState.Failure(vaultResult.error)
+                }
+
+                CardFinishVaultResult.NoResult -> {
+                    // ignore
+                }
+            }
+        }
     }
 }
