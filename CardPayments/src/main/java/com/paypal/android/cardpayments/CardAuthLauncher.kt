@@ -96,18 +96,6 @@ internal class CardAuthLauncher(
             BrowserSwitchFinalResult.NoResult -> CardFinishVaultResult.NoResult
         }
 
-    fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
-        when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
-            is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
-            is BrowserSwitchFinalResult.Failure -> CardStatus.UnknownError(finalResult.error)
-            BrowserSwitchFinalResult.NoResult -> CardStatus.NoResult
-        }
-
-    private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success): CardStatus =
-        when (result.requestCode) {
-            else -> CardStatus.NoResult
-        }
-
     private fun parseVaultSuccessResult(result: BrowserSwitchFinalResult.Success): CardFinishVaultResult =
         if (result.requestCode == BrowserSwitchRequestCodes.CARD_VAULT) {
             val setupTokenId = result.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)

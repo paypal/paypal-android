@@ -108,45 +108,6 @@ class CardAuthLauncherUnitTest {
     }
 
     @Test
-    fun `completeAuthRequest() returns unknown error when browser switch fails`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val browserSwitchError = BrowserSwitchException("browser switch error")
-        val finalResult = mockk<BrowserSwitchFinalResult.Failure>(relaxed = true)
-        every { finalResult.error } returns browserSwitchError
-
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as CardStatus.UnknownError
-        assertSame(browserSwitchError, status.error)
-    }
-
-    @Test
-    fun `completeAuthRequest() returns no result when request code is not for card`() {
-        sut = CardAuthLauncher(browserSwitchClient)
-
-        val scheme = "com.paypal.android.demo"
-        val domain = "example.com"
-        val successDeepLink =
-            "$scheme://$domain/return_url?state=undefined&code=undefined&liability_shift=NO"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
-            approveOrderMetadata,
-            Uri.parse(successDeepLink)
-        )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
-
-        val status = sut.completeAuthRequest(intent, "pending request")
-        assertTrue(status is CardStatus.NoResult)
-    }
-
-    @Test
     fun `completeApproveOrderAuthRequest() returns approve order success`() {
         sut = CardAuthLauncher(browserSwitchClient)
 
