@@ -2,8 +2,6 @@ package com.paypal.android.ui.vaultcard
 
 import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.CardSetupToken
-import com.paypal.android.cardpayments.CardVaultResult
-import com.paypal.android.cardpayments.LegacyCardVaultResult
 import com.paypal.android.cardpayments.SetupTokenInfo
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.uishared.state.ActionState

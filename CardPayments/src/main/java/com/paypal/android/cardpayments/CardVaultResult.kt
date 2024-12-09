@@ -16,8 +16,8 @@ sealed class CardVaultResult {
         val setupTokenId: String,
         val status: String? = null,
         val didAttemptThreeDSecureAuthentication: Boolean = false
-    ): CardVaultResult()
+    ) : CardVaultResult()
 
-    data class AuthorizationRequired(val authChallenge: CardAuthChallenge): CardVaultResult()
+    data class AuthorizationRequired(val authChallenge: CardAuthChallenge) : CardVaultResult()
     data class Failure(val error: PayPalSDKError) : CardVaultResult()
 }

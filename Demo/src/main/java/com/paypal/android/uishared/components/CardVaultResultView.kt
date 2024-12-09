@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.cardpayments.SetupTokenInfo
 import com.paypal.android.utils.UIConstants
 

@@ -8,7 +8,7 @@ sealed class CardFinishVaultResult {
         val setupTokenId: String,
         val status: String? = null,
         val didAttemptThreeDSecureAuthentication: Boolean = false
-    ): CardFinishVaultResult()
+    ) : CardFinishVaultResult()
 
     data class Failure(val error: PayPalSDKError) : CardFinishVaultResult()
 

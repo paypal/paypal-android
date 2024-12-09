@@ -13,11 +13,9 @@ import com.paypal.android.cardpayments.CardFinishVaultResult
 import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
-import com.paypal.android.cardpayments.LegacyCardVaultResult
 import com.paypal.android.cardpayments.SetupTokenInfo
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.uishared.state.ActionState
