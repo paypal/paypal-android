@@ -6,16 +6,21 @@
 * Breaking Changes
   * CardPayments
     * Remove `ApproveOrderListener` type
-    * Add `CardApproveOrderCallback` type
-    * Add `CardApproveOrderResult` type
+    * Add `CardApproveOrderCallback` interface
+    * Convert `CardApproveOrderResult` to a sealed class
     * Remove `CardClient.approveOrder(CardRequest)` method
     * Add `CardClient.approveOrder(CardRequest, CardApproveOrderCallback)` method
     * Add `CardClient.finishApproveOrder(Intent, String)` method
     * Add `CardFinishApproveOrderResult` type
     * Remove `CardResult` type
-    * Remove `CardClient.vault(Context, CardRequest)` method
+    * Remove `CardClient.vault(Context, CardVaultRequest)` method
     * Remove `CardClient.completeAuthChallenge(Intent, String)` method
     * Remove `CardClient.removeObservers()` method
+    * Add `CardClient.vault(CardVaultRequest, CardVaultCallback)` method
+    * Add `CardClient.finishVault(Intent, String)` method
+    * Add `CardFinishVaultResult` type
+    * Add `CardVaultCallback` interface
+    * Convert `CardVaultResult` to a sealed class
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes
