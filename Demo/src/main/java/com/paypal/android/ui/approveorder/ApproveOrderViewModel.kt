@@ -224,11 +224,6 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        cardClient?.removeObservers()
-    }
-
     private fun checkIfApproveOrderFinished(intent: Intent): CardFinishApproveOrderResult? =
         authState?.let { cardClient?.finishApproveOrder(intent, it) }
 

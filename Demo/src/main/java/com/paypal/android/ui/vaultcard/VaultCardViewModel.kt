@@ -192,11 +192,6 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        cardClient?.removeObservers()
-    }
-
     private fun checkIfVaultFinished(intent: Intent): CardFinishVaultResult? =
         authState?.let { cardClient?.finishVault(intent, it) }
 
