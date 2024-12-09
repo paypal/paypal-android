@@ -3,6 +3,16 @@
 ## unreleased
 * CorePayments
   * Fix issue that causes analytics version number to always be `null`
+* Breaking Changes
+  * CardPayments
+    * Remove `ApproveOrderListener` type
+    * Add `CardApproveOrderCallback` type
+    * Add `CardApproveOrderResult` type
+    * Remove `CardClient.approveOrder(CardRequest)` method
+    * Add `CardClient.approveOrder(CardRequest, CardApproveOrderCallback)` method
+    * Add `CardClient.finishApproveOrder(Intent, String)` method
+    * Add `CardFinishApproveOrderResult` type
+    * Remove `CardResult` type
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes

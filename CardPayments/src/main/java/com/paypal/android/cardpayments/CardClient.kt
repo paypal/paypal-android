@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 /**
  * Use this client to approve an order with a [Card].
  *
- * @property approveOrderListener listener to receive callbacks from [CardClient.approveOrder].
  * @property cardVaultListener listener to receive callbacks form [CardClient.vault].
  */
 class CardClient internal constructor(
@@ -28,8 +27,6 @@ class CardClient internal constructor(
     private val authChallengeLauncher: CardAuthLauncher,
     private val dispatcher: CoroutineDispatcher
 ) {
-
-    var approveOrderListener: ApproveOrderListener? = null
 
     // NEXT MAJOR VERSION: rename to vaultListener
     /**
@@ -54,12 +51,14 @@ class CardClient internal constructor(
     )
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
+
     /**
      * Confirm [Card] payment source for an order.
      *
      * @param cardRequest [CardRequest] for requesting an order approval
+     * @param callback [CardApproveOrderCallback] callback for receiving result asynchronously
      */
-    fun approveOrder(cardRequest: CardRequest) {
+    fun approveOrder(cardRequest: CardRequest, callback: CardApproveOrderCallback) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
         analytics.notifyApproveOrderStarted(cardRequest.orderId)
@@ -69,22 +68,27 @@ class CardClient internal constructor(
                 is ConfirmPaymentSourceResult.Success -> {
                     if (response.payerActionHref == null) {
                         analytics.notifyApproveOrderSucceeded(response.orderId)
-                        val result =
-                            response.run { CardResult(orderId = orderId, status = status?.name) }
-                        approveOrderListener?.onApproveOrderSuccess(result)
+                        val result = response.run {
+                            CardApproveOrderResult.Success(
+                                orderId = orderId,
+                                status = status?.name
+                            )
+                        }
+                        callback.onCardApproveOrderResult(result)
                     } else {
                         analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
-                        approveOrderListener?.onApproveOrderThreeDSecureWillLaunch()
 
                         val url = Uri.parse(response.payerActionHref)
                         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
-                        approveOrderListener?.onApproveOrderAuthorizationRequired(authChallenge)
+                        val result = CardApproveOrderResult.AuthorizationRequired(authChallenge)
+                        callback.onCardApproveOrderResult(result)
                     }
                 }
 
                 is ConfirmPaymentSourceResult.Failure -> {
                     analytics.notifyApproveOrderFailed(cardRequest.orderId)
-                    approveOrderListener?.onApproveOrderFailure(response.error)
+                    val result = CardApproveOrderResult.Failure(response.error)
+                    callback.onCardApproveOrderResult(result)
                 }
             }
         }
@@ -134,6 +138,9 @@ class CardClient internal constructor(
 
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
+     * @param activity [ComponentActivity] activity reference used to present a Chrome Custom Tab.
+     * @param authChallenge [CardAuthChallenge] auth challenge to present
+     * (see [CardApproveOrderResult.AuthorizationRequired])
      */
     fun presentAuthChallenge(
         activity: ComponentActivity,
@@ -173,6 +180,25 @@ class CardClient internal constructor(
         }
     }
 
+    fun finishApproveOrder(intent: Intent, authState: String): CardFinishApproveOrderResult {
+        val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
+        when (result) {
+            is CardFinishApproveOrderResult.Success ->
+                analytics.notifyApproveOrderAuthChallengeSucceeded(result.orderId)
+
+            is CardFinishApproveOrderResult.Failure ->
+                analytics.notifyApproveOrderAuthChallengeFailed(null)
+
+            CardFinishApproveOrderResult.Canceled ->
+                analytics.notifyApproveOrderAuthChallengeCanceled(null)
+
+            else -> {
+                // no analytics tracking required at the moment
+            }
+        }
+        return result
+    }
+
     fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
         val status = authChallengeLauncher.completeAuthRequest(intent, authState)
         when (status) {
@@ -194,26 +220,11 @@ class CardClient internal constructor(
                 cardVaultListener?.onVaultFailure(PayPalSDKError(1, "User Canceled"))
             }
 
-            is CardStatus.ApproveOrderError -> {
-                analytics.notifyApproveOrderAuthChallengeFailed(status.orderId)
-                approveOrderListener?.onApproveOrderFailure(status.error)
-            }
-
-            is CardStatus.ApproveOrderSuccess -> {
-                analytics.notifyApproveOrderAuthChallengeSucceeded(status.result.orderId)
-                approveOrderListener?.onApproveOrderSuccess(status.result)
-            }
-
-            is CardStatus.ApproveOrderCanceled -> {
-                analytics.notifyApproveOrderAuthChallengeCanceled(status.orderId)
-                approveOrderListener?.onApproveOrderCanceled()
-            }
-
             is CardStatus.UnknownError -> {
                 Log.d("PayPalSDK", "An unknown error occurred: ${status.error.message}")
             }
 
-            CardStatus.NoResult -> {
+            else -> {
                 // ignore
             }
         }
@@ -224,7 +235,6 @@ class CardClient internal constructor(
      * Call this method at the end of the card flow to clear out all observers and listeners
      */
     fun removeObservers() {
-        approveOrderListener = null
         cardVaultListener = null
     }
 }

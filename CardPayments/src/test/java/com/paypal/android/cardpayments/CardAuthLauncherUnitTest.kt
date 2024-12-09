@@ -147,7 +147,7 @@ class CardAuthLauncherUnitTest {
     }
 
     @Test
-    fun `completeAuthRequest() returns approve order success`() {
+    fun `completeApproveOrderAuthRequest() returns approve order success`() {
         sut = CardAuthLauncher(browserSwitchClient)
 
         val scheme = "com.paypal.android.demo"
@@ -164,13 +164,12 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as CardStatus.ApproveOrderSuccess
+        val result = sut.completeApproveOrderAuthRequest(intent, "pending request")
+            as CardFinishApproveOrderResult.Success
 
-        val cardResult = status.result
-        assertEquals("fake-order-id", cardResult.orderId)
-        assertTrue(cardResult.didAttemptThreeDSecureAuthentication)
-        assertNull(cardResult.status)
+        assertEquals("fake-order-id", result.orderId)
+        assertTrue(result.didAttemptThreeDSecureAuthentication)
+        assertNull(result.status)
     }
 
     @Test

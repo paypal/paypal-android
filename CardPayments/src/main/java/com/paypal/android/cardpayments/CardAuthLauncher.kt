@@ -7,6 +7,7 @@ import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
+import com.paypal.android.corepayments.PayPalSDKError
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
@@ -60,6 +61,25 @@ internal class CardAuthLauncher(
         }
     }
 
+    fun completeApproveOrderAuthRequest(
+        intent: Intent,
+        authState: String
+    ): CardFinishApproveOrderResult =
+        when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+            is BrowserSwitchFinalResult.Success -> parseApproveOrderSuccessResult(finalResult)
+
+            is BrowserSwitchFinalResult.Failure -> {
+                // TODO: remove error codes and error description from project; the built in
+                // Throwable type already has a message property and error codes are only required
+                // for iOS Error protocol conformance
+                val message = "Browser switch failed"
+                val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
+                CardFinishApproveOrderResult.Failure(browserSwitchError)
+            }
+
+            BrowserSwitchFinalResult.NoResult -> CardFinishApproveOrderResult.NoResult
+        }
+
     fun completeAuthRequest(intent: Intent, authState: String): CardStatus =
         when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
@@ -69,7 +89,6 @@ internal class CardAuthLauncher(
 
     private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success): CardStatus =
         when (result.requestCode) {
-            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER -> parseApproveOrderSuccessResult(result)
             BrowserSwitchRequestCodes.CARD_VAULT -> parseVaultSuccessResult(result)
             else -> CardStatus.NoResult
         }
@@ -88,14 +107,19 @@ internal class CardAuthLauncher(
     }
 
     private fun parseApproveOrderSuccessResult(
-        finalResult: BrowserSwitchFinalResult.Success,
-    ): CardStatus {
-        val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-        return if (orderId == null) {
-            CardStatus.ApproveOrderError(CardError.unknownError, null)
+        finalResult: BrowserSwitchFinalResult.Success
+    ): CardFinishApproveOrderResult =
+        if (finalResult.requestCode == BrowserSwitchRequestCodes.CARD_APPROVE_ORDER) {
+            val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
+            if (orderId == null) {
+                CardFinishApproveOrderResult.Failure(CardError.unknownError)
+            } else {
+                CardFinishApproveOrderResult.Success(
+                    orderId = orderId,
+                    didAttemptThreeDSecureAuthentication = true
+                )
+            }
         } else {
-            val result = CardResult(orderId = orderId, didAttemptThreeDSecureAuthentication = true)
-            CardStatus.ApproveOrderSuccess(result)
+            CardFinishApproveOrderResult.NoResult
         }
-    }
 }
