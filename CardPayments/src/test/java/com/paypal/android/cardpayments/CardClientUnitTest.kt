@@ -64,7 +64,6 @@ class CardClientUnitTest {
     private val activity = mockk<FragmentActivity>(relaxed = true)
 
     private val approveOrderCallback = mockk<CardApproveOrderCallback>()
-    private val cardVaultListener = mockk<CardVaultListener>(relaxed = true)
 
     private val intent = Intent()
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -155,15 +154,16 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        sut.vault(cardVaultRequest)
+        val callback = mockk<CardVaultCallback>()
+        sut.vault(cardVaultRequest, callback)
         advanceUntilIdle()
 
-        val resultSlot = slot<LegacyCardVaultResult>()
-        verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(resultSlot)) }
+        val resultSlot = slot<CardVaultResult>()
+        verify(exactly = 1) { callback.onCardVaultResult(capture(resultSlot)) }
 
-        val actual = resultSlot.captured
-        assertEquals("fake-setup-token-id-from-result", actual.setupTokenId)
-        assertEquals("fake-status", actual.status)
+        val result = resultSlot.captured as CardVaultResult.Success
+        assertEquals("fake-setup-token-id-from-result", result.setupTokenId)
+        assertEquals("fake-status", result.status)
     }
 
     @Test
@@ -175,14 +175,15 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns UpdateSetupTokenResult.Failure(error)
 
-        sut.vault(cardVaultRequest)
+        val callback = mockk<CardVaultCallback>()
+        sut.vault(cardVaultRequest, callback)
         advanceUntilIdle()
 
-        val errorSlot = slot<PayPalSDKError>()
-        verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(errorSlot)) }
+        val resultSlot = slot<CardVaultResult>()
+        verify(exactly = 1) { callback.onCardVaultResult(capture(resultSlot)) }
 
-        val capturedError = errorSlot.captured
-        assertEquals("mock_error_message", capturedError.errorDescription)
+        val result = resultSlot.captured as CardVaultResult.Failure
+        assertEquals("mock_error_message", result.error.errorDescription)
     }
 
     @Test
@@ -198,19 +199,15 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        sut.vault(cardVaultRequest)
+        val callback = mockk<CardVaultCallback>()
+        sut.vault(cardVaultRequest, callback)
         advanceUntilIdle()
 
-        val authChallengeSlot = slot<CardAuthChallenge>()
-        verify(exactly = 1) {
-            cardVaultListener.onVaultAuthorizationRequired(
-                capture(
-                    authChallengeSlot
-                )
-            )
-        }
+        val resultSlot = slot<CardVaultResult>()
+        verify(exactly = 1) { callback.onCardVaultResult(capture(resultSlot)) }
 
-        val authChallenge = authChallengeSlot.captured as CardAuthChallenge.Vault
+        val result = resultSlot.captured as CardVaultResult.AuthorizationRequired
+        val authChallenge = result.authChallenge as CardAuthChallenge.Vault
         assertEquals(Uri.parse("/payer/action/href"), authChallenge.url)
         assertEquals(cardVaultRequest, authChallenge.request)
         assertEquals("merchant.app", authChallenge.returnUrlScheme)
@@ -261,66 +258,29 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `completeAuthChallenge() notifies merchant of vault success`() = runTest {
+    fun `finishVault() forwards result from auth launcher`() = runTest {
         val sut = createCardClient(testScheduler)
-        sut.cardVaultListener = cardVaultListener
 
-        val successResult = LegacyCardVaultResult("fake-setup-token-id", "fake-status")
+        val successResult =
+            CardFinishVaultResult.Success("fake-setup-token-id", "fake-status")
         every {
-            cardAuthLauncher.completeAuthRequest(intent, "auth state")
-        } returns CardStatus.VaultSuccess(successResult)
+            cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns successResult
 
-        sut.completeAuthChallenge(intent, "auth state")
-
-        val slot = slot<LegacyCardVaultResult>()
-        verify(exactly = 1) { cardVaultListener.onVaultSuccess(capture(slot)) }
-        assertSame(successResult, slot.captured)
-    }
-
-    @Test
-    fun `completeAuthChallenge() notifies merchant of vault failure`() = runTest {
-        val sut = createCardClient(testScheduler)
-        sut.cardVaultListener = cardVaultListener
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            cardAuthLauncher.completeAuthRequest(intent, "auth state")
-        } returns CardStatus.VaultError(error)
-
-        sut.completeAuthChallenge(intent, "auth state")
-
-        val slot = slot<PayPalSDKError>()
-        verify(exactly = 1) { cardVaultListener.onVaultFailure(capture(slot)) }
-        assertSame(error, slot.captured)
-    }
-
-    @Test
-    fun `completeAuthChallenge() notifies merchant of vault order cancelation`() = runTest {
-        val sut = createCardClient(testScheduler)
-        sut.cardVaultListener = cardVaultListener
-
-        every {
-            cardAuthLauncher.completeAuthRequest(intent, "auth state")
-        } returns CardStatus.VaultCanceled("fake-setup-token-id")
-
-        sut.completeAuthChallenge(intent, "auth state")
-        // BREAKING CHANGE CALLOUT: if we introduce an "onVaultCanceled()" listener method, it could
-        // break existing merchant integrations
-        verify(exactly = 1) { cardVaultListener.onVaultFailure(any()) }
+        val result = sut.finishVault(intent, "auth state")
+        assertSame(successResult, result)
     }
 
     @Test
     fun `completeAuthChallenge() doesn't deliver result when browserSwitchResult is null`() =
         runTest {
             val sut = createCardClient(testScheduler)
-            sut.cardVaultListener = cardVaultListener
 
             every {
                 cardAuthLauncher.completeAuthRequest(intent, "auth state")
             } returns CardStatus.NoResult
 
             sut.completeAuthChallenge(intent, "auth state")
-            verify { sut.cardVaultListener?.wasNot(Called) }
         }
 
     @Test
@@ -359,7 +319,6 @@ class CardClientUnitTest {
     @Test
     fun `presentAuthChallenge() presents a vault auth challenge using auth launcher`() = runTest {
         val sut = createCardClient(testScheduler)
-        sut.cardVaultListener = cardVaultListener
 
         val url = Uri.parse("https://fake.com/url")
         val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
@@ -369,14 +328,12 @@ class CardClientUnitTest {
 
         sut.presentAuthChallenge(activity, authChallenge)
         verify { cardAuthLauncher.presentAuthChallenge(activity, authChallenge) }
-        verify(exactly = 0) { cardVaultListener.onVaultFailure(any()) }
     }
 
     @Test
     fun `presentAuthChallenge() forwards vault auth challenge presentation result to caller`() =
         runTest {
             val sut = createCardClient(testScheduler)
-            sut.cardVaultListener = cardVaultListener
 
             val url = Uri.parse("https://fake.com/url")
             val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
@@ -400,7 +357,6 @@ class CardClientUnitTest {
             cardAuthLauncher,
             dispatcher
         )
-        sut.cardVaultListener = cardVaultListener
         return sut
     }
 
@@ -412,6 +368,5 @@ class CardClientUnitTest {
         every { activity.lifecycle } returns lifeCycle
 
         sut.removeObservers()
-        expectThat(sut.cardVaultListener).isNull()
     }
 }
