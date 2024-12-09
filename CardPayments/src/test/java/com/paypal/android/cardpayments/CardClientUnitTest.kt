@@ -10,7 +10,6 @@ import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
-import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -34,8 +33,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import strikt.api.expectThat
-import strikt.assertions.isNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
