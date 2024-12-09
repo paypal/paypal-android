@@ -189,10 +189,10 @@ class CardAuthLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns finalResult
 
-        val status = sut.completeAuthRequest(intent, "pending request") as CardStatus.VaultSuccess
-        val vaultResult = status.result
-        assertEquals("fake-setup-token-id", vaultResult.setupTokenId)
-        assertNull(vaultResult.status)
+        val result =
+            sut.completeVaultAuthRequest(intent, "pending request") as CardFinishVaultResult.Success
+        assertEquals("fake-setup-token-id", result.setupTokenId)
+        assertNull(result.status)
     }
 
     private fun createBrowserSwitchSuccessFinalResult(
