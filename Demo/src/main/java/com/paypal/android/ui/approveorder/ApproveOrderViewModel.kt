@@ -255,7 +255,5 @@ class ApproveOrderViewModel @Inject constructor(
                 }
             }
         }
-
-        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }

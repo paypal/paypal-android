@@ -209,16 +209,6 @@ class CardClient internal constructor(
         return result
     }
 
-    fun completeAuthChallenge(intent: Intent, authState: String): CardStatus {
-        val status = authChallengeLauncher.completeAuthRequest(intent, authState)
-        when (status) {
-            else -> {
-                // ignore
-            }
-        }
-        return status
-    }
-
     /**
      * Call this method at the end of the card flow to clear out all observers and listeners
      */

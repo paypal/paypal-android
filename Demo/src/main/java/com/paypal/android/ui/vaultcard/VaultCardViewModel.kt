@@ -227,6 +227,5 @@ class VaultCardViewModel @Inject constructor(
                 }
             }
         }
-        authState?.let { cardClient?.completeAuthChallenge(intent, it) }
     }
 }
