@@ -10,6 +10,7 @@ import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -106,6 +107,25 @@ internal class PayPalWebLauncher(
             .build()
     }
 
+    fun completeCheckoutAuthRequest(
+        intent: Intent,
+        authState: String
+    ): PayPalWebCheckoutFinishStartResult {
+        return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
+            is BrowserSwitchFinalResult.Success -> parseWebCheckoutSuccessResult(finalResult)
+            is BrowserSwitchFinalResult.Failure -> {
+                // TODO: remove error codes and error description from project; the built in
+                // Throwable type already has a message property and error codes are only required
+                // for iOS Error protocol conformance
+                val message = "Browser switch failed"
+                val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
+                PayPalWebCheckoutFinishStartResult.Failure(browserSwitchError, null)
+            }
+
+            BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutFinishStartResult.NoResult
+        }
+    }
+
     fun completeAuthRequest(intent: Intent, authState: String): PayPalWebStatus {
         return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
@@ -116,25 +136,31 @@ internal class PayPalWebLauncher(
 
     private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success) =
         when (result.requestCode) {
-            BrowserSwitchRequestCodes.PAYPAL_CHECKOUT -> parseWebCheckoutSuccessResult(result)
             BrowserSwitchRequestCodes.PAYPAL_VAULT -> parseVaultSuccessResult(result)
             else -> PayPalWebStatus.NoResult
         }
 
-    private fun parseWebCheckoutSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebStatus {
+    private fun parseWebCheckoutSuccessResult(
+        finalResult: BrowserSwitchFinalResult.Success
+    ): PayPalWebCheckoutFinishStartResult {
         val deepLinkUrl = finalResult.returnUrl
         val metadata = finalResult.requestMetadata
-
-        return if (metadata == null) {
-            PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.unknownError, null)
-        } else {
-            val payerId = deepLinkUrl.getQueryParameter("PayerID")
-            val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
-            if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
-                PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError, orderId)
+        return if (finalResult.requestCode == BrowserSwitchRequestCodes.PAYPAL_CHECKOUT) {
+            if (metadata == null) {
+                val unknownError = PayPalWebCheckoutError.unknownError
+                PayPalWebCheckoutFinishStartResult.Failure(unknownError, null)
             } else {
-                PayPalWebStatus.CheckoutSuccess(PayPalWebCheckoutResult(orderId, payerId))
+                val payerId = deepLinkUrl.getQueryParameter("PayerID")
+                val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
+                if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
+                    val malformedResultError = PayPalWebCheckoutError.malformedResultError
+                    PayPalWebCheckoutFinishStartResult.Failure(malformedResultError, orderId)
+                } else {
+                    PayPalWebCheckoutFinishStartResult.Success(orderId, payerId)
+                }
             }
+        } else {
+            PayPalWebCheckoutFinishStartResult.NoResult
         }
     }
 
