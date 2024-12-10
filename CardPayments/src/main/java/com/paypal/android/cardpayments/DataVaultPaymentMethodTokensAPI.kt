@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.content.Context
+import androidx.annotation.RawRes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
@@ -13,26 +14,26 @@ import org.json.JSONObject
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
     private val coreConfig: CoreConfig,
+    private val applicationContext: Context,
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader
 ) {
 
-    constructor(coreConfig: CoreConfig) : this(
+    constructor(context: Context, coreConfig: CoreConfig) : this(
         coreConfig,
+        context.applicationContext,
         GraphQLClient(coreConfig),
         ResourceLoader()
     )
 
-    suspend fun updateSetupToken(
-        context: Context,
-        setupTokenId: String,
-        card: Card
-    ): UpdateSetupTokenResult = when (val result =
-        resourceLoader.loadRawResource(context, R.raw.graphql_query_update_setup_token)) {
-        is LoadRawResourceResult.Success ->
-            sendUpdateSetupTokenGraphQLRequest(result.value, setupTokenId, card)
+    suspend fun updateSetupToken(setupTokenId: String, card: Card): UpdateSetupTokenResult {
+        @RawRes val resId = R.raw.graphql_query_update_setup_token
+        return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
+            is LoadRawResourceResult.Success ->
+                sendUpdateSetupTokenGraphQLRequest(result.value, setupTokenId, card)
 
-        is LoadRawResourceResult.Failure -> UpdateSetupTokenResult.Failure(result.error)
+            is LoadRawResourceResult.Failure -> UpdateSetupTokenResult.Failure(result.error)
+        }
     }
 
     private suspend fun sendUpdateSetupTokenGraphQLRequest(
