@@ -272,7 +272,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `completeRequest() parses successful checkout result`() {
+    fun `completeCheckoutAuthRequest() parses successful checkout result`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "fake-order-id",
@@ -285,14 +285,14 @@ class PayPalWebLauncherUnitTest {
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
 
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as PayPalWebStatus.CheckoutSuccess
-        assertEquals("fake-order-id", status.result.orderId)
-        assertEquals("fake-payer-id", status.result.payerId)
+        val result = sut.completeCheckoutAuthRequest(intent, "pending request")
+                as PayPalWebCheckoutFinishStartResult.Success
+        assertEquals("fake-order-id", result.orderId)
+        assertEquals("fake-payer-id", result.payerId)
     }
 
     @Test
-    fun `completeRequest() parses checkout failure when Payer Id is blank`() {
+    fun `completeCheckoutAuthRequest() parses checkout failure when Payer Id is blank`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "fake-order-id",
@@ -303,15 +303,15 @@ class PayPalWebLauncherUnitTest {
         } returns browserSwitchResult
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as PayPalWebStatus.CheckoutError
+        val result = sut.completeCheckoutAuthRequest(intent, "pending request")
+                as PayPalWebCheckoutFinishStartResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
-        assertEquals(expectedDescription, status.error.errorDescription)
+        assertEquals(expectedDescription, result.error.errorDescription)
     }
 
     @Test
-    fun `completeRequest() parses checkout failure when Order Id is blank`() {
+    fun `completeCheckoutAuthRequest() parses checkout failure when Order Id is blank`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             orderId = "",
@@ -322,15 +322,15 @@ class PayPalWebLauncherUnitTest {
         } returns browserSwitchResult
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as PayPalWebStatus.CheckoutError
+        val result = sut.completeCheckoutAuthRequest(intent, "pending request")
+                as PayPalWebCheckoutFinishStartResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
-        assertEquals(expectedDescription, status.error.errorDescription)
+        assertEquals(expectedDescription, result.error.errorDescription)
     }
 
     @Test
-    fun `completeRequest() parses checkout failure when metadata is null`() {
+    fun `completeCheckoutAuthRequest() parses checkout failure when metadata is null`() {
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
             payerId = "fake-payer-id",
@@ -341,11 +341,11 @@ class PayPalWebLauncherUnitTest {
         } returns browserSwitchResult
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
-        val status = sut.completeAuthRequest(intent, "pending request")
-                as PayPalWebStatus.CheckoutError
+        val result = sut.completeCheckoutAuthRequest(intent, "pending request")
+                as PayPalWebCheckoutFinishStartResult.Failure
         val expectedDescription =
             "An unknown error occurred. Contact developer.paypal.com/support."
-        assertEquals(expectedDescription, status.error.errorDescription)
+        assertEquals(expectedDescription, result.error.errorDescription)
     }
 
     @Test
