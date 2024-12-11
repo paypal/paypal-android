@@ -116,18 +116,18 @@ class PayPalWebViewModel @Inject constructor(
                 paypalClient =
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
 
-                paypalClient?.start(activity, PayPalWebCheckoutRequest(orderId, fundingSource))
-                    ?.let { startResult ->
-                        when (startResult) {
-                            is PayPalPresentAuthChallengeResult.Success -> {
-                                authState = startResult.authState
-                            }
+                val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
+                when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
+                    is PayPalPresentAuthChallengeResult.Success ->
+                        authState = startResult.authState
 
-                            is PayPalPresentAuthChallengeResult.Failure -> {
-                                payPalWebCheckoutState = ActionState.Failure(startResult.error)
-                            }
-                        }
+                    is PayPalPresentAuthChallengeResult.Failure ->
+                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
+
+                    null -> {
+                        // do nothing
                     }
+                }
             }
         }
     }
@@ -157,12 +157,10 @@ class PayPalWebViewModel @Inject constructor(
         val result = authState?.let { paypalClient?.finishStart(activity.intent, it) }
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success -> {
-                Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
                 payPalWebCheckoutState = ActionState.Success(result)
             }
 
             is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                Log.i(TAG, "User cancelled")
                 val error = Exception("USER CANCELED")
                 payPalWebCheckoutState = ActionState.Failure(error)
             }
