@@ -5,6 +5,8 @@
   * Fix issue that causes analytics version number to always be `null`
 * Breaking Changes
   * CardPayments
+    * Remove `CardClient.approveOrderListener` property
+    * Remove `CardClient.cardVaultListener` property
     * Remove `ApproveOrderListener` type
     * Add `CardApproveOrderCallback` interface
     * Convert `CardApproveOrderResult` to a sealed class
