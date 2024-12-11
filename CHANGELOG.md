@@ -21,6 +21,10 @@
     * Add `CardFinishVaultResult` type
     * Add `CardVaultCallback` interface
     * Convert `CardVaultResult` to a sealed class
+  * PayPalWebPayments
+    * Remove `PayPalWebCheckoutClient.listener` property
+    * Add `PayPalWebCheckoutClient.finishStart(Intent, String)` method
+    * Add `PayPalWebCheckoutFinishStartResult` type
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes
