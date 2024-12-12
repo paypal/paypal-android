@@ -5,6 +5,8 @@
   * Fix issue that causes analytics version number to always be `null`
 * Breaking Changes
   * CardPayments
+    * Remove `CardClient.approveOrderListener` property
+    * Remove `CardClient.cardVaultListener` property
     * Remove `ApproveOrderListener` type
     * Add `CardApproveOrderCallback` interface
     * Convert `CardApproveOrderResult` to a sealed class
@@ -21,6 +23,10 @@
     * Add `CardFinishVaultResult` type
     * Add `CardVaultCallback` interface
     * Convert `CardVaultResult` to a sealed class
+  * PayPalWebPayments
+    * Remove `PayPalWebCheckoutClient.listener` property
+    * Add `PayPalWebCheckoutClient.finishStart(Intent, String)` method
+    * Add `PayPalWebCheckoutFinishStartResult` type
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes

@@ -1,6 +1,5 @@
 package com.paypal.android.ui.paypalweb
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -8,22 +7,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutListener
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +33,7 @@ class PayPalWebViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase
-) : ViewModel(), PayPalWebCheckoutListener {
+) : ViewModel() {
 
     companion object {
         private val TAG = PayPalWebViewModel::class.qualifiedName
@@ -118,39 +115,21 @@ class PayPalWebViewModel @Inject constructor(
 
                 paypalClient =
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
-                paypalClient?.listener = this@PayPalWebViewModel
 
-                paypalClient?.start(activity, PayPalWebCheckoutRequest(orderId, fundingSource))?.let { startResult ->
-                    when (startResult) {
-                        is PayPalPresentAuthChallengeResult.Success -> {
-                            authState = startResult.authState
-                        }
-                        is PayPalPresentAuthChallengeResult.Failure -> {
-                            payPalWebCheckoutState = ActionState.Failure(startResult.error)
-                        }
+                val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
+                when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
+                    is PayPalPresentAuthChallengeResult.Success ->
+                        authState = startResult.authState
+
+                    is PayPalPresentAuthChallengeResult.Failure ->
+                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
+
+                    null -> {
+                        // do nothing
                     }
                 }
             }
         }
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-        Log.i(TAG, "Order Approved: ${result.orderId} && ${result.payerId}")
-        payPalWebCheckoutState = ActionState.Success(result)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPayPalWebFailure(error: PayPalSDKError) {
-        Log.i(TAG, "Checkout Error: ${error.errorDescription}")
-        payPalWebCheckoutState = ActionState.Failure(error)
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onPayPalWebCanceled() {
-        Log.i(TAG, "User cancelled")
-        val error = Exception("USER CANCELED")
-        payPalWebCheckoutState = ActionState.Failure(error)
     }
 
     fun completeOrder(context: Context) {
@@ -160,9 +139,11 @@ class PayPalWebViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
-                val dataCollectorRequest = PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val dataCollectorRequest =
+                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
                 val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
-                completeOrderState = completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
+                completeOrderState =
+                    completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
     }
@@ -173,6 +154,25 @@ class PayPalWebViewModel @Inject constructor(
     }
 
     fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        authState?.let { paypalClient?.completeAuthChallenge(activity.intent, it) }
+        val result = authState?.let { paypalClient?.finishStart(activity.intent, it) }
+        when (result) {
+            is PayPalWebCheckoutFinishStartResult.Success -> {
+                payPalWebCheckoutState = ActionState.Success(result)
+            }
+
+            is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                val error = Exception("USER CANCELED")
+                payPalWebCheckoutState = ActionState.Failure(error)
+            }
+
+            is PayPalWebCheckoutFinishStartResult.Failure -> {
+                Log.i(TAG, "Checkout Error: ${result.error.errorDescription}")
+                payPalWebCheckoutState = ActionState.Failure(result.error)
+            }
+
+            null, PayPalWebCheckoutFinishStartResult.NoResult -> {
+                // do nothing
+            }
+        }
     }
 }

@@ -22,7 +22,6 @@ class PayPalWebCheckoutClientUnitTest {
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
 
-    private val checkoutListener = mockk<PayPalWebCheckoutListener>(relaxed = true)
     private val vaultListener = mockk<PayPalWebVaultListener>(relaxed = true)
 
     private val intent = Intent()
@@ -38,32 +37,23 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() launches PayPal web checkout`() {
-        sut.listener = checkoutListener
-
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
         sut.start(activity, request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
-        verify(exactly = 0) { checkoutListener.onPayPalWebFailure(any()) }
     }
 
     @Test
     fun `start() notifies merchant of browser switch failure`() {
-        sut.listener = checkoutListener
-
         val sdkError = PayPalSDKError(123, "fake error description")
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(activity, request)
-
-        val slot = slot<PayPalSDKError>()
-        verify(exactly = 1) { checkoutListener.onPayPalWebFailure(capture(slot)) }
-
-        assertSame(slot.captured, sdkError)
+        val result = sut.start(activity, request)
+        assertSame(launchResult, result)
     }
 
     @Test
@@ -99,49 +89,39 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `completeAuthChallenge notifies merchant of Checkout success`() {
-        sut.listener = checkoutListener
-
-        val successResult = PayPalWebCheckoutResult("fake-order-id", "fake-payer-id")
+    fun `finishStart() forwards success result from auth launcher`() {
+        val successResult =
+            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
         every {
-            payPalWebLauncher.completeAuthRequest(intent, "auth state")
-        } returns PayPalWebStatus.CheckoutSuccess(successResult)
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns successResult
 
-        sut.completeAuthChallenge(intent, "auth state")
-
-        val slot = slot<PayPalWebCheckoutResult>()
-        verify(exactly = 1) { checkoutListener.onPayPalWebSuccess(capture(slot)) }
-        assertSame(successResult, slot.captured)
+        val result = sut.finishStart(intent, "auth state")
+        assertSame(successResult, result)
     }
 
     @Test
-    fun `completeAuthChallenge notifies merchant of Checkout failure`() {
-        sut.listener = checkoutListener
+    fun `finishStart() forwards error result from auth launcher`() {
 
         val error = PayPalSDKError(123, "fake-error-description")
+        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
         every {
-            payPalWebLauncher.completeAuthRequest(intent, "auth state")
-        } returns PayPalWebStatus.CheckoutError(error, null)
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns failureResult
 
-        sut.completeAuthChallenge(intent, "auth state")
-
-        val slot = slot<PayPalSDKError>()
-        verify(exactly = 1) { checkoutListener.onPayPalWebFailure(capture(slot)) }
-        assertSame(error, slot.captured)
+        val result = sut.finishStart(intent, "auth state")
+        assertSame(failureResult, result)
     }
 
     @Test
-    fun `completeAuthChallenge notifies merchant of Checkout cancelation`() {
-        sut.listener = checkoutListener
-
-        val status = PayPalWebStatus.CheckoutCanceled("fake-order_id")
+    fun `finishStart() forwards cancellation result from auth launcher`() {
+        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order_id")
         every {
-            payPalWebLauncher.completeAuthRequest(intent, "auth state")
-        } returns status
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns canceledResult
 
-        sut.completeAuthChallenge(intent, "auth state")
-
-        verify(exactly = 1) { checkoutListener.onPayPalWebCanceled() }
+        val result = sut.finishStart(intent, "auth state")
+        assertSame(canceledResult, result)
     }
 
     @Test
@@ -190,7 +170,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `completeAuthChallenge doesn't deliver result when browserSwitchResult is null`() {
-        sut.listener = checkoutListener
         sut.vaultListener = vaultListener
 
         every {
@@ -198,8 +177,6 @@ class PayPalWebCheckoutClientUnitTest {
         } returns PayPalWebStatus.NoResult
 
         sut.completeAuthChallenge(intent, "auth state")
-
-        verify { checkoutListener.wasNot(Called) }
         verify { vaultListener.wasNot(Called) }
     }
 }
