@@ -169,7 +169,9 @@ internal class PayPalWebLauncher(
         }
     }
 
-    private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebCheckoutFinishVaultResult {
+    private fun parseVaultSuccessResult(
+        finalResult: BrowserSwitchFinalResult.Success
+    ): PayPalWebCheckoutFinishVaultResult {
         val deepLinkUrl = finalResult.returnUrl
         val requestMetadata = finalResult.requestMetadata
         return if (finalResult.requestCode == BrowserSwitchRequestCodes.PAYPAL_VAULT) {

@@ -4,20 +4,17 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.paypalwebpayments.PayPalWebVaultListener
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
-import com.paypal.android.paypalwebpayments.PayPalWebVaultResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
-import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +27,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
-) : ViewModel(), PayPalWebVaultListener {
+) : ViewModel() {
 
     companion object {
         const val URL_SCHEME = "com.paypal.android.demo"
@@ -124,15 +121,6 @@ class PayPalWebVaultViewModel @Inject constructor(
                     createPayPalPaymentTokenUseCase(setupToken).mapToActionState()
             }
         }
-    }
-
-    override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-    }
-
-    override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-    }
-
-    override fun onPayPalWebVaultCanceled() {
     }
 
     fun handleBrowserSwitchResult(activity: ComponentActivity) {
