@@ -30,7 +30,7 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     /**
-     * Confirm PayPal payment source for an order. Result will be delivered to your [PayPalWebCheckoutListener].
+     * Confirm PayPal payment source for an order.
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
@@ -51,7 +51,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Vault PayPal as a payment method. Result will be delivered to your [PayPalWebVaultListener].
+     * Vault PayPal as a payment method.
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
@@ -71,6 +71,17 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [PayPalWebCheckoutClient.start]), call this method to see if a user has
+     * successfully authorized a PayPal account as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
+     * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
+     * authorization completed successfully.
+     */
     fun finishStart(intent: Intent, authState: String): PayPalWebCheckoutFinishStartResult {
         val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
         when (result) {
@@ -90,6 +101,17 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [PayPalWebCheckoutClient.vault]), call this method to see if a user has
+     * successfully authorized a PayPal account for vaulting.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
+     * when calling [PayPalWebCheckoutClient.vault]. This is needed to properly verify that an
+     * authorization completed successfully.
+     */
     fun finishVault(intent: Intent, authState: String): PayPalWebCheckoutFinishVaultResult {
         val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
         // TODO: see if we can get setup token id from somewhere for tracking
