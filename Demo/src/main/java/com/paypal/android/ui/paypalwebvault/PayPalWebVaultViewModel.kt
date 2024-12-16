@@ -17,6 +17,7 @@ import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,16 +97,15 @@ class PayPalWebVaultViewModel @Inject constructor(
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
-                paypalClient?.vaultListener = this@PayPalWebVaultViewModel
+                when (val result = paypalClient?.vault(activity, request)) {
+                    is PayPalPresentAuthChallengeResult.Success ->
+                        authState = result.authState
 
-                paypalClient?.vault(activity, request)?.let { result ->
-                    when (result) {
-                        is PayPalPresentAuthChallengeResult.Success -> {
-                            authState = result.authState
-                        }
-                        is PayPalPresentAuthChallengeResult.Failure -> {
-                            vaultPayPalState = ActionState.Failure(result.error)
-                        }
+                    is PayPalPresentAuthChallengeResult.Failure ->
+                        vaultPayPalState = ActionState.Failure(result.error)
+
+                    null -> {
+                        // do nothing for now
                     }
                 }
             }
@@ -115,7 +115,8 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun createPaymentToken() {
         val setupToken = createdSetupToken
         if (setupToken == null) {
-            createPaymentTokenState = ActionState.Failure(Exception("Create a setup token to continue."))
+            createPaymentTokenState =
+                ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             createPaymentTokenState = ActionState.Loading
             viewModelScope.launch {
@@ -126,25 +127,29 @@ class PayPalWebVaultViewModel @Inject constructor(
     }
 
     override fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-        vaultPayPalState = ActionState.Success(result)
     }
 
     override fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-        vaultPayPalState = ActionState.Failure(error)
     }
 
     override fun onPayPalWebVaultCanceled() {
-        vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        paypalClient?.removeObservers()
     }
 
     fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        authState?.let {
-            paypalClient?.completeAuthChallenge(activity.intent, it)
+        val result = authState?.let { paypalClient?.finishVault(activity.intent, it) }
+        when (result) {
+            is PayPalWebCheckoutFinishVaultResult.Success ->
+                vaultPayPalState = ActionState.Success(result)
+
+            is PayPalWebCheckoutFinishVaultResult.Failure ->
+                vaultPayPalState = ActionState.Failure(result.error)
+
+            PayPalWebCheckoutFinishVaultResult.Canceled ->
+                vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
+
+            null, PayPalWebCheckoutFinishVaultResult.NoResult -> {
+                // do nothing
+            }
         }
     }
 }

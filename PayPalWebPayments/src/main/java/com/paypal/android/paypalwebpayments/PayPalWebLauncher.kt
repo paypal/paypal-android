@@ -126,19 +126,24 @@ internal class PayPalWebLauncher(
         }
     }
 
-    fun completeAuthRequest(intent: Intent, authState: String): PayPalWebStatus {
+    fun completeCheckoutVaultRequest(
+        intent: Intent,
+        authState: String
+    ): PayPalWebCheckoutFinishVaultResult {
         return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
-            is BrowserSwitchFinalResult.Success -> parseBrowserSwitchSuccessResult(finalResult)
-            is BrowserSwitchFinalResult.Failure -> PayPalWebStatus.UnknownError(finalResult.error)
-            BrowserSwitchFinalResult.NoResult -> PayPalWebStatus.NoResult
+            is BrowserSwitchFinalResult.Success -> parseVaultSuccessResult(finalResult)
+            is BrowserSwitchFinalResult.Failure -> {
+                // TODO: remove error codes and error description from project; the built in
+                // Throwable type already has a message property and error codes are only required
+                // for iOS Error protocol conformance
+                val message = "Browser switch failed"
+                val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
+                PayPalWebCheckoutFinishVaultResult.Failure(browserSwitchError)
+            }
+
+            BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
-
-    private fun parseBrowserSwitchSuccessResult(result: BrowserSwitchFinalResult.Success) =
-        when (result.requestCode) {
-            BrowserSwitchRequestCodes.PAYPAL_VAULT -> parseVaultSuccessResult(result)
-            else -> PayPalWebStatus.NoResult
-        }
 
     private fun parseWebCheckoutSuccessResult(
         finalResult: BrowserSwitchFinalResult.Success
@@ -164,20 +169,22 @@ internal class PayPalWebLauncher(
         }
     }
 
-    private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebStatus {
+    private fun parseVaultSuccessResult(finalResult: BrowserSwitchFinalResult.Success): PayPalWebCheckoutFinishVaultResult {
         val deepLinkUrl = finalResult.returnUrl
         val requestMetadata = finalResult.requestMetadata
-
-        return if (requestMetadata == null) {
-            PayPalWebStatus.VaultError(PayPalWebCheckoutError.unknownError)
-        } else {
-            val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-            if (approvalSessionId.isNullOrEmpty()) {
-                PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
+        return if (finalResult.requestCode == BrowserSwitchRequestCodes.PAYPAL_VAULT) {
+            if (requestMetadata == null) {
+                PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.unknownError)
             } else {
-                val result = PayPalWebVaultResult(approvalSessionId)
-                PayPalWebStatus.VaultSuccess(result)
+                val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
+                if (approvalSessionId.isNullOrEmpty()) {
+                    PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.malformedResultError)
+                } else {
+                    PayPalWebCheckoutFinishVaultResult.Success(approvalSessionId)
+                }
             }
+        } else {
+            PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
 }

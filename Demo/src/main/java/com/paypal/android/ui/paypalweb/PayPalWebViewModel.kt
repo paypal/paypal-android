@@ -148,11 +148,6 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        paypalClient?.removeObservers()
-    }
-
     fun handleBrowserSwitchResult(activity: ComponentActivity) {
         val result = authState?.let { paypalClient?.finishStart(activity.intent, it) }
         when (result) {
