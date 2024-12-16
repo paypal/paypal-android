@@ -126,7 +126,7 @@ internal class PayPalWebLauncher(
         }
     }
 
-    fun completeCheckoutVaultRequest(
+    fun completeVaultAuthRequest(
         intent: Intent,
         authState: String
     ): PayPalWebCheckoutFinishVaultResult {

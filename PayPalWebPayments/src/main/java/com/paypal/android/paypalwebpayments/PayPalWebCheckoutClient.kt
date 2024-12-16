@@ -91,7 +91,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     fun finishVault(intent: Intent, authState: String): PayPalWebCheckoutFinishVaultResult {
-        val result = payPalWebLauncher.completeCheckoutVaultRequest(intent, authState)
+        val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
         // TODO: see if we can get setup token id from somewhere for tracking
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
