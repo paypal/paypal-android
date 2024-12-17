@@ -38,7 +38,7 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   checkForAuthCompletion(newIntent)
 + }
 
-  private fun approveOrder() {
+  fun approveOrder() {
     val cardRequest: CardRequest = TODO("Create a card request.")
 -   cardClient.approveOrder(this, cardRequest)
 +   when (val approveOrderResult = cardClient.approveOrder(cardRequest)) {
@@ -48,7 +48,7 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   }
   }
   
-  private fun vaultCard() {
+  fun vaultCard() {
     val cardVaultRequest: CardVaultRequest = TODO("Create a card vault request.")
 -   cardClient.vault(this, cardVaultRequest)
 +   when (val vaultResult = cardClient.vault(cardVaultRequest)) {
@@ -58,7 +58,7 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   }
   }
 
-+ private fun presentAuthChallenge(authChallenge: CardAuthChallenge) {
++ fun presentAuthChallenge(authChallenge: CardAuthChallenge) {
 +   // Manually present auth challenge
 +   when (val result = cardClient.presentAuthChallenge(this, authChallenge)) {
 +     is CardPresentAuthChallengeResult.Success -> {
@@ -70,7 +70,7 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   }
 + }
 
-+ private fun checkForAuthCompletion(intent: Intent) = authState?.let { state ->
++ fun checkForAuthCompletion(intent: Intent) = authState?.let { state ->
 +   // check for approve order completion
 +   when (val approveOrderResult = cardClient.finishApproveOrder(intent, state)) {
 +     is CardFinishApproveOrderResult.Success -> {
