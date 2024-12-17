@@ -20,86 +20,124 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 + val cardClient = CardClient(requireContext(), config)
 + var authState: String? = null
 
-  init {
-    cardClient.approveOrderListener = this
-    cardClient.vaultListener = this
-  }
+- init {
+-   cardClient.approveOrderListener = this
+-   cardClient.vaultListener = this
+- }
 
 + override fun onResume() {
 +   super.onResume()
-+   // Manually attempt auth challenge completion (via deep link)
-+   authState?.let { state -> cardClient.completeAuthChallenge(intent, state) }
++   // Manually attempt auth challenge completion (via host activity intent deep link)
++   checkForAuthCompletion(intent)
 + }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    cardClient.removeObservers()
-  }
++ override fun onNewIntent(newIntent: Intent) {
++   super.onNewIntent(newIntent)
++   // Manually attempt auth challenge completion (via new intent deep link)
++   checkForAuthCompletion(newIntent)
++ }
 
   private fun approveOrder() {
     val cardRequest: CardRequest = TODO("Create a card request.")
 -   cardClient.approveOrder(this, cardRequest)
-+   cardClient.approveOrder(cardRequest)
++   when (val approveOrderResult = cardClient.approveOrder(cardRequest)) {
++     is CardApproveOrderResult.Success -> TODO("Capture or authorize order on your server.")
++     is CardApproveOrderResult.Failure -> TODO("Handle approve order failure.")
++     is CardApproveOrderResult.AuthorizationRequired -> presentAuthChallenge(result.authChallenge)
++   }
   }
   
   private fun vaultCard() {
     val cardVaultRequest: CardVaultRequest = TODO("Create a card vault request.")
 -   cardClient.vault(this, cardVaultRequest)
-+   cardClient.vault(cardVaultRequest)
++   when (val vaultResult = cardClient.vault(cardVaultRequest)) {
++     is CardVaultResult.Success -> TODO("Create payment token on your server.")
++     is CardVaultResult.Failure -> TODO("Handle card vault failure.")
++     is CardVaultResult.AuthorizationRequired -> presentAuthChallenge(result.authChallenge)
++   }
   }
 
-  override fun onApproveOrderSuccess(result: CardResult) {
-    TODO("Capture or authorize order on your server.")
-+   // Discard auth state when done
-+   authState = null
-  }
-
-  override fun onApproveOrderFailure(error: PayPalSDKError) {
-    TODO("Handle approve order failure.")
-+   // Discard auth state when done
-+   authState = null
-  }
-
-+ override fun onApproveOrderAuthorizationRequired(authChallenge: CardAuthChallenge) {
++ private fun presentAuthChallenge(authChallenge: CardAuthChallenge) {
 +   // Manually present auth challenge
 +   val result = cardClient.presentAuthChallenge(this, authChallenge)
 +   when (result) {
 +     is CardPresentAuthChallengeResult.Success -> {
-+       // Capture auth state for balancing call to completeAuthChallenge() in onResume()
++       // Capture auth state for balancing call to finishApproveOrder()/finishVault() when
++       // the merchant application re-enters the foreground
 +       authState = result.authState
 +     }
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
 + }
 
-  override fun onVaultSuccess(result: CardVaultResult) {
++ private fun checkForAuthCompletion(intent: Intent) = authState?.let { state ->
++   // check for approve order completion
++   when (val approveOrderResult = cardClient.finishApproveOrder(intent, state)) {
++     is CardFinishApproveOrderResult.Success -> {
++       TODO("Capture or authorize order on your server.")
++       authState = null // Discard auth state when done
++     }
++
++     is CardFinishApproveOrderResult.Failure -> {
++       TODO("Handle approve order failure.")
++       authState = null // Discard auth state when done
++     }
++
++     CardFinishApproveOrderResult.Canceled -> {
++       TODO("Give user the option to restart the flow.")
++       authState = null // Discard auth state when done
++     }
++
++     CardFinishApproveOrderResult.NoResult -> {
++       // there isn't enough information to determine the state of the auth challenge for this payment method
++     }
++   }
++
++   // check for vault completion
++   when (val vaultResult = cardClient.finishVault(intent, state)) {
++     is CardFinishVaultResult.Success -> {
++       TODO("Create payment token on your server.")
++       authState = null // Discard auth state when done
++     }
++     is CardFinishVaultResult.Failure -> {
++       TODO("Handle card vault failure.")
++       authState = null // Discard auth state when done
++     }
++     CardFinishVaultResult.Canceled -> {
++       TODO("Give user the option to restart the flow.")
++       authState = null // Discard auth state when done
++     }
++     CardFinishVaultResult.NoResult -> {
++       // there isn't enough information to determine the state of the auth challenge for this payment method
++     }
++   }
++ }
+
+- override fun onApproveOrderSuccess(result: CardResult) {
+-   TODO("Capture or authorize order on your server.")
+- }
+
+- override fun onApproveOrderFailure(error: PayPalSDKError) {
+-   TODO("Handle approve order failure.")
+- }
+
+- override fun onVaultSuccess(result: CardVaultResult) {
 -   val authChallenge = result.authChallenge
 -   if (authChallenge != null) {
 -     cardClient?.presentAuthChallenge(activity, authChallenge)
 -   } else {
-      TODO("Create payment token on your server.")
+-     TODO("Create payment token on your server.")
 -   }
-+   // Discard auth state when done
-+   authState = null
-  }
+- }
   
-  override fun onVaultFailure(error: PayPalSDKError) {
-    TODO("Handle card vault failure.")
-+   // Discard auth state when done
-+   authState = null
-  }
-  
-+ override fun onVaultAuthorizationRequired(authChallenge: CardAuthChallenge) {
-+   // Manually present auth challenge
-+   val result = cardClient.presentAuthChallenge(this, authChallenge)
-+   when (result) {
-+     is CardPresentAuthChallengeResult.Success -> {
-+       // Capture auth state for balancing call to completeAuthChallenge() in onResume()
-+       authState = result.authState
-+     }
-+     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
-+   }
-+ }
+- override fun onVaultFailure(error: PayPalSDKError) {
+-   TODO("Handle card vault failure.")
+- }
+
+- override fun onDestroy() {
+-   super.onDestroy()
+-   cardClient.removeObservers()
+- }
 }
 ```
 
