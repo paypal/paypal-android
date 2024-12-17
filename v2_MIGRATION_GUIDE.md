@@ -29,13 +29,13 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 + override fun onResume() {
 +   super.onResume()
 +   // Manually attempt auth challenge completion (via host activity intent deep link)
-+   checkForAuthCompletion(intent)
++   checkForCardAuthCompletion(intent)
 + }
 
 + override fun onNewIntent(newIntent: Intent) {
 +   super.onNewIntent(newIntent)
 +   // Manually attempt auth challenge completion (via new intent deep link)
-+   checkForAuthCompletion(newIntent)
++   checkForCardAuthCompletion(newIntent)
 + }
 
   fun approveOrder() {
@@ -70,7 +70,7 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   }
 + }
 
-+ fun checkForAuthCompletion(intent: Intent) = authState?.let { state ->
++ fun checkForCardAuthCompletion(intent: Intent) = authState?.let { state ->
 +   // check for approve order completion
 +   when (val approveOrderResult = cardClient.finishApproveOrder(intent, state)) {
 +     is CardFinishApproveOrderResult.Success -> {
@@ -165,76 +165,131 @@ Here are some detailed notes on the changes made to Card Payments in v2:
 We refactored the `PayPalWebClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
 ```diff
-class SampleActivity: ComponentActivity(), PayPalWebCheckoutListener, PayPalWebVaultListener {
+-class SampleActivity: ComponentActivity(), PayPalWebCheckoutListener, PayPalWebVaultListener {
++class SampleActivity: ComponentActivity() {
 
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 - val payPalClient = PayPalWebCheckoutClient(requireActivity(), config, "my-deep-link-url-scheme")
 + val payPalClient = PayPalWebCheckoutClient(requireContext(), config, "my-deep-link-url-scheme")
 + var authState: String? = null
 
-  init {
-    payPalClient.listener = this
-    payPalClient.vaultListener = this
-  }
+- init {
+-   payPalClient.listener = this
+-   payPalClient.vaultListener = this
+- }
 
 + override fun onResume() {
 +   super.onResume()
-+   // Manually attempt auth challenge completion (via deep link)
-+   authState?.let { state -> payPalClient.completeAuthChallenge(intent, state) }
++   // Manually attempt auth challenge completion (via host activity intent deep link)
++   checkForPayPalAuthCompletion(intent)
 + }
 
-  override fun onDestroy() {
-    super.onDestroy()
-    payPalClient.removeObservers()
-  }
++ override fun onNewIntent(newIntent: Intent) {
++   super.onNewIntent(newIntent)
++   // Manually attempt auth challenge completion (via new intent deep link)
++   checkForPayPalAuthCompletion(newIntent)
++ }
+
+- override fun onDestroy() {
+-   super.onDestroy()
+-   payPalClient.removeObservers()
+- }
 
   private fun launchPayPalCheckout() {
     val checkoutRequest: PayPalWebCheckoutRequest = TODO("Create a PayPal checkout request.")
 -   payPalClient.start(checkoutRequest)
-+   payPalClient.start(this, checkoutRequest)
++   when (val result = paypalClient.start(this, checkoutRequest)) {
++     is PayPalPresentAuthChallengeResult.Success -> {
++       // Capture auth state for balancing call to finishStart() when
++       // the merchant application re-enters the foreground
++       authState = result.authState
++     }
++     is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
++   }
   }
   
   private fun launchPayPalVault() {
     val vaultRequest: PayPalWebVaultRequest = TODO("Create a card vault request.")
 -   payPalClient.vault(vaultRequest)
-+   payPalClient.vault(this, vaultRequest)
-  }
-  
-  override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
-    TODO("Capture or authorize order on your server.")
-+   // Discard auth state when done
-+   authState = null
-  }
-
-  fun onPayPalWebFailure(error: PayPalSDKError) {
-    TODO("Handle approve order failure.")
-+   // Discard auth state when done
-+   authState = null
++   when (val result = paypalClient.vault(this, vaultRequest)) {
++     is PayPalPresentAuthChallengeResult.Success -> {
++       // Capture auth state for balancing call to finishVault() when
++       // the merchant application re-enters the foreground
++       authState = result.authState
++     }
++     is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
++   }
   }
 
-  fun onPayPalWebCanceled() {
-    TODO("Notify user PayPal checkout was canceled.")
-+   // Discard auth state when done
-+   authState = null
-  }
++ fun checkForPayPalAuthCompletion(intent: Intent) = authState?.let { state ->
++   // check for checkout completion
++   when (val checkoutResult = cardClient.finishStart(intent, state)) {
++     is PayPalWebCheckoutFinishStartResult.Success -> {
++       TODO("Capture or authorize order on your server.")
++       authState = null // Discard auth state when done
++     }
++
++     is PayPalWebCheckoutFinishStartResult.Failure -> {
++       TODO("Handle approve order failure.")
++       authState = null // Discard auth state when done
++     }
++
++     is PayPalWebCheckoutFinishStartResult.Canceled -> {
++       TODO("Notify user PayPal checkout was canceled.")
++       authState = null // Discard auth state when done
++     }
++
++     PayPalWebCheckoutFinishStartResult.NoResult -> {
++       // there isn't enough information to determine the state of the auth challenge for this payment method
++     }
++   }
++
++   // check for vault completion
++   when (val vaultResult = cardClient.finishVault(intent, state)) {
++     is PayPalWebCheckoutFinishStartResult.Success -> {
++       TODO("Create payment token on your server.")
++       authState = null // Discard auth state when done
++     }
++
++     is PayPalWebCheckoutFinishStartResult.Failure -> {
++       TODO("Handle card vault failure.")
++       authState = null // Discard auth state when done
++     }
++
++     is PayPalWebCheckoutFinishStartResult.Canceled -> {
++       TODO("Notify user PayPal vault was canceled.")
++       authState = null // Discard auth state when done
++     }
++
++     PayPalWebCheckoutFinishStartResult.NoResult -> {
++       // there isn't enough information to determine the state of the auth challenge for this payment method
++     }
++   }
++ }
   
-  fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
-    TODO("Create payment token on your server.")
-+   // Discard auth state when done
-+   authState = null
-  }
+- override fun onPayPalWebSuccess(result: PayPalWebCheckoutResult) {
+-   TODO("Capture or authorize order on your server.")
+- }
+
+- override fun onPayPalWebFailure(error: PayPalSDKError) {
+-   TODO("Handle approve order failure.")
+- }
+
+- override fun onPayPalWebCanceled() {
+-   TODO("Notify user PayPal checkout was canceled.")
+- }
   
-  fun onPayPalWebVaultFailure(error: PayPalSDKError) {
-    TODO("Handle card vault failure.")
-+   // Discard auth state when done
-+   authState = null
-  }
+- fun onPayPalWebVaultSuccess(result: PayPalWebVaultResult) {
+-   TODO("Create payment token on your server.")
+- }
   
-  fun onPayPalWebVaultCanceled() {
-    TODO("Notify user PayPal vault was canceled.")
-+   // Discard auth state when done
-+   authState = null
-  }
+- fun onPayPalWebVaultFailure(error: PayPalSDKError) {
+-   TODO("Handle card vault failure.")
+- }
+  
+- fun onPayPalWebVaultCanceled() {
+-   TODO("Notify user PayPal vault was canceled.")
+- }
 }
 ```
 
