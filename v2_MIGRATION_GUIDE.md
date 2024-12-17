@@ -246,22 +246,22 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
 +
 +   // check for vault completion
 +   when (val vaultResult = cardClient.finishVault(intent, state)) {
-+     is PayPalWebCheckoutFinishStartResult.Success -> {
++     is PayPalWebCheckoutFinishVaultResult.Success -> {
 +       TODO("Create payment token on your server.")
 +       authState = null // Discard auth state when done
 +     }
 +
-+     is PayPalWebCheckoutFinishStartResult.Failure -> {
++     is PayPalWebCheckoutFinishVaultResult.Failure -> {
 +       TODO("Handle card vault failure.")
 +       authState = null // Discard auth state when done
 +     }
 +
-+     is PayPalWebCheckoutFinishStartResult.Canceled -> {
++     is PayPalWebCheckoutFinishVaultResult.Canceled -> {
 +       TODO("Notify user PayPal vault was canceled.")
 +       authState = null // Discard auth state when done
 +     }
 +
-+     PayPalWebCheckoutFinishStartResult.NoResult -> {
++     PayPalWebCheckoutFinishVaultResult.NoResult -> {
 +       // there isn't enough information to determine the state of the auth challenge for this payment method
 +     }
 +   }
