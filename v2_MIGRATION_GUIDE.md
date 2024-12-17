@@ -13,7 +13,8 @@ This guide highlights how to migrate to the latest version of the PayPal SDK.
 We refactored the `CardClient` API to improve the developer experience. Use this diff to guide your migration from `v1` to `v2`:
 
 ```diff
-class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListener {
+-class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListener {
++class SampleActivity: ComponentActivity() {
 
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 - val cardClient = CardClient(requireActivity(), config)
@@ -59,8 +60,7 @@ class SampleActivity: ComponentActivity(), ApproveOrderListener, CardVaultListen
 
 + private fun presentAuthChallenge(authChallenge: CardAuthChallenge) {
 +   // Manually present auth challenge
-+   val result = cardClient.presentAuthChallenge(this, authChallenge)
-+   when (result) {
++   when (val result = cardClient.presentAuthChallenge(this, authChallenge)) {
 +     is CardPresentAuthChallengeResult.Success -> {
 +       // Capture auth state for balancing call to finishApproveOrder()/finishVault() when
 +       // the merchant application re-enters the foreground
