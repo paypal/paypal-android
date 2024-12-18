@@ -2,7 +2,7 @@
 
 This guide highlights how to migrate to the latest version of the PayPal SDK.
 
-> NOTE: for evolution of this guide, see the previous [v2.0.0-beta1 MIGRATION_GUIDE](https://github.com/paypal/paypal-android/blob/4afcf913ae8ae91c741faa4a7d49f8ba44765117/v2_MIGRATION_GUIDE.md).
+> NOTE: for evolution of this guide, see the MIGRATION_GUIDE for [v2.0.0-beta1](https://github.com/paypal/paypal-android/blob/4afcf913ae8ae91c741faa4a7d49f8ba44765117/v2_MIGRATION_GUIDE.md).
 
 ## Table of Contents
 
