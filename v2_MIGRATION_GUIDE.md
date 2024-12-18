@@ -158,6 +158,13 @@ Here are some detailed notes on the changes made to Card Payments in v2:
 - In `v2` the host application is responsible for calling `CardClient#completeAuthChallenge()` to attempt completion of an auth challenge.
 - The goal of this change is to make the SDK less opinionated and give host applications more control over the auth challenge user experience.
 
+### Migration from Listener Patern to Result Types
+
+- In `v1` the SDK would notify the host application of success, failure, etc. events using a registered listener
+- In `v2` the host application will receive a sealed class `Result` type in response to each method invocation
+- The goal of this change is to prevent having to retain listener references and to make auth challenge presentation more explicit
+- Sealed class result types also have the added benefit of explicitly calling out all possible outcomes of a related method inovcation
+
 </details>
 
 ## PayPal Web Payments
@@ -309,6 +316,13 @@ Here are some detailed notes on the changes made to PayPal Web Payments in v2:
 - In `v1` the SDK registers a lifecycle observer to parse incoming deep links when the host application comes into the foreground.
 - In `v2` the host application is responsible for calling `PayPalWebCheckoutClient#completeAuthChallenge()` to attempt completion of an auth challenge.
 - The goal of this change is to make the SDK less opinionated and give host applications more control over the auth challenge user experience.
+
+### Migration from Listener Patern to Result Types
+
+- In `v1` the SDK would notify the host application of success, failure, etc. events using a registered listener
+- In `v2` the host application will receive a sealed class `Result` type in response to each method invocation
+- The goal of this change is to prevent having to retain listener references and to make auth challenge presentation more explicit
+- Sealed class result types also have the added benefit of explicitly calling out all possible outcomes of a related method inovcation
 
 </details>
 
