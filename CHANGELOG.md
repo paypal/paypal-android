@@ -26,7 +26,13 @@
   * PayPalWebPayments
     * Remove `PayPalWebCheckoutClient.listener` property
     * Add `PayPalWebCheckoutClient.finishStart(Intent, String)` method
+    * Remove `PayPalWebCheckoutResult` type
     * Add `PayPalWebCheckoutFinishStartResult` type
+    * Remove `PayPalWebCheckoutClient.vaultListener` type
+    * Add `PayPalWebCheckoutClient.finishVault(Intent, String)` method
+    * Remove `PayPalWebCheckoutClient.removeObservers()` method
+    * Add `PayPalWebCheckoutFinishVaulResult` type
+    * Remove `PayPalWebVaultResult` type
 
 ## 2.0.0-beta1 (2024-11-20)
 * Breaking Changes
