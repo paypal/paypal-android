@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
  * Represents raw credit or debit card data provided by the customer.
  */
 @Parcelize
-data class Card @JvmOverloads constructor(
+public data class Card @JvmOverloads constructor(
 
     /**
      * The primary account number (PAN) for the payment card

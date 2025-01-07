@@ -1,0 +1,9 @@
+// Ref: https://discuss.gradle.org/t/common-gradle-to-share-across-modules-in-a-multi-module-android-project/47987/2
+// Ref: https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html#sec:sharing_logic_via_convention_plugins
+android {
+    kotlinOptions {
+        // Ref: https://stackoverflow.com/a/63897555
+        // Ref: Effective Kotlin Chapter 2: Readability, Item #13
+        freeCompilerArgs += '-Xexplicit-api=strict'
+    }
+}

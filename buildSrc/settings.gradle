@@ -1,0 +1,9 @@
+// Ref: https://stackoverflow.com/a/70878181
+dependencyResolutionManagement {
+    versionCatalogs {
+        create("libs") {
+            from(files("../gradle/libs.versions.toml"))
+        }
+    }
+}
+

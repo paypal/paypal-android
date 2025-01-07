@@ -38,6 +38,7 @@ squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
 striktMockk = "0.30.1"
+groovyGradlePlugin = "1.9.0"
 
 [libraries]
 android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
@@ -84,6 +85,7 @@ detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-format
 detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
 
 [plugins]
+groovy-gradlePlugin = { id = "dev.gradleplugins.groovy-gradle-plugin", version.ref = "groovyGradlePlugin" }
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
@@ -93,3 +95,4 @@ gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePla
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
+payPalSdks = { id = "paypalsdks.android-conventions" }

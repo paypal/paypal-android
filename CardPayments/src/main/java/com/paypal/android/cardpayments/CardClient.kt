@@ -140,7 +140,7 @@ class CardClient internal constructor(
         return result
     }
 
-    private fun captureAuthChallengePresentationAnalytics(
+    fun captureAuthChallengePresentationAnalytics(
         result: CardPresentAuthChallengeResult,
         authChallenge: CardAuthChallenge
     ) = when (result) {
