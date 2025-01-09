@@ -67,7 +67,7 @@ class CardClient internal constructor(
                         }
                         callback.onCardApproveOrderResult(result)
                     } else {
-                        analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
+                        analytics.notifyApproveOrderAuthChallengeRequired(cardRequest.orderId)
 
                         val url = Uri.parse(response.payerActionHref)
                         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
@@ -148,7 +148,7 @@ class CardClient internal constructor(
             when (authChallenge) {
                 // TODO: see if we can get order id from somewhere
                 is CardAuthChallenge.ApproveOrder ->
-                    analytics.notifyApproveOrderAuthChallengeStarted(null)
+                    analytics.notifyApproveOrderAuthChallengePresentationSucceeded(null)
 
                 // TODO: see if we can get setup token from somewhere
                 is CardAuthChallenge.Vault ->
@@ -160,7 +160,7 @@ class CardClient internal constructor(
             when (authChallenge) {
                 // TODO: see if we can get order id from somewhere
                 is CardAuthChallenge.ApproveOrder ->
-                    analytics.notifyApproveOrderAuthChallengeFailed(null)
+                    analytics.notifyApproveOrderAuthChallengePresentationFailed(null)
 
                 // TODO: see if we can get setup token id from somewhere
                 is CardAuthChallenge.Vault ->
