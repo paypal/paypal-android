@@ -1,3 +1,5 @@
+@file:Suppress("SpacingAroundParens", "NoMultipleSpaces", "MaxLineLength")
+
 package com.paypal.android.cardpayments.analytics
 
 internal enum class ApproveOrderEvent(val value: String) {

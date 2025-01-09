@@ -1,6 +1,8 @@
+@file:Suppress("SpacingAroundParens", "NoMultipleSpaces", "MaxLineLength")
+
 package com.paypal.android.cardpayments.analytics
 
-internal enum class VaultEvent (val value: String) {
+internal enum class VaultEvent(val value: String) {
     // @formatter:off
     STARTED(  "card-payments:vault-wo-purchase:started"),
     SUCCEEDED("card-payments:vault-wo-purchase:succeeded"),

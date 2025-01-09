@@ -1,3 +1,5 @@
+@file:Suppress("SpacingAroundParens", "NoMultipleSpaces", "MaxLineLength")
+
 package com.paypal.android.paypalwebpayments.analytics
 
 internal enum class VaultEvent(val value: String) {
