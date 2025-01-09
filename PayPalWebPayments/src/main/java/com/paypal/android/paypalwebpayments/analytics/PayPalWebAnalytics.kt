@@ -1,4 +1,4 @@
-package com.paypal.android.paypalwebpayments
+package com.paypal.android.paypalwebpayments.analytics
 
 import com.paypal.android.corepayments.analytics.AnalyticsService
 

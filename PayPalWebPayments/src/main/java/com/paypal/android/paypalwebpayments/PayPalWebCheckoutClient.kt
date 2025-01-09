@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
