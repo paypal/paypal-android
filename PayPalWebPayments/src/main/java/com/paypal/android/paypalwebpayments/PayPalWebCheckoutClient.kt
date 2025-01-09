@@ -5,6 +5,9 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
+import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
+import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -16,6 +19,10 @@ class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher
 ) {
+
+    // for analytics tracking
+    private var checkoutOrderId: String? = null
+    private var vaultSetupTokenId: String? = null
 
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
@@ -38,14 +45,18 @@ class PayPalWebCheckoutClient internal constructor(
         activity: ComponentActivity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
-        analytics.notifyCheckoutStarted(request.orderId)
+        checkoutOrderId = request.orderId
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
-            is PayPalPresentAuthChallengeResult.Success ->
-                analytics.notifyCheckoutAuthChallengeStarted(request.orderId)
+            is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
+                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                checkoutOrderId
+            )
 
             is PayPalPresentAuthChallengeResult.Failure ->
-                analytics.notifyCheckoutAuthChallengeFailed(request.orderId)
+                analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
         }
         return result
     }
@@ -59,14 +70,18 @@ class PayPalWebCheckoutClient internal constructor(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
-        analytics.notifyVaultStarted(request.setupTokenId)
+        vaultSetupTokenId = request.setupTokenId
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+
         val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
         when (result) {
-            is PayPalPresentAuthChallengeResult.Success ->
-                analytics.notifyVaultAuthChallengeStarted(request.setupTokenId)
+            is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
+                VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                vaultSetupTokenId
+            )
 
             is PayPalPresentAuthChallengeResult.Failure ->
-                analytics.notifyVaultAuthChallengeFailed(request.setupTokenId)
+                analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, vaultSetupTokenId)
         }
         return result
     }
@@ -86,13 +101,13 @@ class PayPalWebCheckoutClient internal constructor(
         val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success ->
-                analytics.notifyCheckoutAuthChallengeSucceeded(result.orderId)
+                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
 
             is PayPalWebCheckoutFinishStartResult.Canceled ->
-                analytics.notifyCheckoutAuthChallengeCanceled(result.orderId)
+                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
 
             is PayPalWebCheckoutFinishStartResult.Failure ->
-                analytics.notifyCheckoutAuthChallengeFailed(result.orderId)
+                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
 
             PayPalWebCheckoutFinishStartResult.NoResult -> {
                 // no analytics tracking required at the moment
@@ -117,13 +132,13 @@ class PayPalWebCheckoutClient internal constructor(
         // TODO: see if we can get setup token id from somewhere for tracking
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
-                analytics.notifyVaultAuthChallengeSucceeded(null)
+                analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
 
             is PayPalWebCheckoutFinishVaultResult.Failure ->
-                analytics.notifyVaultAuthChallengeFailed(null)
+                analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
 
             PayPalWebCheckoutFinishVaultResult.Canceled ->
-                analytics.notifyVaultAuthChallengeCanceled(null)
+                analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
 
             PayPalWebCheckoutFinishVaultResult.NoResult -> {
                 // no analytics tracking required at the moment

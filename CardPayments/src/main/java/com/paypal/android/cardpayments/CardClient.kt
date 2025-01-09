@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import com.paypal.android.cardpayments.analytics.ApproveOrderEvent
+import com.paypal.android.cardpayments.analytics.CardAnalytics
+import com.paypal.android.cardpayments.analytics.VaultEvent
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.CoreConfig
@@ -25,7 +28,9 @@ class CardClient internal constructor(
     private val dispatcher: CoroutineDispatcher
 ) {
 
+    // for analytics tracking
     private var approveOrderId: String? = null
+    private var vaultSetupTokenId: String? = null
 
     /**
      *  CardClient constructor
@@ -50,15 +55,14 @@ class CardClient internal constructor(
      * @param callback [CardApproveOrderCallback] callback for receiving result asynchronously
      */
     fun approveOrder(cardRequest: CardRequest, callback: CardApproveOrderCallback) {
-        // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
-        analytics.notifyApproveOrderStarted(cardRequest.orderId)
+        analytics.notify(ApproveOrderEvent.STARTED, approveOrderId)
 
         CoroutineScope(dispatcher).launch {
             when (val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)) {
                 is ConfirmPaymentSourceResult.Success -> {
                     if (response.payerActionHref == null) {
-                        analytics.notifyApproveOrderSucceeded(response.orderId)
+                        analytics.notify(ApproveOrderEvent.SUCCEEDED, approveOrderId)
                         val result = response.run {
                             CardApproveOrderResult.Success(
                                 orderId = orderId,
@@ -67,7 +71,7 @@ class CardClient internal constructor(
                         }
                         callback.onCardApproveOrderResult(result)
                     } else {
-                        analytics.notifyApproveOrderAuthChallengeReceived(cardRequest.orderId)
+                        analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_REQUIRED, approveOrderId)
 
                         val url = Uri.parse(response.payerActionHref)
                         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
@@ -77,7 +81,7 @@ class CardClient internal constructor(
                 }
 
                 is ConfirmPaymentSourceResult.Failure -> {
-                    analytics.notifyApproveOrderFailed(cardRequest.orderId)
+                    analytics.notify(ApproveOrderEvent.FAILED, approveOrderId)
                     val result = CardApproveOrderResult.Failure(response.error)
                     callback.onCardApproveOrderResult(result)
                 }
@@ -95,7 +99,8 @@ class CardClient internal constructor(
      * @param callback [CardVaultCallback] callback for receiving a [CardVaultResult] asynchronously
      */
     fun vault(cardVaultRequest: CardVaultRequest, callback: CardVaultCallback) {
-        analytics.notifyVaultStarted(cardVaultRequest.setupTokenId)
+        vaultSetupTokenId = cardVaultRequest.setupTokenId
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
         CoroutineScope(dispatcher).launch {
             val updateSetupTokenResult = cardVaultRequest.run {
@@ -105,10 +110,10 @@ class CardClient internal constructor(
                 is UpdateSetupTokenResult.Success -> {
                     val approveHref = updateSetupTokenResult.approveHref
                     if (approveHref == null) {
-                        analytics.notifyVaultSucceeded(updateSetupTokenResult.setupTokenId)
+                        analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
                         updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
                     } else {
-                        analytics.notifyVaultAuthChallengeReceived(updateSetupTokenResult.setupTokenId)
+                        analytics.notify(VaultEvent.AUTH_CHALLENGE_REQUIRED, vaultSetupTokenId)
                         val url = Uri.parse(approveHref)
                         val authChallenge =
                             CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
@@ -117,7 +122,7 @@ class CardClient internal constructor(
                 }
 
                 is UpdateSetupTokenResult.Failure -> {
-                    analytics.notifyVaultFailed(cardVaultRequest.setupTokenId)
+                    analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
                     CardVaultResult.Failure(updateSetupTokenResult.error)
                 }
             }
@@ -146,25 +151,29 @@ class CardClient internal constructor(
     ) = when (result) {
         is CardPresentAuthChallengeResult.Success -> {
             when (authChallenge) {
-                // TODO: see if we can get order id from somewhere
-                is CardAuthChallenge.ApproveOrder ->
-                    analytics.notifyApproveOrderAuthChallengeStarted(null)
+                is CardAuthChallenge.ApproveOrder -> analytics.notify(
+                    ApproveOrderEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    approveOrderId
+                )
 
-                // TODO: see if we can get setup token from somewhere
-                is CardAuthChallenge.Vault ->
-                    analytics.notifyVaultAuthChallengeStarted(null)
+                is CardAuthChallenge.Vault -> analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    vaultSetupTokenId
+                )
             }
         }
 
         is CardPresentAuthChallengeResult.Failure -> {
             when (authChallenge) {
-                // TODO: see if we can get order id from somewhere
-                is CardAuthChallenge.ApproveOrder ->
-                    analytics.notifyApproveOrderAuthChallengeFailed(null)
+                is CardAuthChallenge.ApproveOrder -> analytics.notify(
+                    ApproveOrderEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    approveOrderId
+                )
 
-                // TODO: see if we can get setup token id from somewhere
-                is CardAuthChallenge.Vault ->
-                    analytics.notifyVaultAuthChallengeFailed(null)
+                is CardAuthChallenge.Vault -> analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    vaultSetupTokenId
+                )
             }
         }
     }
@@ -173,13 +182,13 @@ class CardClient internal constructor(
         val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
         when (result) {
             is CardFinishApproveOrderResult.Success ->
-                analytics.notifyApproveOrderAuthChallengeSucceeded(result.orderId)
+                analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_SUCCEEDED, approveOrderId)
 
             is CardFinishApproveOrderResult.Failure ->
-                analytics.notifyApproveOrderAuthChallengeFailed(null)
+                analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_FAILED, approveOrderId)
 
             CardFinishApproveOrderResult.Canceled ->
-                analytics.notifyApproveOrderAuthChallengeCanceled(null)
+                analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_CANCELED, approveOrderId)
 
             else -> {
                 // no analytics tracking required at the moment
@@ -192,15 +201,13 @@ class CardClient internal constructor(
         val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
         when (result) {
             is CardFinishVaultResult.Success ->
-                analytics.notifyVaultAuthChallengeSucceeded(result.setupTokenId)
+                analytics.notify(VaultEvent.AUTH_CHALLENGE_SUCCEEDED, vaultSetupTokenId)
 
-            // TODO: see if we can access setup token id for analytics tracking
             is CardFinishVaultResult.Failure ->
-                analytics.notifyVaultAuthChallengeFailed(null)
+                analytics.notify(VaultEvent.AUTH_CHALLENGE_FAILED, vaultSetupTokenId)
 
-            // TODO: see if we can access setup token id for analytics tracking
             CardFinishVaultResult.Canceled ->
-                analytics.notifyVaultAuthChallengeCanceled(null)
+                analytics.notify(VaultEvent.AUTH_CHALLENGE_CANCELED, vaultSetupTokenId)
 
             else -> {
                 // no analytics tracking required at the moment
