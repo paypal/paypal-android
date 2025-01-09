@@ -13,6 +13,6 @@ internal enum class ApproveOrderEvent(val value: String) {
 
     AUTH_CHALLENGE_SUCCEEDED("card-payments:approve-order:auth-challenge:succeeded"),
     AUTH_CHALLENGE_FAILED(   "card-payments:approve-order:auth-challenge:failed"),
-    AUTH_CHALLENGE_CANCELED( "card-payments:approve-order:auth-challenge-canceled"),
+    AUTH_CHALLENGE_CANCELED( "card-payments:approve-order:auth-challenge:canceled"),
     // @formatter:on
 }
