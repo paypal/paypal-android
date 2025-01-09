@@ -2,7 +2,6 @@ package com.paypal.android.cardpayments.analytics
 
 import com.paypal.android.corepayments.analytics.AnalyticsService
 
-@Suppress("TooManyFunctions")
 internal class CardAnalytics(private val analyticsService: AnalyticsService) {
 
     fun notify(event: ApproveOrderEvent, orderId: String?) {

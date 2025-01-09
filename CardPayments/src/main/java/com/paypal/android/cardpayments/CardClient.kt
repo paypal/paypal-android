@@ -28,6 +28,7 @@ class CardClient internal constructor(
     private val dispatcher: CoroutineDispatcher
 ) {
 
+    // for analytics tracking
     private var approveOrderId: String? = null
     private var vaultSetupTokenId: String? = null
 
