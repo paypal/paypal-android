@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import com.paypal.android.cardpayments.analytics.ApproveOrderEvent
+import com.paypal.android.cardpayments.analytics.CardAnalytics
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.CoreConfig
@@ -52,13 +54,13 @@ class CardClient internal constructor(
     fun approveOrder(cardRequest: CardRequest, callback: CardApproveOrderCallback) {
         // TODO: deprecate this method and offer auth challenge integration pattern (similar to vault)
         approveOrderId = cardRequest.orderId
-        analytics.notifyApproveOrderStarted(cardRequest.orderId)
+        analytics.notify(ApproveOrderEvent.STARTED, approveOrderId)
 
         CoroutineScope(dispatcher).launch {
             when (val response = checkoutOrdersAPI.confirmPaymentSource(cardRequest)) {
                 is ConfirmPaymentSourceResult.Success -> {
                     if (response.payerActionHref == null) {
-                        analytics.notifyApproveOrderSucceeded(response.orderId)
+                        analytics.notify(ApproveOrderEvent.SUCCEEDED, approveOrderId)
                         val result = response.run {
                             CardApproveOrderResult.Success(
                                 orderId = orderId,
@@ -67,7 +69,7 @@ class CardClient internal constructor(
                         }
                         callback.onCardApproveOrderResult(result)
                     } else {
-                        analytics.notifyApproveOrderAuthChallengeRequired(cardRequest.orderId)
+                        analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_REQUIRED, approveOrderId)
 
                         val url = Uri.parse(response.payerActionHref)
                         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
@@ -77,7 +79,7 @@ class CardClient internal constructor(
                 }
 
                 is ConfirmPaymentSourceResult.Failure -> {
-                    analytics.notifyApproveOrderFailed(cardRequest.orderId)
+                    analytics.notify(ApproveOrderEvent.FAILED, approveOrderId)
                     val result = CardApproveOrderResult.Failure(response.error)
                     callback.onCardApproveOrderResult(result)
                 }
@@ -148,7 +150,10 @@ class CardClient internal constructor(
             when (authChallenge) {
                 // TODO: see if we can get order id from somewhere
                 is CardAuthChallenge.ApproveOrder ->
-                    analytics.notifyApproveOrderAuthChallengePresentationSucceeded(null)
+                    analytics.notify(
+                        ApproveOrderEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                        approveOrderId
+                    )
 
                 // TODO: see if we can get setup token from somewhere
                 is CardAuthChallenge.Vault ->
@@ -160,7 +165,10 @@ class CardClient internal constructor(
             when (authChallenge) {
                 // TODO: see if we can get order id from somewhere
                 is CardAuthChallenge.ApproveOrder ->
-                    analytics.notifyApproveOrderAuthChallengePresentationFailed(null)
+                    analytics.notify(
+                        ApproveOrderEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                        approveOrderId
+                    )
 
                 // TODO: see if we can get setup token id from somewhere
                 is CardAuthChallenge.Vault ->
@@ -173,13 +181,13 @@ class CardClient internal constructor(
         val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
         when (result) {
             is CardFinishApproveOrderResult.Success ->
-                analytics.notifyApproveOrderAuthChallengeSucceeded(result.orderId)
+                analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_SUCCEEDED, approveOrderId)
 
             is CardFinishApproveOrderResult.Failure ->
-                analytics.notifyApproveOrderAuthChallengeFailed(null)
+                analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_FAILED, approveOrderId)
 
             CardFinishApproveOrderResult.Canceled ->
-                analytics.notifyApproveOrderAuthChallengeCanceled(null)
+                analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_CANCELED, approveOrderId)
 
             else -> {
                 // no analytics tracking required at the moment

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.cardpayments.analytics.CardAnalytics
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.OrderStatus
