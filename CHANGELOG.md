@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 2.0.0-beta2 (2025-01-13)
 * CorePayments
   * Fix issue that causes analytics version number to always be `null`
 * Breaking Changes
