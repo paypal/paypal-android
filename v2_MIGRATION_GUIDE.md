@@ -232,7 +232,7 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
 
 + fun checkForPayPalAuthCompletion(intent: Intent) = authState?.let { state ->
 +   // check for checkout completion
-+   when (val checkoutResult = cardClient.finishStart(intent, state)) {
++   when (val checkoutResult = payPalClient.finishStart(intent, state)) {
 +     is PayPalWebCheckoutFinishStartResult.Success -> {
 +       TODO("Capture or authorize order on your server.")
 +       authState = null // Discard auth state when done
@@ -254,7 +254,7 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
 +   }
 +
 +   // check for vault completion
-+   when (val vaultResult = cardClient.finishVault(intent, state)) {
++   when (val vaultResult = payPalClient.finishVault(intent, state)) {
 +     is PayPalWebCheckoutFinishVaultResult.Success -> {
 +       TODO("Create payment token on your server.")
 +       authState = null // Discard auth state when done
