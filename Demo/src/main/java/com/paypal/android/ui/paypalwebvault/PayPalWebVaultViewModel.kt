@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypalwebvault
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -123,8 +124,8 @@ class PayPalWebVaultViewModel @Inject constructor(
         }
     }
 
-    fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        val result = authState?.let { paypalClient?.finishVault(activity.intent, it) }
+    fun handleBrowserSwitchResult(intent: Intent) {
+        val result = authState?.let { paypalClient?.finishVault(intent, it) }
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
                 vaultPayPalState = ActionState.Success(result)

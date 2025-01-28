@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypalweb
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
@@ -148,8 +149,8 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        val result = authState?.let { paypalClient?.finishStart(activity.intent, it) }
+    fun completeAuthChallenge(intent: Intent) {
+        val result = authState?.let { paypalClient?.finishStart(intent, it) }
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success -> {
                 payPalWebCheckoutState = ActionState.Success(result)
