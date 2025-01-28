@@ -40,11 +40,11 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
-        intent?.let { viewModel.handleBrowserSwitchResult(it) }
+        intent?.let { viewModel.completeAuthChallenge(it) }
     }
 
     OnNewIntentEffect { newIntent ->
-        viewModel.handleBrowserSwitchResult(newIntent)
+        viewModel.completeAuthChallenge(newIntent)
     }
 
     val contentPadding = UIConstants.paddingMedium

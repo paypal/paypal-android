@@ -124,7 +124,7 @@ class PayPalWebVaultViewModel @Inject constructor(
         }
     }
 
-    fun handleBrowserSwitchResult(intent: Intent) {
+    fun completeAuthChallenge(intent: Intent) {
         val result = authState?.let { paypalClient?.finishVault(intent, it) }
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
