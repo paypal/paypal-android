@@ -127,19 +127,27 @@ class PayPalWebVaultViewModel @Inject constructor(
     fun completeAuthChallenge(intent: Intent) {
         val result = authState?.let { paypalClient?.finishVault(intent, it) }
         when (result) {
-            is PayPalWebCheckoutFinishVaultResult.Success ->
+            is PayPalWebCheckoutFinishVaultResult.Success -> {
                 vaultPayPalState = ActionState.Success(result)
+                // discard authState
+                authState = null
+            }
 
-            is PayPalWebCheckoutFinishVaultResult.Failure ->
+            is PayPalWebCheckoutFinishVaultResult.Failure -> {
                 vaultPayPalState = ActionState.Failure(result.error)
+                // discard authState
+                authState = null
+            }
 
-            PayPalWebCheckoutFinishVaultResult.Canceled ->
+            PayPalWebCheckoutFinishVaultResult.Canceled -> {
                 vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
+                // discard authState
+                authState = null
+            }
 
             null, PayPalWebCheckoutFinishVaultResult.NoResult -> {
                 // no result; re-enable PayPal button so user can retry
                 vaultPayPalState = ActionState.Idle
-                // do nothing
             }
         }
     }

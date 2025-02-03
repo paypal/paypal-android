@@ -154,16 +154,22 @@ class PayPalWebViewModel @Inject constructor(
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success -> {
                 payPalWebCheckoutState = ActionState.Success(result)
+                // discard authState
+                authState = null
             }
 
             is PayPalWebCheckoutFinishStartResult.Canceled -> {
                 val error = Exception("USER CANCELED")
                 payPalWebCheckoutState = ActionState.Failure(error)
+                // discard authState
+                authState = null
             }
 
             is PayPalWebCheckoutFinishStartResult.Failure -> {
                 Log.i(TAG, "Checkout Error: ${result.error.errorDescription}")
                 payPalWebCheckoutState = ActionState.Failure(result.error)
+                // discard authState
+                authState = null
             }
 
             null, PayPalWebCheckoutFinishStartResult.NoResult -> {
