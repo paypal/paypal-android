@@ -167,7 +167,8 @@ class PayPalWebViewModel @Inject constructor(
             }
 
             null, PayPalWebCheckoutFinishStartResult.NoResult -> {
-                // do nothing
+                // no result; re-enable PayPal button so user can retry
+                payPalWebCheckoutState = ActionState.Idle
             }
         }
     }

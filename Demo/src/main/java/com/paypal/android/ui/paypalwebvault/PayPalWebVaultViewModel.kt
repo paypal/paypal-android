@@ -137,6 +137,8 @@ class PayPalWebVaultViewModel @Inject constructor(
                 vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
 
             null, PayPalWebCheckoutFinishVaultResult.NoResult -> {
+                // no result; re-enable PayPal button so user can retry
+                vaultPayPalState = ActionState.Idle
                 // do nothing
             }
         }
