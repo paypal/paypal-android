@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypalwebvault
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -123,20 +124,30 @@ class PayPalWebVaultViewModel @Inject constructor(
         }
     }
 
-    fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        val result = authState?.let { paypalClient?.finishVault(activity.intent, it) }
+    fun completeAuthChallenge(intent: Intent) {
+        val result = authState?.let { paypalClient?.finishVault(intent, it) }
         when (result) {
-            is PayPalWebCheckoutFinishVaultResult.Success ->
+            is PayPalWebCheckoutFinishVaultResult.Success -> {
                 vaultPayPalState = ActionState.Success(result)
+                // discard authState
+                authState = null
+            }
 
-            is PayPalWebCheckoutFinishVaultResult.Failure ->
+            is PayPalWebCheckoutFinishVaultResult.Failure -> {
                 vaultPayPalState = ActionState.Failure(result.error)
+                // discard authState
+                authState = null
+            }
 
-            PayPalWebCheckoutFinishVaultResult.Canceled ->
+            PayPalWebCheckoutFinishVaultResult.Canceled -> {
                 vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
+                // discard authState
+                authState = null
+            }
 
             null, PayPalWebCheckoutFinishVaultResult.NoResult -> {
-                // do nothing
+                // no result; re-enable PayPal button so user can retry
+                vaultPayPalState = ActionState.Idle
             }
         }
     }

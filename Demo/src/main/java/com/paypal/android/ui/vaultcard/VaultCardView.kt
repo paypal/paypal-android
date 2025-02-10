@@ -30,6 +30,7 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
+import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
@@ -51,6 +52,10 @@ fun VaultCardView(
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
         intent?.let { viewModel.completeAuthChallenge(it) }
+    }
+
+    OnNewIntentEffect { newIntent ->
+        viewModel.completeAuthChallenge(newIntent)
     }
 
     val contentPadding = UIConstants.paddingMedium

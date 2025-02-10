@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypalweb
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
@@ -148,25 +149,32 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun handleBrowserSwitchResult(activity: ComponentActivity) {
-        val result = authState?.let { paypalClient?.finishStart(activity.intent, it) }
+    fun completeAuthChallenge(intent: Intent) {
+        val result = authState?.let { paypalClient?.finishStart(intent, it) }
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success -> {
                 payPalWebCheckoutState = ActionState.Success(result)
+                // discard authState
+                authState = null
             }
 
             is PayPalWebCheckoutFinishStartResult.Canceled -> {
                 val error = Exception("USER CANCELED")
                 payPalWebCheckoutState = ActionState.Failure(error)
+                // discard authState
+                authState = null
             }
 
             is PayPalWebCheckoutFinishStartResult.Failure -> {
                 Log.i(TAG, "Checkout Error: ${result.error.errorDescription}")
                 payPalWebCheckoutState = ActionState.Failure(result.error)
+                // discard authState
+                authState = null
             }
 
             null, PayPalWebCheckoutFinishStartResult.NoResult -> {
-                // do nothing
+                // no result; re-enable PayPal button so user can retry
+                payPalWebCheckoutState = ActionState.Idle
             }
         }
     }

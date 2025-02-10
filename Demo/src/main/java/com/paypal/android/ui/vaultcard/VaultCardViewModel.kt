@@ -207,18 +207,25 @@ class VaultCardViewModel @Inject constructor(
                         )
                     }
                     updateSetupTokenState = ActionState.Success(setupTokenInfo)
+                    // discard authState
+                    authState = null
                 }
 
                 CardFinishVaultResult.Canceled -> {
                     updateSetupTokenState = ActionState.Failure(Exception("USER CANCELED"))
+                    // discard authState
+                    authState = null
                 }
 
                 is CardFinishVaultResult.Failure -> {
                     updateSetupTokenState = ActionState.Failure(vaultResult.error)
+                    // discard authState
+                    authState = null
                 }
 
                 CardFinishVaultResult.NoResult -> {
-                    // ignore
+                    // no result; re-enable vault button so user can retry
+                    updateSetupTokenState = ActionState.Idle
                 }
             }
         }

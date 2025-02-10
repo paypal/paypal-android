@@ -1,6 +1,5 @@
 package com.paypal.android
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,10 +20,5 @@ class MainActivity : ComponentActivity() {
         setContent {
             DemoApp()
         }
-    }
-
-    override fun onNewIntent(newIntent: Intent) {
-        super.onNewIntent(newIntent)
-        intent = newIntent
     }
 }
