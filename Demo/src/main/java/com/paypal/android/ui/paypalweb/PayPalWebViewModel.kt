@@ -149,31 +149,32 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun completeAuthChallenge(intent: Intent) {
-        authState?.let { authState ->
-            val result = paypalClient?.finishStart(intent, authState)
-            when (result) {
-                is PayPalWebCheckoutFinishStartResult.Success -> {
-                    payPalWebCheckoutState = ActionState.Success(result)
-                    discardAuthState()
-                }
+    fun completeAuthChallenge(intent: Intent) = authState?.let { authState ->
+        completeAuthChallengeWithAuthState(intent, authState)
+    }
 
-                is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                    val error = Exception("USER CANCELED")
-                    payPalWebCheckoutState = ActionState.Failure(error)
-                    discardAuthState()
-                }
+    private fun completeAuthChallengeWithAuthState(intent: Intent, authState: String) {
+        when (val result = paypalClient?.finishStart(intent, authState)) {
+            is PayPalWebCheckoutFinishStartResult.Success -> {
+                payPalWebCheckoutState = ActionState.Success(result)
+                discardAuthState()
+            }
 
-                is PayPalWebCheckoutFinishStartResult.Failure -> {
-                    Log.i(TAG, "Checkout Error: ${result.error.errorDescription}")
-                    payPalWebCheckoutState = ActionState.Failure(result.error)
-                    discardAuthState()
-                }
+            is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                val error = Exception("USER CANCELED")
+                payPalWebCheckoutState = ActionState.Failure(error)
+                discardAuthState()
+            }
 
-                null, PayPalWebCheckoutFinishStartResult.NoResult -> {
-                    // no result; re-enable PayPal button so user can retry
-                    payPalWebCheckoutState = ActionState.Idle
-                }
+            is PayPalWebCheckoutFinishStartResult.Failure -> {
+                Log.i(TAG, "Checkout Error: ${result.error.errorDescription}")
+                payPalWebCheckoutState = ActionState.Failure(result.error)
+                discardAuthState()
+            }
+
+            null, PayPalWebCheckoutFinishStartResult.NoResult -> {
+                // no result; re-enable PayPal button so user can retry
+                payPalWebCheckoutState = ActionState.Idle
             }
         }
     }
