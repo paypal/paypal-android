@@ -149,32 +149,33 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun completeAuthChallenge(intent: Intent) = authState?.let { authState ->
-        completeAuthChallengeWithAuthState(intent, authState)
-    }
+    private fun checkIfPayPalAuthFinished(intent: Intent): PayPalWebCheckoutFinishStartResult? =
+        authState?.let { paypalClient?.finishStart(intent, it) }
 
-    private fun completeAuthChallengeWithAuthState(intent: Intent, authState: String) {
-        when (val result = paypalClient?.finishStart(intent, authState)) {
-            is PayPalWebCheckoutFinishStartResult.Success -> {
-                payPalWebCheckoutState = ActionState.Success(result)
-                discardAuthState()
-            }
+    fun completeAuthChallenge(intent: Intent) {
+        checkIfPayPalAuthFinished(intent)?.let { payPalAuthResult ->
+            when (payPalAuthResult) {
+                is PayPalWebCheckoutFinishStartResult.Success -> {
+                    payPalWebCheckoutState = ActionState.Success(payPalAuthResult)
+                    discardAuthState()
+                }
 
-            is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                val error = Exception("USER CANCELED")
-                payPalWebCheckoutState = ActionState.Failure(error)
-                discardAuthState()
-            }
+                is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                    val error = Exception("USER CANCELED")
+                    payPalWebCheckoutState = ActionState.Failure(error)
+                    discardAuthState()
+                }
 
-            is PayPalWebCheckoutFinishStartResult.Failure -> {
-                Log.i(TAG, "Checkout Error: ${result.error.errorDescription}")
-                payPalWebCheckoutState = ActionState.Failure(result.error)
-                discardAuthState()
-            }
+                is PayPalWebCheckoutFinishStartResult.Failure -> {
+                    Log.i(TAG, "Checkout Error: ${payPalAuthResult.error.errorDescription}")
+                    payPalWebCheckoutState = ActionState.Failure(payPalAuthResult.error)
+                    discardAuthState()
+                }
 
-            null, PayPalWebCheckoutFinishStartResult.NoResult -> {
-                // no result; re-enable PayPal button so user can retry
-                payPalWebCheckoutState = ActionState.Idle
+                PayPalWebCheckoutFinishStartResult.NoResult -> {
+                    // no result; re-enable PayPal button so user can retry
+                    payPalWebCheckoutState = ActionState.Idle
+                }
             }
         }
     }
