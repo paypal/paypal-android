@@ -1,5 +1,70 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* Breaking Changes
+  * PayPalNativePayments
+    * Remove entire PayPalNativePayments module
+  * CardPayments
+    * Remove `CardClient(FragmentActivity, Config)` constructor
+    * Add `CardClient(Context, Config)` constructor
+    * Remove `CardClient.approveOrder(FragmentActivity, CardRequest)` method
+    * Add `CardClient.approveOrder(CardRequest)` method
+    * Remove `CardClient.presentAuthChallenge(FragmentActivity, CardAuthChallenge)` method
+    * Add `CardClient.presentAuthChallenge(ComponentActivity, CardAuthChallenge)` method
+    * Add `CardPresentAuthChallengeResult` type
+    * Add `CardClient.completeAuthChallenge(Intent, String)` method
+    * Add `CardStatus` type
+    * Add `ApproveOrderListener.onApproveOrderAuthorizationRequired(CardAuthChallenge)` method
+    * Add `CardVaultListener.onVaultAuthorizationRequired(CardAuthChallenge)` method
+    * Remove `authChallenge` property from `CardVaultResult`
+    * Remove `deepLinkUrl` and `liabilityShift` properties from `CardResult`
+    * Annotate `CardResult` and `CardVaultResult` constructors as restricted to the library group
+    * Add `didAttemptThreeDSecureAuthentication` property to `CardVaultResult`
+    * Remove `CardClient.approveOrderListener` property
+    * Remove `CardClient.cardVaultListener` property
+    * Remove `ApproveOrderListener` type
+    * Add `CardApproveOrderCallback` interface
+    * Convert `CardApproveOrderResult` to a sealed class
+    * Remove `CardClient.approveOrder(CardRequest)` method
+    * Add `CardClient.approveOrder(CardRequest, CardApproveOrderCallback)` method
+    * Add `CardClient.finishApproveOrder(Intent, String)` method
+    * Add `CardFinishApproveOrderResult` type
+    * Remove `CardResult` type
+    * Remove `CardClient.vault(Context, CardVaultRequest)` method
+    * Remove `CardClient.completeAuthChallenge(Intent, String)` method
+    * Remove `CardClient.removeObservers()` method
+    * Add `CardClient.vault(CardVaultRequest, CardVaultCallback)` method
+    * Add `CardClient.finishVault(Intent, String)` method
+    * Add `CardFinishVaultResult` type
+    * Add `CardVaultCallback` interface
+    * Convert `CardVaultResult` to a sealed class
+  * PayPalWebPayments
+    * Remove `PayPalWebCheckoutClient(FragmentActivity, CoreConfig, String)` constructor
+    * Add `PayPalWebCheckoutClient(Context, CoreConfig, String)` constructor
+    * Remove `PayPalWebCheckoutClient.start(PayPalWebCheckoutRequest)` method
+    * Add `PayPalWebCheckoutClient.start(ComponentActivity, PayPalWebCheckoutRequest)` method
+    * Remove `PayPalWebCheckoutClient.vault(PayPalWebVaultRequest)` method
+    * Add `PayPalWebCheckoutClient.vault(ComponentActivity, PayPalWebVaultRequest)` method
+    * Add `CardClient.completeAuthChallenge(Intent, String)` method
+    * Add `PayPalPresentAuthChallengeResult` type
+    * Add `PayPalWebStatus` type
+    * Remove `PayPalWebCheckoutClient.listener` property
+    * Add `PayPalWebCheckoutClient.finishStart(Intent, String)` method
+    * Remove `PayPalWebCheckoutResult` type
+    * Add `PayPalWebCheckoutFinishStartResult` type
+    * Remove `PayPalWebCheckoutClient.vaultListener` type
+    * Add `PayPalWebCheckoutClient.finishVault(Intent, String)` method
+    * Remove `PayPalWebCheckoutClient.removeObservers()` method
+    * Add `PayPalWebCheckoutFinishVaulResult` type
+    * Remove `PayPalWebVaultResult` type
+  * Gradle
+    * Update `browser-switch` version to `3.0.0-beta`
+    * Update Kotlin version to `1.9.24`
+    * Update Android Gradle Plugin (AGP) to version `8.7.1`
+    * Explicitly declare Java 17 version as the target JVM toolchain
+* CorePayments
+  * Fix issue that causes analytics version number to always be `null`
+
 ## 2.0.0-beta2 (2025-01-13)
 * CorePayments
   * Fix issue that causes analytics version number to always be `null`
