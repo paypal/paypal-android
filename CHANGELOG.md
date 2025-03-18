@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 2.0.0 (2025-03-18)
 * Breaking Changes
   * PayPalNativePayments
     * Remove entire PayPalNativePayments module
