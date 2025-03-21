@@ -207,20 +207,17 @@ class VaultCardViewModel @Inject constructor(
                         )
                     }
                     updateSetupTokenState = ActionState.Success(setupTokenInfo)
-                    // discard authState
-                    authState = null
+                    discardAuthState()
                 }
 
                 CardFinishVaultResult.Canceled -> {
                     updateSetupTokenState = ActionState.Failure(Exception("USER CANCELED"))
-                    // discard authState
-                    authState = null
+                    discardAuthState()
                 }
 
                 is CardFinishVaultResult.Failure -> {
                     updateSetupTokenState = ActionState.Failure(vaultResult.error)
-                    // discard authState
-                    authState = null
+                    discardAuthState()
                 }
 
                 CardFinishVaultResult.NoResult -> {
@@ -229,5 +226,9 @@ class VaultCardViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun discardAuthState() {
+        authState = null
     }
 }

@@ -235,20 +235,17 @@ class ApproveOrderViewModel @Inject constructor(
                         OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                     }
                     approveOrderState = ActionState.Success(orderInfo)
-                    // discard authState
-                    authState = null
+                    discardAuthState()
                 }
 
                 is CardFinishApproveOrderResult.Failure -> {
                     approveOrderState = ActionState.Failure(approveOrderResult.error)
-                    // discard authState
-                    authState = null
+                    discardAuthState()
                 }
 
                 CardFinishApproveOrderResult.Canceled -> {
                     approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
-                    // discard authState
-                    authState = null
+                    discardAuthState()
                 }
 
                 CardFinishApproveOrderResult.NoResult -> {
@@ -257,5 +254,9 @@ class ApproveOrderViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun discardAuthState() {
+        authState = null
     }
 }
