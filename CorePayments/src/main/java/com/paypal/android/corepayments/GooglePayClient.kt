@@ -1,4 +1,7 @@
 package com.paypal.android.corepayments
 
-class GooglePayClient {
+class GooglePayClient(private val config: CoreConfig) {
+    fun start() {
+        TODO("Create start method...")
+    }
 }
