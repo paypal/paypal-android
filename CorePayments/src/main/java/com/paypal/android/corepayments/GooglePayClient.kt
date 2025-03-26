@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments
 
 import android.content.Context
+import android.util.Log
 
 class GooglePayClient(
     private val googlePayAPI: GooglePayAPI
@@ -10,7 +11,12 @@ class GooglePayClient(
     )
 
     suspend fun start() {
-        val result = googlePayAPI.getGooglePayConfig()
-        TODO("handle result")
+        when (val result = googlePayAPI.getGooglePayConfig()) {
+            is GetGooglePayConfigResult.Failure -> TODO("handle error")
+            is GetGooglePayConfigResult.Success -> {
+                val config = result.config
+                Log.d("GooglePayClient", "Google Pay Eligible: ${config.isEligible}")
+            }
+        }
     }
 }

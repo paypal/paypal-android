@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RawRes
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
+import org.json.JSONException
 import org.json.JSONObject
 
 class GooglePayAPI(
@@ -19,7 +20,7 @@ class GooglePayAPI(
         ResourceLoader()
     )
 
-    suspend fun getGooglePayConfig(): GooglePayConfigResult {
+    suspend fun getGooglePayConfig(): GetGooglePayConfigResult {
         @RawRes val resId = R.raw.graphql_google_pay_config_sandbox
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success -> sendGraphQLGooglePayConfigRequest(result.value)
@@ -29,7 +30,7 @@ class GooglePayAPI(
 
     private suspend fun sendGraphQLGooglePayConfigRequest(
         query: String,
-    ): GooglePayConfigResult {
+    ): GetGooglePayConfigResult {
         // TODO: allow this to be provided as a param
         val merchantId = ""
         // TODO: allow this to be provided as a param
@@ -49,13 +50,13 @@ class GooglePayAPI(
             .put("variables", variables)
         val graphQLResponse =
             graphQLClient.send(graphQLRequest, queryName = "GetGooglePayConfig")
-        when (graphQLResponse) {
+        return when (graphQLResponse) {
             is GraphQLResult.Success -> {
                 val responseJSON = graphQLResponse.data
                 if (responseJSON == null) {
                     TODO("handle null response error")
                 } else {
-                    TODO("parse success result")
+                    parseSuccessfulUpdateSuccessJSON(responseJSON, graphQLResponse.correlationId)
                 }
             }
 
@@ -63,6 +64,20 @@ class GooglePayAPI(
                 TODO("handle graphql failure error")
             }
         }
-        return GooglePayConfigResult(true)
+    }
+
+    private fun parseSuccessfulUpdateSuccessJSON(
+        responseBody: JSONObject,
+        correlationId: String?
+    ): GetGooglePayConfigResult {
+        return try {
+            val googlePayConfigJSON = responseBody.getJSONObject("googlePayConfig")
+            val isEligible = googlePayConfigJSON.getBoolean("isEligible")
+            GetGooglePayConfigResult.Success(GooglePayConfig(isEligible))
+        } catch (jsonError: JSONException) {
+            val message = "Update Setup Token Failed: GraphQL JSON body was invalid."
+            val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
+            GetGooglePayConfigResult.Failure(error)
+        }
     }
 }
