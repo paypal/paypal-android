@@ -1,7 +1,16 @@
 package com.paypal.android.corepayments
 
-class GooglePayClient(private val config: CoreConfig) {
-    fun start() {
-        TODO("Create start method...")
+import android.content.Context
+
+class GooglePayClient(
+    private val googlePayAPI: GooglePayAPI
+) {
+    constructor(context: Context, config: CoreConfig) : this(
+        googlePayAPI = GooglePayAPI(context, config)
+    )
+
+    suspend fun start() {
+        val result = googlePayAPI.getGooglePayConfig()
+        TODO("handle result")
     }
 }

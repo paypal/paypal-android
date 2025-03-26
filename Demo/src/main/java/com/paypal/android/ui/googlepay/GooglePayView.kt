@@ -12,11 +12,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.utils.UIConstants
+import com.paypal.android.utils.getActivityOrNull
 
 @Composable
 fun GooglePayView(
@@ -37,13 +39,14 @@ fun GooglePayView(
 
 @Composable
 private fun Step1_LaunchGooglePay(viewModel: GooglePayViewModel) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create an Order")
         Button(
             onClick = {
-                viewModel.launchGooglePay()
+                context.getActivityOrNull()?.let { viewModel.launchGooglePay(it) }
             },
             modifier = Modifier
                 .fillMaxWidth()
