@@ -123,6 +123,7 @@ dependencies {
     implementation libs.androidx.constraintLayout
     implementation libs.lifecycle.runtimeKtx
     implementation libs.androidx.fragmentKtx
+    implementation 'com.google.android.gms:play-services-wallet:19.4.0'
 
     // Compose Bill of Materials (BOM) dependency manages compose dependency versions without
     // us having to explicitly state versions of individual compose dependencies; the BOM project
