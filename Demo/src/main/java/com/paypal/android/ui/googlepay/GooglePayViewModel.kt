@@ -1,5 +1,6 @@
 package com.paypal.android.ui.googlepay
 
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -17,13 +18,13 @@ class GooglePayViewModel @Inject constructor(
 
     private var googlePayClient: GooglePayClient? = null
 
-    fun launchGooglePay() {
+    fun launchGooglePay(activity: ComponentActivity) {
         viewModelScope.launch {
             when (val clientIdResult = getClientIdUseCase()) {
                 is SDKSampleServerResult.Failure -> TODO("handle failure")
                 is SDKSampleServerResult.Success -> {
                     val coreConfig = CoreConfig(clientIdResult.value)
-                    googlePayClient = GooglePayClient(config = coreConfig)
+                    googlePayClient = GooglePayClient(activity, coreConfig)
                     googlePayClient?.start()
                 }
             }
