@@ -73,7 +73,13 @@ class GooglePayAPI(
         return try {
             val googlePayConfigJSON = responseBody.getJSONObject("googlePayConfig")
             val isEligible = googlePayConfigJSON.getBoolean("isEligible")
-            GetGooglePayConfigResult.Success(GooglePayConfig(isEligible))
+            val allowedPaymentMethods =
+                googlePayConfigJSON.getJSONArray("allowedPaymentMethods")
+            val merchantInfo =
+                googlePayConfigJSON.getJSONObject("merchantInfo")
+            GetGooglePayConfigResult.Success(
+                GooglePayConfig(isEligible, allowedPaymentMethods, merchantInfo)
+            )
         } catch (jsonError: JSONException) {
             val message = "Update Setup Token Failed: GraphQL JSON body was invalid."
             val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
