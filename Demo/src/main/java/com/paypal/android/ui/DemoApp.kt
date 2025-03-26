@@ -25,6 +25,7 @@ import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
 import com.paypal.android.ui.features.FeaturesView
+import com.paypal.android.ui.googlepay.GooglePayView
 import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
 import com.paypal.android.ui.paypalstaticbuttons.PayPalStaticButtonsView
 import com.paypal.android.ui.paypalweb.PayPalCheckoutView
@@ -117,6 +118,9 @@ fun DemoApp() {
                 }
                 composable(DemoAppDestinations.PAYPAL_STATIC_BUTTONS) {
                     PayPalStaticButtonsView()
+                }
+                composable(DemoAppDestinations.GOOGLE_PAY) {
+                    GooglePayView()
                 }
                 composable(DemoAppDestinations.SELECT_TEST_CARD) {
                     SelectCardView(onSelectedTestCardChange = { testCardId ->
