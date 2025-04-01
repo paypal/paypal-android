@@ -118,15 +118,13 @@ class PayPalWebViewModel @Inject constructor(
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
 
                 val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
-                when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
-                    is PayPalPresentAuthChallengeResult.Success ->
-                        authState = startResult.authState
+                paypalClient?.start(activity, checkoutRequest) { startResult ->
+                    when (startResult) {
+                        is PayPalPresentAuthChallengeResult.Success ->
+                            authState = startResult.authState
 
-                    is PayPalPresentAuthChallengeResult.Failure ->
-                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
-
-                    null -> {
-                        // do nothing
+                        is PayPalPresentAuthChallengeResult.Failure ->
+                            payPalWebCheckoutState = ActionState.Failure(startResult.error)
                     }
                 }
             }
