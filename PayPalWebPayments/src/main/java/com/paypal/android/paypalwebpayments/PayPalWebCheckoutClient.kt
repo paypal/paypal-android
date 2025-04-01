@@ -48,6 +48,10 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
+        if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
+            // TODO: update client config
+        }
+
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
