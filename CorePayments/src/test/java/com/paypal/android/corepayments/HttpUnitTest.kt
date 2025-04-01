@@ -63,8 +63,8 @@ class HttpUnitTest {
 
     @Test
     fun `send sets request headers on url connection`() = runTest {
-        val httpRequest = HttpRequest(url, HttpMethod.GET)
-        httpRequest.headers["Sample-Header"] = "sample-value"
+        val headers = mapOf("Sample-Header" to "sample-value")
+        val httpRequest = HttpRequest(url, HttpMethod.GET, headers = headers)
 
         val sut = createHttp(testScheduler)
         sut.send(httpRequest)
