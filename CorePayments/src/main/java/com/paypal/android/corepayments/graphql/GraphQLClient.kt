@@ -29,17 +29,22 @@ class GraphQLClient internal constructor(
     private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
     private val graphQLURL = "$graphQLEndpoint/graphql"
 
-    private val httpRequestHeaders = mutableMapOf(
+    private val httpRequestHeaders = mapOf(
         "Content-Type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResult {
+    suspend fun send(
+        graphQLRequestBody: JSONObject,
+        queryName: String? = null,
+        additionalHeaders: Map<String, String> = emptyMap()
+    ): GraphQLResult {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
-        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
+        val allHeaders = httpRequestHeaders + additionalHeaders
+        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, allHeaders)
 
         val httpResponse = http.send(httpRequest)
         val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
@@ -51,7 +56,10 @@ class GraphQLClient internal constructor(
             } else {
                 try {
                     val responseAsJSON = JSONObject(httpResponse.body)
-                    GraphQLResult.Success(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
+                    GraphQLResult.Success(
+                        responseAsJSON.getJSONObject("data"),
+                        correlationId = correlationId
+                    )
                 } catch (jsonParseError: JSONException) {
                     val error = APIClientError.graphQLJSONParseError(correlationId, jsonParseError)
                     GraphQLResult.Failure(error)
