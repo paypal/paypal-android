@@ -90,7 +90,7 @@ internal class UpdateClientConfigAPI(
         correlationId: String?
     ): UpdateClientConfigResult {
         return try {
-            val clientConfig = responseBody.getString("updateClientConfig")
+            val clientConfig = responseBody.optString("updateClientConfig", "")
             UpdateClientConfigResult.Success(clientConfig)
         } catch (jsonError: JSONException) {
             val message = "Update Client Config Failed: GraphQL JSON body was invalid."
