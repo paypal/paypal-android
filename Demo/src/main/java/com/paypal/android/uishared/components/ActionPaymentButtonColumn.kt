@@ -19,14 +19,14 @@ import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalButtonColor
 import com.paypal.android.paymentbuttons.PayPalButtonLabel
 import com.paypal.android.paymentbuttons.PaymentButtonSize
-import com.paypal.android.uishared.enums.DemoPaymentButtonType
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
 
 @Composable
 fun <S, E> ActionPaymentButtonColumn(
-    type: DemoPaymentButtonType,
+    fundingSource: PayPalWebCheckoutFundingSource,
     state: ActionState<S, E>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -36,7 +36,7 @@ fun <S, E> ActionPaymentButtonColumn(
         modifier = modifier
     ) {
         DemoPaymentButton(
-            type = type,
+            fundingSource = fundingSource,
             onClick = {
                 if (state is ActionState.Idle) {
                     onClick()
@@ -59,12 +59,24 @@ fun <S, E> ActionPaymentButtonColumn(
 
 @Composable
 fun DemoPaymentButton(
-    type: DemoPaymentButtonType,
+    fundingSource: PayPalWebCheckoutFundingSource,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    when (type) {
-        DemoPaymentButtonType.PAYPAL -> AndroidView(
+    when (fundingSource) {
+
+        PayPalWebCheckoutFundingSource.CARD -> AndroidView(
+            factory = { context ->
+                CardButton(context).apply { setOnClickListener { onClick() } }
+            },
+            update = { button ->
+                button.label = CardButtonLabel.PAY
+                button.size = PaymentButtonSize.LARGE
+            },
+            modifier = modifier
+        )
+
+        else -> AndroidView(
             factory = { context ->
                 PayPalButton(context).apply { setOnClickListener { onClick() } }
             },
@@ -72,16 +84,6 @@ fun DemoPaymentButton(
                 button.color = PayPalButtonColor.BLUE
                 button.label = PayPalButtonLabel.PAY
                 button.size = PaymentButtonSize.LARGE
-            },
-            modifier = modifier
-        )
-
-        DemoPaymentButtonType.CARD -> AndroidView(
-            factory = { context ->
-                CardButton(context).apply { setOnClickListener { onClick() } }
-            },
-            update = { button ->
-                button.label = CardButtonLabel.PAY
             },
             modifier = modifier
         )
@@ -95,7 +97,7 @@ fun StatefulActionPaymentButtonPreview() {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column {
                 ActionPaymentButtonColumn(
-                    type = DemoPaymentButtonType.CARD,
+                    fundingSource = PayPalWebCheckoutFundingSource.CARD,
                     state = ActionState.Idle,
                     onClick = {},
                     modifier = Modifier
