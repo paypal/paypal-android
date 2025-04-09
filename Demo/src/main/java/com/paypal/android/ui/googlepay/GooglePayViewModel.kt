@@ -1,14 +1,17 @@
 package com.paypal.android.ui.googlepay
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.GooglePayClient
 import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,5 +30,9 @@ class GooglePayViewModel @Inject constructor(
                 return googlePayClient!!.start()
             }
         }
+    }
+
+    fun completeGooglePayLaunch(result: ApiTaskResult<PaymentData>) {
+        googlePayClient!!.confirmOrder(result)
     }
 }

@@ -1,6 +1,5 @@
 package com.paypal.android.ui.googlepay
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +31,7 @@ fun GooglePayView(
     // Ref: https://stackoverflow.com/a/67156998
     val googlePayLauncher =
         rememberLauncherForActivityResult(TaskResultContracts.GetPaymentDataResult()) { taskResult ->
-            Log.d("GooglePayView", "Result: $taskResult")
+            taskResult?.let { viewModel.completeGooglePayLaunch(it) }
         }
 
     val context = LocalContext.current
