@@ -39,7 +39,7 @@ internal class UpdateClientConfigAPI(
                 )
 
             is LoadRawResourceResult.Failure -> UpdateClientConfigResult.Failure(
-                PayPalSDKError(123, "TODO: implement")
+                PayPalSDKError(0, "TODO: implement")
             )
         }
     }
