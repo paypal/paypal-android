@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
@@ -21,6 +22,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
+    private val updateClientConfigAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
 
     private val intent = Intent()
 
@@ -30,7 +32,12 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(analytics, payPalWebLauncher)
+        sut = PayPalWebCheckoutClient(
+            analytics = analytics,
+            updateClientConfigAPI = updateClientConfigAPI,
+            payPalWebLauncher = payPalWebLauncher,
+            dispatcher = Dispatchers.Main
+        )
     }
 
     @Test

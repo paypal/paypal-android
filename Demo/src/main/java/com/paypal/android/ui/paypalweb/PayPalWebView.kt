@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.ActionPaymentButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
@@ -106,9 +107,8 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             fundingSource = uiState.fundingSource,
             onFundingSourceChange = { value -> viewModel.fundingSource = value },
         )
-        ActionButtonColumn(
-            defaultTitle = "START CHECKOUT",
-            successTitle = "CHECKOUT COMPLETE",
+        ActionPaymentButtonColumn(
+            fundingSource = uiState.fundingSource,
             state = uiState.payPalWebCheckoutState,
             onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
             modifier = Modifier
