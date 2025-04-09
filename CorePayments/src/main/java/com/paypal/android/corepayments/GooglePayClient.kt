@@ -1,12 +1,14 @@
 package com.paypal.android.corepayments
 
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
+import com.google.android.gms.wallet.contract.ApiTaskResult
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -68,6 +70,18 @@ class GooglePayClient(
             .put("callbackIntents", JSONArray(listOf("PAYMENT_AUTHORIZATION")))
             .put("transactionInfo", transactionInfo)
         return request
+    }
+
+    suspend fun confirmOrder(taskResult: ApiTaskResult<PaymentData>) {
+        taskResult.result?.let { paymentData ->
+            val paymentDataJSON = JSONObject(paymentData.toJson())
+            val paymentMethodData = paymentDataJSON.getJSONObject("paymentMethodData")
+            val orderId = "TODO: create order"
+            googlePayAPI.confirmOrder(orderId = orderId, paymentMethodData = paymentMethodData)
+
+            // TODO: confirm order
+        }
+        Log.d("GooglePayClient", "Result: $taskResult")
     }
 
     companion object {
