@@ -86,4 +86,8 @@ class GooglePayAPI(
             GetGooglePayConfigResult.Failure(error)
         }
     }
+
+    suspend fun confirmOrder(orderId: String, paymentMethodData: JSONObject) {
+
+    }
 }
