@@ -13,6 +13,7 @@ import com.paypal.android.corepayments.ApproveGooglePayPaymentResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.GooglePayClient
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +24,7 @@ import javax.inject.Inject
 class GooglePayViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
+    val completeOrderUseCase: CompleteOrderUseCase
 ) : ViewModel() {
 
     private var googlePayClient: GooglePayClient? = null
@@ -46,6 +48,7 @@ class GooglePayViewModel @Inject constructor(
                     val orderId = createOrderResult.value.id!!
                     confirmOrderGooglePayOrder(orderId, result)
                 }
+
                 is SDKSampleServerResult.Failure -> {
                     // TODO: handle error
                 }
@@ -53,13 +56,36 @@ class GooglePayViewModel @Inject constructor(
         }
     }
 
-    private suspend fun confirmOrderGooglePayOrder(orderId: String, result: ApiTaskResult<PaymentData>) {
+    private suspend fun confirmOrderGooglePayOrder(
+        orderId: String,
+        result: ApiTaskResult<PaymentData>
+    ) {
         when (val confirmOrderResult = googlePayClient!!.confirmOrder(orderId, result)) {
             is ApproveGooglePayPaymentResult.Success -> {
                 val status = confirmOrderResult.status
-                Log.d("GooglePayViewModel", "Status: $status")
+                if (status == "APPROVED") {
+                    completeOrder(orderId)
+                } else {
+                    // TODO: handle error
+                }
             }
+
             is ApproveGooglePayPaymentResult.Failure -> {
+                // TODO: handle error
+            }
+        }
+    }
+
+    private suspend fun completeOrder(orderId: String) {
+        val orderIntent = OrderIntent.CAPTURE
+        val completeOrderResult =
+            completeOrderUseCase(orderId = orderId, intent = orderIntent, clientMetadataId = "")
+        when (completeOrderResult) {
+            is SDKSampleServerResult.Success -> {
+                val order = completeOrderResult.value
+                Log.d("GooglePayViewModel", "Order Complete: $order")
+            }
+            is SDKSampleServerResult.Failure -> {
                 // TODO: handle error
             }
         }
