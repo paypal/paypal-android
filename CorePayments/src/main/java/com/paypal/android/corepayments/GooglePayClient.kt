@@ -72,16 +72,22 @@ class GooglePayClient(
         return request
     }
 
-    suspend fun confirmOrder(taskResult: ApiTaskResult<PaymentData>) {
-        taskResult.result?.let { paymentData ->
-            val paymentDataJSON = JSONObject(paymentData.toJson())
-            val paymentMethodData = paymentDataJSON.getJSONObject("paymentMethodData")
-            val orderId = "TODO: create order"
-            googlePayAPI.confirmOrder(orderId = orderId, paymentMethodData = paymentMethodData)
-
-            // TODO: confirm order
+    suspend fun confirmOrder(
+        orderId: String,
+        taskResult: ApiTaskResult<PaymentData>
+    ): ApproveGooglePayPaymentResult {
+        val paymentData = taskResult.result
+        if (paymentData == null) {
+            val error = PayPalSDKError(0, "ApiTaskResult has no payment data.")
+            return ApproveGooglePayPaymentResult.Failure(error)
         }
-        Log.d("GooglePayClient", "Result: $taskResult")
+
+        val paymentDataJSON = JSONObject(paymentData.toJson())
+        val paymentMethodData = paymentDataJSON.getJSONObject("paymentMethodData")
+        return googlePayAPI.confirmOrder(
+            orderId = orderId,
+            paymentMethodData = paymentMethodData
+        )
     }
 
     companion object {
