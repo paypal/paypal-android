@@ -7,16 +7,21 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.ApproveGooglePayPaymentResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.GooglePayClient
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,7 +34,42 @@ class GooglePayViewModel @Inject constructor(
 
     private var googlePayClient: GooglePayClient? = null
 
+    private val _uiState = MutableStateFlow(GooglePayUiState())
+    val uiState = _uiState.asStateFlow()
+
+    var intentOption: OrderIntent
+        get() = _uiState.value.intentOption
+        set(value) {
+            _uiState.update { it.copy(intentOption = value) }
+        }
+
+    private var createOrderState
+        get() = _uiState.value.createOrderState
+        set(value) {
+            _uiState.update { it.copy(createOrderState = value) }
+        }
+
+    private var googlePayState
+        get() = _uiState.value.googlePayState
+        set(value) {
+            _uiState.update { it.copy(googlePayState = value) }
+        }
+
+    private val createdOrder: Order?
+        get() = (createOrderState as? ActionState.Success)?.value
+
+    fun createOrder() {
+        viewModelScope.launch {
+            createOrderState = ActionState.Loading
+            val orderRequest = _uiState.value.run {
+                OrderRequest(intent = intentOption, shouldVault = false)
+            }
+            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
+        }
+    }
+
     suspend fun launchGooglePay(activity: ComponentActivity): Task<PaymentData> {
+        googlePayState = ActionState.Loading
         when (val clientIdResult = getClientIdUseCase()) {
             is SDKSampleServerResult.Failure -> TODO("handle failure")
             is SDKSampleServerResult.Success -> {
@@ -42,36 +82,15 @@ class GooglePayViewModel @Inject constructor(
 
     fun completeGooglePayLaunch(result: ApiTaskResult<PaymentData>) {
         viewModelScope.launch {
-            val orderRequest = OrderRequest(intent = OrderIntent.CAPTURE, shouldVault = false)
-            when (val createOrderResult = createOrderUseCase(orderRequest)) {
-                is SDKSampleServerResult.Success -> {
-                    val orderId = createOrderResult.value.id!!
-                    confirmOrderGooglePayOrder(orderId, result)
+            val orderId = createdOrder!!.id!!
+            when (val confirmOrderResult = googlePayClient!!.confirmOrder(orderId, result)) {
+                is ApproveGooglePayPaymentResult.Success -> {
+                    googlePayState = ActionState.Success(confirmOrderResult)
                 }
 
-                is SDKSampleServerResult.Failure -> {
+                is ApproveGooglePayPaymentResult.Failure -> {
                     // TODO: handle error
                 }
-            }
-        }
-    }
-
-    private suspend fun confirmOrderGooglePayOrder(
-        orderId: String,
-        result: ApiTaskResult<PaymentData>
-    ) {
-        when (val confirmOrderResult = googlePayClient!!.confirmOrder(orderId, result)) {
-            is ApproveGooglePayPaymentResult.Success -> {
-                val status = confirmOrderResult.status
-                if (status == "APPROVED") {
-                    completeOrder(orderId)
-                } else {
-                    // TODO: handle error
-                }
-            }
-
-            is ApproveGooglePayPaymentResult.Failure -> {
-                // TODO: handle error
             }
         }
     }
@@ -85,6 +104,7 @@ class GooglePayViewModel @Inject constructor(
                 val order = completeOrderResult.value
                 Log.d("GooglePayViewModel", "Order Complete: $order")
             }
+
             is SDKSampleServerResult.Failure -> {
                 // TODO: handle error
             }
