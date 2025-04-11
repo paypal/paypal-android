@@ -9,7 +9,11 @@ data class GooglePayUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val googlePayState: ActionState<ApproveGooglePayPaymentResult.Success, Exception> = ActionState.Idle,
+    val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
+
+    val isGooglePaySuccessful: Boolean
+        get() = googlePayState is ActionState.Success
 }
