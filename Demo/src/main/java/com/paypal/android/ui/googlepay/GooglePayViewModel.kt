@@ -1,6 +1,5 @@
 package com.paypal.android.ui.googlepay
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,6 +57,12 @@ class GooglePayViewModel @Inject constructor(
     private val createdOrder: Order?
         get() = (createOrderState as? ActionState.Success)?.value
 
+    private var completeOrderState
+        get() = _uiState.value.completeOrderState
+        set(value) {
+            _uiState.update { it.copy(completeOrderState = value) }
+        }
+
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
@@ -95,18 +100,15 @@ class GooglePayViewModel @Inject constructor(
         }
     }
 
-    private suspend fun completeOrder(orderId: String) {
-        val orderIntent = OrderIntent.CAPTURE
-        val completeOrderResult =
-            completeOrderUseCase(orderId = orderId, intent = orderIntent, clientMetadataId = "")
-        when (completeOrderResult) {
-            is SDKSampleServerResult.Success -> {
-                val order = completeOrderResult.value
-                Log.d("GooglePayViewModel", "Order Complete: $order")
-            }
-
-            is SDKSampleServerResult.Failure -> {
-                // TODO: handle error
+    fun completeOrder() {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                completeOrderState = ActionState.Loading
+                completeOrderState =
+                    completeOrderUseCase(orderId, intentOption, "").mapToActionState()
             }
         }
     }

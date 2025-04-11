@@ -2,9 +2,11 @@ package com.paypal.android.ui.googlepay
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +22,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.wallet.contract.TaskResultContracts
 import com.paypal.android.corepayments.ApproveGooglePayPaymentResult
+import com.paypal.android.ui.paypalweb.PayPalWebUiState
+import com.paypal.android.ui.paypalweb.PayPalWebViewModel
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
@@ -74,6 +78,10 @@ fun GooglePayView(
                 }
             )
         }
+        if (uiState.isGooglePaySuccessful) {
+            Step3_CompleteOrder(uiState, viewModel)
+        }
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
@@ -120,6 +128,29 @@ private fun Step2_LaunchGooglePay(uiState: GooglePayUiState, onLaunchGooglePay: 
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
                 is CompletedActionState.Success -> GooglePayTaskResultView(result = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step3_CompleteOrder(uiState: GooglePayUiState, viewModel: GooglePayViewModel) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Complete Order")
+        ActionButtonColumn(
+            defaultTitle = "COMPLETE ORDER",
+            successTitle = "ORDER COMPLETED",
+            state = uiState.completeOrderState,
+            onClick = { viewModel.completeOrder() },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
             }
         }
     }
