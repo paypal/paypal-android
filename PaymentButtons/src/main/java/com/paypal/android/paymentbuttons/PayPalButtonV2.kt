@@ -5,7 +5,9 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
+import com.paypal.android.ui.R
 
 // Ref: https://stackoverflow.com/a/6327095
 fun Context.toPx(dp: Int): Float = TypedValue.applyDimension(
@@ -23,7 +25,10 @@ class PayPalButtonV2 @JvmOverloads constructor(
     init {
         text = "helloooo"
         minHeight = context.toPx(48).toInt()
-        setBackgroundColor("#60CDFF".toColorInt())
         gravity = Gravity.CENTER
+
+        // TODO: leverage material shape drawable to programmatically set corner radius and maintain ripple effect
+        val drawable = ContextCompat.getDrawable(context, R.drawable.paypal_button_v2_background)
+        background = drawable
     }
 }
