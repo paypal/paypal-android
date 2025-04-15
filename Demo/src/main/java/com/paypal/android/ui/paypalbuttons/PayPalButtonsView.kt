@@ -30,6 +30,7 @@ import com.paypal.android.R
 import com.paypal.android.paymentbuttons.PayLaterButton
 import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalButtonColor
+import com.paypal.android.paymentbuttons.PayPalButtonV2
 import com.paypal.android.paymentbuttons.PayPalCreditButton
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
@@ -156,14 +157,19 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAYPAL -> {
             AndroidView(
                 factory = { context ->
-                    PayPalButton(context).apply {
+                    PayPalButtonV2(context).apply {
                         setOnClickListener {
                             showToast(context, "PayPalButton clicked!")
                         }
                     }
+//                    PayPalButton(context).apply {
+//                        setOnClickListener {
+//                            showToast(context, "PayPalButton clicked!")
+//                        }
+//                    }
                 },
                 update = { button ->
-                    configureButton(button, uiState)
+//                    configureButton(button, uiState)
                 },
                 modifier = Modifier.fillMaxWidth()
             )
