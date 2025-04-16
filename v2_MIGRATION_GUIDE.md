@@ -34,11 +34,12 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   checkForCardAuthCompletion(intent)
 + }
 
-+ override fun onNewIntent(newIntent: Intent) {
-+   super.onNewIntent(newIntent)
+  override fun onNewIntent(newIntent: Intent) {
+    super.onNewIntent(newIntent)
+-   intent = newIntent
 +   // Manually attempt auth challenge completion (via new intent deep link)
 +   checkForCardAuthCompletion(newIntent)
-+ }
+  }
 
   fun approveOrder() {
     val cardRequest: CardRequest = TODO("Create a card request.")
@@ -193,11 +194,12 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
 +   checkForPayPalAuthCompletion(intent)
 + }
 
-+ override fun onNewIntent(newIntent: Intent) {
-+   super.onNewIntent(newIntent)
+  override fun onNewIntent(newIntent: Intent) {
+    super.onNewIntent(newIntent)
+-   intent = newIntent
 +   // Manually attempt auth challenge completion (via new intent deep link)
 +   checkForPayPalAuthCompletion(newIntent)
-+ }
+  }
 
 - override fun onDestroy() {
 -   super.onDestroy()
