@@ -25,17 +25,13 @@ internal class UpdateClientConfigAPI(
         ResourceLoader()
     )
 
-    suspend fun updateClientConfig(
-        orderId: String,
-        fundingSource: PayPalWebCheckoutFundingSource
-    ): UpdateClientConfigResult {
+    suspend fun updateClientConfig(orderId: String): UpdateClientConfigResult {
         @RawRes val resId = R.raw.graphql_query_update_client_config
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success ->
                 sendUpdateClientConfigGraphQLRequest(
                     query = result.value,
-                    orderId = orderId,
-                    fundingSource = fundingSource
+                    orderId = orderId
                 )
 
             is LoadRawResourceResult.Failure -> UpdateClientConfigResult.Failure(
@@ -46,15 +42,14 @@ internal class UpdateClientConfigAPI(
 
     private suspend fun sendUpdateClientConfigGraphQLRequest(
         query: String,
-        orderId: String,
-        fundingSource: PayPalWebCheckoutFundingSource
+        orderId: String
     ): UpdateClientConfigResult {
         val variables = JSONObject()
             .put("orderID", orderId)
-            .put("fundingSource", fundingSource.value)
-            .put("integrationArtifact", "PAYPAL_JS_SDK")
+            .put("fundingSource", "card")
+            .put("integrationArtifact", "MOBILE_SDK")
             .put("userExperienceFlow", "INCONTEXT")
-            .put("productFlow", "SMART_PAYMENT_BUTTONS")
+            .put("productFlow", "MOBILE_SDK")
             .put("buttonSessionId", JSONObject.NULL)
 
         val graphQLRequest = JSONObject()

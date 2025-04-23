@@ -90,8 +90,7 @@ class PayPalWebCheckoutClient internal constructor(
             if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
                 val updateConfigResult = request.run {
                     updateClientConfigAPI.updateClientConfig(
-                        orderId = orderId,
-                        fundingSource = fundingSource
+                        orderId = orderId
                     )
                 }
                 if (updateConfigResult is UpdateClientConfigResult.Failure) {
