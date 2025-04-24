@@ -22,6 +22,7 @@ plugins {
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false
     alias libs.plugins.nexus.publishPlugin
+    // TODO: address dokka v1 deprecation; use v2 instead
     alias libs.plugins.dokka
 }
 
@@ -49,6 +50,8 @@ task clean(type: Delete) {
 dependencies {
     detektPlugins libs.detekt.formatting
     detektPlugins libs.detekt.rulesLibraries
+
+    dokkaPlugin libs.dokka.android
 }
 
 detekt {
