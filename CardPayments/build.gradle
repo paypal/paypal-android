@@ -70,6 +70,7 @@ dependencies {
     androidTestImplementation libs.androidx.test.espresso
 
     dokkaPlugin libs.dokka.android
+    dokkaPlugin libs.dokka.versioning
 }
 
 project.ext.name = "card-payments"

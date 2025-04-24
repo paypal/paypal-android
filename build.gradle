@@ -1,6 +1,6 @@
 buildscript {
     ext.modules = [
-            "sdkVersionName"      : "2.0.1-SNAPSHOT",
+            "sdkVersionName"      : "2.0.2-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
             "androidTargetVersion": 35,
@@ -52,6 +52,31 @@ dependencies {
     detektPlugins libs.detekt.rulesLibraries
 
     dokkaPlugin libs.dokka.android
+    dokkaPlugin libs.dokka.versioning
+}
+
+dokkaHtmlMultiModule {
+    // Ref: https://github.com/Kotlin/dokka/tree/2.0.0/dokka-subprojects/plugin-versioning#usage-example
+
+    def docVersionsDir = projectDir.toPath().resolve("documentation/version")
+    def currentVersion = modules.sdkVersionName
+    def currentDocsDir = docVersionsDir.resolve(currentVersion).toString()
+    outputDirectory.set(file(currentDocsDir))
+
+    def versioningConfiguration = """
+    {
+      "version": "$currentVersion",
+      "olderVersionsDir": "${docVersionsDir.toString()}",
+      "renderVersionsNavigationOnAllPages": true
+    }
+    """
+    pluginsMapConfiguration.set(
+            ["org.jetbrains.dokka.versioning.VersioningPlugin": versioningConfiguration]
+    )
+
+//    doLast {
+//        currentDocsDir.copyTo()
+//    }
 }
 
 detekt {
