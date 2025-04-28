@@ -96,16 +96,14 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             }
 
             shapeAppearanceModel = ShapeAppearanceModel.builder().apply {
-                value?.let {
-                    setAllCornerSizes(it)
-                }
+                setAllCornerSizes(value)
                 setAllCorners(cornerTreatment)
             }.build()
         }
 
     /**
      * Updates the shape of the Payment Button with the provided [PaymentButtonShape]
-     * and defaults to [ROUNDED] if one is not provided.
+     * and defaults to [PaymentButtonShape.ROUNDED] if one is not provided.
      *
      * If your application is taking advantage of Material Theming then your own shape definitions
      * will be used as the default.
@@ -179,14 +177,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         gravity = Gravity.CENTER
 
         initAttributes(attributeSet, defStyleAttr)
-
-        minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
-        val verticalPadding = resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
-        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
-
-        val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
-        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
-        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
+        applyDefaultAttributes()
     }
 
     override fun onAttachedToWindow() {
@@ -214,6 +205,17 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
         }
+    }
+
+    private fun applyDefaultAttributes() {
+        minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
+        val verticalPadding =
+            resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
+        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
+
+        val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {
