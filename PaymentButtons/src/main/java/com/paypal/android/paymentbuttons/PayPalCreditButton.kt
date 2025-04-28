@@ -118,7 +118,7 @@ enum class PayPalCreditButtonColor(
                 BLACK.value -> BLACK
                 GOLD.value -> GOLD
                 WHITE.value -> WHITE
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", values().size)
+                else -> throw createFormattedIllegalArgumentException("PayPalCreditButtonColor", values().size)
             }
         }
     }

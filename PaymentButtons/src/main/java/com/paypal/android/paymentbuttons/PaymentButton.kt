@@ -123,9 +123,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 PaymentButtonShape.ROUNDED -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_radius_rounded)
                 }
+
                 PaymentButtonShape.PILL -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_pill)
                 }
+
                 PaymentButtonShape.RECTANGLE -> {
                     resources.getDimension(R.dimen.paypal_payment_button_corner_radius_square)
                 }
@@ -165,27 +167,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var prefixTextView: TextView
     private var suffixTextView: TextView
 
-    /**
-     * Updates the size of the Payment Button with the provided [PaymentButtonSize].
-     *
-     * The main UI elements which change when modifying the size include:
-     *  - Minimum height of the button.
-     *  - Height and width of the wordmark.
-     *
-     * The default size of a button is [MEDIUM].
-     */
-    var size: PaymentButtonSize = PaymentButtonSize.MEDIUM
-        set(value) {
-            field = value
-            minimumHeight = resources.getDimension(field.minHeightResId).toInt()
-            val verticalPadding = resources.getDimension(field.verticalPaddingResId).toInt()
-            setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
-
-            val labelTextSize = resources.getDimension(field.labelTextSizeResId)
-            prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
-            suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
-        }
-
     init {
         LayoutInflater.from(context)
             .inflate(R.layout.paypal_ui_payment_button_view, this, true)
@@ -198,6 +179,14 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         gravity = Gravity.CENTER
 
         initAttributes(attributeSet, defStyleAttr)
+
+        minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
+        val verticalPadding = resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
+        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
+
+        val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
     }
 
     override fun onAttachedToWindow() {
@@ -223,7 +212,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     private fun initAttributes(attributeSet: AttributeSet?, defStyleAttr: Int) {
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
-            updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
         }
     }
@@ -239,16 +227,13 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
     }
 
-    private fun updateSizeFrom(typedArray: TypedArray) {
-        val paypalSizeAttribute = typedArray.getInt(
-            R.styleable.PaymentButton_payment_button_size,
-            PaymentButtonSize.MEDIUM.value
-        )
-        size = PaymentButtonSize(paypalSizeAttribute)
-    }
-
-    private fun updateShapeFrom(typedArray: TypedArray, attributeSet: AttributeSet?, defStyleAttr: Int) {
-        val shapeAttributeExists = typedArray.hasValue(R.styleable.PaymentButton_payment_button_shape)
+    private fun updateShapeFrom(
+        typedArray: TypedArray,
+        attributeSet: AttributeSet?,
+        defStyleAttr: Int
+    ) {
+        val shapeAttributeExists =
+            typedArray.hasValue(R.styleable.PaymentButton_payment_button_shape)
         if (shapeAttributeExists) {
             val paypalShapeAttribute = typedArray.getInt(
                 R.styleable.PaymentButton_payment_button_shape,
@@ -293,6 +278,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             PaymentButtonColorLuminance.LIGHT -> {
                 ContextCompat.getDrawable(context, wordmarkLightLuminanceResId)
             }
+
             PaymentButtonColorLuminance.DARK -> {
                 ContextCompat.getDrawable(context, wordmarkDarkLuminanceResId)
             }
@@ -305,6 +291,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             PaymentButtonColorLuminance.LIGHT -> {
                 ContextCompat.getColor(context, R.color.paypal_spb_on_light_surface)
             }
+
             PaymentButtonColorLuminance.DARK -> {
                 ContextCompat.getColor(context, R.color.paypal_spb_on_dark_surface)
             }
