@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:minHeight="@dimen/paypal_payment_button_min_height"
-    android:paddingVertical="@dimen/paypal_payment_button_vertical_padding"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     tools:background="@color/black_56"
     tools:gravity="center"
+    tools:layout_height="wrap_content"
+    tools:layout_width="match_parent"
+    tools:minHeight="@dimen/paypal_payment_button_min_height"
     tools:orientation="horizontal"
+    tools:paddingVertical="@dimen/paypal_payment_button_vertical_padding"
     tools:parentTag="android.widget.LinearLayout">
 
     <TextView
