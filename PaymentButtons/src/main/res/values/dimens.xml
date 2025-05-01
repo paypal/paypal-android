@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="margin_8x">8dp</dimen>
-
     <!-- Payment Buttons -->
     <dimen name="paypal_payment_button_corner_radius_rounded">4dp</dimen>
     <dimen name="paypal_payment_button_corner_radius_square">0dp</dimen>
     <dimen name="paypal_payment_button_corner_pill">24dp</dimen>
-    <dimen name="paypal_payment_button_text_margin">@dimen/margin_8x</dimen>
+    <dimen name="paypal_payment_button_text_margin">8dp</dimen>
     <!-- The stroke used for white buttons to help them standout on light backgrounds. -->
     <dimen name="paypal_payment_button_stroke_width">1dp</dimen>
     <!-- 48dp is the minimum height of buttons to account for accessibility requirements -->
