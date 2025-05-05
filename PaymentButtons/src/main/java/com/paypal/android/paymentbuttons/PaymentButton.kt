@@ -3,15 +3,14 @@ package com.paypal.android.paymentbuttons
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Canvas
-import android.icu.util.Measure
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
 import com.google.android.material.shape.CutCornerTreatment
@@ -30,7 +29,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : LinearLayout(context, attributeSet, defStyleAttr) {
+) : ConstraintLayout(context, attributeSet, defStyleAttr) {
 
     /**
      * Signals that the backing shape has changed and may require a full redraw.
@@ -176,8 +175,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         suffixTextView = findViewById(R.id.suffixText)
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
 
-        orientation = HORIZONTAL
-        gravity = Gravity.CENTER
+//        orientation = HORIZONTAL
+//        gravity = Gravity.CENTER
 
         initAttributes(attributeSet, defStyleAttr)
         applyDefaultAttributes()
@@ -211,10 +210,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 
     private fun applyDefaultAttributes() {
-        minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
-        val verticalPadding =
-            resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
-        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
+//        minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
+//        val verticalPadding =
+//            resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
+//        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
 
         val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
         prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
@@ -310,16 +309,16 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 
     private fun updateButtonWordmark() {
-        val wordmark = when (colorLuminance) {
-            PaymentButtonColorLuminance.LIGHT -> {
-                ContextCompat.getDrawable(context, wordmarkLightLuminanceResId)
-            }
-
-            PaymentButtonColorLuminance.DARK -> {
-                ContextCompat.getDrawable(context, wordmarkDarkLuminanceResId)
-            }
-        }
-        payPalWordmarkImage.setImageDrawable(wordmark)
+//        val wordmark = when (colorLuminance) {
+//            PaymentButtonColorLuminance.LIGHT -> {
+//                ContextCompat.getDrawable(context, wordmarkLightLuminanceResId)
+//            }
+//
+//            PaymentButtonColorLuminance.DARK -> {
+//                ContextCompat.getDrawable(context, wordmarkDarkLuminanceResId)
+//            }
+//        }
+//        payPalWordmarkImage.setImageDrawable(wordmark)
     }
 
     private fun updateButtonTextColor() {

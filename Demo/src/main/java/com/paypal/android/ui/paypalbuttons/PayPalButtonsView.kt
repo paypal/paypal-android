@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypalbuttons
 
 import android.content.Context
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -158,14 +159,17 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                         setOnClickListener {
                             showToast(context, "PayPalButton clicked!")
                         }
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
                     }
                 },
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
+                modifier = Modifier.fillMaxWidth()
+                    .height(5.dp)
             )
         }
 
