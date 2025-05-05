@@ -3,6 +3,7 @@ package com.paypal.android.paymentbuttons
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Canvas
+import android.icu.util.Measure
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -21,6 +22,8 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
+import kotlin.math.max
+import kotlin.math.min
 
 @Suppress("TooManyFunctions")
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
@@ -216,6 +219,37 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
         prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
         suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
+    }
+
+    private val minMaxHeightMeasureSpecCache = mutableMapOf<Int, Int>()
+
+    private fun clamp(value: Int, min: Int, max: Int): Int {
+        return min(max(value, min), max)
+    }
+
+    private fun clampMeasureSpec(measureSpec: Int, minSize: Int, maxSize: Int): Int {
+        // Ref: https://stackoverflow.com/a/29178364
+        val originalSize = MeasureSpec.getSize(measureSpec)
+        val clampedSize = clamp(originalSize, minSize, maxSize)
+        val mode = MeasureSpec.getMode(measureSpec)
+        return when (mode) {
+            MeasureSpec.AT_MOST -> MeasureSpec.makeMeasureSpec(clampedSize, MeasureSpec.AT_MOST)
+            MeasureSpec.UNSPECIFIED -> MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.AT_MOST)
+            MeasureSpec.EXACTLY -> MeasureSpec.makeMeasureSpec(clampedSize, MeasureSpec.EXACTLY)
+            // return original measure spec without modifications
+            else -> measureSpec
+        }
+    }
+
+    private fun computeMinMaxHeightMeasureSpec(originalHeightMeasureSpec: Int): Int {
+        val minHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
+        val maxHeight = resources.getDimension(R.dimen.paypal_payment_button_max_height).toInt()
+        return clampMeasureSpec(originalHeightMeasureSpec, minHeight, maxHeight)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val clampedHeightMeasureSpec = computeMinMaxHeightMeasureSpec(heightMeasureSpec)
+        super.onMeasure(widthMeasureSpec, clampedHeightMeasureSpec)
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {
