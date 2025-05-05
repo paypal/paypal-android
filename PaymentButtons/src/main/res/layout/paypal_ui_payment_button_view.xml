@@ -5,9 +5,10 @@
     tools:gravity="center"
     tools:layout_height="wrap_content"
     tools:layout_width="match_parent"
-    tools:minHeight="48dp"
+    tools:minHeight="@dimen/paypal_payment_button_min_height"
     tools:orientation="horizontal"
-    tools:parentTag="LinearLayout">
+    tools:paddingVertical="@dimen/paypal_payment_button_vertical_padding"
+    tools:parentTag="android.widget.LinearLayout">
 
     <TextView
         android:id="@+id/prefixText"
@@ -15,6 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/paypal_payment_button_text_margin"
         android:fontFamily="@font/paypalopen_regular"
+        android:textSize="@dimen/paypal_payment_button_label_text_size"
         android:visibility="gone"
         tools:text="Buy turnips with"
         tools:textColor="@color/paypal_spb_on_light_surface"
@@ -27,7 +29,7 @@
         android:contentDescription="@null"
         android:visibility="gone"
         tools:srcCompat="@drawable/wordmark_paypal_credit_monochrome"
-        tools:visibility="gone"/>
+        tools:visibility="gone" />
 
     <TextView
         android:id="@+id/suffixText"
@@ -35,6 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/paypal_payment_button_text_margin"
         android:fontFamily="@font/paypalopen_regular"
+        android:textSize="@dimen/paypal_payment_button_label_text_size"
         android:visibility="gone"
         tools:text="Checkout"
         tools:textColor="@color/paypal_spb_on_light_surface"

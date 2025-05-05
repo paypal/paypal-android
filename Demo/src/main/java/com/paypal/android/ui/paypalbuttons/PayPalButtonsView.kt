@@ -98,10 +98,6 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                 cornerRadius = uiState.customCornerRadius,
                 onCornerRadiusChange = { value -> viewModel.customCornerRadius = value }
             )
-            PaymentButtonSizeOptionList(
-                selectedOption = uiState.paymentButtonSize,
-                onSelection = { value -> viewModel.paymentButtonSize = value }
-            )
             Spacer(modifier = Modifier.size(contentPadding))
         }
     }
@@ -208,7 +204,6 @@ private fun configureButton(
     uiState: PayPalButtonsUiState
 ) {
     button.shape = uiState.paymentButtonShape
-    button.size = uiState.paymentButtonSize
 
     if (button is PayPalButton) {
         button.label = uiState.payPalButtonLabel
