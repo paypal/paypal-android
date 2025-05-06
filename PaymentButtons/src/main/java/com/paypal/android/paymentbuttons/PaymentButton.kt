@@ -210,7 +210,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 
     private fun applyDefaultAttributes() {
-        // minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
         val verticalPadding =
             resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
         setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
