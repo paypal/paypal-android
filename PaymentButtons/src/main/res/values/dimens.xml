@@ -10,7 +10,8 @@
     <!-- The stroke used for white buttons to help them standout on light backgrounds. -->
     <dimen name="paypal_payment_button_stroke_width">1dp</dimen>
     <!-- 48dp is the minimum height of buttons to account for accessibility requirements -->
-    <dimen name="paypal_payment_button_min_height">48dp</dimen>
+    <dimen name="paypal_payment_button_min_height">25dp</dimen>
+    <dimen name="paypal_payment_button_max_height">60dp</dimen>
     <dimen name="paypal_payment_button_min_height_large">55dp</dimen>
     <!-- Padding is used to help keep the minimum button height in check, 13dp is the default with
         15dp being used for large buttons -->
