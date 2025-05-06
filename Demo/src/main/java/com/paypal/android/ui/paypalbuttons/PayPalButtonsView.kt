@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
@@ -58,7 +60,7 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
             color = Color.Black,
             style = MaterialTheme.typography.titleLarge,
         )
-        PayPalButtonFactory(uiState = uiState)
+        PayPalMinDefaultMaxButtonGroup(uiState = uiState)
         Text(
             text = stringResource(id = R.string.pay_pal_button_options),
             color = Color.Black,
@@ -147,7 +149,32 @@ fun CustomCornerRadiusSlider(cornerRadius: Int?, onCornerRadiusChange: (Int) -> 
 }
 
 @Composable
-fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
+fun PayPalMinDefaultMaxButtonGroup(uiState: PayPalButtonsUiState) {
+    Column {
+        Text("Minimum Height")
+        PayPalButtonFactory(
+            uiState = uiState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.paypal_payment_button_min_height))
+        )
+        Text("Default")
+        PayPalButtonFactory(
+            uiState = uiState,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text("Maximum Height")
+        PayPalButtonFactory(
+            uiState = uiState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(dimensionResource(R.dimen.paypal_payment_button_max_height))
+        )
+    }
+}
+
+@Composable
+fun PayPalButtonFactory(uiState: PayPalButtonsUiState, modifier: Modifier = Modifier) {
     when (uiState.fundingType) {
         ButtonFundingType.PAYPAL -> {
             AndroidView(
@@ -161,7 +188,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = modifier
             )
         }
 
@@ -177,7 +204,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = modifier
             )
         }
 
@@ -193,7 +220,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = modifier
             )
         }
     }
