@@ -58,9 +58,9 @@ open class PayPalButton @JvmOverloads constructor(
             }
         }
 
-    override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_monochrome
+    override val wordmarkDarkLuminanceResId: Int = R.drawable.paypal_logo_white
 
-    override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_color
+    override val wordmarkLightLuminanceResId: Int = R.drawable.paypal_logo_black
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL
 
@@ -134,7 +134,7 @@ enum class PayPalButtonColor(
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
     GOLD(value = 0, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.LIGHT),
-    BLUE(value = 1, colorResId = R.color.paypal_blue, luminance = PaymentButtonColorLuminance.DARK),
+    BLUE(value = 1, colorResId = R.color.paypal_blue, luminance = PaymentButtonColorLuminance.LIGHT),
     WHITE(
         value = 2,
         colorResId = R.color.paypal_white,

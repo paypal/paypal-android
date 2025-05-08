@@ -56,10 +56,10 @@ class PayLaterButton @JvmOverloads constructor(
         }
 
     override val wordmarkDarkLuminanceResId: Int
-        get() = R.drawable.logo_paypal_monochrome
+        get() = R.drawable.paypal_logo_white
 
     override val wordmarkLightLuminanceResId: Int
-        get() = R.drawable.logo_paypal_color
+        get() = R.drawable.paypal_logo_black
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAY_LATER
 
@@ -90,11 +90,13 @@ class PayLaterButton @JvmOverloads constructor(
                 prefixTextVisibility = View.VISIBLE
                 prefixText = updatedLabel.retrieveLabel(context)
             }
+
             PayPalButtonLabel.Position.END -> {
                 prefixTextVisibility = View.GONE
                 suffixTextVisibility = View.VISIBLE
                 suffixText = updatedLabel.retrieveLabel(context)
             }
+
             else -> {
                 prefixTextVisibility = View.GONE
                 suffixTextVisibility = View.GONE

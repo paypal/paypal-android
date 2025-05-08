@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import androidx.core.content.res.use
-import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
-import com.paypal.android.ui.R
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.DARK_BLUE
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.GOLD
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.WHITE
+import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
+import com.paypal.android.ui.R
 
 /**
  * PayPalCreditButton provides a PayPal Credit button with the ability to modify the [color], [shape],
@@ -40,10 +42,8 @@ class PayPalCreditButton @JvmOverloads constructor(
             updateShapeDrawableFillColor(field)
         }
 
-    // NEXT_MAJOR_VERSION: - Remove monochrome credit logo
-    override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
-
-    override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_credit_color
+    override val wordmarkDarkLuminanceResId: Int = R.drawable.paypal_logo_white
+    override val wordmarkLightLuminanceResId: Int = R.drawable.paypal_logo_black
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
@@ -86,7 +86,7 @@ enum class PayPalCreditButtonColor(
     DARK_BLUE(
         value = 0,
         colorResId = R.color.paypal_dark_blue,
-        luminance = PaymentButtonColorLuminance.DARK
+        luminance = PaymentButtonColorLuminance.LIGHT
     ),
     BLACK(
         value = 1,
@@ -118,7 +118,10 @@ enum class PayPalCreditButtonColor(
                 BLACK.value -> BLACK
                 GOLD.value -> GOLD
                 WHITE.value -> WHITE
-                else -> throw createFormattedIllegalArgumentException("PayPalCreditButtonColor", values().size)
+                else -> throw createFormattedIllegalArgumentException(
+                    "PayPalCreditButtonColor",
+                    values().size
+                )
             }
         }
     }
