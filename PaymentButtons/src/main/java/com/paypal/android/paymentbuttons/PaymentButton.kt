@@ -173,9 +173,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         suffixTextView = findViewById(R.id.suffixText)
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
 
-        orientation = HORIZONTAL
-        gravity = Gravity.CENTER
-
         initAttributes(attributeSet, defStyleAttr)
         applyDefaultAttributes()
     }
@@ -209,9 +206,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     private fun applyDefaultAttributes() {
         minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
-        val verticalPadding =
-            resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
-        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
 
         val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
         prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)

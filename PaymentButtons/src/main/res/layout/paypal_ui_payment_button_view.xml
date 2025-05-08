@@ -1,46 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/paypal_payment_button_default_height"
+    android:orientation="vertical"
     tools:background="@color/black_56"
-    tools:gravity="center"
-    tools:layout_height="wrap_content"
-    tools:layout_width="match_parent"
     tools:minHeight="@dimen/paypal_payment_button_min_height"
-    tools:orientation="horizontal"
-    tools:paddingVertical="@dimen/paypal_payment_button_vertical_padding"
     tools:parentTag="android.widget.LinearLayout">
 
-    <TextView
-        android:id="@+id/prefixText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/paypal_payment_button_text_margin"
-        android:fontFamily="@font/paypalopen_regular"
-        android:textSize="@dimen/paypal_payment_button_label_text_size"
-        android:visibility="gone"
-        tools:text="Buy turnips with"
-        tools:textColor="@color/paypal_spb_on_light_surface"
-        tools:visibility="gone" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@dimen/paypal_payment_button_vertical_spacer_weight" />
 
-    <ImageView
-        android:id="@+id/payPalWordmarkImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@null"
-        android:visibility="gone"
-        tools:srcCompat="@drawable/wordmark_paypal_credit_monochrome"
-        tools:visibility="gone" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@dimen/paypal_payment_button_logo_weight"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/suffixText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/paypal_payment_button_text_margin"
-        android:fontFamily="@font/paypalopen_regular"
-        android:textSize="@dimen/paypal_payment_button_label_text_size"
-        android:visibility="gone"
-        tools:text="Checkout"
-        tools:textColor="@color/paypal_spb_on_light_surface"
-        tools:visibility="gone" />
+        <TextView
+            android:id="@+id/prefixText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/paypal_payment_button_text_margin"
+            android:fontFamily="@font/paypalopen_regular"
+            android:textSize="@dimen/paypal_payment_button_label_text_size"
+            android:visibility="gone"
+            tools:text="Buy turnips with"
+            tools:textColor="@color/paypal_spb_on_light_surface"
+            tools:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/payPalWordmarkImage"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:visibility="gone"
+            tools:srcCompat="@drawable/paypal_logo_black"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/suffixText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/paypal_payment_button_text_margin"
+            android:fontFamily="@font/paypalopen_regular"
+            android:textSize="@dimen/paypal_payment_button_label_text_size"
+            android:visibility="gone"
+            tools:text="Checkout"
+            tools:textColor="@color/paypal_spb_on_light_surface"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="@dimen/paypal_payment_button_vertical_spacer_weight" />
 
 </merge>
