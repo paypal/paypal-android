@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/paypal_payment_button_default_height"
-    android:orientation="vertical"
+    tools:layout_width="match_parent"
+    tools:layout_height="@dimen/paypal_payment_button_default_height"
+    tools:orientation="vertical"
     tools:background="@color/black_56"
     tools:minHeight="@dimen/paypal_payment_button_min_height"
     tools:parentTag="android.widget.LinearLayout">
