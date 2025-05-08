@@ -173,6 +173,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         suffixTextView = findViewById(R.id.suffixText)
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
 
+        orientation = VERTICAL
+
         initAttributes(attributeSet, defStyleAttr)
         applyDefaultAttributes()
     }
