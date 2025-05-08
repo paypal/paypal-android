@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalbuttons
+package com.paypal.android.ui.paypal
 
 import android.content.Context
 import android.widget.Toast

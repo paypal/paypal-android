@@ -16,11 +16,9 @@
 
     <declare-styleable name="PayPalButton">
         <attr name="paypal_color" format="enum">
-            <enum name="gold" value="0" />
-            <enum name="blue" value="1" />
-            <enum name="white" value="2" />
-            <enum name="black" value="3" />
-            <enum name="silver" value="4" />
+            <enum name="blue" value="0" />
+            <enum name="white" value="1" />
+            <enum name="black" value="2" />
         </attr>
 
         <attr name="paypal_label" format="enum">
@@ -33,20 +31,17 @@
 
     <declare-styleable name="PayPalCreditButton">
         <attr name="paypal_credit_color" format="enum">
-            <enum name="dark_blue" value="0" />
-            <enum name="black" value="1" />
-            <enum name="gold" value="2" />
-            <enum name="white" value="3" />
+            <enum name="blue" value="0" />
+            <enum name="white" value="1" />
+            <enum name="black" value="2" />
         </attr>
     </declare-styleable>
 
     <declare-styleable name="PayLaterButton">
     <attr name="paylater_color" format="enum">
-        <enum name="gold" value="0" />
-        <enum name="blue" value="1" />
-        <enum name="white" value="2" />
-        <enum name="black" value="3" />
-        <enum name="silver" value="4" />
+        <enum name="blue" value="0" />
+        <enum name="white" value="1" />
+        <enum name="black" value="2" />
     </attr>
     </declare-styleable>
 </resources>

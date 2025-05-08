@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalbuttons
+package com.paypal.android.ui.paypal
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -12,7 +12,7 @@ fun PayPalButtonFundingTypeOptionList(
 ) {
     OptionList(
         title = stringResource(id = R.string.pay_pal_button_type),
-        options = ButtonFundingType.values().map { it.name },
+        options = ButtonFundingType.entries.map { it.name },
         selectedOption = selectedOption.name,
         onSelectedOptionChange = { option ->
             onSelection(ButtonFundingType.valueOf(option))

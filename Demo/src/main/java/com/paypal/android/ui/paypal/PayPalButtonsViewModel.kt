@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalbuttons
+package com.paypal.android.ui.paypal
 
 import androidx.lifecycle.ViewModel
 import com.paypal.android.paymentbuttons.PayPalButtonColor

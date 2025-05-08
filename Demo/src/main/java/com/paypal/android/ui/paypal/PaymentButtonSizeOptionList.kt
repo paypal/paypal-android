@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalbuttons
+package com.paypal.android.ui.paypal
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -13,7 +13,7 @@ fun PaymentButtonSizeOptionList(
 ) {
     OptionList(
         title = stringResource(id = R.string.pay_pal_button_size),
-        options = PaymentButtonSize.values().map { it.name },
+        options = PaymentButtonSize.entries.map { it.name },
         selectedOption = selectedOption.name,
         onSelectedOptionChange = { option ->
             onSelection(PaymentButtonSize.valueOf(option))

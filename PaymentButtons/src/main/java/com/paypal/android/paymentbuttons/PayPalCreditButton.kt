@@ -4,10 +4,11 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import androidx.core.content.res.use
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLUE
+import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.WHITE
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
-import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
-import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.DARK_BLUE
 
 /**
  * PayPalCreditButton provides a PayPal Credit button with the ability to modify the [color], [shape],
@@ -34,7 +35,7 @@ class PayPalCreditButton @JvmOverloads constructor(
     /**
      * Updates the color of the Payment Button with the provided [PayPalCreditButtonColor].
      */
-    override var color: PaymentButtonColor = DARK_BLUE
+    override var color: PaymentButtonColor = BLUE
         set(value) {
             field = value
             updateShapeDrawableFillColor(field)
@@ -63,7 +64,7 @@ class PayPalCreditButton @JvmOverloads constructor(
     private fun updateColorFrom(typedArray: TypedArray) {
         val attribute = typedArray.getInt(
             R.styleable.PayPalCreditButton_paypal_credit_color,
-            DARK_BLUE.value
+            BLUE.value
         )
         color = PayPalCreditButtonColor(attribute)
     }
@@ -72,10 +73,9 @@ class PayPalCreditButton @JvmOverloads constructor(
 /**
  * Defines the colors available for PayPal Credit buttons.
  *
- * @see DARK_BLUE is the default and recommended color for PayPal Credit
- * @see BLACK is a secondary alternative color for PayPal Credit
- * @see GOLD alternative color for PayPal Credit
+ * @see BLUE is the default and recommended color for PayPal Credit
  * @see WHITE alternative color for PayPal Credit
+ * @see BLACK is a secondary alternative color for PayPal Credit
  */
 enum class PayPalCreditButtonColor(
     val value: Int,
@@ -83,26 +83,21 @@ enum class PayPalCreditButtonColor(
     override val hasOutline: Boolean = false,
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
-    DARK_BLUE(
+    BLUE(
         value = 0,
-        colorResId = R.color.paypal_dark_blue,
+        colorResId = R.color.paypal_blue,
         luminance = PaymentButtonColorLuminance.DARK
-    ),
-    BLACK(
-        value = 1,
-        colorResId = R.color.paypal_black,
-        luminance = PaymentButtonColorLuminance.DARK
-    ),
-    GOLD(
-        value = 2,
-        colorResId = R.color.paypal_gold,
-        luminance = PaymentButtonColorLuminance.LIGHT
     ),
     WHITE(
-        value = 3,
+        value = 1,
         colorResId = R.color.paypal_white,
         hasOutline = true,
         luminance = PaymentButtonColorLuminance.LIGHT
+    ),
+    BLACK(
+        value = 2,
+        colorResId = R.color.paypal_black,
+        luminance = PaymentButtonColorLuminance.DARK
     );
 
     companion object {
@@ -114,11 +109,13 @@ enum class PayPalCreditButtonColor(
          */
         operator fun invoke(attributeIndex: Int): PayPalCreditButtonColor {
             return when (attributeIndex) {
-                DARK_BLUE.value -> DARK_BLUE
+                BLUE.value -> BLUE
                 BLACK.value -> BLACK
-                GOLD.value -> GOLD
                 WHITE.value -> WHITE
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonSize", values().size)
+                else -> throw createFormattedIllegalArgumentException(
+                    "PaymentButtonSize",
+                    entries.size
+                )
             }
         }
     }

@@ -25,7 +25,7 @@ import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
 import com.paypal.android.ui.features.FeaturesView
-import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
+import com.paypal.android.ui.paypal.PayPalButtonsView
 import com.paypal.android.ui.paypalstaticbuttons.PayPalStaticButtonsView
 import com.paypal.android.ui.paypalweb.PayPalWebView
 import com.paypal.android.ui.paypalwebvault.PayPalWebVaultView

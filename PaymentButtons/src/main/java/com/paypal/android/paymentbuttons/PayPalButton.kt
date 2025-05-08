@@ -134,15 +134,19 @@ enum class PayPalButtonColor(
     override val hasOutline: Boolean = false,
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
-    BLUE(value = 1, colorResId = R.color.paypal_blue, luminance = PaymentButtonColorLuminance.DARK),
+    BLUE(
+        value = 0,
+        colorResId = R.color.paypal_blue,
+        luminance = PaymentButtonColorLuminance.DARK
+    ),
     WHITE(
-        value = 2,
+        value = 1,
         colorResId = R.color.paypal_white,
         hasOutline = true,
         luminance = PaymentButtonColorLuminance.LIGHT
     ),
     BLACK(
-        value = 3,
+        value = 2,
         colorResId = R.color.paypal_black,
         luminance = PaymentButtonColorLuminance.DARK
     );

@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalbuttons
+package com.paypal.android.ui.paypal
 
 enum class ButtonFundingType {
     PAYPAL,

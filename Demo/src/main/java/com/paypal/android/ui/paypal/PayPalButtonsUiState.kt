@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypalbuttons
+package com.paypal.android.ui.paypal
 
 import com.paypal.android.paymentbuttons.PayPalButtonColor
 import com.paypal.android.paymentbuttons.PayPalButtonLabel
@@ -8,7 +8,7 @@ import com.paypal.android.paymentbuttons.PaymentButtonSize
 
 data class PayPalButtonsUiState(
     val fundingType: ButtonFundingType = ButtonFundingType.PAYPAL,
-    val payPalCreditButtonColor: PayPalCreditButtonColor = PayPalCreditButtonColor.DARK_BLUE,
+    val payPalCreditButtonColor: PayPalCreditButtonColor = PayPalCreditButtonColor.BLUE,
     val payPalButtonColor: PayPalButtonColor = PayPalButtonColor.BLUE,
     val payPalButtonLabel: PayPalButtonLabel = PayPalButtonLabel.PAYPAL,
     val paymentButtonShape: PaymentButtonShape = PaymentButtonShape.ROUNDED,

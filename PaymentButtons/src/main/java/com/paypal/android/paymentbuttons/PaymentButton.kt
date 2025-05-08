@@ -223,7 +223,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     private fun initAttributes(attributeSet: AttributeSet?, defStyleAttr: Int) {
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
-            updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
         }
     }
@@ -268,7 +267,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     private fun updateButtonStroke() {
         materialShapeDrawable = if (color.hasOutline) {
-            val strokeColor = ContextCompat.getColor(context, R.color.paypal_spb_on_white_stroke)
+            val strokeColor = ContextCompat.getColor(context, R.color.neutral_white_border)
             val strokeWidth = resources.getDimension(R.dimen.paypal_payment_button_stroke_width)
             materialShapeDrawable.apply { setStroke(strokeWidth, strokeColor) }
         } else {
