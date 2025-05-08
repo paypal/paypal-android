@@ -57,7 +57,7 @@ open class PayPalButton @JvmOverloads constructor(
      */
     open var label = PAYPAL
         set(value) {
-            if (value != PayPalButtonLabel.PAY_LATER) {
+            if (value != PAY_LATER) {
                 field = value
                 updateLabel(field)
             }
