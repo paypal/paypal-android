@@ -5,6 +5,11 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
+import com.paypal.android.paymentbuttons.PayPalButtonColor.BLACK
+import com.paypal.android.paymentbuttons.PayPalButtonColor.BLUE
+import com.paypal.android.paymentbuttons.PayPalButtonColor.WHITE
+import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAYPAL
+import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAY_LATER
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
@@ -37,7 +42,7 @@ open class PayPalButton @JvmOverloads constructor(
      * WHITE it will be updated to the traditional wordmark. When updated to BLUE or BLACK it will
      * be updated to the monochrome wordmark.
      */
-    override var color: PaymentButtonColor = PayPalButtonColor.GOLD
+    override var color: PaymentButtonColor = BLUE
         set(value) {
             field = value
             updateShapeDrawableFillColor(field)
@@ -50,9 +55,9 @@ open class PayPalButton @JvmOverloads constructor(
      * the wordmark. Note: this does not support [PAY_LATER], if you require a button with that
      * label then use the specialized [PayLaterButton].
      */
-    open var label: PayPalButtonLabel = PayPalButtonLabel.PAYPAL
+    open var label = PAYPAL
         set(value) {
-            if (value != PayPalButtonLabel.PAY_LATER) {
+            if (value != PAY_LATER) {
                 field = value
                 updateLabel(field)
             }
@@ -80,7 +85,7 @@ open class PayPalButton @JvmOverloads constructor(
     private fun updateColorFrom(typedArray: TypedArray) {
         val paypalColorAttribute = typedArray.getInt(
             R.styleable.PayPalButton_paypal_color,
-            PayPalButtonColor.GOLD.value
+            BLUE.value
         )
         color = PayPalButtonColor(paypalColorAttribute)
     }
@@ -115,16 +120,12 @@ open class PayPalButton @JvmOverloads constructor(
 /**
  * Defines the colors available for PayPal buttons.
  *
- * @see GOLD is the default color if one is not provided and is the recommended choice as research
- * has shown it results in the best conversion.
  * @see BLUE is the preferred alternative color if gold does not work for your experience. Research
  * has shown that people know it is our brand color, which provides a halo of trust and security to
  * your experience.
  * @see WHITE is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
  * @see BLACK is one of our secondary alternatives. This color is less capable of drawing people's
- * attention.
- * @see SILVER is one of our secondary alternatives. This color is less capable of drawing people's
  * attention.
  */
 enum class PayPalButtonColor(
@@ -133,7 +134,6 @@ enum class PayPalButtonColor(
     override val hasOutline: Boolean = false,
     override val luminance: PaymentButtonColorLuminance
 ) : PaymentButtonColor {
-    GOLD(value = 0, colorResId = R.color.paypal_gold, luminance = PaymentButtonColorLuminance.LIGHT),
     BLUE(value = 1, colorResId = R.color.paypal_blue, luminance = PaymentButtonColorLuminance.DARK),
     WHITE(
         value = 2,
@@ -141,8 +141,11 @@ enum class PayPalButtonColor(
         hasOutline = true,
         luminance = PaymentButtonColorLuminance.LIGHT
     ),
-    BLACK(value = 3, colorResId = R.color.paypal_black, luminance = PaymentButtonColorLuminance.DARK),
-    SILVER(value = 4, colorResId = R.color.paypal_silver, luminance = PaymentButtonColorLuminance.LIGHT);
+    BLACK(
+        value = 3,
+        colorResId = R.color.paypal_black,
+        luminance = PaymentButtonColorLuminance.DARK
+    );
 
     companion object {
         /**
@@ -153,12 +156,13 @@ enum class PayPalButtonColor(
          */
         operator fun invoke(attributeIndex: Int): PayPalButtonColor {
             return when (attributeIndex) {
-                GOLD.value -> GOLD
                 BLUE.value -> BLUE
                 WHITE.value -> WHITE
                 BLACK.value -> BLACK
-                SILVER.value -> SILVER
-                else -> throw createFormattedIllegalArgumentException("PayPalButtonColor", values().size)
+                else -> throw createFormattedIllegalArgumentException(
+                    "PayPalButtonColor",
+                    entries.size
+                )
             }
         }
     }
@@ -244,7 +248,10 @@ enum class PayPalButtonLabel(
                 BUY_NOW.value -> BUY_NOW
                 PAY.value -> PAY
                 PAY_LATER.value -> PAY_LATER
-                else -> throw createFormattedIllegalArgumentException("PaymentButtonLabel", values().size)
+                else -> throw createFormattedIllegalArgumentException(
+                    "PaymentButtonLabel",
+                    entries.size
+                )
             }
         }
     }

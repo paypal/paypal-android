@@ -36,23 +36,10 @@ class PayLaterButton @JvmOverloads constructor(
      * WHITE it will be updated to the traditional wordmark. When updated to BLUE or BLACK it will
      * be updated to the monochrome wordmark.
      */
-    override var color: PaymentButtonColor = PayPalButtonColor.GOLD
+    override var color: PaymentButtonColor = PayPalButtonColor.BLUE
         set(value) {
             field = value
             updateShapeDrawableFillColor(field)
-        }
-
-    /**
-     * Provides the label of the [PayLaterButton]. This value will always be
-     * [PaymentButtonFundingType.PAY_LATER], attempting
-     * to set the value to anything else will result in that value being ignored.
-     */
-    var label: PayPalButtonLabel = PayPalButtonLabel.PAY_LATER
-        set(value) {
-            if (value == PayPalButtonLabel.PAY_LATER) {
-                field = value
-                updateLabel(field)
-            }
         }
 
     override val wordmarkDarkLuminanceResId: Int
@@ -78,7 +65,7 @@ class PayLaterButton @JvmOverloads constructor(
     private fun updateColorFrom(typedArray: TypedArray) {
         val paypalColorAttributeIndex = typedArray.getInt(
             R.styleable.PayLaterButton_paylater_color,
-            PayPalButtonColor.GOLD.value
+            PayPalButtonColor.BLUE.value
         )
         color = PayPalButtonColor(paypalColorAttributeIndex)
     }
