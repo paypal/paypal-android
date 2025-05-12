@@ -11,10 +11,10 @@
     <dimen name="paypal_payment_button_stroke_width">1dp</dimen>
     <!-- 48dp is the minimum height of buttons to account for accessibility requirements -->
     <dimen name="paypal_payment_button_min_height">48dp</dimen>
+    <dimen name="paypal_payment_button_default_height">48dp</dimen>
     <dimen name="paypal_payment_button_min_height_large">55dp</dimen>
     <dimen name="paypal_payment_button_label_text_size">14sp</dimen>
     <dimen name="paypal_payment_button_label_text_size_large">18sp</dimen>
-    <dimen name="paypal_payment_button_default_height">45dp</dimen>
 
     <!-- Make logo height 76% of button -->
     <dimen name="paypal_payment_button_logo_weight">0.76</dimen>
