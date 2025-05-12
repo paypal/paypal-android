@@ -163,7 +163,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier.fillMaxWidth().height(45.dp)
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
@@ -179,7 +179,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier.fillMaxWidth().height(45.dp)
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
@@ -195,7 +195,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                 update = { button ->
                     configureButton(button, uiState)
                 },
-                modifier = Modifier.fillMaxWidth().height(45.dp)
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
