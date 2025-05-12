@@ -1,4 +1,4 @@
-package com.paypal.android.ui.paypal
+package com.paypal.android.ui.paypalbuttons
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

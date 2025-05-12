@@ -9,8 +9,7 @@ import com.paypal.android.ui.R
 
 
 /**
- * PayLaterButton provides a PayPal PayLater button with the ability to modify the [color], [shape],
- * and [size].
+ * PayLaterButton provides a PayPal PayLater button with the ability to modify the [color], [shape].
  *
  * Setting up PayLaterButton within an XML layout:
  * ```

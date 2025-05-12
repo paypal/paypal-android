@@ -71,7 +71,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_credit_color="black" />
+            app:paypal_credit_color="blue" />
 
     </LinearLayout>
 </ScrollView>
