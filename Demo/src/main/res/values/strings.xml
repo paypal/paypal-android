@@ -26,7 +26,6 @@
     <string name="pay_pal_button_color">Button Color</string>
     <string name="pay_pal_button_label">Button Label</string>
     <string name="pay_pal_button_shape">Button Shape</string>
-    <string name="pay_pal_button_size">Button Size</string>
 
     <string name="intent_title">INTENT</string>
     <string-array name="intent_options">
