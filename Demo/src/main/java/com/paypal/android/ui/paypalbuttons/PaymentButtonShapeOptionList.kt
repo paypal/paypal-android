@@ -13,7 +13,7 @@ fun PaymentButtonShapeOptionList(
 ) {
     OptionList(
         title = stringResource(id = R.string.pay_pal_button_shape),
-        options = PaymentButtonShape.values().map { it.name },
+        options = PaymentButtonShape.entries.map { it.name },
         selectedOption = selectedOption.name,
         onSelectedOptionChange = { option ->
             onSelection(PaymentButtonShape.valueOf(option))

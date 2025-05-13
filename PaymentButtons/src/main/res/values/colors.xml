@@ -2,6 +2,19 @@
 <resources>
     <color name="black_56">#8f000000</color>
 
+    // Black Colors
+    <color name="neutral_black">#000000</color>
+    <color name="neutral_black_600">#696969</color>
+
+    // Blue Colors
+    <color name="blue_pressed">#3DB5FF</color>
+    <color name="blue">#60CDFF</color>
+
+    // White Colors
+    <color name="neutral_white">#FFFFFF</color>
+    <color name="neutral_white_pressed">#E9E9E9</color>
+    <color name="neutral_white_border">#555555</color>
+
     <color name="paypal_spb_on_light_surface">#000000</color>
     <color name="paypal_spb_on_dark_surface">#FFFFFF</color>
     <color name="paypal_spb_on_white_stroke">#000000</color>

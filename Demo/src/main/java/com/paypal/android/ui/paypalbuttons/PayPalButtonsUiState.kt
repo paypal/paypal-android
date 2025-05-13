@@ -7,8 +7,8 @@ import com.paypal.android.paymentbuttons.PaymentButtonShape
 
 data class PayPalButtonsUiState(
     val fundingType: ButtonFundingType = ButtonFundingType.PAYPAL,
-    val payPalCreditButtonColor: PayPalCreditButtonColor = PayPalCreditButtonColor.DARK_BLUE,
-    val payPalButtonColor: PayPalButtonColor = PayPalButtonColor.GOLD,
+    val payPalCreditButtonColor: PayPalCreditButtonColor = PayPalCreditButtonColor.BLUE,
+    val payPalButtonColor: PayPalButtonColor = PayPalButtonColor.BLUE,
     val payPalButtonLabel: PayPalButtonLabel = PayPalButtonLabel.PAYPAL,
     val paymentButtonShape: PaymentButtonShape = PaymentButtonShape.ROUNDED,
     val customCornerRadius: Int? = null

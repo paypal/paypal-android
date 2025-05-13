@@ -13,7 +13,7 @@ fun PayPalCreditButtonColorOptionList(
 ) {
     OptionList(
         title = stringResource(id = R.string.pay_pal_button_color),
-        options = PayPalCreditButtonColor.values().map { it.name },
+        options = PayPalCreditButtonColor.entries.map { it.name },
         selectedOption = selectedOption.name,
         onSelectedOptionChange = { option ->
             onSelection(PayPalCreditButtonColor.valueOf(option))
