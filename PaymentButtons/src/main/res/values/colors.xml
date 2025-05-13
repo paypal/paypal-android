@@ -7,8 +7,8 @@
     <color name="neutral_black_600">#696969</color>
 
     // Blue Colors
-    <color name="blue_400">#3DB5FF</color>
-    <color name="blue_300">#60CDFF</color>
+    <color name="blue_pressed">#3DB5FF</color>
+    <color name="blue">#60CDFF</color>
 
     // White Colors
     <color name="neutral_white">#FFFFFF</color>
