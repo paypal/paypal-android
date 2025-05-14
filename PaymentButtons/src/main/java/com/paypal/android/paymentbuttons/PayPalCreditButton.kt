@@ -41,10 +41,8 @@ class PayPalCreditButton @JvmOverloads constructor(
             updateShapeDrawableFillColor(field)
         }
 
-    // NEXT_MAJOR_VERSION: - Remove monochrome credit logo
-    override val wordmarkDarkLuminanceResId: Int = R.drawable.wordmark_paypal_credit_monochrome
-
-    override val wordmarkLightLuminanceResId: Int = R.drawable.wordmark_paypal_credit_color
+    override val wordmarkDarkLuminanceResId: Int = R.drawable.paypal_logo_white
+    override val wordmarkLightLuminanceResId: Int = R.drawable.paypal_logo_black
 
     override val fundingType: PaymentButtonFundingType = PaymentButtonFundingType.PAYPAL_CREDIT
 
@@ -86,7 +84,7 @@ enum class PayPalCreditButtonColor(
     BLUE(
         value = 0,
         colorResId = R.color.paypal_blue,
-        luminance = PaymentButtonColorLuminance.DARK
+        luminance = PaymentButtonColorLuminance.LIGHT
     ),
     WHITE(
         value = 1,

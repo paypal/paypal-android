@@ -8,6 +8,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -173,8 +174,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         suffixTextView = findViewById(R.id.suffixText)
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
 
-        orientation = HORIZONTAL
-        gravity = Gravity.CENTER
+        orientation = VERTICAL
 
         initAttributes(attributeSet, defStyleAttr)
         applyDefaultAttributes()
@@ -209,9 +209,17 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     private fun applyDefaultAttributes() {
         minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
-        val verticalPadding =
-            resources.getDimension(R.dimen.paypal_payment_button_vertical_padding).toInt()
-        setPadding(paddingLeft, verticalPadding, paddingRight, verticalPadding)
+
+        // set explicit height if none given; for percentage layout to work, this button needs
+        // an explicitly set height
+        val needsExplicitHeight =
+            (layoutParams == null || layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT)
+        if (needsExplicitHeight) {
+            val width = layoutParams?.width ?: ViewGroup.LayoutParams.MATCH_PARENT
+            val height =
+                resources.getDimensionPixelSize(R.dimen.paypal_payment_button_default_height)
+            layoutParams = ViewGroup.LayoutParams(width, height)
+        }
 
         val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
         prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
