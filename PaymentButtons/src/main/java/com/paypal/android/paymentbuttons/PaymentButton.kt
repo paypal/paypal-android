@@ -5,7 +5,6 @@ import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +21,8 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
+import kotlin.math.round
+
 
 @Suppress("TooManyFunctions")
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
@@ -221,9 +222,14 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             layoutParams = ViewGroup.LayoutParams(width, height)
         }
 
-        val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
-        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
-        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
+        // Ref: https://stackoverflow.com/a/20120240
+        val typedValue = TypedValue()
+        resources.getValue(R.dimen.paypal_payment_button_logo_weight, typedValue, true)
+        val logoHeightPercentage = typedValue.float
+
+        val proportionalTextSize = round(layoutParams.height * 0.58f * 0.58f)
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, proportionalTextSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, proportionalTextSize)
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {

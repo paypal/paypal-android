@@ -50,6 +50,7 @@
             android:fontFamily="@font/paypal_pro_book"
             android:textSize="@dimen/paypal_payment_button_label_text_size"
             android:visibility="gone"
+            android:includeFontPadding="false"
             tools:text="Checkout"
             tools:textColor="@color/paypal_spb_on_light_surface"
             tools:visibility="visible" />
