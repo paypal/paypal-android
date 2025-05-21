@@ -31,6 +31,12 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
 
+    companion object {
+        const val LOGO_TO_BUTTON_HEIGHT_RATIO = 0.58f
+        const val TEXT_TO_LOGO_HEIGHT_RATIO = 0.58f
+        private const val TEXT_SIZE_ADJUSTMENT_DIP = 2f
+    }
+
     /**
      * Signals that the backing shape has changed and may require a full redraw.
      */
@@ -222,14 +228,20 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             layoutParams = ViewGroup.LayoutParams(width, height)
         }
 
-        // Ref: https://stackoverflow.com/a/20120240
-        val typedValue = TypedValue()
-        resources.getValue(R.dimen.paypal_payment_button_logo_weight, typedValue, true)
-        val logoHeightPercentage = typedValue.float
+        val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight()
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+    }
 
-        val proportionalTextSize = round(layoutParams.height * 0.58f * 0.58f)
-        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, proportionalTextSize)
-        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, proportionalTextSize)
+    private fun calculateTextSizeInPixelsRelativeToLayoutHeight(): Float {
+        val textSizeAdjustment = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            TEXT_SIZE_ADJUSTMENT_DIP,
+            resources.displayMetrics
+        )
+        val proportionalTextSize =
+            round(layoutParams.height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
+        return proportionalTextSize + textSizeAdjustment
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {
