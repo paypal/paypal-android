@@ -32,8 +32,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
 
     companion object {
-        const val LOGO_TO_BUTTON_HEIGHT_RATIO = 0.58f
-        const val TEXT_TO_LOGO_HEIGHT_RATIO = 0.58f
+        private const val LOGO_TO_BUTTON_HEIGHT_RATIO = 0.58f
+        private const val TEXT_TO_LOGO_HEIGHT_RATIO = 0.58f
+
+        // tweaking text size after an ad hoc design review. Text should be approximately 2pts
+        // bigger than the value obtained by multiplying logo height and text height percentages
         private const val TEXT_SIZE_ADJUSTMENT_DIP = 2f
     }
 
