@@ -7,10 +7,10 @@
             <enum name="large" value="2" />
         </attr>
 
-        <attr name="payment_button_shape" format="enum">
-            <enum name="rounded" value="0" />
+        <attr name="payment_button_edges" format="enum">
+            <enum name="soft" value="0" />
             <enum name="pill" value="1" />
-            <enum name="rectangle" value="2" />
+            <enum name="sharp" value="2" />
         </attr>
     </declare-styleable>
 

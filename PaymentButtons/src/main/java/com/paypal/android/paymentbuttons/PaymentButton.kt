@@ -2,18 +2,18 @@ package com.paypal.android.paymentbuttons
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.DimenRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
+import com.google.android.material.shape.CornerTreatment
 import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
@@ -29,11 +29,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
-
-    /**
-     * Signals that the backing shape has changed and may require a full redraw.
-     */
-    private var shapeHasChanged = false
 
     internal val analyticsService: AnalyticsService =
         AnalyticsService(context, CoreConfig(clientId = "N/A", environment = Environment.LIVE))
@@ -79,62 +74,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             prefixTextView.visibility = prefixTextVisibility
         }
 
-    /**
-     * Updates the corner radius of the button
-     *
-     * Cannot be used with PaymentButtonShape
-     */
-    var customCornerRadius: Float? = null
+    var edges: PaymentButtonEdges = PaymentButtonEdges.Soft
         set(value) {
             field = value
-
-            if (value == null) return
-
-            val cornerTreatment = if (value == 0.0f) {
-                CutCornerTreatment()
-            } else {
-                RoundedCornerTreatment()
-            }
-
-            shapeAppearanceModel = ShapeAppearanceModel.builder().apply {
-                setAllCornerSizes(value)
-                setAllCorners(cornerTreatment)
-            }.build()
-        }
-
-    /**
-     * Updates the shape of the Payment Button with the provided [PaymentButtonShape]
-     * and defaults to [PaymentButtonShape.ROUNDED] if one is not provided.
-     *
-     * If your application is taking advantage of Material Theming then your own shape definitions
-     * will be used as the default.
-     *
-     * Cannot be used with customCornerRadius
-     */
-    var shape: PaymentButtonShape = PaymentButtonShape.ROUNDED
-        set(value) {
-            shapeHasChanged = field != value
-            field = value
-
-            this.customCornerRadius = null
-
-            val cornerRadius = when (field) {
-                PaymentButtonShape.ROUNDED -> {
-                    resources.getDimension(R.dimen.paypal_payment_button_corner_radius_rounded)
-                }
-
-                PaymentButtonShape.PILL -> {
-                    resources.getDimension(R.dimen.paypal_payment_button_corner_pill)
-                }
-
-                PaymentButtonShape.RECTANGLE -> {
-                    resources.getDimension(R.dimen.paypal_payment_button_corner_radius_square)
-                }
-            }
-
-            shapeAppearanceModel = ShapeAppearanceModel.builder()
-                .setAllCornerSizes(cornerRadius)
-                .build()
+            applyEdgeStyling()
         }
 
     /**
@@ -194,13 +137,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         visibility = VISIBLE
     }
 
-    override fun onDraw(canvas: Canvas) {
-        if (shape == PaymentButtonShape.PILL && shapeHasChanged) {
-            shape = PaymentButtonShape.PILL // force update since PILL is dependent on view height.
-        }
-        super.onDraw(canvas)
-    }
-
     private fun initAttributes(attributeSet: AttributeSet?, defStyleAttr: Int) {
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
@@ -243,13 +179,13 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         defStyleAttr: Int
     ) {
         val shapeAttributeExists =
-            typedArray.hasValue(R.styleable.PaymentButton_payment_button_shape)
+            typedArray.hasValue(R.styleable.PaymentButton_payment_button_edges)
         if (shapeAttributeExists) {
-            val paypalShapeAttribute = typedArray.getInt(
-                R.styleable.PaymentButton_payment_button_shape,
-                PaymentButtonShape.ROUNDED.value
+            val edgesAttribute = typedArray.getInt(
+                R.styleable.PaymentButton_payment_button_edges,
+                PaymentButtonEdges.PAYMENT_BUTTON_EDGE_DEFAULT_INT_VALUE
             )
-            shape = PaymentButtonShape(paypalShapeAttribute)
+            PaymentButtonEdges.fromInt(edgesAttribute)?.let { edges = it }
         } else {
             useThemeShapeAppearance(attributeSet, defStyleAttr)
         }
@@ -308,6 +244,40 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
         prefixTextView.setTextColor(textColor)
         suffixTextView.setTextColor(textColor)
+    }
+
+    private fun applyEdgeStyling() {
+        var cornerSize: Float? = null
+        val cornerTreatment: CornerTreatment
+
+        when (val edges = edges) {
+            is PaymentButtonEdges.Custom -> {
+                cornerSize = edges.cornerRadius
+                cornerTreatment =
+                    if (cornerSize == 0.0f) CutCornerTreatment() else RoundedCornerTreatment()
+            }
+
+            PaymentButtonEdges.Sharp -> {
+                cornerTreatment = CutCornerTreatment()
+            }
+
+            PaymentButtonEdges.Pill -> {
+                cornerSize = layoutParams.height / 2f
+                cornerTreatment = RoundedCornerTreatment()
+            }
+
+            PaymentButtonEdges.Soft -> {
+                @DimenRes val cornerSizeResId = R.dimen.paypal_payment_button_corner_radius_soft
+                cornerSize = resources.getDimensionPixelSize(cornerSizeResId).toFloat()
+                cornerTreatment = RoundedCornerTreatment()
+            }
+        }
+
+        val shapeAppearanceBuilder = ShapeAppearanceModel.builder().apply {
+            setAllCorners(cornerTreatment)
+        }
+        cornerSize?.let { shapeAppearanceBuilder.setAllCornerSizes(it) }
+        shapeAppearanceModel = shapeAppearanceBuilder.build()
     }
 }
 

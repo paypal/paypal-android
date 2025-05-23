@@ -22,10 +22,10 @@
 
     <string name="pay_pal_button_preview">Button Preview</string>
     <string name="pay_pal_button_options">Button Options</string>
-    <string name="pay_pal_button_type">Button Type</string>
-    <string name="pay_pal_button_color">Button Color</string>
-    <string name="pay_pal_button_label">Button Label</string>
-    <string name="pay_pal_button_shape">Button Shape</string>
+    <string name="pay_pal_button_type">Type</string>
+    <string name="pay_pal_button_color">Color</string>
+    <string name="pay_pal_button_label">Label</string>
+    <string name="pay_pal_button_edges">Edges</string>
 
     <string name="intent_title">INTENT</string>
     <string-array name="intent_options">
