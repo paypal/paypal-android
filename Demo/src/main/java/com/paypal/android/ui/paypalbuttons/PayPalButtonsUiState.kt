@@ -11,5 +11,4 @@ data class PayPalButtonsUiState(
     val payPalButtonColor: PayPalButtonColor = PayPalButtonColor.BLUE,
     val payPalButtonLabel: PayPalButtonLabel = PayPalButtonLabel.PAYPAL,
     val paymentButtonEdges: PaymentButtonEdges = PaymentButtonEdges.Soft,
-    val customCornerRadius: Int? = null
 )
