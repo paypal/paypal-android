@@ -5,7 +5,6 @@ import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +21,8 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
+import kotlin.math.round
+
 
 @Suppress("TooManyFunctions")
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
@@ -29,6 +30,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     attributeSet: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
+
+    companion object {
+        private const val LOGO_TO_BUTTON_HEIGHT_RATIO = 0.58f
+        private const val TEXT_TO_LOGO_HEIGHT_RATIO = 0.58f
+    }
 
     /**
      * Signals that the backing shape has changed and may require a full redraw.
@@ -221,9 +227,17 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             layoutParams = ViewGroup.LayoutParams(width, height)
         }
 
-        val labelTextSize = resources.getDimension(R.dimen.paypal_payment_button_label_text_size)
-        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
-        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelTextSize)
+        val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight()
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+    }
+
+    private fun calculateTextSizeInPixelsRelativeToLayoutHeight(): Float {
+        val textSizeAdjustment =
+            resources.getDimensionPixelSize(R.dimen.paypal_payment_button_text_size_adjustment)
+        val proportionalTextSize =
+            round(layoutParams.height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
+        return proportionalTextSize + textSizeAdjustment
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {
