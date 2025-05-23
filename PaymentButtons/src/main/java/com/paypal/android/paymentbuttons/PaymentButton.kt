@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.DimenRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
 import com.google.android.material.shape.CornerTreatment
@@ -334,7 +335,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     private fun applyEdgeChanges() {
         var cornerSize: Float? = null
-        var cornerTreatment: CornerTreatment
+        val cornerTreatment: CornerTreatment
 
         when (val edges = edges) {
             is PaymentButtonEdges.Custom -> {
@@ -353,13 +354,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             }
 
             PaymentButtonEdges.Soft -> {
-                // TODO: move to companion
-                val SOFT_PILL_CORNER_RADIUS = 4f
-                cornerSize = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    SOFT_PILL_CORNER_RADIUS,
-                    resources.displayMetrics
-                )
+                @DimenRes val cornerSizeResId = R.dimen.paypal_payment_button_corner_radius_soft
+                cornerSize = resources.getDimensionPixelSize(cornerSizeResId).toFloat()
                 cornerTreatment = RoundedCornerTreatment()
             }
         }
