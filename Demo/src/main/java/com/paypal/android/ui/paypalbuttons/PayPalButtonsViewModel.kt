@@ -37,18 +37,12 @@ class PayPalButtonsViewModel : ViewModel() {
             _uiState.update { it.copy(payPalButtonLabel = value) }
         }
 
-    var customCornerRadius: Int?
-        get() = _uiState.value.customCornerRadius
-        set(value) {
-            _uiState.update { it.copy(customCornerRadius = value) }
-        }
     var paymentButtonEdges: PaymentButtonEdges
         get() = _uiState.value.paymentButtonEdges
         set(value) {
             _uiState.update {
                 it.copy(
                     paymentButtonEdges = value,
-                    customCornerRadius = null
                 )
             }
         }
