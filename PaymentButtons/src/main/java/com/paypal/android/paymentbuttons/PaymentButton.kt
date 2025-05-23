@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
+import com.google.android.material.shape.CornerTreatment
 import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
@@ -141,6 +142,13 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             shapeAppearanceModel = ShapeAppearanceModel.builder()
                 .setAllCornerSizes(cornerRadius)
                 .build()
+        }
+
+    var edges: PaymentButtonEdges = PaymentButtonEdges.Soft
+        set(value) {
+            shapeHasChanged = field != value
+            field = value
+            applyEdgeChanges()
         }
 
     /**
@@ -322,6 +330,45 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
         prefixTextView.setTextColor(textColor)
         suffixTextView.setTextColor(textColor)
+    }
+
+    private fun applyEdgeChanges() {
+        var cornerSize: Float? = null
+        var cornerTreatment: CornerTreatment
+
+        when (val edges = edges) {
+            is PaymentButtonEdges.Custom -> {
+                cornerSize = edges.cornerRadius
+                cornerTreatment =
+                    if (cornerSize == 0.0f) CutCornerTreatment() else RoundedCornerTreatment()
+            }
+
+            PaymentButtonEdges.Sharp -> {
+                cornerTreatment = CutCornerTreatment()
+            }
+
+            PaymentButtonEdges.Pill -> {
+                cornerSize = layoutParams.height / 2f
+                cornerTreatment = RoundedCornerTreatment()
+            }
+
+            PaymentButtonEdges.Soft -> {
+                // TODO: move to companion
+                val SOFT_PILL_CORNER_RADIUS = 4f
+                cornerSize = TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    SOFT_PILL_CORNER_RADIUS,
+                    resources.displayMetrics
+                )
+                cornerTreatment = RoundedCornerTreatment()
+            }
+        }
+
+        val shapeAppearanceBuilder = ShapeAppearanceModel.builder().apply {
+            setAllCorners(cornerTreatment)
+        }
+        cornerSize?.let { shapeAppearanceBuilder.setAllCornerSizes(it) }
+        shapeAppearanceModel = shapeAppearanceBuilder.build()
     }
 }
 
