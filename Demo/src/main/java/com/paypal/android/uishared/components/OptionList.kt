@@ -32,55 +32,69 @@ fun OptionList(
     Card(
         modifier = modifier
     ) {
-        Row(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.inverseSurface)
-        ) {
-            Text(
-                text = title,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(UIConstants.paddingMedium)
-                    .fillMaxWidth()
-            )
-        }
+        OptionListTitle(text = title)
         Column(
             modifier = Modifier.selectableGroup()
         ) {
             options.forEachIndexed { index, option ->
-                val isLast = (index == options.lastIndex)
-                Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
-                        .selectable(
-                            selected = (option == selectedOption),
-                            onClick = { onSelectedOptionChange(option) },
-                            role = Role.RadioButton,
-                        )
-                ) {
-                    Text(
-                        text = option,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .padding(UIConstants.paddingMedium)
-                            .weight(1.0f)
-                            .align(Alignment.CenterVertically)
-                    )
-                    RadioButton(
-                        selected = (option == selectedOption),
-                        onClick = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(horizontal = UIConstants.paddingMedium)
-                    )
-                }
-                if (!isLast) {
+                OptionListItem(
+                    text = option,
+                    isSelected = (option == selectedOption),
+                    onClick = { onSelectedOptionChange(option) }
+                )
+                val isLastOption = (index == options.lastIndex)
+                if (!isLastOption) {
                     Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
                 }
             }
         }
+    }
+}
+
+@Composable
+fun OptionListTitle(text: String) {
+    Row(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.inverseSurface)
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .padding(UIConstants.paddingMedium)
+                .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun OptionListItem(text: String, isSelected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
+            .selectable(
+                selected = isSelected,
+                onClick = onClick,
+                role = Role.RadioButton,
+            )
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .padding(UIConstants.paddingMedium)
+                .weight(1.0f)
+                .align(Alignment.CenterVertically)
+        )
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(horizontal = UIConstants.paddingMedium)
+        )
     }
 }
 
