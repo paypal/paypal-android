@@ -18,7 +18,6 @@ import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.uishared.components.OptionListItem
 import com.paypal.android.uishared.components.OptionListTitle
 import com.paypal.android.utils.UIConstants
-import kotlin.reflect.KClass
 
 private enum class PaymentButtonEdgesOption {
     SOFT, PILL, SHARP, CUSTOM
@@ -33,7 +32,7 @@ fun PaymentButtonEdgesOptionList(
     Card(
         modifier = modifier
     ) {
-        OptionListTitle(text = stringResource(id = R.string.pay_pal_button_shape))
+        OptionListTitle(text = stringResource(id = R.string.pay_pal_button_edges))
         Column(
             modifier = Modifier.selectableGroup()
         ) {
