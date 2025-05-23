@@ -34,6 +34,7 @@ import com.paypal.android.paymentbuttons.PayPalCreditButton
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
 import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
+import com.paypal.android.paymentbuttons.PaymentButtonEdges
 import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.utils.UIConstants
 
@@ -204,6 +205,9 @@ private fun configureButton(
     uiState: PayPalButtonsUiState
 ) {
     button.edges = uiState.paymentButtonEdges
+    uiState.customCornerRadius?.let { customCornerRadius ->
+        button.edges = PaymentButtonEdges.Custom(customCornerRadius.toFloat())
+    }
 
     if (button is PayPalButton) {
         button.label = uiState.payPalButtonLabel
@@ -213,10 +217,6 @@ private fun configureButton(
         button.color = uiState.payPalCreditButtonColor
     } else {
         button.color = uiState.payPalButtonColor
-    }
-
-    uiState.customCornerRadius?.let { customCornerRadius ->
-        button.customCornerRadius = customCornerRadius.toFloat()
     }
 }
 

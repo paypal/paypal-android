@@ -30,11 +30,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
 
-    /**
-     * Signals that the backing shape has changed and may require a full redraw.
-     */
-    private var shapeHasChanged = false
-
     internal val analyticsService: AnalyticsService =
         AnalyticsService(context, CoreConfig(clientId = "N/A", environment = Environment.LIVE))
 
@@ -79,32 +74,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             prefixTextView.visibility = prefixTextVisibility
         }
 
-    /**
-     * Updates the corner radius of the button
-     *
-     * Cannot be used with PaymentButtonShape
-     */
-    var customCornerRadius: Float? = null
-        set(value) {
-            field = value
-
-            if (value == null) return
-
-            val cornerTreatment = if (value == 0.0f) {
-                CutCornerTreatment()
-            } else {
-                RoundedCornerTreatment()
-            }
-
-            shapeAppearanceModel = ShapeAppearanceModel.builder().apply {
-                setAllCornerSizes(value)
-                setAllCorners(cornerTreatment)
-            }.build()
-        }
-
     var edges: PaymentButtonEdges = PaymentButtonEdges.Soft
         set(value) {
-            shapeHasChanged = field != value
             field = value
             applyEdgeStyling()
         }
