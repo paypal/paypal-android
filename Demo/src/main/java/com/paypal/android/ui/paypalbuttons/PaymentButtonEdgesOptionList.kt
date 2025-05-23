@@ -1,28 +1,82 @@
 package com.paypal.android.ui.paypalbuttons
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.runtime.Composable
+import com.paypal.android.paymentbuttons.PaymentButtonEdges
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.paypal.android.R
-import com.paypal.android.paymentbuttons.PaymentButtonEdges
-import com.paypal.android.uishared.components.OptionList
+import com.paypal.android.uishared.components.IntSlider
+import com.paypal.android.uishared.components.OptionListItem
+import com.paypal.android.uishared.components.OptionListTitle
+import com.paypal.android.utils.UIConstants
 
 private enum class PaymentButtonEdgesOption {
-    SOFT, PILL, SHARP
+    SOFT, PILL, SHARP, CUSTOM
 }
 
 @Composable
 fun PaymentButtonEdgesOptionList(
     edges: PaymentButtonEdges,
-    onSelection: (PaymentButtonEdges) -> Unit
+    onSelection: (PaymentButtonEdges) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    OptionList(
-        title = stringResource(id = R.string.pay_pal_button_shape),
-        options = PaymentButtonEdgesOption.entries.map { it.name },
-        selectedOption = edgesToString(edges),
-        onSelectedOptionChange = { option ->
-            onSelection(stringToEdges(option))
+    Card(
+        modifier = modifier
+    ) {
+        OptionListTitle(text = stringResource(id = R.string.pay_pal_button_shape))
+        Column(
+            modifier = Modifier.selectableGroup()
+        ) {
+            OptionListItem(
+                text = edgesToString(PaymentButtonEdges.Soft),
+                isSelected = (edges is PaymentButtonEdges.Soft),
+                onClick = { onSelection(PaymentButtonEdges.Soft) }
+            )
+            Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+            OptionListItem(
+                text = edgesToString(PaymentButtonEdges.Pill),
+                isSelected = (edges is PaymentButtonEdges.Pill),
+                onClick = { onSelection(PaymentButtonEdges.Pill) }
+            )
+            Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+            OptionListItem(
+                text = edgesToString(PaymentButtonEdges.Sharp),
+                isSelected = (edges is PaymentButtonEdges.Sharp),
+                onClick = { onSelection(PaymentButtonEdges.Sharp) }
+            )
+            Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+            OptionListItem(
+                text = edgesToString(PaymentButtonEdges.Custom(0f)),
+                isSelected = (edges is PaymentButtonEdges.Custom),
+                onClick = { onSelection(PaymentButtonEdges.Custom(0f)) }
+            )
+            val cornerRadius = (edges as? PaymentButtonEdges.Custom)?.cornerRadius ?: 0
+            IntSlider(
+                value = cornerRadius.toInt(),
+                valueRange = 0..CORNER_RADIUS_SLIDER_MAX,
+                steps = CORNER_RADIUS_SLIDER_MAX,
+                colors = SliderDefaults.colors(
+                    inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                onValueChange = { value ->
+                    val newSelection = PaymentButtonEdges.Custom(value.toFloat())
+                    onSelection(newSelection)
+                },
+                modifier = Modifier.padding(
+                    start = UIConstants.paddingMedium,
+                    end = UIConstants.paddingMedium,
+                    bottom = UIConstants.paddingMedium
+                )
+            )
         }
-    )
+    }
 }
 
 fun edgesToString(edges: PaymentButtonEdges): String {
@@ -30,16 +84,16 @@ fun edgesToString(edges: PaymentButtonEdges): String {
         PaymentButtonEdges.Pill -> PaymentButtonEdgesOption.PILL
         PaymentButtonEdges.Sharp -> PaymentButtonEdgesOption.SHARP
         PaymentButtonEdges.Soft -> PaymentButtonEdgesOption.SOFT
-        is PaymentButtonEdges.Custom -> TODO("Should not get here. Figure out the best way to handle this scenario")
+        is PaymentButtonEdges.Custom -> PaymentButtonEdgesOption.CUSTOM
     }
     return option.name
 }
 
-fun stringToEdges(value: String): PaymentButtonEdges {
-    val edgesOption = PaymentButtonEdgesOption.valueOf(value)
-    return when (edgesOption) {
-        PaymentButtonEdgesOption.SOFT -> PaymentButtonEdges.Soft
-        PaymentButtonEdgesOption.PILL -> PaymentButtonEdges.Pill
-        PaymentButtonEdgesOption.SHARP -> PaymentButtonEdges.Sharp
-    }
-}
+//fun stringToEdges(value: String): PaymentButtonEdges {
+//    val edgesOption = PaymentButtonEdgesOption.valueOf(value)
+//    return when (edgesOption) {
+//        PaymentButtonEdgesOption.SOFT -> PaymentButtonEdges.Soft
+//        PaymentButtonEdgesOption.PILL -> PaymentButtonEdges.Pill
+//        PaymentButtonEdgesOption.SHARP -> PaymentButtonEdges.Sharp
+//    }
+//}
