@@ -16,6 +16,7 @@ import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.uishared.components.OptionListItem
 import com.paypal.android.uishared.components.OptionListTitle
 import com.paypal.android.utils.UIConstants
+import kotlin.reflect.KClass
 
 private enum class PaymentButtonEdgesOption {
     SOFT, PILL, SHARP, CUSTOM
@@ -55,7 +56,14 @@ fun PaymentButtonEdgesOptionList(
             OptionListItem(
                 text = edgesToString(PaymentButtonEdges.Custom(0f)),
                 isSelected = (edges is PaymentButtonEdges.Custom),
-                onClick = { onSelection(PaymentButtonEdges.Custom(0f)) }
+                onClick = {
+                    val selectionHasChanged = (edges !is PaymentButtonEdges.Custom)
+                    if (selectionHasChanged) {
+                        // to prevent the overwrite of an existing custom radius slider value, only
+                        // update if a selection change has occurred
+                        onSelection(PaymentButtonEdges.Custom(0f))
+                    }
+                }
             )
             val cornerRadius = (edges as? PaymentButtonEdges.Custom)?.cornerRadius ?: 0
             IntSlider(
