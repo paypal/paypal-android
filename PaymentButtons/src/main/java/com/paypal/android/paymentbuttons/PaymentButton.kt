@@ -34,10 +34,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     companion object {
         private const val LOGO_TO_BUTTON_HEIGHT_RATIO = 0.58f
         private const val TEXT_TO_LOGO_HEIGHT_RATIO = 0.58f
-
-        // tweaking text size after an ad hoc design review. Text should be approximately 2pts
-        // bigger than the value obtained by multiplying logo height and text height percentages
-        private const val TEXT_SIZE_ADJUSTMENT_DIP = 2f
     }
 
     /**
@@ -237,11 +233,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 
     private fun calculateTextSizeInPixelsRelativeToLayoutHeight(): Float {
-        val textSizeAdjustment = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            TEXT_SIZE_ADJUSTMENT_DIP,
-            resources.displayMetrics
-        )
+        val textSizeAdjustment =
+            resources.getDimensionPixelSize(R.dimen.paypal_payment_button_text_size_adjustment)
         val proportionalTextSize =
             round(layoutParams.height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
         return proportionalTextSize + textSizeAdjustment

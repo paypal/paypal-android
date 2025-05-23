@@ -13,6 +13,13 @@
     <dimen name="paypal_payment_button_min_height">48dp</dimen>
     <dimen name="paypal_payment_button_default_height">48dp</dimen>
     <dimen name="paypal_payment_button_min_height_large">55dp</dimen>
+
+    <!--
+        Tweaking text size after an ad hoc design review. Text should be approximately 2pts
+        bigger than the value obtained by multiplying logo height and text height percentages
+    -->
+    <dimen name="paypal_payment_button_text_size_adjustment">2dp</dimen>
+
     <dimen name="paypal_payment_button_label_text_size">14sp</dimen>
     <dimen name="paypal_payment_button_label_text_size_large">18sp</dimen>
 
