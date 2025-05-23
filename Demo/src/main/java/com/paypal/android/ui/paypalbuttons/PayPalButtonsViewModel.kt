@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.paypal.android.paymentbuttons.PayPalButtonColor
 import com.paypal.android.paymentbuttons.PayPalButtonLabel
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor
-import com.paypal.android.paymentbuttons.PaymentButtonShape
+import com.paypal.android.paymentbuttons.PaymentButtonEdges
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -42,12 +42,12 @@ class PayPalButtonsViewModel : ViewModel() {
         set(value) {
             _uiState.update { it.copy(customCornerRadius = value) }
         }
-    var paymentButtonShape: PaymentButtonShape
-        get() = _uiState.value.paymentButtonShape
+    var paymentButtonEdges: PaymentButtonEdges
+        get() = _uiState.value.paymentButtonEdges
         set(value) {
             _uiState.update {
                 it.copy(
-                    paymentButtonShape = value,
+                    paymentButtonEdges = value,
                     customCornerRadius = null
                 )
             }

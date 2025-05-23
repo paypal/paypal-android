@@ -90,9 +90,9 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
                     onSelection = { value -> viewModel.payPalButtonLabel = value }
                 )
             }
-            PaymentButtonShapeOptionList(
-                selectedOption = uiState.paymentButtonShape,
-                onSelection = { value -> viewModel.paymentButtonShape = value }
+            PaymentButtonEdgesOptionList(
+                edges = uiState.paymentButtonEdges,
+                onSelection = { value -> viewModel.paymentButtonEdges = value }
             )
             CustomCornerRadiusSlider(
                 cornerRadius = uiState.customCornerRadius,
@@ -203,7 +203,7 @@ private fun configureButton(
     button: PaymentButton<out PaymentButtonColor>,
     uiState: PayPalButtonsUiState
 ) {
-    button.shape = uiState.paymentButtonShape
+    button.edges = uiState.paymentButtonEdges
 
     if (button is PayPalButton) {
         button.label = uiState.payPalButtonLabel
