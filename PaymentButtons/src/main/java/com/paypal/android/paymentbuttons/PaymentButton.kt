@@ -197,7 +197,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         if (shapeAttributeExists) {
             val edgesAttribute = typedArray.getInt(
                 R.styleable.PaymentButton_payment_button_edges,
-                PaymentButtonEdges.PAYMENT_BUTTON_EDGE_DEFAULT_INT_VALUE
+                PaymentButtonEdges.PAYMENT_BUTTON_EDGE_INT_VALUE_DEFAULT
             )
             PaymentButtonEdges.fromInt(edgesAttribute)?.let { edges = it }
         } else {

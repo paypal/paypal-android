@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -18,10 +18,6 @@ import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.uishared.components.OptionListItem
 import com.paypal.android.uishared.components.OptionListTitle
 import com.paypal.android.utils.UIConstants
-
-private enum class PaymentButtonEdgesOption {
-    SOFT, PILL, SHARP, CUSTOM
-}
 
 @Composable
 fun PaymentButtonEdgesOptionList(
@@ -37,25 +33,25 @@ fun PaymentButtonEdgesOptionList(
             modifier = Modifier.selectableGroup()
         ) {
             OptionListItem(
-                text = edgesToString(PaymentButtonEdges.Soft),
+                text = "SOFT",
                 isSelected = (edges is PaymentButtonEdges.Soft),
                 onClick = { onSelection(PaymentButtonEdges.Soft) }
             )
-            Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+            HorizontalDivider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
             OptionListItem(
-                text = edgesToString(PaymentButtonEdges.Pill),
+                text = "PILL",
                 isSelected = (edges is PaymentButtonEdges.Pill),
                 onClick = { onSelection(PaymentButtonEdges.Pill) }
             )
-            Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+            HorizontalDivider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
             OptionListItem(
-                text = edgesToString(PaymentButtonEdges.Sharp),
+                text = "SHARP",
                 isSelected = (edges is PaymentButtonEdges.Sharp),
                 onClick = { onSelection(PaymentButtonEdges.Sharp) }
             )
-            Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+            HorizontalDivider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
             OptionListItem(
-                text = edgesToString(PaymentButtonEdges.Custom(0f)),
+                text = "CUSTOM",
                 isSelected = (edges is PaymentButtonEdges.Custom),
                 onClick = {
                     val selectionHasChanged = (edges !is PaymentButtonEdges.Custom)
@@ -105,14 +101,4 @@ fun PaymentButtonEdgesCustomRadiusSlider(
             }
         )
     }
-}
-
-fun edgesToString(edges: PaymentButtonEdges): String {
-    val option = when (edges) {
-        PaymentButtonEdges.Pill -> PaymentButtonEdgesOption.PILL
-        PaymentButtonEdges.Sharp -> PaymentButtonEdgesOption.SHARP
-        PaymentButtonEdges.Soft -> PaymentButtonEdgesOption.SOFT
-        is PaymentButtonEdges.Custom -> PaymentButtonEdgesOption.CUSTOM
-    }
-    return option.name
 }
