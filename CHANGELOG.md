@@ -4,6 +4,9 @@
 
 * PayPalButtons
   * Add `PayPalCreditButtonColor.BLUE` enum case
+  * Add `PaymentButtonEdges` sealed class
+  * Add `PaymentButton.edges` property
+  * Add `PaymentButton:payment_button_edges` xml attribute.
 * Breaking Changes
   * PayPalButtons
     * Remove `PaymentButtonSize` enum
@@ -12,6 +15,10 @@
     * Remove `PaymentButtonColor.SILVER` enum case
     * Remove `PayPalCreditButtonColor.GOLD` enum case
     * Remove `PayPalCreditButtonColor.DARK_BLUE` enum case
+    * Remove `PaymentButton.customCornerRadius` property
+    * Remove `PaymentButtonShape` enum
+    * Remove `PaymentButton.shape` property
+    * Remove `PaymentButton:payment_button_shape` xml attribute.
 
 ## 2.0.0 (2025-03-18)
 * Breaking Changes
