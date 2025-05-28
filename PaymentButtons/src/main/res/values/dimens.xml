@@ -6,17 +6,24 @@
     <dimen name="paypal_payment_button_corner_radius_rounded">4dp</dimen>
     <dimen name="paypal_payment_button_corner_radius_square">0dp</dimen>
     <dimen name="paypal_payment_button_corner_pill">24dp</dimen>
-    <dimen name="paypal_payment_button_text_margin">@dimen/margin_8x</dimen>
+    <dimen name="paypal_payment_button_text_margin">5dp</dimen>
     <!-- The stroke used for white buttons to help them standout on light backgrounds. -->
     <dimen name="paypal_payment_button_stroke_width">1dp</dimen>
     <!-- 48dp is the minimum height of buttons to account for accessibility requirements -->
     <dimen name="paypal_payment_button_min_height">48dp</dimen>
     <dimen name="paypal_payment_button_default_height">48dp</dimen>
     <dimen name="paypal_payment_button_min_height_large">55dp</dimen>
+
+    <!--
+        Tweaking text size after an ad hoc design review. Text should be approximately 2pts
+        bigger than the value obtained by multiplying logo height and text height percentages
+    -->
+    <dimen name="paypal_payment_button_text_size_adjustment">2dp</dimen>
+
     <dimen name="paypal_payment_button_label_text_size">14sp</dimen>
     <dimen name="paypal_payment_button_label_text_size_large">18sp</dimen>
 
     <!-- Make logo height 76% of button -->
-    <dimen name="paypal_payment_button_logo_weight">0.76</dimen>
-    <dimen name="paypal_payment_button_vertical_spacer_weight">0.12</dimen>
+    <item name="paypal_payment_button_logo_weight" type="dimen" format="float">0.76</item>
+    <item name="paypal_payment_button_vertical_spacer_weight" type="dimen" format="float">0.12</item>
 </resources>
