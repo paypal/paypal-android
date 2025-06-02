@@ -110,7 +110,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
+            onClick = { context.getActivityOrNull()?.let { viewModel.startAppSwitchCheckout(it) } },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

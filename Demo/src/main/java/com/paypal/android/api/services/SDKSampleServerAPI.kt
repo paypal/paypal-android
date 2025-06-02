@@ -8,6 +8,7 @@ import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.api.model.PaymentSource
 import com.paypal.android.models.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -27,7 +28,8 @@ private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
 // To hardcode an clientId and orderId for this demo app, set the below values:
-private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
+private val DEFAULT_CLIENT_ID: String? =
+    "AfzjtKHjBmgYVdAs4-tQZO7iwFlaIop57k0dD__y_lrpQV5VCKoovrIOSN4NVsQV3Ia-nl3OFboZMT4t"
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 // TODO: consider refactoring each method into a "use case"
@@ -129,7 +131,9 @@ class SDKSampleServerAPI {
             Order(DEFAULT_ORDER_ID, "CREATED")
         } else {
             val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
-            findService(merchantIntegration).createOrder(body)
+            findService(merchantIntegration).createOrder(body).also {
+                println("Karthik :$it")
+            }
         }
     }
 
@@ -256,7 +260,8 @@ class SDKSampleServerAPI {
     }
 
     private fun parseOrder(json: JSONObject): Order {
-        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
+        val paymentSourceJson = json.optJSONObject("payment_source")
+        val cardJSON = paymentSourceJson?.optJSONObject("card")
         val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
         val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
 
@@ -267,7 +272,8 @@ class SDKSampleServerAPI {
             cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
             cardBrand = optNonEmptyString(cardJSON, "brand"),
             vaultId = optNonEmptyString(vaultJSON, "id"),
-            customerId = optNonEmptyString(vaultCustomerJSON, "id")
+            customerId = optNonEmptyString(vaultCustomerJSON, "id"),
+            paymentSource = PaymentSource.fromJson(paymentSourceJson)
         )
     }
 }

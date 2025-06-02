@@ -1,6 +1,7 @@
 package com.paypal.android.api.model
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -11,5 +12,19 @@ data class Order(
     val cardLast4: String? = null,
     val cardBrand: String? = null,
     val vaultId: String? = null,
-    val customerId: String? = null
+    val customerId: String? = null,
+    @SerializedName("payment_source")
+    val paymentSource: PaymentSource? = null,
+    val links: List<Link>? = null,
+    //todo: add fields related to app switch
+) : Parcelable
+
+@Parcelize
+data class Link(
+    @SerializedName("href")
+    val href: String? = null,
+    @SerializedName("rel")
+    val rel: String? = null,
+    @SerializedName("method")
+    val method: String? = null
 ) : Parcelable

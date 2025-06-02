@@ -42,6 +42,43 @@ class CreateOrderUseCase @Inject constructor(
 
                 orderRequest.put("payment_source", paymentSourceJSON)
             }
+            if (request.enableAppSwitch) {
+
+                val nativeAppJSON = JSONObject()
+                    .put("os_type", "ANDROID")
+                    .put("os_version", "35")
+
+                val appSwitchPreferenceJSON = JSONObject()
+                    .put("app_url", app_url)
+                    .put("launch_paypal_app", true)
+                    .put("os_type", "ANDROID")
+                    .put("os_version", "35")
+                    .put("native_app", nativeAppJSON)
+
+                val experienceContextJSON = JSONObject()
+                    .put("brand_name", "AA Logos")
+                    .put("landing_page", "LOGIN")
+                    .put("shipping_preference", "NO_SHIPPING")
+                    .put("return_url", success_url)
+                    .put("cancel_url", cancel_url)
+                    .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
+                    .put("payment_method_selected", "PAYPAL")
+                    .put("user_action", "CONTINUE")
+                    .put("app_switch_preference", appSwitchPreferenceJSON)
+
+                val paypalJSON = JSONObject()
+                    .put("email_address", "sb-ze5t741841447@personal.example.com")
+                    .put("experience_context", experienceContextJSON)
+
+                val paymentSourceJSON = JSONObject()
+                    .put("paypal", paypalJSON)
+
+                orderRequest.put("payment_source", paymentSourceJSON)
+            }
             sdkSampleServerAPI.createOrder(orderRequest)
         }
 }
+
+const val app_url = "https://sdk-sample-merchant-server.herokuapp.com/merchant_app_universal_link"
+const val success_url = "$app_url/success"
+const val cancel_url = "$app_url/cancel"

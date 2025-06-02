@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -11,6 +12,7 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.paypalwebpayments.appSwitch.AppSwitchRequest
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -38,6 +40,21 @@ internal class PayPalWebLauncher(
         val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
         val options = BrowserSwitchOptions()
             .url(url)
+            .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
+            .returnUrlScheme(urlScheme)
+            .metadata(metadata)
+        return launchBrowserSwitch(activity, options)
+    }
+
+    fun launchAppSwitch(
+        activity: ComponentActivity,
+        request: AppSwitchRequest
+    ): PayPalPresentAuthChallengeResult {
+        val metadata = JSONObject()
+            .put(METADATA_KEY_ORDER_ID, request.orderId)
+        val url = request.appSwitchUrl
+        val options = BrowserSwitchOptions()
+            .url(url.toUri())
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
