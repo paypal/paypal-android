@@ -88,10 +88,12 @@ fun PaymentButtonEdgesCustomRadiusSlider(
                 .padding(bottom = UIConstants.paddingSmall)
                 .fillMaxWidth()
         )
+
+        val cornerRadiusValueRange = 0..CORNER_RADIUS_SLIDER_MAX
         IntSlider(
             value = cornerRadius.toInt(),
-            valueRange = 0..CORNER_RADIUS_SLIDER_MAX,
-            steps = CORNER_RADIUS_SLIDER_MAX,
+            valueRange = cornerRadiusValueRange,
+            steps = cornerRadiusValueRange.run { last - first },
             colors = SliderDefaults.colors(
                 inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
