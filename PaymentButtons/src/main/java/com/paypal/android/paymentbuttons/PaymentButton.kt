@@ -156,10 +156,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     }
 
     private fun applyDefaultAttributes() {
-        /**
-         * For PayPal logo and prefix/suffix font sizes to be calculated using
-         * relative percentages, this button needs an explicit height.
-         */
+        // For PayPal logo and prefix/suffix font sizes to be calculated using
+        // relative percentages, this button needs an explicit height.
         val layoutHeight = layoutParams?.height
         val height = if (layoutHeight == null || layoutHeight == ViewGroup.LayoutParams.WRAP_CONTENT) {
             // if no height given, use the default height
