@@ -96,20 +96,17 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
+    val buttonModifier: Modifier = Modifier
     when (uiState.fundingType) {
         ButtonFundingType.PAYPAL -> {
             AndroidView(
                 factory = { context ->
                     PayPalButton(context).apply {
-                        setOnClickListener {
-                            showToast(context, "PayPalButton clicked!")
-                        }
+                        setOnClickListener { showToast(context, "PayPalButton clicked!") }
                     }
                 },
-                update = { button ->
-                    configureButton(button, uiState)
-                },
-                modifier = Modifier.fillMaxWidth()
+                update = { button -> configureButton(button, uiState) },
+                modifier = buttonModifier
             )
         }
 
@@ -117,15 +114,11 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
             AndroidView(
                 factory = { context ->
                     PayLaterButton(context).apply {
-                        setOnClickListener {
-                            showToast(context, "PayLaterButton clicked!")
-                        }
+                        setOnClickListener { showToast(context, "PayLaterButton clicked!") }
                     }
                 },
-                update = { button ->
-                    configureButton(button, uiState)
-                },
-                modifier = Modifier.fillMaxWidth()
+                update = { button -> configureButton(button, uiState) },
+                modifier = buttonModifier
             )
         }
 
@@ -133,15 +126,11 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
             AndroidView(
                 factory = { context ->
                     PayPalCreditButton(context).apply {
-                        setOnClickListener {
-                            showToast(context, "PayPalCreditButton clicked!")
-                        }
+                        setOnClickListener { showToast(context, "PayPalCreditButton clicked!") }
                     }
                 },
-                update = { button ->
-                    configureButton(button, uiState)
-                },
-                modifier = Modifier.fillMaxWidth()
+                update = { button -> configureButton(button, uiState) },
+                modifier = buttonModifier
             )
         }
     }
