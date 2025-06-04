@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -97,8 +100,8 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
-//    val buttonModifier: Modifier = Modifier.wrapContentSize()
-    val buttonModifier: Modifier = Modifier.fillMaxWidth()
+    val buttonModifier: Modifier = Modifier.wrapContentSize()
+//    val buttonModifier: Modifier = Modifier.height(25.dp)
 
     when (uiState.fundingType) {
         ButtonFundingType.PAYPAL -> {

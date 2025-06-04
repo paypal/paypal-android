@@ -172,17 +172,23 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         val width = layoutParams?.width ?: ViewGroup.LayoutParams.WRAP_CONTENT
         layoutParams = ViewGroup.LayoutParams(width, height)
 
-        val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight()
-        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
-        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        addOnLayoutChangeListener({ view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
+        })
     }
 
-    private fun calculateTextSizeInPixelsRelativeToLayoutHeight(): Float {
+    private fun calculateTextSizeInPixelsRelativeToLayoutHeight(height: Int): Float {
         val textSizeAdjustment =
             resources.getDimensionPixelSize(R.dimen.paypal_payment_button_text_size_adjustment)
         val proportionalTextSize =
-            round(layoutParams.height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
+            round(height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
         return proportionalTextSize + textSizeAdjustment
+    }
+
+    private fun updateFontSizing(height: Int) {
+        val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight(height)
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {
