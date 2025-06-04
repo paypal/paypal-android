@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -130,6 +131,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
 
         orientation = VERTICAL
+        gravity = Gravity.CENTER
 
         initAttributes(attributeSet, defStyleAttr)
         applyDefaultAttributes()

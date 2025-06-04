@@ -97,7 +97,8 @@ fun PayPalButtonsView(viewModel: PayPalButtonsViewModel = viewModel()) {
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
-    val buttonModifier: Modifier = Modifier.wrapContentSize()
+//    val buttonModifier: Modifier = Modifier.wrapContentSize()
+    val buttonModifier: Modifier = Modifier.fillMaxWidth()
 
     when (uiState.fundingType) {
         ButtonFundingType.PAYPAL -> {
