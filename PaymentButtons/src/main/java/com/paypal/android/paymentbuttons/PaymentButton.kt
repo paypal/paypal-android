@@ -167,7 +167,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             val maxHeight = resources.getDimension(R.dimen.paypal_payment_button_max_height).toInt()
             clamp(layoutHeight, minHeight, maxHeight)
         }
-        val width = layoutParams?.width ?: ViewGroup.LayoutParams.MATCH_PARENT
+        val width = layoutParams?.width ?: ViewGroup.LayoutParams.WRAP_CONTENT
         layoutParams = ViewGroup.LayoutParams(width, height)
 
         val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight()

@@ -14,6 +14,8 @@
     <dimen name="paypal_payment_button_min_height">25dp</dimen>
     <dimen name="paypal_payment_button_max_height">60dp</dimen>
     <dimen name="paypal_payment_button_default_height">48dp</dimen>
+    <!-- Use this value to enforce the 8px minimum padding required by the design spec -->
+    <dimen name="paypal_payment_button_horizontal_padding">8dp</dimen>
 
     <!--
         Tweaking text size after an ad hoc design review. Text should be approximately 2pts

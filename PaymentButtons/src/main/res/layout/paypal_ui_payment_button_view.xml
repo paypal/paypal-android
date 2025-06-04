@@ -14,11 +14,13 @@
         android:layout_weight="@dimen/paypal_payment_button_vertical_spacer_weight" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="@dimen/paypal_payment_button_logo_weight"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/paypal_payment_button_horizontal_padding"
+        >
 
         <TextView
             android:id="@+id/prefixText"
