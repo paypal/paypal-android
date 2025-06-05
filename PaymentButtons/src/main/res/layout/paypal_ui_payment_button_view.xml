@@ -17,6 +17,7 @@
         android:id="@+id/contentContainer"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
+        android:layout_gravity="center"
         android:layout_weight="@dimen/paypal_payment_button_logo_weight"
         android:gravity="center"
         android:orientation="horizontal"

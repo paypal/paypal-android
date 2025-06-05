@@ -121,6 +121,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var prefixTextView: TextView
     private var suffixTextView: TextView
 
+    private val defaultButtonHeight: Int
+    private val minButtonHeight: Int
+    private val maxButtonHeight: Int
+
     init {
         LayoutInflater.from(context)
             .inflate(R.layout.paypal_ui_payment_button_view, this, true)
@@ -133,12 +137,21 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         gravity = Gravity.CENTER
 
         initAttributes(attributeSet, defStyleAttr)
+
+        // resolve these values at initialization time and cache them to avoid expensive function
+        // calls in onMeasure
+        defaultButtonHeight =
+            resources.getDimensionPixelSize(R.dimen.paypal_payment_button_default_height)
+        minButtonHeight = resources.getDimensionPixelSize(R.dimen.paypal_payment_button_min_height)
+        maxButtonHeight = resources.getDimensionPixelSize(R.dimen.paypal_payment_button_max_height)
+
+        minimumHeight = minButtonHeight
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         renderButton()
-        constrainLayoutParams()
+//        constrainLayoutParams()
         addOnLayoutChangeListener({ view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
             (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
         })
@@ -180,10 +193,27 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         val width = layoutParams?.width ?: LayoutParams.WRAP_CONTENT
         layoutParams = LayoutParams(width, height)
 
+
 //        updateFontSizing(height)
 //        addOnLayoutChangeListener({ view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
 //            (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
 //        })
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // Ref: https://stackoverflow.com/a/23617530
+        // Ref: https://stackoverflow.com/a/10339611
+        val hMode = MeasureSpec.getMode(heightMeasureSpec)
+        val hSize = MeasureSpec.getSize(heightMeasureSpec)
+        val heightOverride = when (hMode) {
+            MeasureSpec.AT_MOST -> clamp(hSize, minButtonHeight, maxButtonHeight)
+            MeasureSpec.EXACTLY -> clamp(hSize, minButtonHeight, maxButtonHeight)
+            else -> defaultButtonHeight
+        }
+
+        val heightMeasureSpecOverride =
+            MeasureSpec.makeMeasureSpec(heightOverride, MeasureSpec.EXACTLY)
+        super.onMeasure(widthMeasureSpec, heightMeasureSpecOverride)
     }
 
     private fun calculateTextSizeInPixelsRelativeToLayoutHeight(height: Int): Float {
