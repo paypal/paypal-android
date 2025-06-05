@@ -206,7 +206,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         val hMode = MeasureSpec.getMode(heightMeasureSpec)
         val hSize = MeasureSpec.getSize(heightMeasureSpec)
         val heightOverride = when (hMode) {
-            MeasureSpec.AT_MOST -> clamp(hSize, minButtonHeight, maxButtonHeight)
+            MeasureSpec.AT_MOST -> clamp(hSize, minButtonHeight, defaultButtonHeight)
             MeasureSpec.EXACTLY -> clamp(hSize, minButtonHeight, maxButtonHeight)
             else -> defaultButtonHeight
         }
