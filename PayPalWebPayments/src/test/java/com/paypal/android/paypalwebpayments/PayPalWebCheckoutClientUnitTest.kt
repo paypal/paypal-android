@@ -38,7 +38,7 @@ class PayPalWebCheckoutClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val request = PayPalCheckoutRequest("fake-order-id")
         sut.start(activity, request)
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
     }
@@ -49,7 +49,7 @@ class PayPalWebCheckoutClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val request = PayPalCheckoutRequest("fake-order-id")
         val result = sut.start(activity, request)
         assertSame(launchResult, result)
     }

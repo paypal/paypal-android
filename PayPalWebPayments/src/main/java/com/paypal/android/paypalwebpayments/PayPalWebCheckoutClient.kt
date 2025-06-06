@@ -8,13 +8,12 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
-import com.paypal.android.paypalwebpayments.appSwitch.AppSwitchRequest
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
 
 /**
- * Use this client to approve an order with a [PayPalWebCheckoutRequest].
+ * Use this client to approve an order with a [PayPalCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
@@ -40,11 +39,11 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Confirm PayPal payment source for an order.
      *
-     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param request [PayPalCheckoutRequest] for requesting an order approval
      */
     fun start(
         activity: ComponentActivity,
-        request: PayPalWebCheckoutRequest
+        request: PayPalCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
@@ -58,25 +57,6 @@ class PayPalWebCheckoutClient internal constructor(
 
             is PayPalPresentAuthChallengeResult.Failure ->
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
-        }
-        return result
-    }
-
-    fun start(
-        activity: ComponentActivity,
-        request: AppSwitchRequest
-    ): PayPalPresentAuthChallengeResult {
-        checkoutOrderId = request.orderId
-
-        val result = payPalWebLauncher.launchAppSwitch(activity, request)
-        when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                println("Karthik: $result")
-            }
-
-            is PayPalPresentAuthChallengeResult.Failure -> {
-                println("Karthik: $result")
-            }
         }
         return result
     }

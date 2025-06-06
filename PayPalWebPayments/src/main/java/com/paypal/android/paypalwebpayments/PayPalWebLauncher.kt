@@ -12,7 +12,6 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.paypalwebpayments.appSwitch.AppSwitchRequest
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -33,28 +32,14 @@ internal class PayPalWebLauncher(
 
     fun launchPayPalWebCheckout(
         activity: ComponentActivity,
-        request: PayPalWebCheckoutRequest,
+        request: PayPalCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
-        val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
+        val url = if (request.appSwitchEnabled) request.url?.toUri()
+        else request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource, url) }
         val options = BrowserSwitchOptions()
             .url(url)
-            .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
-            .returnUrlScheme(urlScheme)
-            .metadata(metadata)
-        return launchBrowserSwitch(activity, options)
-    }
-
-    fun launchAppSwitch(
-        activity: ComponentActivity,
-        request: AppSwitchRequest
-    ): PayPalPresentAuthChallengeResult {
-        val metadata = JSONObject()
-            .put(METADATA_KEY_ORDER_ID, request.orderId)
-        val url = request.appSwitchUrl
-        val options = BrowserSwitchOptions()
-            .url(url.toUri())
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
@@ -94,13 +79,14 @@ internal class PayPalWebLauncher(
     private fun buildPayPalCheckoutUri(
         orderId: String?,
         config: CoreConfig,
-        funding: PayPalWebCheckoutFundingSource
+        funding: PayPalWebCheckoutFundingSource,
+        url: String? = null
     ): Uri {
-        val baseURL = when (config.environment) {
+        val baseURL = url ?: when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
         }
-        return Uri.parse(baseURL)
+        return baseURL.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)

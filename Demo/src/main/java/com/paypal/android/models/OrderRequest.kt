@@ -5,5 +5,5 @@ import com.paypal.android.api.model.OrderIntent
 data class OrderRequest(
     val intent: OrderIntent,
     val shouldVault: Boolean = false,
-    val enableAppSwitch: Boolean = true
+    val enableAppSwitch: Boolean = false
 )

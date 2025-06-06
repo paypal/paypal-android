@@ -79,6 +79,6 @@ class CreateOrderUseCase @Inject constructor(
         }
 }
 
-const val app_url = "https://sdk-sample-merchant-server.herokuapp.com/merchant_app_universal_link"
-const val success_url = "$app_url/success"
-const val cancel_url = "$app_url/cancel"
+const val app_url = "com.paypal.android.demo://"
+const val success_url = "${app_url}success"
+const val cancel_url = "${app_url}cancel"

@@ -17,7 +17,13 @@ data class Order(
     val paymentSource: PaymentSource? = null,
     val links: List<Link>? = null,
     //todo: add fields related to app switch
-) : Parcelable
+) : Parcelable {
+    val approveUrl: String?
+        get() = links?.firstOrNull { it.rel == "approve" }?.href
+
+    val payerActionUrl: String?
+        get() = links?.firstOrNull { it.rel == "payer-action" }?.href
+}
 
 @Parcelize
 data class Link(
