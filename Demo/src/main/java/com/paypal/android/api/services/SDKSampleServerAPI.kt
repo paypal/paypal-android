@@ -1,5 +1,6 @@
 package com.paypal.android.api.services
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.CardPaymentToken
@@ -229,7 +230,7 @@ class SDKSampleServerAPI {
 
         PayPalPaymentToken(
             id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id")
+            customerId = customerJSON.getString("id"),
         )
     }
 
@@ -238,15 +239,7 @@ class SDKSampleServerAPI {
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
         val response = findService(merchantIntegration).createSetupToken(jsonObject)
-
-        val responseJSON = JSONObject(response.string())
-        val customerJSON = responseJSON.getJSONObject("customer")
-
-        PayPalSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status")
-        )
+        Gson().fromJson(response.string(), PayPalSetupToken::class.java)
     }
 
     // Ref: https://medium.com/@douglas.iacovelli/how-to-handle-errors-with-retrofit-and-coroutines-33e7492a912

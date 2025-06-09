@@ -58,10 +58,17 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
+    var appSwitchEnabled: Boolean
+        get() = _uiState.value.appSwitchEnabled
+        set(value) {
+            _uiState.update { it.copy(appSwitchEnabled = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createPayPalSetupTokenUseCase().mapToActionState()
+            createSetupTokenState =
+                createPayPalSetupTokenUseCase(appSwitchEnabled).mapToActionState()
         }
     }
 
@@ -74,7 +81,11 @@ class PayPalWebVaultViewModel @Inject constructor(
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
-                val request = PayPalWebVaultRequest(setupTokenId)
+                val request = PayPalWebVaultRequest(
+                    setupTokenId,
+                    createdSetupToken?.launchUrl,
+                    appSwitchEnabled
+                )
                 vaultSetupTokenWithRequest(activity, request)
             }
         }
@@ -156,4 +167,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     private fun discardAuthState() {
         authState = null
     }
+
+    val PayPalSetupToken.launchUrl: String?
+        get() = approveUrl
 }

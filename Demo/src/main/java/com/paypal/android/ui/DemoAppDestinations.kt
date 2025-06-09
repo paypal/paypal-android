@@ -18,7 +18,7 @@ object DemoAppDestinations {
         PAYPAL_BUTTONS -> "PayPal Buttons"
         PAYPAL_STATIC_BUTTONS -> "PayPal Static Buttons"
         SELECT_TEST_CARD -> "Select a Test Card"
-        PAYPAL_WEB_VAULT -> "PayPal Web Vault"
+        PAYPAL_WEB_VAULT -> "Paypal Vault"
         else -> "Demo"
     }
 }

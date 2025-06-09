@@ -5,7 +5,7 @@
     <string name="feature_approve_order">Approve Order</string>
     <string name="feature_vault">Vault</string>
     <string name="feature_paypal">PayPal</string>
-    <string name="feature_paypal_web_vault">PayPal Web Vault</string>
+    <string name="feature_paypal_web_vault">Paypal Vault</string>
     <string name="feature_paypal_buttons">PayPal Buttons</string>
     <string name="feature_paypal_static_buttons">PayPal Buttons - XML</string>
 

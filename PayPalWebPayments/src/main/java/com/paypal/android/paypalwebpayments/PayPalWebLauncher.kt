@@ -52,7 +52,8 @@ internal class PayPalWebLauncher(
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-        val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
+        val url = if (request.appSwitchEnabled) request.approveVaultHref?.toUri()
+        else request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig, approveVaultHref) }
         val options = BrowserSwitchOptions()
             .url(url)
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_VAULT)
@@ -98,13 +99,14 @@ internal class PayPalWebLauncher(
 
     private fun buildPayPalVaultUri(
         setupTokenId: String,
-        config: CoreConfig
+        config: CoreConfig,
+        url: String? = null
     ): Uri {
-        val baseURL = when (config.environment) {
+        val baseURL = url ?: when (config.environment) {
             Environment.LIVE -> "https://paypal.com/agreements/approve"
             Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
         }
-        return Uri.parse(baseURL)
+        return baseURL.toUri()
             .buildUpon()
             .appendQueryParameter("approval_session_id", setupTokenId)
             .build()
