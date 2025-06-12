@@ -151,10 +151,9 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         renderButton()
-//        constrainLayoutParams()
-        addOnLayoutChangeListener({ view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        addOnLayoutChangeListener { view, _, top, _, bottom, _, _, _, _ ->
             (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
-        })
+        }
     }
 
     private fun renderButton() {
@@ -192,12 +191,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
         val width = layoutParams?.width ?: LayoutParams.WRAP_CONTENT
         layoutParams = LayoutParams(width, height)
-
-
-//        updateFontSizing(height)
-//        addOnLayoutChangeListener({ view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-//            (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
-//        })
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
