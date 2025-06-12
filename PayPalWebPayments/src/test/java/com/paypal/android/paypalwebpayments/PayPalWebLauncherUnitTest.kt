@@ -249,7 +249,7 @@ class PayPalWebLauncherUnitTest {
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
 
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Success
+                as PaypalCheckoutResult.Success
         assertEquals("fake-order-id", result.orderId)
         assertEquals("fake-payer-id", result.payerId)
     }
@@ -267,7 +267,7 @@ class PayPalWebLauncherUnitTest {
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Failure
+                as PaypalCheckoutResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -286,7 +286,7 @@ class PayPalWebLauncherUnitTest {
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Failure
+                as PaypalCheckoutResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -305,7 +305,7 @@ class PayPalWebLauncherUnitTest {
 
         sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Failure
+                as PaypalCheckoutResult.Failure
         val expectedDescription =
             "An unknown error occurred. Contact developer.paypal.com/support."
         assertEquals(expectedDescription, result.error.errorDescription)

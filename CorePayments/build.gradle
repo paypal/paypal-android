@@ -64,7 +64,6 @@ android {
 }
 
 dependencies {
-    implementation libs.braintree.browserSwitch
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.kotlin.stdLib

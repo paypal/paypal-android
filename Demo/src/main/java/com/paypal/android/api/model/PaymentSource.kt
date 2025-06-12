@@ -9,12 +9,6 @@ data class PaymentSource(
     val paypal: PayPalDetails? = null
 ) : Parcelable {
     companion object {
-        fun fromJson(json: String?): PaymentSource? {
-            return if (json.isNullOrEmpty()) null else {
-                val jsonObject = JSONObject(json)
-                fromJson(jsonObject)
-            }
-        }
 
         internal fun fromJson(jsonObject: JSONObject): PaymentSource? {
             return jsonObject.optJSONObject("paypal")?.let {
@@ -32,11 +26,6 @@ data class PayPalDetails(
     val appSwitchEligibility: Boolean? = null
 ) : Parcelable {
     companion object {
-        fun fromJson(json: String?): PayPalDetails? {
-            return if (json.isNullOrEmpty()) null else {
-                fromJson(JSONObject(json))
-            }
-        }
 
         fun fromJson(jsonObject: JSONObject?): PayPalDetails? {
             return jsonObject?.let {

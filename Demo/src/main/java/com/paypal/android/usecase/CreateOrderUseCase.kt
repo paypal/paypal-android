@@ -49,7 +49,7 @@ class CreateOrderUseCase @Inject constructor(
                     .put("os_version", "35")
 
                 val appSwitchPreferenceJSON = JSONObject()
-                    .put("app_url", app_url)
+                    .put("app_url", APP_URL)
                     .put("launch_paypal_app", true)
                     .put("os_type", "ANDROID")
                     .put("os_version", "35")
@@ -59,8 +59,8 @@ class CreateOrderUseCase @Inject constructor(
                     .put("brand_name", "AA Logos")
                     .put("landing_page", "LOGIN")
                     .put("shipping_preference", "NO_SHIPPING")
-                    .put("return_url", success_url)
-                    .put("cancel_url", cancel_url)
+                    .put("return_url", SUCCESS_URL)
+                    .put("cancel_url", CANCEL_URL)
                     .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
                     .put("payment_method_selected", "PAYPAL")
                     .put("user_action", "CONTINUE")
@@ -79,6 +79,6 @@ class CreateOrderUseCase @Inject constructor(
         }
 }
 
-const val app_url = "com.paypal.android.demo://"
-const val success_url = "${app_url}success"
-const val cancel_url = "${app_url}cancel"
+private const val APP_URL = "com.paypal.android.demo://"
+private const val SUCCESS_URL = "${APP_URL}success"
+private const val CANCEL_URL = "${APP_URL}cancel"

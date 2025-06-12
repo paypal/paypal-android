@@ -97,19 +97,19 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
      * authorization completed successfully.
      */
-    fun finishStart(intent: Intent, authState: String): PayPalWebCheckoutFinishStartResult {
+    fun finishStart(intent: Intent, authState: String): PaypalCheckoutResult {
         val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
         when (result) {
-            is PayPalWebCheckoutFinishStartResult.Success ->
+            is PaypalCheckoutResult.Success ->
                 analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
 
-            is PayPalWebCheckoutFinishStartResult.Canceled ->
+            is PaypalCheckoutResult.Canceled ->
                 analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
 
-            is PayPalWebCheckoutFinishStartResult.Failure ->
+            is PaypalCheckoutResult.Failure ->
                 analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
 
-            PayPalWebCheckoutFinishStartResult.NoResult -> {
+            PaypalCheckoutResult.NoResult -> {
                 // no analytics tracking required at the moment
             }
         }

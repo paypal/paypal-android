@@ -16,7 +16,7 @@ data class Order(
     @SerializedName("payment_source")
     val paymentSource: PaymentSource? = null,
     val links: List<Link>? = null,
-    //todo: add fields related to app switch
+    // todo: add fields related to app switch
 ) : Parcelable {
     val approveUrl: String?
         get() = links?.firstOrNull { it.rel == "approve" }?.href
@@ -24,4 +24,3 @@ data class Order(
     val payerActionUrl: String?
         get() = links?.firstOrNull { it.rel == "payer-action" }?.href
 }
-

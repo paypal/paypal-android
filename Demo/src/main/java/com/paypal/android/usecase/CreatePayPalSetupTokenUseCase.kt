@@ -9,6 +9,10 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import javax.inject.Inject
 
+private const val CANCEL_URL = "com.paypal.android.demo://vault/cancel"
+
+private const val SUCCESS_URL = "com.paypal.android.demo://vault/success"
+
 class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
@@ -31,8 +35,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 //                        .put("brand_name", "AA Logos")
 //                        .put("shipping_preference", "NO_SHIPPING")
 //                        .put("vault_instruction", "ON_PAYER_APPROVAL")
-                        .put("return_url", success_url)
-                        .put("cancel_url", cancel_url)
+                        .put("return_url", SUCCESS_URL)
+                        .put("cancel_url", CANCEL_URL)
 //                        .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
 //                        .put("payment_method_selected", "PAYPAL")
 //                        .put("user_action", "CONTINUE")
@@ -53,8 +57,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
                             put("usage_type", "MERCHANT")
                             put("experience_context", JSONObject().apply {
                                 put("vault_instruction", "ON_PAYER_APPROVAL")
-                                put("return_url", "com.paypal.android.demo://vault/success")
-                                put("cancel_url", "com.paypal.android.demo://vault/cancel")
+                                put("return_url", SUCCESS_URL)
+                                put("cancel_url", CANCEL_URL)
                             })
                         }
                         put("paypal", paypalJSON)

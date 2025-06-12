@@ -59,7 +59,7 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_WebOrNativeCheckoutHeader()
+        Step1_WebOrNativeCheckoutHeader(viewModel)
         Step2_CreateSetupToken(uiState, viewModel)
         if (uiState.isCreateSetupTokenSuccessful) {
             Step3_VaultPayPal(uiState, viewModel)
@@ -72,8 +72,7 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun Step1_WebOrNativeCheckoutHeader() {
-    val viewModel: PayPalWebVaultViewModel = hiltViewModel()
+fun Step1_WebOrNativeCheckoutHeader(viewModel: PayPalWebVaultViewModel) {
     val uiState: PayPalWebVaultUiState by viewModel.uiState.collectAsStateWithLifecycle()
     StepHeader(stepNumber = 1, title = "Select web or app switch checkout")
     Column(

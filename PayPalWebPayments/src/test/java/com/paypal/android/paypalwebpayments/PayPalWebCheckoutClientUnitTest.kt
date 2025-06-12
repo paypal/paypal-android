@@ -81,7 +81,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() forwards success result from auth launcher`() {
         val successResult =
-            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
+            PaypalCheckoutResult.Success("fake-order-id", "fake-payer-id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns successResult
@@ -94,7 +94,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `finishStart() forwards error result from auth launcher`() {
 
         val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
+        val failureResult = PaypalCheckoutResult.Failure(error, null)
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns failureResult
@@ -105,7 +105,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishStart() forwards cancellation result from auth launcher`() {
-        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order_id")
+        val canceledResult = PaypalCheckoutResult.Canceled("fake-order_id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns canceledResult
