@@ -246,7 +246,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 R.styleable.PaymentButton_payment_button_edges,
                 PaymentButtonEdges.PAYMENT_BUTTON_EDGE_INT_VALUE_DEFAULT
             )
-            PaymentButtonEdges.fromInt(edgesAttribute)?.let { edges = it }
+            edges = PaymentButtonEdges.fromInt(edgesAttribute) ?: PaymentButtonEdges.Soft
         } else {
             useThemeShapeAppearance(attributeSet, defStyleAttr)
         }

@@ -8,20 +8,18 @@ sealed class PaymentButtonEdges {
 
     companion object {
 
-        const val PAYMENT_BUTTON_EDGE_INT_VALUE_DEFAULT = -1
         private const val PAYMENT_BUTTON_EDGE_INT_VALUE_SOFT = 0
         private const val PAYMENT_BUTTON_EDGE_INT_VALUE_PILL = 1
         private const val PAYMENT_BUTTON_EDGE_INT_VALUE_SHARP = 2
+
+        const val PAYMENT_BUTTON_EDGE_INT_VALUE_DEFAULT = PAYMENT_BUTTON_EDGE_INT_VALUE_SOFT
 
         /**
          * See attrs.xml for valid values.
          */
         fun fromInt(value: Int): PaymentButtonEdges? =
             when (value) {
-                PAYMENT_BUTTON_EDGE_INT_VALUE_DEFAULT,
-                PAYMENT_BUTTON_EDGE_INT_VALUE_SOFT,
-                    -> Soft
-
+                PAYMENT_BUTTON_EDGE_INT_VALUE_SOFT -> Soft
                 PAYMENT_BUTTON_EDGE_INT_VALUE_PILL -> Pill
                 PAYMENT_BUTTON_EDGE_INT_VALUE_SHARP -> Sharp
                 else -> null
