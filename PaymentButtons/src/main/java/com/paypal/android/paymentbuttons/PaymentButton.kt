@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,6 +21,8 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.round
 
 
@@ -34,6 +36,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     companion object {
         private const val LOGO_TO_BUTTON_HEIGHT_RATIO = 0.58f
         private const val TEXT_TO_LOGO_HEIGHT_RATIO = 0.58f
+
+        private fun clamp(value: Int, min: Int, max: Int): Int {
+            return min(max(value, min), max)
+        }
     }
 
     internal val analyticsService: AnalyticsService =
@@ -115,6 +121,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var prefixTextView: TextView
     private var suffixTextView: TextView
 
+    private val defaultButtonHeight: Int
+    private val minButtonHeight: Int
+    private val maxButtonHeight: Int
+
     init {
         LayoutInflater.from(context)
             .inflate(R.layout.paypal_ui_payment_button_view, this, true)
@@ -124,14 +134,26 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         payPalWordmarkImage = findViewById(R.id.payPalWordmarkImage)
 
         orientation = VERTICAL
+        gravity = Gravity.CENTER
 
         initAttributes(attributeSet, defStyleAttr)
-        applyDefaultAttributes()
+
+        // resolve these values at initialization time and cache them to avoid expensive function
+        // calls in onMeasure
+        defaultButtonHeight =
+            resources.getDimensionPixelSize(R.dimen.paypal_payment_button_default_height)
+        minButtonHeight = resources.getDimensionPixelSize(R.dimen.paypal_payment_button_min_height)
+        maxButtonHeight = resources.getDimensionPixelSize(R.dimen.paypal_payment_button_max_height)
+
+        minimumHeight = minButtonHeight
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         renderButton()
+        addOnLayoutChangeListener { view, _, top, _, bottom, _, _, _, _ ->
+            (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
+        }
     }
 
     private fun renderButton() {
@@ -149,31 +171,56 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
     }
 
-    private fun applyDefaultAttributes() {
-        minimumHeight = resources.getDimension(R.dimen.paypal_payment_button_min_height).toInt()
-
-        // set explicit height if none given; for percentage layout to work, this button needs
-        // an explicitly set height
-        val needsExplicitHeight =
-            (layoutParams == null || layoutParams.height == ViewGroup.LayoutParams.WRAP_CONTENT)
-        if (needsExplicitHeight) {
-            val width = layoutParams?.width ?: ViewGroup.LayoutParams.MATCH_PARENT
-            val height =
-                resources.getDimensionPixelSize(R.dimen.paypal_payment_button_default_height)
-            layoutParams = ViewGroup.LayoutParams(width, height)
+    private fun constrainLayoutParams() {
+        // For PayPal logo and prefix/suffix font sizes to be calculated using
+        // relative percentages, this button needs an explicit height.
+        val layoutHeight = layoutParams?.height
+        val height = if (
+            layoutHeight == null
+            || layoutHeight == LayoutParams.WRAP_CONTENT
+            || layoutHeight == LayoutParams.MATCH_PARENT
+        ) {
+            // if no height given, use the default height
+            resources.getDimensionPixelSize(R.dimen.paypal_payment_button_default_height)
+        } else {
+            val minHeight =
+                resources.getDimensionPixelSize(R.dimen.paypal_payment_button_min_height)
+            val maxHeight =
+                resources.getDimensionPixelSize(R.dimen.paypal_payment_button_max_height)
+            clamp(layoutHeight, minHeight, maxHeight)
         }
-
-        val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight()
-        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
-        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        val width = layoutParams?.width ?: LayoutParams.WRAP_CONTENT
+        layoutParams = LayoutParams(width, height)
     }
 
-    private fun calculateTextSizeInPixelsRelativeToLayoutHeight(): Float {
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // Ref: https://stackoverflow.com/a/23617530
+        // Ref: https://stackoverflow.com/a/10339611
+        val hMode = MeasureSpec.getMode(heightMeasureSpec)
+        val hSize = MeasureSpec.getSize(heightMeasureSpec)
+        val heightOverride = when (hMode) {
+            MeasureSpec.AT_MOST -> clamp(hSize, minButtonHeight, defaultButtonHeight)
+            MeasureSpec.EXACTLY -> clamp(hSize, minButtonHeight, maxButtonHeight)
+            else -> defaultButtonHeight
+        }
+
+        val heightMeasureSpecOverride =
+            MeasureSpec.makeMeasureSpec(heightOverride, MeasureSpec.EXACTLY)
+        super.onMeasure(widthMeasureSpec, heightMeasureSpecOverride)
+    }
+
+    private fun calculateTextSizeInPixelsRelativeToLayoutHeight(height: Int): Float {
         val textSizeAdjustment =
             resources.getDimensionPixelSize(R.dimen.paypal_payment_button_text_size_adjustment)
         val proportionalTextSize =
-            round(layoutParams.height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
+            round(height * LOGO_TO_BUTTON_HEIGHT_RATIO * TEXT_TO_LOGO_HEIGHT_RATIO)
         return proportionalTextSize + textSizeAdjustment
+    }
+
+    private fun updateFontSizing(height: Int) {
+        val textSize = calculateTextSizeInPixelsRelativeToLayoutHeight(height)
+        prefixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
+        suffixTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize)
     }
 
     override fun setOnClickListener(listener: OnClickListener?) {
@@ -199,7 +246,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 R.styleable.PaymentButton_payment_button_edges,
                 PaymentButtonEdges.PAYMENT_BUTTON_EDGE_INT_VALUE_DEFAULT
             )
-            PaymentButtonEdges.fromInt(edgesAttribute)?.let { edges = it }
+            edges = PaymentButtonEdges.fromInt(edgesAttribute) ?: PaymentButtonEdges.Soft
         } else {
             useThemeShapeAppearance(attributeSet, defStyleAttr)
         }
