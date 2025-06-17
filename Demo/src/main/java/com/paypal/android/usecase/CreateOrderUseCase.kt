@@ -63,7 +63,7 @@ class CreateOrderUseCase @Inject constructor(
                     .put("cancel_url", CANCEL_URL)
                     .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
                     .put("payment_method_selected", "PAYPAL")
-                    .put("user_action", "CONTINUE")
+                    .put("user_action", "PAY_NOW")
                     .put("app_switch_preference", appSwitchPreferenceJSON)
 
                 val paypalJSON = JSONObject()
