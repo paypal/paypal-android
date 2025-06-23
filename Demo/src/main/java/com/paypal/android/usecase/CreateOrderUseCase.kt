@@ -17,7 +17,7 @@ class CreateOrderUseCase @Inject constructor(
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> =
         withContext(Dispatchers.IO) {
             val amountJSON = JSONObject()
-                .put("currency_code", "USD")
+                .put("currencyCode", "USD")
                 .put("value", "10.99")
 
             val purchaseUnitJSON = JSONObject()
@@ -25,11 +25,11 @@ class CreateOrderUseCase @Inject constructor(
 
             val orderRequest = JSONObject()
                 .put("intent", request.intent)
-                .put("purchase_units", JSONArray().put(purchaseUnitJSON))
+                .put("purchaseUnits", JSONArray().put(purchaseUnitJSON))
 
             if (request.shouldVault) {
                 val vaultJSON = JSONObject()
-                    .put("store_in_vault", "ON_SUCCESS")
+                    .put("storeInVault", "ON_SUCCESS")
 
                 val cardAttributesJSON = JSONObject()
                     .put("vault", vaultJSON)
@@ -40,7 +40,7 @@ class CreateOrderUseCase @Inject constructor(
                 val paymentSourceJSON = JSONObject()
                     .put("card", cardJSON)
 
-                orderRequest.put("payment_source", paymentSourceJSON)
+                orderRequest.put("paymentSource", paymentSourceJSON)
             }
             sdkSampleServerAPI.createOrder(orderRequest)
         }

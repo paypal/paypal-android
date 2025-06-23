@@ -27,7 +27,7 @@ private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
 // To hardcode an clientId and orderId for this demo app, set the below values:
-private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
+private val DEFAULT_CLIENT_ID: String? = "AQTfw2irFfemo-eWG4H5UY-b9auKihUpXQ2Engl4G1EsHJe2mkpfUv_SN3Mba0v3CfrL6Fk_ecwv9EOo" // = "your-client-id"
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 // TODO: consider refactoring each method into a "use case"
