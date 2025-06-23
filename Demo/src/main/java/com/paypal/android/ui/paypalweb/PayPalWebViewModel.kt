@@ -130,7 +130,6 @@ class PayPalWebViewModel @Inject constructor(
                 val checkoutRequest = PayPalCheckoutRequest(
                     orderId,
                     fundingSource,
-                    createdOrder?.launchUrl,
                     appSwitchEnabled
                 )
                 when (val startResult = paypalClient?.start(activity, checkoutRequest)) {

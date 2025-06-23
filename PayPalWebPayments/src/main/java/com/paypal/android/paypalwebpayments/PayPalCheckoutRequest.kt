@@ -9,6 +9,5 @@ package com.paypal.android.paypalwebpayments
 data class PayPalCheckoutRequest @JvmOverloads constructor(
     val orderId: String,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
-    val url: String? = null,
     val appSwitchEnabled: Boolean = false
 )

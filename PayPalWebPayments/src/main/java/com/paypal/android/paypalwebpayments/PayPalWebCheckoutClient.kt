@@ -17,7 +17,7 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
-    private val payPalWebLauncher: PayPalWebLauncher
+    private val payPalWebLauncher: PayPalWebLauncher,
 ) {
 
     // for analytics tracking
@@ -33,7 +33,10 @@ class PayPalWebCheckoutClient internal constructor(
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        PayPalWebLauncher(urlScheme, configuration),
+        PayPalWebLauncher(
+            coreConfig = configuration,
+            urlScheme = urlScheme
+        )
     )
 
     /**
@@ -41,11 +44,10 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalCheckoutRequest] for requesting an order approval
      */
-    fun start(
+    suspend fun start(
         activity: ComponentActivity,
         request: PayPalCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
-        checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
@@ -66,7 +68,7 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    fun vault(
+    suspend fun vault(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {

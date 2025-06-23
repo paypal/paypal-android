@@ -12,6 +12,8 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.api.FetchAppSwitchEligibility
+import com.paypal.android.corepayments.api.FetchClientToken
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -20,6 +22,8 @@ internal class PayPalWebLauncher(
     private val urlScheme: String,
     private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
+    private val fetchClientToken: FetchClientToken = FetchClientToken(coreConfig),
+    private val fetchAppSwitchEligibility: FetchAppSwitchEligibility = FetchAppSwitchEligibility(coreConfig)
 ) {
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
@@ -30,16 +34,24 @@ internal class PayPalWebLauncher(
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
 
-    fun launchPayPalWebCheckout(
+    suspend fun launchPayPalWebCheckout(
         activity: ComponentActivity,
         request: PayPalCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
+
+        val token = fetchClientToken()
+        println("PayPalWebCheckoutClient: Client token fetched: $token")
+        val patchCcoResponse = fetchAppSwitchEligibility(
+            context = activity,
+            token = token,
+            orderId = request.orderId
+        )
+        println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
+
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
-        val url = if (request.appSwitchEnabled) {
-            request.url?.toUri()
-        } else {
-            request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource, url) }
+        val url = patchCcoResponse?.launchUrl?.toUri() ?: request.run {
+            buildPayPalCheckoutUri(orderId, coreConfig, fundingSource)
         }
         val options = BrowserSwitchOptions()
             .url(url)
@@ -49,17 +61,24 @@ internal class PayPalWebLauncher(
         return launchBrowserSwitch(activity, options)
     }
 
-    fun launchPayPalWebVault(
+    suspend fun launchPayPalWebVault(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-        val url = if (request.appSwitchEnabled) {
-            request.approveVaultHref?.toUri()
-        } else {
-            request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig, approveVaultHref) }
-        }
+
+        val token = fetchClientToken()
+        println("PayPalWebCheckoutClient: Client token fetched: $token")
+        val patchCcoResponse = fetchAppSwitchEligibility(
+            context = activity,
+            token = token,
+            orderId = request.setupTokenId
+        )
+        println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
+
+        val url = patchCcoResponse?.launchUrl?.toUri() ?: request.run { buildPayPalVaultUri(setupTokenId, coreConfig) }
+
         val options = BrowserSwitchOptions()
             .url(url)
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_VAULT)
@@ -87,9 +106,8 @@ internal class PayPalWebLauncher(
         orderId: String?,
         config: CoreConfig,
         funding: PayPalWebCheckoutFundingSource,
-        url: String? = null
     ): Uri {
-        val baseURL = url ?: when (config.environment) {
+        val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
         }
@@ -106,9 +124,8 @@ internal class PayPalWebLauncher(
     private fun buildPayPalVaultUri(
         setupTokenId: String,
         config: CoreConfig,
-        url: String? = null
     ): Uri {
-        val baseURL = url ?: when (config.environment) {
+        val baseURL = when (config.environment) {
             Environment.LIVE -> "https://paypal.com/agreements/approve"
             Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
         }
