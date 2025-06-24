@@ -10,8 +10,8 @@ import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.paypal.android.corepayments.api.FetchAppSwitchEligibility
 import com.paypal.android.corepayments.api.FetchClientToken
+import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -31,7 +31,7 @@ class PayPalWebLauncherUnitTest {
 
     private lateinit var browserSwitchClient: BrowserSwitchClient
     private lateinit var fetchClientToken: FetchClientToken
-    private lateinit var fetchAppSwitchEligibility: FetchAppSwitchEligibility
+    private lateinit var patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility
     private lateinit var sut: PayPalWebLauncher
 
     // TODO: consider using androidx.test activity instead of mockk
@@ -46,11 +46,20 @@ class PayPalWebLauncherUnitTest {
     fun beforeEach() {
         browserSwitchClient = mockk(relaxed = true)
         fetchClientToken = mockk(relaxed = true)
-        fetchAppSwitchEligibility = mockk(relaxed = true)
+        patchCCOWithAppSwitchEligibility = mockk(relaxed = true)
 
         // Mock the suspend functions
         every { runBlocking { fetchClientToken() } } returns "fake-token"
-        every { runBlocking { fetchAppSwitchEligibility(any(), any(), any()) } } returns null
+        every {
+            runBlocking {
+                patchCCOWithAppSwitchEligibility(
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
+        } returns null
     }
 
     @Test
@@ -60,7 +69,7 @@ class PayPalWebLauncherUnitTest {
             sandboxConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val slot = slot<BrowserSwitchOptions>()
@@ -94,7 +103,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val slot = slot<BrowserSwitchOptions>()
@@ -128,7 +137,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val slot = slot<BrowserSwitchOptions>()
@@ -162,7 +171,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val slot = slot<BrowserSwitchOptions>()
@@ -196,7 +205,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val browserSwitchError = Exception("error message from browser switch")
@@ -217,7 +226,7 @@ class PayPalWebLauncherUnitTest {
             sandboxConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val slot = slot<BrowserSwitchOptions>()
@@ -247,7 +256,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val slot = slot<BrowserSwitchOptions>()
@@ -277,7 +286,7 @@ class PayPalWebLauncherUnitTest {
             sandboxConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val browserSwitchError = Exception("error message from browser switch")
@@ -311,7 +320,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
 
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
@@ -336,7 +345,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PaypalCheckoutResult.Failure
@@ -361,7 +370,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PaypalCheckoutResult.Failure
@@ -386,7 +395,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PaypalCheckoutResult.Failure
@@ -411,7 +420,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Success
@@ -434,7 +443,7 @@ class PayPalWebLauncherUnitTest {
             liveConfig,
             browserSwitchClient,
             fetchClientToken,
-            fetchAppSwitchEligibility
+            patchCCOWithAppSwitchEligibility
         )
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Failure

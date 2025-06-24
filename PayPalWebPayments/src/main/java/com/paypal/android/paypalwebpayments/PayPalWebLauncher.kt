@@ -12,8 +12,8 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.api.FetchAppSwitchEligibility
 import com.paypal.android.corepayments.api.FetchClientToken
+import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -23,7 +23,9 @@ internal class PayPalWebLauncher(
     private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
     private val fetchClientToken: FetchClientToken = FetchClientToken(coreConfig),
-    private val fetchAppSwitchEligibility: FetchAppSwitchEligibility = FetchAppSwitchEligibility(coreConfig)
+    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(
+        coreConfig
+    )
 ) {
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
@@ -41,10 +43,11 @@ internal class PayPalWebLauncher(
 
         val token = fetchClientToken()
         println("PayPalWebCheckoutClient: Client token fetched: $token")
-        val patchCcoResponse = fetchAppSwitchEligibility(
+        val patchCcoResponse = patchCCOWithAppSwitchEligibility(
             context = activity,
             token = token,
-            orderId = request.orderId
+            orderId = request.orderId,
+            tokenType = "ORDER_ID"
         )
         println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
 
@@ -70,10 +73,11 @@ internal class PayPalWebLauncher(
 
         val token = fetchClientToken()
         println("PayPalWebCheckoutClient: Client token fetched: $token")
-        val patchCcoResponse = fetchAppSwitchEligibility(
+        val patchCcoResponse = patchCCOWithAppSwitchEligibility(
             context = activity,
             token = token,
-            orderId = request.setupTokenId
+            orderId = request.setupTokenId,
+            tokenType = "VAULT_ID"
         )
         println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
 

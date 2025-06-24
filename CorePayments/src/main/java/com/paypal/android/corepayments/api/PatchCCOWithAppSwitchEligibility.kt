@@ -14,7 +14,7 @@ import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRes
 import com.paypal.android.corepayments.model.Variables
 import org.json.JSONObject
 
-public class FetchAppSwitchEligibility(
+class PatchCCOWithAppSwitchEligibility(
     private val coreConfig: CoreConfig,
     private val graphQLClient: GraphQLClient = GraphQLClient(coreConfig),
 ) {
@@ -22,28 +22,23 @@ public class FetchAppSwitchEligibility(
         context: Context,
         token: String,
         orderId: String,
-        fundingSource: String = "paypal",
-        integrationArtifact: String = "PAYPAL_JS_SDK",
-        productFlow: String = "SMART_PAYMENT_BUTTONS",
+        tokenType: String = "ORDER_ID",
+        integrationArtifact: String = "NATIVE_SDK",
         osType: String = "ANDROID",
         merchantOptInForAppSwitch: Boolean = true
     ): PatchCcoWithAppSwitchEligibilityResponse? {
         val experimentationContext = ExperimentationContext(
-            merchantCountry = "US",
-            isWebView = false,
-            paymentType = "COMMIT",
-            integrationChannel = "PPCP_JS_SDK",
-            isWebLLSEligible = false
+            paymentType = "CONTINUE",
+            integrationChannel = "PPCP_NATIVE_SDK",
+            isWebLLSEligible = true
         )
 
         val variables = Variables(
-            fundingSource = fundingSource,
             experimentationContext = experimentationContext,
             integrationArtifact = integrationArtifact,
-            tokenType = "ORDER_ID",
+            tokenType = tokenType,
             userExperienceFlow = "INCONTEXT",
             contextId = orderId,
-            productFlow = productFlow,
             token = orderId,
             osType = osType,
             merchantOptInForAppSwitch = merchantOptInForAppSwitch
@@ -71,26 +66,19 @@ public class FetchAppSwitchEligibility(
 
     private fun createVariablesJson(variables: Variables): JSONObject {
         val experimentationContext = JSONObject()
-            .put("merchantCountry", variables.experimentationContext.merchantCountry)
-            .put("isWebView", variables.experimentationContext.isWebView)
             .put("paymentType", variables.experimentationContext.paymentType)
             .put("integrationChannel", variables.experimentationContext.integrationChannel)
             .put("isWebLLSEligible", variables.experimentationContext.isWebLLSEligible)
 
         return JSONObject()
-            .put("fundingSource", variables.fundingSource)
             .put("experimentationContext", experimentationContext)
             .put("integrationArtifact", variables.integrationArtifact)
             .put("tokenType", variables.tokenType)
             .put("userExperienceFlow", variables.userExperienceFlow)
             .put("contextId", variables.contextId)
-            .put("productFlow", variables.productFlow)
             .put("token", variables.token)
             .put("osType", variables.osType)
             .put("merchantOptInForAppSwitch", variables.merchantOptInForAppSwitch)
-            .apply {
-                variables.buttonSessionID?.let { put("buttonSessionID", it) }
-            }
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")

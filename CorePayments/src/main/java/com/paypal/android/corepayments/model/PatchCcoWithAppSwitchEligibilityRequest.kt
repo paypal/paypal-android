@@ -26,22 +26,17 @@ data class PatchCcoWithAppSwitchEligibilityRequest(
 }
 
 data class Variables(
-    val fundingSource: String,
     val experimentationContext: ExperimentationContext,
     val integrationArtifact: String,
     val tokenType: String,
     val userExperienceFlow: String,
     val contextId: String,
-    val productFlow: String,
     val token: String,
     val osType: String,
-    val merchantOptInForAppSwitch: Boolean,
-    val buttonSessionID: String? = null
+    val merchantOptInForAppSwitch: Boolean
 )
 
 data class ExperimentationContext(
-    val merchantCountry: String,
-    val isWebView: Boolean,
     val paymentType: String,
     val integrationChannel: String,
     val isWebLLSEligible: Boolean

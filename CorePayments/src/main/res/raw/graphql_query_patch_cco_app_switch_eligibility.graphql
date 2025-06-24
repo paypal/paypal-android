@@ -1,42 +1,36 @@
 mutation PatchCcoWithAppSwitchEligibility(
-    $contextId: String!,
-    $experimentationContext: externalExperimentationContextInput,
-    $osType: externalOSType!,
-    $merchantOptInForAppSwitch: Boolean!,
-    $token: externalToken!,
-    $tokenType: externalTokenType!,
-    $buttonSessionID: String,
-    $fundingSource: externalButtonFundingSourceType!,
-    $integrationArtifact: externalIntegrationArtifactType!,
-    $productFlow: externalProductFlowType!,
-    $userExperienceFlow: externalUserExperienceFlowType!
+  $contextId: String!
+  $experimentationContext: externalExperimentationContextInput
+  $osType: externalOSType!
+  $merchantOptInForAppSwitch: Boolean!
+  $token: externalToken!
+  $tokenType: externalTokenType!
+  $integrationArtifact: externalIntegrationArtifactType!
+  $userExperienceFlow: externalUserExperienceFlowType!
 ) {
-    external {
-        patchCcoWithAppSwitchEligibility(
-            appSwitchEligibilityInput: {
-                contextId: $contextId,
-                experimentationContext: $experimentationContext,
-                merchantOptInForAppSwitch: $merchantOptInForAppSwitch,
-                osType: $osType,
-                token: $token,
-                tokenType: $tokenType
-            },
-            patchCcoInput: {
-                token: $token,
-                clientConfig: {
-                    fundingSource: $fundingSource,
-                    integrationArtifact: $integrationArtifact,
-                    userExperienceFlow: $userExperienceFlow,
-                    productFlow: $productFlow,
-                    buttonSessionID: $buttonSessionID
-                }
-            }
-        ) {
-            appSwitchEligibility {
-                appSwitchEligible,
-                redirectURL,
-                ineligibleReason
-            }
+  external {
+    patchCcoWithAppSwitchEligibility(
+      appSwitchEligibilityInput: {
+        contextId: $contextId
+        experimentationContext: $experimentationContext
+        merchantOptInForAppSwitch: $merchantOptInForAppSwitch
+        osType: $osType
+        token: $token
+        tokenType: $tokenType
+      }
+      patchCcoInput: {
+        token: $token
+        clientConfig: {
+          integrationArtifact: $integrationArtifact
+          userExperienceFlow: $userExperienceFlow
         }
+      }
+    ) {
+      appSwitchEligibility {
+        appSwitchEligible
+        redirectURL
+        ineligibleReason
+      }
     }
+  }
 }
