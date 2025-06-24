@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
@@ -21,8 +21,8 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
-import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -31,7 +31,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalWebViewModel @Inject constructor(
-    val getClientIdUseCase: GetClientIdUseCase,
+    @ApplicationContext val applicationContext: Context,
     val createOrderUseCase: CreateOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase
 ) : ViewModel() {
@@ -40,8 +40,10 @@ class PayPalWebViewModel @Inject constructor(
         private val TAG = PayPalWebViewModel::class.qualifiedName
     }
 
-    private var paypalClient: PayPalWebCheckoutClient? = null
-    private lateinit var payPalDataCollector: PayPalDataCollector
+    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val payPalDataCollector = PayPalDataCollector(coreConfig)
+    private val paypalClient =
+        PayPalWebCheckoutClient(applicationContext, coreConfig, "com.paypal.android.demo")
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
     val uiState = _uiState.asStateFlow()
@@ -102,34 +104,16 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
-        when (val clientIdResult = getClientIdUseCase()) {
-            is SDKSampleServerResult.Failure -> {
-                payPalWebCheckoutState = clientIdResult.mapToActionState()
-            }
+        val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
+        when (val startResult = paypalClient.start(activity, checkoutRequest)) {
+            is PayPalPresentAuthChallengeResult.Success ->
+                authState = startResult.authState
 
-            is SDKSampleServerResult.Success -> {
-                val coreConfig = CoreConfig(clientIdResult.value)
-                payPalDataCollector = PayPalDataCollector(coreConfig)
-
-                paypalClient =
-                    PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
-
-                val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
-                when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
-                    is PayPalPresentAuthChallengeResult.Success ->
-                        authState = startResult.authState
-
-                    is PayPalPresentAuthChallengeResult.Failure ->
-                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
-
-                    null -> {
-                        // do nothing
-                    }
-                }
-            }
+            is PayPalPresentAuthChallengeResult.Failure ->
+                payPalWebCheckoutState = ActionState.Failure(startResult.error)
         }
     }
 
@@ -150,7 +134,7 @@ class PayPalWebViewModel @Inject constructor(
     }
 
     private fun checkIfPayPalAuthFinished(intent: Intent): PayPalWebCheckoutFinishStartResult? =
-        authState?.let { paypalClient?.finishStart(intent, it) }
+        authState?.let { paypalClient.finishStart(intent, it) }
 
     fun completeAuthChallenge(intent: Intent) {
         checkIfPayPalAuthFinished(intent)?.let { payPalAuthResult ->
