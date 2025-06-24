@@ -69,10 +69,10 @@ class SDKSampleServerAPI {
             @Header("PayPal-Client-Metadata-Id") payPalClientMetadataId: String?
         ): ResponseBody
 
-        @POST("/setup_tokens")
+        @POST("/setup-tokens")
         suspend fun createSetupToken(@Body jsonObject: JsonObject): ResponseBody
 
-        @POST("/payment_tokens")
+        @POST("/payment-tokens")
         suspend fun createPaymentToken(@Body jsonObject: JsonObject): ResponseBody
 
         @GET("/setup-tokens/{setupTokenId}")
