@@ -21,12 +21,12 @@ class CreateCardSetupTokenUseCase @Inject constructor(
             // language=JSON
             val request = """
             {
-                "payment_source": {
+                "paymentSource": {
                     "card": {
-                        "verification_method": "${sca.name}",
-                        "experience_context": {
-                            "return_url": "com.paypal.android.demo://vault/success",
-                            "cancel_url": "com.paypal.android.demo://vault/cancel"
+                        "verificationMethod": "${sca.name}",
+                        "experienceContext": {
+                            "returnUrl": "com.paypal.android.demo://vault/success",
+                            "cancelUrl": "com.paypal.android.demo://vault/cancel"
                         }
                     }
                 }

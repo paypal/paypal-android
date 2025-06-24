@@ -18,13 +18,13 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             // language=JSON
             val request = """
             {
-              "payment_source": {
+              "paymentSource": {
                 "paypal": {
-                  "usage_type": "MERCHANT",
-                  "experience_context": {
-                    "vault_instruction": "ON_PAYER_APPROVAL",
-                    "return_url": "com.paypal.android.demo://vault/success",
-                    "cancel_url": "com.paypal.android.demo://vault/cancel"
+                  "usageType": "MERCHANT",
+                  "experienceContext": {
+                    "vaultInstruction": "ON_PAYER_APPROVAL",
+                    "returnUrl": "com.paypal.android.demo://vault/success",
+                    "cancelUrl": "com.paypal.android.demo://vault/cancel"
                   }
                 }
               }
