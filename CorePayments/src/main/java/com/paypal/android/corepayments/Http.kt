@@ -34,7 +34,7 @@ internal class Http(
                 if (httpRequest.method == HttpMethod.POST) {
                     try {
                         connection.doOutput = true
-                        connection.outputStream.write(httpRequest.body?.toByteArray())
+                        httpRequest.body?.let { connection.outputStream.write(it.toByteArray()) }
                         connection.outputStream.flush()
                         connection.outputStream.close()
                     } catch (e: IOException) {

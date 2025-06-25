@@ -8,7 +8,7 @@ class PayPalWebCheckoutRequestUnitTest {
     @Test
     fun `given an order id, PayPalRequest should return the same orderId`() {
         val orderId = "fake_order_id"
-        val payPalRequest = PayPalWebCheckoutRequest(orderId)
+        val payPalRequest = PayPalCheckoutRequest(orderId)
         assertEquals(orderId, payPalRequest.orderId)
     }
 }

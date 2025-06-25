@@ -10,10 +10,14 @@ import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.api.FetchClientToken
+import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
@@ -26,6 +30,8 @@ import strikt.assertions.isEqualTo
 class PayPalWebLauncherUnitTest {
 
     private lateinit var browserSwitchClient: BrowserSwitchClient
+    private lateinit var fetchClientToken: FetchClientToken
+    private lateinit var patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility
     private lateinit var sut: PayPalWebLauncher
 
     // TODO: consider using androidx.test activity instead of mockk
@@ -39,11 +45,32 @@ class PayPalWebLauncherUnitTest {
     @Before
     fun beforeEach() {
         browserSwitchClient = mockk(relaxed = true)
+        fetchClientToken = mockk(relaxed = true)
+        patchCCOWithAppSwitchEligibility = mockk(relaxed = true)
+
+        // Mock the suspend functions
+        every { runBlocking { fetchClientToken() } } returns "fake-token"
+        every {
+            runBlocking {
+                patchCCOWithAppSwitchEligibility(
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
+        } returns null
     }
 
     @Test
-    fun `launchPayPalWebCheckout() browser switches to SANDBOX PayPal web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
+    fun `launchPayPalWebCheckout() browser switches to SANDBOX PayPal web checkout`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            sandboxConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val slot = slot<BrowserSwitchOptions>()
         every {
@@ -51,7 +78,7 @@ class PayPalWebLauncherUnitTest {
         } returns BrowserSwitchStartResult.Started("pending request")
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
+        val request = PayPalCheckoutRequest("fake-order-id", fundingSource)
         sut.launchPayPalWebCheckout(activity, request)
 
         val expectedUrl = "https://www.sandbox.paypal.com/checkoutnow?" +
@@ -70,8 +97,14 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebCheckout() browser switches to LIVE PayPal web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+    fun `launchPayPalWebCheckout() browser switches to LIVE PayPal web checkout`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val slot = slot<BrowserSwitchOptions>()
         every {
@@ -79,7 +112,7 @@ class PayPalWebLauncherUnitTest {
         } returns BrowserSwitchStartResult.Started("pending request")
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
+        val request = PayPalCheckoutRequest("fake-order-id", fundingSource)
         sut.launchPayPalWebCheckout(activity, request)
 
         val expectedUrl = "https://www.paypal.com/checkoutnow?" +
@@ -98,8 +131,14 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebCheckout() browser switches to PayPal Credit web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+    fun `launchPayPalWebCheckout() browser switches to PayPal Credit web checkout`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val slot = slot<BrowserSwitchOptions>()
         every {
@@ -107,7 +146,7 @@ class PayPalWebLauncherUnitTest {
         } returns BrowserSwitchStartResult.Started("pending request")
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
+        val request = PayPalCheckoutRequest("fake-order-id", fundingSource)
         sut.launchPayPalWebCheckout(activity, request)
 
         val expectedUrl = "https://www.paypal.com/checkoutnow?" +
@@ -126,8 +165,14 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebCheckout() browser switches to PayPal Pay Later web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+    fun `launchPayPalWebCheckout() browser switches to PayPal Pay Later web checkout`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val slot = slot<BrowserSwitchOptions>()
         every {
@@ -135,7 +180,7 @@ class PayPalWebLauncherUnitTest {
         } returns BrowserSwitchStartResult.Started("pending request")
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAY_LATER
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
+        val request = PayPalCheckoutRequest("fake-order-id", fundingSource)
         sut.launchPayPalWebCheckout(activity, request)
 
         val expectedUrl = "https://www.paypal.com/checkoutnow?" +
@@ -154,23 +199,35 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebCheckout() returns an error when it cannot browser switch`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+    fun `launchPayPalWebCheckout() returns an error when it cannot browser switch`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
             browserSwitchClient.start(any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val request = PayPalCheckoutRequest("fake-order-id")
         val result = sut.launchPayPalWebCheckout(activity, request)
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
     }
 
     @Test
-    fun `launchPayPalWebVault() browser switches to SANDBOX PayPal vault checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
+    fun `launchPayPalWebVault() browser switches to SANDBOX PayPal vault checkout`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            sandboxConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val slot = slot<BrowserSwitchOptions>()
         every {
@@ -193,8 +250,14 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebVault() browser switches to LIVE PayPal vault checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+    fun `launchPayPalWebVault() browser switches to LIVE PayPal vault checkout`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val slot = slot<BrowserSwitchOptions>()
         every {
@@ -217,8 +280,14 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchPayPalWebVault() returns an error when it cannot browser switch`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
+    fun `launchPayPalWebVault() returns an error when it cannot browser switch`() = runTest {
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            sandboxConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
@@ -228,7 +297,7 @@ class PayPalWebLauncherUnitTest {
         val vaultRequest = PayPalWebVaultRequest("fake-setup-token-id")
         sut.launchPayPalWebVault(activity, vaultRequest)
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val request = PayPalCheckoutRequest("fake-order-id")
         val result = sut.launchPayPalWebCheckout(activity, request)
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
@@ -246,10 +315,16 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
 
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Success
+                as PaypalCheckoutResult.Success
         assertEquals("fake-order-id", result.orderId)
         assertEquals("fake-payer-id", result.payerId)
     }
@@ -265,9 +340,15 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Failure
+                as PaypalCheckoutResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -284,9 +365,15 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Failure
+                as PaypalCheckoutResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -303,9 +390,15 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
-                as PayPalWebCheckoutFinishStartResult.Failure
+                as PaypalCheckoutResult.Failure
         val expectedDescription =
             "An unknown error occurred. Contact developer.paypal.com/support."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -322,7 +415,13 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Success
         assertEquals("fake-approval-session-id", result.approvalSessionId)
@@ -339,7 +438,13 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(
+            "custom_url_scheme",
+            liveConfig,
+            browserSwitchClient,
+            fetchClientToken,
+            patchCCOWithAppSwitchEligibility
+        )
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Failure
         val expectedDescription =

@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -11,6 +12,8 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.api.FetchClientToken
+import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -19,6 +22,10 @@ internal class PayPalWebLauncher(
     private val urlScheme: String,
     private val coreConfig: CoreConfig,
     private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
+    private val fetchClientToken: FetchClientToken = FetchClientToken(coreConfig),
+    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(
+        coreConfig
+    )
 ) {
     private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
 
@@ -29,13 +36,27 @@ internal class PayPalWebLauncher(
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
 
-    fun launchPayPalWebCheckout(
+    suspend fun launchPayPalWebCheckout(
         activity: ComponentActivity,
-        request: PayPalWebCheckoutRequest,
+        request: PayPalCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
+
+        val token = fetchClientToken()
+        println("PayPalWebCheckoutClient: Client token fetched: $token")
+        val patchCcoResponse = patchCCOWithAppSwitchEligibility(
+            context = activity,
+            token = token,
+            orderId = request.orderId,
+            tokenType = "ORDER_ID",
+            merchantOptInForAppSwitch = request.appSwitchEnabled
+        )
+        println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
+
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
-        val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
+        val url = patchCcoResponse?.launchUrl?.toUri() ?: request.run {
+            buildPayPalCheckoutUri(orderId, coreConfig, fundingSource)
+        }
         val options = BrowserSwitchOptions()
             .url(url)
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
@@ -44,13 +65,26 @@ internal class PayPalWebLauncher(
         return launchBrowserSwitch(activity, options)
     }
 
-    fun launchPayPalWebVault(
+    suspend fun launchPayPalWebVault(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
-        val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
+
+        val token = fetchClientToken()
+        println("PayPalWebCheckoutClient: Client token fetched: $token")
+        val patchCcoResponse = patchCCOWithAppSwitchEligibility(
+            context = activity,
+            token = token,
+            orderId = request.setupTokenId,
+            tokenType = "VAULT_ID",
+            merchantOptInForAppSwitch = request.appSwitchEnabled
+        )
+        println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
+
+        val url = patchCcoResponse?.launchUrl?.toUri() ?: request.run { buildPayPalVaultUri(setupTokenId, coreConfig) }
+
         val options = BrowserSwitchOptions()
             .url(url)
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_VAULT)
@@ -77,13 +111,13 @@ internal class PayPalWebLauncher(
     private fun buildPayPalCheckoutUri(
         orderId: String?,
         config: CoreConfig,
-        funding: PayPalWebCheckoutFundingSource
+        funding: PayPalWebCheckoutFundingSource,
     ): Uri {
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
         }
-        return Uri.parse(baseURL)
+        return baseURL.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
@@ -95,13 +129,13 @@ internal class PayPalWebLauncher(
 
     private fun buildPayPalVaultUri(
         setupTokenId: String,
-        config: CoreConfig
+        config: CoreConfig,
     ): Uri {
         val baseURL = when (config.environment) {
             Environment.LIVE -> "https://paypal.com/agreements/approve"
             Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
         }
-        return Uri.parse(baseURL)
+        return baseURL.toUri()
             .buildUpon()
             .appendQueryParameter("approval_session_id", setupTokenId)
             .build()
@@ -110,7 +144,7 @@ internal class PayPalWebLauncher(
     fun completeCheckoutAuthRequest(
         intent: Intent,
         authState: String
-    ): PayPalWebCheckoutFinishStartResult {
+    ): PaypalCheckoutResult {
         return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
             is BrowserSwitchFinalResult.Success -> parseWebCheckoutSuccessResult(finalResult)
             is BrowserSwitchFinalResult.Failure -> {
@@ -119,10 +153,10 @@ internal class PayPalWebLauncher(
                 // for iOS Error protocol conformance
                 val message = "Browser switch failed"
                 val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
-                PayPalWebCheckoutFinishStartResult.Failure(browserSwitchError, null)
+                PaypalCheckoutResult.Failure(browserSwitchError, null)
             }
 
-            BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutFinishStartResult.NoResult
+            BrowserSwitchFinalResult.NoResult -> PaypalCheckoutResult.NoResult
         }
     }
 
@@ -147,25 +181,25 @@ internal class PayPalWebLauncher(
 
     private fun parseWebCheckoutSuccessResult(
         finalResult: BrowserSwitchFinalResult.Success
-    ): PayPalWebCheckoutFinishStartResult {
+    ): PaypalCheckoutResult {
         val deepLinkUrl = finalResult.returnUrl
         val metadata = finalResult.requestMetadata
         return if (finalResult.requestCode == BrowserSwitchRequestCodes.PAYPAL_CHECKOUT) {
             if (metadata == null) {
                 val unknownError = PayPalWebCheckoutError.unknownError
-                PayPalWebCheckoutFinishStartResult.Failure(unknownError, null)
+                PaypalCheckoutResult.Failure(unknownError, null)
             } else {
                 val payerId = deepLinkUrl.getQueryParameter("PayerID")
                 val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
                 if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
                     val malformedResultError = PayPalWebCheckoutError.malformedResultError
-                    PayPalWebCheckoutFinishStartResult.Failure(malformedResultError, orderId)
+                    PaypalCheckoutResult.Failure(malformedResultError, orderId)
                 } else {
-                    PayPalWebCheckoutFinishStartResult.Success(orderId, payerId)
+                    PaypalCheckoutResult.Success(orderId, payerId)
                 }
             }
         } else {
-            PayPalWebCheckoutFinishStartResult.NoResult
+            PaypalCheckoutResult.NoResult
         }
     }
 

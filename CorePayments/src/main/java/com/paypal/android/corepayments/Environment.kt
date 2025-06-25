@@ -1,6 +1,6 @@
 package com.paypal.android.corepayments
 
-enum class Environment(internal val url: String, internal val graphQLEndpoint: String) {
+enum class Environment(val url: String, internal val graphQLEndpoint: String) {
     LIVE(
         "https://api-m.paypal.com",
         "https://www.paypal.com"

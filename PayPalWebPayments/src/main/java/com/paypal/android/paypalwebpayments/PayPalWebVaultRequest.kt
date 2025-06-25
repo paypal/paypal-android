@@ -10,7 +10,8 @@ data class PayPalWebVaultRequest @Deprecated("Use PayPalWebVaultRequest(setupTok
 constructor(
     val setupTokenId: String,
     @Deprecated("The approveVaultHref property is no longer required and will be ignored.")
-    val approveVaultHref: String? // NEXT_MAJOR_VERSION: - Remove this property
+    val approveVaultHref: String?, // NEXT_MAJOR_VERSION: - Remove this property
+    val appSwitchEnabled: Boolean
 ) {
 
     /**
@@ -18,5 +19,5 @@ constructor(
      *
      * @property [setupTokenId] ID for the setup token associated with the vault approval
      */
-    constructor(setupTokenId: String) : this(setupTokenId, null)
+    constructor(setupTokenId: String) : this(setupTokenId, null, false)
 }
