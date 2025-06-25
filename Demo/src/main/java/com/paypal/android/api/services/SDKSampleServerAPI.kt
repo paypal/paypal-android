@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.CardSetupToken
-import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
@@ -26,8 +25,7 @@ private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
-// To hardcode an clientId and orderId for this demo app, set the below values:
-private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
+// To hardcode an orderId for this demo app, set the below value
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 // TODO: consider refactoring each method into a "use case"
@@ -38,6 +36,10 @@ class SDKSampleServerAPI {
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
         val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
+
+        val clientId: String
+            get() = SELECTED_MERCHANT_INTEGRATION.clientId
+
         private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
             it.optString(key).ifEmpty {
                 null
@@ -53,9 +55,6 @@ class SDKSampleServerAPI {
 
         @POST("/orders")
         suspend fun createOrder(@Body order: OrderRequest): Order
-
-        @GET("/client_id")
-        suspend fun fetchClientId(): ClientId
 
         @POST("/orders/{orderId}/capture")
         suspend fun captureOrder(
@@ -115,11 +114,6 @@ class SDKSampleServerAPI {
     private fun findService(merchantIntegration: MerchantIntegration) =
         serviceMap[merchantIntegration]
             ?: throw AssertionError("Couldn't find retrofit service for ${merchantIntegration.name}")
-
-    suspend fun fetchClientId(merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
-        safeApiCall {
-            DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
-        }
 
     suspend fun createOrder(
         orderRequest: JSONObject,
