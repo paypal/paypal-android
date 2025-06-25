@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.api.FetchClientToken
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
@@ -17,7 +19,8 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
-    private val payPalWebLauncher: PayPalWebLauncher
+    private val payPalWebLauncher: PayPalWebLauncher,
+    private val fetchClientToken: FetchClientToken
 ) {
 
     // for analytics tracking
@@ -34,6 +37,7 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
+        FetchClientToken(configuration, RestClient(configuration))
     )
 
     /**
@@ -41,12 +45,16 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(
+    suspend fun start(
         activity: ComponentActivity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+
+        // Fetch client token for authentication
+        fetchClientToken()
+        // todo: token will be used while fetching app switch eligibility
 
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
