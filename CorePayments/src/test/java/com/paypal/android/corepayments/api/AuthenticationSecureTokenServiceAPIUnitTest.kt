@@ -5,7 +5,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.RestClient
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -13,28 +12,31 @@ import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class FetchClientTokenUnitTest {
+class AuthenticationSecureTokenServiceAPIUnitTest {
 
     private lateinit var restClient: RestClient
     private lateinit var coreConfig: CoreConfig
-    private lateinit var sut: FetchClientToken
+    private lateinit var sut: AuthenticationSecureTokenServiceAPI
 
     @Before
     fun beforeEach() {
         coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
         restClient = mockk(relaxed = true)
-        sut = FetchClientToken(coreConfig, restClient)
+        sut = AuthenticationSecureTokenServiceAPI(coreConfig, restClient)
     }
 
     @Test
-    fun `invoke() makes correct API request with proper headers and body`() = runTest {
+    fun `createLowScopedAccessToken() makes correct API request with proper headers and body`() =
+        runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -45,7 +47,7 @@ class FetchClientTokenUnitTest {
         val requestSlot = slot<APIRequest>()
 
         // When
-        val result = sut()
+            val result = sut.createLowScopedAccessToken()
 
         // Then
         coVerify { restClient.send(capture(requestSlot)) }
@@ -60,11 +62,12 @@ class FetchClientTokenUnitTest {
         assertEquals("application/x-www-form-urlencoded", headers["Content-Type"])
         assert(headers["Authorization"]!!.startsWith("Basic "))
 
-        assertEquals("test-token", result)
+            assertTrue(result is CreateLowScopedAccessTokenResult.Success)
+            assertEquals("test-token", (result as CreateLowScopedAccessTokenResult.Success).token)
     }
 
     @Test
-    fun `invoke() returns access token from successful response`() = runTest {
+    fun `createLowScopedAccessToken() returns access token from successful response`() = runTest {
         // Given
         val expectedToken = "test-access-token-12345"
         val successResponse = HttpResponse(
@@ -74,14 +77,15 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns successResponse
 
         // When
-        val result = sut()
+        val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertEquals(expectedToken, result)
+        assertTrue(result is CreateLowScopedAccessTokenResult.Success)
+        assertEquals(expectedToken, (result as CreateLowScopedAccessTokenResult.Success).token)
     }
 
     @Test
-    fun `invoke() throws APIClientError when response is not successful`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when response is not successful`() = runTest {
         // Given
         val errorResponse = HttpResponse(
             status = 401,
@@ -89,14 +93,15 @@ class FetchClientTokenUnitTest {
         )
         coEvery { restClient.send(any()) } returns errorResponse
 
-        // When/Then
-        val result = runCatching { sut() }
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is PayPalSDKError)
+        // When
+        val result = sut.createLowScopedAccessToken()
+
+        // Then
+        assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
     }
 
     @Test
-    fun `invoke() throws APIClientError when response body is null`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when response body is null`() = runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -104,14 +109,15 @@ class FetchClientTokenUnitTest {
         )
         coEvery { restClient.send(any()) } returns successResponse
 
-        // When/Then
-        val result = runCatching { sut() }
-        assertTrue(result.isFailure)
-        // Expected JSONException when parsing null body
+        // When
+        val result = sut.createLowScopedAccessToken()
+
+        // Then
+        assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
     }
 
     @Test
-    fun `invoke() throws JSONException when response is not valid JSON`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when response is not valid JSON`() = runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -119,14 +125,17 @@ class FetchClientTokenUnitTest {
         )
         coEvery { restClient.send(any()) } returns successResponse
 
-        // When/Then
-        val result = runCatching { sut() }
-        assertTrue(result.isFailure)
-        // Expected JSONException for invalid JSON
+        // When
+        val result = sut.createLowScopedAccessToken()
+
+        // Then
+        assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+        // Expected JSONException wrapped in PayPalSDKError
     }
 
     @Test
-    fun `invoke() throws JSONException when access_token is missing from response`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when access_token field is missing from successful response`() =
+        runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -134,14 +143,18 @@ class FetchClientTokenUnitTest {
         )
         coEvery { restClient.send(any()) } returns successResponse
 
-        // When/Then
-        val result = runCatching { sut() }
-        assertTrue(result.isFailure)
-        // Expected JSONException for missing access_token
+            // When
+            val result = sut.createLowScopedAccessToken()
+
+            // Then
+            assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+            val error = (result as CreateLowScopedAccessTokenResult.Failure).error
+            assertTrue(error.errorDescription.contains("Missing access_token in response"))
     }
 
     @Test
-    fun `invoke() handles empty response body with proper error message`() = runTest {
+    fun `createLowScopedAccessToken() handles empty response body with proper error message`() =
+        runTest {
         // Given
         val errorResponse = HttpResponse(
             status = 500,
@@ -149,19 +162,20 @@ class FetchClientTokenUnitTest {
         )
         coEvery { restClient.send(any()) } returns errorResponse
 
-        // When/Then
-        try {
-            sut()
-            assert(false) { "Expected PayPalSDKError to be thrown" }
-        } catch (e: PayPalSDKError) {
-            val errorMessage = e.errorDescription
-            // Just verify it contains some error information
-            assert(errorMessage.contains("Error fetching client token"))
-        }
+        // When
+            val result = sut.createLowScopedAccessToken()
+
+        // Then
+            assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+            val errorMessage =
+                (result as CreateLowScopedAccessTokenResult.Failure).error.errorDescription
+        // The error description will be the empty body from the HTTP response
+        assertEquals("", errorMessage)
     }
 
     @Test
-    fun `invoke() includes error message in exception when available`() = runTest {
+    fun `createLowScopedAccessToken() includes error message in exception when available`() =
+        runTest {
         // Given
         val errorMessage = "Server temporarily unavailable"
         val errorResponse = HttpResponse(
@@ -170,23 +184,24 @@ class FetchClientTokenUnitTest {
         )
         coEvery { restClient.send(any()) } returns errorResponse
 
-        // When/Then
-        try {
-            sut()
-            assert(false) { "Expected PayPalSDKError to be thrown" }
-        } catch (e: PayPalSDKError) {
-            val description = e.errorDescription
-            // Just verify it contains some error information
-            assert(description.contains("Error fetching client token"))
-        }
+        // When
+            val result = sut.createLowScopedAccessToken()
+
+        // Then
+            assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+            val description =
+                (result as CreateLowScopedAccessTokenResult.Failure).error.errorDescription
+        // The error description will be the error message from the HTTP response body
+        assertEquals(errorMessage, description)
     }
 
     @Test
-    fun `invoke() creates proper Basic Auth header from client ID`() = runTest {
+    fun `createLowScopedAccessToken() creates proper Basic Auth header from client ID`() = runTest {
         // Given
         val clientId = "test-client-123"
         val configWithCustomClientId = CoreConfig(clientId, Environment.LIVE)
-        val sutWithCustomConfig = FetchClientToken(configWithCustomClientId, restClient)
+        val sutWithCustomConfig =
+            AuthenticationSecureTokenServiceAPI(configWithCustomClientId, restClient)
 
         val successResponse = HttpResponse(
             status = 200,
@@ -197,7 +212,7 @@ class FetchClientTokenUnitTest {
         val requestSlot = slot<APIRequest>()
 
         // When
-        sutWithCustomConfig()
+        sutWithCustomConfig.createLowScopedAccessToken()
 
         // Then
         coVerify { restClient.send(capture(requestSlot)) }
@@ -207,8 +222,9 @@ class FetchClientTokenUnitTest {
 
         // Decode and verify the Basic auth contains the client ID
         val encodedCredentials = authHeader.substring("Basic ".length)
-        val decodedCredentials =
-            String(android.util.Base64.decode(encodedCredentials, android.util.Base64.DEFAULT))
-        assertEquals("$clientId:", decodedCredentials)
+        val decodedClientId =
+            android.util.Base64.decode(encodedCredentials, android.util.Base64.DEFAULT)
+                .decodeToString()
+        assertEquals(clientId, decodedClientId)
     }
 }
