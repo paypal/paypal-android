@@ -47,7 +47,8 @@ internal class PayPalWebLauncher(
             context = activity,
             token = token,
             orderId = request.orderId,
-            tokenType = "ORDER_ID"
+            tokenType = "ORDER_ID",
+            merchantOptInForAppSwitch = request.appSwitchEnabled
         )
         println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
 
@@ -77,7 +78,8 @@ internal class PayPalWebLauncher(
             context = activity,
             token = token,
             orderId = request.setupTokenId,
-            tokenType = "VAULT_ID"
+            tokenType = "VAULT_ID",
+            merchantOptInForAppSwitch = request.appSwitchEnabled
         )
         println("PayPalWebCheckoutClient: App switch eligibility fetched: $patchCcoResponse")
 
