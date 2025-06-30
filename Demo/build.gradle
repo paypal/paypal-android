@@ -5,6 +5,7 @@ plugins {
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.kotlinKapt
     alias libs.plugins.kotlinParcelize
+    alias libs.plugins.googleProtoBuf
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
@@ -111,8 +112,8 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.android.material
     implementation libs.androidx.constraintLayout
-    implementation libs.lifecycle.runtimeKtx
     implementation libs.androidx.fragmentKtx
+    implementation libs.lifecycle.runtimeKtx
 
     // Compose Bill of Materials (BOM) dependency manages compose dependency versions without
     // us having to explicitly state versions of individual compose dependencies; the BOM project
@@ -142,6 +143,9 @@ dependencies {
     implementation libs.navigation.compose
     implementation libs.hilt.navigationCompose
 
+    implementation libs.androidx.dataStore
+    implementation libs.google.protoBufJavaLite
+
     testImplementation libs.junit
 
     androidTestImplementation libs.androidx.test.junit
@@ -153,6 +157,28 @@ dependencies {
     // compose ui-test
     androidTestImplementation libs.compose.uiTestJunit4
     debugImplementation libs.compose.uiTestManifest
+}
+
+protobuf {
+    // Ref: https://github.com/grpc/grpc-java/blob/master/README.md
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.31.1"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.73.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' }
+            }
+            task.plugins {
+                grpc { option 'lite' }
+            }
+        }
+    }
 }
 
 /**

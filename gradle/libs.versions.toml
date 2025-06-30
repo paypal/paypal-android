@@ -9,6 +9,7 @@ androidxJUnit = "1.1.5"
 androidxLifecycleCommonJava = "2.4.1"
 androidxLifecycleRuntimeKtx = "2.4.1"
 androidxPreferenceKtx = "1.1.1"
+androidxDataStore = "1.1.7"
 androidxTestCore = "1.5.0"
 androidxTestRules = "1.5.0"
 androidxTestRunner = "1.5.2"
@@ -18,6 +19,7 @@ constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
 googleMaterial = "1.4.0"
+googleProtoBufPlugin = "0.9.5"
 gradleNexusPublishPlugin = "1.1.0"
 gradlePlayPublisher = "3.8.4"
 hiltNavigationCompose = "1.1.0"
@@ -38,6 +40,7 @@ squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
 striktMockk = "0.30.1"
+googleProtoBufJavaLite = "4.31.1"
 
 [libraries]
 android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
@@ -46,6 +49,7 @@ androidx-constraintLayout = { group = "androidx.constraintlayout", name = "const
 androidx-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
 androidx-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidxFragmentKtx" }
 androidx-preferenceKtx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreferenceKtx" }
+androidx-dataStore = { group = "androidx.datastore", name = "datastore", version.ref = "androidxDataStore" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspressoCore" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJUnit" }
@@ -82,6 +86,7 @@ strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "strikt
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-formatting", version.ref = "detektVersion" }
 detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
+google-protoBufJavaLite = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "googleProtoBufJavaLite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -93,3 +98,5 @@ gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePla
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
+# Ref: https://github.com/google/protobuf-gradle-plugin?tab=readme-ov-file#latest-version
+googleProtoBuf = { id = "com.google.protobuf", version.ref = "googleProtoBufPlugin" }

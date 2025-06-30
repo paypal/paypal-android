@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +38,7 @@ import com.paypal.android.utils.getActivityOrNull
 @Composable
 fun ApproveOrderView(
     viewModel: ApproveOrderViewModel,
+    onDisplayEnvironmentOptionsClick: () -> Unit = {},
     onUseTestCardClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,6 +70,13 @@ fun ApproveOrderView(
                 testTagsAsResourceId = true
             }
     ) {
+        Button(
+            onClick = onDisplayEnvironmentOptionsClick,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(text = "Environment")
+        }
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
             Step2_ApproveOrder(uiState, viewModel, onUseTestCardClick)
