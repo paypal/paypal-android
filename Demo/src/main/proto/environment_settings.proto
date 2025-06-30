@@ -3,16 +3,19 @@ syntax = "proto3";
 option java_package = "com.paypal.android.datastore";
 option java_multiple_files = true;
 
-message EnvironmentSettings {
-  repeated DemoEnvironment environments = 1;
+enum PayPalEnvironment {
+  SANDBOX = 0;
+  LIVE = 1;
 }
 
 message DemoEnvironment {
-  string server_url = 1;
-  EnvironmentName name = 2;
+  string name = 1;
+  PayPalEnvironment pay_pal_environment = 2;
+  string server_url = 3;
+  string client_id = 4;
 }
 
-enum EnvironmentName {
-  SANDBOX = 0;
-  LIVE = 1;
+message EnvironmentSettings {
+  int32 active_environment_index = 1;
+  repeated DemoEnvironment environments = 2;
 }

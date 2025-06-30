@@ -13,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -21,6 +22,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.datastore.EnvironmentSettings
+import com.paypal.android.datastore.environmentSettingsDataStore
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardResultView
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
@@ -32,6 +35,7 @@ import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import kotlinx.coroutines.flow.map
 
 @ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
@@ -44,12 +48,16 @@ fun ApproveOrderView(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
+    val context = LocalContext.current
+    val activeEnvironment by context.environmentSettingsDataStore.data.map { environmentSettings ->
+        environmentSettings.run { getEnvironments(activeEnvironmentIndex) }
+    }.collectAsStateWithLifecycle(null)
+
     LaunchedEffect(scrollState.maxValue) {
         // continuously scroll to bottom of the list when scroll bounds change
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
         intent?.let { viewModel.completeAuthChallenge(it) }
@@ -75,7 +83,10 @@ fun ApproveOrderView(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = "Environment")
+            Column {
+                Text(text = "Environment")
+                Text(text = activeEnvironment?.name ?: "Loading")
+            }
         }
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
