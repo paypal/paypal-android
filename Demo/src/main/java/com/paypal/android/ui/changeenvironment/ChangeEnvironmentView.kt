@@ -2,15 +2,70 @@ package com.paypal.android.ui.changeenvironment
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role.Companion.Button
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.datastore.environmentSettingsDataStore
+import com.paypal.android.uishared.components.ActionButton
+import com.paypal.android.uishared.components.OptionList
+import com.paypal.android.utils.UIConstants
+import kotlinx.coroutines.flow.map
+
+const val OPTION_NEW = "New"
 
 @ExperimentalFoundationApi
 @ExperimentalMaterial3Api
 @Composable
 fun ChangeEnvironmentView() {
-    Column {
-        Text("What a gwaaaan")
+    val context = LocalContext.current
+    val availableEnvironments by context.environmentSettingsDataStore.data.map { environmentSettings ->
+        environmentSettings.environmentsList
+    }.collectAsStateWithLifecycle(null)
+
+    val activeEnvironment by context.environmentSettingsDataStore.data.map { environmentSettings ->
+        environmentSettings.run { getEnvironments(activeEnvironmentIndex) }
+    }.collectAsStateWithLifecycle(null)
+
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(activeEnvironment) {
+        // make active environment the default option once it's loaded from shared prefs
+        val activeEnvironmentName = activeEnvironment?.name
+        if (selectedOption == null && activeEnvironmentName != null) {
+            selectedOption = activeEnvironmentName
+        }
+    }
+
+    val staticOptions = listOf(OPTION_NEW)
+    Column(
+        verticalArrangement = UIConstants.spacingLarge,
+        modifier = Modifier
+            .padding(horizontal = UIConstants.paddingMedium)
+    ) {
+        OptionList(
+            title = "Select an environment",
+            options = (availableEnvironments?.map { it.name } ?: emptyList()) + staticOptions,
+            onSelectedOptionChange = { value -> selectedOption = value },
+            selectedOption = selectedOption ?: ""
+        )
+        val actionButtonText = if (selectedOption == OPTION_NEW) "Create New" else "Save Changes"
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(actionButtonText)
+        }
     }
 }
