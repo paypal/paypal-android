@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
+import com.paypal.android.ui.changeenvironment.ChangeEnvironmentView
 import com.paypal.android.ui.features.FeaturesView
 import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
 import com.paypal.android.ui.paypalstaticbuttons.PayPalStaticButtonsView
@@ -92,6 +93,9 @@ fun DemoApp() {
                     }
                     ApproveOrderView(
                         viewModel = viewModel,
+                        onDisplayEnvironmentOptionsClick = {
+                            navController.navigate( DemoAppDestinations.CHANGE_ENVIRONMENT )
+                        },
                         onUseTestCardClick = { navController.navigate(DemoAppDestinations.SELECT_TEST_CARD) }
                     )
                 }
@@ -124,6 +128,9 @@ fun DemoApp() {
                         prevBackStackEntry?.savedStateHandle?.set("test_card_id", testCardId)
                         navController.popBackStack()
                     })
+                }
+                composable(DemoAppDestinations.CHANGE_ENVIRONMENT) {
+                    ChangeEnvironmentView()
                 }
             }
         }

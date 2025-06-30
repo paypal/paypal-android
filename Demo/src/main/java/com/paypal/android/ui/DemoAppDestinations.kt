@@ -9,6 +9,7 @@ object DemoAppDestinations {
     const val PAYPAL_BUTTONS = "paypal_buttons"
     const val PAYPAL_STATIC_BUTTONS = "paypal_static_buttons"
     const val SELECT_TEST_CARD = "select_test_card"
+    const val CHANGE_ENVIRONMENT = "change_environment"
 
     fun titleForDestination(destination: String?): String = when (destination) {
         CARD_APPROVE_ORDER -> "Card Approve Order"
@@ -19,6 +20,7 @@ object DemoAppDestinations {
         PAYPAL_STATIC_BUTTONS -> "PayPal Static Buttons"
         SELECT_TEST_CARD -> "Select a Test Card"
         PAYPAL_WEB_VAULT -> "PayPal Web Vault"
+        CHANGE_ENVIRONMENT -> "Change Environment"
         else -> "Demo"
     }
 }
