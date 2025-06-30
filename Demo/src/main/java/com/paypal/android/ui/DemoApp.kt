@@ -130,7 +130,9 @@ fun DemoApp() {
                     })
                 }
                 composable(DemoAppDestinations.CHANGE_ENVIRONMENT) {
-                    ChangeEnvironmentView()
+                    ChangeEnvironmentView(onEnvironmentSelected = {
+                        navController.popBackStack()
+                    })
                 }
             }
         }

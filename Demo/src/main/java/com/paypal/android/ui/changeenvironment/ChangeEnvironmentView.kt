@@ -12,23 +12,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.datastore.environmentSettingsDataStore
-import com.paypal.android.uishared.components.ActionButton
 import com.paypal.android.uishared.components.OptionList
 import com.paypal.android.utils.UIConstants
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 const val OPTION_NEW = "New"
 
 @ExperimentalFoundationApi
 @ExperimentalMaterial3Api
 @Composable
-fun ChangeEnvironmentView() {
+fun ChangeEnvironmentView(onEnvironmentSelected: () -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+
     val context = LocalContext.current
     val availableEnvironments by context.environmentSettingsDataStore.data.map { environmentSettings ->
         environmentSettings.environmentsList
@@ -61,7 +63,23 @@ fun ChangeEnvironmentView() {
         )
         val actionButtonText = if (selectedOption == OPTION_NEW) "Create New" else "Save Changes"
         Button(
-            onClick = {},
+            onClick = {
+                if (selectedOption == OPTION_NEW) {
+                    // TODO: launch new environment dialog
+                } else {
+                    coroutineScope.launch {
+                        context.environmentSettingsDataStore.updateData { environmentSettings ->
+                            val updatedEnvironmentIndex =
+                                environmentSettings.environmentsList.indexOfFirst { it.name == selectedOption }
+                            environmentSettings
+                                .toBuilder()
+                                .setActiveEnvironmentIndex(updatedEnvironmentIndex)
+                                .build()
+                        }
+                        onEnvironmentSelected()
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
         ) {
