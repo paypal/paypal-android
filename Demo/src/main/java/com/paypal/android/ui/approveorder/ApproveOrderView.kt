@@ -26,6 +26,7 @@ import com.paypal.android.datastore.EnvironmentSettings
 import com.paypal.android.datastore.environmentSettingsDataStore
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardResultView
+import com.paypal.android.uishared.components.ChangeEnvironmentButton
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
@@ -45,13 +46,9 @@ fun ApproveOrderView(
     onDisplayEnvironmentOptionsClick: () -> Unit = {},
     onUseTestCardClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
-
-    val context = LocalContext.current
-    val activeEnvironment by context.environmentSettingsDataStore.data.map { environmentSettings ->
-        environmentSettings.run { getEnvironments(activeEnvironmentIndex) }
-    }.collectAsStateWithLifecycle(null)
 
     LaunchedEffect(scrollState.maxValue) {
         // continuously scroll to bottom of the list when scroll bounds change
@@ -78,16 +75,7 @@ fun ApproveOrderView(
                 testTagsAsResourceId = true
             }
     ) {
-        Button(
-            onClick = onDisplayEnvironmentOptionsClick,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Column {
-                Text(text = "Environment")
-                Text(text = activeEnvironment?.name ?: "Loading")
-            }
-        }
+        ChangeEnvironmentButton(onClick = onDisplayEnvironmentOptionsClick)
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
             Step2_ApproveOrder(uiState, viewModel, onUseTestCardClick)
