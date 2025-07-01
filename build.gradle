@@ -28,6 +28,9 @@ version modules.sdkVersionName // we add it here so that nexus automatically cho
 
 nexusPublishing {
     repositories {
+        sonatype()
+    }
+    repositories {
         sonatype {
             // Ref: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuration
             nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
