@@ -23,7 +23,7 @@ import com.paypal.android.utils.UIConstants
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-const val OPTION_NEW = "New"
+const val OPTION_CREATE_NEW = "Create New"
 
 @ExperimentalFoundationApi
 @ExperimentalMaterial3Api
@@ -49,22 +49,22 @@ fun ChangeEnvironmentView(onEnvironmentSelected: () -> Unit) {
         }
     }
 
-    val staticOptions = listOf(OPTION_NEW)
+    val staticOptions = listOf(OPTION_CREATE_NEW)
     Column(
         verticalArrangement = UIConstants.spacingLarge,
         modifier = Modifier
             .padding(horizontal = UIConstants.paddingMedium)
     ) {
         OptionList(
-            title = "Select an environment",
+            title = "Environment Options",
             options = (availableEnvironments?.map { it.name } ?: emptyList()) + staticOptions,
             onSelectedOptionChange = { value -> selectedOption = value },
             selectedOption = selectedOption ?: ""
         )
-        val actionButtonText = if (selectedOption == OPTION_NEW) "Create New" else "Save Changes"
+        val actionButtonText = if (selectedOption == OPTION_CREATE_NEW) "Create New" else "Save Changes"
         Button(
             onClick = {
-                if (selectedOption == OPTION_NEW) {
+                if (selectedOption == OPTION_CREATE_NEW) {
                     // TODO: launch new environment dialog
                 } else {
                     coroutineScope.launch {
