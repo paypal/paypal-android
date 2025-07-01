@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
 import com.paypal.android.cardpayments.CardApproveOrderResult
 import com.paypal.android.cardpayments.CardAuthChallenge
@@ -25,8 +25,8 @@ import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
-import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,21 +35,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ApproveOrderViewModel @Inject constructor(
+    @ApplicationContext val applicationContext: Context,
     private val createOrderUseCase: CreateOrderUseCase,
-    private val getClientIdUseCase: GetClientIdUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
     companion object {
-        const val TAG = "CardFragment"
         const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
     }
 
+    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val payPalDataCollector = PayPalDataCollector(coreConfig)
+    private val cardClient = CardClient(applicationContext, coreConfig)
+
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
-
-    private var cardClient: CardClient? = null
-    private lateinit var payPalDataCollector: PayPalDataCollector
 
     private var authState: String? = null
 
@@ -74,38 +74,25 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    private suspend fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
+    private fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
-        when (val clientIdResult = getClientIdUseCase()) {
-            is SDKSampleServerResult.Failure -> {
-                approveOrderState = clientIdResult.mapToActionState()
-            }
-
-            is SDKSampleServerResult.Success -> {
-                val clientId = clientIdResult.value
-                val coreConfig = CoreConfig(clientId = clientId)
-                payPalDataCollector = PayPalDataCollector(coreConfig)
-
-                val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
-                cardClient = CardClient(activity, coreConfig)
-                cardClient?.approveOrder(cardRequest) { result ->
-                    when (result) {
-                        is CardApproveOrderResult.Success -> {
-                            val orderInfo = result.run {
-                                OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
-                            }
-                            approveOrderState = ActionState.Success(orderInfo)
-                        }
-
-                        is CardApproveOrderResult.AuthorizationRequired -> {
-                            presentAuthChallenge(activity, result.authChallenge)
-                        }
-
-                        is CardApproveOrderResult.Failure -> {
-                            approveOrderState = ActionState.Failure(result.error)
-                        }
+        val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
+        cardClient.approveOrder(cardRequest) { result ->
+            when (result) {
+                is CardApproveOrderResult.Success -> {
+                    val orderInfo = result.run {
+                        OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                     }
+                    approveOrderState = ActionState.Success(orderInfo)
+                }
+
+                is CardApproveOrderResult.AuthorizationRequired -> {
+                    presentAuthChallenge(activity, result.authChallenge)
+                }
+
+                is CardApproveOrderResult.Failure -> {
+                    approveOrderState = ActionState.Failure(result.error)
                 }
             }
         }
@@ -115,16 +102,12 @@ class ApproveOrderViewModel @Inject constructor(
         activity: ComponentActivity,
         authChallenge: CardAuthChallenge
     ) {
-        cardClient?.presentAuthChallenge(activity, authChallenge)?.let { presentAuthResult ->
-            when (presentAuthResult) {
-                is CardPresentAuthChallengeResult.Success -> {
-                    authState = presentAuthResult.authState
-                }
+        when (val presentAuthResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
+            is CardPresentAuthChallengeResult.Success ->
+                authState = presentAuthResult.authState
 
-                is CardPresentAuthChallengeResult.Failure -> {
-                    approveOrderState = ActionState.Failure(presentAuthResult.error)
-                }
-            }
+            is CardPresentAuthChallengeResult.Failure ->
+                approveOrderState = ActionState.Failure(presentAuthResult.error)
         }
     }
 
@@ -165,7 +148,7 @@ class ApproveOrderViewModel @Inject constructor(
     private val createdOrder: Order?
         get() = (createOrderState as? ActionState.Success)?.value
 
-    var approveOrderState
+    private var approveOrderState
         get() = _uiState.value.approveOrderState
         set(value) {
             _uiState.update { it.copy(approveOrderState = value) }
@@ -225,7 +208,7 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     private fun checkIfApproveOrderFinished(intent: Intent): CardFinishApproveOrderResult? =
-        authState?.let { cardClient?.finishApproveOrder(intent, it) }
+        authState?.let { cardClient.finishApproveOrder(intent, it) }
 
     fun completeAuthChallenge(intent: Intent) {
         checkIfApproveOrderFinished(intent)?.let { approveOrderResult ->

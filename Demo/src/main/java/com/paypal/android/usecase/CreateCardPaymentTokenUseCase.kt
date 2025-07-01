@@ -19,7 +19,7 @@ class CreateCardPaymentTokenUseCase @Inject constructor(
             // language=JSON
             val request = """
             {
-              "payment_source": {
+              "paymentSource": {
                 "token": {
                   "id": "${setupToken.id}",
                   "type": "SETUP_TOKEN"
