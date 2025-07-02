@@ -4,10 +4,10 @@ import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.TokenType
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.corepayments.model.TokenType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

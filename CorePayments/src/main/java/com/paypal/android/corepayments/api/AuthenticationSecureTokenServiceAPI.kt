@@ -9,6 +9,7 @@ import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.base64encoded
+import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.model.APIResult
 import org.json.JSONObject
 
@@ -21,8 +22,8 @@ class AuthenticationSecureTokenServiceAPI(
         val requestBody = "grant_type=client_credentials&response_type=token"
 
         val headers = mutableMapOf(
-            "Authorization" to "Basic ${"${coreConfig.clientId}:".base64encoded()}",
-            "Content-Type" to "application/x-www-form-urlencoded"
+            Headers.AUTHORIZATION to "Basic ${"${coreConfig.clientId}:".base64encoded()}",
+            Headers.CONTENT_TYPE to "application/x-www-form-urlencoded"
         )
 
         val apiRequest = APIRequest(
@@ -34,7 +35,7 @@ class AuthenticationSecureTokenServiceAPI(
 
         return runCatching {
             val httpResponse = restClient.send(apiRequest)
-            val correlationId = httpResponse.headers["paypal-debug-id"]
+            val correlationId = httpResponse.headers[Headers.PAYPAL_DEBUG_ID]
             if (httpResponse.isSuccessful && httpResponse.body != null) {
                 val jsonObject = JSONObject(httpResponse.body)
                 val token = jsonObject.optString("access_token")

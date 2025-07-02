@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments
+package com.paypal.android.corepayments.model
 
 enum class TokenType {
     ORDER_ID,

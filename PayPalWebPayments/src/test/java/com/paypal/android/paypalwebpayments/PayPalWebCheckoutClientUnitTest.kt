@@ -3,7 +3,6 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.TokenType
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
@@ -11,6 +10,7 @@ import com.paypal.android.corepayments.model.AppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.ExternalResponse
 import com.paypal.android.corepayments.model.PatchCcoResponse
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
+import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import io.mockk.coEvery
 import io.mockk.coVerify

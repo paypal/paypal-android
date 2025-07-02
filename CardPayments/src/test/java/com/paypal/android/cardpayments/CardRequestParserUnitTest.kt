@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKErrorCode
+import com.paypal.android.corepayments.common.Headers
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
@@ -19,7 +20,7 @@ class CardRequestParserUnitTest {
 
         private val correlationId = "correlation-id"
         private val headers: Map<String, String> = mapOf(
-            "Paypal-Debug-Id" to correlationId,
+            Headers.PAYPAL_DEBUG_ID to correlationId,
         )
 
         private lateinit var sut: CardResponseParser
@@ -96,7 +97,7 @@ class CardRequestParserUnitTest {
 
         private val correlationId = "correlation-id"
         private val headers: Map<String, String> = mapOf(
-            "Paypal-Debug-Id" to correlationId,
+            Headers.PAYPAL_DEBUG_ID to correlationId,
         )
 
         @Test

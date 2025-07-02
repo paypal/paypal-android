@@ -3,7 +3,7 @@ package com.paypal.android.corepayments.api
 import android.content.Context
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.TokenType
+import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
@@ -14,6 +14,7 @@ import com.paypal.android.corepayments.model.ExternalResponse
 import com.paypal.android.corepayments.model.PatchCcoResponse
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
+import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.model.Variables
 import org.json.JSONObject
 
@@ -52,7 +53,7 @@ class PatchCCOWithAppSwitchEligibility(
 
             when (val result = graphQLClient.send(
                 graphQLRequestBody = graphQLRequest,
-                headers = mapOf("Authorization" to "Bearer $token")
+                headers = mapOf(Headers.AUTHORIZATION to "Bearer $token")
             )) {
                 is GraphQLResult.Success -> {
                     result.data?.let { data ->

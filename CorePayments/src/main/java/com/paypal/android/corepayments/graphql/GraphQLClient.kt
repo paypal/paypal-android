@@ -6,6 +6,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
+import com.paypal.android.corepayments.common.Headers
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -19,11 +20,6 @@ class GraphQLClient internal constructor(
     coreConfig: CoreConfig,
     private val http: Http = Http(),
 ) {
-
-    companion object {
-        const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
-    }
-
     constructor(coreConfig: CoreConfig) : this(coreConfig, Http())
 
     private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
@@ -47,7 +43,7 @@ class GraphQLClient internal constructor(
         headers?.forEach { (key, value) -> httpRequestHeaders.put(key, value) }
 
         val httpResponse = http.send(httpRequest)
-        val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]
+        val correlationId: String? = httpResponse.headers[Headers.PAYPAL_DEBUG_ID]
         val status = httpResponse.status
         return if (status == HttpURLConnection.HTTP_OK) {
             if (httpResponse.body.isNullOrBlank()) {
