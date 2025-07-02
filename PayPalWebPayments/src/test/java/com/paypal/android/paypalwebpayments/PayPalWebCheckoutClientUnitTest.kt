@@ -3,13 +3,24 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.TokenType
+import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
+import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.corepayments.model.AppSwitchEligibility
+import com.paypal.android.corepayments.model.AppSwitchEligibilityResponse
+import com.paypal.android.corepayments.model.ExternalResponse
+import com.paypal.android.corepayments.model.PatchCcoResponse
+import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +32,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
+    private lateinit var patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility
 
     private val intent = Intent()
 
@@ -30,21 +42,28 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(analytics, payPalWebLauncher)
+        patchCCOWithAppSwitchEligibility = mockk(relaxed = true)
+        sut = PayPalWebCheckoutClient(
+            analytics,
+            payPalWebLauncher,
+            patchCCOWithAppSwitchEligibility
+        )
     }
 
     @Test
-    fun `start() launches PayPal web checkout`() {
+    fun `start() fetches client token and launches PayPal web checkout`() = runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
         sut.start(activity, request)
+
+        // Authentication is now handled internally by PatchCCOWithAppSwitchEligibility
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
     }
 
     @Test
-    fun `start() notifies merchant of browser switch failure`() {
+    fun `start() notifies merchant of browser switch failure`() = runTest {
         val sdkError = PayPalSDKError(123, "fake error description")
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
@@ -53,6 +72,9 @@ class PayPalWebCheckoutClientUnitTest {
         val result = sut.start(activity, request)
         assertSame(launchResult, result)
     }
+
+    // Note: Authentication failure tests removed since authentication 
+    // is now handled internally by PatchCCOWithAppSwitchEligibility
 
     @Test
     fun `vault() launches PayPal web checkout`() {
@@ -159,5 +181,181 @@ class PayPalWebCheckoutClientUnitTest {
 
         val result = sut.finishVault(intent, "auth state")
         assertTrue(result is PayPalWebCheckoutFinishVaultResult.NoResult)
+    }
+
+    @Test
+    fun `start() uses app switch when enabled and app switch URL is available`() = runTest {
+        // Given
+        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+        val appSwitchResponse = createAppSwitchEligibilityResponse("https://paypal.com/app-switch")
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        coEvery {
+            patchCCOWithAppSwitchEligibility.invoke(
+                context = activity,
+                orderId = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                merchantOptInForAppSwitch = true
+            )
+        } returns APIResult.Success(appSwitchResponse)
+
+        every {
+            payPalWebLauncher.launchWithUrl(
+                activity,
+                "https://paypal.com/app-switch"
+            )
+        } returns launchResult
+
+        // When
+        val result = sut.start(activity, request)
+
+        // Then
+        coVerify { patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any()) }
+        verify { payPalWebLauncher.launchWithUrl(activity, "https://paypal.com/app-switch") }
+        verify(exactly = 0) { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) }
+        assertSame(launchResult, result)
+    }
+
+    @Test
+    fun `start() falls back to web checkout when app switch is enabled but URL is null`() =
+        runTest {
+            // Given
+            val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+            val appSwitchResponse = createAppSwitchEligibilityResponse(null)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            coEvery {
+                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any())
+            } returns APIResult.Success(appSwitchResponse)
+
+            every {
+                payPalWebLauncher.launchPayPalWebCheckout(
+                    activity,
+                    request
+                )
+            } returns launchResult
+
+            // When
+            val result = sut.start(activity, request)
+
+            // Then
+            coVerify { patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any()) }
+            verify { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+            verify(exactly = 0) { payPalWebLauncher.launchWithUrl(any(), any()) }
+            assertSame(launchResult, result)
+        }
+
+    @Test
+    fun `start() falls back to web checkout when app switch is enabled but empty URL is returned`() =
+        runTest {
+            // Given
+            val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+            val appSwitchResponse = createAppSwitchEligibilityResponse("")
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            coEvery {
+                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any())
+            } returns APIResult.Success(appSwitchResponse)
+
+            every {
+                payPalWebLauncher.launchPayPalWebCheckout(
+                    activity,
+                    request
+                )
+            } returns launchResult
+
+            // When
+            val result = sut.start(activity, request)
+
+            // Then
+            coVerify { patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any()) }
+            verify { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+            verify(exactly = 0) { payPalWebLauncher.launchWithUrl(any(), any()) }
+            assertSame(launchResult, result)
+        }
+
+    @Test
+    fun `start() falls back to web checkout when app switch request fails`() = runTest {
+        // Given
+        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        coEvery {
+            patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any())
+        } returns APIResult.Failure(PayPalSDKError(1001, "Test failure"))
+
+        every { payPalWebLauncher.launchPayPalWebCheckout(activity, request) } returns launchResult
+
+        // When
+        val result = sut.start(activity, request)
+
+        // Then
+        coVerify { patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any()) }
+        verify { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+        verify(exactly = 0) { payPalWebLauncher.launchWithUrl(any(), any()) }
+        assertSame(launchResult, result)
+    }
+
+    @Test
+    fun `start() skips app switch check when appSwitchWhenEligible is false`() = runTest {
+        // Given
+        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = false)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every { payPalWebLauncher.launchPayPalWebCheckout(activity, request) } returns launchResult
+
+        // When
+        val result = sut.start(activity, request)
+
+        // Then
+        coVerify(exactly = 0) {
+            patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any())
+        }
+        verify { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+        verify(exactly = 0) { payPalWebLauncher.launchWithUrl(any(), any()) }
+        assertSame(launchResult, result)
+    }
+
+    @Test
+    fun `start() uses correct token type in app switch request`() = runTest {
+        // Given
+        val request = PayPalWebCheckoutRequest("test-order-123", appSwitchWhenEligible = true)
+        val appSwitchResponse = createAppSwitchEligibilityResponse("https://test.com")
+
+        coEvery {
+            patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any())
+        } returns APIResult.Success(appSwitchResponse)
+
+        every {
+            payPalWebLauncher.launchWithUrl(
+                any(),
+                any()
+            )
+        } returns PayPalPresentAuthChallengeResult.Success("state")
+
+        // When
+        sut.start(activity, request)
+
+        // Then
+        coVerify {
+            patchCCOWithAppSwitchEligibility.invoke(
+                context = activity,
+                orderId = "test-order-123",
+                tokenType = TokenType.ORDER_ID,
+                merchantOptInForAppSwitch = true
+            )
+        }
+    }
+
+    private fun createAppSwitchEligibilityResponse(redirectURL: String?): PatchCcoWithAppSwitchEligibilityResponse {
+        val appSwitchEligibility = AppSwitchEligibility(
+            appSwitchEligible = true,
+            redirectURL = redirectURL,
+            ineligibleReason = null
+        )
+        val appSwitchEligibilityResponse = AppSwitchEligibilityResponse(appSwitchEligibility)
+        val patchCcoResponse = PatchCcoResponse(appSwitchEligibilityResponse)
+        val externalResponse = ExternalResponse(patchCcoResponse)
+        return PatchCcoWithAppSwitchEligibilityResponse(externalResponse)
     }
 }

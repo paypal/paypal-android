@@ -36,10 +36,15 @@ class GraphQLClient internal constructor(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(graphQLRequestBody: JSONObject, queryName: String? = null): GraphQLResult {
+    suspend fun send(
+        graphQLRequestBody: JSONObject,
+        queryName: String? = null,
+        headers: Map<String, String>? = null
+    ): GraphQLResult {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
         val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
+        headers?.forEach { (key, value) -> httpRequestHeaders.put(key, value) }
 
         val httpResponse = http.send(httpRequest)
         val correlationId: String? = httpResponse.headers[PAYPAL_DEBUG_ID]

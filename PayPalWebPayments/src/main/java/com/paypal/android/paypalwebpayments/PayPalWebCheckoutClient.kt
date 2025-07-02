@@ -4,10 +4,19 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.RestClient
+import com.paypal.android.corepayments.TokenType
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.api.AuthenticationSecureTokenServiceAPI
+import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
+import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -17,7 +26,9 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
-    private val payPalWebLauncher: PayPalWebLauncher
+    private val payPalWebLauncher: PayPalWebLauncher,
+    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     // for analytics tracking
@@ -34,6 +45,10 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
+        PatchCCOWithAppSwitchEligibility(
+            configuration,
+            AuthenticationSecureTokenServiceAPI(configuration, RestClient(configuration))
+        )
     )
 
     /**
@@ -41,14 +56,37 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(
+    suspend fun start(
         activity: ComponentActivity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+        val result = if (request.appSwitchWhenEligible) {
+            // Check app switch eligibility (token fetching handled internally)
+            val patchCcoResult = patchCCOWithAppSwitchEligibility(
+                context = activity,
+                orderId = request.orderId,
+                tokenType = TokenType.ORDER_ID,
+                merchantOptInForAppSwitch = request.appSwitchWhenEligible
+            )
+            // Get RedirectUrl
+            val launchUrl = when (patchCcoResult) {
+                is APIResult.Success -> patchCcoResult.data.launchUrl
+                is APIResult.Failure -> null
+            }
+            // if RedirectUrl not available fallback to webcheckout
+            if (!launchUrl.isNullOrEmpty()) {
+                payPalWebLauncher.launchWithUrl(activity, launchUrl)
+            } else {
+                payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+            }
+        } else {
+            // Normal web checkout flow
+            payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+        }
+
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
                 CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
@@ -56,9 +94,32 @@ class PayPalWebCheckoutClient internal constructor(
             )
 
             is PayPalPresentAuthChallengeResult.Failure ->
-                analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    checkoutOrderId
+                )
         }
         return result
+    }
+
+    /**
+     * Confirm PayPal payment source for an order with callback.
+     * Network operations are handled automatically by the Http layer.
+     *
+     * @param activity the ComponentActivity to launch the auth challenge from
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param callback callback to receive the result
+     */
+    fun start(
+        activity: ComponentActivity,
+        request: PayPalWebCheckoutRequest,
+        callback: PayPalWebCheckoutCallback
+    ) {
+        CoroutineScope(mainDispatcher).launch {
+            callback.onPayPalWebCheckoutResult(
+                start(activity, request)
+            )
+        }
     }
 
     /**

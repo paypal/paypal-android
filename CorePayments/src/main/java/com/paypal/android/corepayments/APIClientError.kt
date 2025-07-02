@@ -9,9 +9,10 @@ import androidx.annotation.RestrictTo
 object APIClientError {
 
     // 0. An unknown error occurred.
-    fun unknownError(correlationId: String?) = PayPalSDKError(
+    fun unknownError(correlationId: String? = null, throwable: Throwable? = null) = PayPalSDKError(
         code = PayPalSDKErrorCode.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support.",
+        reason = throwable,
         correlationId = correlationId
     )
 
@@ -91,4 +92,16 @@ object APIClientError {
         )
         return error
     }
+
+    fun payPalSDKError(
+        code: Int,
+        errorDescription: String?,
+        correlationId: String? = null,
+        reason: Throwable? = null
+    ): PayPalSDKError = PayPalSDKError(
+        code = code,
+        errorDescription = errorDescription.orEmpty(),
+        correlationId = correlationId,
+        reason = reason
+    )
 }
