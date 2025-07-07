@@ -3,13 +3,18 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.api.AuthenticationSecureTokenServiceAPI
+import com.paypal.android.corepayments.api.CreateLowScopedAccessTokenResult
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +26,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
+    private lateinit var authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI
 
     private val intent = Intent()
 
@@ -30,21 +36,32 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-        sut = PayPalWebCheckoutClient(analytics, payPalWebLauncher)
+        authenticationSecureTokenServiceAPI = mockk(relaxed = true)
+        sut = PayPalWebCheckoutClient(
+            analytics,
+            payPalWebLauncher,
+            authenticationSecureTokenServiceAPI
+        )
+
+        // Mock successful token fetch by default
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns
+                CreateLowScopedAccessTokenResult.Success("fake-access-token")
     }
 
     @Test
-    fun `start() launches PayPal web checkout`() {
+    fun `start() fetches client token and launches PayPal web checkout`() = runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
         sut.start(activity, request)
+
+        coVerify(exactly = 1) { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() }
         verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
     }
 
     @Test
-    fun `start() notifies merchant of browser switch failure`() {
+    fun `start() notifies merchant of browser switch failure`() = runTest {
         val sdkError = PayPalSDKError(123, "fake error description")
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
@@ -52,6 +69,33 @@ class PayPalWebCheckoutClientUnitTest {
         val request = PayPalWebCheckoutRequest("fake-order-id")
         val result = sut.start(activity, request)
         assertSame(launchResult, result)
+    }
+
+    @Test
+    fun `start() returns failure when FetchClientToken fails`() = runTest {
+        val tokenError = PayPalSDKError(401, "Token fetch failed")
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns
+                CreateLowScopedAccessTokenResult.Failure(tokenError)
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+
+        val result = sut.start(activity, request)
+        assertTrue(result is PayPalPresentAuthChallengeResult.Failure)
+        assertSame(tokenError, (result as PayPalPresentAuthChallengeResult.Failure).error)
+    }
+
+    @Test
+    fun `start() does not call launcher when token fetch fails`() = runTest {
+        val tokenError = PayPalSDKError(401, "Token fetch failed")
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns
+                CreateLowScopedAccessTokenResult.Failure(tokenError)
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+
+        val result = sut.start(activity, request)
+        assertTrue(result is PayPalPresentAuthChallengeResult.Failure)
+
+        verify(exactly = 0) { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) }
     }
 
     @Test

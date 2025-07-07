@@ -9,9 +9,10 @@ import androidx.annotation.RestrictTo
 object APIClientError {
 
     // 0. An unknown error occurred.
-    fun unknownError(correlationId: String?) = PayPalSDKError(
+    fun unknownError(correlationId: String? = null, throwable: Throwable? = null) = PayPalSDKError(
         code = PayPalSDKErrorCode.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support.",
+        reason = throwable,
         correlationId = correlationId
     )
 
@@ -37,12 +38,6 @@ object APIClientError {
         correlationId = correlationId
     )
 
-    // 4. There was an error constructing the URLRequest.
-    val invalidUrlRequest = PayPalSDKError(
-        code = PayPalSDKErrorCode.INVALID_URL_REQUEST.ordinal,
-        errorDescription = "An error occurred constructing an HTTP request. Contact developer.paypal.com/support."
-    )
-
     // 5. The server's response body returned an error message.
     fun serverResponseError(correlationId: String?) = PayPalSDKError(
         code = PayPalSDKErrorCode.SERVER_RESPONSE_ERROR.ordinal,
@@ -57,28 +52,6 @@ object APIClientError {
             errorDescription = description,
             correlationId = correlationId
         )
-
-    val payPalCheckoutError: (description: String) -> PayPalSDKError = { description ->
-        PayPalSDKError(
-            code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
-            errorDescription = description
-        )
-    }
-
-    val payPalNativeCheckoutError: (description: String, reason: Exception) -> PayPalSDKError =
-        { description, reason ->
-            PayPalSDKError(
-                code = PayPalSDKErrorCode.NATIVE_CHECKOUT_ERROR.ordinal,
-                errorDescription = description,
-                reason = reason
-            )
-        }
-
-    fun clientIDNotFoundError(code: Int, correlationId: String?) = PayPalSDKError(
-        code = code,
-        errorDescription = "Error fetching clientId. Contact developer.paypal.com/support.",
-        correlationId = correlationId
-    )
 
     fun graphQLJSONParseError(correlationId: String?, reason: Exception): PayPalSDKError {
         val message =
