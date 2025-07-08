@@ -45,6 +45,7 @@
         <item>PAYPAL_CREDIT</item>
         <item>PAY_LATER</item>
         <item>PAYPAL</item>
+        <item>CARD</item>
     </string-array>
 
 </resources>
