@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.UpdateClientConfigParams
-import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
