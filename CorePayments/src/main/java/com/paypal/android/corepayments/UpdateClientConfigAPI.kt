@@ -19,6 +19,12 @@ class UpdateClientConfigAPI(
     private val resourceLoader: ResourceLoader
 ) {
 
+    private object Defaults {
+        const val INTEGRATION_ARTIFACT = "MOBILE_SDK"
+        const val USER_EXPERIENCE_FLOW = "INCONTEXT"
+        const val PRODUCT_FLOW = "MOBILE_SDK"
+    }
+
     constructor(context: Context, coreConfig: CoreConfig) : this(
         coreConfig,
         context.applicationContext,
@@ -45,9 +51,9 @@ class UpdateClientConfigAPI(
         val variables = JSONObject()
             .put("orderID", params.orderId)
             .put("fundingSource", params.fundingSource)
-            .put("integrationArtifact", "PAYPAL_JS_SDK")
-            .put("userExperienceFlow", "INCONTEXT")
-            .put("productFlow", "SMART_PAYMENT_BUTTONS")
+            .put("integrationArtifact", Defaults.INTEGRATION_ARTIFACT)
+            .put("userExperienceFlow", Defaults.USER_EXPERIENCE_FLOW)
+            .put("productFlow", Defaults.PRODUCT_FLOW)
             .put("buttonSessionId", JSONObject.NULL)
 
         val graphQLRequest = JSONObject()
