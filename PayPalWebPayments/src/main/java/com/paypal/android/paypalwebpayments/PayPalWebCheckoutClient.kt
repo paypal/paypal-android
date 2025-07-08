@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.UpdateClientConfigAPI
+import com.paypal.android.corepayments.UpdateClientConfigParams
+import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
@@ -89,10 +92,11 @@ class PayPalWebCheckoutClient internal constructor(
 
             if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
                 val updateConfigResult = request.run {
-                    updateClientConfigAPI.updateClientConfig(
+                    val params = UpdateClientConfigParams(
                         orderId = orderId,
-                        fundingSource = fundingSource
+                        fundingSource = fundingSource.value
                     )
+                    updateClientConfigAPI.updateClientConfig(params = params)
                 }
                 if (updateConfigResult is UpdateClientConfigResult.Failure) {
                     // notify failure

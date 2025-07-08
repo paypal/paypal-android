@@ -1,7 +1,11 @@
-package com.paypal.android.paypalwebpayments
+package com.paypal.android.corepayments
 
-import com.paypal.android.corepayments.PayPalSDKError
+import androidx.annotation.RestrictTo
 
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class UpdateClientConfigResult {
 
     data class Success(val clientConfig: String) : UpdateClientConfigResult()

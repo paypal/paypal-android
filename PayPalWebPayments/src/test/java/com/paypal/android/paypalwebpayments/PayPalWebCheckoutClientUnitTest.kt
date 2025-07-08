@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import io.mockk.every
 import io.mockk.mockk

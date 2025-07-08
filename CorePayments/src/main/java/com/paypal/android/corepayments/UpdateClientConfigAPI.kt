@@ -1,17 +1,18 @@
-package com.paypal.android.paypalwebpayments
+package com.paypal.android.corepayments
 
 import android.content.Context
 import androidx.annotation.RawRes
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.LoadRawResourceResult
-import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.ResourceLoader
+import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import org.json.JSONException
 import org.json.JSONObject
 
-internal class UpdateClientConfigAPI(
+/**
+ * @suppress
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class UpdateClientConfigAPI(
     private val coreConfig: CoreConfig,
     private val applicationContext: Context,
     private val graphQLClient: GraphQLClient,
@@ -25,18 +26,11 @@ internal class UpdateClientConfigAPI(
         ResourceLoader()
     )
 
-    suspend fun updateClientConfig(
-        orderId: String,
-        fundingSource: PayPalWebCheckoutFundingSource
-    ): UpdateClientConfigResult {
+    suspend fun updateClientConfig(params: UpdateClientConfigParams): UpdateClientConfigResult {
         @RawRes val resId = R.raw.graphql_query_update_client_config
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success ->
-                sendUpdateClientConfigGraphQLRequest(
-                    query = result.value,
-                    orderId = orderId,
-                    fundingSource = fundingSource
-                )
+                sendUpdateClientConfigGraphQLRequest(query = result.value, params = params)
 
             is LoadRawResourceResult.Failure -> UpdateClientConfigResult.Failure(
                 PayPalSDKError(0, "TODO: implement")
@@ -46,12 +40,11 @@ internal class UpdateClientConfigAPI(
 
     private suspend fun sendUpdateClientConfigGraphQLRequest(
         query: String,
-        orderId: String,
-        fundingSource: PayPalWebCheckoutFundingSource
+        params: UpdateClientConfigParams
     ): UpdateClientConfigResult {
         val variables = JSONObject()
-            .put("orderID", orderId)
-            .put("fundingSource", fundingSource.value)
+            .put("orderID", params.orderId)
+            .put("fundingSource", params.fundingSource)
             .put("integrationArtifact", "PAYPAL_JS_SDK")
             .put("userExperienceFlow", "INCONTEXT")
             .put("productFlow", "SMART_PAYMENT_BUTTONS")
