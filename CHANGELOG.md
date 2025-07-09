@@ -2,13 +2,13 @@
 
 ## unreleased
 
-* PayPalButtons
+* PaymentButtons
   * Add `PayPalCreditButtonColor.BLUE` enum case
   * Add `PaymentButtonEdges` sealed class
   * Add `PaymentButton.edges` property
   * Add `PaymentButton:payment_button_edges` xml attribute.
 * Breaking Changes
-  * PayPalButtons
+  * PaymentButtons
     * Remove `PaymentButtonSize` enum
     * Remove `size` property from `PaymentButton` base class
     * Remove `PaymentButtonColor.GOLD` enum case
