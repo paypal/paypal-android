@@ -22,7 +22,7 @@ class UpdateClientConfigAPI(
     private object Defaults {
         const val INTEGRATION_ARTIFACT = "MOBILE_SDK"
         const val USER_EXPERIENCE_FLOW = "INCONTEXT"
-        const val PRODUCT_FLOW = "MOBILE_SDK"
+        const val PRODUCT_FLOW = "HERMES"
     }
 
     constructor(context: Context, coreConfig: CoreConfig) : this(
