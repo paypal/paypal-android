@@ -8,7 +8,6 @@ import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_ARTIFACT
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_CHANNEL
 
-
 data class PatchCcoWithAppSwitchEligibilityRequest(
     val query: String = "",
     val variables: Variables

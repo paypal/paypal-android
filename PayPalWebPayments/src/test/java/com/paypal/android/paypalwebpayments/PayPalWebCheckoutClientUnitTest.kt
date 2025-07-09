@@ -73,7 +73,7 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(launchResult, result)
     }
 
-    // Note: Authentication failure tests removed since authentication 
+    // Note: Authentication failure tests removed since authentication
     // is now handled internally by PatchCCOWithAppSwitchEligibility
 
     @Test

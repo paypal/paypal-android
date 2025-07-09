@@ -38,12 +38,6 @@ object APIClientError {
         correlationId = correlationId
     )
 
-    // 4. There was an error constructing the URLRequest.
-    val invalidUrlRequest = PayPalSDKError(
-        code = PayPalSDKErrorCode.INVALID_URL_REQUEST.ordinal,
-        errorDescription = "An error occurred constructing an HTTP request. Contact developer.paypal.com/support."
-    )
-
     // 5. The server's response body returned an error message.
     fun serverResponseError(correlationId: String?) = PayPalSDKError(
         code = PayPalSDKErrorCode.SERVER_RESPONSE_ERROR.ordinal,
@@ -59,28 +53,6 @@ object APIClientError {
             correlationId = correlationId
         )
 
-    val payPalCheckoutError: (description: String) -> PayPalSDKError = { description ->
-        PayPalSDKError(
-            code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
-            errorDescription = description
-        )
-    }
-
-    val payPalNativeCheckoutError: (description: String, reason: Exception) -> PayPalSDKError =
-        { description, reason ->
-            PayPalSDKError(
-                code = PayPalSDKErrorCode.NATIVE_CHECKOUT_ERROR.ordinal,
-                errorDescription = description,
-                reason = reason
-            )
-        }
-
-    fun clientIDNotFoundError(code: Int, correlationId: String?) = PayPalSDKError(
-        code = code,
-        errorDescription = "Error fetching clientId. Contact developer.paypal.com/support.",
-        correlationId = correlationId
-    )
-
     fun graphQLJSONParseError(correlationId: String?, reason: Exception): PayPalSDKError {
         val message =
             "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support."
@@ -92,16 +64,4 @@ object APIClientError {
         )
         return error
     }
-
-    fun payPalSDKError(
-        code: Int,
-        errorDescription: String?,
-        correlationId: String? = null,
-        reason: Throwable? = null
-    ): PayPalSDKError = PayPalSDKError(
-        code = code,
-        errorDescription = errorDescription.orEmpty(),
-        correlationId = correlationId,
-        reason = reason
-    )
 }

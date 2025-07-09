@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import com.paypal.android.corepayments.api.AuthenticationSecureTokenServiceAPI
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
@@ -45,10 +43,7 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
-        PatchCCOWithAppSwitchEligibility(
-            configuration,
-            AuthenticationSecureTokenServiceAPI(configuration, RestClient(configuration))
-        )
+        PatchCCOWithAppSwitchEligibility(configuration)
     )
 
     /**

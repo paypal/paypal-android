@@ -42,7 +42,6 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         graphQLClient = mockk(relaxed = true)
         authenticationSecureTokenServiceAPI = mockk(relaxed = true)
         sut = PatchCCOWithAppSwitchEligibility(
-            coreConfig,
             authenticationSecureTokenServiceAPI,
             graphQLClient
         )
@@ -52,7 +51,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     fun `invoke sends GraphQL request with correct authorization header`() = runTest {
         // Given
         val successResponse = createSuccessfulGraphQLResult()
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
@@ -77,7 +76,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     fun `invoke sends GraphQL request with correct variables`() = runTest {
         // Given
         val successResponse = createSuccessfulGraphQLResult()
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
@@ -109,7 +108,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     fun `invoke returns parsed response when GraphQL request succeeds`() = runTest {
         // Given
         val successResponse = createSuccessfulGraphQLResult()
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
@@ -132,7 +131,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         // Given
         val sdkError = PayPalSDKError(1001, "Test error")
         val failureResponse = GraphQLResult.Failure(sdkError)
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns failureResponse
@@ -157,7 +156,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             data = null,
             correlationId = "correlation-123"
         )
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponseWithNullData
@@ -182,7 +181,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             data = malformedData,
             correlationId = "correlation-123"
         )
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
@@ -203,7 +202,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     fun `invoke works with different token types`() = runTest {
         // Given
         val successResponse = createSuccessfulGraphQLResult()
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
@@ -229,7 +228,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     fun `invoke sets experimentation context correctly`() = runTest {
         // Given
         val successResponse = createSuccessfulGraphQLResult()
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Success(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
             testToken
         )
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
@@ -255,7 +254,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     fun `invoke returns failure when authentication fails`() = runTest {
         // Given
         val sdkError = PayPalSDKError(1001, "Authentication failed")
-        coEvery { authenticationSecureTokenServiceAPI.getClientToken() } returns APIResult.Failure(
+        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Failure(
             sdkError
         )
 

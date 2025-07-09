@@ -2,10 +2,10 @@ package com.paypal.android.corepayments.api
 
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
-import com.paypal.android.corepayments.APIClientError.payPalSDKError
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.HttpMethod
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.base64encoded
@@ -18,7 +18,7 @@ class AuthenticationSecureTokenServiceAPI(
     private val coreConfig: CoreConfig,
     private val restClient: RestClient = RestClient(configuration = coreConfig),
 ) {
-    suspend fun getClientToken(): APIResult<String> {
+    suspend fun createLowScopedAccessToken(): APIResult<String> {
         val requestBody = "grant_type=client_credentials&response_type=token"
 
         val headers = mutableMapOf(
@@ -42,7 +42,7 @@ class AuthenticationSecureTokenServiceAPI(
                 if (token.isNotEmpty()) {
                     APIResult.Success(token)
                 } else {
-                    val error = payPalSDKError(
+                    val error = PayPalSDKError(
                         code = PayPalSDKErrorCode.NO_ACCESS_TOKEN_ERROR.ordinal,
                         errorDescription = "Missing access_token in response",
                         correlationId = correlationId
@@ -51,9 +51,9 @@ class AuthenticationSecureTokenServiceAPI(
                 }
             } else {
                 val error = httpResponse.run {
-                    payPalSDKError(
+                    PayPalSDKError(
                         code = status,
-                        errorDescription = body,
+                        errorDescription = body ?: "Unexpected error",
                         correlationId = correlationId
                     )
                 }

@@ -22,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class FetchClientTokenUnitTest {
+class AuthenticationSecureTokenServiceAPIUnitTest {
 
     private lateinit var restClient: RestClient
     private lateinit var coreConfig: CoreConfig
@@ -36,7 +36,8 @@ class FetchClientTokenUnitTest {
     }
 
     @Test
-    fun `getClientToken() makes correct API request with proper headers and body`() = runTest {
+    fun `createLowScopedAccessToken() makes correct API request with proper headers and body`() =
+        runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -47,7 +48,7 @@ class FetchClientTokenUnitTest {
         val requestSlot = slot<APIRequest>()
 
         // When
-        val result = sut.getClientToken()
+            val result = sut.createLowScopedAccessToken()
 
         // Then
         coVerify { restClient.send(capture(requestSlot)) }
@@ -62,12 +63,12 @@ class FetchClientTokenUnitTest {
         assertEquals("application/x-www-form-urlencoded", headers["Content-Type"])
         assert(headers["Authorization"]!!.startsWith("Basic "))
 
-        assertTrue(result is APIResult.Success)
-        assertEquals("test-token", (result as APIResult.Success).data)
+            assertTrue(result is APIResult.Success)
+            assertEquals("test-token", (result as APIResult.Success).data)
     }
 
     @Test
-    fun `getClientToken() returns access token from successful response`() = runTest {
+    fun `createLowScopedAccessToken() returns access token from successful response`() = runTest {
         // Given
         val expectedToken = "test-access-token-12345"
         val successResponse = HttpResponse(
@@ -77,7 +78,7 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns successResponse
 
         // When
-        val result = sut.getClientToken()
+        val result = sut.createLowScopedAccessToken()
 
         // Then
         assertTrue(result is APIResult.Success)
@@ -85,7 +86,7 @@ class FetchClientTokenUnitTest {
     }
 
     @Test
-    fun `getClientToken() returns failure when response is not successful`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when response is not successful`() = runTest {
         // Given
         val errorResponse = HttpResponse(
             status = 401,
@@ -94,14 +95,14 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns errorResponse
 
         // When
-        val result = sut.getClientToken()
+        val result = sut.createLowScopedAccessToken()
 
         // Then
         assertTrue(result is APIResult.Failure)
     }
 
     @Test
-    fun `getClientToken() returns failure when response body is null`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when response body is null`() = runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -110,14 +111,14 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns successResponse
 
         // When
-        val result = sut.getClientToken()
+        val result = sut.createLowScopedAccessToken()
 
         // Then
         assertTrue(result is APIResult.Failure)
     }
 
     @Test
-    fun `getClientToken() returns failure when response is not valid JSON`() = runTest {
+    fun `createLowScopedAccessToken() returns failure when response is not valid JSON`() = runTest {
         // Given
         val successResponse = HttpResponse(
             status = 200,
@@ -126,7 +127,7 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns successResponse
 
         // When
-        val result = sut.getClientToken()
+        val result = sut.createLowScopedAccessToken()
 
         // Then
         assertTrue(result is APIResult.Failure)
@@ -134,7 +135,7 @@ class FetchClientTokenUnitTest {
     }
 
     @Test
-    fun `getClientToken() returns failure when access_token field is missing from successful response`() =
+    fun `createLowScopedAccessToken() returns failure when access_token field is missing from successful response`() =
         runTest {
         // Given
         val successResponse = HttpResponse(
@@ -144,7 +145,7 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns successResponse
 
             // When
-            val result = sut.getClientToken()
+            val result = sut.createLowScopedAccessToken()
 
             // Then
             assertTrue(result is APIResult.Failure)
@@ -153,7 +154,8 @@ class FetchClientTokenUnitTest {
     }
 
     @Test
-    fun `getClientToken() handles empty response body with proper error message`() = runTest {
+    fun `createLowScopedAccessToken() handles empty response body with proper error message`() =
+        runTest {
         // Given
         val errorResponse = HttpResponse(
             status = 500,
@@ -162,17 +164,19 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns errorResponse
 
         // When
-        val result = sut.getClientToken()
+            val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertTrue(result is APIResult.Failure)
-        val errorMessage = (result as APIResult.Failure).error.errorDescription
+            assertTrue(result is APIResult.Failure)
+            val errorMessage =
+                (result as APIResult.Failure).error.errorDescription
         // The error description will be the empty body from the HTTP response
         assertEquals("", errorMessage)
     }
 
     @Test
-    fun `getToken() includes error message in exception when available`() = runTest {
+    fun `createLowScopedAccessToken() includes error message in exception when available`() =
+        runTest {
         // Given
         val errorMessage = "Server temporarily unavailable"
         val errorResponse = HttpResponse(
@@ -182,17 +186,18 @@ class FetchClientTokenUnitTest {
         coEvery { restClient.send(any()) } returns errorResponse
 
         // When
-        val result = sut.getClientToken()
+            val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertTrue(result is APIResult.Failure)
-        val description = (result as APIResult.Failure).error.errorDescription
+            assertTrue(result is APIResult.Failure)
+            val description =
+                (result as APIResult.Failure).error.errorDescription
         // The error description will be the error message from the HTTP response body
         assertEquals(errorMessage, description)
     }
 
     @Test
-    fun `getClientToken() creates proper Basic Auth header from client ID`() = runTest {
+    fun `createLowScopedAccessToken() creates proper Basic Auth header from client ID`() = runTest {
         // Given
         val clientId = "test-client-123"
         val configWithCustomClientId = CoreConfig(clientId, Environment.LIVE)
@@ -208,7 +213,7 @@ class FetchClientTokenUnitTest {
         val requestSlot = slot<APIRequest>()
 
         // When
-        sutWithCustomConfig.getClientToken()
+        sutWithCustomConfig.createLowScopedAccessToken()
 
         // Then
         coVerify { restClient.send(capture(requestSlot)) }
@@ -216,10 +221,11 @@ class FetchClientTokenUnitTest {
         val authHeader = requestSlot.captured.headers!!["Authorization"]!!
         assert(authHeader.startsWith("Basic "))
 
-        // Decode and verify the Basic auth contains the client ID
+        // Decode and verify the Basic auth contains the client ID with colon
         val encodedCredentials = authHeader.substring("Basic ".length)
         val decodedCredentials =
-            String(android.util.Base64.decode(encodedCredentials, android.util.Base64.DEFAULT))
+            android.util.Base64.decode(encodedCredentials, android.util.Base64.DEFAULT)
+                .decodeToString()
         assertEquals("$clientId:", decodedCredentials)
     }
 }

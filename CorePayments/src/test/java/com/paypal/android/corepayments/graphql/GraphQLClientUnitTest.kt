@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKErrorCode
+import com.paypal.android.corepayments.common.Headers
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -122,7 +123,7 @@ internal class GraphQLClientUnitTest {
     fun `send parses GraphQL success response`() = runTest {
         // language=JSON
         val successBody = """{ "data": { "fake": "success_data" } }"""
-        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+        val successHeaders = mapOf(Headers.PAYPAL_DEBUG_ID to "fake-debug-id")
         val successHttpResponse = HttpResponse(200, successHeaders, successBody)
         coEvery { http.send(any()) } returns successHttpResponse
 
@@ -137,7 +138,7 @@ internal class GraphQLClientUnitTest {
     fun `send returns an error when GraphQL response is successful with an empty body`() = runTest {
         // language=JSON
         val emptyBody = ""
-        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+        val successHeaders = mapOf(Headers.PAYPAL_DEBUG_ID to "fake-debug-id")
         val successHttpResponse = HttpResponse(200, successHeaders, emptyBody)
         coEvery { http.send(any()) } returns successHttpResponse
 
@@ -155,7 +156,7 @@ internal class GraphQLClientUnitTest {
     fun `send returns an error when GraphQL response is successful with an invalid JSON body`() =
         runTest {
             val invalidJSON = """{ invalid: """
-            val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+            val successHeaders = mapOf(Headers.PAYPAL_DEBUG_ID to "fake-debug-id")
             val successHttpResponse = HttpResponse(200, successHeaders, invalidJSON)
             coEvery { http.send(any()) } returns successHttpResponse
 

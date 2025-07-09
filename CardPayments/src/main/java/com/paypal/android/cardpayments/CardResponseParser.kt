@@ -9,7 +9,6 @@ import com.paypal.android.corepayments.OrderErrorDetail
 import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PaymentsJSON
-import com.paypal.android.corepayments.common.Headers
 import org.json.JSONException
 
 internal class CardResponseParser {
@@ -32,7 +31,7 @@ internal class CardResponseParser {
                 json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
             )
         } catch (ignored: JSONException) {
-            val correlationId = httpResponse.headers[Headers.PAYPAL_DEBUG_ID]
+            val correlationId = httpResponse.headers["Paypal-Debug-Id"]
             val error = APIClientError.dataParsingError(correlationId)
             ConfirmPaymentSourceResult.Failure(error)
         }
@@ -43,7 +42,7 @@ internal class CardResponseParser {
             result = null
         } else {
 
-            val correlationId = httpResponse.headers[Headers.PAYPAL_DEBUG_ID]
+            val correlationId = httpResponse.headers["Paypal-Debug-Id"]
             val bodyResponse = httpResponse.body
             if (bodyResponse.isNullOrBlank()) {
                 result = APIClientError.noResponseData(correlationId)

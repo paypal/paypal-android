@@ -3,6 +3,7 @@ package com.paypal.android.corepayments.api
 import android.content.Context
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
@@ -18,20 +19,28 @@ import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.model.Variables
 import org.json.JSONObject
 
-class PatchCCOWithAppSwitchEligibility(
-    private val coreConfig: CoreConfig,
+class PatchCCOWithAppSwitchEligibility internal constructor(
     private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
-    private val graphQLClient: GraphQLClient = GraphQLClient(coreConfig),
+    private val graphQLClient: GraphQLClient,
 ) {
+
+    constructor(coreConfig: CoreConfig) : this(
+        authenticationSecureTokenServiceAPI = AuthenticationSecureTokenServiceAPI(
+            coreConfig,
+            RestClient(coreConfig)
+        ),
+        graphQLClient = GraphQLClient(coreConfig)
+    )
+
     suspend operator fun invoke(
         context: Context,
         orderId: String,
         tokenType: TokenType,
-        merchantOptInForAppSwitch: Boolean
+        merchantOptInForAppSwitch: Boolean,
     ): APIResult<PatchCcoWithAppSwitchEligibilityResponse> {
         return runCatching {
             val token =
-                when (val tokenResult = authenticationSecureTokenServiceAPI.getClientToken()) {
+                when (val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()) {
                     is APIResult.Success -> tokenResult.data
                     is APIResult.Failure -> return APIResult.Failure(tokenResult.error)
                 }
