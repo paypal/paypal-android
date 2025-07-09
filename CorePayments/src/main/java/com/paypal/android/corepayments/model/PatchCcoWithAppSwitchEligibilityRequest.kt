@@ -2,36 +2,55 @@ package com.paypal.android.corepayments.model
 
 import android.content.Context
 import androidx.annotation.RawRes
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_ARTIFACT
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_CHANNEL
+import org.json.JSONObject
 
 data class PatchCcoWithAppSwitchEligibilityRequest(
-    val query: String = "",
     val variables: Variables
 ) {
+    suspend fun create(
+        context: Context,
+        resourceLoader: ResourceLoader = ResourceLoader()
+    ): JSONObject {
+        @RawRes val resId = R.raw.graphql_query_patch_cco_app_switch_eligibility
+            val query = when (val result = resourceLoader.loadRawResource(context, resId)) {
+                is LoadRawResourceResult.Success -> result.value
+
+                is LoadRawResourceResult.Failure -> throw APIClientError.graphQLRequestLoadError()
+            }
+        val variablesJson = createVariablesJson(variables)
+        return JSONObject()
+            .put("query", query)
+            .put("variables", variablesJson)
+    }
+
+    private fun createVariablesJson(variables: Variables): JSONObject {
+        val experimentationContext = JSONObject()
+            .put("integrationChannel", variables.experimentationContext.integrationChannel)
+
+        return JSONObject()
+            .put("experimentationContext", experimentationContext)
+            .put(
+                "integrationArtifact",
+                INTEGRATION_ARTIFACT
+            )
+            .put("tokenType", variables.tokenType)
+            .put("contextId", variables.contextId)
+            .put("token", variables.token)
+            .put("osType", OS_TYPE)
+            .put("merchantOptInForAppSwitch", variables.merchantOptInForAppSwitch)
+            .put("paypalNativeAppInstalled", variables.paypalNativeAppInstalled)
+    }
+
     companion object {
-        const val INTEGRATION_ARTIFACT = "NATIVE_SDK"
+        const val INTEGRATION_ARTIFACT = "NATIVE_SDK" // todo: use Mobile SDK artifact after backend changes
         const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
         const val OS_TYPE = "ANDROID"
-
-        suspend fun create(
-            context: Context,
-            variables: Variables,
-            resourceLoader: ResourceLoader = ResourceLoader()
-        ): PatchCcoWithAppSwitchEligibilityRequest {
-            @RawRes val resId = R.raw.graphql_query_patch_cco_app_switch_eligibility
-
-            return when (val result = resourceLoader.loadRawResource(context, resId)) {
-                is LoadRawResourceResult.Success ->
-                    PatchCcoWithAppSwitchEligibilityRequest(result.value, variables)
-
-                is LoadRawResourceResult.Failure ->
-                    PatchCcoWithAppSwitchEligibilityRequest("", variables)
-            }
-        }
     }
 }
 
@@ -40,6 +59,7 @@ data class Variables(
     val contextId: String,
     val token: String,
     val merchantOptInForAppSwitch: Boolean,
+    val paypalNativeAppInstalled: Boolean,
     val experimentationContext: ExperimentationContext = ExperimentationContext(),
 )
 

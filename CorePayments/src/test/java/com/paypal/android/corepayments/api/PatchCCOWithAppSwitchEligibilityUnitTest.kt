@@ -73,7 +73,34 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     }
 
     @Test
-    fun `invoke sends GraphQL request with correct variables`() = runTest {
+    fun `invoke sends GraphQL request with correct variables for ORDER_ID and true merchantOptIn`() =
+        runTest {
+            testGraphQLRequestVariables(TokenType.ORDER_ID, true, "ORDER_ID")
+        }
+
+    @Test
+    fun `invoke sends GraphQL request with correct variables for VAULT_ID and false merchantOptIn`() =
+        runTest {
+            testGraphQLRequestVariables(TokenType.VAULT_ID, false, "VAULT_ID")
+        }
+
+    @Test
+    fun `invoke sends GraphQL request with correct variables for CHECKOUT_TOKEN and true merchantOptIn`() =
+        runTest {
+            testGraphQLRequestVariables(TokenType.CHECKOUT_TOKEN, true, "CHECKOUT_TOKEN")
+        }
+
+    @Test
+    fun `invoke sends GraphQL request with correct variables for BILLING_TOKEN and false merchantOptIn`() =
+        runTest {
+            testGraphQLRequestVariables(TokenType.BILLING_TOKEN, false, "BILLING_TOKEN")
+        }
+
+    private suspend fun testGraphQLRequestVariables(
+        tokenType: TokenType,
+        merchantOptInForAppSwitch: Boolean,
+        expectedTokenTypeName: String
+    ) {
         // Given
         val successResponse = createSuccessfulGraphQLResult()
         coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
@@ -87,8 +114,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         sut.invoke(
             context = context,
             orderId = testOrderId,
-            tokenType = TokenType.ORDER_ID,
-            merchantOptInForAppSwitch = true
+            tokenType = tokenType,
+            merchantOptInForAppSwitch = merchantOptInForAppSwitch
         )
 
         // Then
@@ -96,10 +123,10 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         val capturedRequest = requestSlot.captured
         val variables = capturedRequest.getJSONObject("variables")
 
-        assertEquals("ORDER_ID", variables.getString("tokenType"))
+        assertEquals(expectedTokenTypeName, variables.getString("tokenType"))
         assertEquals(testOrderId, variables.getString("contextId"))
         assertEquals(testOrderId, variables.getString("token"))
-        assertEquals(true, variables.getBoolean("merchantOptInForAppSwitch"))
+        assertEquals(merchantOptInForAppSwitch, variables.getBoolean("merchantOptInForAppSwitch"))
         assertEquals("ANDROID", variables.getString("osType"))
         assertEquals("NATIVE_SDK", variables.getString("integrationArtifact"))
     }
@@ -196,32 +223,6 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
 
         // Then
         assertTrue(result is APIResult.Failure)
-    }
-
-    @Test
-    fun `invoke works with different token types`() = runTest {
-        // Given
-        val successResponse = createSuccessfulGraphQLResult()
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
-        coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
-
-        val requestSlot = slot<JSONObject>()
-
-        // When
-        sut.invoke(
-            context = context,
-            orderId = testOrderId,
-            tokenType = TokenType.CHECKOUT_TOKEN,
-            merchantOptInForAppSwitch = false
-        )
-
-        // Then
-        coVerify { graphQLClient.send(capture(requestSlot), any(), any()) }
-        val variables = requestSlot.captured.getJSONObject("variables")
-        assertEquals("CHECKOUT_TOKEN", variables.getString("tokenType"))
-        assertEquals(false, variables.getBoolean("merchantOptInForAppSwitch"))
     }
 
     @Test

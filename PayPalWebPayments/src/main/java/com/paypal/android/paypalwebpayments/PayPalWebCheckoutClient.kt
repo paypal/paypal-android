@@ -59,19 +59,20 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         val result = if (request.appSwitchWhenEligible) {
-            // Check app switch eligibility (token fetching handled internally)
+            // Check app switch eligibility
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = activity,
                 orderId = request.orderId,
                 tokenType = TokenType.ORDER_ID,
-                merchantOptInForAppSwitch = request.appSwitchWhenEligible
+                merchantOptInForAppSwitch = request.appSwitchWhenEligible,
+                paypalNativeAppInstalled = true // TODO: implement native app installed check
             )
             // Get RedirectUrl
             val launchUrl = when (patchCcoResult) {
                 is APIResult.Success -> patchCcoResult.data.launchUrl
                 is APIResult.Failure -> null
             }
-            // if RedirectUrl not available fallback to webcheckout
+            // if RedirectUrl not available fallback to web checkout
             if (!launchUrl.isNullOrEmpty()) {
                 payPalWebLauncher.launchWithUrl(activity, launchUrl)
             } else {

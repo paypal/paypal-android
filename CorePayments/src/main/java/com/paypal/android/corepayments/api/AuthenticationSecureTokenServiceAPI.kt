@@ -22,7 +22,7 @@ class AuthenticationSecureTokenServiceAPI(
         val requestBody = "grant_type=client_credentials&response_type=token"
 
         val headers = mutableMapOf(
-            Headers.AUTHORIZATION to "Basic ${"${coreConfig.clientId}:".base64encoded()}",
+            Headers.AUTHORIZATION to "Basic ${coreConfig.clientId.base64encoded()}",
             Headers.CONTENT_TYPE to "application/x-www-form-urlencoded"
         )
 

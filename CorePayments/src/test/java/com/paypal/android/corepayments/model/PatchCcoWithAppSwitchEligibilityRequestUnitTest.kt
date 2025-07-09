@@ -1,8 +1,10 @@
 package com.paypal.android.corepayments.model
 
 import android.content.Context
-import android.content.res.Resources
-import io.mockk.every
+import com.paypal.android.corepayments.LoadRawResourceResult
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.ResourceLoader
+import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,20 +13,18 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayInputStream
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
 
     private lateinit var context: Context
-    private lateinit var resources: Resources
+    private lateinit var resourceLoader: ResourceLoader
 
     @Before
     fun beforeEach() {
         context = mockk(relaxed = true)
-        resources = mockk(relaxed = true)
-        every { context.resources } returns resources
+        resourceLoader = mockk(relaxed = true)
     }
 
     @Test
@@ -38,15 +38,15 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
             merchantOptInForAppSwitch = true
         )
 
-        val inputStream = ByteArrayInputStream(testQuery.toByteArray())
-        every { resources.openRawResource(any()) } returns inputStream
+        coEvery { resourceLoader.loadRawResource(any(), any()) } returns LoadRawResourceResult.Success(testQuery)
 
         // When
-        val result = PatchCcoWithAppSwitchEligibilityRequest.create(context, testVariables)
+        val request = PatchCcoWithAppSwitchEligibilityRequest(testVariables)
+        val result = request.create(context, resourceLoader)
 
         // Then
-        assertEquals(testQuery, result.query)
-        assertEquals(testVariables, result.variables)
+        assertEquals(testQuery, result.getString("query"))
+        assertEquals(testVariables.tokenType, result.getJSONObject("variables").getString("tokenType"))
     }
 
     @Test
@@ -59,14 +59,19 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
             merchantOptInForAppSwitch = false
         )
 
-        every { resources.openRawResource(any()) } throws Resources.NotFoundException("File not found")
+        val mockError = PayPalSDKError(0, "File not found")
+        coEvery { resourceLoader.loadRawResource(any(), any()) } returns LoadRawResourceResult.Failure(mockError)
 
         // When
-        val result = PatchCcoWithAppSwitchEligibilityRequest.create(context, testVariables)
-
-        // Then
-        assertEquals("", result.query)
-        assertEquals(testVariables, result.variables)
+        val request = PatchCcoWithAppSwitchEligibilityRequest(testVariables)
+        try {
+            request.create(context, resourceLoader)
+            // This should not be reached since we expect an exception
+            assert(false) { "Expected APIClientError to be thrown" }
+        } catch (e: Exception) {
+            // Expected behavior when resource loading fails - verify it's the right exception
+            assert(e.message?.contains("Error creating GraphQL request") == true)
+        }
     }
 
     @Test
@@ -130,13 +135,9 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
         )
 
         // When
-        val request = PatchCcoWithAppSwitchEligibilityRequest(
-            query = "",
-            variables = variables
-        )
+        val request = PatchCcoWithAppSwitchEligibilityRequest(variables)
 
         // Then
-        assertEquals("", request.query)
         assertEquals(variables, request.variables)
     }
 }

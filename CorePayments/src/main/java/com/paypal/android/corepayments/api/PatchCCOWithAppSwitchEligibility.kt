@@ -3,21 +3,18 @@ package com.paypal.android.corepayments.api
 import android.content.Context
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
-import com.paypal.android.corepayments.model.AppSwitchEligibility
-import com.paypal.android.corepayments.model.AppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.ExperimentationContext
 import com.paypal.android.corepayments.model.ExternalResponse
-import com.paypal.android.corepayments.model.PatchCcoResponse
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.model.Variables
-import org.json.JSONObject
 
 class PatchCCOWithAppSwitchEligibility internal constructor(
     private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
@@ -37,6 +34,7 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         orderId: String,
         tokenType: TokenType,
         merchantOptInForAppSwitch: Boolean,
+        paypalNativeAppInstalled: Boolean
     ): APIResult<PatchCcoWithAppSwitchEligibilityResponse> {
         return runCatching {
             val token =
@@ -50,70 +48,29 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
                 tokenType = tokenType.name,
                 contextId = orderId,
                 token = orderId,
-                merchantOptInForAppSwitch = merchantOptInForAppSwitch
+                merchantOptInForAppSwitch = merchantOptInForAppSwitch,
+                paypalNativeAppInstalled = paypalNativeAppInstalled
             )
 
-            val request = PatchCcoWithAppSwitchEligibilityRequest.create(context, variables)
-
-            val variablesJson = createVariablesJson(variables)
-            val graphQLRequest = JSONObject()
-                .put("query", request.query)
-                .put("variables", variablesJson)
+            val patchCcoWithAppSwitchEligibilityRequestBody =
+                PatchCcoWithAppSwitchEligibilityRequest(variables).create(context)
 
             when (val result = graphQLClient.send(
-                graphQLRequestBody = graphQLRequest,
+                graphQLRequestBody = patchCcoWithAppSwitchEligibilityRequestBody,
                 headers = mapOf(Headers.AUTHORIZATION to "Bearer $token")
             )) {
                 is GraphQLResult.Success -> {
-                    result.data?.let { data ->
-                        parseResponse(data)?.let { response ->
-                            APIResult.Success(response)
-                        } ?: APIResult.Failure(APIClientError.unknownError())
-                    } ?: APIResult.Failure(APIClientError.unknownError())
+                    val data = result.data ?: throw APIClientError.dataParsingError(result.correlationId)
+                    val patchCcoResponse = PatchCcoWithAppSwitchEligibilityResponse.parse(data, result.correlationId)
+                    APIResult.Success(PatchCcoWithAppSwitchEligibilityResponse(ExternalResponse(patchCcoResponse)))
                 }
-
                 is GraphQLResult.Failure -> APIResult.Failure(result.error)
             }
         }.getOrElse { throwable ->
-            APIResult.Failure(APIClientError.unknownError(throwable = throwable))
+            when (throwable) {
+                is PayPalSDKError -> APIResult.Failure(throwable)
+                else -> APIResult.Failure(APIClientError.unknownError(throwable = throwable))
+            }
         }
     }
-
-    private fun createVariablesJson(variables: Variables): JSONObject {
-        val experimentationContext = JSONObject()
-            .put("integrationChannel", variables.experimentationContext.integrationChannel)
-
-        return JSONObject()
-            .put("experimentationContext", experimentationContext)
-            .put(
-                "integrationArtifact",
-                PatchCcoWithAppSwitchEligibilityRequest.INTEGRATION_ARTIFACT
-            )
-            .put("tokenType", variables.tokenType)
-            .put("contextId", variables.contextId)
-            .put("token", variables.token)
-            .put("osType", PatchCcoWithAppSwitchEligibilityRequest.OS_TYPE)
-            .put("merchantOptInForAppSwitch", variables.merchantOptInForAppSwitch)
-    }
-
-    private fun parseResponse(data: JSONObject): PatchCcoWithAppSwitchEligibilityResponse? =
-        runCatching {
-            val external = data.optJSONObject("external") ?: return null
-            val patchCco = external.optJSONObject("patchCcoWithAppSwitchEligibility") ?: return null
-            val appSwitchEligibilityJson = patchCco.optJSONObject("appSwitchEligibility")
-
-            val appSwitchEligibility = appSwitchEligibilityJson?.let {
-                AppSwitchEligibility(
-                    appSwitchEligible = it.optBoolean("appSwitchEligible"),
-                    redirectURL = it.optString("redirectURL"),
-                    ineligibleReason = it.optString("ineligibleReason")
-                )
-            }
-
-            val appSwitchEligibilityResponse = AppSwitchEligibilityResponse(appSwitchEligibility)
-            val patchCcoResponse = PatchCcoResponse(appSwitchEligibilityResponse)
-            val externalResponse = ExternalResponse(patchCcoResponse)
-
-            PatchCcoWithAppSwitchEligibilityResponse(externalResponse)
-        }.getOrThrow()
 }
