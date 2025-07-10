@@ -7,4 +7,5 @@
     <string name="paypal_checkout_smart_payment_button_label_checkout">Checkout</string>
     <string name="paypal_checkout_smart_payment_button_label_pay">Pay with</string>
     <string name="paypal_checkout_smart_payment_button_label_pay_later">Pay Later</string>
+    <string name="paypal_checkout_smart_payment_button_label_credit">Credit</string>
 </resources>

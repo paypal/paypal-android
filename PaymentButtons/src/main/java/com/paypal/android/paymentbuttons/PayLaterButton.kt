@@ -53,7 +53,7 @@ class PayLaterButton @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PayLaterButton).use { typedArray ->
             updateColorFrom(typedArray)
         }
-        configureLayout()
+        configurePayLaterLayout()
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
@@ -69,7 +69,7 @@ class PayLaterButton @JvmOverloads constructor(
         color = PayPalButtonColor(paypalColorAttributeIndex)
     }
 
-    private fun configureLayout() {
+    private fun configurePayLaterLayout() {
         prefixTextVisibility = View.GONE
         suffixTextVisibility = View.VISIBLE
 
