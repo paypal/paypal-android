@@ -9,7 +9,6 @@ import com.paypal.android.paymentbuttons.PayPalButtonColor.BLACK
 import com.paypal.android.paymentbuttons.PayPalButtonColor.BLUE
 import com.paypal.android.paymentbuttons.PayPalButtonColor.WHITE
 import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAYPAL
-import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAY_LATER
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
@@ -57,10 +56,8 @@ open class PayPalButton @JvmOverloads constructor(
      */
     open var label = PAYPAL
         set(value) {
-            if (value != PAY_LATER) {
-                field = value
-                updateLabel(field)
-            }
+            field = value
+            updateLabel(field)
         }
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.paypal_logo_white
@@ -104,11 +101,13 @@ open class PayPalButton @JvmOverloads constructor(
                 prefixTextVisibility = View.VISIBLE
                 prefixText = updatedLabel.retrieveLabel(context)
             }
+
             PayPalButtonLabel.Position.END -> {
                 prefixTextVisibility = View.GONE
                 suffixTextVisibility = View.VISIBLE
                 suffixText = updatedLabel.retrieveLabel(context)
             }
+
             else -> {
                 prefixTextVisibility = View.GONE
                 suffixTextVisibility = View.GONE
@@ -214,15 +213,6 @@ enum class PayPalButtonLabel(
         value = 3,
         position = Position.START,
         stringResId = R.string.paypal_checkout_smart_payment_button_label_pay
-    ),
-
-    /**
-     * Label for Pay Later text
-     */
-    PAY_LATER(
-        value = 4,
-        position = Position.END,
-        stringResId = R.string.paypal_checkout_smart_payment_button_label_pay_later
     );
 
     fun retrieveLabel(context: Context): String? {
@@ -251,7 +241,6 @@ enum class PayPalButtonLabel(
                 CHECKOUT.value -> CHECKOUT
                 BUY_NOW.value -> BUY_NOW
                 PAY.value -> PAY
-                PAY_LATER.value -> PAY_LATER
                 else -> throw createFormattedIllegalArgumentException(
                     "PaymentButtonLabel",
                     entries.size
