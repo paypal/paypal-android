@@ -1,5 +1,6 @@
 package com.paypal.android.api.services
 
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.paypal.android.api.model.CardPaymentToken
@@ -8,6 +9,7 @@ import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.api.model.PaymentSource
 import com.paypal.android.models.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -225,7 +227,7 @@ class SDKSampleServerAPI {
 
         PayPalPaymentToken(
             id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id")
+            customerId = customerJSON.getString("id"),
         )
     }
 
@@ -234,15 +236,7 @@ class SDKSampleServerAPI {
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
         val response = findService(merchantIntegration).createSetupToken(jsonObject)
-
-        val responseJSON = JSONObject(response.string())
-        val customerJSON = responseJSON.getJSONObject("customer")
-
-        PayPalSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status")
-        )
+        Gson().fromJson(response.string(), PayPalSetupToken::class.java)
     }
 
     // Ref: https://medium.com/@douglas.iacovelli/how-to-handle-errors-with-retrofit-and-coroutines-33e7492a912
@@ -256,7 +250,8 @@ class SDKSampleServerAPI {
     }
 
     private fun parseOrder(json: JSONObject): Order {
-        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
+        val paymentSourceJson = json.optJSONObject("payment_source")
+        val cardJSON = paymentSourceJson?.optJSONObject("card")
         val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
         val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
 
@@ -267,7 +262,8 @@ class SDKSampleServerAPI {
             cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
             cardBrand = optNonEmptyString(cardJSON, "brand"),
             vaultId = optNonEmptyString(vaultJSON, "id"),
-            customerId = optNonEmptyString(vaultCustomerJSON, "id")
+            customerId = optNonEmptyString(vaultCustomerJSON, "id"),
+            paymentSource = PaymentSource.fromJson(paymentSourceJson)
         )
     }
 }

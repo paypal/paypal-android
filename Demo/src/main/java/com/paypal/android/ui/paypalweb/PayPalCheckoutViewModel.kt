@@ -30,20 +30,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PayPalWebViewModel @Inject constructor(
+class PayPalCheckoutViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase
 ) : ViewModel() {
 
     companion object {
-        private val TAG = PayPalWebViewModel::class.qualifiedName
+        private val TAG = PayPalCheckoutViewModel::class.qualifiedName
     }
 
     private var paypalClient: PayPalWebCheckoutClient? = null
     private lateinit var payPalDataCollector: PayPalDataCollector
 
-    private val _uiState = MutableStateFlow(PayPalWebUiState())
+    private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()
 
     private var authState: String? = null
@@ -52,6 +52,12 @@ class PayPalWebViewModel @Inject constructor(
         get() = _uiState.value.intentOption
         set(value) {
             _uiState.update { it.copy(intentOption = value) }
+        }
+
+    var appSwitchWhenEligible: Boolean
+        get() = _uiState.value.appSwitchWhenEligible
+        set(value) {
+            _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
     private var createOrderState
@@ -85,24 +91,28 @@ class PayPalWebViewModel @Inject constructor(
         viewModelScope.launch {
             createOrderState = ActionState.Loading
             val orderRequest = _uiState.value.run {
-                OrderRequest(intent = intentOption, shouldVault = false)
+                OrderRequest(
+                    intent = intentOption,
+                    shouldVault = false,
+                    appSwitchWhenEligible = this.appSwitchWhenEligible
+                )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
 
-    fun startWebCheckout(activity: ComponentActivity) {
+    fun startCheckout(activity: ComponentActivity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
             viewModelScope.launch {
-                startWebCheckoutWithOrderId(activity, orderId)
+                startCheckoutWithOrderId(activity, orderId)
             }
         }
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private suspend fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -117,7 +127,8 @@ class PayPalWebViewModel @Inject constructor(
                 paypalClient =
                     PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
 
-                val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
+                val checkoutRequest =
+                    PayPalWebCheckoutRequest(orderId, fundingSource, appSwitchWhenEligible)
                 when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
                     is PayPalPresentAuthChallengeResult.Success ->
                         authState = startResult.authState
