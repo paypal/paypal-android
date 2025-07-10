@@ -63,7 +63,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -115,7 +116,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = tokenType,
-            merchantOptInForAppSwitch = merchantOptInForAppSwitch
+            merchantOptInForAppSwitch = merchantOptInForAppSwitch,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -145,7 +147,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.VAULT_ID,
-            merchantOptInForAppSwitch = false
+            merchantOptInForAppSwitch = false,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -168,7 +171,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -193,7 +197,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -218,7 +223,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -241,7 +247,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.BILLING_TOKEN,
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -264,7 +271,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then

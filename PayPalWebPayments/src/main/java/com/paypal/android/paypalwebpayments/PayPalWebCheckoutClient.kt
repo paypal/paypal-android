@@ -74,7 +74,12 @@ class PayPalWebCheckoutClient internal constructor(
             }
             // if RedirectUrl not available fallback to web checkout
             if (!launchUrl.isNullOrEmpty()) {
-                payPalWebLauncher.launchWithUrl(activity, launchUrl)
+                payPalWebLauncher.launchWithUrl(
+                    activity,
+                    launchUrl,
+                    request.orderId,
+                    TokenType.ORDER_ID
+                )
             } else {
                 payPalWebLauncher.launchPayPalWebCheckout(activity, request)
             }
@@ -123,14 +128,43 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    fun vault(
+    suspend fun vault(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = request.setupTokenId
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
-        val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
+        val result = if (request.appSwitchWhenEligible) {
+            // Check app switch eligibility for vault
+            val patchCcoResult = patchCCOWithAppSwitchEligibility(
+                context = activity,
+                orderId = request.setupTokenId,
+                tokenType = TokenType.VAULT_ID,
+                merchantOptInForAppSwitch = request.appSwitchWhenEligible,
+                paypalNativeAppInstalled = true // TODO: implement native app installed check
+            )
+            // Get RedirectUrl
+            val launchUrl = when (patchCcoResult) {
+                is APIResult.Success -> patchCcoResult.data.launchUrl
+                is APIResult.Failure -> null
+            }
+            // if RedirectUrl not available fallback to web vault
+            if (!launchUrl.isNullOrEmpty()) {
+                payPalWebLauncher.launchWithUrl(
+                    activity,
+                    launchUrl,
+                    request.setupTokenId,
+                    TokenType.VAULT_ID
+                )
+            } else {
+                payPalWebLauncher.launchPayPalWebVault(activity, request)
+            }
+        } else {
+            // Normal web vault flow
+            payPalWebLauncher.launchPayPalWebVault(activity, request)
+        }
+
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
                 VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
@@ -141,6 +175,26 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, vaultSetupTokenId)
         }
         return result
+    }
+
+    /**
+     * Vault PayPal as a payment method with callback.
+     * Network operations are handled automatically by the Http layer.
+     *
+     * @param activity the ComponentActivity to launch the auth challenge from
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     * @param callback callback to receive the result
+     */
+    fun vault(
+        activity: ComponentActivity,
+        request: PayPalWebVaultRequest,
+        callback: PayPalWebVaultCallback
+    ) {
+        CoroutineScope(mainDispatcher).launch {
+            callback.onPayPalWebVaultResult(
+                vault(activity, request)
+            )
+        }
     }
 
     /**

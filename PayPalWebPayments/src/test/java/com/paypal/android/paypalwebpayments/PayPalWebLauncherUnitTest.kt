@@ -10,6 +10,7 @@ import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.model.TokenType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -386,5 +387,72 @@ class PayPalWebLauncherUnitTest {
         every { finalResult.requestCode } returns requestCode
         every { finalResult.requestUrl } returns Uri.parse("https://example.com/url")
         return finalResult
+    }
+
+    // LAUNCH WITH URL TESTS
+
+    @Test
+    fun `launchWithUrl() launches with ORDER_ID token type and correct request code`() {
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val slot = slot<BrowserSwitchOptions>()
+        every {
+            browserSwitchClient.start(activity, capture(slot))
+        } returns BrowserSwitchStartResult.Started("pending request")
+
+        sut.launchWithUrl(
+            activity,
+            "https://paypal.com/app-switch",
+            "order-123",
+            TokenType.ORDER_ID
+        )
+
+        val browserSwitchOptions = slot.captured
+        expectThat(browserSwitchOptions) {
+            get { metadata?.get("order_id") }.isEqualTo("order-123")
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
+            get { url }.isEqualTo(Uri.parse("https://paypal.com/app-switch"))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
+        }
+    }
+
+    @Test
+    fun `launchWithUrl() launches with VAULT_ID token type and correct request code`() {
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val slot = slot<BrowserSwitchOptions>()
+        every {
+            browserSwitchClient.start(activity, capture(slot))
+        } returns BrowserSwitchStartResult.Started("pending request")
+
+        sut.launchWithUrl(
+            activity,
+            "https://paypal.com/vault-switch",
+            "setup-456",
+            TokenType.VAULT_ID
+        )
+
+        val browserSwitchOptions = slot.captured
+        expectThat(browserSwitchOptions) {
+            get { metadata?.get("setup_token_id") }.isEqualTo("setup-456")
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
+            get { url }.isEqualTo(Uri.parse("https://paypal.com/vault-switch"))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_VAULT)
+        }
+    }
+
+    @Test
+    fun `launchWithUrl() returns error when browser switch fails`() {
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val browserSwitchError = Exception("error message from browser switch")
+        every {
+            browserSwitchClient.start(any(), any())
+        } returns BrowserSwitchStartResult.Failure(browserSwitchError)
+
+        val result =
+            sut.launchWithUrl(activity, "https://test.com", "token-123", TokenType.ORDER_ID)
+                    as PayPalPresentAuthChallengeResult.Failure
+        assertEquals("error message from browser switch", result.error.errorDescription)
     }
 }
