@@ -152,7 +152,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         super.onAttachedToWindow()
         renderButton()
         addOnLayoutChangeListener { view, _, top, _, bottom, _, _, _, _ ->
-            (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
+            (view as? PaymentButton<*>)?.let { paymentButton ->
+                paymentButton.updateFontSizing(bottom - top)
+                paymentButton.applyEdgeStyling()
+            }
         }
     }
 
@@ -288,7 +291,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private fun applyEdgeStyling() {
         val cornerSize: Float = when (val edges = edges) {
             PaymentButtonEdges.Sharp -> 0f
-            PaymentButtonEdges.Pill -> layoutParams.height / 2f
+            PaymentButtonEdges.Pill -> measuredHeight / 2f
             PaymentButtonEdges.Soft -> getSoftCornerRadiusDimensionValue()
             is PaymentButtonEdges.Custom -> edges.cornerRadius
         }
