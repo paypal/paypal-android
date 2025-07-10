@@ -12,6 +12,7 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -62,13 +63,38 @@ internal class PayPalWebLauncher(
 
     fun launchWithUrl(
         activity: ComponentActivity,
-        url: String
+        url: String,
+        token: String,
+        tokenType: TokenType
     ): PayPalPresentAuthChallengeResult {
+        val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions()
             .url(url.toUri())
-            .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
+            .requestCode(getRequestCode(tokenType))
             .returnUrlScheme(urlScheme)
+            .metadata(metadata)
         return launchBrowserSwitch(activity, options)
+    }
+
+    private fun getRequestCode(tokenType: TokenType): Int {
+        return when (tokenType) {
+            TokenType.ORDER_ID -> BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
+            TokenType.VAULT_ID -> BrowserSwitchRequestCodes.PAYPAL_VAULT
+            TokenType.CHECKOUT_TOKEN -> BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
+            TokenType.BILLING_TOKEN -> BrowserSwitchRequestCodes.PAYPAL_VAULT
+        }
+    }
+
+    private fun getMetadata(
+        token: String,
+        tokenType: TokenType
+    ) = JSONObject().apply {
+        when (tokenType) {
+            TokenType.ORDER_ID -> put(METADATA_KEY_ORDER_ID, token)
+            TokenType.VAULT_ID -> put(METADATA_KEY_SETUP_TOKEN_ID, token)
+            TokenType.CHECKOUT_TOKEN -> put(METADATA_KEY_ORDER_ID, token)
+            TokenType.BILLING_TOKEN -> put(METADATA_KEY_SETUP_TOKEN_ID, token)
+        }
     }
 
     private fun launchBrowserSwitch(

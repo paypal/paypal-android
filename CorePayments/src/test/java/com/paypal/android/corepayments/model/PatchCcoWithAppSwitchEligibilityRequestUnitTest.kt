@@ -35,7 +35,8 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
             tokenType = "ORDER_ID",
             contextId = "test-context",
             token = "test-token",
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         coEvery { resourceLoader.loadRawResource(any(), any()) } returns LoadRawResourceResult.Success(testQuery)
@@ -56,7 +57,8 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
             tokenType = "VAULT_ID",
             contextId = "test-context",
             token = "test-token",
-            merchantOptInForAppSwitch = false
+            merchantOptInForAppSwitch = false,
+            paypalNativeAppInstalled = true
         )
 
         val mockError = PayPalSDKError(0, "File not found")
@@ -82,7 +84,8 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
             tokenType = "CHECKOUT_TOKEN",
             contextId = "context-123",
             token = "token-456",
-            merchantOptInForAppSwitch = true
+            merchantOptInForAppSwitch = true,
+            paypalNativeAppInstalled = true
         )
 
         // Then
@@ -131,7 +134,8 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
             tokenType = "BILLING_TOKEN",
             contextId = "context",
             token = "token",
-            merchantOptInForAppSwitch = false
+            merchantOptInForAppSwitch = false,
+            paypalNativeAppInstalled = true
         )
 
         // When
