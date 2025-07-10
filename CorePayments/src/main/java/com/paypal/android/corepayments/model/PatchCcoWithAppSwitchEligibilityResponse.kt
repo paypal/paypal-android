@@ -1,8 +1,10 @@
 package com.paypal.android.corepayments.model
 
+import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
 import org.json.JSONObject
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PatchCcoWithAppSwitchEligibilityResponse(
     val data: ExternalResponse
 ) {

@@ -10,7 +10,7 @@ import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityReq
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_CHANNEL
 import org.json.JSONObject
 
-data class PatchCcoWithAppSwitchEligibilityRequest(
+internal data class PatchCcoWithAppSwitchEligibilityRequest(
     val variables: Variables
 ) {
     suspend fun create(

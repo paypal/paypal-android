@@ -226,6 +226,6 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         val decodedCredentials =
             android.util.Base64.decode(encodedCredentials, android.util.Base64.DEFAULT)
                 .decodeToString()
-        assertEquals("$clientId:", decodedCredentials)
+        assertEquals(clientId, decodedCredentials)
     }
 }
