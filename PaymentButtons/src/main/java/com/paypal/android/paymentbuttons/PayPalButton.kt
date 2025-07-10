@@ -8,7 +8,7 @@ import androidx.core.content.res.use
 import com.paypal.android.paymentbuttons.PayPalButtonColor.BLACK
 import com.paypal.android.paymentbuttons.PayPalButtonColor.BLUE
 import com.paypal.android.paymentbuttons.PayPalButtonColor.WHITE
-import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAYPAL
+import com.paypal.android.paymentbuttons.PayPalButtonLabel.NONE
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
@@ -50,11 +50,11 @@ open class PayPalButton @JvmOverloads constructor(
     /**
      * Updates the label for Payment Button with the provided [PayPalButtonLabel].
      *
-     * This will default to [PAYPAL] if one is not provided which omits a label and only displays
+     * This will default to [NONE] if one is not provided which omits a label and only displays
      * the wordmark. Note: this does not support [PAY_LATER], if you require a button with that
      * label then use the specialized [PayLaterButton].
      */
-    open var label = PAYPAL
+    open var label = NONE
         set(value) {
             field = value
             updateLabel(field)
@@ -173,7 +173,7 @@ enum class PayPalButtonColor(
 
 /**
  * Defines the labels available for payment buttons. If no label is provided then it will
- * default to [PAYPAL] which will not display a label and will only display the PayPal wordmark. For
+ * default to [NONE] which will not display a label and will only display the PayPal wordmark. For
  * other labels they will have the label value itself along with a position either at the start or
  * the end of the button.
  *
@@ -186,7 +186,7 @@ enum class PayPalButtonLabel(
     /**
      * Label for PayPal text
      */
-    PAYPAL(value = 0),
+    NONE(value = 0),
 
     /**
      * Label for Checkout text
@@ -237,7 +237,7 @@ enum class PayPalButtonLabel(
          */
         operator fun invoke(attributeIndex: Int): PayPalButtonLabel {
             return when (attributeIndex) {
-                PAYPAL.value -> PAYPAL
+                NONE.value -> NONE
                 CHECKOUT.value -> CHECKOUT
                 BUY_NOW.value -> BUY_NOW
                 PAY.value -> PAY
