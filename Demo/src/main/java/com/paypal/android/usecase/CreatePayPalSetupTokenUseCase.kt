@@ -9,10 +9,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import javax.inject.Inject
 
-private const val CANCEL_URL = "com.paypal.android.demo://vault/cancel"
-
-private const val SUCCESS_URL = "com.paypal.android.demo://vault/success"
-
 class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
@@ -23,28 +19,14 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
                 if (appSwitchEnabled) {
 
                     val nativeAppJSON = JSONObject()
-                        .put("os_type", "ANDROID")
-                        .put("os_version", "35")
-
-                    val appSwitchPreferenceJSON = JSONObject()
-//                        .put("app_url", app_url)
-//                        .put("launch_paypal_app", true)
-                        .put("native_app", nativeAppJSON)
-
+                        .put("app_url", APP_URL)
                     val experienceContextJSON = JSONObject()
-//                        .put("brand_name", "AA Logos")
-//                        .put("shipping_preference", "NO_SHIPPING")
-//                        .put("vault_instruction", "ON_PAYER_APPROVAL")
                         .put("return_url", SUCCESS_URL)
                         .put("cancel_url", CANCEL_URL)
-//                        .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
-//                        .put("payment_method_selected", "PAYPAL")
-//                        .put("user_action", "CONTINUE")
-                        .put("app_switch_context", appSwitchPreferenceJSON)
+                        .put("native-app", nativeAppJSON)
 
                     val paypalJSON = JSONObject()
                         .put("usage_type", "MERCHANT")
-                        .put("email_address", "sb-ze5t741841447@personal.example.com")
                         .put("experience_context", experienceContextJSON)
 
                     val paymentSourceJSON = JSONObject()
@@ -70,3 +52,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             sdkSampleServerAPI.createPayPalSetupToken(jsonObject)
         }
 }
+
+private const val APP_URL = "com.paypal.android.demo://"
+private const val SUCCESS_URL = "${APP_URL}success"
+private const val CANCEL_URL = "${APP_URL}cancel"
