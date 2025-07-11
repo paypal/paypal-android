@@ -61,7 +61,7 @@ fun PayPalCheckoutView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_WebOrNativeCheckoutHeader(viewModel)
+        Step1_WebOrNativeCheckoutHeader(uiState, viewModel)
         Step2_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
             Step3_StartPayPalCheckout(uiState, viewModel)
@@ -74,8 +74,7 @@ fun PayPalCheckoutView(
 }
 
 @Composable
-fun Step1_WebOrNativeCheckoutHeader(viewModel: PayPalCheckoutViewModel) {
-    val uiState: PayPalUiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun Step1_WebOrNativeCheckoutHeader(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
     StepHeader(stepNumber = 1, title = "Select web or app switch checkout")
     Column(
         verticalArrangement = UIConstants.spacingMedium

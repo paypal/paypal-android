@@ -28,7 +28,7 @@ import com.paypal.android.ui.features.FeaturesView
 import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
 import com.paypal.android.ui.paypalstaticbuttons.PayPalStaticButtonsView
 import com.paypal.android.ui.paypalweb.PayPalCheckoutView
-import com.paypal.android.ui.paypalwebvault.PayPalWebVaultView
+import com.paypal.android.ui.paypalwebvault.PayPalVaultView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
@@ -110,7 +110,7 @@ fun DemoApp() {
                     PayPalCheckoutView()
                 }
                 composable(DemoAppDestinations.PAYPAL_WEB_VAULT) {
-                    PayPalWebVaultView()
+                    PayPalVaultView()
                 }
                 composable(DemoAppDestinations.PAYPAL_BUTTONS) {
                     PayPalButtonsView()

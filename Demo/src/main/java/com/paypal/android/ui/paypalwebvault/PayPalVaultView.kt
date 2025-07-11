@@ -32,7 +32,7 @@ import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
 @Composable
-fun PayPalWebVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
+fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
@@ -59,7 +59,7 @@ fun PayPalWebVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_WebOrNativeCheckoutHeader(viewModel)
+        Step1_WebOrNativeCheckoutHeader(uiState, viewModel)
         Step2_CreateSetupToken(uiState, viewModel)
         if (uiState.isCreateSetupTokenSuccessful) {
             Step3_VaultPayPal(uiState, viewModel)
@@ -72,8 +72,7 @@ fun PayPalWebVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun Step1_WebOrNativeCheckoutHeader(viewModel: PayPalVaultViewModel) {
-    val uiState: PayPalVaultUiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun Step1_WebOrNativeCheckoutHeader(uiState: PayPalVaultUiState, viewModel: PayPalVaultViewModel) {
     StepHeader(stepNumber = 1, title = "Select web or app switch checkout")
     Column(
         verticalArrangement = UIConstants.spacingMedium
