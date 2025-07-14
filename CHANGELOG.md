@@ -7,6 +7,7 @@
   * Add `PaymentButtonEdges` sealed class
   * Add `PaymentButton.edges` property
   * Add `PaymentButton:payment_button_edges` xml attribute.
+  * Add `PayPalButtonLabel.NONE` enum case
 * Breaking Changes
   * PaymentButtons
     * Remove `PaymentButtonSize` enum
@@ -19,6 +20,8 @@
     * Remove `PaymentButtonShape` enum
     * Remove `PaymentButton.shape` property
     * Remove `PaymentButton:payment_button_shape` xml attribute.
+    * Remove `PayPalButtonLabel.PAY_LATER` enum case
+    * Remove `PayPalButtonLabel.PAYPAL` enum case
 
 ## 2.0.0 (2025-03-18)
 * Breaking Changes
