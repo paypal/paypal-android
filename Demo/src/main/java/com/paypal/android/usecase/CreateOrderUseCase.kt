@@ -45,14 +45,29 @@ class CreateOrderUseCase @Inject constructor(
             if (request.appSwitchWhenEligible) {
 
                 val nativeAppJSON = JSONObject()
+                    .put("os_type", "ANDROID")
+                    .put("os_version", "35")
+
+                val appSwitchPreferenceJSON = JSONObject()
                     .put("app_url", APP_URL)
+                    .put("launch_paypal_app", true)
+                    .put("os_type", "ANDROID")
+                    .put("os_version", "35")
+                    .put("native_app", nativeAppJSON)
 
                 val experienceContextJSON = JSONObject()
+                    .put("brand_name", "AA Logos")
+                    .put("landing_page", "LOGIN")
+                    .put("shipping_preference", "NO_SHIPPING")
                     .put("return_url", SUCCESS_URL)
                     .put("cancel_url", CANCEL_URL)
-                    .put("native-app", nativeAppJSON)
+                    .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
+                    .put("payment_method_selected", "PAYPAL")
+                    .put("user_action", "PAY_NOW")
+                    .put("app_switch_preference", appSwitchPreferenceJSON)
 
                 val paypalJSON = JSONObject()
+                    .put("email_address", "sb-ze5t741841447@personal.example.com")
                     .put("experience_context", experienceContextJSON)
 
                 val paymentSourceJSON = JSONObject()
