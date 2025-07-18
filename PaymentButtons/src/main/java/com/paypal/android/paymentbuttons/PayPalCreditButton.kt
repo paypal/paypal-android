@@ -3,6 +3,7 @@ package com.paypal.android.paymentbuttons
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
+import android.view.View
 import androidx.core.content.res.use
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLUE
@@ -52,6 +53,7 @@ class PayPalCreditButton @JvmOverloads constructor(
                 updateColorFrom(typedArray)
             }
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
+        configurePayPalCreditLayout()
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
@@ -65,6 +67,14 @@ class PayPalCreditButton @JvmOverloads constructor(
             BLUE.value
         )
         color = PayPalCreditButtonColor(attribute)
+    }
+
+    private fun configurePayPalCreditLayout() {
+        prefixTextVisibility = View.GONE
+        suffixTextVisibility = View.VISIBLE
+
+        val stringResId = R.string.paypal_checkout_smart_payment_button_label_credit
+        suffixText = context.getString(stringResId)
     }
 }
 

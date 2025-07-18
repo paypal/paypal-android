@@ -8,8 +8,7 @@ import androidx.core.content.res.use
 import com.paypal.android.paymentbuttons.PayPalButtonColor.BLACK
 import com.paypal.android.paymentbuttons.PayPalButtonColor.BLUE
 import com.paypal.android.paymentbuttons.PayPalButtonColor.WHITE
-import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAYPAL
-import com.paypal.android.paymentbuttons.PayPalButtonLabel.PAY_LATER
+import com.paypal.android.paymentbuttons.PayPalButtonLabel.NONE
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
@@ -51,16 +50,14 @@ open class PayPalButton @JvmOverloads constructor(
     /**
      * Updates the label for Payment Button with the provided [PayPalButtonLabel].
      *
-     * This will default to [PAYPAL] if one is not provided which omits a label and only displays
+     * This will default to [NONE] if one is not provided which omits a label and only displays
      * the wordmark. Note: this does not support [PAY_LATER], if you require a button with that
      * label then use the specialized [PayLaterButton].
      */
-    open var label = PAYPAL
+    open var label = NONE
         set(value) {
-            if (value != PAY_LATER) {
-                field = value
-                updateLabel(field)
-            }
+            field = value
+            updateLabel(field)
         }
 
     override val wordmarkDarkLuminanceResId: Int = R.drawable.paypal_logo_white
@@ -104,11 +101,13 @@ open class PayPalButton @JvmOverloads constructor(
                 prefixTextVisibility = View.VISIBLE
                 prefixText = updatedLabel.retrieveLabel(context)
             }
+
             PayPalButtonLabel.Position.END -> {
                 prefixTextVisibility = View.GONE
                 suffixTextVisibility = View.VISIBLE
                 suffixText = updatedLabel.retrieveLabel(context)
             }
+
             else -> {
                 prefixTextVisibility = View.GONE
                 suffixTextVisibility = View.GONE
@@ -174,7 +173,7 @@ enum class PayPalButtonColor(
 
 /**
  * Defines the labels available for payment buttons. If no label is provided then it will
- * default to [PAYPAL] which will not display a label and will only display the PayPal wordmark. For
+ * default to [NONE] which will not display a label and will only display the PayPal wordmark. For
  * other labels they will have the label value itself along with a position either at the start or
  * the end of the button.
  *
@@ -187,7 +186,7 @@ enum class PayPalButtonLabel(
     /**
      * Label for PayPal text
      */
-    PAYPAL(value = 0),
+    NONE(value = 0),
 
     /**
      * Label for Checkout text
@@ -214,15 +213,6 @@ enum class PayPalButtonLabel(
         value = 3,
         position = Position.START,
         stringResId = R.string.paypal_checkout_smart_payment_button_label_pay
-    ),
-
-    /**
-     * Label for Pay Later text
-     */
-    PAY_LATER(
-        value = 4,
-        position = Position.END,
-        stringResId = R.string.paypal_checkout_smart_payment_button_label_pay_later
     );
 
     fun retrieveLabel(context: Context): String? {
@@ -247,11 +237,10 @@ enum class PayPalButtonLabel(
          */
         operator fun invoke(attributeIndex: Int): PayPalButtonLabel {
             return when (attributeIndex) {
-                PAYPAL.value -> PAYPAL
+                NONE.value -> NONE
                 CHECKOUT.value -> CHECKOUT
                 BUY_NOW.value -> BUY_NOW
                 PAY.value -> PAY
-                PAY_LATER.value -> PAY_LATER
                 else -> throw createFormattedIllegalArgumentException(
                     "PaymentButtonLabel",
                     entries.size

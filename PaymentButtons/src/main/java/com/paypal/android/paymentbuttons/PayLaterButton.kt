@@ -9,7 +9,7 @@ import com.paypal.android.ui.R
 
 
 /**
- * PayLaterButton provides a PayPal PayLater button with the ability to modify the [color], [shape].
+ * PayLaterButton provides a PayPal PayLater button with the ability to modify the [color].
  *
  * Setting up PayLaterButton within an XML layout:
  * ```
@@ -53,7 +53,7 @@ class PayLaterButton @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PayLaterButton).use { typedArray ->
             updateColorFrom(typedArray)
         }
-        updateLabel(PayPalButtonLabel.PAY_LATER)
+        configurePayLaterLayout()
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
@@ -69,24 +69,11 @@ class PayLaterButton @JvmOverloads constructor(
         color = PayPalButtonColor(paypalColorAttributeIndex)
     }
 
-    private fun updateLabel(updatedLabel: PayPalButtonLabel) {
-        when (updatedLabel.position) {
-            PayPalButtonLabel.Position.START -> {
-                suffixTextVisibility = View.GONE
-                prefixTextVisibility = View.VISIBLE
-                prefixText = updatedLabel.retrieveLabel(context)
-            }
+    private fun configurePayLaterLayout() {
+        prefixTextVisibility = View.GONE
+        suffixTextVisibility = View.VISIBLE
 
-            PayPalButtonLabel.Position.END -> {
-                prefixTextVisibility = View.GONE
-                suffixTextVisibility = View.VISIBLE
-                suffixText = updatedLabel.retrieveLabel(context)
-            }
-
-            else -> {
-                prefixTextVisibility = View.GONE
-                suffixTextVisibility = View.GONE
-            }
-        }
+        val stringResId = R.string.paypal_checkout_smart_payment_button_label_pay_later
+        suffixText = context.getString(stringResId)
     }
 }

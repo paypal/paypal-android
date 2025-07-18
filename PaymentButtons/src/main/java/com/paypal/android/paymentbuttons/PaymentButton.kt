@@ -152,7 +152,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         super.onAttachedToWindow()
         renderButton()
         addOnLayoutChangeListener { view, _, top, _, bottom, _, _, _, _ ->
-            (view as? PaymentButton<*>)?.updateFontSizing(bottom - top)
+            (view as? PaymentButton<*>)?.let { paymentButton ->
+                paymentButton.updateFontSizing(bottom - top)
+                paymentButton.applyEdgeStyling()
+            }
         }
     }
 
@@ -169,28 +172,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
         }
-    }
-
-    private fun constrainLayoutParams() {
-        // For PayPal logo and prefix/suffix font sizes to be calculated using
-        // relative percentages, this button needs an explicit height.
-        val layoutHeight = layoutParams?.height
-        val height = if (
-            layoutHeight == null
-            || layoutHeight == LayoutParams.WRAP_CONTENT
-            || layoutHeight == LayoutParams.MATCH_PARENT
-        ) {
-            // if no height given, use the default height
-            resources.getDimensionPixelSize(R.dimen.paypal_payment_button_default_height)
-        } else {
-            val minHeight =
-                resources.getDimensionPixelSize(R.dimen.paypal_payment_button_min_height)
-            val maxHeight =
-                resources.getDimensionPixelSize(R.dimen.paypal_payment_button_max_height)
-            clamp(layoutHeight, minHeight, maxHeight)
-        }
-        val width = layoutParams?.width ?: LayoutParams.WRAP_CONTENT
-        layoutParams = LayoutParams(width, height)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -310,7 +291,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private fun applyEdgeStyling() {
         val cornerSize: Float = when (val edges = edges) {
             PaymentButtonEdges.Sharp -> 0f
-            PaymentButtonEdges.Pill -> layoutParams.height / 2f
+            PaymentButtonEdges.Pill -> measuredHeight / 2f
             PaymentButtonEdges.Soft -> getSoftCornerRadiusDimensionValue()
             is PaymentButtonEdges.Custom -> edges.cornerRadius
         }

@@ -9,6 +9,6 @@ data class PayPalButtonsUiState(
     val fundingType: ButtonFundingType = ButtonFundingType.PAYPAL,
     val payPalCreditButtonColor: PayPalCreditButtonColor = PayPalCreditButtonColor.BLUE,
     val payPalButtonColor: PayPalButtonColor = PayPalButtonColor.BLUE,
-    val payPalButtonLabel: PayPalButtonLabel = PayPalButtonLabel.PAYPAL,
+    val payPalButtonLabel: PayPalButtonLabel = PayPalButtonLabel.NONE,
     val paymentButtonEdges: PaymentButtonEdges = PaymentButtonEdges.Soft,
 )
