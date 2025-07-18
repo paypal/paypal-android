@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
+import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -26,6 +27,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
+    private val deviceInspector: DeviceInspector,
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
@@ -43,7 +45,8 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
-        PatchCCOWithAppSwitchEligibility(configuration)
+        PatchCCOWithAppSwitchEligibility(configuration),
+        DeviceInspector(context)
     )
 
     /**
@@ -58,14 +61,14 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        val result = if (request.appSwitchWhenEligible) {
-            // Check app switch eligibility
+        val result = if (request.appSwitchWhenEligible && deviceInspector.isPayPalInstalled()) {
+            // Only attempt app switch if PayPal app is installed
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = activity,
                 orderId = request.orderId,
                 tokenType = TokenType.ORDER_ID,
                 merchantOptInForAppSwitch = request.appSwitchWhenEligible,
-                paypalNativeAppInstalled = true // TODO: implement native app installed check
+                paypalNativeAppInstalled = true
             )
             // Get RedirectUrl
             val launchUrl = when (patchCcoResult) {
@@ -84,7 +87,7 @@ class PayPalWebCheckoutClient internal constructor(
                 payPalWebLauncher.launchPayPalWebCheckout(activity, request)
             }
         } else {
-            // Normal web checkout flow
+            // Normal web checkout flow (when app switch disabled or PayPal app not installed)
             payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         }
 
@@ -135,14 +138,14 @@ class PayPalWebCheckoutClient internal constructor(
         vaultSetupTokenId = request.setupTokenId
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
-        val result = if (request.appSwitchWhenEligible) {
-            // Check app switch eligibility for vault
+        val result = if (request.appSwitchWhenEligible && deviceInspector.isPayPalInstalled()) {
+            // Only attempt app switch if PayPal app is installed
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = activity,
                 orderId = request.setupTokenId,
                 tokenType = TokenType.VAULT_ID,
                 merchantOptInForAppSwitch = request.appSwitchWhenEligible,
-                paypalNativeAppInstalled = true // TODO: implement native app installed check
+                paypalNativeAppInstalled = true
             )
             // Get RedirectUrl
             val launchUrl = when (patchCcoResult) {
@@ -161,7 +164,7 @@ class PayPalWebCheckoutClient internal constructor(
                 payPalWebLauncher.launchPayPalWebVault(activity, request)
             }
         } else {
-            // Normal web vault flow
+            // Normal web vault flow (when app switch disabled or PayPal app not installed)
             payPalWebLauncher.launchPayPalWebVault(activity, request)
         }
 
