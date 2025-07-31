@@ -35,6 +35,7 @@ lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
 navigationCompose = "2.7.5"
 retrofit2KotlinxSerializationConverter = "1.0.0"
+playServicesWallet = "19.4.0"
 robolectric = "4.13"
 squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
@@ -78,6 +79,7 @@ lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-v
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
+play-services-wallet = { module = "com.google.android.gms:play-services-wallet", version.ref = "playServicesWallet" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
