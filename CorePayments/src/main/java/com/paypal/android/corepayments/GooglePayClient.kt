@@ -28,6 +28,7 @@ class GooglePayClient(
                 Log.d("GooglePayClient", "${result.error}")
                 TODO("handle error")
             }
+
             is GetGooglePayConfigResult.Success -> {
                 loadPaymentData(result.value)
             }
@@ -50,11 +51,11 @@ class GooglePayClient(
                 JSONObject()
                     .put("label", "Subtotal")
                     .put("type", "SUBTOTAL")
-                    .put("price", "100.00"),
+                    .put("price", "1.00"),
                 JSONObject()
                     .put("label", "Tax")
                     .put("type", "TAX")
-                    .put("price", "10.00"),
+                    .put("price", "0.00"),
             )
         )
 
@@ -63,7 +64,7 @@ class GooglePayClient(
             .put("countryCode", "US")
             .put("currencyCode", "USD")
             .put("totalPriceStatus", "FINAL")
-            .put("totalPrice", "110.00")
+            .put("totalPrice", "1.00")
             .put("totalPriceLabel", "Total")
 
         val request = JSONObject()
