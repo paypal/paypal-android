@@ -37,7 +37,7 @@ class GooglePayAPI(
         val buyerCountry = "US"
 
         // TODO: see if we need this
-        val merchantOrigin = ""
+        val merchantOrigin = "com.paypal.android.sdk"
 
         val variables = JSONObject()
             .put("clientId", coreConfig.clientId)
