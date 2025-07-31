@@ -23,7 +23,11 @@ class GooglePayClient(
 
     suspend fun start(): Task<PaymentData> {
         return when (val result = googlePayAPI.getGooglePayConfig()) {
-            is GetGooglePayConfigResult.Failure -> TODO("handle error")
+            is GetGooglePayConfigResult.Failure -> {
+                Log.d("GooglePayClient", "Failure")
+                Log.d("GooglePayClient", "${result.error}")
+                TODO("handle error")
+            }
             is GetGooglePayConfigResult.Success -> {
                 loadPaymentData(result.value)
             }
