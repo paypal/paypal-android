@@ -74,9 +74,9 @@ class GooglePayAPI(
             val googlePayConfigJSON = responseBody.getJSONObject("googlePayConfig")
             val isEligible = googlePayConfigJSON.getBoolean("isEligible")
             val allowedPaymentMethods =
-                googlePayConfigJSON.getJSONArray("allowedPaymentMethods")
+                googlePayConfigJSON.optJSONArray("allowedPaymentMethods")
             val merchantInfo =
-                googlePayConfigJSON.getJSONObject("merchantInfo")
+                googlePayConfigJSON.optJSONObject("merchantInfo")
             GetGooglePayConfigResult.Success(
                 GooglePayConfig(isEligible, allowedPaymentMethods, merchantInfo)
             )

@@ -18,7 +18,7 @@ class CreateOrderUseCase @Inject constructor(
         withContext(Dispatchers.IO) {
             val amountJSON = JSONObject()
                 .put("currencyCode", "USD")
-                .put("value", "10.99")
+                .put("value", "1.00")
 
             val purchaseUnitJSON = JSONObject()
                 .put("amount", amountJSON)
