@@ -32,6 +32,7 @@ lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
 navigationCompose = "2.7.5"
+playServicesWallet = "19.4.0"
 robolectric = "4.13"
 squareConverterGson = "2.11.0"
 squareLoggingInterceptor = "4.9.2"
@@ -74,6 +75,7 @@ lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime
 lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+play-services-wallet = { module = "com.google.android.gms:play-services-wallet", version.ref = "playServicesWallet" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
 square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
