@@ -13,6 +13,7 @@ androidxTestCore = "1.5.0"
 androidxTestRules = "1.5.0"
 androidxTestRunner = "1.5.2"
 androidxTestUiAutomator = "2.2.0"
+browser = "1.5.0"
 browserSwitch = "3.0.0-beta1"
 constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
@@ -42,6 +43,7 @@ striktMockk = "0.30.1"
 [libraries]
 android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppcompat" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-constraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
 androidx-coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
 androidx-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidxFragmentKtx" }
