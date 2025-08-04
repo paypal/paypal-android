@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypalweb
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +14,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.corepayments.LaunchChromeCustomTab
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
@@ -28,6 +31,7 @@ import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import kotlinx.coroutines.launch
 
 @Composable
 fun PayPalWebView(
@@ -50,6 +54,14 @@ fun PayPalWebView(
         viewModel.completeAuthChallenge(newIntent)
     }
 
+    // Ref: https://stackoverflow.com/a/67156998
+    val coroutineScope = rememberCoroutineScope()
+    val chromeCustomTabsLauncher =
+        rememberLauncherForActivityResult(LaunchChromeCustomTab()) { result ->
+            // forward result from activity launcher
+            viewModel.completeAuthChallenge(result)
+        }
+
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -60,7 +72,18 @@ fun PayPalWebView(
     ) {
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
-            Step2_StartPayPalWebCheckout(uiState, viewModel)
+            Step2_StartPayPalWebCheckout(
+                uiState = uiState,
+                viewModel = viewModel,
+                onPayPalCheckoutInitiated = {
+                    coroutineScope.launch {
+                        val activity = context.getActivityOrNull()
+                        activity?.let { viewModel.startWebCheckout(activity) }?.let { uri ->
+                            chromeCustomTabsLauncher.launch(uri)
+                        }
+                    }
+                }
+            )
         }
         if (uiState.isPayPalWebCheckoutSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
@@ -96,8 +119,11 @@ private fun Step1_CreateOrder(uiState: PayPalWebUiState, viewModel: PayPalWebVie
 }
 
 @Composable
-private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: PayPalWebViewModel) {
-    val context = LocalContext.current
+private fun Step2_StartPayPalWebCheckout(
+    uiState: PayPalWebUiState,
+    viewModel: PayPalWebViewModel,
+    onPayPalCheckoutInitiated: () -> Unit
+) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -110,7 +136,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
+            onClick = onPayPalCheckoutInitiated,
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

@@ -1,14 +1,18 @@
 package com.paypal.android.ui.paypalweb
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.corepayments.ChromeCustomTabsResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
@@ -91,18 +95,17 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun startWebCheckout(activity: ComponentActivity) {
+    suspend fun startWebCheckout(activity: ComponentActivity): Uri? {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            viewModelScope.launch {
-                startWebCheckoutWithOrderId(activity, orderId)
-            }
+            return startWebCheckoutWithOrderId(activity, orderId)
         }
+        return null
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String): Uri? {
         payPalWebCheckoutState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -119,8 +122,10 @@ class PayPalWebViewModel @Inject constructor(
 
                 val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
                 when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
-                    is PayPalPresentAuthChallengeResult.Success ->
+                    is PayPalPresentAuthChallengeResult.Success -> {
                         authState = startResult.authState
+                        return startResult.uri
+                    }
 
                     is PayPalPresentAuthChallengeResult.Failure ->
                         payPalWebCheckoutState = ActionState.Failure(startResult.error)
@@ -131,6 +136,7 @@ class PayPalWebViewModel @Inject constructor(
                 }
             }
         }
+        return null
     }
 
     fun completeOrder(context: Context) {
@@ -178,6 +184,14 @@ class PayPalWebViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun completeAuthChallenge(chromeCustomTabsResult: ChromeCustomTabsResult) {
+//        if (chromeCustomTabsResult.resultCode == Activity.RESULT_CANCELED) {
+//            val error = Exception("USER CANCELED")
+//            payPalWebCheckoutState = ActionState.Failure(error)
+//            discardAuthState()
+//        }
     }
 
     private fun discardAuthState() {
