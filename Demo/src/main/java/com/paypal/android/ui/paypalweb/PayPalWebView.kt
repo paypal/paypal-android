@@ -77,8 +77,7 @@ fun PayPalWebView(
                 viewModel = viewModel,
                 onPayPalCheckoutInitiated = {
                     coroutineScope.launch {
-                        val activity = context.getActivityOrNull()
-                        activity?.let { viewModel.startWebCheckout(activity) }?.let { uri ->
+                        viewModel.startWebCheckout()?.let { uri ->
                             chromeCustomTabsLauncher.launch(uri)
                         }
                     }

@@ -7,8 +7,6 @@ import androidx.activity.ComponentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchRequest
-import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -39,7 +37,6 @@ internal class PayPalWebLauncher(
     }
 
     fun launchPayPalWebCheckout(
-        activity: ComponentActivity,
         request: PayPalWebCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -50,7 +47,7 @@ internal class PayPalWebLauncher(
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(options)
     }
 
     fun launchPayPalWebVault(
@@ -65,11 +62,10 @@ internal class PayPalWebLauncher(
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_VAULT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(options)
     }
 
     private fun launchBrowserSwitch(
-        activity: ComponentActivity,
         options: BrowserSwitchOptions
     ): PayPalPresentAuthChallengeResult {
         // HACK: create auth state object for now

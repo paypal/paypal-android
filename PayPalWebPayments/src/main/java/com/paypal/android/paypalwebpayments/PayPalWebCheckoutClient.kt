@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.SessionStore
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
@@ -17,7 +18,8 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
-    private val payPalWebLauncher: PayPalWebLauncher
+    private val payPalWebLauncher: PayPalWebLauncher,
+    private val sessionStore: SessionStore
 ) {
 
     // for analytics tracking
@@ -34,6 +36,7 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
+        SessionStore()
     )
 
     /**
@@ -41,19 +44,21 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(
-        activity: ComponentActivity,
-        request: PayPalWebCheckoutRequest
-    ): PayPalPresentAuthChallengeResult {
+    fun start(request: PayPalWebCheckoutRequest): PayPalPresentAuthChallengeResult {
+        sessionStore.reset()
+
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+        val result = payPalWebLauncher.launchPayPalWebCheckout(request)
         when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
-                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                checkoutOrderId
-            )
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+                sessionStore.put("auth_state", result.authState)
+            }
 
             is PayPalPresentAuthChallengeResult.Failure ->
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)

@@ -52,7 +52,7 @@ class PayPalWebLauncherUnitTest {
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
         val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
+        sut.launchPayPalWebCheckout(request)
 
         val expectedUrl = "https://www.sandbox.paypal.com/checkoutnow?" +
                 "token=fake-order-id" +
@@ -80,7 +80,7 @@ class PayPalWebLauncherUnitTest {
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
         val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
+        sut.launchPayPalWebCheckout(request)
 
         val expectedUrl = "https://www.paypal.com/checkoutnow?" +
                 "token=fake-order-id" +
@@ -108,7 +108,7 @@ class PayPalWebLauncherUnitTest {
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
         val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
+        sut.launchPayPalWebCheckout(request)
 
         val expectedUrl = "https://www.paypal.com/checkoutnow?" +
                 "token=fake-order-id" +
@@ -136,7 +136,7 @@ class PayPalWebLauncherUnitTest {
 
         val fundingSource = PayPalWebCheckoutFundingSource.PAY_LATER
         val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
+        sut.launchPayPalWebCheckout(request)
 
         val expectedUrl = "https://www.paypal.com/checkoutnow?" +
                 "token=fake-order-id" +
@@ -163,7 +163,7 @@ class PayPalWebLauncherUnitTest {
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        val result = sut.launchPayPalWebCheckout(activity, request)
+        val result = sut.launchPayPalWebCheckout(request)
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
     }
@@ -229,7 +229,7 @@ class PayPalWebLauncherUnitTest {
         sut.launchPayPalWebVault(activity, vaultRequest)
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        val result = sut.launchPayPalWebCheckout(activity, request)
+        val result = sut.launchPayPalWebCheckout(request)
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
     }

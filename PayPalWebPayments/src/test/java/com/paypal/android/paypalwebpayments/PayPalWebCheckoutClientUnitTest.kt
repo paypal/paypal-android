@@ -36,21 +36,21 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() launches PayPal web checkout`() {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+        every { payPalWebLauncher.launchPayPalWebCheckout(any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(activity, request)
-        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+        sut.start(request)
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(request) }
     }
 
     @Test
     fun `start() notifies merchant of browser switch failure`() {
         val sdkError = PayPalSDKError(123, "fake error description")
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+        every { payPalWebLauncher.launchPayPalWebCheckout(any()) } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        val result = sut.start(activity, request)
+        val result = sut.start(request)
         assertSame(launchResult, result)
     }
 
