@@ -59,6 +59,10 @@ This SDK follows [Semantic Versioning](https://semver.org/). This SDK is publish
 
 This repository includes unit tests, integration tests, and end-to-end tests.
 
+```
+./gradlew test
+```
+
 // TODO: Add sections with commands for running each type of tests 
 
 ## Static Analysis Tools
