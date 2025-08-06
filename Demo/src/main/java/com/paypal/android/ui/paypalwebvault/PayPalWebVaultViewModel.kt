@@ -34,7 +34,6 @@ class PayPalWebVaultViewModel @Inject constructor(
         const val URL_SCHEME = "com.paypal.android.demo"
     }
 
-    private var authState: String? = null
     private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -96,12 +95,10 @@ class PayPalWebVaultViewModel @Inject constructor(
 
                 paypalClient = PayPalWebCheckoutClient(activity, coreConfig, URL_SCHEME)
                 when (val result = paypalClient?.vault(activity, request)) {
-                    is PayPalPresentAuthChallengeResult.Success ->
-                        authState = result.authState
-
                     is PayPalPresentAuthChallengeResult.Failure ->
                         vaultPayPalState = ActionState.Failure(result.error)
 
+                    is PayPalPresentAuthChallengeResult.Success,
                     null -> {
                         // do nothing for now
                     }
@@ -125,24 +122,21 @@ class PayPalWebVaultViewModel @Inject constructor(
     }
 
     private fun checkIfPayPalAuthFinished(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
-        authState?.let { paypalClient?.finishVault(intent, it) }
+        paypalClient?.finishVault(intent)
 
     fun completeAuthChallenge(intent: Intent) {
         checkIfPayPalAuthFinished(intent)?.let { result ->
             when (result) {
                 is PayPalWebCheckoutFinishVaultResult.Success -> {
                     vaultPayPalState = ActionState.Success(result)
-                    discardAuthState()
                 }
 
                 is PayPalWebCheckoutFinishVaultResult.Failure -> {
                     vaultPayPalState = ActionState.Failure(result.error)
-                    discardAuthState()
                 }
 
                 PayPalWebCheckoutFinishVaultResult.Canceled -> {
                     vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
-                    discardAuthState()
                 }
 
                 PayPalWebCheckoutFinishVaultResult.NoResult -> {
@@ -151,9 +145,5 @@ class PayPalWebVaultViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun discardAuthState() {
-        authState = null
     }
 }

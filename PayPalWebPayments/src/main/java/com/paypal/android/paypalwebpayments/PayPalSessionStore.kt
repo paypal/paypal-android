@@ -1,16 +1,18 @@
 package com.paypal.android.paypalwebpayments
 
-data class PayPalSessionStore(private val properties: MutableMap<String, String> = mutableMapOf()) {
+import com.paypal.android.corepayments.SessionStore
 
-    fun get(key: String): String? {
-        return properties[key]
-    }
+const val KEY_AUTH_STATE = "auth_state"
 
-    fun put(key: String, value: String) {
-        properties[key] = value
-    }
+class PayPalSessionStore() {
+    private val sessionStore = SessionStore()
 
-    fun reset() {
-        properties.clear()
-    }
+    internal var authState: String?
+        get() = sessionStore.get(KEY_AUTH_STATE)
+        set(value) = sessionStore.put(KEY_AUTH_STATE, value)
+
+    internal fun clear() = sessionStore.clear()
+    internal fun restore(base64EncodedJSON: String) = sessionStore.restore(base64EncodedJSON)
+
+    internal fun toBase64EncodedJSON() = sessionStore.toBase64EncodedJSON()
 }

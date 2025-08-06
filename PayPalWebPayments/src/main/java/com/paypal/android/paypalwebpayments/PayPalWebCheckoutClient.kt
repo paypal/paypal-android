@@ -21,6 +21,13 @@ class PayPalWebCheckoutClient internal constructor(
     private val sessionStore: PayPalSessionStore
 ) {
 
+    /**
+     * Capture instance state for later restoration. This can be useful for recovery during a
+     * process kill.
+     */
+    val instanceState: String
+        get() = sessionStore.toBase64EncodedJSON()
+
     // for analytics tracking
     private var checkoutOrderId: String? = null
     private var vaultSetupTokenId: String? = null
@@ -39,12 +46,19 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     /**
+     * Restore a feature client using instance state. @see [instanceState]
+     */
+    fun restore(instanceState: String) {
+        sessionStore.restore(instanceState)
+    }
+
+    /**
      * Confirm PayPal payment source for an order.
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(request: PayPalWebCheckoutRequest): PayPalPresentAuthChallengeResult {
-        sessionStore.reset()
+        sessionStore.clear()
 
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
@@ -56,7 +70,7 @@ class PayPalWebCheckoutClient internal constructor(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                     checkoutOrderId
                 )
-                sessionStore.put("auth_state", result.authState)
+                sessionStore.authState = result.authState
             }
 
             is PayPalPresentAuthChallengeResult.Failure ->
@@ -79,10 +93,13 @@ class PayPalWebCheckoutClient internal constructor(
 
         val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
         when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
-                VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                vaultSetupTokenId
-            )
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    vaultSetupTokenId
+                )
+                sessionStore.authState = result.authState
+            }
 
             is PayPalPresentAuthChallengeResult.Failure ->
                 analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, vaultSetupTokenId)
@@ -101,24 +118,31 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
      * authorization completed successfully.
      */
-    fun finishStart(intent: Intent, authState: String): PayPalWebCheckoutFinishStartResult {
-        val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
-        when (result) {
-            is PayPalWebCheckoutFinishStartResult.Success ->
-                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
+        sessionStore.authState?.let { authState ->
+            val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
+            when (result) {
+                is PayPalWebCheckoutFinishStartResult.Success -> {
+                    analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                    sessionStore.clear()
+                }
 
-            is PayPalWebCheckoutFinishStartResult.Canceled ->
-                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                    analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                    sessionStore.clear()
+                }
 
-            is PayPalWebCheckoutFinishStartResult.Failure ->
-                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                is PayPalWebCheckoutFinishStartResult.Failure -> {
+                    analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                    sessionStore.clear()
+                }
 
-            PayPalWebCheckoutFinishStartResult.NoResult -> {
-                // no analytics tracking required at the moment
+                PayPalWebCheckoutFinishStartResult.NoResult -> {
+                    // no analytics tracking required at the moment
+                }
             }
+            result
         }
-        return result
-    }
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
@@ -131,23 +155,30 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.vault]. This is needed to properly verify that an
      * authorization completed successfully.
      */
-    fun finishVault(intent: Intent, authState: String): PayPalWebCheckoutFinishVaultResult {
-        val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
-        // TODO: see if we can get setup token id from somewhere for tracking
-        when (result) {
-            is PayPalWebCheckoutFinishVaultResult.Success ->
-                analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
+    fun finishVault(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
+        sessionStore.authState?.let { authState ->
+            val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
+            // TODO: see if we can get setup token id from somewhere for tracking
+            when (result) {
+                is PayPalWebCheckoutFinishVaultResult.Success -> {
+                    analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
 
-            is PayPalWebCheckoutFinishVaultResult.Failure ->
-                analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
+                is PayPalWebCheckoutFinishVaultResult.Failure -> {
+                    analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
 
-            PayPalWebCheckoutFinishVaultResult.Canceled ->
-                analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
+                PayPalWebCheckoutFinishVaultResult.Canceled -> {
+                    analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
 
-            PayPalWebCheckoutFinishVaultResult.NoResult -> {
-                // no analytics tracking required at the moment
+                PayPalWebCheckoutFinishVaultResult.NoResult -> {
+                    // no analytics tracking required at the moment
+                }
             }
+            result
         }
-        return result
-    }
 }

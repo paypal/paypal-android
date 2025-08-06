@@ -81,7 +81,7 @@ internal class PayPalWebLauncher(
         val requestJSONBytes: ByteArray? =
             requestJSON.toString().toByteArray(StandardCharsets.UTF_8)
         val authState = Base64.encodeToString(requestJSONBytes, Base64.DEFAULT)
-        return PayPalPresentAuthChallengeResult.Success(authState = authState, uri = options.url!!)
+        return PayPalPresentAuthChallengeResult.Success(uri = options.url!!, authState = authState)
     }
 
     private fun buildPayPalCheckoutUri(
