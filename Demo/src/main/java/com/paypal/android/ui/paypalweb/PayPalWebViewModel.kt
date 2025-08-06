@@ -3,7 +3,9 @@ package com.paypal.android.ui.paypalweb
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -36,7 +38,8 @@ class PayPalWebViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
-    val completeOrderUseCase: CompleteOrderUseCase
+    val completeOrderUseCase: CompleteOrderUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     companion object {
@@ -48,6 +51,10 @@ class PayPalWebViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(PayPalWebUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        registerPayPalWebCheckoutClientSaveInstanceStateHandler()
+    }
 
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
@@ -81,6 +88,28 @@ class PayPalWebViewModel @Inject constructor(
         set(value) {
             _uiState.update { it.copy(fundingSource = value) }
         }
+
+    private fun registerPayPalWebCheckoutClientSaveInstanceStateHandler() {
+        savedStateHandle.setSavedStateProvider("pay_pal_web_view_model") {
+            val bundle = Bundle()
+            paypalClient?.instanceState?.let { instanceState ->
+                bundle.putString("instance_state", instanceState)
+            }
+            bundle
+        }
+    }
+
+    private fun restorePayPalWebCheckoutClientFromSavedInstanceState() {
+        // restore instance state
+        val savedStateBundle = savedStateHandle.get<Bundle>("pay_pal_web_view_model")
+        savedStateBundle?.let { bundle ->
+            bundle.getString("instance_state")?.let { instanceState ->
+                paypalClient?.restore(instanceState)
+            }
+        }
+        // make sure saved instance state is only restored once
+        savedStateHandle.remove<Bundle>("pay_pal_web_view_model")
+    }
 
     fun createOrder() {
         viewModelScope.launch {
@@ -116,6 +145,7 @@ class PayPalWebViewModel @Inject constructor(
 
                 paypalClient =
                     PayPalWebCheckoutClient(applicationContext, coreConfig, "com.paypal.android.demo")
+                restorePayPalWebCheckoutClientFromSavedInstanceState()
 
                 val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
                 when (val startResult = paypalClient?.start(checkoutRequest)) {

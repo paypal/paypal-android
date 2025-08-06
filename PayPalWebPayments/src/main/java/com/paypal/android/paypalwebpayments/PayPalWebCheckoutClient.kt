@@ -28,10 +28,6 @@ class PayPalWebCheckoutClient internal constructor(
     val instanceState: String
         get() = sessionStore.toBase64EncodedJSON()
 
-    // for analytics tracking
-    private var checkoutOrderId: String? = null
-    private var vaultSetupTokenId: String? = null
-
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
      *
@@ -59,22 +55,22 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun start(request: PayPalWebCheckoutRequest): PayPalPresentAuthChallengeResult {
         sessionStore.clear()
+        sessionStore.checkoutOrderId = request.orderId
 
-        checkoutOrderId = request.orderId
-        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+        analytics.notify(CheckoutEvent.STARTED, sessionStore.checkoutOrderId)
 
         val result = payPalWebLauncher.launchPayPalWebCheckout(request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    checkoutOrderId
+                    sessionStore.checkoutOrderId
                 )
                 sessionStore.authState = result.authState
             }
 
             is PayPalPresentAuthChallengeResult.Failure ->
-                analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
+                analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, sessionStore.checkoutOrderId)
         }
         return result
     }
@@ -88,21 +84,23 @@ class PayPalWebCheckoutClient internal constructor(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
-        vaultSetupTokenId = request.setupTokenId
-        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+        sessionStore.clear()
+
+        sessionStore.vaultSetupTokenId = request.setupTokenId
+        analytics.notify(VaultEvent.STARTED, sessionStore.vaultSetupTokenId)
 
         val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    vaultSetupTokenId
+                    sessionStore.vaultSetupTokenId
                 )
                 sessionStore.authState = result.authState
             }
 
             is PayPalPresentAuthChallengeResult.Failure ->
-                analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, vaultSetupTokenId)
+                analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, sessionStore.vaultSetupTokenId)
         }
         return result
     }
@@ -114,26 +112,23 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
-     * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
-     * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
-     * authorization completed successfully.
      */
     fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
         sessionStore.authState?.let { authState ->
             val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
             when (result) {
                 is PayPalWebCheckoutFinishStartResult.Success -> {
-                    analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                    analytics.notify(CheckoutEvent.SUCCEEDED, sessionStore.checkoutOrderId)
                     sessionStore.clear()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                    analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                    analytics.notify(CheckoutEvent.CANCELED, sessionStore.checkoutOrderId)
                     sessionStore.clear()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Failure -> {
-                    analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                    analytics.notify(CheckoutEvent.FAILED, sessionStore.checkoutOrderId)
                     sessionStore.clear()
                 }
 
@@ -151,9 +146,6 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
-     * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
-     * when calling [PayPalWebCheckoutClient.vault]. This is needed to properly verify that an
-     * authorization completed successfully.
      */
     fun finishVault(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
         sessionStore.authState?.let { authState ->
@@ -161,17 +153,17 @@ class PayPalWebCheckoutClient internal constructor(
             // TODO: see if we can get setup token id from somewhere for tracking
             when (result) {
                 is PayPalWebCheckoutFinishVaultResult.Success -> {
-                    analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
+                    analytics.notify(VaultEvent.SUCCEEDED, sessionStore.vaultSetupTokenId)
                     sessionStore.clear()
                 }
 
                 is PayPalWebCheckoutFinishVaultResult.Failure -> {
-                    analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
+                    analytics.notify(VaultEvent.FAILED, sessionStore.vaultSetupTokenId)
                     sessionStore.clear()
                 }
 
                 PayPalWebCheckoutFinishVaultResult.Canceled -> {
-                    analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
+                    analytics.notify(VaultEvent.CANCELED, sessionStore.vaultSetupTokenId)
                     sessionStore.clear()
                 }
 
