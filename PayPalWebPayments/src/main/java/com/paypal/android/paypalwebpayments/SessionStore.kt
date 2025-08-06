@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments
+package com.paypal.android.paypalwebpayments
 
 data class SessionStore(private val properties: MutableMap<String, String> = mutableMapOf()) {
 
