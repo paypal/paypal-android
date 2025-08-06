@@ -2,17 +2,24 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Base64
 import androidx.activity.ComponentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
+import java.nio.charset.StandardCharsets
+
+private const val KEY_REQUEST_CODE = "requestCode"
+private const val KEY_URL = "url"
+private const val KEY_RETURN_URL_SCHEME = "returnUrlScheme"
+private const val KEY_METADATA = "metadata"
+private const val KEY_APP_LINK_URI = "appLinkUri"
 
 // TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 internal class PayPalWebLauncher(
@@ -30,7 +37,6 @@ internal class PayPalWebLauncher(
     }
 
     fun launchPayPalWebCheckout(
-        activity: ComponentActivity,
         request: PayPalWebCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -41,7 +47,7 @@ internal class PayPalWebLauncher(
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(options)
     }
 
     fun launchPayPalWebVault(
@@ -56,23 +62,27 @@ internal class PayPalWebLauncher(
             .requestCode(BrowserSwitchRequestCodes.PAYPAL_VAULT)
             .returnUrlScheme(urlScheme)
             .metadata(metadata)
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(options)
     }
 
     private fun launchBrowserSwitch(
-        activity: ComponentActivity,
         options: BrowserSwitchOptions
-    ): PayPalPresentAuthChallengeResult =
-        when (val startResult = browserSwitchClient.start(activity, options)) {
-            is BrowserSwitchStartResult.Started -> {
-                PayPalPresentAuthChallengeResult.Success(startResult.pendingRequest)
-            }
-
-            is BrowserSwitchStartResult.Failure -> {
-                val error = PayPalWebCheckoutError.browserSwitchError(startResult.error)
-                PayPalPresentAuthChallengeResult.Failure(error)
-            }
+    ): PayPalPresentAuthChallengeResult {
+        // HACK: create auth state object for now
+        val requestJSON = options.run {
+            JSONObject()
+                .put(KEY_REQUEST_CODE, requestCode)
+                .put(KEY_URL, url.toString())
+                .putOpt(KEY_RETURN_URL_SCHEME, returnUrlScheme)
+                .putOpt(KEY_METADATA, metadata)
+                .putOpt(KEY_APP_LINK_URI, appLinkUri)
         }
+
+        val requestJSONBytes: ByteArray? =
+            requestJSON.toString().toByteArray(StandardCharsets.UTF_8)
+        val authState = Base64.encodeToString(requestJSONBytes, Base64.DEFAULT)
+        return PayPalPresentAuthChallengeResult.Success(uri = options.url!!, authState = authState)
+    }
 
     private fun buildPayPalCheckoutUri(
         orderId: String?,

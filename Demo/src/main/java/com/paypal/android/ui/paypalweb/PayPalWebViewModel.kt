@@ -2,13 +2,16 @@ package com.paypal.android.ui.paypalweb
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerResult
+import com.paypal.android.corepayments.ChromeCustomTabsResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
@@ -23,6 +26,7 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.GetClientIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -31,9 +35,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PayPalWebViewModel @Inject constructor(
+    @ApplicationContext val applicationContext: Context,
     val getClientIdUseCase: GetClientIdUseCase,
     val createOrderUseCase: CreateOrderUseCase,
-    val completeOrderUseCase: CompleteOrderUseCase
+    val completeOrderUseCase: CompleteOrderUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     companion object {
@@ -46,7 +52,9 @@ class PayPalWebViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayPalWebUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var authState: String? = null
+    init {
+        registerPayPalWebCheckoutClientSaveInstanceStateHandler()
+    }
 
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
@@ -81,6 +89,28 @@ class PayPalWebViewModel @Inject constructor(
             _uiState.update { it.copy(fundingSource = value) }
         }
 
+    private fun registerPayPalWebCheckoutClientSaveInstanceStateHandler() {
+        savedStateHandle.setSavedStateProvider("pay_pal_web_view_model") {
+            val bundle = Bundle()
+            paypalClient?.instanceState?.let { instanceState ->
+                bundle.putString("instance_state", instanceState)
+            }
+            bundle
+        }
+    }
+
+    private fun restorePayPalWebCheckoutClientFromSavedInstanceState() {
+        // restore instance state
+        val savedStateBundle = savedStateHandle.get<Bundle>("pay_pal_web_view_model")
+        savedStateBundle?.let { bundle ->
+            bundle.getString("instance_state")?.let { instanceState ->
+                paypalClient?.restore(instanceState)
+            }
+        }
+        // make sure saved instance state is only restored once
+        savedStateHandle.remove<Bundle>("pay_pal_web_view_model")
+    }
+
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
@@ -91,18 +121,17 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun startWebCheckout(activity: ComponentActivity) {
+    suspend fun startWebCheckout(): Uri? {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            viewModelScope.launch {
-                startWebCheckoutWithOrderId(activity, orderId)
-            }
+            return startWebCheckoutWithOrderId(orderId)
         }
+        return null
     }
 
-    private suspend fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private suspend fun startWebCheckoutWithOrderId(orderId: String): Uri? {
         payPalWebCheckoutState = ActionState.Loading
 
         when (val clientIdResult = getClientIdUseCase()) {
@@ -115,12 +144,14 @@ class PayPalWebViewModel @Inject constructor(
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 paypalClient =
-                    PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
+                    PayPalWebCheckoutClient(applicationContext, coreConfig, "com.paypal.android.demo")
+                restorePayPalWebCheckoutClientFromSavedInstanceState()
 
                 val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
-                when (val startResult = paypalClient?.start(activity, checkoutRequest)) {
-                    is PayPalPresentAuthChallengeResult.Success ->
-                        authState = startResult.authState
+                when (val startResult = paypalClient?.start(checkoutRequest)) {
+                    is PayPalPresentAuthChallengeResult.Success -> {
+                        return startResult.uri
+                    }
 
                     is PayPalPresentAuthChallengeResult.Failure ->
                         payPalWebCheckoutState = ActionState.Failure(startResult.error)
@@ -131,6 +162,7 @@ class PayPalWebViewModel @Inject constructor(
                 }
             }
         }
+        return null
     }
 
     fun completeOrder(context: Context) {
@@ -150,26 +182,23 @@ class PayPalWebViewModel @Inject constructor(
     }
 
     private fun checkIfPayPalAuthFinished(intent: Intent): PayPalWebCheckoutFinishStartResult? =
-        authState?.let { paypalClient?.finishStart(intent, it) }
+         paypalClient?.finishStart(intent)
 
     fun completeAuthChallenge(intent: Intent) {
         checkIfPayPalAuthFinished(intent)?.let { payPalAuthResult ->
             when (payPalAuthResult) {
                 is PayPalWebCheckoutFinishStartResult.Success -> {
                     payPalWebCheckoutState = ActionState.Success(payPalAuthResult)
-                    discardAuthState()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Canceled -> {
                     val error = Exception("USER CANCELED")
                     payPalWebCheckoutState = ActionState.Failure(error)
-                    discardAuthState()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Failure -> {
                     Log.i(TAG, "Checkout Error: ${payPalAuthResult.error.errorDescription}")
                     payPalWebCheckoutState = ActionState.Failure(payPalAuthResult.error)
-                    discardAuthState()
                 }
 
                 PayPalWebCheckoutFinishStartResult.NoResult -> {
@@ -180,7 +209,11 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    private fun discardAuthState() {
-        authState = null
+    fun completeAuthChallenge(chromeCustomTabsResult: ChromeCustomTabsResult) {
+//        if (chromeCustomTabsResult.resultCode == Activity.RESULT_CANCELED) {
+//            val error = Exception("USER CANCELED")
+//            payPalWebCheckoutState = ActionState.Failure(error)
+//            discardAuthState()
+//        }
     }
 }
