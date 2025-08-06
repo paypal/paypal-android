@@ -1,6 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
-data class SessionStore(private val properties: MutableMap<String, String> = mutableMapOf()) {
+data class PayPalSessionStore(private val properties: MutableMap<String, String> = mutableMapOf()) {
 
     fun get(key: String): String? {
         return properties[key]
