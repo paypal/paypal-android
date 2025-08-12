@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MutableMap<String, String?>.restoreFromBase64EncodedJSON(base64EncodedJSON: String) {
     clear()
-
     val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
     val requestJSONString = String(data, StandardCharsets.UTF_8)
     val requestJSON = JSONObject(requestJSONString)
@@ -21,7 +20,7 @@ fun MutableMap<String, String?>.restoreFromBase64EncodedJSON(base64EncodedJSON: 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MutableMap<String, String?>.toBase64EncodedJSON(): String {
     val propertiesAsJSON = JSONObject()
-    this.forEach { entry -> propertiesAsJSON.put(entry.key, entry.value) }
+    forEach { entry -> propertiesAsJSON.put(entry.key, entry.value) }
     val requestJSONBytes: ByteArray? =
         propertiesAsJSON.toString().toByteArray(StandardCharsets.UTF_8)
     return Base64.encodeToString(requestJSONBytes, Base64.DEFAULT)
