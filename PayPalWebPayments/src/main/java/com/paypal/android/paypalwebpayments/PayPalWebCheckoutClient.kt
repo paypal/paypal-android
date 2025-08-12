@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.SessionStore
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
@@ -12,14 +11,6 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
-
-internal class PayPalSessionStore() : SessionStore() {
-    internal var authState: String? by properties
-
-    // for analytics tracking
-    internal var checkoutOrderId: String? by properties
-    internal var vaultSetupTokenId: String? by properties
-}
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
