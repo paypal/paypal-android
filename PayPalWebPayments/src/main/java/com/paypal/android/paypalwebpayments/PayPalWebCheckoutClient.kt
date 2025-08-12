@@ -222,7 +222,6 @@ class PayPalWebCheckoutClient internal constructor(
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      */
-    @Deprecated("See finishStart(intent: Intent)")
     fun finishVault(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
         sessionStore.authState?.let { authState ->
             val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)

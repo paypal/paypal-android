@@ -37,7 +37,6 @@ class PayPalWebVaultViewModel @Inject constructor(
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
     private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig, URL_SCHEME)
 
-    private var authState: String? = null
     private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -88,8 +87,9 @@ class PayPalWebVaultViewModel @Inject constructor(
         vaultPayPalState = ActionState.Loading
 
         when (val result = paypalClient.vault(activity, request)) {
-            is PayPalPresentAuthChallengeResult.Success ->
-                authState = result.authState
+            is PayPalPresentAuthChallengeResult.Success -> {
+                // do nothing; wait for Chrome Custom Tab to return control back to the Demo app
+            }
 
             is PayPalPresentAuthChallengeResult.Failure ->
                 vaultPayPalState = ActionState.Failure(result.error)
@@ -110,36 +110,19 @@ class PayPalWebVaultViewModel @Inject constructor(
         }
     }
 
-    private fun checkIfPayPalAuthFinished(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
-        authState?.let { paypalClient.finishVault(intent, it) }
-
     fun completeAuthChallenge(intent: Intent) {
-        checkIfPayPalAuthFinished(intent)?.let { result ->
-            when (result) {
-                is PayPalWebCheckoutFinishVaultResult.Success -> {
-                    vaultPayPalState = ActionState.Success(result)
-                    discardAuthState()
-                }
+        paypalClient.finishVault(intent)?.let { result ->
+            vaultPayPalState = when (result) {
+                is PayPalWebCheckoutFinishVaultResult.Success -> ActionState.Success(result)
+                is PayPalWebCheckoutFinishVaultResult.Failure ->
+                    ActionState.Failure(result.error)
 
-                is PayPalWebCheckoutFinishVaultResult.Failure -> {
-                    vaultPayPalState = ActionState.Failure(result.error)
-                    discardAuthState()
-                }
+                PayPalWebCheckoutFinishVaultResult.Canceled ->
+                    ActionState.Failure(Exception("USER CANCELED"))
 
-                PayPalWebCheckoutFinishVaultResult.Canceled -> {
-                    vaultPayPalState = ActionState.Failure(Exception("USER CANCELED"))
-                    discardAuthState()
-                }
-
-                PayPalWebCheckoutFinishVaultResult.NoResult -> {
-                    // no result; re-enable PayPal button so user can retry
-                    vaultPayPalState = ActionState.Idle
-                }
+                // no result; re-enable PayPal button so user can retry
+                PayPalWebCheckoutFinishVaultResult.NoResult -> ActionState.Idle
             }
         }
-    }
-
-    private fun discardAuthState() {
-        authState = null
     }
 }
