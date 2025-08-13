@@ -9,10 +9,6 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
-import com.paypal.android.corepayments.model.AppSwitchEligibilityResponse
-import com.paypal.android.corepayments.model.ExternalResponse
-import com.paypal.android.corepayments.model.PatchCcoResponse
-import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import io.mockk.coEvery
@@ -680,15 +676,11 @@ class PayPalWebCheckoutClientUnitTest {
         }
     }
 
-    private fun createAppSwitchEligibilityResponse(redirectURL: String?): PatchCcoWithAppSwitchEligibilityResponse {
-        val appSwitchEligibility = AppSwitchEligibility(
+    private fun createAppSwitchEligibilityResponse(redirectURL: String?): AppSwitchEligibility {
+        return AppSwitchEligibility(
             appSwitchEligible = true,
-            redirectURL = redirectURL,
+            launchUrl = redirectURL,
             ineligibleReason = null
         )
-        val appSwitchEligibilityResponse = AppSwitchEligibilityResponse(appSwitchEligibility)
-        val patchCcoResponse = PatchCcoResponse(appSwitchEligibilityResponse)
-        val externalResponse = ExternalResponse(patchCcoResponse)
-        return PatchCcoWithAppSwitchEligibilityResponse(externalResponse)
     }
 }
