@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKErrorCode
+import com.paypal.android.corepayments.common.Headers
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -122,7 +123,7 @@ internal class GraphQLClientUnitTest {
     fun `send parses GraphQL success response`() = runTest {
         // language=JSON
         val successBody = """{ "data": { "fake": "success_data" } }"""
-        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+        val successHeaders = mapOf(Headers.PAYPAL_DEBUG_ID to "fake-debug-id")
         val successHttpResponse = HttpResponse(200, successHeaders, successBody)
         coEvery { http.send(any()) } returns successHttpResponse
 
@@ -137,7 +138,7 @@ internal class GraphQLClientUnitTest {
     fun `send returns an error when GraphQL response is successful with an empty body`() = runTest {
         // language=JSON
         val emptyBody = ""
-        val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+        val successHeaders = mapOf(Headers.PAYPAL_DEBUG_ID to "fake-debug-id")
         val successHttpResponse = HttpResponse(200, successHeaders, emptyBody)
         coEvery { http.send(any()) } returns successHttpResponse
 
@@ -155,7 +156,7 @@ internal class GraphQLClientUnitTest {
     fun `send returns an error when GraphQL response is successful with an invalid JSON body`() =
         runTest {
             val invalidJSON = """{ invalid: """
-            val successHeaders = mapOf("Paypal-Debug-Id" to "fake-debug-id")
+            val successHeaders = mapOf(Headers.PAYPAL_DEBUG_ID to "fake-debug-id")
             val successHttpResponse = HttpResponse(200, successHeaders, invalidJSON)
             coEvery { http.send(any()) } returns successHttpResponse
 
@@ -168,4 +169,56 @@ internal class GraphQLClientUnitTest {
             assertEquals(expectedErrorMessage, result.error.errorDescription)
             assertEquals("fake-debug-id", result.error.correlationId)
         }
+
+    @Test
+    fun `send includes custom headers when provided`() = runTest {
+        sut = GraphQLClient(sandboxConfig, http)
+        val customHeaders = mapOf(
+            "Authorization" to "Bearer test-token",
+            "Custom-Header" to "custom-value"
+        )
+
+        sut.send(graphQLRequestBody, headers = customHeaders)
+        coVerify { http.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals("Bearer test-token", httpRequest.headers["Authorization"])
+        assertEquals("custom-value", httpRequest.headers["Custom-Header"])
+        assertEquals("application/json", httpRequest.headers["Content-Type"])
+        assertEquals("application/json", httpRequest.headers["Accept"])
+        assertEquals("nativecheckout", httpRequest.headers["x-app-name"])
+        assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
+    fun `send works with query name and custom headers together`() = runTest {
+        sut = GraphQLClient(liveConfig, http)
+        val customHeaders = mapOf("Authorization" to "Bearer auth-token")
+
+        sut.send(graphQLRequestBody, "TestQuery", customHeaders)
+        coVerify { http.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals(URL("https://www.paypal.com/graphql?TestQuery"), httpRequest.url)
+        assertEquals("Bearer auth-token", httpRequest.headers["Authorization"])
+        assertEquals("https://www.paypal.com", httpRequest.headers["Origin"])
+    }
+
+    @Test
+    fun `send allows custom headers to override default headers`() = runTest {
+        sut = GraphQLClient(sandboxConfig, http)
+        val customHeaders = mapOf(
+            "Content-Type" to "application/custom",
+            "x-app-name" to "customapp"
+        )
+
+        sut.send(graphQLRequestBody, headers = customHeaders)
+        coVerify { http.send(capture(httpRequestSlot)) }
+
+        val httpRequest = httpRequestSlot.captured
+        assertEquals("application/custom", httpRequest.headers["Content-Type"])
+        assertEquals("customapp", httpRequest.headers["x-app-name"])
+        assertEquals("application/json", httpRequest.headers["Accept"])
+        assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
+    }
 }

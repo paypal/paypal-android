@@ -6,6 +6,7 @@ import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.RestClient
+import com.paypal.android.corepayments.model.APIResult
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -62,8 +63,8 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         assertEquals("application/x-www-form-urlencoded", headers["Content-Type"])
         assert(headers["Authorization"]!!.startsWith("Basic "))
 
-            assertTrue(result is CreateLowScopedAccessTokenResult.Success)
-            assertEquals("test-token", (result as CreateLowScopedAccessTokenResult.Success).token)
+            assertTrue(result is APIResult.Success)
+            assertEquals("test-token", (result as APIResult.Success).data)
     }
 
     @Test
@@ -80,8 +81,8 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertTrue(result is CreateLowScopedAccessTokenResult.Success)
-        assertEquals(expectedToken, (result as CreateLowScopedAccessTokenResult.Success).token)
+        assertTrue(result is APIResult.Success)
+        assertEquals(expectedToken, (result as APIResult.Success).data)
     }
 
     @Test
@@ -97,7 +98,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+        assertTrue(result is APIResult.Failure)
     }
 
     @Test
@@ -113,7 +114,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+        assertTrue(result is APIResult.Failure)
     }
 
     @Test
@@ -129,7 +130,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         val result = sut.createLowScopedAccessToken()
 
         // Then
-        assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+        assertTrue(result is APIResult.Failure)
         // Expected JSONException wrapped in PayPalSDKError
     }
 
@@ -147,8 +148,8 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
             val result = sut.createLowScopedAccessToken()
 
             // Then
-            assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
-            val error = (result as CreateLowScopedAccessTokenResult.Failure).error
+            assertTrue(result is APIResult.Failure)
+            val error = (result as APIResult.Failure).error
             assertTrue(error.errorDescription.contains("Missing access_token in response"))
     }
 
@@ -166,9 +167,9 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
             val result = sut.createLowScopedAccessToken()
 
         // Then
-            assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+            assertTrue(result is APIResult.Failure)
             val errorMessage =
-                (result as CreateLowScopedAccessTokenResult.Failure).error.errorDescription
+                (result as APIResult.Failure).error.errorDescription
         // The error description will be the empty body from the HTTP response
         assertEquals("", errorMessage)
     }
@@ -188,9 +189,9 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
             val result = sut.createLowScopedAccessToken()
 
         // Then
-            assertTrue(result is CreateLowScopedAccessTokenResult.Failure)
+            assertTrue(result is APIResult.Failure)
             val description =
-                (result as CreateLowScopedAccessTokenResult.Failure).error.errorDescription
+                (result as APIResult.Failure).error.errorDescription
         // The error description will be the error message from the HTTP response body
         assertEquals(errorMessage, description)
     }
@@ -220,11 +221,11 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         val authHeader = requestSlot.captured.headers!!["Authorization"]!!
         assert(authHeader.startsWith("Basic "))
 
-        // Decode and verify the Basic auth contains the client ID
+        // Decode and verify the Basic auth contains the client ID with colon
         val encodedCredentials = authHeader.substring("Basic ".length)
-        val decodedClientId =
+        val decodedCredentials =
             android.util.Base64.decode(encodedCredentials, android.util.Base64.DEFAULT)
                 .decodeToString()
-        assertEquals(clientId, decodedClientId)
+        assertEquals(clientId, decodedCredentials)
     }
 }
