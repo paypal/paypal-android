@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PayPalWebVaultViewModel @Inject constructor(
+class PayPalVaultViewModel @Inject constructor(
     val getClientIdUseCase: GetClientIdUseCase,
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
@@ -35,7 +35,7 @@ class PayPalWebVaultViewModel @Inject constructor(
     }
 
     private var authState: String? = null
-    private val _uiState = MutableStateFlow(PayPalWebVaultUiState())
+    private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
 
     private var paypalClient: PayPalWebCheckoutClient? = null
@@ -58,10 +58,17 @@ class PayPalWebVaultViewModel @Inject constructor(
             _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
+    var appSwitchWhenEligible: Boolean
+        get() = _uiState.value.appSwitchWhenEligible
+        set(value) {
+            _uiState.update { it.copy(appSwitchWhenEligible = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createPayPalSetupTokenUseCase().mapToActionState()
+            createSetupTokenState =
+                createPayPalSetupTokenUseCase(appSwitchWhenEligible).mapToActionState()
         }
     }
 
@@ -74,7 +81,10 @@ class PayPalWebVaultViewModel @Inject constructor(
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
-                val request = PayPalWebVaultRequest(setupTokenId)
+                val request = PayPalWebVaultRequest(
+                    setupTokenId,
+                    appSwitchWhenEligible
+                )
                 vaultSetupTokenWithRequest(activity, request)
             }
         }

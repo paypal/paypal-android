@@ -4,5 +4,6 @@ import com.paypal.android.api.model.OrderIntent
 
 data class OrderRequest(
     val intent: OrderIntent,
-    val shouldVault: Boolean = false
+    val shouldVault: Boolean = false,
+    val appSwitchWhenEligible: Boolean = false
 )

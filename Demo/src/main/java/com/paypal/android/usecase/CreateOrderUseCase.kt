@@ -42,6 +42,28 @@ class CreateOrderUseCase @Inject constructor(
 
                 orderRequest.put("payment_source", paymentSourceJSON)
             }
+            if (request.appSwitchWhenEligible) {
+
+                val nativeAppJSON = JSONObject()
+                    .put("app_url", APP_URL)
+
+                val experienceContextJSON = JSONObject()
+                    .put("return_url", SUCCESS_URL)
+                    .put("cancel_url", CANCEL_URL)
+                    .put("native_app", nativeAppJSON)
+
+                val paypalJSON = JSONObject()
+                    .put("experience_context", experienceContextJSON)
+
+                val paymentSourceJSON = JSONObject()
+                    .put("paypal", paypalJSON)
+
+                orderRequest.put("payment_source", paymentSourceJSON)
+            }
             sdkSampleServerAPI.createOrder(orderRequest)
         }
 }
+
+private const val APP_URL = "com.paypal.android.demo://"
+private const val SUCCESS_URL = "${APP_URL}success"
+private const val CANCEL_URL = "${APP_URL}cancel"
