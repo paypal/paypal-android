@@ -75,6 +75,16 @@ detekt {
 
 subprojects {
     group = "com.paypal.android"
+
+    afterEvaluate {
+        if (plugins.hasPlugin('org.jetbrains.kotlin.android')) {
+            kotlin {
+                abiValidation {
+                    enabled = project.name != 'Demo'
+                }
+            }
+        }
+    }
 }
 
 task incrementSnapshotVersion {

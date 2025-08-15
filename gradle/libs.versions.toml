@@ -15,17 +15,17 @@ androidxTestRunner = "1.5.2"
 androidxTestUiAutomator = "2.2.0"
 browserSwitch = "3.0.0-beta1"
 constraintLayout = "2.1.0"
-daggerHilt = "2.51.1"
+daggerHilt = "2.57"
 detektVersion = "1.22.0"
 googleMaterial = "1.4.0"
 gradleNexusPublishPlugin = "1.1.0"
 gradlePlayPublisher = "3.8.4"
 hiltNavigationCompose = "1.1.0"
-hiltVersion = "2.51.1"
+hiltVersion = "2.57"
 json = "20220320"
 jsonAssert = "1.4.0"
 junit = "4.13.2"
-kotlinVersion = "1.9.24"
+kotlinVersion = "2.2.10"
 kotlinxAndroidCoroutinesTest = "1.6.1"
 kotlinxCoroutinesAndroid = "1.6.1"
 lifecycleRuntimeCompose = "2.8.6"
@@ -93,3 +93,4 @@ gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePla
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
+kotlinComposeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }
