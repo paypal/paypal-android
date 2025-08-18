@@ -38,34 +38,34 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
     @Test
     fun `createLowScopedAccessToken() makes correct API request with proper headers and body`() =
         runTest {
-        // Given
-        val successResponse = HttpResponse(
-            status = 200,
-            body = """{"access_token": "test-token", "token_type": "Bearer", "expires_in": 3600}"""
-        )
-        coEvery { restClient.send(any()) } returns successResponse
+            // Given
+            val successResponse = HttpResponse(
+                status = 200,
+                body = """{"access_token": "test-token", "token_type": "Bearer", "expires_in": 3600}"""
+            )
+            coEvery { restClient.send(any()) } returns successResponse
 
-        val requestSlot = slot<APIRequest>()
+            val requestSlot = slot<APIRequest>()
 
-        // When
+            // When
             val result = sut.createLowScopedAccessToken()
 
-        // Then
-        coVerify { restClient.send(capture(requestSlot)) }
+            // Then
+            coVerify { restClient.send(capture(requestSlot)) }
 
-        val capturedRequest = requestSlot.captured
-        assertEquals("v1/oauth2/token", capturedRequest.path)
-        assertEquals(HttpMethod.POST, capturedRequest.method)
-        assertEquals("grant_type=client_credentials&response_type=token", capturedRequest.body)
+            val capturedRequest = requestSlot.captured
+            assertEquals("v1/oauth2/token", capturedRequest.path)
+            assertEquals(HttpMethod.POST, capturedRequest.method)
+            assertEquals("grant_type=client_credentials&response_type=token", capturedRequest.body)
 
-        // Verify headers
-        val headers = capturedRequest.headers!!
-        assertEquals("application/x-www-form-urlencoded", headers["Content-Type"])
-        assert(headers["Authorization"]!!.startsWith("Basic "))
+            // Verify headers
+            val headers = capturedRequest.headers!!
+            assertEquals("application/x-www-form-urlencoded", headers["Content-Type"])
+            assertTrue(headers["Authorization"]!!.startsWith("Basic "))
 
             assertTrue(result is APIResult.Success)
             assertEquals("test-token", (result as APIResult.Success).data)
-    }
+        }
 
     @Test
     fun `createLowScopedAccessToken() returns access token from successful response`() = runTest {
@@ -99,6 +99,11 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
 
         // Then
         assertTrue(result is APIResult.Failure)
+        val error = (result as APIResult.Failure).error
+        assertEquals(401, error.code)
+        val expectedErrorBody =
+            """{"error": "invalid_client", "error_description": "Client authentication failed"}"""
+        assertEquals(expectedErrorBody, error.errorDescription)
     }
 
     @Test
@@ -137,12 +142,12 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
     @Test
     fun `createLowScopedAccessToken() returns failure when access_token field is missing from successful response`() =
         runTest {
-        // Given
-        val successResponse = HttpResponse(
-            status = 200,
-            body = """{"token_type": "Bearer", "expires_in": 3600}"""
-        )
-        coEvery { restClient.send(any()) } returns successResponse
+            // Given
+            val successResponse = HttpResponse(
+                status = 200,
+                body = """{"token_type": "Bearer", "expires_in": 3600}"""
+            )
+            coEvery { restClient.send(any()) } returns successResponse
 
             // When
             val result = sut.createLowScopedAccessToken()
@@ -151,50 +156,50 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
             assertTrue(result is APIResult.Failure)
             val error = (result as APIResult.Failure).error
             assertTrue(error.errorDescription.contains("Missing access_token in response"))
-    }
+        }
 
     @Test
     fun `createLowScopedAccessToken() handles empty response body with proper error message`() =
         runTest {
-        // Given
-        val errorResponse = HttpResponse(
-            status = 500,
-            body = ""
-        )
-        coEvery { restClient.send(any()) } returns errorResponse
+            // Given
+            val errorResponse = HttpResponse(
+                status = 500,
+                body = ""
+            )
+            coEvery { restClient.send(any()) } returns errorResponse
 
-        // When
+            // When
             val result = sut.createLowScopedAccessToken()
 
-        // Then
+            // Then
             assertTrue(result is APIResult.Failure)
             val errorMessage =
                 (result as APIResult.Failure).error.errorDescription
-        // The error description will be the empty body from the HTTP response
-        assertEquals("", errorMessage)
-    }
+            // The error description will be the empty body from the HTTP response
+            assertEquals("", errorMessage)
+        }
 
     @Test
     fun `createLowScopedAccessToken() includes error message in exception when available`() =
         runTest {
-        // Given
-        val errorMessage = "Server temporarily unavailable"
-        val errorResponse = HttpResponse(
-            status = 503,
-            body = errorMessage
-        )
-        coEvery { restClient.send(any()) } returns errorResponse
+            // Given
+            val errorMessage = "Server temporarily unavailable"
+            val errorResponse = HttpResponse(
+                status = 503,
+                body = errorMessage
+            )
+            coEvery { restClient.send(any()) } returns errorResponse
 
-        // When
+            // When
             val result = sut.createLowScopedAccessToken()
 
-        // Then
+            // Then
             assertTrue(result is APIResult.Failure)
             val description =
                 (result as APIResult.Failure).error.errorDescription
-        // The error description will be the error message from the HTTP response body
-        assertEquals(errorMessage, description)
-    }
+            // The error description will be the error message from the HTTP response body
+            assertEquals(errorMessage, description)
+        }
 
     @Test
     fun `createLowScopedAccessToken() creates proper Basic Auth header from client ID`() = runTest {
@@ -219,7 +224,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
         coVerify { restClient.send(capture(requestSlot)) }
 
         val authHeader = requestSlot.captured.headers!!["Authorization"]!!
-        assert(authHeader.startsWith("Basic "))
+        assertTrue(authHeader.startsWith("Basic "))
 
         // Decode and verify the Basic auth contains the client ID with colon
         val encodedCredentials = authHeader.substring("Basic ".length)

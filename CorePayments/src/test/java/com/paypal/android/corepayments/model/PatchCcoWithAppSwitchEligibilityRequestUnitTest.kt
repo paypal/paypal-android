@@ -46,12 +46,15 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
         val result = request.create(context, resourceLoader)
 
         // Then
-        assertEquals(testQuery, result.getString("query"))
-        assertEquals(testVariables.tokenType, result.getJSONObject("variables").getString("tokenType"))
+        assertEquals(testQuery, result?.getString("query"))
+        assertEquals(
+            testVariables.tokenType,
+            result?.getJSONObject("variables")?.getString("tokenType")
+        )
     }
 
     @Test
-    fun `create returns empty query when resource loading fails`() = runTest {
+    fun `create returns null when resource loading fails`() = runTest {
         // Given
         val testVariables = Variables(
             tokenType = "VAULT_ID",
@@ -66,14 +69,10 @@ class PatchCcoWithAppSwitchEligibilityRequestUnitTest {
 
         // When
         val request = PatchCcoWithAppSwitchEligibilityRequest(testVariables)
-        try {
-            request.create(context, resourceLoader)
-            // This should not be reached since we expect an exception
-            assert(false) { "Expected APIClientError to be thrown" }
-        } catch (e: Exception) {
-            // Expected behavior when resource loading fails - verify it's the right exception
-            assert(e.message?.contains("Error creating GraphQL request") == true)
-        }
+        val result = request.create(context, resourceLoader)
+
+        // Then
+        assertEquals(null, result)
     }
 
     @Test

@@ -39,8 +39,8 @@ class GraphQLClient internal constructor(
     ): GraphQLResult {
         val body = graphQLRequestBody.toString()
         val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
-        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
         headers?.forEach { (key, value) -> httpRequestHeaders.put(key, value) }
+        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
 
         val httpResponse = http.send(httpRequest)
         val correlationId: String? = httpResponse.headers[Headers.PAYPAL_DEBUG_ID]

@@ -106,7 +106,7 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebCheckoutRequest,
         callback: PayPalWebCheckoutCallback
     ) {
-        launchWithCallback {
+        CoroutineScope(mainDispatcher).launch {
             callback.onPayPalWebCheckoutResult(start(activity, request))
         }
     }
@@ -164,7 +164,7 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest,
         callback: PayPalWebVaultCallback
     ) {
-        launchWithCallback {
+        CoroutineScope(mainDispatcher).launch {
             callback.onPayPalWebVaultResult(vault(activity, request))
         }
     }
@@ -286,12 +286,6 @@ class PayPalWebCheckoutClient internal constructor(
             }
         } else {
             fallbackUri
-        }
-    }
-
-    private fun launchWithCallback(block: suspend () -> Unit) {
-        CoroutineScope(mainDispatcher).launch {
-            block()
         }
     }
 }

@@ -2,7 +2,6 @@ package com.paypal.android.corepayments.model
 
 import android.content.Context
 import androidx.annotation.RawRes
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
@@ -16,13 +15,12 @@ internal data class PatchCcoWithAppSwitchEligibilityRequest(
     suspend fun create(
         context: Context,
         resourceLoader: ResourceLoader = ResourceLoader()
-    ): JSONObject {
+    ): JSONObject? {
         @RawRes val resId = R.raw.graphql_query_patch_cco_app_switch_eligibility
-            val query = when (val result = resourceLoader.loadRawResource(context, resId)) {
-                is LoadRawResourceResult.Success -> result.value
-
-                is LoadRawResourceResult.Failure -> throw APIClientError.graphQLRequestLoadError()
-            }
+        val query = when (val result = resourceLoader.loadRawResource(context, resId)) {
+            is LoadRawResourceResult.Success -> result.value
+            is LoadRawResourceResult.Failure -> return null
+        }
         val variablesJson = createVariablesJson(variables)
         return JSONObject()
             .put("query", query)
@@ -48,7 +46,8 @@ internal data class PatchCcoWithAppSwitchEligibilityRequest(
     }
 
     companion object {
-        const val INTEGRATION_ARTIFACT = "NATIVE_SDK" // todo: use Mobile SDK artifact after backend changes
+        const val INTEGRATION_ARTIFACT =
+            "NATIVE_SDK" // TODO: use Mobile SDK artifact after backend changes
         const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
         const val OS_TYPE = "ANDROID"
     }

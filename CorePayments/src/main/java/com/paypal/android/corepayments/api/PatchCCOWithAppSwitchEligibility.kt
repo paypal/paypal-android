@@ -37,12 +37,47 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         merchantOptInForAppSwitch: Boolean,
         paypalNativeAppInstalled: Boolean
     ): APIResult<AppSwitchEligibility> {
-        val token = when (val tokenResult =
-            authenticationSecureTokenServiceAPI.createLowScopedAccessToken()) {
-            is APIResult.Success -> tokenResult.data
-            is APIResult.Failure -> return APIResult.Failure(tokenResult.error)
+        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
+        if (tokenResult is APIResult.Failure) {
+            return APIResult.Failure(tokenResult.error)
         }
+        val token = (tokenResult as APIResult.Success).data
 
+        val patchCcoWithAppSwitchEligibilityRequestBody = createRequest(
+            tokenType = tokenType,
+            orderId = orderId,
+            merchantOptInForAppSwitch = merchantOptInForAppSwitch,
+            paypalNativeAppInstalled = paypalNativeAppInstalled,
+            context = context
+        )
+
+        return if (patchCcoWithAppSwitchEligibilityRequestBody == null) {
+            APIResult.Failure(APIClientError.graphQLRequestLoadError())
+        } else {
+            when (val result = graphQLClient.send(
+                graphQLRequestBody = patchCcoWithAppSwitchEligibilityRequestBody,
+                headers = mapOf(Headers.AUTHORIZATION to "Bearer $token")
+            )) {
+                is GraphQLResult.Success -> {
+                    parseResponse(result.data)?.let { appSwitchEligibility ->
+                        APIResult.Success(data = appSwitchEligibility)
+                    } ?: APIResult.Failure(
+                        APIClientError.dataParsingError(result.correlationId)
+                    )
+                }
+
+                is GraphQLResult.Failure -> APIResult.Failure(result.error)
+            }
+        }
+    }
+
+    private suspend fun createRequest(
+        tokenType: TokenType,
+        orderId: String,
+        merchantOptInForAppSwitch: Boolean,
+        paypalNativeAppInstalled: Boolean,
+        context: Context
+    ): JSONObject? {
         val variables = Variables(
             experimentationContext = ExperimentationContext(),
             tokenType = tokenType.name,
@@ -54,21 +89,7 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
 
         val patchCcoWithAppSwitchEligibilityRequestBody =
             PatchCcoWithAppSwitchEligibilityRequest(variables).create(context)
-
-        return when (val result = graphQLClient.send(
-            graphQLRequestBody = patchCcoWithAppSwitchEligibilityRequestBody,
-            headers = mapOf(Headers.AUTHORIZATION to "Bearer $token")
-        )) {
-            is GraphQLResult.Success -> {
-                parseResponse(result.data)?.let { appSwitchEligibility ->
-                    APIResult.Success(data = appSwitchEligibility)
-                } ?: APIResult.Failure(
-                    APIClientError.dataParsingError(result.correlationId)
-                )
-            }
-
-            is GraphQLResult.Failure -> APIResult.Failure(result.error)
-        }
+        return patchCcoWithAppSwitchEligibilityRequestBody
     }
 
     fun parseResponse(data: JSONObject?): AppSwitchEligibility? {
