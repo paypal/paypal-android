@@ -59,7 +59,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         val headersSlot = slot<Map<String, String>>()
 
         // When
-        sut.invoke(
+        sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
@@ -112,7 +112,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         val requestSlot = slot<JSONObject>()
 
         // When
-        sut.invoke(
+        sut(
             context = context,
             orderId = testOrderId,
             tokenType = tokenType,
@@ -143,7 +143,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
 
         // When
-        val result = sut.invoke(
+        val result = sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.VAULT_ID,
@@ -167,7 +167,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coEvery { graphQLClient.send(any(), any(), any()) } returns failureResponse
 
         // When
-        val result = sut.invoke(
+        val result = sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
@@ -193,7 +193,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponseWithNullData
 
         // When
-        val result = sut.invoke(
+        val result = sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
@@ -219,7 +219,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coEvery { graphQLClient.send(any(), any(), any()) } returns successResponse
 
         // When
-        val result = sut.invoke(
+        val result = sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
@@ -243,7 +243,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         val requestSlot = slot<JSONObject>()
 
         // When
-        sut.invoke(
+        sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.BILLING_TOKEN,
@@ -267,7 +267,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         )
 
         // When
-        val result = sut.invoke(
+        val result = sut(
             context = context,
             orderId = testOrderId,
             tokenType = TokenType.ORDER_ID,
