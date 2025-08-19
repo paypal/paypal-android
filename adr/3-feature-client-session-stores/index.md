@@ -86,3 +86,23 @@ class MyActivity: ComponentActivity() {
 
 ## Consequences
 
+**Positive Impacts**
+
+- Merchants no longer need to think about `authState` when finishing a browser-switched payment flow
+- The `finishStart(intent: Intent, authState: String)` method API is reduced to `finishStart(intent: Intent)`
+- Merchants no longer need to "discard" pending `authState`, making integration errors less likely
+- Merchant apps retain full control over their own persistence strategies while benefiting from simplified state management
+- We can deprecate the existing pattern, and merchants can be gradually migrated to this new pattern
+
+**Negative Impacts**
+
+- The SDK is responsible for serialization and deserialization of internal state, which increases implexity
+- Merchants will need to update their existing integrations to take advantage of the new feature
+- Instance state may need to be versioned to avoid schema collisions with new instance state formats
+- Instance state may become arbitrarily large as more internal state is preserved
+- We need to update the MIGRATION_GUIDE for this new pattern
+
+**Long-term Impact**
+
+- Future Feature Clients with browser and app-switched flows should follow this pattern for consistentcy
+- The SDK team must maintain robust testing around state serialization to prevent restoration errors
