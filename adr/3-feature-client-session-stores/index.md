@@ -16,24 +16,27 @@ class MyActivity: ComponentActivity() {
   private val payPalWebCheckoutClient =
       PayPalWebCheckoutClient(applicationContext, config, urlScheme)
   
-+ override fun onCreate(savedInstanceState: Bundle?) {
-+   super.onCreate(savedInstanceState)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    // the merchant app can restore feature clients using "instance state"
 +   savedInstanceState?.getString("pay_pal_instance_state")?.let { payPalState ->
 +     payPalWebCheckoutClient.restore(payPalState)
 +   }
-+ }
-+
-+ override fun onSaveInstanceState(outState: Bundle) {
-+   super.onSaveInstanceState(outState)
+  }
+ 
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    // instance state can be captured in any persistance store that supports strings;
+    // this example uses saved instance state for process kill recovery
 +   outState.putString("pay_pal_instance_state", payPalWebCheckoutClient.instanceState)
-+ }
+  }
 
   private fun payWithPayPal() {
     val checkoutRequest = PayPalWebCheckoutRequest(orderId = "ORDER_ID")
     when (val startResult = payPalWebCheckoutClient.start(this, checkoutRequest)) {
       is PayPalPresentAuthChallengeResult.Success -> {
-+       // authState is now a part of instance state; merchants will no longer
-+       // be required to capture this value
+        // authState is now a part of instance state; merchant apps will no longer
+        // be required to capture this value
 -       authState = startResult.authState
       }
 
@@ -44,6 +47,7 @@ class MyActivity: ComponentActivity() {
   }
 
   private fun checkIfPayPalAuthComplete(intent: Intent) {
+    // the merchant app no longer needs to provide "auth state" to the finishStart() method
 -   when (val payPalAuthResult = payPalWebCheckoutClient.finishStart(intent, authState)) {
 +   when (val payPalAuthResult = payPalWebCheckoutClient.finishStart(intent)) {
       is PayPalWebCheckoutFinishStartResult.Success -> {
