@@ -1,6 +1,10 @@
-# Feature Client Session Stores
+# Feature Client Instance State
 
 **Status: Pending**
+
+## Summary
+
+This ADR proposes creating an internal state handle for each Feature Client in the SDK to offer support for Android process-kill recovery for browser and app-switched flows. In addition to providing an opaque snapshot of each Feature Client's internal state to merchants, the SDK will automatically manage the persistence of internal state for each Feature Client. This refactor will reduce integration complexity, improve developer experience, and maintain reliable process kill recovery without imposing an opinion on the merchant app's architecture.
 
 ## Context
 
@@ -85,6 +89,8 @@ class MyActivity: ComponentActivity() {
 ```
 
 ## Consequences
+
+Here are potential positive, negative, and long term impacts that may result from this refactor:
 
 **Positive Impacts**
 
