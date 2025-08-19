@@ -10,7 +10,7 @@ This ADR proposes creating internal state handles for Feature Clients to offer s
 
 <dl>
   <dt><strong>Feature Client</strong></dt>
-  <dd>An SDK component that serves as a merchant-facing entry point to a payment method e.g. <code>CardClient</code>, <code>PayPalWebCheckoutClient</code>, etc.</dd>
+  <dd>An SDK component that serves as a merchant-facing entry point to a payment method e.g. <code>CardClient</code>, <code>PayPalWebCheckoutClient</code></dd>
   <dt><strong>Instance State</strong></dt>
   <dd>Serialized representation of a Feature Client's internal state used for persistence and restoration.</dd>
 </dl>
