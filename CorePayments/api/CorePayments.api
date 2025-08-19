@@ -1,0 +1,315 @@
+public final class com/paypal/android/corepayments/APIClientError {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/APIClientError;
+	public final fun clientIDNotFoundError (ILjava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun dataParsingError (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun getInvalidUrlRequest ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun getPayPalCheckoutError ()Lkotlin/jvm/functions/Function1;
+	public final fun getPayPalNativeCheckoutError ()Lkotlin/jvm/functions/Function2;
+	public final fun graphQLJSONParseError (Ljava/lang/String;Ljava/lang/Exception;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun httpURLConnectionError (ILjava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun noResponseData (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun serverResponseError (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun unknownError (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun unknownHost (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+}
+
+public final class com/paypal/android/corepayments/APIRequest {
+	public fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/HttpMethod;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/HttpMethod;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/paypal/android/corepayments/HttpMethod;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lcom/paypal/android/corepayments/HttpMethod;Ljava/lang/String;)Lcom/paypal/android/corepayments/APIRequest;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/APIRequest;Ljava/lang/String;Lcom/paypal/android/corepayments/HttpMethod;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/APIRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getMethod ()Lcom/paypal/android/corepayments/HttpMethod;
+	public final fun getPath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/Address : android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/Address;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/Address;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCountryCode ()Ljava/lang/String;
+	public final fun getExtendedAddress ()Ljava/lang/String;
+	public final fun getLocality ()Ljava/lang/String;
+	public final fun getPostalCode ()Ljava/lang/String;
+	public final fun getRegion ()Ljava/lang/String;
+	public final fun getStreetAddress ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/paypal/android/corepayments/Address$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/paypal/android/corepayments/Address;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/paypal/android/corepayments/Address;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/paypal/android/corepayments/BrowserSwitchRequestCodes {
+	public static final field CARD_APPROVE_ORDER I
+	public static final field CARD_VAULT I
+	public static final field INSTANCE Lcom/paypal/android/corepayments/BrowserSwitchRequestCodes;
+	public static final field PAYPAL_CHECKOUT I
+	public static final field PAYPAL_VAULT I
+}
+
+public final class com/paypal/android/corepayments/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field CLIENT_SDK_VERSION Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/paypal/android/corepayments/CoreConfig {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/paypal/android/corepayments/Environment;
+	public final fun copy (Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;)Lcom/paypal/android/corepayments/CoreConfig;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/CoreConfig;Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;ILjava/lang/Object;)Lcom/paypal/android/corepayments/CoreConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientId ()Ljava/lang/String;
+	public final fun getEnvironment ()Lcom/paypal/android/corepayments/Environment;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/CoreCoroutineExceptionHandler : kotlin/coroutines/AbstractCoroutineContextElement, kotlinx/coroutines/CoroutineExceptionHandler {
+	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+	public fun handleException (Lkotlin/coroutines/CoroutineContext;Ljava/lang/Throwable;)V
+}
+
+public final class com/paypal/android/corepayments/Environment : java/lang/Enum {
+	public static final field LIVE Lcom/paypal/android/corepayments/Environment;
+	public static final field SANDBOX Lcom/paypal/android/corepayments/Environment;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/Environment;
+	public static fun values ()[Lcom/paypal/android/corepayments/Environment;
+}
+
+public final class com/paypal/android/corepayments/HttpMethod : java/lang/Enum {
+	public static final field GET Lcom/paypal/android/corepayments/HttpMethod;
+	public static final field POST Lcom/paypal/android/corepayments/HttpMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/HttpMethod;
+	public static fun values ()[Lcom/paypal/android/corepayments/HttpMethod;
+}
+
+public final class com/paypal/android/corepayments/HttpResponse {
+	public static final field Companion Lcom/paypal/android/corepayments/HttpResponse$Companion;
+	public static final field SERVER_ERROR I
+	public static final field STATUS_UNDETERMINED I
+	public static final field STATUS_UNKNOWN_HOST I
+	public fun <init> (ILjava/util/Map;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (ILjava/util/Map;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Throwable;
+	public final fun copy (ILjava/util/Map;Ljava/lang/String;Ljava/lang/Throwable;)Lcom/paypal/android/corepayments/HttpResponse;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/HttpResponse;ILjava/util/Map;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/paypal/android/corepayments/HttpResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getError ()Ljava/lang/Throwable;
+	public final fun getHeaders ()Ljava/util/Map;
+	public final fun getStatus ()I
+	public fun hashCode ()I
+	public final fun isSuccessful ()Z
+	public final fun setSuccessful (Z)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/HttpResponse$Companion {
+	public final fun getSUCCESSFUL_STATUS_CODES ()Lkotlin/ranges/IntRange;
+}
+
+public abstract class com/paypal/android/corepayments/LoadRawResourceResult {
+}
+
+public final class com/paypal/android/corepayments/LoadRawResourceResult$Failure : com/paypal/android/corepayments/LoadRawResourceResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/corepayments/LoadRawResourceResult$Failure;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/LoadRawResourceResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/corepayments/LoadRawResourceResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/LoadRawResourceResult$Success : com/paypal/android/corepayments/LoadRawResourceResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/LoadRawResourceResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/LoadRawResourceResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/LoadRawResourceResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/OrderErrorDetail {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/OrderErrorDetail;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/OrderErrorDetail;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/OrderErrorDetail;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getIssue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/OrderStatus : java/lang/Enum {
+	public static final field APPROVED Lcom/paypal/android/corepayments/OrderStatus;
+	public static final field COMPLETED Lcom/paypal/android/corepayments/OrderStatus;
+	public static final field CREATED Lcom/paypal/android/corepayments/OrderStatus;
+	public static final field PAYER_ACTION_REQUIRED Lcom/paypal/android/corepayments/OrderStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/OrderStatus;
+	public static fun values ()[Lcom/paypal/android/corepayments/OrderStatus;
+}
+
+public final class com/paypal/android/corepayments/PayPalSDKError : java/lang/Exception {
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCode ()I
+	public final fun getCorrelationId ()Ljava/lang/String;
+	public final fun getErrorDescription ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/PayPalSDKErrorCode : java/lang/Enum {
+	public static final field CHECKOUT_ERROR Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field DATA_PARSING_ERROR Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field GRAPHQL_JSON_INVALID_ERROR Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field INVALID_URL_REQUEST Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field NATIVE_CHECKOUT_ERROR Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field NO_RESPONSE_DATA Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field SERVER_RESPONSE_ERROR Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field UNKNOWN Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static final field UNKNOWN_HOST Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+	public static fun values ()[Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
+}
+
+public final class com/paypal/android/corepayments/PaymentsJSON {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lorg/json/JSONObject;)V
+	public final fun getJson ()Lorg/json/JSONObject;
+	public final fun getLinkHref (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getString (Ljava/lang/String;)Ljava/lang/String;
+	public final fun optGetObject (Ljava/lang/String;)Lcom/paypal/android/corepayments/PaymentsJSON;
+	public final fun optMapObject (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun optMapObjectArray (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
+	public final fun optString (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/ResourceLoader {
+	public fun <init> ()V
+	public final fun loadRawResource (Landroid/content/Context;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/paypal/android/corepayments/RestClient {
+	public fun <init> (Lcom/paypal/android/corepayments/CoreConfig;)V
+	public final fun send (Lcom/paypal/android/corepayments/APIRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/paypal/android/corepayments/analytics/AnalyticsService {
+	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
+	public final fun sendAnalyticsEvent (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun sendAnalyticsEvent$default (Lcom/paypal/android/corepayments/analytics/AnalyticsService;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLClient {
+	public static final field Companion Lcom/paypal/android/corepayments/graphql/GraphQLClient$Companion;
+	public static final field PAYPAL_DEBUG_ID Ljava/lang/String;
+	public fun <init> (Lcom/paypal/android/corepayments/CoreConfig;)V
+	public final fun send (Lorg/json/JSONObject;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun send$default (Lcom/paypal/android/corepayments/graphql/GraphQLClient;Lorg/json/JSONObject;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLClient$Companion {
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLError {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lcom/paypal/android/corepayments/graphql/GraphQLError;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLError;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExtensions ()Ljava/util/List;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLExtension {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/graphql/GraphQLExtension;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLExtension;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLExtension;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getCorrelationId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/paypal/android/corepayments/graphql/GraphQLResult {
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLResult$Failure : com/paypal/android/corepayments/graphql/GraphQLResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Failure;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLResult$Success : com/paypal/android/corepayments/graphql/GraphQLResult {
+	public fun <init> ()V
+	public fun <init> (Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/json/JSONObject;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCorrelationId ()Ljava/lang/String;
+	public final fun getData ()Lorg/json/JSONObject;
+	public final fun getErrors ()Ljava/util/List;
+	public final fun getExtensions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

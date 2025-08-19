@@ -22,6 +22,7 @@ plugins {
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false
     alias libs.plugins.nexus.publishPlugin
+    alias libs.plugins.binaryCompatibilityValidator apply false
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo
@@ -75,6 +76,10 @@ detekt {
 
 subprojects {
     group = "com.paypal.android"
+    // Apply binary compatibility validator to all projects except Demo
+    if (project.name != 'Demo') {
+        apply plugin: libs.plugins.binaryCompatibilityValidator.get().pluginId
+    }
 }
 
 task incrementSnapshotVersion {
