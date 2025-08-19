@@ -6,11 +6,13 @@
 
 This ADR proposes creating internal state handles for Feature Clients to offer support for process-kill recovery in browser and app-switched flows. In addition to providing an opaque snapshot of each Feature Client's internal state to merchants, the SDK will automatically manage the persistence of internal state for each Feature Client. This refactor will reduce integration complexity, improve developer experience, and maintain reliable process kill recovery without imposing an opinion on the merchant app's architecture.
 
-## Definitions
+## Key Terms
 
 <dl>
   <dt><strong>Feature Client</strong></dt>
-  <dd>A client that serves as a merchant-facing entry point to a payment method e.g. `CardClient`, `PayPalWebCheckoutClient`, etc.</dd>
+  <dd>An SDK component that serves as a merchant-facing entry point to a payment method e.g. `CardClient`, `PayPalWebCheckoutClient`, etc.</dd>
+  <dt><strong>Instance State</strong></dt>
+  <dd>Serialized representation of a Feature Client's internal state used for persistence and restoration.</dd>
 </dl>
 
 ## Context
@@ -101,21 +103,21 @@ Here are potential positive, negative, and long term impacts that may result fro
 
 **Positive Impacts**
 
-- Merchants no longer need to think about `authState` when finishing a browser-switched payment flow
-- The `finishStart(intent: Intent, authState: String)` method API is reduced to `finishStart(intent: Intent)`
-- Merchants no longer need to "discard" pending `authState`, making integration errors less likely
-- Merchant apps retain full control over their own persistence strategies while benefiting from simplified state management
-- We can deprecate the existing pattern, and merchants can be gradually migrated to this new pattern
+1. Merchants no longer need to think about `authState` when finishing a browser-switched payment flow
+1. The `finishStart(intent: Intent, authState: String)` method API is reduced to `finishStart(intent: Intent)`
+1. Merchants no longer need to "discard" pending `authState`, making integration errors less likely
+1. Merchant apps retain full control over their own persistence strategies while benefiting from simplified state management
+1. We can deprecate the existing pattern, and merchants can be gradually migrated to this new pattern
 
 **Negative Impacts**
 
-- The SDK is responsible for serialization and deserialization of internal state, which increases complexity
-- Merchants will need to update their existing integrations to take advantage of the new feature
-- Instance state may need to be versioned to avoid schema collisions with new instance state formats
-- Instance state may become arbitrarily large as more internal state is preserved
-- We need to update the MIGRATION_GUIDE for this new pattern
+1. The SDK is responsible for serialization and deserialization of internal state, which increases complexity
+1. Merchants will need to update their existing integrations to take advantage of the new feature
+1. Instance state may need to be versioned to avoid schema collisions with new instance state formats
+1. Instance state may become arbitrarily large as more internal state is preserved
+1. We need to update the MIGRATION_GUIDE for this new pattern
 
 **Long-term Impact**
 
-- Future Feature Clients with browser and app-switched flows should follow this pattern for consistency
-- The SDK team must maintain robust testing around state serialization to prevent restoration errors
+1. Future Feature Clients with browser and app-switched flows should follow this pattern for consistency
+1. The SDK team must maintain robust testing around state serialization to prevent restoration errors
