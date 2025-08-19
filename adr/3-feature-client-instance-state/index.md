@@ -4,19 +4,26 @@
 
 ## Summary
 
-This ADR proposes creating an internal state handle for each Feature Client in the SDK to offer support for Android process-kill recovery for browser and app-switched flows. In addition to providing an opaque snapshot of each Feature Client's internal state to merchants, the SDK will automatically manage the persistence of internal state for each Feature Client. This refactor will reduce integration complexity, improve developer experience, and maintain reliable process kill recovery without imposing an opinion on the merchant app's architecture.
+This ADR proposes creating internal state handles for Feature Clients to offer support for process-kill recovery in browser and app-switched flows. In addition to providing an opaque snapshot of each Feature Client's internal state to merchants, the SDK will automatically manage the persistence of internal state for each Feature Client. This refactor will reduce integration complexity, improve developer experience, and maintain reliable process kill recovery without imposing an opinion on the merchant app's architecture.
+
+## Definitions
+
+<dl>
+  <dt><strong>Feature Client</strong></dt>
+  <dd>A client that serves as a merchant-facing entry point to a payment method e.g. `CardClient`, `PayPalWebCheckoutClient`, etc.</dd>
+</dl>
 
 ## Context
 
-In the past, specifically with the Braintree Android SDK, we made an attempt to improve the developer experience by providing our own solution for process recovery. We later found that our solution for process recovery was too opinonated for a small minority of merchant apps. The fact that many valid Android app architectures exist prevents us from providing a one-size-fits-all solution for process recovery–we simply cannot support every possible Android app architecture.
+In the past, specifically with the Braintree Android SDK, we made an attempt to improve the developer experience by providing our own solution for process recovery. We later found that our solution for process recovery was too opinionated for a small minority of merchant apps. The fact that many Android app architectures exist prevents us from providing a one-size-fits-all solution for process recovery–we simply cannot support every possible Android app architecture.
 
-Our current solution to allow merchants to recover from an Android process kill requires merchants to keep a reference to an `authState` value during a browser-switched flows. The merchant app is fully responsible for restoring itself after its process has been terminated by the Android OS.
+Our current solution to allow merchants to recover from an Android process kill requires merchants to keep a reference to an `authState` value during browser-switched flows. The merchant app is fully responsible for restoring itself after its process has been terminated by the Android OS.
 
 While the current solution does prevent the SDK having an opinion on how the merchant app should be architected, it is somewhat error prone. We not only require merchants to keep a reference to a pending `authState` value, we also require them to discard the same reference when an app switch has completed. This is necessary to prevent the SDK from attempting to handle an app switch that has already completed.
 
 ## Decision
 
-We can simplify merchant integrations by automatically managing authentication state. We can also prevent the SDK from becoming opinionated in regards to process kill by offering merchant apps a way to restore a Feature Client from a previous state.
+We can simplify merchant integrations by automatically managing `authState`. We can also offer merchant apps a way to restore a Feature Client from a previous state during process recovery.
 
 An `instanceState` property will give merchants a handle to a Feature Client's internal state as an opaque, base64 encoded string. To restore a Feature Client using `instanceState`, merchant apps can simply call `restore()` at any point in time. In practice, `restore()` and `instanceState` can be invoked in response to the lifecycle events of Android components, e.g. Activities, Fragments, ViewModels, etc.
 
@@ -40,7 +47,7 @@ class MyActivity: ComponentActivity() {
  
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    // instance state can be captured in any persistance store that supports strings;
+    // instance state can be captured in any persistent store that supports strings;
     // this example uses saved instance state for process kill recovery
 +   outState.putString("pay_pal_instance_state", payPalWebCheckoutClient.instanceState)
   }
@@ -102,7 +109,7 @@ Here are potential positive, negative, and long term impacts that may result fro
 
 **Negative Impacts**
 
-- The SDK is responsible for serialization and deserialization of internal state, which increases implexity
+- The SDK is responsible for serialization and deserialization of internal state, which increases complexity
 - Merchants will need to update their existing integrations to take advantage of the new feature
 - Instance state may need to be versioned to avoid schema collisions with new instance state formats
 - Instance state may become arbitrarily large as more internal state is preserved
@@ -110,5 +117,5 @@ Here are potential positive, negative, and long term impacts that may result fro
 
 **Long-term Impact**
 
-- Future Feature Clients with browser and app-switched flows should follow this pattern for consistentcy
+- Future Feature Clients with browser and app-switched flows should follow this pattern for consistency
 - The SDK team must maintain robust testing around state serialization to prevent restoration errors
