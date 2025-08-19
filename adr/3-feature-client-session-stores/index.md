@@ -12,7 +12,11 @@ While the current solution does prevent the SDK having an opinion on how the mer
 
 ## Decision
 
-TODO: Add a description of the decision itself
+We can simplify merchant integrations by automatically managing authentication state. We can also prevent the SDK from becoming opinionated in regards to process kill by offering merchant apps a way to restore a Feature Client from a previous state.
+
+An `instanceState` property will give merchants a handle to a Feature Client's internal state as an opaque, base64 encoded string. To restore a Feature Client using `instanceState`, merchant apps can simply call `restore()` at any point in time. In practice, `restore()` and `instanceState` can be invoked in response to the lifecycle events of Android components, e.g. Activities, Fragments, ViewModels, etc.
+
+In summary, this solution preserves merchant flexibility by allowing them to choose their own persistence strategy (Bundle, SharedPreferences, databases, etc.) while the SDK handles the complexity of Feature Client state management internally.
 
 ```diff
 class MyActivity: ComponentActivity() {
@@ -82,4 +86,3 @@ class MyActivity: ComponentActivity() {
 
 ## Consequences
 
-TODO: Add a description of the consequences related to the decision
