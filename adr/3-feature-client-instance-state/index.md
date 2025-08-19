@@ -6,7 +6,7 @@
 
 This ADR proposes creating internal state handles for Feature Clients to offer support for process-kill recovery in browser and app-switched flows. In addition to providing an opaque snapshot of each Feature Client's internal state to merchants, the SDK will automatically manage the persistence of internal state for each Feature Client. This refactor will reduce integration complexity, improve developer experience, and maintain reliable process kill recovery without imposing an opinion on the merchant app's architecture.
 
-## Key Terms
+### Key Terms
 
 <dl>
   <dt><strong>Feature Client</strong></dt>
