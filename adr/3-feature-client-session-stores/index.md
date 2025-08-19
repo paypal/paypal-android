@@ -47,7 +47,8 @@ class MyActivity: ComponentActivity() {
   }
 
   private fun checkIfPayPalAuthComplete(intent: Intent) {
-    // the merchant app no longer needs to provide "auth state" to the finishStart() method
+    // the merchant app no longer needs to provide "auth state" to the finishStart() method; the merchant app
+    // also no longer needs to discard its reference to "auth state" when complete
 -   when (val payPalAuthResult = payPalWebCheckoutClient.finishStart(intent, authState)) {
 +   when (val payPalAuthResult = payPalWebCheckoutClient.finishStart(intent)) {
       is PayPalWebCheckoutFinishStartResult.Success -> {
