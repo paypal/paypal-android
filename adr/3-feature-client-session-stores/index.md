@@ -8,7 +8,7 @@ TODO: Add a description of why this decision is being made
 
 ## Decision
 
-```kotlin
+```diff
 class MyActivity: ComponentActivity() {
     
     private val urlScheme =  "my.custom.url.scheme"
