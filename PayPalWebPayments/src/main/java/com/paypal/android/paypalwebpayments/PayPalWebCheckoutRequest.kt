@@ -5,8 +5,10 @@ package com.paypal.android.paypalwebpayments
  *
  * @param orderId The ID of the order to be approved.
  * @param fundingSource specify funding (credit, paylater or default)
+ * @param appSwitchWhenEligible whether to switch to the PayPal app when eligible
  */
 data class PayPalWebCheckoutRequest @JvmOverloads constructor(
     val orderId: String,
-    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
+    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
+    val appSwitchWhenEligible: Boolean = false
 )

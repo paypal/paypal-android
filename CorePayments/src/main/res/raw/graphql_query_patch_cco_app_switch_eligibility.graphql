@@ -1,0 +1,34 @@
+mutation PatchCcoWithAppSwitchEligibility(
+  $contextId: String!
+  $experimentationContext: externalExperimentationContextInput
+  $osType: externalOSType!
+  $merchantOptInForAppSwitch: Boolean!
+  $token: externalToken!
+  $tokenType: externalTokenType!
+  $integrationArtifact: externalIntegrationArtifactType!
+) {
+  external {
+    patchCcoWithAppSwitchEligibility(
+      appSwitchEligibilityInput: {
+        contextId: $contextId
+        experimentationContext: $experimentationContext
+        merchantOptInForAppSwitch: $merchantOptInForAppSwitch
+        osType: $osType
+        token: $token
+        tokenType: $tokenType
+      }
+      patchCcoInput: {
+        token: $token
+        clientConfig: {
+          integrationArtifact: $integrationArtifact
+        }
+      }
+    ) {
+      appSwitchEligibility {
+        appSwitchEligible
+        redirectURL
+        ineligibleReason
+      }
+    }
+  }
+}
