@@ -16,17 +16,17 @@ class MyActivity: ComponentActivity() {
     private val payPalWebCheckoutClient =
         PayPalWebCheckoutClient(applicationContext, config, urlScheme)
     
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        savedInstanceState?.getString("pay_pal_instance_state")?.let { payPalState ->
-            payPalWebCheckoutClient.restore(payPalState)
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("pay_pal_instance_state", payPalWebCheckoutClient.instanceState)
-    }
++   override fun onCreate(savedInstanceState: Bundle?) {
++       super.onCreate(savedInstanceState)
++       savedInstanceState?.getString("pay_pal_instance_state")?.let { payPalState ->
++           payPalWebCheckoutClient.restore(payPalState)
++       }
++   }
++
++   override fun onSaveInstanceState(outState: Bundle) {
++       super.onSaveInstanceState(outState)
++       outState.putString("pay_pal_instance_state", payPalWebCheckoutClient.instanceState)
++   }
 }
 ```
 
