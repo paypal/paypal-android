@@ -124,8 +124,11 @@ class PayPalCheckoutViewModel @Inject constructor(
                 val coreConfig = CoreConfig(clientIdResult.value)
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
-                paypalClient =
-                    PayPalWebCheckoutClient(activity, coreConfig, "com.paypal.android.demo")
+                paypalClient = PayPalWebCheckoutClient(
+                    context = activity,
+                    configuration = coreConfig,
+                    urlScheme = "com.paypal.android.demo"
+                )
 
                 val checkoutRequest =
                     PayPalWebCheckoutRequest(orderId, fundingSource, appSwitchWhenEligible)

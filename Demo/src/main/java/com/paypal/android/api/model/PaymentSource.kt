@@ -9,7 +9,6 @@ data class PaymentSource(
     val paypal: PayPalDetails? = null
 ) : Parcelable {
     companion object {
-
         internal fun fromJson(jsonObject: JSONObject): PaymentSource? {
             return jsonObject.optJSONObject("paypal")?.let {
                 PayPalDetails.fromJson(it)?.let { details ->
