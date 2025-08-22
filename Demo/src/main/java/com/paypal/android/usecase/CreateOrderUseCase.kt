@@ -1,5 +1,8 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants.APP_URL
+import com.paypal.android.DemoConstants.CANCEL_URL
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -39,6 +42,24 @@ class CreateOrderUseCase @Inject constructor(
 
                 val paymentSourceJSON = JSONObject()
                     .put("card", cardJSON)
+
+                orderRequest.put("payment_source", paymentSourceJSON)
+            }
+            if (request.appSwitchWhenEligible) {
+
+                val nativeAppJSON = JSONObject()
+                    .put("app_url", APP_URL)
+
+                val experienceContextJSON = JSONObject()
+                    .put("return_url", SUCCESS_URL)
+                    .put("cancel_url", CANCEL_URL)
+                    .put("native_app", nativeAppJSON)
+
+                val paypalJSON = JSONObject()
+                    .put("experience_context", experienceContextJSON)
+
+                val paymentSourceJSON = JSONObject()
+                    .put("paypal", paypalJSON)
 
                 orderRequest.put("payment_source", paymentSourceJSON)
             }

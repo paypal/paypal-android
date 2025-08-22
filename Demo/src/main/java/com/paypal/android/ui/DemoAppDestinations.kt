@@ -4,7 +4,7 @@ object DemoAppDestinations {
     const val CARD_APPROVE_ORDER = "card_approve_order"
     const val FEATURES_ROUTE = "features"
     const val CARD_VAULT = "card_vault"
-    const val PAYPAL_WEB = "paypal_web"
+    const val PAYPAL = "paypal"
     const val PAYPAL_WEB_VAULT = "paypal_web_vault"
     const val PAYPAL_BUTTONS = "paypal_buttons"
     const val PAYPAL_STATIC_BUTTONS = "paypal_static_buttons"
@@ -14,11 +14,11 @@ object DemoAppDestinations {
         CARD_APPROVE_ORDER -> "Card Approve Order"
         FEATURES_ROUTE -> "Features"
         CARD_VAULT -> "Vault Card"
-        PAYPAL_WEB -> "PayPal Web"
+        PAYPAL -> "PayPal"
         PAYPAL_BUTTONS -> "PayPal Buttons"
         PAYPAL_STATIC_BUTTONS -> "PayPal Static Buttons"
         SELECT_TEST_CARD -> "Select a Test Card"
-        PAYPAL_WEB_VAULT -> "PayPal Web Vault"
+        PAYPAL_WEB_VAULT -> "Paypal Vault"
         else -> "Demo"
     }
 }
