@@ -1,5 +1,8 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants.APP_URL
+import com.paypal.android.DemoConstants.CANCEL_URL
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -63,7 +66,3 @@ class CreateOrderUseCase @Inject constructor(
             sdkSampleServerAPI.createOrder(orderRequest)
         }
 }
-
-private const val APP_URL = "com.paypal.android.demo://"
-private const val SUCCESS_URL = "${APP_URL}success"
-private const val CANCEL_URL = "${APP_URL}cancel"

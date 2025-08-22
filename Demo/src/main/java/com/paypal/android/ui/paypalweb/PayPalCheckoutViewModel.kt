@@ -94,7 +94,7 @@ class PayPalCheckoutViewModel @Inject constructor(
                 OrderRequest(
                     intent = intentOption,
                     shouldVault = false,
-                    appSwitchWhenEligible = this.appSwitchWhenEligible
+                    appSwitchWhenEligible = appSwitchWhenEligible
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -125,7 +125,7 @@ class PayPalCheckoutViewModel @Inject constructor(
                 payPalDataCollector = PayPalDataCollector(coreConfig)
 
                 paypalClient = PayPalWebCheckoutClient(
-                    context = activity,
+                    context = activity.applicationContext,
                     configuration = coreConfig,
                     urlScheme = "com.paypal.android.demo"
                 )

@@ -1,6 +1,9 @@
 package com.paypal.android.usecase
 
 import com.google.gson.JsonParser
+import com.paypal.android.DemoConstants.APP_URL
+import com.paypal.android.DemoConstants.CANCEL_URL
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -52,7 +55,3 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
             sdkSampleServerAPI.createPayPalSetupToken(jsonObject)
         }
 }
-
-private const val APP_URL = "com.paypal.android.demo://"
-private const val SUCCESS_URL = "${APP_URL}success"
-private const val CANCEL_URL = "${APP_URL}cancel"

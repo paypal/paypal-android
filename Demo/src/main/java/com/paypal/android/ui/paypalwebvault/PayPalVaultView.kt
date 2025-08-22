@@ -59,42 +59,32 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_WebOrNativeCheckoutHeader(uiState, viewModel)
-        Step2_CreateSetupToken(uiState, viewModel)
+        Step1_CreateSetupToken(uiState, viewModel)
         if (uiState.isCreateSetupTokenSuccessful) {
-            Step3_VaultPayPal(uiState, viewModel)
+            Step2_VaultPayPal(uiState, viewModel)
         }
         if (uiState.isVaultPayPalSuccessful) {
-            Step4_CreatePaymentToken(uiState, viewModel)
+            Step3_CreatePaymentToken(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-fun Step1_WebOrNativeCheckoutHeader(uiState: PayPalVaultUiState, viewModel: PayPalVaultViewModel) {
-    StepHeader(stepNumber = 1, title = "Select web or app switch checkout")
-    Column(
-        verticalArrangement = UIConstants.spacingMedium
-    ) {
-        BooleanOptionList(
-            title = stringResource(id = R.string.app_switch_when_available),
-            selectedOption = uiState.appSwitchWhenEligible,
-            onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun Step2_CreateSetupToken(
+private fun Step1_CreateSetupToken(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 2, title = "Create Setup Token")
+        StepHeader(stepNumber = 1, title = "Create Setup Token")
+        BooleanOptionList(
+            title = stringResource(id = R.string.app_switch_when_available),
+            selectedOption = uiState.appSwitchWhenEligible,
+            onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
+            modifier = Modifier.fillMaxWidth()
+        )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
             successTitle = "SETUP TOKEN CREATED",
@@ -110,7 +100,7 @@ private fun Step2_CreateSetupToken(
 }
 
 @Composable
-private fun Step3_VaultPayPal(
+private fun Step2_VaultPayPal(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
@@ -118,7 +108,7 @@ private fun Step3_VaultPayPal(
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Vault PayPal")
+        StepHeader(stepNumber = 2, title = "Vault PayPal")
         ActionButtonColumn(
             defaultTitle = "VAULT PAYPAL",
             successTitle = "PAYPAL VAULTED",
@@ -138,14 +128,14 @@ private fun Step3_VaultPayPal(
 }
 
 @Composable
-private fun Step4_CreatePaymentToken(
+private fun Step3_CreatePaymentToken(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 4, title = "Create Payment Token")
+        StepHeader(stepNumber = 3, title = "Create Payment Token")
         ActionButtonColumn(
             defaultTitle = "CREATE PAYMENT TOKEN",
             successTitle = "PAYMENT TOKEN CREATED",
