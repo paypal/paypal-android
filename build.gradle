@@ -76,10 +76,6 @@ detekt {
 
 subprojects {
     group = "com.paypal.android"
-    // Apply binary compatibility validator to all projects except Demo
-    if (project.name != 'Demo') {
-        apply plugin: libs.plugins.binaryCompatibilityValidator.get().pluginId
-    }
 }
 
 task incrementSnapshotVersion {
