@@ -50,7 +50,7 @@ class UpdateClientConfigAPI(
     ): UpdateClientConfigResult {
         val variables = JSONObject()
             .put("orderID", params.orderId)
-            .put("fundingSource", params.fundingSource)
+//            .put("fundingSource", params.fundingSource)
             .put("integrationArtifact", Defaults.INTEGRATION_ARTIFACT)
             .put("userExperienceFlow", Defaults.USER_EXPERIENCE_FLOW)
             .put("productFlow", Defaults.PRODUCT_FLOW)

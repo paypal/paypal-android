@@ -10,10 +10,8 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -24,8 +22,7 @@ import kotlinx.coroutines.launch
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val updateClientConfigAPI: UpdateClientConfigAPI,
-    private val payPalWebLauncher: PayPalWebLauncher,
-    private val dispatcher: CoroutineDispatcher
+    private val payPalWebLauncher: PayPalWebLauncher
 ) {
 
     // for analytics tracking
@@ -42,8 +39,7 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         UpdateClientConfigAPI(context, configuration),
-        PayPalWebLauncher(urlScheme, configuration),
-        dispatcher = Dispatchers.Main
+        PayPalWebLauncher(urlScheme, configuration)
     )
 
     /**
@@ -57,7 +53,9 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
-        updateCCO(request)
+        runBlocking(Dispatchers.IO) {
+            updateCCO(request)
+        }
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
@@ -157,17 +155,15 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    private fun updateCCO(request: PayPalWebCheckoutRequest) {
-        CoroutineScope(dispatcher).launch {
-            val fundingSource = when (request.fundingSource) {
-                PayPalWebCheckoutFundingSource.PAYPAL -> "payPal"
-                else -> request.fundingSource.value
-            }
-            val params =
-                UpdateClientConfigParams(orderId = request.orderId, fundingSource = fundingSource)
-            // ignore result; in the rare occasion this call fails, we will still allow
-            // the transaction to proceed
-            updateClientConfigAPI.updateClientConfig(params = params)
+    private suspend fun updateCCO(request: PayPalWebCheckoutRequest) {
+        val fundingSource = when (request.fundingSource) {
+            PayPalWebCheckoutFundingSource.PAYPAL -> "payPal"
+            else -> request.fundingSource.value
         }
+        val params =
+            UpdateClientConfigParams(orderId = request.orderId, fundingSource = fundingSource)
+        // ignore result; in the rare occasion this call fails, we will still allow
+        // the transaction to proceed
+        updateClientConfigAPI.updateClientConfig(params = params)
     }
 }

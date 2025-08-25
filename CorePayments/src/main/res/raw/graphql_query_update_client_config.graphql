@@ -1,14 +1,12 @@
 mutation UpdateClientConfig(
     $orderID: String!,
-    $fundingSource: ButtonFundingSourceType!,
     $integrationArtifact: IntegrationArtifactType!,
     $userExperienceFlow: UserExperienceFlowType!,
     $productFlow: ProductFlowType!,
     $buttonSessionID: String
 ) {
     updateClientConfig(
-        token: $orderID
-        fundingSource: $fundingSource
+        token: $orderID,
         integrationArtifact: $integrationArtifact,
         userExperienceFlow: $userExperienceFlow,
         productFlow: $productFlow,
