@@ -17,7 +17,8 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
  */
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
-    private val payPalWebLauncher: PayPalWebLauncher
+    private val payPalWebLauncher: PayPalWebLauncher,
+    private val sessionStore: PayPalWebCheckoutSessionStore
 ) {
 
     // for analytics tracking
@@ -34,6 +35,7 @@ class PayPalWebCheckoutClient internal constructor(
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(urlScheme, configuration),
+        PayPalWebCheckoutSessionStore()
     )
 
     /**
@@ -50,10 +52,15 @@ class PayPalWebCheckoutClient internal constructor(
 
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
-                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                checkoutOrderId
-            )
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
 
             is PayPalPresentAuthChallengeResult.Failure ->
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
@@ -97,6 +104,10 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
      * authorization completed successfully.
      */
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishStart(intent).",
+        replaceWith = ReplaceWith("finishStart(intent)")
+    )
     fun finishStart(intent: Intent, authState: String): PayPalWebCheckoutFinishStartResult {
         val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
         when (result) {
@@ -108,6 +119,40 @@ class PayPalWebCheckoutClient internal constructor(
 
             is PayPalWebCheckoutFinishStartResult.Failure ->
                 analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+
+            PayPalWebCheckoutFinishStartResult.NoResult -> {
+                // no analytics tracking required at the moment
+            }
+        }
+        return result
+    }
+
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [PayPalWebCheckoutClient.start]), call this method to see if a user has
+     * successfully authorized a PayPal account as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
+    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult {
+        val authState = sessionStore.authState ?: return PayPalWebCheckoutFinishStartResult.NoResult
+        val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
+        when (result) {
+            is PayPalWebCheckoutFinishStartResult.Success -> {
+                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                sessionStore.clear()
+            }
+
+            is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                sessionStore.clear()
+            }
+
+            is PayPalWebCheckoutFinishStartResult.Failure -> {
+                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                sessionStore.clear()
+            }
 
             PayPalWebCheckoutFinishStartResult.NoResult -> {
                 // no analytics tracking required at the moment
