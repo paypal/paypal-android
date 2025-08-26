@@ -225,7 +225,7 @@ class SDKSampleServerAPI {
 
         PayPalPaymentToken(
             id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id")
+            customerId = customerJSON.getString("id"),
         )
     }
 
@@ -256,7 +256,8 @@ class SDKSampleServerAPI {
     }
 
     private fun parseOrder(json: JSONObject): Order {
-        val cardJSON = json.optJSONObject("payment_source")?.optJSONObject("card")
+        val paymentSourceJson = json.optJSONObject("payment_source")
+        val cardJSON = paymentSourceJson?.optJSONObject("card")
         val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
         val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
 

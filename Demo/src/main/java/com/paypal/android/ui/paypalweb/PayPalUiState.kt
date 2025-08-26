@@ -6,12 +6,13 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.uishared.state.ActionState
 
-data class PayPalWebUiState(
+data class PayPalUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
-    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL
+    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
+    val appSwitchWhenEligible: Boolean = false,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
