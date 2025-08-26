@@ -18,7 +18,7 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
-    private val sessionStore: PayPalWebCheckoutSessionStore
+    private val sessionStore: PayPalWebCheckoutSessionStore = PayPalWebCheckoutSessionStore()
 ) {
 
     // for analytics tracking
@@ -34,8 +34,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        PayPalWebLauncher(urlScheme, configuration),
-        PayPalWebCheckoutSessionStore()
+        PayPalWebLauncher(urlScheme, configuration)
     )
 
     /**
