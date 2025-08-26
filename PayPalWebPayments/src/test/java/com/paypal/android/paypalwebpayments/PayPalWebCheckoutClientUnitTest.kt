@@ -170,7 +170,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state clears session to prevent delivering success twice`() {
+    fun `finishStart() with session auth state clears session to prevent delivering success event twice`() {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
@@ -182,6 +182,37 @@ class PayPalWebCheckoutClientUnitTest {
 
         sut.start(activity, PayPalWebCheckoutRequest("fake-order-id"))
         assertSame(successResult, sut.finishStart(intent))
+        assertNull(sut.finishStart(intent))
+    }
+
+    @Test
+    fun `finishStart() with session auth state clears session to prevent delivering error event twice`() {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns failureResult
+
+        sut.start(activity, PayPalWebCheckoutRequest("fake-order-id"))
+        assertSame(failureResult, sut.finishStart(intent))
+        assertNull(sut.finishStart(intent))
+    }
+
+    @Test
+    fun `finishStart() with session auth state clears session to prevent delivering cancellation event twice`() {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+
+        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order_id")
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns canceledResult
+
+        sut.start(activity, PayPalWebCheckoutRequest("fake-order-id"))
+        assertSame(canceledResult, sut.finishStart(intent))
         assertNull(sut.finishStart(intent))
     }
 
