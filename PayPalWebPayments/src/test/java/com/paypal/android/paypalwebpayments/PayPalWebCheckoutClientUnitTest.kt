@@ -79,7 +79,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() forwards success result from auth launcher`() {
+    fun `finishStart() with user auth state forwards success result from auth launcher`() {
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
         every {
@@ -91,8 +91,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() forwards error result from auth launcher`() {
-
+    fun `finishStart() with user auth state forwards error result from auth launcher`() {
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
         every {
@@ -100,6 +99,40 @@ class PayPalWebCheckoutClientUnitTest {
         } returns failureResult
 
         val result = sut.finishStart(intent, "auth state")
+        assertSame(failureResult, result)
+    }
+
+    @Test
+    fun `finishStart() with session auth state forwards success result from auth launcher`() {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+
+        val successResult =
+            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns successResult
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        sut.start(activity, request)
+        val result = sut.finishStart(intent)
+        assertSame(successResult, result)
+    }
+
+    @Test
+    fun `finishStart() with session auth state forwards error result from auth launcher`() {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns failureResult
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        sut.start(activity, request)
+        val result = sut.finishStart(intent)
         assertSame(failureResult, result)
     }
 
