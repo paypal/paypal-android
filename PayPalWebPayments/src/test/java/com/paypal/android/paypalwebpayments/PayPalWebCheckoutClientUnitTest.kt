@@ -713,7 +713,7 @@ class PayPalWebCheckoutClientUnitTest {
             coVerify(exactly = 0) {
                 patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
             }
-            verify { 
+            verify {
                 payPalWebLauncher.launchWithUrl(
                     activity = activity,
                     uri = any(),
@@ -744,7 +744,7 @@ class PayPalWebCheckoutClientUnitTest {
             coVerify(exactly = 0) {
                 patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
             }
-            verify { 
+            verify {
                 payPalWebLauncher.launchWithUrl(
                     activity = activity,
                     uri = any(),
@@ -775,7 +775,7 @@ class PayPalWebCheckoutClientUnitTest {
             coVerify(exactly = 0) {
                 patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
             }
-            verify { 
+            verify {
                 payPalWebLauncher.launchWithUrl(
                     activity = activity,
                     uri = any(),
@@ -806,7 +806,7 @@ class PayPalWebCheckoutClientUnitTest {
             coVerify(exactly = 0) {
                 patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
             }
-            verify { 
+            verify {
                 payPalWebLauncher.launchWithUrl(
                     activity = activity,
                     uri = any(),
