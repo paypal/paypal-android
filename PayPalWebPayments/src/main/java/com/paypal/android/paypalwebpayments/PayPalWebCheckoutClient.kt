@@ -135,31 +135,31 @@ class PayPalWebCheckoutClient internal constructor(
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      */
-    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult {
-        val authState = sessionStore.authState ?: return PayPalWebCheckoutFinishStartResult.NoResult
-        val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
-        when (result) {
-            is PayPalWebCheckoutFinishStartResult.Success -> {
-                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
-                sessionStore.clear()
-            }
+    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
+        sessionStore.authState?.let { authState ->
+            val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
+            when (result) {
+                is PayPalWebCheckoutFinishStartResult.Success -> {
+                    analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                    sessionStore.clear()
+                }
 
-            is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
-                sessionStore.clear()
-            }
+                is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                    analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                    sessionStore.clear()
+                }
 
-            is PayPalWebCheckoutFinishStartResult.Failure -> {
-                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
-                sessionStore.clear()
-            }
+                is PayPalWebCheckoutFinishStartResult.Failure -> {
+                    analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                    sessionStore.clear()
+                }
 
-            PayPalWebCheckoutFinishStartResult.NoResult -> {
-                // no analytics tracking required at the moment
+                PayPalWebCheckoutFinishStartResult.NoResult -> {
+                    // no analytics tracking required at the moment
+                }
             }
+            result
         }
-        return result
-    }
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
