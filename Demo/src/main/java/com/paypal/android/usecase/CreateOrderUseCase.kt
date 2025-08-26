@@ -1,5 +1,8 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants.APP_URL
+import com.paypal.android.DemoConstants.CANCEL_URL
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -45,29 +48,14 @@ class CreateOrderUseCase @Inject constructor(
             if (request.appSwitchWhenEligible) {
 
                 val nativeAppJSON = JSONObject()
-                    .put("os_type", "ANDROID")
-                    .put("os_version", "35")
-
-                val appSwitchPreferenceJSON = JSONObject()
                     .put("app_url", APP_URL)
-                    .put("launch_paypal_app", true)
-                    .put("os_type", "ANDROID")
-                    .put("os_version", "35")
-                    .put("native_app", nativeAppJSON)
 
                 val experienceContextJSON = JSONObject()
-                    .put("brand_name", "AA Logos")
-                    .put("landing_page", "LOGIN")
-                    .put("shipping_preference", "NO_SHIPPING")
                     .put("return_url", SUCCESS_URL)
                     .put("cancel_url", CANCEL_URL)
-                    .put("payment_method_preference", "IMMEDIATE_PAYMENT_REQUIRED")
-                    .put("payment_method_selected", "PAYPAL")
-                    .put("user_action", "PAY_NOW")
-                    .put("app_switch_preference", appSwitchPreferenceJSON)
+                    .put("native_app", nativeAppJSON)
 
                 val paypalJSON = JSONObject()
-                    .put("email_address", "sb-ze5t741841447@personal.example.com")
                     .put("experience_context", experienceContextJSON)
 
                 val paymentSourceJSON = JSONObject()
@@ -78,7 +66,3 @@ class CreateOrderUseCase @Inject constructor(
             sdkSampleServerAPI.createOrder(orderRequest)
         }
 }
-
-private const val APP_URL = "com.paypal.android.demo://"
-private const val SUCCESS_URL = "${APP_URL}success"
-private const val CANCEL_URL = "${APP_URL}cancel"
