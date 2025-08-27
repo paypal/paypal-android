@@ -33,7 +33,7 @@ class DeviceInspectorUnitTest {
             packageManager.getApplicationInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
         } returns ApplicationInfo()
 
-        val result = sut.isPayPalInstalled()
+        val result = sut.isPayPalInstalled
 
         assertTrue(result)
     }
@@ -44,7 +44,7 @@ class DeviceInspectorUnitTest {
             packageManager.getApplicationInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
         } throws PackageManager.NameNotFoundException("Package not found")
 
-        val result = sut.isPayPalInstalled()
+        val result = sut.isPayPalInstalled
 
         assertFalse(result)
     }
@@ -55,7 +55,7 @@ class DeviceInspectorUnitTest {
             packageManager.getApplicationInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
         } throws RuntimeException("Unexpected error")
 
-        val result = sut.isPayPalInstalled()
+        val result = sut.isPayPalInstalled
 
         assertFalse(result)
     }

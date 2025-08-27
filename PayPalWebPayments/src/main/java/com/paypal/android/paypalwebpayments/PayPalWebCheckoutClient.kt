@@ -6,10 +6,10 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
-import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -275,7 +275,7 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchWhenEligible: Boolean,
         fallbackUri: Uri
     ): Uri {
-        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled()) {
+        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = context,
                 orderId = token,
