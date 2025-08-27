@@ -108,7 +108,7 @@ class PayPalWebViewModel @Inject constructor(
         val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
         when (val startResult = paypalClient.start(activity, checkoutRequest)) {
             is PayPalPresentAuthChallengeResult.Success -> {
-                /* do nothing; wait for user to authenticate PayPal */
+                // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
             }
 
             is PayPalPresentAuthChallengeResult.Failure ->
