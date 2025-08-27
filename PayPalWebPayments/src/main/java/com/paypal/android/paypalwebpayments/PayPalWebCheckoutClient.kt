@@ -9,6 +9,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
+import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -29,9 +30,10 @@ class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
+    private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
     private val urlScheme: String,
-    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
 
     // for analytics tracking
@@ -49,6 +51,7 @@ class PayPalWebCheckoutClient internal constructor(
         PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         PayPalWebLauncher(),
         PatchCCOWithAppSwitchEligibility(configuration),
+        DeviceInspector(context),
         configuration,
         urlScheme
     )
@@ -272,7 +275,7 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchWhenEligible: Boolean,
         fallbackUri: Uri
     ): Uri {
-        return if (appSwitchWhenEligible) {
+        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = context,
                 orderId = token,

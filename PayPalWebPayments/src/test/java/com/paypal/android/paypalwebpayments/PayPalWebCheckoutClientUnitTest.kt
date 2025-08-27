@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
+import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
 import com.paypal.android.corepayments.model.TokenType
@@ -26,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("LargeClass")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
@@ -33,6 +35,7 @@ class PayPalWebCheckoutClientUnitTest {
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
     private lateinit var patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility
+    private lateinit var deviceInspector: DeviceInspector
     private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
     private val urlScheme = "com.example.app"
     private val testDispatcher = StandardTestDispatcher()
@@ -47,10 +50,12 @@ class PayPalWebCheckoutClientUnitTest {
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
         patchCCOWithAppSwitchEligibility = mockk(relaxed = true)
+        deviceInspector = mockk(relaxed = true)
         sut = PayPalWebCheckoutClient(
             analytics,
             payPalWebLauncher,
             patchCCOWithAppSwitchEligibility,
+            deviceInspector,
             coreConfig,
             urlScheme,
             testDispatcher
@@ -239,6 +244,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() uses app switch when enabled and app switch URL is available`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
         val appSwitchResponse = createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -269,11 +275,11 @@ class PayPalWebCheckoutClientUnitTest {
         // Then
         coVerify {
             patchCCOWithAppSwitchEligibility(
-                activity.applicationContext,
-                "fake-order-id",
-                TokenType.ORDER_ID,
-                true,
-                true
+                context = activity.applicationContext,
+                orderId = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                merchantOptInForAppSwitch = true,
+                paypalNativeAppInstalled = true
             )
         }
         verify {
@@ -292,6 +298,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() falls back to web checkout when app switch is enabled but URL is null`() =
         runTest {
             // Given
+            every { deviceInspector.isPayPalInstalled } returns true
             val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
             val appSwitchResponse = createAppSwitchEligibilityResponse(null)
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -324,6 +331,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() falls back to web checkout when app switch is enabled but empty URL is returned`() =
         runTest {
             // Given
+            every { deviceInspector.isPayPalInstalled } returns true
             val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
             val appSwitchResponse = createAppSwitchEligibilityResponse("")
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -355,6 +363,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() falls back to web checkout when app switch request fails`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
@@ -427,6 +436,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() uses correct token type in app switch request`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebCheckoutRequest("test-order-123", appSwitchWhenEligible = true)
         val appSwitchResponse = createAppSwitchEligibilityResponse("https://test.com")
 
@@ -458,6 +468,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() uses app switch when enabled and app switch URL is available`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = true)
         val appSwitchResponse =
             createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
@@ -511,6 +522,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() falls back to web vault when app switch is enabled but URL is null`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = true)
         val appSwitchResponse = createAppSwitchEligibilityResponse(null)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -529,7 +541,11 @@ class PayPalWebCheckoutClientUnitTest {
         // Then
         coVerify {
             patchCCOWithAppSwitchEligibility(
-                activity.applicationContext, "fake-setup-token-id", TokenType.VAULT_ID, true, true
+                context = activity.applicationContext,
+                orderId = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                merchantOptInForAppSwitch = true,
+                paypalNativeAppInstalled = true
             )
         }
         verify {
@@ -548,6 +564,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `vault() falls back to web vault when app switch is enabled but empty URL is returned`() =
         runTest {
             // Given
+            every { deviceInspector.isPayPalInstalled } returns true
             val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = true)
             val appSwitchResponse = createAppSwitchEligibilityResponse("")
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -579,6 +596,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() falls back to web vault when app switch request fails`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = true)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
@@ -650,6 +668,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() uses correct token type in app switch request`() = runTest {
         // Given
+        every { deviceInspector.isPayPalInstalled } returns true
         val request = PayPalWebVaultRequest("test-setup-123", appSwitchWhenEligible = true)
         val appSwitchResponse = createAppSwitchEligibilityResponse("https://test.com")
 
@@ -675,6 +694,130 @@ class PayPalWebCheckoutClientUnitTest {
             )
         }
     }
+
+    @Test
+    fun `start() skips app switch when app switch enabled but PayPal app not installed`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns false
+            val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            val result = sut.start(activity, request)
+
+            // Then
+            coVerify(exactly = 0) {
+                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
+            }
+            verify {
+                payPalWebLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = any(),
+                    token = "fake-order-id",
+                    tokenType = TokenType.ORDER_ID,
+                    returnUrlScheme = urlScheme
+                )
+            }
+            assertSame(launchResult, result)
+        }
+
+    @Test
+    fun `vault() skips app switch when app switch enabled but PayPal app not installed`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns false
+            val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = true)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            val result = sut.vault(activity, request)
+
+            // Then
+            coVerify(exactly = 0) {
+                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
+            }
+            verify {
+                payPalWebLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = any(),
+                    token = "fake-setup-token-id",
+                    tokenType = TokenType.VAULT_ID,
+                    returnUrlScheme = urlScheme
+                )
+            }
+            assertSame(launchResult, result)
+        }
+
+    @Test
+    fun `start() uses web checkout when app switch disabled regardless of PayPal app installation`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns true
+            val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = false)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            val result = sut.start(activity, request)
+
+            // Then
+            coVerify(exactly = 0) {
+                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
+            }
+            verify {
+                payPalWebLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = any(),
+                    token = "fake-order-id",
+                    tokenType = TokenType.ORDER_ID,
+                    returnUrlScheme = urlScheme
+                )
+            }
+            assertSame(launchResult, result)
+        }
+
+    @Test
+    fun `vault() uses web vault when app switch disabled regardless of PayPal app installation`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns true
+            val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = false)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            val result = sut.vault(activity, request)
+
+            // Then
+            coVerify(exactly = 0) {
+                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
+            }
+            verify {
+                payPalWebLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = any(),
+                    token = "fake-setup-token-id",
+                    tokenType = TokenType.VAULT_ID,
+                    returnUrlScheme = urlScheme
+                )
+            }
+            assertSame(launchResult, result)
+        }
 
     private fun createAppSwitchEligibilityResponse(redirectURL: String?): AppSwitchEligibility {
         return AppSwitchEligibility(
