@@ -176,6 +176,10 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.vault]. This is needed to properly verify that an
      * authorization completed successfully.
      */
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishVault(intent).",
+        replaceWith = ReplaceWith("finishVault(intent)")
+    )
     fun finishVault(intent: Intent, authState: String): PayPalWebCheckoutFinishVaultResult {
         val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
         // TODO: see if we can get setup token id from somewhere for tracking
