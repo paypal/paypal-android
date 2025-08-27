@@ -79,7 +79,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with user auth state forwards success result from auth launcher`() {
+    fun `finishStart() with merchant provided auth state forwards success result from auth launcher`() {
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
         every {
@@ -91,7 +91,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with user auth state forwards error result from auth launcher`() {
+    fun `finishStart() with merchant provided auth state forwards error result from auth launcher`() {
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
         every {
@@ -103,7 +103,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with user auth state forwards cancellation result from auth launcher`() {
+    fun `finishStart() with merchant provided auth state forwards cancellation result from auth launcher`() {
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
@@ -216,7 +216,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishVault() with user auth forwards vault success from PayPal web launcher`() {
+    fun `finishVault() with merchant provided auth forwards vault success from PayPal web launcher`() {
         val successResult =
             PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
         every {
@@ -229,7 +229,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishVault() with user auth notifies merchant of vault failure`() {
+    fun `finishVault() with merchant provided auth notifies merchant of vault failure`() {
         val error = PayPalSDKError(123, "fake-error-description")
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
@@ -241,7 +241,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishVault with user auth forwards vault cancellation`() {
+    fun `finishVault with merchant provided auth forwards vault cancellation`() {
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
@@ -251,7 +251,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishVault with user auth forwards no result`() {
+    fun `finishVault with merchant provided auth forwards no result`() {
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.NoResult
