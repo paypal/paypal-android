@@ -213,7 +213,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `finishApproveOrder() notifies merchant of approve order success`() = runTest {
+    fun `finishApproveOrder() with merchant provided auth state notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val successResult = CardFinishApproveOrderResult.Success(
@@ -230,7 +230,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `finishApproveOrder() notifies merchant of approve order failure`() = runTest {
+    fun `finishApproveOrder() with merchant provided auth state notifies merchant of approve order failure`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(123, "fake-error-description")
@@ -244,7 +244,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `finishApproveOrder() notifies merchant of approve order cancelation`() = runTest {
+    fun `finishApproveOrder() with merchant provided auth state notifies merchant of approve order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val canceledResult = CardFinishApproveOrderResult.Canceled
@@ -254,6 +254,38 @@ class CardClientUnitTest {
 
         val result = sut.finishApproveOrder(intent, "auth state")
         assertSame(canceledResult, result)
+    }
+    @Test
+    fun `finishApproveOrder() with session auth state notifies merchant of approve order success`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        every {
+            cardAuthLauncher.presentAuthChallenge(any(), any())
+        } returns CardPresentAuthChallengeResult.Success("auth state")
+
+        val successResult = CardFinishApproveOrderResult.Success(
+            orderId = "fake-order-id",
+            status = OrderStatus.APPROVED.name,
+            didAttemptThreeDSecureAuthentication = false
+        )
+        every {
+            cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
+        } returns successResult
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+        sut.presentAuthChallenge(activity, authChallenge)
+
+        val actual = sut.finishApproveOrder(intent)
+        assertSame(successResult, actual)
+    }
+
+    @Test
+    fun `finishApproveOrder() with session auth state notifies merchant of approve order failure`() = runTest {
+    }
+
+    @Test
+    fun `finishApproveOrder() with session auth state notifies merchant of approve order cancelation`() = runTest {
     }
 
     @Test
