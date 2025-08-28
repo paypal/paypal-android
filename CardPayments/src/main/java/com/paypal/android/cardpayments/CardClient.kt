@@ -2,8 +2,8 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import com.paypal.android.cardpayments.analytics.ApproveOrderEvent
 import com.paypal.android.cardpayments.analytics.CardAnalytics
 import com.paypal.android.cardpayments.analytics.VaultEvent
@@ -73,7 +73,7 @@ class CardClient internal constructor(
                     } else {
                         analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_REQUIRED, approveOrderId)
 
-                        val url = Uri.parse(response.payerActionHref)
+                        val url = response.payerActionHref.toUri()
                         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
                         val result = CardApproveOrderResult.AuthorizationRequired(authChallenge)
                         callback.onCardApproveOrderResult(result)
@@ -114,7 +114,7 @@ class CardClient internal constructor(
                         updateSetupTokenResult.run { CardVaultResult.Success(setupTokenId, status) }
                     } else {
                         analytics.notify(VaultEvent.AUTH_CHALLENGE_REQUIRED, vaultSetupTokenId)
-                        val url = Uri.parse(approveHref)
+                        val url = approveHref.toUri()
                         val authChallenge =
                             CardAuthChallenge.Vault(url = url, request = cardVaultRequest)
                         CardVaultResult.AuthorizationRequired(authChallenge)
