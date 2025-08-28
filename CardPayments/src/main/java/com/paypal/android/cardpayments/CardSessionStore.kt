@@ -1,6 +1,6 @@
 package com.paypal.android.cardpayments
 
-private const val KEY_AUTH_STATE = "AUTH_STATE"
+private const val KEY_AUTH_STATE = "Card.AUTH_STATE"
 
 internal class CardSessionStore {
     private val properties: MutableMap<String, String?> = mutableMapOf()
