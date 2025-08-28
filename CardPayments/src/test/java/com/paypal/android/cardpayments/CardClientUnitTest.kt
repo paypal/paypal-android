@@ -15,6 +15,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -69,6 +70,7 @@ class CardClientUnitTest {
     private lateinit var mainThreadSurrogate: ExecutorCoroutineDispatcher
 
     @Before
+    @DelicateCoroutinesApi
     fun beforeEach() {
         mainThreadSurrogate = newSingleThreadContext("UI thread")
         Dispatchers.setMain(mainThreadSurrogate)
@@ -211,7 +213,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `completeApproveOrderAuthRequest() notifies merchant of approve order success`() = runTest {
+    fun `finishApproveOrder() notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val successResult = CardFinishApproveOrderResult.Success(
@@ -228,7 +230,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `completeApproveOrderAuthRequest() notifies merchant of approve order failure`() = runTest {
+    fun `finishApproveOrder() notifies merchant of approve order failure`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val error = PayPalSDKError(123, "fake-error-description")
@@ -242,7 +244,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `completeAuthChallenge() notifies merchant of approve order cancelation`() = runTest {
+    fun `finishApproveOrder() notifies merchant of approve order cancelation`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val canceledResult = CardFinishApproveOrderResult.Canceled
