@@ -25,7 +25,8 @@ class CardClient internal constructor(
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analytics: CardAnalytics,
     private val authChallengeLauncher: CardAuthLauncher,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val sessionStore: CardSessionStore = CardSessionStore()
 ) {
 
     // for analytics tracking
@@ -142,6 +143,9 @@ class CardClient internal constructor(
     ): CardPresentAuthChallengeResult {
         val result = authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
         captureAuthChallengePresentationAnalytics(result, authChallenge)
+        if (result is CardPresentAuthChallengeResult.Success) {
+            sessionStore.authState = result.authState
+        }
         return result
     }
 
@@ -178,6 +182,7 @@ class CardClient internal constructor(
         }
     }
 
+    // TODO: add documentation
     fun finishApproveOrder(intent: Intent, authState: String): CardFinishApproveOrderResult {
         val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
         when (result) {
@@ -197,6 +202,34 @@ class CardClient internal constructor(
         return result
     }
 
+    // TODO: add documentation
+    fun finishApproveOrder(intent: Intent): CardFinishApproveOrderResult? =
+        sessionStore.authState?.let { authState ->
+            val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
+            when (result) {
+                is CardFinishApproveOrderResult.Success -> {
+                    analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_SUCCEEDED, approveOrderId)
+                    sessionStore.clear()
+                }
+
+                is CardFinishApproveOrderResult.Failure -> {
+                    analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_FAILED, approveOrderId)
+                    sessionStore.clear()
+                }
+
+                CardFinishApproveOrderResult.Canceled -> {
+                    analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_CANCELED, approveOrderId)
+                    sessionStore.clear()
+                }
+
+                else -> {
+                    // no analytics tracking required at the moment
+                }
+            }
+            result
+        }
+
+    // TODO: add documentation
     fun finishVault(intent: Intent, authState: String): CardFinishVaultResult {
         val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
         when (result) {
@@ -215,4 +248,31 @@ class CardClient internal constructor(
         }
         return result
     }
+
+    // TODO: add documentation
+    fun finishVault(intent: Intent): CardFinishVaultResult? =
+        sessionStore.authState?.let { authState ->
+            val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
+            when (result) {
+                is CardFinishVaultResult.Success -> {
+                    analytics.notify(VaultEvent.AUTH_CHALLENGE_SUCCEEDED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                is CardFinishVaultResult.Failure -> {
+                    analytics.notify(VaultEvent.AUTH_CHALLENGE_FAILED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                CardFinishVaultResult.Canceled -> {
+                    analytics.notify(VaultEvent.AUTH_CHALLENGE_CANCELED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                else -> {
+                    // no analytics tracking required at the moment
+                }
+            }
+            result
+        }
 }
