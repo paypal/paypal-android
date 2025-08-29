@@ -51,8 +51,6 @@ class ApproveOrderViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var authState: String? = null
-
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
@@ -103,8 +101,9 @@ class ApproveOrderViewModel @Inject constructor(
         authChallenge: CardAuthChallenge
     ) {
         when (val presentAuthResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
-            is CardPresentAuthChallengeResult.Success ->
-                authState = presentAuthResult.authState
+            is CardPresentAuthChallengeResult.Success -> {
+                // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+            }
 
             is CardPresentAuthChallengeResult.Failure ->
                 approveOrderState = ActionState.Failure(presentAuthResult.error)
@@ -207,29 +206,21 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    private fun checkIfApproveOrderFinished(intent: Intent): CardFinishApproveOrderResult? =
-        authState?.let { cardClient.finishApproveOrder(intent, it) }
-
     fun completeAuthChallenge(intent: Intent) {
-        checkIfApproveOrderFinished(intent)?.let { approveOrderResult ->
+        cardClient.finishApproveOrder(intent)?.let { approveOrderResult ->
             when (approveOrderResult) {
                 is CardFinishApproveOrderResult.Success -> {
                     val orderInfo = approveOrderResult.run {
                         OrderInfo(orderId, status, didAttemptThreeDSecureAuthentication)
                     }
                     approveOrderState = ActionState.Success(orderInfo)
-                    discardAuthState()
                 }
 
-                is CardFinishApproveOrderResult.Failure -> {
+                is CardFinishApproveOrderResult.Failure ->
                     approveOrderState = ActionState.Failure(approveOrderResult.error)
-                    discardAuthState()
-                }
 
-                CardFinishApproveOrderResult.Canceled -> {
+                CardFinishApproveOrderResult.Canceled ->
                     approveOrderState = ActionState.Failure(Exception("USER CANCELED"))
-                    discardAuthState()
-                }
 
                 CardFinishApproveOrderResult.NoResult -> {
                     // no result; re-enable approve order button so user can retry
@@ -237,9 +228,5 @@ class ApproveOrderViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun discardAuthState() {
-        authState = null
     }
 }
