@@ -316,12 +316,12 @@ class CardClientUnitTest {
         val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
         sut.presentAuthChallenge(activity, authChallenge)
 
-        val result = sut.finishApproveOrder(intent, "auth state")
+        val result = sut.finishApproveOrder(intent)
         assertSame(canceledResult, result)
     }
 
     @Test
-    fun `finishVault() forwards result from auth launcher`() = runTest {
+    fun `finishVault() with merchant provided auth state forwards result from auth launcher`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val successResult =
@@ -331,6 +331,27 @@ class CardClientUnitTest {
         } returns successResult
 
         val result = sut.finishVault(intent, "auth state")
+        assertSame(successResult, result)
+    }
+
+    @Test
+    fun `finishVault() with session auth state forwards result from auth launcher`() = runTest {
+        val sut = createCardClient(testScheduler)
+        every {
+            cardAuthLauncher.presentAuthChallenge(any(), any())
+        } returns CardPresentAuthChallengeResult.Success("auth state")
+
+        val successResult =
+            CardFinishVaultResult.Success("fake-setup-token-id", "fake-status")
+        every {
+            cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns successResult
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        sut.presentAuthChallenge(activity, authChallenge)
+
+        val result = sut.finishVault(intent)
         assertSame(successResult, result)
     }
 
