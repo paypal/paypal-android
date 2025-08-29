@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
@@ -433,6 +434,71 @@ class CardClientUnitTest {
 
             val result = sut.finishVault(intent)
             assertSame(canceledResult, result)
+        }
+
+    @Test
+    fun `finishVault() with session auth state clears session to prevent delivering success event twice`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val successResult =
+                CardFinishVaultResult.Success("fake-setup-token-id", "fake-status")
+            every {
+                cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns successResult
+
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            sut.presentAuthChallenge(activity, authChallenge)
+
+            sut.finishVault(intent)
+            assertNull(sut.finishVault(intent))
+        }
+
+    @Test
+    fun `finishVault() with session auth state clears session to prevent delivering error event twice`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val error = PayPalSDKError(123, "fake-error-description")
+            val failureResult = CardFinishVaultResult.Failure(error)
+            every {
+                cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns failureResult
+
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            sut.presentAuthChallenge(activity, authChallenge)
+
+            sut.finishVault(intent)
+            assertNull(sut.finishVault(intent))
+        }
+
+    @Test
+    fun `finishVault() with session auth state clears session to prevent delivering canceled event twice`() =
+        runTest {
+            val sut = createCardClient(testScheduler)
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val canceledResult = CardFinishVaultResult.Canceled
+            every {
+                cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns canceledResult
+
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            sut.presentAuthChallenge(activity, authChallenge)
+
+            sut.finishVault(intent)
+            assertNull(sut.finishVault(intent))
         }
 
     @Test
