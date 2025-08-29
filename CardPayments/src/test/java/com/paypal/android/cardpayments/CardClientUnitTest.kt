@@ -301,7 +301,23 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `finishApproveOrder() with session auth state notifies merchant of approve order cancelation`() = runTest {
+    fun `finishApproveOrder() with session auth state notifies merchant of approve order cancellation`() = runTest {
+        val sut = createCardClient(testScheduler)
+        every {
+            cardAuthLauncher.presentAuthChallenge(any(), any())
+        } returns CardPresentAuthChallengeResult.Success("auth state")
+
+        val canceledResult = CardFinishApproveOrderResult.Canceled
+        every {
+            cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
+        } returns canceledResult
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+        sut.presentAuthChallenge(activity, authChallenge)
+
+        val result = sut.finishApproveOrder(intent, "auth state")
+        assertSame(canceledResult, result)
     }
 
     @Test
