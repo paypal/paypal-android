@@ -183,6 +183,10 @@ class CardClient internal constructor(
     }
 
     // TODO: add documentation
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishApproveOrder(intent).",
+        replaceWith = ReplaceWith("finishApproveOrder(intent)")
+    )
     fun finishApproveOrder(intent: Intent, authState: String): CardFinishApproveOrderResult {
         val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
         when (result) {
@@ -230,6 +234,10 @@ class CardClient internal constructor(
         }
 
     // TODO: add documentation
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishVault(intent).",
+        replaceWith = ReplaceWith("finishVault(intent)")
+    )
     fun finishVault(intent: Intent, authState: String): CardFinishVaultResult {
         val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
         when (result) {
