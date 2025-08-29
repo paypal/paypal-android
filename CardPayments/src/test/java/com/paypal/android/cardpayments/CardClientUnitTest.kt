@@ -244,7 +244,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `finishApproveOrder() with merchant provided auth state notifies merchant of approve order cancelation`() = runTest {
+    fun `finishApproveOrder() with merchant provided auth state notifies merchant of approve order cancellation`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val canceledResult = CardFinishApproveOrderResult.Canceled
@@ -258,7 +258,6 @@ class CardClientUnitTest {
     @Test
     fun `finishApproveOrder() with session auth state notifies merchant of approve order success`() = runTest {
         val sut = createCardClient(testScheduler)
-
         every {
             cardAuthLauncher.presentAuthChallenge(any(), any())
         } returns CardPresentAuthChallengeResult.Success("auth state")
@@ -282,6 +281,23 @@ class CardClientUnitTest {
 
     @Test
     fun `finishApproveOrder() with session auth state notifies merchant of approve order failure`() = runTest {
+        val sut = createCardClient(testScheduler)
+        every {
+            cardAuthLauncher.presentAuthChallenge(any(), any())
+        } returns CardPresentAuthChallengeResult.Success("auth state")
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        val failureResult = CardFinishApproveOrderResult.Failure(error)
+        every {
+            cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
+        } returns failureResult
+
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+        sut.presentAuthChallenge(activity, authChallenge)
+
+        val actual = sut.finishApproveOrder(intent)
+        assertSame(failureResult, actual)
     }
 
     @Test
