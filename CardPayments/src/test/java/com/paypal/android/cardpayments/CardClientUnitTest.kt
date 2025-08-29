@@ -321,7 +321,7 @@ class CardClientUnitTest {
     }
 
     @Test
-    fun `finishVault() with merchant provided auth state forwards result from auth launcher`() = runTest {
+    fun `finishVault() with merchant provided auth state forwards success result from auth launcher`() = runTest {
         val sut = createCardClient(testScheduler)
 
         val successResult =
@@ -332,6 +332,14 @@ class CardClientUnitTest {
 
         val result = sut.finishVault(intent, "auth state")
         assertSame(successResult, result)
+    }
+
+    @Test
+    fun `finishVault() with merchant provided auth state forwards error result from auth launcher`() = runTest {
+    }
+
+    @Test
+    fun `finishVault() with merchant provided auth state forwards cancellation result from auth launcher`() = runTest {
     }
 
     @Test
@@ -353,6 +361,14 @@ class CardClientUnitTest {
 
         val result = sut.finishVault(intent)
         assertSame(successResult, result)
+    }
+
+    @Test
+    fun `finishVault() with session auth state forwards error result from auth launcher`() = runTest {
+    }
+
+    @Test
+    fun `finishVault() with session auth state forwards cancellation result from auth launcher`() = runTest {
     }
 
     @Test
