@@ -336,10 +336,29 @@ class CardClientUnitTest {
 
     @Test
     fun `finishVault() with merchant provided auth state forwards error result from auth launcher`() = runTest {
+        val sut = createCardClient(testScheduler)
+        val error = PayPalSDKError(123, "fake-error-description")
+
+        val failureResult = CardFinishVaultResult.Failure(error)
+        every {
+            cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns failureResult
+
+        val actual = sut.finishVault(intent, "auth state")
+        assertSame(failureResult, actual)
     }
 
     @Test
     fun `finishVault() with merchant provided auth state forwards cancellation result from auth launcher`() = runTest {
+        val sut = createCardClient(testScheduler)
+
+        val canceledResult = CardFinishVaultResult.Canceled
+        every {
+            cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns canceledResult
+
+        val actual = sut.finishVault(intent, "auth state")
+        assertSame(canceledResult, actual)
     }
 
     @Test
