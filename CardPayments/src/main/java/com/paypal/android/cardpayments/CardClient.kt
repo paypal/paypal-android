@@ -182,7 +182,17 @@ class CardClient internal constructor(
         }
     }
 
-    // TODO: add documentation
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.approveOrder]), call this method to see if a user has
+     * successfully approved their Credit (or Debit) card as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     * @param [authState] A continuation state received from [CardPresentAuthChallengeResult.Success]
+     * when calling [CardClient.presentAuthChallenge]. This is needed to properly verify that an
+     * authorization completed successfully.
+     */
     @Deprecated(
         message = "Auth state is now captured internally by the SDK. Please migrate to finishApproveOrder(intent).",
         replaceWith = ReplaceWith("finishApproveOrder(intent)")
@@ -206,7 +216,14 @@ class CardClient internal constructor(
         return result
     }
 
-    // TODO: add documentation
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.approveOrder]), call this method to see if a user has
+     * successfully approved their Credit (or Debit) card as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
     fun finishApproveOrder(intent: Intent): CardFinishApproveOrderResult? =
         sessionStore.authState?.let { authState ->
             val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
@@ -233,7 +250,17 @@ class CardClient internal constructor(
             result
         }
 
-    // TODO: add documentation
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.vault]), call this method to see if a user has
+     * successfully authorized their Credit (or Debit) card for vaulting.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     * @param [authState] A continuation state received from [CardPresentAuthChallengeResult.Success]
+     * when calling [CardClient.vault]. This is needed to properly verify that an
+     * authorization completed successfully.
+     */
     @Deprecated(
         message = "Auth state is now captured internally by the SDK. Please migrate to finishVault(intent).",
         replaceWith = ReplaceWith("finishVault(intent)")
@@ -257,7 +284,14 @@ class CardClient internal constructor(
         return result
     }
 
-    // TODO: add documentation
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.vault]), call this method to see if a user has
+     * successfully authorized their Credit (or Debit) card for vaulting.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
     fun finishVault(intent: Intent): CardFinishVaultResult? =
         sessionStore.authState?.let { authState ->
             val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
