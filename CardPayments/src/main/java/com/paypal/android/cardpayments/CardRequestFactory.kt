@@ -15,9 +15,10 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-internal class CardRequestFactory {
+internal class CardRequestFactory(
+    private val json: Json = Json
+) {
 
-    private val json = Json
 
     @OptIn(InternalSerializationApi::class)
     fun createConfirmPaymentSourceRequest(cardRequest: CardRequest): APIRequest {
