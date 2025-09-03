@@ -2,6 +2,7 @@ plugins {
     alias libs.plugins.android.library
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.kotlinParcelize
+    alias libs.plugins.kotlinSerialization
     alias libs.plugins.binaryCompatibilityValidator
 }
 
@@ -53,6 +54,7 @@ dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.kotlinx.serializationJson
     implementation libs.braintree.browserSwitch
     implementation libs.lifecycle.commonJava8
     implementation libs.lifecycle.runtimeKtx

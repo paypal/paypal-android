@@ -19,3 +19,27 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Kotlin serialization rules
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
+
+# kotlinx-serialization-json specific. Add this if you have problems with serialization.
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Change here com.yourcompany.yourpackage
+-keep,includedescriptorclasses class com.paypal.android.cardpayments.**$$serializer { *; }
+-keepclassmembers class com.paypal.android.cardpayments.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.paypal.android.cardpayments.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Keep @Serializable classes
+-keep @kotlinx.serialization.Serializable class * { *; }

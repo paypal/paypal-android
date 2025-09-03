@@ -1,54 +1,75 @@
 package com.paypal.android.cardpayments
 
+import com.paypal.android.cardpayments.api.ApplicationContext
+import com.paypal.android.cardpayments.api.BillingAddress
+import com.paypal.android.cardpayments.api.CardAttributes
+import com.paypal.android.cardpayments.api.CardPaymentSource
+import com.paypal.android.cardpayments.api.ConfirmPaymentSourceRequest
+import com.paypal.android.cardpayments.api.PaymentSource
+import com.paypal.android.cardpayments.api.Verification
+import com.paypal.android.cardpayments.api.VerificationMethod
+import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
-import org.json.JSONObject
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 internal class CardRequestFactory {
 
+    private val json = Json
+
+    @OptIn(InternalSerializationApi::class)
     fun createConfirmPaymentSourceRequest(cardRequest: CardRequest): APIRequest {
         val card = cardRequest.card
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
 
-        val cardJSON = JSONObject()
-            .put("number", cardNumber)
-            .put("expiry", cardExpiry)
-
-        card.cardholderName?.let { cardJSON.put("name", it) }
-        cardJSON.put("security_code", card.securityCode)
-
-        card.billingAddress?.apply {
-            val billingAddressJSON = JSONObject()
-                .put("address_line_1", streetAddress)
-                .put("address_line_2", extendedAddress)
-                .put("admin_area_1", region)
-                .put("admin_area_2", locality)
-                .put("postal_code", postalCode)
-                .put("country_code", countryCode)
-            cardJSON.put("billing_address", billingAddressJSON)
+        val billingAddress = card.billingAddress?.let { address ->
+            BillingAddress(
+                addressLine1 = address.streetAddress,
+                addressLine2 = address.extendedAddress,
+                adminArea2 = address.locality,
+                adminArea1 = address.region,
+                postalCode = address.postalCode,
+                countryCode = address.countryCode
+            )
         }
 
-        val bodyJSON = JSONObject()
-        val verificationJSON = JSONObject()
-            .put("method", cardRequest.sca.name)
-        val attributesJSON = JSONObject()
-            .put("verification", verificationJSON)
+        val verification = when (cardRequest.sca) {
+            SCA.SCA_WHEN_REQUIRED -> Verification(method = VerificationMethod.SCA_WHEN_REQUIRED)
+            SCA.SCA_ALWAYS -> Verification(method = VerificationMethod.SCA_ALWAYS)
+        }
 
-        cardJSON.put("attributes", attributesJSON)
+        val cardAttributes = CardAttributes(verification = verification)
 
-        val returnUrl = cardRequest.returnUrl
-        val returnURLJSON = JSONObject()
-            .put("return_url", returnUrl)
-            .put("cancel_url", returnUrl) // we can set the same url
-        bodyJSON.put("application_context", returnURLJSON)
+        val cardPaymentSource = CardPaymentSource(
+            name = card.cardholderName,
+            number = cardNumber,
+            expiry = cardExpiry,
+            securityCode = card.securityCode,
+            billingAddress = billingAddress,
+            attributes = cardAttributes
+        )
 
-        val paymentSourceJSON = JSONObject().put("card", cardJSON)
-        bodyJSON.put("payment_source", paymentSourceJSON)
+        val paymentSource = PaymentSource(card = cardPaymentSource)
 
-        val body = bodyJSON.toString().replace("\\/", "/")
+        val applicationContext = ApplicationContext(
+            returnUrl = cardRequest.returnUrl,
+            cancelUrl = cardRequest.returnUrl // we can set the same url
+        )
 
-        val path = "v2/checkout/orders/${cardRequest.orderId}/confirm-payment-source"
-        return APIRequest(path, HttpMethod.POST, body)
+        val confirmPaymentSourceRequest = ConfirmPaymentSourceRequest(
+            paymentSource = paymentSource,
+            applicationContext = applicationContext
+        )
+
+        val body = json.encodeToString(confirmPaymentSourceRequest)
+
+        return APIRequest(
+            path = "v2/checkout/orders/${cardRequest.orderId}/confirm-payment-source",
+            method = HttpMethod.POST,
+            body = body
+        )
     }
 }

@@ -28,6 +28,7 @@ jsonAssert = "1.4.0"
 junit = "4.13.2"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
+kotlinxSerialization = "1.6.3"
 kotlinxCoroutinesAndroid = "1.6.1"
 lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
@@ -69,6 +70,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
+kotlinx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 lifecycle-commonJava8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
 lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
@@ -94,4 +96,5 @@ gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePla
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinVersion" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
