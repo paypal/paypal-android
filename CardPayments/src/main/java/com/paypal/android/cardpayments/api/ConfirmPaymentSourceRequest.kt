@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * Verification methods for 3D Secure authentication
  */
 @Serializable
-enum class VerificationMethod {
+internal enum class VerificationMethod {
     @SerialName("SCA_ALWAYS")
     SCA_ALWAYS,
 
