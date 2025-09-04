@@ -37,8 +37,6 @@ class VaultCardViewModel @Inject constructor(
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
-    private var authState: String? = null
-
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
     private val cardClient = CardClient(applicationContext, coreConfig)
 
@@ -177,17 +175,17 @@ class VaultCardViewModel @Inject constructor(
         authChallenge: CardAuthChallenge
     ) {
         when (val result = cardClient.presentAuthChallenge(activity, authChallenge)) {
-            is CardPresentAuthChallengeResult.Success -> authState = result.authState
+            is CardPresentAuthChallengeResult.Success -> {
+                // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+            }
+
             is CardPresentAuthChallengeResult.Failure ->
                 updateSetupTokenState = ActionState.Failure(result.error)
         }
     }
 
-    private fun checkIfVaultFinished(intent: Intent): CardFinishVaultResult? =
-        authState?.let { cardClient.finishVault(intent, it) }
-
     fun completeAuthChallenge(intent: Intent) {
-        checkIfVaultFinished(intent)?.let { vaultResult ->
+        cardClient.finishVault(intent)?.let { vaultResult ->
             when (vaultResult) {
                 is CardFinishVaultResult.Success -> {
                     val setupTokenInfo = vaultResult.run {
@@ -198,18 +196,13 @@ class VaultCardViewModel @Inject constructor(
                         )
                     }
                     updateSetupTokenState = ActionState.Success(setupTokenInfo)
-                    discardAuthState()
                 }
 
-                CardFinishVaultResult.Canceled -> {
+                CardFinishVaultResult.Canceled ->
                     updateSetupTokenState = ActionState.Failure(Exception("USER CANCELED"))
-                    discardAuthState()
-                }
 
-                is CardFinishVaultResult.Failure -> {
+                is CardFinishVaultResult.Failure ->
                     updateSetupTokenState = ActionState.Failure(vaultResult.error)
-                    discardAuthState()
-                }
 
                 CardFinishVaultResult.NoResult -> {
                     // no result; re-enable vault button so user can retry
@@ -217,9 +210,5 @@ class VaultCardViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun discardAuthState() {
-        authState = null
     }
 }
