@@ -1,8 +1,8 @@
-package com.paypal.android.paypalwebpayments
+package com.paypal.android.cardpayments
 
-private const val KEY_AUTH_STATE = "PayPal.AUTH_STATE"
+private const val KEY_AUTH_STATE = "Card.AUTH_STATE"
 
-internal class PayPalWebCheckoutSessionStore {
+internal class CardSessionStore {
     private val properties: MutableMap<String, String?> = mutableMapOf()
 
     var authState: String?
