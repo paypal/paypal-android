@@ -1,5 +1,8 @@
 package com.paypal.android.paypalwebpayments
 
+import com.paypal.android.corepayments.restoreFromBase64EncodedJSON
+import com.paypal.android.corepayments.toBase64EncodedJSON
+
 private const val KEY_AUTH_STATE = "PayPal.AUTH_STATE"
 
 internal class PayPalWebCheckoutSessionStore {
@@ -12,4 +15,9 @@ internal class PayPalWebCheckoutSessionStore {
         }
 
     fun clear() = properties.clear()
+
+    fun restore(base64EncodedJSON: String) =
+        properties.restoreFromBase64EncodedJSON(base64EncodedJSON)
+
+    fun toBase64EncodedJSON() = properties.toBase64EncodedJSON()
 }
