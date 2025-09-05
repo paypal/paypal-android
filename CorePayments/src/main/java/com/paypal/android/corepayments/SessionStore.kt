@@ -1,6 +1,9 @@
 package com.paypal.android.corepayments
 
+import android.util.Base64
 import androidx.annotation.RestrictTo
+import org.json.JSONObject
+import java.nio.charset.StandardCharsets
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SessionStore(private val properties: MutableMap<String, String?> = mutableMapOf()) {
@@ -12,8 +15,20 @@ class SessionStore(private val properties: MutableMap<String, String?> = mutable
     }
 
     fun clear() = properties.clear()
-    fun restore(base64EncodedJSON: String) =
-        properties.restoreFromBase64EncodedJSON(base64EncodedJSON)
 
-    fun toBase64EncodedJSON() = properties.toBase64EncodedJSON()
+    fun restore(base64EncodedJSON: String) {
+        val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
+        val requestJSONString = String(data, StandardCharsets.UTF_8)
+        val requestJSON = JSONObject(requestJSONString)
+
+        properties.clear()
+        requestJSON.keys().forEach { properties.put(it, requestJSON[it] as? String) }
+    }
+
+    fun toBase64EncodedJSON(): String {
+        val propertiesAsJSON = JSONObject(properties)
+        val requestJSONBytes: ByteArray? =
+            propertiesAsJSON.toString().toByteArray(StandardCharsets.UTF_8)
+        return Base64.encodeToString(requestJSONBytes, Base64.DEFAULT)
+    }
 }
