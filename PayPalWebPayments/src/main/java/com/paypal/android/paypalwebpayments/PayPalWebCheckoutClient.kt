@@ -38,6 +38,20 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     /**
+     * Capture instance state for later restoration. This can be useful for recovery during a
+     * process kill.
+     */
+    val instanceState: String
+        get() = sessionStore.toBase64EncodedJSON()
+
+    /**
+     * Restore a feature client using instance state. @see [instanceState]
+     */
+    fun restore(instanceState: String) {
+        sessionStore.restore(instanceState)
+    }
+
+    /**
      * Confirm PayPal payment source for an order.
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
