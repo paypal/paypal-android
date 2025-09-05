@@ -15,9 +15,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-internal class CardRequestFactory(
-    private val json: Json = Json
-) {
+internal class CardRequestFactory {
     @OptIn(InternalSerializationApi::class)
     fun createConfirmPaymentSourceRequest(cardRequest: CardRequest): APIRequest {
         val card = cardRequest.card
@@ -63,7 +61,7 @@ internal class CardRequestFactory(
             applicationContext = applicationContext
         )
 
-        val body = json.encodeToString(confirmPaymentSourceRequest)
+        val body = Json.encodeToString(confirmPaymentSourceRequest)
 
         return APIRequest(
             path = "v2/checkout/orders/${cardRequest.orderId}/confirm-payment-source",

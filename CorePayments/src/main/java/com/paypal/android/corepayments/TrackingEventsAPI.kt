@@ -8,8 +8,7 @@ import kotlinx.serialization.json.Json
 
 internal class TrackingEventsAPI constructor(
     private val coreConfig: CoreConfig,
-    private val restClient: RestClient,
-    private val json: Json = Json,
+    private val restClient: RestClient
 ) {
 
     // api-m.sandbox.paypal.com does not currently send FPTI events to BigQuery/Looker
@@ -50,7 +49,7 @@ internal class TrackingEventsAPI constructor(
 
         val events = TrackingEvents(eventParams = eventParams)
         val request = TrackingEventRequest(events = events)
-        val jsonBody = json.encodeToString(request)
+        val jsonBody = Json.encodeToString(request)
 
         return APIRequest("v1/tracking/events", HttpMethod.POST, jsonBody)
     }
