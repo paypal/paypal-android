@@ -20,26 +20,30 @@ internal class CardResponseParser {
 
     @OptIn(InternalSerializationApi::class)
     fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResult {
-        parseError(httpResponse)?.let { return ConfirmPaymentSourceResult.Failure(it) }
-
         val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-        val responseBody = httpResponse.body ?: return ConfirmPaymentSourceResult.Failure(
-            APIClientError.noResponseData(correlationId)
-        )
+        val error = parseError(httpResponse)
 
-        return try {
-            val response = json.decodeFromString<ConfirmPaymentSourceResponse>(responseBody)
-            response.run {
-                ConfirmPaymentSourceResult.Success(
-                    orderId = id,
-                    status = status,
-                    payerActionHref = links?.firstOrNull { it.rel == "payer-action" }?.href,
-                    paymentSource = paymentSource?.card,
-                    purchaseUnits = purchaseUnits ?: emptyList()
-                )
+        return when {
+            error != null -> ConfirmPaymentSourceResult.Failure(error)
+            httpResponse.body.isNullOrBlank() -> {
+                ConfirmPaymentSourceResult.Failure(APIClientError.noResponseData(correlationId))
             }
-        } catch (_: Exception) {
-            ConfirmPaymentSourceResult.Failure(APIClientError.dataParsingError(correlationId))
+
+            else -> {
+                try {
+                    val response =
+                        json.decodeFromString<ConfirmPaymentSourceResponse>(httpResponse.body!!)
+                    ConfirmPaymentSourceResult.Success(
+                        orderId = response.id,
+                        status = response.status,
+                        payerActionHref = response.links?.firstOrNull { it.rel == "payer-action" }?.href,
+                        paymentSource = response.paymentSource?.card,
+                        purchaseUnits = response.purchaseUnits ?: emptyList()
+                    )
+                } catch (_: SerializationException) {
+                    ConfirmPaymentSourceResult.Failure(APIClientError.dataParsingError(correlationId))
+                }
+            }
         }
     }
 

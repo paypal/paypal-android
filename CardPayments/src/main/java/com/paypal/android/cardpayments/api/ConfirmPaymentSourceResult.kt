@@ -8,7 +8,8 @@ import kotlinx.serialization.InternalSerializationApi
 
 internal sealed class ConfirmPaymentSourceResult {
 
-    data class Success @OptIn(InternalSerializationApi::class) constructor(
+    @OptIn(InternalSerializationApi::class)
+    data class Success constructor(
         val orderId: String,
         val status: OrderStatus,
         val payerActionHref: String? = null,
