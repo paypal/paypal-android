@@ -285,6 +285,33 @@ class CardClientUnitTest {
         }
 
     @Test
+    fun `finishApproveOrder() with restored session auth state notifies merchant of approve order success`() =
+        runTest {
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val successResult = CardFinishApproveOrderResult.Success(
+                orderId = "fake-order-id",
+                status = OrderStatus.APPROVED.name,
+                didAttemptThreeDSecureAuthentication = false
+            )
+            every {
+                cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
+            } returns successResult
+
+            val previousStore = createCardClient(testScheduler)
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            previousStore.presentAuthChallenge(activity, authChallenge)
+
+            val sut = createCardClient(testScheduler)
+            sut.restore(previousStore.instanceState)
+            val actual = sut.finishApproveOrder(intent)
+            assertSame(successResult, actual)
+        }
+
+    @Test
     fun `finishApproveOrder() with session auth state notifies merchant of approve order failure`() =
         runTest {
             val sut = createCardClient(testScheduler)
@@ -307,6 +334,30 @@ class CardClientUnitTest {
         }
 
     @Test
+    fun `finishApproveOrder() with restored session auth state notifies merchant of approve order failure`() =
+        runTest {
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val error = PayPalSDKError(123, "fake-error-description")
+            val failureResult = CardFinishApproveOrderResult.Failure(error)
+            every {
+                cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
+            } returns failureResult
+
+            val previousStore = createCardClient(testScheduler)
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            previousStore.presentAuthChallenge(activity, authChallenge)
+
+            val sut = createCardClient(testScheduler)
+            sut.restore(previousStore.instanceState)
+            val actual = sut.finishApproveOrder(intent)
+            assertSame(failureResult, actual)
+        }
+
+    @Test
     fun `finishApproveOrder() with session auth state notifies merchant of approve order cancellation`() =
         runTest {
             val sut = createCardClient(testScheduler)
@@ -323,6 +374,29 @@ class CardClientUnitTest {
             val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
+            val result = sut.finishApproveOrder(intent)
+            assertSame(canceledResult, result)
+        }
+
+    @Test
+    fun `finishApproveOrder() with restored session auth state notifies merchant of approve order cancellation`() =
+        runTest {
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val canceledResult = CardFinishApproveOrderResult.Canceled
+            every {
+                cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
+            } returns canceledResult
+
+            val previousStore = createCardClient(testScheduler)
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            previousStore.presentAuthChallenge(activity, authChallenge)
+
+            val sut = createCardClient(testScheduler)
+            sut.restore(previousStore.instanceState)
             val result = sut.finishApproveOrder(intent)
             assertSame(canceledResult, result)
         }
