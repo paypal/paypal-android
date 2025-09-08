@@ -17,10 +17,14 @@ class SessionStore(private val properties: MutableMap<String, String?> = mutable
     fun clear() = properties.clear()
 
     fun restore(base64EncodedJSON: String) {
-        val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
-        val requestJSONString = String(data, StandardCharsets.UTF_8)
-        val requestJSON = JSONObject(requestJSONString)
-
+        val requestJSON = runCatching {
+            val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
+            val requestJSONString = String(data, StandardCharsets.UTF_8)
+            JSONObject(requestJSONString)
+        }.getOrElse {
+            // default to empty JSON if either Base64 conversion or JSONObject parsing fails
+            JSONObject()
+        }
         properties.clear()
         requestJSON.keys().forEach { properties.put(it, requestJSON[it] as? String) }
     }

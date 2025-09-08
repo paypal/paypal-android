@@ -47,7 +47,7 @@ class SessionStoreUnitTest {
     }
 
     @Test
-    fun `it should restore properties`() {
+    fun `it should restore base64 encoded JSON properties`() {
         val previousStore = SessionStore()
         previousStore["example_key1"] = "example_value1"
         previousStore["example_key2"] = "example_value2"
@@ -57,5 +57,23 @@ class SessionStoreUnitTest {
         sut.restore(encodedState)
         assertEquals(sut["example_key1"], "example_value1")
         assertEquals(sut["example_key2"], "example_value2")
+    }
+
+    @Test
+    fun `it should not throw when restoring input is not valid base64`() {
+        val sut = SessionStore()
+        val invalidBase64 = "invalidBase64WithTooMuchPadding======="
+        sut.restore(invalidBase64)
+        assertNull(sut["example_key"])
+    }
+
+    @Test
+    fun `it should not throw when restoring input is not valid json`() {
+        // NOTE: contains base64 string == "invalid json"
+        val base64EncodingOfInvalidJSON = "aW52YWxpZCBqc29u"
+
+        val sut = SessionStore()
+        sut.restore(base64EncodingOfInvalidJSON)
+        assertNull(sut["example_key"])
     }
 }
