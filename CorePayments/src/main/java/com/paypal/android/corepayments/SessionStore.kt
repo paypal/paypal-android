@@ -30,6 +30,8 @@ class SessionStore(private val properties: MutableMap<String, String?> = mutable
         properties.forEach { (key, value) -> propertiesAsJSON.put(key, value) }
         val requestJSONBytes: ByteArray? =
             propertiesAsJSON.toString().toByteArray(StandardCharsets.UTF_8)
-        return Base64.encodeToString(requestJSONBytes, Base64.DEFAULT or Base64.NO_WRAP)
+        // use bitwise OR to combine flags
+        val flags = Base64.DEFAULT or Base64.NO_WRAP
+        return Base64.encodeToString(requestJSONBytes, flags)
     }
 }
