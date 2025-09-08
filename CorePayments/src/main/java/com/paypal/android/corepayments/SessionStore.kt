@@ -26,7 +26,8 @@ class SessionStore(private val properties: MutableMap<String, String?> = mutable
     }
 
     fun toBase64EncodedJSON(): String {
-        val propertiesAsJSON = JSONObject(properties)
+        val propertiesAsJSON = JSONObject()
+        properties.forEach { (key, value) -> propertiesAsJSON.put(key, value) }
         val requestJSONBytes: ByteArray? =
             propertiesAsJSON.toString().toByteArray(StandardCharsets.UTF_8)
         return Base64.encodeToString(requestJSONBytes, Base64.DEFAULT)
