@@ -36,6 +36,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private val AUTH_CHALLENGE_URL = Uri.parse("https://fake.com/url")
+
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class CardClientUnitTest {
@@ -276,8 +278,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns successResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             val actual = sut.finishApproveOrder(intent)
@@ -301,8 +302,7 @@ class CardClientUnitTest {
             } returns successResult
 
             val previousStore = createCardClient(testScheduler)
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             previousStore.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
@@ -325,8 +325,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns failureResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             val actual = sut.finishApproveOrder(intent)
@@ -347,8 +346,7 @@ class CardClientUnitTest {
             } returns failureResult
 
             val previousStore = createCardClient(testScheduler)
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             previousStore.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
@@ -370,8 +368,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns canceledResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             val result = sut.finishApproveOrder(intent)
@@ -391,8 +388,7 @@ class CardClientUnitTest {
             } returns canceledResult
 
             val previousStore = createCardClient(testScheduler)
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             previousStore.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
@@ -418,8 +414,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns successResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             sut.finishApproveOrder(intent)
@@ -440,8 +435,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns failureResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             sut.finishApproveOrder(intent)
@@ -461,8 +455,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns canceledResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             sut.finishApproveOrder(intent)
@@ -526,8 +519,7 @@ class CardClientUnitTest {
             cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns successResult
 
-        val url = Uri.parse("https://fake.com/url")
-        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
         sut.presentAuthChallenge(activity, authChallenge)
 
         val result = sut.finishVault(intent)
@@ -547,8 +539,7 @@ class CardClientUnitTest {
         } returns successResult
 
         val previousClient = createCardClient(testScheduler)
-        val url = Uri.parse("https://fake.com/url")
-        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
         previousClient.presentAuthChallenge(activity, authChallenge)
 
         val sut = createCardClient(testScheduler)
@@ -571,8 +562,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns failureResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             val result = sut.finishVault(intent)
@@ -593,8 +583,7 @@ class CardClientUnitTest {
             } returns failureResult
 
             val previousClient = createCardClient(testScheduler)
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             previousClient.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
@@ -616,8 +605,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns canceledResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             val result = sut.finishVault(intent)
@@ -637,8 +625,7 @@ class CardClientUnitTest {
             } returns canceledResult
 
             val previousClient = createCardClient(testScheduler)
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             previousClient.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
@@ -661,8 +648,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns successResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             sut.finishVault(intent)
@@ -683,8 +669,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns failureResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             sut.finishVault(intent)
@@ -704,8 +689,7 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns canceledResult
 
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
             sut.finishVault(intent)
@@ -716,9 +700,7 @@ class CardClientUnitTest {
     fun `presentAuthChallenge() presents an approve order auth challenge using auth launcher`() =
         runTest {
             val sut = createCardClient(testScheduler)
-
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
             every {
                 cardAuthLauncher.presentAuthChallenge(activity, authChallenge)
             } returns CardPresentAuthChallengeResult.Success("auth state")
@@ -731,9 +713,7 @@ class CardClientUnitTest {
     fun `presentAuthChallenge() forwards approve order auth challenge presentation result to caller`() =
         runTest {
             val sut = createCardClient(testScheduler)
-
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+            val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
 
             val error = PayPalSDKError(123, "fake-error-description")
             val internalResult = CardPresentAuthChallengeResult.Failure(error)
@@ -748,9 +728,7 @@ class CardClientUnitTest {
     @Test
     fun `presentAuthChallenge() presents a vault auth challenge using auth launcher`() = runTest {
         val sut = createCardClient(testScheduler)
-
-        val url = Uri.parse("https://fake.com/url")
-        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
         every {
             cardAuthLauncher.presentAuthChallenge(activity, authChallenge)
         } returns CardPresentAuthChallengeResult.Success("auth state")
@@ -763,9 +741,7 @@ class CardClientUnitTest {
     fun `presentAuthChallenge() forwards vault auth challenge presentation result to caller`() =
         runTest {
             val sut = createCardClient(testScheduler)
-
-            val url = Uri.parse("https://fake.com/url")
-            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
 
             val error = PayPalSDKError(123, "fake-error-description")
             val internalResult = CardPresentAuthChallengeResult.Failure(error)
