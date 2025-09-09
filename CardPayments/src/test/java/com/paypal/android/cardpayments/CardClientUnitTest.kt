@@ -535,6 +535,29 @@ class CardClientUnitTest {
     }
 
     @Test
+    fun `finishVault() with restored session auth state forwards result from auth launcher`() = runTest {
+        every {
+            cardAuthLauncher.presentAuthChallenge(any(), any())
+        } returns CardPresentAuthChallengeResult.Success("auth state")
+
+        val successResult =
+            CardFinishVaultResult.Success("fake-setup-token-id", "fake-status")
+        every {
+            cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns successResult
+
+        val previousClient = createCardClient(testScheduler)
+        val url = Uri.parse("https://fake.com/url")
+        val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+        previousClient.presentAuthChallenge(activity, authChallenge)
+
+        val sut = createCardClient(testScheduler)
+        sut.restore(previousClient.instanceState)
+        val result = sut.finishVault(intent)
+        assertSame(successResult, result)
+    }
+
+    @Test
     fun `finishVault() with session auth state forwards error result from auth launcher`() =
         runTest {
             val sut = createCardClient(testScheduler)
@@ -557,6 +580,30 @@ class CardClientUnitTest {
         }
 
     @Test
+    fun `finishVault() with restored session auth state forwards error result from auth launcher`() =
+        runTest {
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val error = PayPalSDKError(123, "fake-error-description")
+            val failureResult = CardFinishVaultResult.Failure(error)
+            every {
+                cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns failureResult
+
+            val previousClient = createCardClient(testScheduler)
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            previousClient.presentAuthChallenge(activity, authChallenge)
+
+            val sut = createCardClient(testScheduler)
+            sut.restore(previousClient.instanceState)
+            val result = sut.finishVault(intent)
+            assertSame(failureResult, result)
+        }
+
+    @Test
     fun `finishVault() with session auth state forwards cancellation result from auth launcher`() =
         runTest {
             val sut = createCardClient(testScheduler)
@@ -573,6 +620,29 @@ class CardClientUnitTest {
             val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
             sut.presentAuthChallenge(activity, authChallenge)
 
+            val result = sut.finishVault(intent)
+            assertSame(canceledResult, result)
+        }
+
+    @Test
+    fun `finishVault() with restored session auth state forwards cancellation result from auth launcher`() =
+        runTest {
+            every {
+                cardAuthLauncher.presentAuthChallenge(any(), any())
+            } returns CardPresentAuthChallengeResult.Success("auth state")
+
+            val canceledResult = CardFinishVaultResult.Canceled
+            every {
+                cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns canceledResult
+
+            val previousClient = createCardClient(testScheduler)
+            val url = Uri.parse("https://fake.com/url")
+            val authChallenge = CardAuthChallenge.Vault(url, cardVaultRequest)
+            previousClient.presentAuthChallenge(activity, authChallenge)
+
+            val sut = createCardClient(testScheduler)
+            sut.restore(previousClient.instanceState)
             val result = sut.finishVault(intent)
             assertSame(canceledResult, result)
         }
