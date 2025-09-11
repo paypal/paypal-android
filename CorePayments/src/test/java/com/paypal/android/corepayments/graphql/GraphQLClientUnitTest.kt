@@ -278,7 +278,7 @@ internal class GraphQLClientUnitTest {
         // Assert
         assertTrue(result is GraphQLResult.Failure)
         val failureResult = result as GraphQLResult.Failure
-        assertEquals(PayPalSDKErrorCode.UNKNOWN.ordinal, failureResult.error.code)
+        assertEquals(PayPalSDKErrorCode.INVALID_URL_REQUEST.ordinal, failureResult.error.code)
 
         // Verify HTTP send was NOT called since the request creation failed
         coVerify(exactly = 0) { mockHttp.send(any()) }

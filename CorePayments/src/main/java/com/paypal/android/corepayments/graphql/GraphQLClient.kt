@@ -55,6 +55,7 @@ class GraphQLClient internal constructor(
         responseSerializer: KSerializer<R>,
     ): GraphQLResult<R> {
         val httpRequest = createHttpRequest(graphQLRequest, variablesSerializer)
+            ?: return GraphQLResult.Failure(error = invalidUrlRequest)
 
         val httpResponse = http.send(httpRequest)
         val correlationId = httpResponse.headers[PAYPAL_DEBUG_ID]
@@ -84,18 +85,18 @@ class GraphQLClient internal constructor(
     private fun <V> createHttpRequest(
         graphQLRequest: GraphQLRequest<V>,
         variablesSerializer: KSerializer<V>
-    ): HttpRequest {
+    ): HttpRequest? = runCatching {
         val urlString = graphQLRequest.operationName?.let { "$graphQLURL?$it" } ?: graphQLURL
         val requestBody =
             json.encodeToString(GraphQLRequest.serializer(variablesSerializer), graphQLRequest)
 
-        return HttpRequest(
+        HttpRequest(
             url = URL(urlString),
             method = HttpMethod.POST,
             body = requestBody,
             headers = httpRequestHeaders
         )
-    }
+    }.getOrNull()
 
     /**
      * Public API for sending GraphQL requests.
