@@ -22,17 +22,16 @@ internal class CardResponseParser {
     fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResult {
         val correlationId = httpResponse.headers["Paypal-Debug-Id"]
         val error = parseError(httpResponse)
+        val responseBody = httpResponse.body?.takeIf { it.isNotBlank() }
+            ?: return ConfirmPaymentSourceResult.Failure(APIClientError.noResponseData(correlationId))
 
         return when {
             error != null -> ConfirmPaymentSourceResult.Failure(error)
-            httpResponse.body.isNullOrBlank() -> {
-                ConfirmPaymentSourceResult.Failure(APIClientError.noResponseData(correlationId))
-            }
 
             else -> {
                 try {
                     val response =
-                        json.decodeFromString<ConfirmPaymentSourceResponse>(httpResponse.body!!)
+                        json.decodeFromString<ConfirmPaymentSourceResponse>(responseBody)
                     ConfirmPaymentSourceResult.Success(
                         orderId = response.id,
                         status = response.status,
