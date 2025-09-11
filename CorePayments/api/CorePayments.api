@@ -134,7 +134,6 @@ public final class com/paypal/android/corepayments/HttpResponse {
 	public final fun getStatus ()I
 	public fun hashCode ()I
 	public final fun isSuccessful ()Z
-	public final fun setSuccessful (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -211,18 +210,6 @@ public final class com/paypal/android/corepayments/PayPalSDKErrorCode : java/lan
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
 	public static fun values ()[Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
-}
-
-public final class com/paypal/android/corepayments/PaymentsJSON {
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Lorg/json/JSONObject;)V
-	public final fun getJson ()Lorg/json/JSONObject;
-	public final fun getLinkHref (Ljava/lang/String;)Ljava/lang/String;
-	public final fun getString (Ljava/lang/String;)Ljava/lang/String;
-	public final fun optGetObject (Ljava/lang/String;)Lcom/paypal/android/corepayments/PaymentsJSON;
-	public final fun optMapObject (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public final fun optMapObjectArray (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
-	public final fun optString (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class com/paypal/android/corepayments/ResourceLoader {
