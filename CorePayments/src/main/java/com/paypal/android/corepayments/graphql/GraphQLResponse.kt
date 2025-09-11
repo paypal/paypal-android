@@ -4,13 +4,11 @@ import androidx.annotation.RestrictTo
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
-/**
- * @suppress
- */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @InternalSerializationApi
 @Serializable
-data class GraphQLError(
-    val message: String,
-    val extensions: List<GraphQLExtension>? = null
+data class GraphQLResponse<out T> @OptIn(InternalSerializationApi::class) constructor(
+    val data: T? = null,
+    val extensions: List<GraphQLExtension>? = null,
+    val errors: List<GraphQLError>? = null,
 )
