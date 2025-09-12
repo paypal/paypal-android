@@ -209,5 +209,4 @@ class SDKSampleServerAPI {
     } catch (e: Throwable) {
         SDKSampleServerResult.Failure(SDKSampleServerException(e.message, e))
     }
-
 }

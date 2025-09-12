@@ -19,8 +19,21 @@ class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> =
-        withContext(Dispatchers.IO) {
+    suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
+        val paymentSource = if (request.shouldVault) {
+            OrderPaymentSource(
+                card = Card(
+                    attributes = CardAttributes(
+                        vault = Vault(
+                            storeInVault = "ON_SUCCESS"
+                        )
+                    )
+                )
+            )
+        } else {
+            null
+        }
+        return withContext(Dispatchers.IO) {
             val amount = Amount(
                 currencyCode = "USD",
                 value = "10.99"
@@ -33,19 +46,10 @@ class CreateOrderUseCase @Inject constructor(
             val orderRequestBody = OrderRequestBody(
                 intent = request.intent,
                 purchaseUnits = listOf(purchaseUnit),
-                paymentSource = if (request.shouldVault) {
-                    OrderPaymentSource(
-                        card = Card(
-                            attributes = CardAttributes(
-                                vault = Vault(
-                                    storeInVault = "ON_SUCCESS"
-                                )
-                            )
-                        )
-                    )
-                } else null
+                paymentSource = paymentSource
             )
 
             sdkSampleServerAPI.createOrder(orderRequestBody)
         }
+    }
 }

@@ -17,4 +17,3 @@ data class Token(
     val id: String,
     val type: String
 )
-
