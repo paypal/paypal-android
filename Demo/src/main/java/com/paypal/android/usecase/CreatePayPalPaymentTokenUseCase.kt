@@ -1,9 +1,10 @@
 package com.paypal.android.usecase
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.api.model.serialization.PaymentSource
+import com.paypal.android.api.model.serialization.Token
+import com.paypal.android.api.model.serialization.TokenRequest
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import kotlinx.coroutines.Dispatchers
@@ -15,19 +16,15 @@ class CreatePayPalPaymentTokenUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(setupToken: PayPalSetupToken): SDKSampleServerResult<PayPalPaymentToken, Exception> =
         withContext(Dispatchers.IO) {
-            // language=JSON
-            val request = """
-            {
-              "paymentSource": {
-                "token": {
-                  "id": "${setupToken.id}",
-                  "type": "SETUP_TOKEN"
-                }
-              }
-            }
-            """
+            val tokenRequest = TokenRequest(
+                paymentSource = PaymentSource(
+                    token = Token(
+                        id = setupToken.id,
+                        type = "SETUP_TOKEN"
+                    )
+                )
+            )
 
-            val requestJson = JsonParser.parseString(request) as JsonObject
-            sdkSampleServerAPI.createPayPalPaymentToken(requestJson)
+            sdkSampleServerAPI.createPayPalPaymentToken(tokenRequest)
         }
 }
