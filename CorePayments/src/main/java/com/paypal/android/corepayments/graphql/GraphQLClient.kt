@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments.graphql
 
 import androidx.annotation.RestrictTo
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.APIClientError.graphQLJSONParseError
 import com.paypal.android.corepayments.APIClientError.invalidUrlRequest
 import com.paypal.android.corepayments.APIClientError.noResponseData
@@ -62,8 +63,7 @@ class GraphQLClient internal constructor(
 
         return when {
             httpResponse.status != HTTP_OK -> {
-                val emptyResponse = GraphQLResponse<R>(null, null, null)
-                GraphQLResult.Success(emptyResponse, correlationId = correlationId)
+                GraphQLResult.Failure(APIClientError.serverResponseError(correlationId))
             }
 
             httpResponse.body.isNullOrBlank() -> {

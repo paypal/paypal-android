@@ -14,7 +14,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -142,14 +141,11 @@ internal class GraphQLClientUnitTest {
         )
 
         // Assert
-        assertTrue(result is GraphQLResult.Success)
-        val successResult = result as GraphQLResult.Success<TestResponse>
+        assertTrue(result is GraphQLResult.Failure)
+        val failureResult = result as GraphQLResult.Failure
 
-        // Verify we get a response object with null data
-        assertEquals(testCorrelationId, successResult.correlationId)
-        assertNull(successResult.response.data)
-        assertNull(successResult.response.errors)
-        assertNull(successResult.response.extensions)
+        // Verify we get an error response for HTTP error
+        assertEquals(testCorrelationId, failureResult.error.correlationId)
 
         // Verify HTTP send was called
         coVerify(exactly = 1) { mockHttp.send(any()) }
