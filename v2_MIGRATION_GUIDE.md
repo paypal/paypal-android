@@ -2,7 +2,7 @@
 
 This guide highlights how to migrate to the latest version of the PayPal SDK.
 
-> For evolution of this guide, see the MIGRATION_GUIDE for [v2.0.0-beta1](https://github.com/paypal/paypal-android/blob/4afcf913ae8ae91c741faa4a7d49f8ba44765117/v2_MIGRATION_GUIDE.md).
+> For evolution of this guide, see the MIGRATION_GUIDE for [v2.0.0](https://github.com/paypal/paypal-android/blob/ff48f17bf502ed6c99ae4a9b1dd8caba998a7219/v2_MIGRATION_GUIDE.md).
 
 ## Table of Contents
 
@@ -21,7 +21,6 @@ We refactored the `CardClient` API to improve the developer experience. Use this
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 - val cardClient = CardClient(requireActivity(), config)
 + val cardClient = CardClient(requireContext(), config)
-+ var authState: String? = null
 
 - init {
 -   cardClient.approveOrderListener = this
@@ -65,53 +64,36 @@ We refactored the `CardClient` API to improve the developer experience. Use this
 +   // Manually present auth challenge
 +   when (val result = cardClient.presentAuthChallenge(this, authChallenge)) {
 +     is CardPresentAuthChallengeResult.Success -> {
-+       // Capture auth state for balancing call to finishApproveOrder()/finishVault() when
-+       // the merchant application re-enters the foreground
-+       authState = result.authState
++       // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
++       // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
++       // balancing call to finishApproveOrder() / finishVault()
 +     }
 +     is CardPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
 + }
 
-+ fun checkForCardAuthCompletion(intent: Intent) = authState?.let { state ->
++ fun checkForCardAuthCompletion(intent: Intent) {
 +   // check for approve order completion
-+   when (val approveOrderResult = cardClient.finishApproveOrder(intent, state)) {
-+     is CardFinishApproveOrderResult.Success -> {
-+       TODO("Capture or authorize order on your server.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     is CardFinishApproveOrderResult.Failure -> {
-+       TODO("Handle approve order failure.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     CardFinishApproveOrderResult.Canceled -> {
-+       TODO("Give user the option to restart the flow.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     CardFinishApproveOrderResult.NoResult -> {
-+       // there isn't enough information to determine the state of the auth challenge for this payment method
++   cardClient.finishApproveOrder(intent)?.let { approveOrderResult ->
++     when (approveOrderResult) {
++       is CardFinishApproveOrderResult.Success -> TODO("Capture or authorize order on your server.")
++       is CardFinishApproveOrderResult.Failure -> TODO("Handle approve order failure.")
++       CardFinishApproveOrderResult.Canceled -> TODO("Give user the option to restart the flow.")
++       CardFinishApproveOrderResult.NoResult -> {
++         // there isn't enough information to determine the state of the auth challenge for this payment method
++       }
 +     }
 +   }
 +
 +   // check for vault completion
-+   when (val vaultResult = cardClient.finishVault(intent, state)) {
-+     is CardFinishVaultResult.Success -> {
-+       TODO("Create payment token on your server.")
-+       authState = null // Discard auth state when done
-+     }
-+     is CardFinishVaultResult.Failure -> {
-+       TODO("Handle card vault failure.")
-+       authState = null // Discard auth state when done
-+     }
-+     CardFinishVaultResult.Canceled -> {
-+       TODO("Give user the option to restart the flow.")
-+       authState = null // Discard auth state when done
-+     }
-+     CardFinishVaultResult.NoResult -> {
-+       // there isn't enough information to determine the state of the auth challenge for this payment method
++   cardClient.finishVault(intent)?.let { vaultReslt
++     when (vaultResult) {
++       is CardFinishVaultResult.Success -> TODO("Create payment token on your server.")
++       is CardFinishVaultResult.Failure -> TODO("Handle card vault failure.")
++       CardFinishVaultResult.Canceled -> TODO("Give user the option to restart the flow.")
++       CardFinishVaultResult.NoResult -> {
++         // there isn't enough information to determine the state of the auth challenge for this payment method
++       }
 +     }
 +   }
 + }
