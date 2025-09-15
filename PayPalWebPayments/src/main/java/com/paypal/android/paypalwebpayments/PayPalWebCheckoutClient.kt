@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -42,7 +43,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(
-        activity: ComponentActivity,
+        activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId

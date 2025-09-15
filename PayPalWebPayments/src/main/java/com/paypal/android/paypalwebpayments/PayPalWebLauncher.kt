@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
@@ -30,7 +31,7 @@ internal class PayPalWebLauncher(
     }
 
     fun launchPayPalWebCheckout(
-        activity: ComponentActivity,
+        activity: Activity,
         request: PayPalWebCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -60,7 +61,7 @@ internal class PayPalWebLauncher(
     }
 
     private fun launchBrowserSwitch(
-        activity: ComponentActivity,
+        activity: Activity,
         options: BrowserSwitchOptions
     ): PayPalPresentAuthChallengeResult =
         when (val startResult = browserSwitchClient.start(activity, options)) {
