@@ -163,7 +163,6 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
   val config = CoreConfig("<CLIENT_ID>", environment = Environment.LIVE)
 - val payPalClient = PayPalWebCheckoutClient(requireActivity(), config, "my-deep-link-url-scheme")
 + val payPalClient = PayPalWebCheckoutClient(requireContext(), config, "my-deep-link-url-scheme")
-+ var authState: String? = null
 
 - init {
 -   payPalClient.listener = this
@@ -193,9 +192,9 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
 -   payPalClient.start(checkoutRequest)
 +   when (val result = paypalClient.start(this, checkoutRequest)) {
 +     is PayPalPresentAuthChallengeResult.Success -> {
-+       // Capture auth state for balancing call to finishStart() when
-+       // the merchant application re-enters the foreground
-+       authState = result.authState
++       // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
++       // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
++       // balancing call to finishStart()
 +     }
 +     is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
@@ -206,56 +205,36 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
 -   payPalClient.vault(vaultRequest)
 +   when (val result = paypalClient.vault(this, vaultRequest)) {
 +     is PayPalPresentAuthChallengeResult.Success -> {
-+       // Capture auth state for balancing call to finishVault() when
-+       // the merchant application re-enters the foreground
-+       authState = result.authState
++       // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
++       // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
++       // balancing call to finishVault()
 +     }
 +     is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
   }
 
-+ fun checkForPayPalAuthCompletion(intent: Intent) = authState?.let { state ->
++ fun checkForPayPalAuthCompletion(intent: Intent) {
 +   // check for checkout completion
-+   when (val checkoutResult = payPalClient.finishStart(intent, state)) {
-+     is PayPalWebCheckoutFinishStartResult.Success -> {
-+       TODO("Capture or authorize order on your server.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     is PayPalWebCheckoutFinishStartResult.Failure -> {
-+       TODO("Handle approve order failure.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     is PayPalWebCheckoutFinishStartResult.Canceled -> {
-+       TODO("Notify user PayPal checkout was canceled.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     PayPalWebCheckoutFinishStartResult.NoResult -> {
-+       // there isn't enough information to determine the state of the auth challenge for this payment method
++   payPalClient.finishStart(intent)?.let { checkoutResult ->
++     when (checkoutResult) {
++       is PayPalWebCheckoutFinishStartResult.Success -> TODO("Capture or authorize order on your server.")
++       is PayPalWebCheckoutFinishStartResult.Failure -> TODO("Handle approve order failure.")
++       is PayPalWebCheckoutFinishStartResult.Canceled -> TODO("Notify user PayPal checkout was canceled.")
++       PayPalWebCheckoutFinishStartResult.NoResult -> {
++         // there isn't enough information to determine the state of the auth challenge for this payment method
++       }
 +     }
 +   }
 +
 +   // check for vault completion
-+   when (val vaultResult = payPalClient.finishVault(intent, state)) {
-+     is PayPalWebCheckoutFinishVaultResult.Success -> {
-+       TODO("Create payment token on your server.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     is PayPalWebCheckoutFinishVaultResult.Failure -> {
-+       TODO("Handle card vault failure.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     is PayPalWebCheckoutFinishVaultResult.Canceled -> {
-+       TODO("Notify user PayPal vault was canceled.")
-+       authState = null // Discard auth state when done
-+     }
-+
-+     PayPalWebCheckoutFinishVaultResult.NoResult -> {
-+       // there isn't enough information to determine the state of the auth challenge for this payment method
++   payPalClient.finishVault(intent)?.let { vaultResult ->
++     when (vaultResult) {
++       is PayPalWebCheckoutFinishVaultResult.Success -> TODO("Create payment token on your server.")
++       is PayPalWebCheckoutFinishVaultResult.Failure -> TODO("Handle card vault failure.")
++       is PayPalWebCheckoutFinishVaultResult.Canceled ->TODO("Notify user PayPal vault was canceled.")
++       PayPalWebCheckoutFinishVaultResult.NoResult -> {
++         // there isn't enough information to determine the state of the auth challenge for this payment method
++       }
 +     }
 +   }
 + }
