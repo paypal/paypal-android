@@ -74,7 +74,7 @@ fun OrderResponse.toOrder(): Order {
         id = id,
         intent = intent,
         status = status,
-        cardLast4 = paymentSource?.card?.lastDigits,
+        lastDigits = paymentSource?.card?.lastDigits,
         cardBrand = paymentSource?.card?.brand,
         vaultId = paymentSource?.card?.attributes?.vault?.id,
         customerId = paymentSource?.card?.attributes?.vault?.customer?.id
@@ -94,7 +94,7 @@ fun PaymentTokenResponse.toCardPaymentToken(): CardPaymentToken {
     return CardPaymentToken(
         id = id,
         customerId = customer.id,
-        cardLast4 = paymentSource?.card?.lastDigits ?: "",
+        lastDigits = paymentSource?.card?.lastDigits ?: "",
         cardBrand = paymentSource?.card?.brand ?: ""
     )
 }
