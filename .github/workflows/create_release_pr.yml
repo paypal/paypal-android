@@ -1,0 +1,57 @@
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Version to release (e.g., 2.1.0)'
+        required: true
+        type: string
+
+jobs:
+  create_release_pr:
+    name: Create Release PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history to ensure branch creation works
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+
+      - name: Update Version Files
+        run: |
+          # Update version in build.gradle
+          ./gradlew -PversionParam=${{ github.event.inputs.versionName }} changeReleaseVersion
+          
+          # Update CHANGELOG with the version and date
+          DATE=$(date +%Y-%m-%d)
+          ./gradlew -PversionParam=${{ github.event.inputs.versionName }} updateCHANGELOGVersion
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Prepare release ${{ github.event.inputs.versionName }}"
+          branch: release/${{ github.event.inputs.versionName }}
+          delete-branch: false
+          title: "Release ${{ github.event.inputs.versionName }}"
+          body: |
+            ## Release PR for version ${{ github.event.inputs.versionName }}
+            
+            This PR prepares the codebase for releasing version ${{ github.event.inputs.versionName }}.
+            
+            ### Changes:
+            - Updated version in build.gradle to ${{ github.event.inputs.versionName }}
+            - Updated CHANGELOG.md with release date
+            
+            Once this PR is merged, the release workflow will automatically publish the SDK to Maven Central.
+          base: main
