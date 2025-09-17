@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - develop
-  workflow_run:
-    workflows: [ "Release On Merge To Main" ]
-    types:
-      - completed
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
