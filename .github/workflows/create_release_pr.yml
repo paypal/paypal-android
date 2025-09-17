@@ -53,5 +53,5 @@ jobs:
             - Updated version in build.gradle to ${{ github.event.inputs.versionName }}
             - Updated CHANGELOG.md with release date
             
-            Once this PR is merged, the release workflow will automatically publish the SDK to Maven Central.
+            Once this PR is merged, the [Release On Merge To Main] workflow will automatically publish the SDK to Maven Central.
           base: main

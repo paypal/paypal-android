@@ -1,4 +1,4 @@
-name: Release
+name: Release On Merge To Main
 on:
   push:
     branches:
@@ -171,12 +171,8 @@ jobs:
           VERSION="${{ needs.extract_version.outputs.version }}"
           echo "Using current version from build.gradle: $VERSION"
           
-          # Update changelog with current date
-          DATE=$(date +%Y-%m-%d)
-          sed -i "s/## unreleased/## $VERSION ($DATE)/g" CHANGELOG.md
-          
-          git add CHANGELOG.md
-          git commit -m "Update CHANGELOG for release $VERSION"
+          # CHANGELOG is already updated by the release PR process
+          # Just create the tag without modifying files
           git tag $VERSION -a -m "Release $VERSION, automated from main branch"
           git push origin $VERSION
       - name: Save changelog entries to a file
