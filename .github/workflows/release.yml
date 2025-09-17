@@ -1,13 +1,28 @@
 name: Release
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release'
-        required: true
+  push:
+    branches:
+      - main
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
+  # Extract version from build.gradle
+  extract_version:
+    name: Extract Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Get version from build.gradle
+        id: get_version
+        run: |
+          # Extract version from build.gradle
+          VERSION=$(grep -o '"sdkVersionName"\s*:\s*"[^"]*"' build.gradle | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+[^"]*')
+          echo "Current version in build.gradle: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
   #First we build
   build_aar:
     name: Build
@@ -106,7 +121,7 @@ jobs:
   # after build and unit tests are finished, publish all modules at once
   # to help reduce the probability of failure when interacting with sonatype servers
   publish_all_modules:
-    needs: [ unit_test_finished, build_aar ]
+    needs: [ unit_test_finished, build_aar, extract_version ]
     name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
     steps:
@@ -122,9 +137,10 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Update Version
+      - name: Log Version
         run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+          # Use extracted version from build.gradle
+          echo "Using version from build.gradle: ${{ needs.extract_version.outputs.version }}"
       - name: Publish All Modules
         uses: ./.github/actions/publish_all_modules
         with:
@@ -136,7 +152,7 @@ jobs:
 
   # Once all releases are done, we bump version, tag it and prepare next
   bump_version:
-    needs: [ publish_all_modules ]
+    needs: [ publish_all_modules, extract_version ]
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
@@ -149,30 +165,30 @@ jobs:
           distribution: 'microsoft'
       - name: Set github user
         uses: ./.github/actions/set_github_user
-      - name: Update Version
+      - name: Tag and Release
         run: |
-
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} updateCHANGELOGVersion
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-
-          git add .
-          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
-          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
-
-          ./gradlew incrementSnapshotVersion
-          git add .
-          git commit -m 'Next version ready'
-          git push origin HEAD ${{ github.event.inputs.version }}
+          # Use extracted version from build.gradle
+          VERSION="${{ needs.extract_version.outputs.version }}"
+          echo "Using current version from build.gradle: $VERSION"
+          
+          # Update changelog with current date
+          DATE=$(date +%Y-%m-%d)
+          sed -i "s/## unreleased/## $VERSION ($DATE)/g" CHANGELOG.md
+          
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG for release $VERSION"
+          git tag $VERSION -a -m "Release $VERSION, automated from main branch"
+          git push origin $VERSION
       - name: Save changelog entries to a file
-        run: sed -e '1,/##/d' -e '/##/,$d' CHANGELOG.md > changelog_entries.md
+        run: sed -e '1,/##/d'e '/##/,$d' CHANGELOG.md > changelog_entries.md
       - name: Create GitHub release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: ${{ github.event.inputs.version }}
+          tag_name: ${{ needs.extract_version.outputs.version }}
+          release_name: ${{ needs.extract_version.outputs.version }}
           body_path: changelog_entries.md
           draft: false
           prerelease: false
