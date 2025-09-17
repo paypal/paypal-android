@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - develop
   workflow_run:
     workflows: ["Release"]
     types:
