@@ -158,7 +158,7 @@ class CardClient internal constructor(
         val result = authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
         captureAuthChallengePresentationAnalytics(result, authChallenge)
         if (result is CardPresentAuthChallengeResult.Success) {
-            sessionStore.authState = result.authState
+            sessionStore.authState = result.authStateInternal
         }
         return result
     }
