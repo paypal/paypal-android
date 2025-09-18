@@ -15,6 +15,8 @@
     * Deprecate `CardClient.finishVault(intent: Intent, authState: String)` method
   * Add `CardClient.instanceState` property
   * Add `CardClient.restore(instanceState: String)` method
+  * Deprecate `CardPresentAuthChalengeResult.authState` property
+  * Deprecate `PayPalPresentAuthChallengeResult.authState` property
 
 ## 2.0.0 (2025-03-18)
 * Breaking Changes
