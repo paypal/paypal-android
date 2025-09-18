@@ -170,7 +170,7 @@ jobs:
           # Use extracted version from build.gradle
           VERSION="${{ needs.extract_version.outputs.version }}"
           echo "Using current version from build.gradle: $VERSION"
-          
+
           # CHANGELOG is already updated by the release PR process
           # Just create the tag without modifying files
           git tag $VERSION -a -m "Release $VERSION, automated from main branch"
@@ -188,3 +188,67 @@ jobs:
           body_path: changelog_entries.md
           draft: false
           prerelease: false
+
+  # Create PR to sync changes from main to develop after successful release
+  sync_to_develop:
+    needs: [ bump_version, extract_version ]
+    name: Sync Main to Develop
+    runs-on: ubuntu-latest
+    # Add permissions needed for PR creation and merge
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history to ensure branch creation works
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Setup GitHub CLI
+        uses: cli/cli-action@v2
+      - name: Create sync branch and PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.extract_version.outputs.version }}"
+          BRANCH_NAME="sync/main-to-develop-$VERSION"
+          PR_TITLE="Sync: Main to Develop after release $VERSION"
+
+          # Create body file to avoid heredoc issues
+          cat > pr_body.md << 'EOFMARKER'
+## Sync PR from main to develop
+
+This PR syncs changes from the main branch to the develop branch after release VERSION_PLACEHOLDER.
+
+### Changes included:
+- Release version VERSION_PLACEHOLDER
+- Any hotfixes or changes made during the release process
+EOFMARKER
+
+          # Replace placeholder with actual version (compatible with both GNU and BSD sed)
+          sed -i.bak "s/VERSION_PLACEHOLDER/$VERSION/g" pr_body.md && rm -f pr_body.md.bak
+
+          # Create new branch from main
+          git checkout main
+          git pull origin main
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+
+          echo "Created branch $BRANCH_NAME from main"
+
+          # Create PR using GitHub CLI
+          PR_URL=$(gh pr create \
+            --base develop \
+            --head $BRANCH_NAME \
+            --title "$PR_TITLE" \
+            --body-file pr_body.md)
+
+          echo "Created PR: $PR_URL"
+
+          # Enable auto-merge for the PR
+          # Extract PR number from URL using GitHub CLI
+          echo "Enabling auto-merge for PR at $PR_URL"
+          gh pr merge $PR_URL --auto --merge --delete-branch
+
+          echo "Auto-merge enabled. PR will be merged automatically when all checks pass."
