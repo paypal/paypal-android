@@ -2,7 +2,6 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -57,13 +56,13 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     fun start(
-        activity: ComponentActivity,
+        context: Context,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+        val result = payPalWebLauncher.launchPayPalWebCheckout(context, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
@@ -87,13 +86,13 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
     fun vault(
-        activity: ComponentActivity,
+        context: Context,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = request.setupTokenId
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
-        val result = payPalWebLauncher.launchPayPalWebVault(activity, request)
+        val result = payPalWebLauncher.launchPayPalWebVault(context, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(

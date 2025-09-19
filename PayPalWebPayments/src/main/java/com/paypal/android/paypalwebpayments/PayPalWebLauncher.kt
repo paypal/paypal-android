@@ -1,8 +1,8 @@
 package com.paypal.android.paypalwebpayments
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -30,7 +30,7 @@ internal class PayPalWebLauncher(
     }
 
     fun launchPayPalWebCheckout(
-        activity: ComponentActivity,
+        context: Context,
         request: PayPalWebCheckoutRequest,
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -42,11 +42,11 @@ internal class PayPalWebLauncher(
             returnUrlScheme = urlScheme,
             metadata = metadata
         )
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(context, options)
     }
 
     fun launchPayPalWebVault(
-        activity: ComponentActivity,
+        context: Context,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         val metadata = JSONObject()
@@ -58,14 +58,14 @@ internal class PayPalWebLauncher(
             returnUrlScheme = urlScheme,
             metadata = metadata
         )
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(context, options)
     }
 
     private fun launchBrowserSwitch(
-        activity: ComponentActivity,
+        context: Context,
         options: BrowserSwitchOptions
     ): PayPalPresentAuthChallengeResult =
-        when (val startResult = browserSwitchClient.start(activity, options)) {
+        when (val startResult = browserSwitchClient.start(context, options)) {
             is BrowserSwitchStartResult.Success -> {
                 val authState = startResult.pendingState.toBase64EncodedJSON()
                 PayPalPresentAuthChallengeResult.Success(authState)
