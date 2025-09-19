@@ -3,7 +3,6 @@ package com.paypal.android.ui.paypalweb
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -91,22 +90,22 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun startWebCheckout(activity: ComponentActivity) {
+    fun startWebCheckout(context: Context) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
             viewModelScope.launch {
-                startWebCheckoutWithOrderId(activity, orderId)
+                startWebCheckoutWithOrderId(context, orderId)
             }
         }
     }
 
-    private fun startWebCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private fun startWebCheckoutWithOrderId(context: Context, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
         val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
-        when (val startResult = paypalClient.start(activity, checkoutRequest)) {
+        when (val startResult = paypalClient.start(context, checkoutRequest)) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
             }
@@ -116,7 +115,7 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    fun completeOrder(context: Context) {
+    fun completeOrder() {
         val orderId = createdOrder?.id
         if (orderId == null) {
             completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
@@ -125,7 +124,8 @@ class PayPalWebViewModel @Inject constructor(
                 completeOrderState = ActionState.Loading
                 val dataCollectorRequest =
                     PayPalDataCollectorRequest(hasUserLocationConsent = false)
-                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
+                val cmid =
+                    payPalDataCollector.collectDeviceData(applicationContext, dataCollectorRequest)
                 completeOrderState =
                     completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }

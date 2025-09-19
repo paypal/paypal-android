@@ -110,7 +110,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
+            onClick = { viewModel.startWebCheckout(context) },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
@@ -135,7 +135,7 @@ private fun Step3_CompleteOrder(uiState: PayPalWebUiState, viewModel: PayPalWebV
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",
             state = uiState.completeOrderState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.completeOrder(it) } },
+            onClick = { viewModel.completeOrder() },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
