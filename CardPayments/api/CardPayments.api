@@ -225,6 +225,7 @@ public final class com/paypal/android/cardpayments/CardPresentAuthChallengeResul
 
 public final class com/paypal/android/cardpayments/CardPresentAuthChallengeResult$Success : com/paypal/android/cardpayments/CardPresentAuthChallengeResult {
 	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult$Success;
 	public static synthetic fun copy$default (Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult$Success;
 	public fun equals (Ljava/lang/Object;)Z
