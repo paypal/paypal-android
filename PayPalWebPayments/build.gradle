@@ -42,7 +42,6 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    implementation libs.braintree.browserSwitch
 
     implementation libs.kotlin.stdLib
     implementation libs.androidx.coreKtx

@@ -3,14 +3,15 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchFinalResult
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchFinishResult
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -32,7 +33,7 @@ internal class PayPalWebLauncher(
     fun launchPayPalWebCheckout(
         activity: ComponentActivity,
         request: PayPalWebCheckoutRequest,
-    ): PayPalPresentAuthChallengeResult {
+    ): PayPalWebLaunchResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_ORDER_ID, request.orderId)
         val url = request.run { buildPayPalCheckoutUri(orderId, coreConfig, fundingSource) }
@@ -47,7 +48,7 @@ internal class PayPalWebLauncher(
     fun launchPayPalWebVault(
         activity: ComponentActivity,
         request: PayPalWebVaultRequest
-    ): PayPalPresentAuthChallengeResult {
+    ): PayPalWebLaunchResult {
         val metadata = JSONObject()
             .put(METADATA_KEY_SETUP_TOKEN_ID, request.setupTokenId)
         val url = request.run { buildPayPalVaultUri(request.setupTokenId, coreConfig) }
@@ -62,15 +63,15 @@ internal class PayPalWebLauncher(
     private fun launchBrowserSwitch(
         activity: ComponentActivity,
         options: BrowserSwitchOptions
-    ): PayPalPresentAuthChallengeResult =
+    ): PayPalWebLaunchResult =
         when (val startResult = browserSwitchClient.start(activity, options)) {
-            is BrowserSwitchStartResult.Started -> {
-                PayPalPresentAuthChallengeResult.Success(startResult.pendingRequest)
+            is BrowserSwitchStartResult.Success -> {
+                PayPalWebLaunchResult.Success(startResult.pendingState)
             }
 
             is BrowserSwitchStartResult.Failure -> {
                 val error = PayPalWebCheckoutError.browserSwitchError(startResult.error)
-                PayPalPresentAuthChallengeResult.Failure(error)
+                PayPalWebLaunchResult.Failure(error)
             }
         }
 
@@ -109,11 +110,11 @@ internal class PayPalWebLauncher(
 
     fun completeCheckoutAuthRequest(
         intent: Intent,
-        authState: String
+        pendingState: BrowserSwitchPendingState
     ): PayPalWebCheckoutFinishStartResult {
-        return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
-            is BrowserSwitchFinalResult.Success -> parseWebCheckoutSuccessResult(finalResult)
-            is BrowserSwitchFinalResult.Failure -> {
+        return when (val finalResult = browserSwitchClient.finish(intent, pendingState)) {
+            is BrowserSwitchFinishResult.Success -> parseWebCheckoutSuccessResult(finalResult)
+            is BrowserSwitchFinishResult.Failure -> {
                 // TODO: remove error codes and error description from project; the built in
                 // Throwable type already has a message property and error codes are only required
                 // for iOS Error protocol conformance
@@ -122,17 +123,17 @@ internal class PayPalWebLauncher(
                 PayPalWebCheckoutFinishStartResult.Failure(browserSwitchError, null)
             }
 
-            BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutFinishStartResult.NoResult
+            BrowserSwitchFinishResult.NoResult -> PayPalWebCheckoutFinishStartResult.NoResult
         }
     }
 
     fun completeVaultAuthRequest(
         intent: Intent,
-        authState: String
+        authState: BrowserSwitchPendingState
     ): PayPalWebCheckoutFinishVaultResult {
-        return when (val finalResult = browserSwitchClient.completeRequest(intent, authState)) {
-            is BrowserSwitchFinalResult.Success -> parseVaultSuccessResult(finalResult)
-            is BrowserSwitchFinalResult.Failure -> {
+        return when (val finalResult = browserSwitchClient.finish(intent, authState)) {
+            is BrowserSwitchFinishResult.Success -> parseVaultSuccessResult(finalResult)
+            is BrowserSwitchFinishResult.Failure -> {
                 // TODO: remove error codes and error description from project; the built in
                 // Throwable type already has a message property and error codes are only required
                 // for iOS Error protocol conformance
@@ -141,12 +142,12 @@ internal class PayPalWebLauncher(
                 PayPalWebCheckoutFinishVaultResult.Failure(browserSwitchError)
             }
 
-            BrowserSwitchFinalResult.NoResult -> PayPalWebCheckoutFinishVaultResult.NoResult
+            BrowserSwitchFinishResult.NoResult -> PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
 
     private fun parseWebCheckoutSuccessResult(
-        finalResult: BrowserSwitchFinalResult.Success
+        finalResult: BrowserSwitchFinishResult.Success
     ): PayPalWebCheckoutFinishStartResult {
         val deepLinkUrl = finalResult.returnUrl
         val metadata = finalResult.requestMetadata
@@ -170,7 +171,7 @@ internal class PayPalWebLauncher(
     }
 
     private fun parseVaultSuccessResult(
-        finalResult: BrowserSwitchFinalResult.Success
+        finalResult: BrowserSwitchFinishResult.Success
     ): PayPalWebCheckoutFinishVaultResult {
         val deepLinkUrl = finalResult.returnUrl
         val requestMetadata = finalResult.requestMetadata
