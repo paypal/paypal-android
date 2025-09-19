@@ -6,7 +6,6 @@ import org.json.JSONObject
 data class BrowserSwitchOptions(
     val targetUri: Uri,
     val requestCode: Int,
-    val returnUrlScheme: String? = null,
-    val appLinkUri: Uri? = null,
+    val returnUrlScheme: String,
     val metadata: JSONObject? = null
 )
