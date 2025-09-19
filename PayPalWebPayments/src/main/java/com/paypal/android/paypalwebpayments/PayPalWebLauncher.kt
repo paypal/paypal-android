@@ -117,16 +117,20 @@ internal class PayPalWebLauncher(
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
         return when (val finalResult = browserSwitchClient.finish(intent, requestCode, authState)) {
             is BrowserSwitchFinishResult.Success -> parseWebCheckoutSuccessResult(finalResult)
-            is BrowserSwitchFinishResult.Failure -> {
+            BrowserSwitchFinishResult.PendingStateInvalid -> {
                 // TODO: remove error codes and error description from project; the built in
                 // Throwable type already has a message property and error codes are only required
                 // for iOS Error protocol conformance
                 val message = "Browser switch failed"
-                val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
+                val reason = Error("Auth State Invalid")
+                val browserSwitchError = PayPalSDKError(0, message, reason = reason)
                 PayPalWebCheckoutFinishStartResult.Failure(browserSwitchError, null)
             }
 
-            BrowserSwitchFinishResult.NoResult -> PayPalWebCheckoutFinishStartResult.NoResult
+            // we do not have enough information to consider these events to be failures
+            BrowserSwitchFinishResult.DeepLinkNotPresent,
+            BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
+            BrowserSwitchFinishResult.RequestCodeDoesNotMatch -> PayPalWebCheckoutFinishStartResult.NoResult
         }
     }
 
@@ -137,16 +141,20 @@ internal class PayPalWebLauncher(
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
         return when (val finalResult = browserSwitchClient.finish(intent, requestCode, authState)) {
             is BrowserSwitchFinishResult.Success -> parseVaultSuccessResult(finalResult)
-            is BrowserSwitchFinishResult.Failure -> {
+            BrowserSwitchFinishResult.PendingStateInvalid -> {
                 // TODO: remove error codes and error description from project; the built in
                 // Throwable type already has a message property and error codes are only required
                 // for iOS Error protocol conformance
                 val message = "Browser switch failed"
-                val browserSwitchError = PayPalSDKError(0, message, reason = finalResult.error)
+                val reason = Error("Auth State Invalid")
+                val browserSwitchError = PayPalSDKError(0, message, reason = reason)
                 PayPalWebCheckoutFinishVaultResult.Failure(browserSwitchError)
             }
 
-            BrowserSwitchFinishResult.NoResult -> PayPalWebCheckoutFinishVaultResult.NoResult
+            // we do not have enough information to consider these events to be failures
+            BrowserSwitchFinishResult.DeepLinkNotPresent,
+            BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
+            BrowserSwitchFinishResult.RequestCodeDoesNotMatch -> PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
 
