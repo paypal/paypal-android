@@ -11,7 +11,7 @@ class BrowserSwitchClient {
         TODO("Not yet implemented")
     }
 
-    fun finish(intent: Intent, pendingState: BrowserSwitchPendingState): BrowserSwitchFinishResult {
+    fun finish(intent: Intent, pendingStateBase64: String): BrowserSwitchFinishResult {
         TODO("Not yet implemented")
     }
 }

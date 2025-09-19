@@ -72,7 +72,7 @@ class PayPalWebCheckoutClient internal constructor(
                 )
 
                 // update auth state value in session store
-                sessionStore.authState = result.authStateInternal
+                sessionStore.authState = result.authState
             }
 
             is PayPalPresentAuthChallengeResult.Failure ->

@@ -55,6 +55,7 @@ dependencies {
     implementation libs.kotlinx.coroutinesAndroid
     implementation libs.lifecycle.commonJava8
     implementation libs.lifecycle.runtimeKtx
+    implementation libs.braintree.browserSwitch
 
     testImplementation libs.junit
     testImplementation libs.mockk
