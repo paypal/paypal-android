@@ -1,17 +1,22 @@
 package com.paypal.android.corepayments.browserswitch
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import androidx.browser.customtabs.CustomTabsIntent
 
 class BrowserSwitchClient {
     fun start(
-        activity: Activity,
+        context: Context,
         options: BrowserSwitchOptions
     ): BrowserSwitchStartResult {
-        TODO("Not yet implemented")
+        val customTabsIntent = CustomTabsIntent.Builder().build()
+        customTabsIntent.launchUrl(context, options.targetUri)
+        val pendingState = BrowserSwitchPendingState(options)
+        return BrowserSwitchStartResult.Success(pendingState)
     }
 
     fun finish(intent: Intent, pendingStateBase64: String): BrowserSwitchFinishResult {
-        TODO("Not yet implemented")
+        // TODO: implement
+        return BrowserSwitchFinishResult.NoResult
     }
 }

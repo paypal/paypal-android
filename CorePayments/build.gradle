@@ -69,6 +69,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.kotlin.stdLib
     implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.androidx.browser
 
     testImplementation libs.json
     testImplementation libs.jsonAssert
