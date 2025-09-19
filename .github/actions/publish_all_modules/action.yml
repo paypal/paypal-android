@@ -25,7 +25,47 @@ runs:
   using: "composite"
   steps:
     - run: |
-        ./gradlew --stacktrace clean publishToSonatype closeAndReleaseSonatypeStagingRepository
+        echo "::group::Publishing All Modules to Sonatype"
+        echo "🚀 Starting the publishing process to Sonatype"
+        echo "⏱️ $(date): Beginning clean task"
+        ./gradlew --stacktrace clean
+
+        if [ $? -ne 0 ]; then
+          echo "::error::❌ Clean task failed. Aborting publication process."
+          exit 1
+        fi
+
+        echo "⏱️ $(date): Clean task completed successfully"
+        echo "⏱️ $(date): Beginning publish to Sonatype task"
+
+        ./gradlew --stacktrace publishToSonatype
+
+        if [ $? -ne 0 ]; then
+          echo "::error::❌ Publishing to Sonatype failed. Check Sonatype credentials and network connection."
+          echo "📋 Diagnostic information:"
+          echo "  - Sonatype user provided: ${{ inputs.sonatype_usr != '' }}"
+          echo "  - Signing key ID provided: ${{ inputs.signing_key_id != '' }}"
+          echo "  - Signing key file exists: $([ -f ${{ inputs.signing_key_file }} ] && echo 'Yes' || echo 'No')"
+          exit 1
+        fi
+
+        echo "⏱️ $(date): Publication to Sonatype completed successfully"
+        echo "⏱️ $(date): Beginning close and release of Sonatype staging repository"
+
+        ./gradlew --stacktrace closeAndReleaseSonatypeStagingRepository
+
+        if [ $? -ne 0 ]; then
+          echo "::error::❌ Closing and releasing Sonatype staging repository failed."
+          echo "📋 Possible reasons:"
+          echo "  - Repository validation rules failed"
+          echo "  - Network connection issues with Sonatype"
+          echo "  - Staging repository already closed or released"
+          echo "👉 Check Sonatype Nexus Repository Manager for details"
+          exit 1
+        fi
+
+        echo "✅ $(date): Successfully published, closed and released all modules to Sonatype"
+        echo "::endgroup::"
       shell: bash
       env:
         SONATYPE_NEXUS_USERNAME: ${{ inputs.sonatype_usr }}

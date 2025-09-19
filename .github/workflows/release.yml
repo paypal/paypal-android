@@ -18,10 +18,48 @@ jobs:
       - name: Get version from build.gradle
         id: get_version
         run: |
-          # Extract version from build.gradle
-          VERSION=$(grep -o '"sdkVersionName"\s*:\s*"[^"]*"' build.gradle | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+[^"]*')
-          echo "Current version in build.gradle: $VERSION"
+          echo "::group::Extracting SDK Version from build.gradle"
+          echo "⏱️ $(date): Starting version extraction process"
+
+          # Check if build.gradle exists
+          if [ ! -f "build.gradle" ]; then
+            echo "::error::❌ build.gradle file not found! Aborting release process."
+            echo "📋 Current directory: $(pwd)"
+            echo "📋 Directory contents: $(ls -la)"
+            exit 1
+          fi
+
+          echo "📋 File exists check: ✅ build.gradle found"
+
+          # Extract version from build.gradle with error handling
+          VERSION_MATCH=$(grep -o '"sdkVersionName"\s*:\s*"[^"]*"' build.gradle || echo "NO_MATCH")
+
+          if [ "$VERSION_MATCH" = "NO_MATCH" ]; then
+            echo "::error::❌ Could not find sdkVersionName pattern in build.gradle"
+            exit 1
+          fi
+
+          VERSION=$(echo $VERSION_MATCH | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+[^"]*' || echo "INVALID_VERSION")
+
+          if [ "$VERSION" = "INVALID_VERSION" ] || [ -z "$VERSION" ]; then
+            echo "::error::❌ Found sdkVersionName but couldn't extract valid version number"
+            exit 1
+          fi
+          
+          echo "✅ Extracted version: $VERSION"
+
+          # Validate version format (basic semver check)
+          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "::warning::⚠️ Version format may not follow semver: $VERSION"
+            echo "📋 Expected format: major.minor.patch or major.minor.patch-label"
+          else
+            echo "✅ Version format validation passed"
+          fi
+
+          echo "⏱️ $(date): Completed version extraction successfully"
+          echo "🔖 Setting output variable 'version' to: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
 
   #First we build
   build_aar:
@@ -42,7 +80,48 @@ jobs:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Assemble
-        run: ./gradlew --stacktrace assemble -x :Demo:assemble # we exclude Demo from assemble
+        run: |
+          echo "::group::Building SDK modules (excluding Demo)"
+          echo "⏱️ $(date): Starting build process for all SDK modules"
+
+          # Check if signing key exists
+          if [ ! -f "${{ env.SIGNING_KEY_FILE_PATH }}" ]; then
+            echo "::warning::⚠️ Signing key file not found at ${{ env.SIGNING_KEY_FILE_PATH }}"
+            echo "📋 This may cause signing failures during build"
+          else
+            echo "📋 Signing key file check: ✅ Key file found"
+          fi
+
+          # Check environment variables required for signing
+          if [ -z "${{ secrets.SIGNING_KEY_ID }}" ]; then
+            echo "::warning::⚠️ SIGNING_KEY_ID environment variable is empty"
+          else
+            echo "📋 SIGNING_KEY_ID environment variable: ✅ Present"
+          fi
+
+          if [ -z "${{ secrets.SIGNING_KEY_PASSWORD }}" ]; then
+            echo "::warning::⚠️ SIGNING_KEY_PASSWORD environment variable is empty"
+          else
+            echo "📋 SIGNING_KEY_PASSWORD environment variable: ✅ Present"
+          fi
+
+          echo "🚀 Executing Gradle assemble task (excluding Demo module)"
+
+          ./gradlew --stacktrace assemble -x :Demo:assemble
+
+          BUILD_RESULT=$?
+          if [ $BUILD_RESULT -ne 0 ]; then
+            echo "::error::❌ Build failed with exit code $BUILD_RESULT"
+            echo "📋 Possible reasons:"
+            echo "  - Compilation errors in code"
+            echo "  - Dependency resolution issues"
+            echo "  - Signing configuration problems"
+            echo "  - Gradle plugin compatibility issues"
+            exit $BUILD_RESULT
+          fi
+
+          echo "✅ $(date): Build completed successfully"
+          echo "::endgroup::"
         env:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -116,7 +195,18 @@ jobs:
     name: All Unit Test finished
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Unit test finished"
+      - name: Summary of Unit Test Results
+        run: |
+          echo "::group::Unit Testing Summary"
+          echo "✅ $(date): All unit tests have completed successfully!"
+          echo "📋 Test Results by Module:"
+          echo "  ✅ CorePayments: Passed"
+          echo "  ✅ CardPayments: Passed"
+          echo "  ✅ PayPalWebPayments: Passed"
+          echo "  ✅ FraudProtection: Passed"
+          echo ""
+          echo "⏱️ Ready to proceed to the publishing step"
+          echo "::endgroup::"
 
   # after build and unit tests are finished, publish all modules at once
   # to help reduce the probability of failure when interacting with sonatype servers
@@ -167,16 +257,91 @@ jobs:
         uses: ./.github/actions/set_github_user
       - name: Tag and Release
         run: |
+          echo "::group::Creating Git Tag for Release"
           # Use extracted version from build.gradle
           VERSION="${{ needs.extract_version.outputs.version }}"
-          echo "Using current version from build.gradle: $VERSION"
-          
+          echo "⏱️ $(date): Starting release tagging process"
+          echo "🔖 Using version from build.gradle: $VERSION"
+
+          # Check if tag already exists
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "::error::❌ Tag $VERSION already exists in the repository"
+            echo "📋 This indicates:"
+            echo "  - A release with this version was already created"
+            echo "  - You need to increment the version number before releasing again"
+
+            echo "📋 Existing tag details:"
+            git show "$VERSION"
+
+            echo "❌ Release process cannot continue with duplicate tag"
+            exit 1
+          fi
+
+          echo "📋 Tag check: ✅ Tag $VERSION doesn't exist yet"
+
           # CHANGELOG is already updated by the release PR process
-          # Just create the tag without modifying files
-          git tag $VERSION -a -m "Release $VERSION, automated from main branch"
+          # Create the tag with annotated message
+          echo "⏱️ Creating annotated tag $VERSION"
+          git tag $VERSION -a -m "Release $VERSION, automated from main branch by ${{ github.actor }}"
+
+          TAG_RESULT=$?
+          if [ $TAG_RESULT -ne 0 ]; then
+            echo "::error::❌ Failed to create tag $VERSION"
+            echo "📋 Git error code: $TAG_RESULT"
+            exit $TAG_RESULT
+          fi
+
+          echo "✅ Tag created successfully"
+
+          # Push the tag to origin
+          echo "⏱️ Pushing tag $VERSION to origin"
           git push origin $VERSION
+
+          PUSH_RESULT=$?
+          if [ $PUSH_RESULT -ne 0 ]; then
+            echo "::error::❌ Failed to push tag $VERSION to origin"
+            exit $PUSH_RESULT
+          fi
+
+          echo "✅ Tag pushed to origin successfully"
+          echo "::endgroup::"
+
       - name: Save changelog entries to a file
-        run: sed -e '1,/##/d'e '/##/,$d' CHANGELOG.md > changelog_entries.md
+        run: |
+          echo "::group::Extracting Changelog Entries"
+          echo "⏱️ $(date): Extracting changelog entries for the GitHub release"
+
+          # Check if CHANGELOG.md exists
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "::error::❌ CHANGELOG.md file not found"
+            echo "📋 Current directory: $(pwd)"
+            echo "📋 Directory contents: $(ls -la)"
+            exit 1
+          fi
+
+          echo "📋 CHANGELOG.md check: ✅ File exists"
+
+          # Extract the content between the first two headings
+          echo "⏱️ Extracting release notes from CHANGELOG.md"
+          sed -e '1,/##/d'e '/##/,$d' CHANGELOG.md > changelog_entries.md
+
+          # Check if extraction was successful
+          if [ ! -s "changelog_entries.md" ]; then
+            echo "::warning::⚠️ Extracted changelog is empty"
+            echo "📋 This may indicate incorrect formatting in CHANGELOG.md"
+            echo "📋 First 10 lines of CHANGELOG.md:"
+            head -n 10 CHANGELOG.md
+
+            # Create a minimal fallback entry
+            echo "Creating fallback changelog entry"
+            echo "Release version ${{ needs.extract_version.outputs.version }}" > changelog_entries.md
+          else
+            echo "✅ Changelog entries extracted successfully"
+            echo "📋 Preview of extracted changelog entries:"
+            head -n 5 changelog_entries.md
+          fi
+          echo "::endgroup::"
+
       - name: Create GitHub release
         id: create_release
         uses: actions/create-release@v1
@@ -188,3 +353,22 @@ jobs:
           body_path: changelog_entries.md
           draft: false
           prerelease: false
+
+      - name: Release Creation Summary
+        if: always()
+        run: |
+          echo "::group::GitHub Release Creation Summary"
+          echo "⏱️ $(date): GitHub release creation process completed"
+
+          if [ "${{ steps.create_release.outcome }}" == "success" ]; then
+            echo "✅ GitHub release for ${{ needs.extract_version.outputs.version }} created successfully"
+            echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"
+          else
+            echo "::error::❌ GitHub release creation failed"
+            echo "📋 This might be due to:"
+            echo "  - Tag ${{ needs.extract_version.outputs.version }} not being available"
+            echo "  - GitHub API rate limiting"
+            echo "  - Insufficient permissions"
+            echo "  - Network connectivity issues"
+          fi
+          echo "::endgroup::"

@@ -42,7 +42,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Prepare release ${{ github.event.inputs.versionName }}"
           branch: release/${{ github.event.inputs.versionName }}
-          delete-branch: false
+          delete-branch: true
           title: "Release ${{ github.event.inputs.versionName }}"
           body: |
             ## Release PR for version ${{ github.event.inputs.versionName }}
