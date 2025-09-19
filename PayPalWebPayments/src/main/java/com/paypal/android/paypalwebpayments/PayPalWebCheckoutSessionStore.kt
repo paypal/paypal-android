@@ -1,14 +1,11 @@
 package com.paypal.android.paypalwebpayments
 
 import com.paypal.android.corepayments.SessionStore
-import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 
 private const val KEY_AUTH_STATE = "PayPal.AUTH_STATE"
 
 internal class PayPalWebCheckoutSessionStore {
     private val properties = SessionStore()
-
-    var browserSwitchPendingState: BrowserSwitchPendingState? = null
 
     var authState: String?
         get() = properties[KEY_AUTH_STATE]
