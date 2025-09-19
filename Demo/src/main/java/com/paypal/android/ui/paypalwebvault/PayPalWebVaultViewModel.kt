@@ -2,7 +2,6 @@ package com.paypal.android.ui.paypalwebvault
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
@@ -68,25 +67,22 @@ class PayPalWebVaultViewModel @Inject constructor(
     private val createdSetupToken: PayPalSetupToken?
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
-    fun vaultSetupToken(activity: ComponentActivity) {
+    fun vaultSetupToken(context: Context) {
         val setupTokenId = createdSetupToken?.id
         if (setupTokenId == null) {
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
                 val request = PayPalWebVaultRequest(setupTokenId)
-                vaultSetupTokenWithRequest(activity, request)
+                vaultSetupTokenWithRequest(context, request)
             }
         }
     }
 
-    private fun vaultSetupTokenWithRequest(
-        activity: ComponentActivity,
-        request: PayPalWebVaultRequest
-    ) {
+    private fun vaultSetupTokenWithRequest(context: Context, request: PayPalWebVaultRequest) {
         vaultPayPalState = ActionState.Loading
 
-        when (val result = paypalClient.vault(activity, request)) {
+        when (val result = paypalClient.vault(context, request)) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
             }

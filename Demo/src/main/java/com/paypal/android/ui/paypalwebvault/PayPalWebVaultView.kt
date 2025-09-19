@@ -103,11 +103,7 @@ private fun Step2_VaultPayPal(
             defaultTitle = "VAULT PAYPAL",
             successTitle = "PAYPAL VAULTED",
             state = uiState.vaultPayPalState,
-            onClick = {
-                context.getActivityOrNull()?.let { activity ->
-                    viewModel.vaultSetupToken(activity)
-                }
-            }
+            onClick = { viewModel.vaultSetupToken(context) }
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
