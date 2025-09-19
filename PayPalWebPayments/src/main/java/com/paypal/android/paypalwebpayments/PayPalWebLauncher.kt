@@ -114,7 +114,8 @@ internal class PayPalWebLauncher(
         intent: Intent,
         authState: String
     ): PayPalWebCheckoutFinishStartResult {
-        return when (val finalResult = browserSwitchClient.finish(intent, authState)) {
+        val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
+        return when (val finalResult = browserSwitchClient.finish(intent, requestCode, authState)) {
             is BrowserSwitchFinishResult.Success -> parseWebCheckoutSuccessResult(finalResult)
             is BrowserSwitchFinishResult.Failure -> {
                 // TODO: remove error codes and error description from project; the built in
@@ -133,7 +134,8 @@ internal class PayPalWebLauncher(
         intent: Intent,
         authState: String
     ): PayPalWebCheckoutFinishVaultResult {
-        return when (val finalResult = browserSwitchClient.finish(intent, authState)) {
+        val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
+        return when (val finalResult = browserSwitchClient.finish(intent, requestCode, authState)) {
             is BrowserSwitchFinishResult.Success -> parseVaultSuccessResult(finalResult)
             is BrowserSwitchFinishResult.Failure -> {
                 // TODO: remove error codes and error description from project; the built in

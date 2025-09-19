@@ -15,8 +15,14 @@ class BrowserSwitchClient {
         return BrowserSwitchStartResult.Success(pendingState)
     }
 
-    fun finish(intent: Intent, pendingStateBase64: String): BrowserSwitchFinishResult {
-        // TODO: implement
-        return BrowserSwitchFinishResult.NoResult
+    fun finish(intent: Intent, requestCode: Int, pendingStateBase64: String): BrowserSwitchFinishResult {
+        val pendingState = BrowserSwitchPendingState.fromBase64(pendingStateBase64)
+        return if (requestCode == pendingState.originalOptions.requestCode) {
+            // TODO: parse success
+//            return BrowserSwitchFinishResult.Success
+            BrowserSwitchFinishResult.NoResult
+        } else {
+            BrowserSwitchFinishResult.NoResult
+        }
     }
 }
