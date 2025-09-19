@@ -10,7 +10,7 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
     }
 
     companion object {
-        fun fromBase64(pendingStateBase64: String): BrowserSwitchPendingState {
+        fun fromBase64(pendingStateBase64: String): BrowserSwitchPendingState? {
             // TODO: implement
             val targetUri = "https://paypal.com".toUri()
             val options = BrowserSwitchOptions(
