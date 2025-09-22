@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Context
+import android.content.Intent
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
@@ -49,5 +50,13 @@ class BrowserSwitchClientUnitTest {
 
         val expectedPendingState = BrowserSwitchPendingState(browserSwitchOptions)
         assertEquals(expectedPendingState, pendingState)
+    }
+
+    @Test
+    fun `it should finish with failure when the request code does not match the input pending state`() {
+        val intent = Intent()
+        val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
+        val result = sut.finish(intent, 456, pendingState)
+        assertTrue(result is BrowserSwitchFinishResult.RequestCodeDoesNotMatch)
     }
 }

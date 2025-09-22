@@ -19,13 +19,8 @@ class BrowserSwitchClient(
     fun finish(
         intent: Intent,
         requestCode: Int,
-        pendingStateBase64: String
+        pendingState: BrowserSwitchPendingState
     ): BrowserSwitchFinishResult {
-        val pendingState = BrowserSwitchPendingState.fromBase64(pendingStateBase64)
-        if (pendingState == null) {
-            return BrowserSwitchFinishResult.PendingStateInvalid
-        }
-
         val originalOptions = pendingState.originalOptions
         if (requestCode != originalOptions.requestCode) {
             return BrowserSwitchFinishResult.RequestCodeDoesNotMatch
