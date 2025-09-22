@@ -53,10 +53,21 @@ class BrowserSwitchClientUnitTest {
     }
 
     @Test
-    fun `it should finish with failure when the request code does not match the input pending state`() {
+    fun `it should finish unsuccessfully when the request code does not match the input pending state`() {
         val intent = Intent()
         val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
+
         val result = sut.finish(intent, 456, pendingState)
         assertTrue(result is BrowserSwitchFinishResult.RequestCodeDoesNotMatch)
+    }
+
+    @Test
+    fun `it should finish unsuccessfully when the input intent has no associated data url`() {
+        val intent = Intent().apply {
+            data = null
+        }
+        val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
+        val result = sut.finish(intent, 123, pendingState)
+        assertTrue(result is BrowserSwitchFinishResult.DeepLinkNotPresent)
     }
 }
