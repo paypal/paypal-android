@@ -48,6 +48,6 @@ class BrowserSwitchClientUnitTest {
         val pendingState = (result as? BrowserSwitchStartResult.Success)?.pendingState
 
         val expectedPendingState = BrowserSwitchPendingState(browserSwitchOptions)
-        assertEquals(pendingState, expectedPendingState)
+        assertEquals(expectedPendingState, pendingState)
     }
 }
