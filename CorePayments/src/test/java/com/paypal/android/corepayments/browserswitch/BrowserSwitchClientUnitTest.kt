@@ -6,12 +6,14 @@ import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
 import io.mockk.verify
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.skyscreamer.jsonassert.JSONAssert
 
 @RunWith(RobolectricTestRunner::class)
 class BrowserSwitchClientUnitTest {
@@ -21,7 +23,8 @@ class BrowserSwitchClientUnitTest {
     private val browserSwitchOptions = BrowserSwitchOptions(
         targetUri = "https://example.com/uri".toUri(),
         requestCode = 123,
-        returnUrlScheme = "example.return.url.scheme"
+        returnUrlScheme = "example.return.url.scheme",
+        metadata = JSONObject().put("example_prop", "example_value")
     )
 
     private lateinit var chromeCustomTabsClient: ChromeCustomTabsClient
@@ -88,13 +91,16 @@ class BrowserSwitchClientUnitTest {
         }
         val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
         val result = sut.finish(intent, 123, pendingState)
-        val expectedResult = BrowserSwitchFinishResult.Success(
-            returnUrl = "example.return.url.scheme://domain/path".toUri(),
-            requestCode = 123,
-            requestUrl = "https://example.com/uri".toUri(),
-            requestMetadata = null
+
+        val successResult = result as? BrowserSwitchFinishResult.Success
+        assertEquals("example.return.url.scheme://domain/path".toUri(), successResult?.returnUrl)
+        assertEquals(123, successResult?.requestCode)
+        assertEquals("https://example.com/uri".toUri(), successResult?.requestUrl)
+        JSONAssert.assertEquals(
+            JSONObject().put("example_prop", "example_value"),
+            successResult?.requestMetadata,
+            false
         )
-        assertEquals(expectedResult, result)
     }
 
     @Test
@@ -104,12 +110,15 @@ class BrowserSwitchClientUnitTest {
         }
         val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
         val result = sut.finish(intent, 123, pendingState)
-        val expectedResult = BrowserSwitchFinishResult.Success(
-            returnUrl = "EXAMPLE.RETURN.URL.SCHEME://domain/path".toUri(),
-            requestCode = 123,
-            requestUrl = "https://example.com/uri".toUri(),
-            requestMetadata = null
+
+        val successResult = result as? BrowserSwitchFinishResult.Success
+        assertEquals("EXAMPLE.RETURN.URL.SCHEME://domain/path".toUri(), successResult?.returnUrl)
+        assertEquals(123, successResult?.requestCode)
+        assertEquals("https://example.com/uri".toUri(), successResult?.requestUrl)
+        JSONAssert.assertEquals(
+            JSONObject().put("example_prop", "example_value"),
+            successResult?.requestMetadata,
+            false
         )
-        assertEquals(expectedResult, result)
     }
 }
