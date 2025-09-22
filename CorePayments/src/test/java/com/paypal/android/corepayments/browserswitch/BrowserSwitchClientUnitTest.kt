@@ -62,12 +62,54 @@ class BrowserSwitchClientUnitTest {
     }
 
     @Test
-    fun `it should finish unsuccessfully when the input intent has no associated data url`() {
+    fun `it should finish unsuccessfully when the input intent has no deep link`() {
         val intent = Intent().apply {
             data = null
         }
         val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
         val result = sut.finish(intent, 123, pendingState)
         assertTrue(result is BrowserSwitchFinishResult.DeepLinkNotPresent)
+    }
+
+    @Test
+    fun `it should finish unsuccessfully when the input intent deep link has an unrecognized custom url scheme`() {
+        val intent = Intent().apply {
+            data = "unrecognized.return.url.scheme://domain/path".toUri()
+        }
+        val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
+        val result = sut.finish(intent, 123, pendingState)
+        assertTrue(result is BrowserSwitchFinishResult.DeepLinkDoesNotMatch)
+    }
+
+    @Test
+    fun `it should finish successfully when the input intent deep link has a matching custom url scheme`() {
+        val intent = Intent().apply {
+            data = "example.return.url.scheme://domain/path".toUri()
+        }
+        val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
+        val result = sut.finish(intent, 123, pendingState)
+        val expectedResult = BrowserSwitchFinishResult.Success(
+            returnUrl = "example.return.url.scheme://domain/path".toUri(),
+            requestCode = 123,
+            requestUrl = "https://example.com/uri".toUri(),
+            requestMetadata = null
+        )
+        assertEquals(expectedResult, result)
+    }
+
+    @Test
+    fun `it should finish successfully when the input intent deep link has a case-insensitive matching custom url scheme`() {
+        val intent = Intent().apply {
+            data = "EXAMPLE.RETURN.URL.SCHEME://domain/path".toUri()
+        }
+        val pendingState = BrowserSwitchPendingState(browserSwitchOptions)
+        val result = sut.finish(intent, 123, pendingState)
+        val expectedResult = BrowserSwitchFinishResult.Success(
+            returnUrl = "EXAMPLE.RETURN.URL.SCHEME://domain/path".toUri(),
+            requestCode = 123,
+            requestUrl = "https://example.com/uri".toUri(),
+            requestMetadata = null
+        )
+        assertEquals(expectedResult, result)
     }
 }
