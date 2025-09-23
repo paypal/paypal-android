@@ -34,7 +34,7 @@ fun OrderView(order: Order, title: String? = null) {
             PropertyView(name = "ID", value = order.id)
             order.intent?.let { PropertyView(name = "Intent", value = it) }
             order.status?.let { PropertyView(name = "Status", value = it) }
-            order.cardLast4?.let { PropertyView(name = "Card Last 4", value = order.cardLast4) }
+            order.lastDigits?.let { PropertyView(name = "Card Last 4", value = order.lastDigits) }
             order.cardBrand?.let { PropertyView(name = "Card Brand", value = order.cardBrand) }
             order.vaultId?.let {
                 PropertyView(name = "Vault Id / Payment Token", value = order.vaultId)

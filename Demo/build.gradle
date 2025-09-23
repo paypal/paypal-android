@@ -1,3 +1,5 @@
+import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+
 plugins {
     alias libs.plugins.android.application
     alias libs.plugins.dagger.hilt
@@ -5,6 +7,7 @@ plugins {
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.kotlinKapt
     alias libs.plugins.kotlinParcelize
+    alias libs.plugins.kotlinSerialization
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
@@ -89,7 +92,7 @@ android {
 
 play {
     // Ref: https://github.com/Triple-T/gradle-play-publisher/issues/979#issuecomment-884763388
-    releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.DRAFT)
+    releaseStatus.set(ReleaseStatus.DRAFT)
     serviceAccountCredentials.set(file(System.getenv("DEMO_GCP_SERVICE_ACCOUNT_CREDENTIALS_FILE") ?: '/path/to/credential_file.json'))
 }
 
@@ -133,7 +136,8 @@ dependencies {
     implementation libs.androidx.preferenceKtx
 
     implementation libs.square.retrofit2
-    implementation libs.square.converterGson
+    implementation libs.kotlinx.serializationJson
+    implementation libs.retrofit2.kotlinx.serialization.converter
     implementation libs.square.loggingInterceptor
 
     implementation libs.dagger.hiltAndroid

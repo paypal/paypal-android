@@ -34,8 +34,8 @@ lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
 navigationCompose = "2.7.5"
+retrofit2KotlinxSerializationConverter = "1.0.0"
 robolectric = "4.13"
-squareConverterGson = "2.11.0"
 squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
@@ -77,8 +77,8 @@ lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime
 lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
-square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
 square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
