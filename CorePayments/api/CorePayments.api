@@ -235,6 +235,17 @@ public final class com/paypal/android/corepayments/RestClient {
 	public final fun send (Lcom/paypal/android/corepayments/APIRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/paypal/android/corepayments/SessionStore {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clear ()V
+	public final fun get (Ljava/lang/String;)Ljava/lang/String;
+	public final fun restore (Ljava/lang/String;)V
+	public final fun set (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun toBase64EncodedJSON ()Ljava/lang/String;
+}
+
 public final class com/paypal/android/corepayments/analytics/AnalyticsService {
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
 	public final fun sendAnalyticsEvent (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
