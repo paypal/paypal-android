@@ -149,7 +149,7 @@ internal class PayPalWebLauncher(
         finalResult: BrowserSwitchFinalResult.Success
     ): PayPalWebCheckoutFinishStartResult {
         if (finalResult.requestCode != BrowserSwitchRequestCodes.PAYPAL_CHECKOUT) {
-            PayPalWebCheckoutFinishStartResult.NoResult
+            return PayPalWebCheckoutFinishStartResult.NoResult
         }
 
         val deepLinkUrl = finalResult.returnUrl
@@ -178,7 +178,7 @@ internal class PayPalWebLauncher(
         finalResult: BrowserSwitchFinalResult.Success
     ): PayPalWebCheckoutFinishVaultResult {
         if (finalResult.requestCode != BrowserSwitchRequestCodes.PAYPAL_VAULT) {
-            PayPalWebCheckoutFinishVaultResult.NoResult
+            return PayPalWebCheckoutFinishVaultResult.NoResult
         }
 
         val deepLinkUrl = finalResult.returnUrl
