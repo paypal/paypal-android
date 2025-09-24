@@ -183,11 +183,17 @@ internal class PayPalWebLauncher(
             if (requestMetadata == null) {
                 PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.unknownError)
             } else {
-                val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-                if (approvalSessionId.isNullOrEmpty()) {
-                    PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.malformedResultError)
+                val isCancelUrl = deepLinkUrl.path?.contains("cancel") ?: false
+                if (isCancelUrl) {
+                    PayPalWebCheckoutFinishVaultResult.Canceled
                 } else {
-                    PayPalWebCheckoutFinishVaultResult.Success(approvalSessionId)
+                    val approvalSessionId =
+                        deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
+                    if (approvalSessionId.isNullOrEmpty()) {
+                        PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.malformedResultError)
+                    } else {
+                        PayPalWebCheckoutFinishVaultResult.Success(approvalSessionId)
+                    }
                 }
             }
         } else {
