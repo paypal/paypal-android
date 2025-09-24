@@ -1,5 +1,11 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* PayPalWebPayments
+  * Fix issue with `PayPalWebCheckoutClient.finishStart()` that caused explicit user cancelation to return a `Failure` event, instead of `Canceled`
+  * Fix issue with `PayPalWebCheckoutClient.finishVault()` that caused explicit user cancelation ro return a `Success` event, instead of `Canceled`
+
 ## 2.0.0 (2025-03-18)
 * Breaking Changes
   * PayPalNativePayments

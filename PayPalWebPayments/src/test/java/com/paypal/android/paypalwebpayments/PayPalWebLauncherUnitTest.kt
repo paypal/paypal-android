@@ -2,6 +2,7 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
@@ -14,6 +15,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
@@ -312,6 +314,23 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
+    fun `completeCheckoutAuthRequest() parses checkout cancellation deep link url indicates failure`() {
+        val browserSwitchResult = createCheckoutCancellationBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT,
+            orderId = "fake-order-id"
+        )
+
+        every {
+            browserSwitchClient.completeRequest(intent, "pending request")
+        } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+
+        val result = sut.completeCheckoutAuthRequest(intent, "pending request")
+        assertTrue(result is PayPalWebCheckoutFinishStartResult.Canceled)
+    }
+
+    @Test
     fun `completeVaultAuthRequest() parses successful vault result`() {
         val browserSwitchResult = createVaultSuccessBrowserSwitchResult(
             requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT,
@@ -326,6 +345,22 @@ class PayPalWebLauncherUnitTest {
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Success
         assertEquals("fake-approval-session-id", result.approvalSessionId)
+    }
+
+    @Test
+    fun `completeVaultAuthRequest() parses cancellation vault result when deep link path contains the word cancel`() {
+        val browserSwitchResult = createVaultCancellationBrowserSwitchResult(
+            requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT,
+            setupTokenId = "fake-setup-token-id",
+            approvalSessionId = "fake-approval-session-id",
+        )
+        every {
+            browserSwitchClient.completeRequest(intent, "pending request")
+        } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val result = sut.completeVaultAuthRequest(intent, "pending request")
+        assertTrue(result is PayPalWebCheckoutFinishVaultResult.Canceled)
     }
 
     @Test
@@ -361,6 +396,15 @@ class PayPalWebLauncherUnitTest {
         deepLinkUrl: Uri = createCheckoutDeepLinkUrl(payerId!!)
     ) = createBrowserSwitchSuccessFinalResult(requestCode, metadata, deepLinkUrl)
 
+    private fun createCheckoutCancellationBrowserSwitchResult(
+        requestCode: Int,
+        orderId: String,
+    ): BrowserSwitchFinalResult.Success {
+        val deepLinkUrl = "http://testurl.com/checkout?opType=cancel".toUri()
+        val metadata = createCheckoutMetadata(orderId)
+        return createBrowserSwitchSuccessFinalResult(requestCode, metadata, deepLinkUrl)
+    }
+
     private fun createVaultMetadata(setupTokenId: String) = JSONObject()
         .put("setup_token_id", setupTokenId)
 
@@ -374,6 +418,17 @@ class PayPalWebLauncherUnitTest {
         metadata: JSONObject? = createVaultMetadata(setupTokenId!!),
         deepLinkUrl: Uri = createVaultDeepLinkUrl(approvalSessionId!!)
     ) = createBrowserSwitchSuccessFinalResult(requestCode, metadata, deepLinkUrl)
+
+    private fun createVaultCancellationBrowserSwitchResult(
+        requestCode: Int,
+        setupTokenId: String,
+        approvalSessionId: String
+    ): BrowserSwitchFinalResult.Success {
+        val metadata = createVaultMetadata(setupTokenId)
+        val deepLinkUrl =
+            "http://testurl.com/checkout/cancel?approval_session_id=$approvalSessionId".toUri()
+        return createBrowserSwitchSuccessFinalResult(requestCode, metadata, deepLinkUrl)
+    }
 
     private fun createBrowserSwitchSuccessFinalResult(
         requestCode: Int,
