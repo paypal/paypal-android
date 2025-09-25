@@ -148,15 +148,22 @@ internal class PayPalWebLauncher(
     private fun parseWebCheckoutSuccessResult(
         finalResult: BrowserSwitchFinalResult.Success
     ): PayPalWebCheckoutFinishStartResult {
+        if (finalResult.requestCode != BrowserSwitchRequestCodes.PAYPAL_CHECKOUT) {
+            return PayPalWebCheckoutFinishStartResult.NoResult
+        }
+
         val deepLinkUrl = finalResult.returnUrl
         val metadata = finalResult.requestMetadata
-        return if (finalResult.requestCode == BrowserSwitchRequestCodes.PAYPAL_CHECKOUT) {
-            if (metadata == null) {
-                val unknownError = PayPalWebCheckoutError.unknownError
-                PayPalWebCheckoutFinishStartResult.Failure(unknownError, null)
+        return if (metadata == null) {
+            val unknownError = PayPalWebCheckoutError.unknownError
+            PayPalWebCheckoutFinishStartResult.Failure(unknownError, null)
+        } else {
+            val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
+            val opType = deepLinkUrl.getQueryParameter("opType")
+            if (opType == "cancel") {
+                PayPalWebCheckoutFinishStartResult.Canceled(orderId)
             } else {
                 val payerId = deepLinkUrl.getQueryParameter("PayerID")
-                val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
                 if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
                     val malformedResultError = PayPalWebCheckoutError.malformedResultError
                     PayPalWebCheckoutFinishStartResult.Failure(malformedResultError, orderId)
@@ -164,29 +171,33 @@ internal class PayPalWebLauncher(
                     PayPalWebCheckoutFinishStartResult.Success(orderId, payerId)
                 }
             }
-        } else {
-            PayPalWebCheckoutFinishStartResult.NoResult
         }
     }
 
     private fun parseVaultSuccessResult(
         finalResult: BrowserSwitchFinalResult.Success
     ): PayPalWebCheckoutFinishVaultResult {
+        if (finalResult.requestCode != BrowserSwitchRequestCodes.PAYPAL_VAULT) {
+            return PayPalWebCheckoutFinishVaultResult.NoResult
+        }
+
         val deepLinkUrl = finalResult.returnUrl
         val requestMetadata = finalResult.requestMetadata
-        return if (finalResult.requestCode == BrowserSwitchRequestCodes.PAYPAL_VAULT) {
-            if (requestMetadata == null) {
-                PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.unknownError)
+        return if (requestMetadata == null) {
+            PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.unknownError)
+        } else {
+            val isCancelUrl = deepLinkUrl.path?.contains("cancel") ?: false
+            if (isCancelUrl) {
+                PayPalWebCheckoutFinishVaultResult.Canceled
             } else {
-                val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
+                val approvalSessionId =
+                    deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
                 if (approvalSessionId.isNullOrEmpty()) {
                     PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.malformedResultError)
                 } else {
                     PayPalWebCheckoutFinishVaultResult.Success(approvalSessionId)
                 }
             }
-        } else {
-            PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
 }
