@@ -173,10 +173,10 @@ jobs:
 
           # CHANGELOG is already updated by the release PR process
           # Just create the tag without modifying files
-          git tag $VERSION -a -m "Release $VERSION, automated from main branch"
+          git tag $VERSION -a -m "Release $VERSION, automated from main branch, , by ${{ github.actor }}"
           git push origin $VERSION
       - name: Save changelog entries to a file
-        run: sed -e '1,/##/d'e '/##/,$d' CHANGELOG.md > changelog_entries.md
+        run: sed -e '1,/##/d'-e '/##/,$d' CHANGELOG.md > changelog_entries.md
       - name: Create GitHub release
         id: create_release
         uses: actions/create-release@v1
