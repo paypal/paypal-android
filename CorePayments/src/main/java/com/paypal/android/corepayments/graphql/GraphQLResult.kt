@@ -2,20 +2,19 @@ package com.paypal.android.corepayments.graphql
 
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.PayPalSDKError
-import org.json.JSONObject
+import kotlinx.serialization.InternalSerializationApi
 
 /**
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class GraphQLResult {
+sealed class GraphQLResult<out T> {
 
-    data class Success(
-        val data: JSONObject? = null,
-        val extensions: List<GraphQLExtension>? = null,
-        val errors: List<GraphQLError>? = null,
+    @OptIn(InternalSerializationApi::class)
+    data class Success<out T>(
+        val response: GraphQLResponse<T>,
         val correlationId: String? = null
-    ) : GraphQLResult()
+    ) : GraphQLResult<T>()
 
-    data class Failure(val error: PayPalSDKError) : GraphQLResult()
+    data class Failure(val error: PayPalSDKError) : GraphQLResult<Nothing>()
 }

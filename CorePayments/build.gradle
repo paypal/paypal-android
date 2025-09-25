@@ -2,6 +2,7 @@ plugins {
     alias libs.plugins.android.library
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.kotlinParcelize
+    alias libs.plugins.kotlinSerialization
     alias libs.plugins.binaryCompatibilityValidator
 }
 
@@ -69,6 +70,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.kotlin.stdLib
     implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.kotlinx.serializationJson
 
     testImplementation libs.json
     testImplementation libs.jsonAssert

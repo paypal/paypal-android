@@ -2,15 +2,19 @@ package com.paypal.android.cardpayments
 
 import android.content.Context
 import androidx.annotation.RawRes
+import com.paypal.android.cardpayments.api.UpdateSetupTokenResponse
+import com.paypal.android.cardpayments.api.UpdateSetupTokenVariables
+import com.paypal.android.cardpayments.api.VaultBillingAddress
+import com.paypal.android.cardpayments.api.VaultCard
+import com.paypal.android.cardpayments.api.VaultPaymentSource
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
+import kotlinx.serialization.InternalSerializationApi
 
 internal class DataVaultPaymentMethodTokensAPI internal constructor(
     private val coreConfig: CoreConfig,
@@ -36,6 +40,7 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         }
     }
 
+    @OptIn(InternalSerializationApi::class)
     private suspend fun sendUpdateSetupTokenGraphQLRequest(
         query: String,
         setupTokenId: String,
@@ -45,47 +50,48 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         val cardNumber = card.number.replace("\\s".toRegex(), "")
         val cardExpiry = "${card.expirationYear}-${card.expirationMonth}"
 
-        val cardJSON = JSONObject()
-            .put("number", cardNumber)
-            .put("expiry", cardExpiry)
-
-        card.cardholderName?.let { cardJSON.put("name", it) }
-        cardJSON.put("securityCode", card.securityCode)
-
-        card.billingAddress?.apply {
-            val billingAddressJSON = JSONObject()
-                .put("addressLine1", streetAddress)
-                .put("addressLine2", extendedAddress)
-                .put("adminArea1", region)
-                .put("adminArea2", locality)
-                .put("postalCode", postalCode)
-                .put("countryCode", countryCode)
-            cardJSON.put("billingAddress", billingAddressJSON)
+        val vaultBillingAddress = card.billingAddress?.let {
+            VaultBillingAddress(
+                addressLine1 = it.streetAddress,
+                addressLine2 = it.extendedAddress,
+                adminArea1 = it.region,
+                adminArea2 = it.locality,
+                postalCode = it.postalCode,
+                countryCode = it.countryCode
+            )
         }
 
-        val paymentSourceJSON = JSONObject()
-        paymentSourceJSON.put("card", cardJSON)
+        val vaultCard = VaultCard(
+            number = cardNumber,
+            expiry = cardExpiry,
+            name = card.cardholderName,
+            securityCode = card.securityCode,
+            billingAddress = vaultBillingAddress
+        )
 
-        val variables = JSONObject()
-            .put("clientId", coreConfig.clientId)
-            .put("vaultSetupToken", setupTokenId)
-            .put("paymentSource", paymentSourceJSON)
+        val paymentSource = VaultPaymentSource(card = vaultCard)
 
-        val graphQLRequest = JSONObject()
-            .put("query", query)
-            .put("variables", variables)
+        val variables = UpdateSetupTokenVariables(
+            clientId = coreConfig.clientId,
+            vaultSetupToken = setupTokenId,
+            paymentSource = paymentSource
+        )
+
+        val graphQLRequest = GraphQLRequest(query, variables, "UpdateVaultSetupToken")
         val graphQLResponse =
-            graphQLClient.send(graphQLRequest, queryName = "UpdateVaultSetupToken")
+            graphQLClient.send<UpdateSetupTokenResponse, UpdateSetupTokenVariables>(graphQLRequest)
         return when (graphQLResponse) {
             is GraphQLResult.Success -> {
-                val responseJSON = graphQLResponse.data
-                if (responseJSON == null) {
-                    val error = graphQLResponse.run {
-                        CardError.updateSetupTokenResponseBodyMissing(errors, correlationId)
-                    }
+                val response = graphQLResponse.response
+                val responseData = response.data
+                if (responseData == null) {
+                    val error = CardError.updateSetupTokenResponseBodyMissing(
+                        response.errors,
+                        graphQLResponse.correlationId
+                    )
                     UpdateSetupTokenResult.Failure(error)
                 } else {
-                    parseSuccessfulUpdateSuccessJSON(responseJSON, graphQLResponse.correlationId)
+                    parseSuccessfulUpdateSuccess(responseData, graphQLResponse.correlationId)
                 }
             }
 
@@ -95,38 +101,28 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         }
     }
 
-    private fun parseSuccessfulUpdateSuccessJSON(
-        responseBody: JSONObject,
+    @OptIn(InternalSerializationApi::class)
+    private fun parseSuccessfulUpdateSuccess(
+        responseBody: UpdateSetupTokenResponse,
         correlationId: String?
     ): UpdateSetupTokenResult {
-        return try {
-            val setupTokenJSON = responseBody.getJSONObject("updateVaultSetupToken")
-            val status = setupTokenJSON.getString("status")
+        return runCatching {
+            val setupToken = responseBody.updateVaultSetupToken
+            val status = setupToken.status
             val approveHref = if (status == "PAYER_ACTION_REQUIRED") {
-                findLinkHref(setupTokenJSON, "approve")
+                setupToken.links?.find { it.rel == "approve" }?.href
             } else {
                 null
             }
             UpdateSetupTokenResult.Success(
-                setupTokenId = setupTokenJSON.getString("id"),
+                setupTokenId = setupToken.id,
                 status = status,
                 approveHref = approveHref
             )
-        } catch (jsonError: JSONException) {
-            val message = "Update Setup Token Failed: GraphQL JSON body was invalid."
-            val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
-            UpdateSetupTokenResult.Failure(error)
+        }.getOrElse { error ->
+            val message = "Update Setup Token Failed: Response parsing failed."
+            val sdkError = PayPalSDKError(0, message, correlationId, reason = error)
+            UpdateSetupTokenResult.Failure(sdkError)
         }
-    }
-
-    private fun findLinkHref(responseJSON: JSONObject, rel: String): String? {
-        val linksJSON = responseJSON.optJSONArray("links") ?: JSONArray()
-        for (i in 0 until linksJSON.length()) {
-            val link = linksJSON.getJSONObject(i)
-            if (link.optString("rel") == rel) {
-                return link.optString("href")
-            }
-        }
-        return null
     }
 }

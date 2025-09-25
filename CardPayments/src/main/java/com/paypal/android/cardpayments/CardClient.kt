@@ -81,7 +81,7 @@ class CardClient internal constructor(
                         val result = response.run {
                             CardApproveOrderResult.Success(
                                 orderId = orderId,
-                                status = status?.name
+                                status = status.name
                             )
                         }
                         callback.onCardApproveOrderResult(result)

@@ -1,7 +1,12 @@
 package com.paypal.android.cardpayments.model
 
-import com.paypal.android.corepayments.PaymentsJSON
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-internal data class Payee(val emailAddress: String) {
-    internal constructor(json: PaymentsJSON) : this(json.optString("email_address") ?: "")
-}
+@InternalSerializationApi
+@Serializable
+internal data class Payee(
+    @SerialName("email_address")
+    val emailAddress: String
+)

@@ -9,14 +9,14 @@ import androidx.annotation.RestrictTo
 object APIClientError {
 
     // 0. An unknown error occurred.
-    fun unknownError(correlationId: String?) = PayPalSDKError(
+    fun unknownError(correlationId: String? = null) = PayPalSDKError(
         code = PayPalSDKErrorCode.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support.",
         correlationId = correlationId
     )
 
     // 1. Error parsing HTTP response data.
-    fun dataParsingError(correlationId: String?) = PayPalSDKError(
+    fun dataParsingError(correlationId: String? = null) = PayPalSDKError(
         code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
         errorDescription = "An error occurred parsing HTTP response data." +
                 " Contact developer.paypal.com/support.",
@@ -80,7 +80,7 @@ object APIClientError {
         correlationId = correlationId
     )
 
-    fun graphQLJSONParseError(correlationId: String?, reason: Exception): PayPalSDKError {
+    fun graphQLJSONParseError(correlationId: String?, reason: Throwable): PayPalSDKError {
         val message =
             "An error occurred while parsing the GraphQL response JSON. Contact developer.paypal.com/support."
         val error = PayPalSDKError(
