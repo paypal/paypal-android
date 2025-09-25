@@ -16,6 +16,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: 'develop'
           fetch-depth: 0  # Full git history to ensure branch creation works
 
       - name: Set up Java
