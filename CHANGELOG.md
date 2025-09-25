@@ -1,5 +1,23 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutClient.finishStart(intent: Intent)` method
+    * Deprecate `PayPalWebCheckoutClient.finishStart(intent: Intent, authState: String)` method
+  * Add `PayPalWebCheckoutClient.finishVault(intent: Intent)` method
+    * Deprecate `PayPalWebCheckoutClient.finishVault(intent: Intent, authState: String)` method
+  * Add `PayPalWebCheckoutClient.instanceState` property
+  * Add `PayPalWebCheckoutClient.restore(instanceState: String)` method
+* CardPayments
+  * Add `CardClient.finishApproveOrder(intent: Intent)` method
+    * Deprecate `CardClient.finishApproveOrder(intent: Intent, authState: String)` method
+  * Add `CardClient.finishVault(intent: Intent)` method
+    * Deprecate `CardClient.finishVault(intent: Intent, authState: String)` method
+  * Add `CardClient.instanceState` property
+  * Add `CardClient.restore(instanceState: String)` method
+  * Deprecate `CardPresentAuthChalengeResult.authState` property
+  * Deprecate `PayPalPresentAuthChallengeResult.authState` property
+
 ## 2.0.1 (2025-09-24)
 
 * PayPalWebPayments
