@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 2.1.1 (2025-09-25)
 * PayPalWebPayments
   * Add `PayPalWebCheckoutClient.finishStart(intent: Intent)` method
     * Deprecate `PayPalWebCheckoutClient.finishStart(intent: Intent, authState: String)` method
