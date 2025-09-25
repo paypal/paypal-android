@@ -1,6 +1,7 @@
 buildscript {
     ext.modules = [
             "sdkVersionName"      : "2.1.0",
+            "sdkVersionName"      : "2.0.2-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
             "androidTargetVersion": 35,
@@ -22,6 +23,7 @@ plugins {
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false
     alias libs.plugins.nexus.publishPlugin
+    alias libs.plugins.binaryCompatibilityValidator apply false
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo

@@ -32,6 +32,20 @@ jobs:
       - name: Lint
         run: ./gradlew lint
 
+  api_check:
+    name: API Binary Compatibility Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: API Check
+        run: ./gradlew apiCheck
+
   diffuse:
     name: Diffuse AAR Analysis
     runs-on: macOS-13
