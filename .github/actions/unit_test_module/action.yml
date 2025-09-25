@@ -8,42 +8,5 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
-        echo "::group::Running Unit Tests for ${{ inputs.module }}"
-        echo "⏱️ $(date): Starting unit tests for ${{ inputs.module }} module"
-
-        # Check if the module exists
-        if [ ! -d "${{ inputs.module }}" ]; then
-          echo "::error::❌ Module directory not found: ${{ inputs.module }}"
-          echo "📋 Current directory: $(pwd)"
-          echo "📋 Available directories: $(ls -d */ | tr '\n' ' ')"
-          exit 1
-        fi
-
-        echo "📋 Module directory check: ✅ ${{ inputs.module }} found"
-
-        # Run the tests with detailed output
-        echo "🧪 Executing test task for ${{ inputs.module }}"
-        ./gradlew --stacktrace :${{ inputs.module }}:testRelease
-
-        TEST_RESULT=$?
-        if [ $TEST_RESULT -ne 0 ]; then
-          echo "::error::❌ Tests failed for ${{ inputs.module }} with exit code $TEST_RESULT"
-          echo "📋 Common failure reasons:"
-          echo "  - Test assertions failed"
-          echo "  - Test execution errors"
-          echo "  - Timeout during test execution"
-          echo "  - Memory issues during test execution"
-
-          # Check if there's a test report and provide its location
-          TEST_REPORTS="${{ inputs.module }}/build/reports/tests"
-          if [ -d "$TEST_REPORTS" ]; then
-            echo "📊 Test reports available at: $TEST_REPORTS"
-          fi
-
-          exit $TEST_RESULT
-        fi
-
-        echo "✅ $(date): Unit tests for ${{ inputs.module }} completed successfully"
-        echo "::endgroup::"
+    - run: ./gradlew --stacktrace :${{ inputs.module }}:testRelease
       shell: bash
