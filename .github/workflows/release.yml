@@ -212,7 +212,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ needs.extract_version.outputs.version }}"
-          BRANCH_NAME="sync/main-to-develop-$VERSION"
+          BRANCH_NAME="sync-main-to-develop-$VERSION"
           PR_TITLE="Sync: Main to Develop after release $VERSION"
 
           # Create body file to avoid heredoc issues
