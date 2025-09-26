@@ -48,8 +48,6 @@ class PayPalWebViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayPalWebUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var authState: String? = null
-
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
         set(value) {
@@ -109,8 +107,9 @@ class PayPalWebViewModel @Inject constructor(
 
         val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
         when (val startResult = paypalClient.start(activity, checkoutRequest)) {
-            is PayPalPresentAuthChallengeResult.Success ->
-                authState = startResult.authState
+            is PayPalPresentAuthChallengeResult.Success -> {
+                // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+            }
 
             is PayPalPresentAuthChallengeResult.Failure ->
                 payPalWebCheckoutState = ActionState.Failure(startResult.error)
@@ -133,27 +132,21 @@ class PayPalWebViewModel @Inject constructor(
         }
     }
 
-    private fun checkIfPayPalAuthFinished(intent: Intent): PayPalWebCheckoutFinishStartResult? =
-        authState?.let { paypalClient.finishStart(intent, it) }
-
-    fun completeAuthChallenge(intent: Intent) {
-        checkIfPayPalAuthFinished(intent)?.let { payPalAuthResult ->
+    fun completeAuthChallenge(intent: Intent) =
+        paypalClient.finishStart(intent)?.let { payPalAuthResult ->
             when (payPalAuthResult) {
                 is PayPalWebCheckoutFinishStartResult.Success -> {
                     payPalWebCheckoutState = ActionState.Success(payPalAuthResult)
-                    discardAuthState()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Canceled -> {
                     val error = Exception("USER CANCELED")
                     payPalWebCheckoutState = ActionState.Failure(error)
-                    discardAuthState()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Failure -> {
                     Log.i(TAG, "Checkout Error: ${payPalAuthResult.error.errorDescription}")
                     payPalWebCheckoutState = ActionState.Failure(payPalAuthResult.error)
-                    discardAuthState()
                 }
 
                 PayPalWebCheckoutFinishStartResult.NoResult -> {
@@ -162,9 +155,4 @@ class PayPalWebViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun discardAuthState() {
-        authState = null
-    }
 }
