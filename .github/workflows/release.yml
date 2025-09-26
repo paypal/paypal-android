@@ -112,7 +112,7 @@ jobs:
           module: FraudProtection
 
   unit_test_finished:
-    needs: [unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_fraud_protection]
+    needs: [ unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_fraud_protection ]
     name: All Unit Test finished
     runs-on: ubuntu-latest
     steps:
@@ -214,20 +214,7 @@ jobs:
           VERSION="${{ needs.extract_version.outputs.version }}"
           BRANCH_NAME="sync-main-to-develop-$VERSION"
           PR_TITLE="Sync: Main to Develop after release $VERSION"
-
-          # Create body file to avoid heredoc issues
-          cat > pr_body.md << 'EOFMARKER'
-## Sync PR from main to develop
-
-This PR syncs changes from the main branch to the develop branch after release VERSION_PLACEHOLDER.
-
-### Changes included:
-- Release version VERSION_PLACEHOLDER
-- Any hotfixes or changes made during the release process
-EOFMARKER
-
-          # Replace placeholder with actual version (compatible with both GNU and BSD sed)
-          sed -i.bak "s/VERSION_PLACEHOLDER/$VERSION/g" pr_body.md && rm -f pr_body.md.bak
+          PR_BODY ="This PR syncs changes from the main branch to the develop branch after release of $VERSION"
 
           # Create new branch from main
           git checkout main
