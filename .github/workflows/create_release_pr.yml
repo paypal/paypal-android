@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
+          ref: 'main'
           fetch-depth: 0  # Full git history to ensure branch creation works
 
       - name: Set up Java
@@ -29,6 +30,10 @@ jobs:
 
       - name: Update Version Files
         run: |
+          # Ref: https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#keep-a-branch-up-to-date-with-another
+          git fetch origin develop:develop
+          git reset --hard develop
+
           # Update version in build.gradle
           ./gradlew -PversionParam=${{ github.event.inputs.versionName }} changeReleaseVersion
           
