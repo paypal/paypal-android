@@ -1,8 +1,8 @@
 package com.paypal.android.cardpayments
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import com.paypal.android.cardpayments.analytics.ApproveOrderEvent
 import com.paypal.android.cardpayments.analytics.CardAnalytics
@@ -147,12 +147,12 @@ class CardClient internal constructor(
 
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
-     * @param activity [ComponentActivity] activity reference used to present a Chrome Custom Tab.
+     * @param activity [Activity] activity reference used to present a Chrome Custom Tab.
      * @param authChallenge [CardAuthChallenge] auth challenge to present
      * (see [CardApproveOrderResult.AuthorizationRequired])
      */
     fun presentAuthChallenge(
-        activity: ComponentActivity,
+        activity: Activity,
         authChallenge: CardAuthChallenge
     ): CardPresentAuthChallengeResult {
         val result = authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
