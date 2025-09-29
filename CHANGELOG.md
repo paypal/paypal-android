@@ -1,7 +1,7 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
-* CartPayments
+* CardPayments
   * Migrate `CardClient.presentAuthChallenge()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
 * PayPalWebPayments
   * Migrate `PayPalWebCheckoutClient.start()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
