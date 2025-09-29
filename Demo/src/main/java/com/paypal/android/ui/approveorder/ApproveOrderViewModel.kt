@@ -1,8 +1,8 @@
 package com.paypal.android.ui.approveorder
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -61,7 +61,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    fun approveOrder(activity: Activity) {
+    fun approveOrder(activity: ComponentActivity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             approveOrderState = ActionState.Failure(Exception("Create an order to continue."))
@@ -72,7 +72,7 @@ class ApproveOrderViewModel @Inject constructor(
         }
     }
 
-    private fun approveOrderWithId(activity: Activity, orderId: String) {
+    private fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
         val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
@@ -97,7 +97,7 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     private fun presentAuthChallenge(
-        activity: Activity,
+        activity: ComponentActivity,
         authChallenge: CardAuthChallenge
     ) {
         when (val presentAuthResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
