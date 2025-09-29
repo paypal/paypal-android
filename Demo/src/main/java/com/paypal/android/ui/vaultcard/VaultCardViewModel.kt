@@ -1,8 +1,8 @@
 package com.paypal.android.ui.vaultcard
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.CardSetupToken
@@ -107,7 +107,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    fun updateSetupToken(activity: Activity) {
+    fun updateSetupToken(activity: ComponentActivity) {
         val setupToken = createdSetupToken
         if (setupToken == null) {
             updateSetupTokenState =
@@ -119,7 +119,7 @@ class VaultCardViewModel @Inject constructor(
         }
     }
 
-    private fun updateSetupTokenWithId(activity: Activity, setupTokenId: String) {
+    private fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
         val card = parseCard(_uiState.value)
         val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
@@ -171,7 +171,7 @@ class VaultCardViewModel @Inject constructor(
     }
 
     private fun presentAuthChallenge(
-        activity: Activity,
+        activity: ComponentActivity,
         authChallenge: CardAuthChallenge
     ) {
         when (val result = cardClient.presentAuthChallenge(activity, authChallenge)) {
