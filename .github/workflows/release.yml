@@ -111,17 +111,17 @@ jobs:
         with:
           module: FraudProtection
 
-  unit_test_finished:
-    needs: [ unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_fraud_protection ]
-    name: All Unit Test finished
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Unit test finished"
-
   # after build and unit tests are finished, publish all modules at once
   # to help reduce the probability of failure when interacting with sonatype servers
   publish_all_modules:
-    needs: [ unit_test_finished, build_aar, extract_version ]
+    needs: [
+      unit_test_card,
+      unit_test_core,
+      unit_test_paypal_web,
+      unit_test_fraud_protection,
+      build_aar,
+      extract_version
+    ]
     name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
     steps:
@@ -151,7 +151,7 @@ jobs:
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
 
   # Once all releases are done, we bump version, tag it and prepare next
-  bump_version:
+  publish_version_tag:
     needs: [ publish_all_modules, extract_version ]
     name: Bump Version
     runs-on: ubuntu-latest
@@ -191,7 +191,7 @@ jobs:
 
   # Create PR to sync changes from main to develop after successful release
   sync_to_develop:
-    needs: [ bump_version, extract_version ]
+    needs: [ publish_version_tag, extract_version ]
     name: Sync Main to Develop
     runs-on: ubuntu-latest
     # Add permissions needed for PR creation and merge
@@ -205,8 +205,6 @@ jobs:
           fetch-depth: 0  # Full git history to ensure branch creation works
       - name: Set github user
         uses: ./.github/actions/set_github_user
-      - name: Setup GitHub CLI
-        uses: cli/cli-action@v2
       - name: Create sync branch and PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
