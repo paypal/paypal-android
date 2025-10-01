@@ -1,6 +1,5 @@
-Welcome to the PayPal Android SDK. This library will help you accept Card and PayPal payments in your Android app.
-
 ![Maven Central Version](https://img.shields.io/maven-central/v/com.paypal.android/card-payments) ![Maven Snapshot Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fcom%2Fpaypal%2Fandroid%2Fpaypal-web-payments%2Fmaven-metadata.xml)
+Welcome to the PayPal Android SDK. This library will help you accept Card and PayPal payments in your Android app.
 
 ## FAQ
 
