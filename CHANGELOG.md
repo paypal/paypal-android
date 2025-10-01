@@ -4,6 +4,7 @@
 * CardPayments
   * Migrate `CardClient.presentAuthChallenge()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
 * PayPalWebPayments
+  * Fix breaking change bug where `PayPalPresentAuthChallengeResult.authState` was marked as `internal`
   * Migrate `PayPalWebCheckoutClient.start()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
   * Migrate `PayPalWebCheckoutClient.vault()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
 
