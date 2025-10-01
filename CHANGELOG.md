@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 2.2.0 (2025-10-01)
 * CardPayments
   * Migrate `CardClient.presentAuthChallenge()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
 * PayPalWebPayments
