@@ -116,7 +116,7 @@ public final class com/paypal/android/cardpayments/CardClient {
 	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/cardpayments/CardFinishVaultResult;
 	public final fun finishVault (Landroid/content/Intent;Ljava/lang/String;)Lcom/paypal/android/cardpayments/CardFinishVaultResult;
 	public final fun getInstanceState ()Ljava/lang/String;
-	public final fun presentAuthChallenge (Landroidx/activity/ComponentActivity;Lcom/paypal/android/cardpayments/CardAuthChallenge;)Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult;
+	public final fun presentAuthChallenge (Landroid/app/Activity;Lcom/paypal/android/cardpayments/CardAuthChallenge;)Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult;
 	public final fun restore (Ljava/lang/String;)V
 	public final fun vault (Lcom/paypal/android/cardpayments/CardVaultRequest;Lcom/paypal/android/cardpayments/CardVaultCallback;)V
 }
