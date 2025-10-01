@@ -31,7 +31,7 @@ Snapshot builds of the latest SDK features are published from the `main` branch 
 ```groovy
 repositories {
     maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        url 'https://central.sonatype.com/repository/maven-snapshots/'
     }
 }
 ```
