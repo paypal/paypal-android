@@ -77,10 +77,6 @@ class PayPalWebCheckoutClient internal constructor(
             updateCCO(request)
         }
 
-        if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
-            // TODO: consider returning an error immediately
-        }
-
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {

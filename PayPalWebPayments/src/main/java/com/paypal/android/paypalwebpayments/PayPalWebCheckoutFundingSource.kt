@@ -22,8 +22,4 @@ enum class PayPalWebCheckoutFundingSource(val value: String) {
      */
     PAYPAL("paypal"),
 
-    /**
-     * TODO: add docstring
-     */
-    CARD("card")
 }

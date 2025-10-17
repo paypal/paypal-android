@@ -97,7 +97,6 @@ public final class com/paypal/android/paypalwebpayments/PayPalWebCheckoutFinishV
 }
 
 public final class com/paypal/android/paypalwebpayments/PayPalWebCheckoutFundingSource : java/lang/Enum {
-	public static final field CARD Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFundingSource;
 	public static final field PAYPAL Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFundingSource;
 	public static final field PAYPAL_CREDIT Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFundingSource;
 	public static final field PAY_LATER Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFundingSource;
@@ -132,31 +131,6 @@ public final class com/paypal/android/paypalwebpayments/PayPalWebVaultRequest {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getApproveVaultHref ()Ljava/lang/String;
 	public final fun getSetupTokenId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class com/paypal/android/paypalwebpayments/UpdateClientConfigResult {
-}
-
-public final class com/paypal/android/paypalwebpayments/UpdateClientConfigResult$Failure : com/paypal/android/paypalwebpayments/UpdateClientConfigResult {
-	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
-	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/paypalwebpayments/UpdateClientConfigResult$Failure;
-	public static synthetic fun copy$default (Lcom/paypal/android/paypalwebpayments/UpdateClientConfigResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/paypalwebpayments/UpdateClientConfigResult$Failure;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/paypalwebpayments/UpdateClientConfigResult$Success : com/paypal/android/paypalwebpayments/UpdateClientConfigResult {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/paypalwebpayments/UpdateClientConfigResult$Success;
-	public static synthetic fun copy$default (Lcom/paypal/android/paypalwebpayments/UpdateClientConfigResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/paypalwebpayments/UpdateClientConfigResult$Success;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getClientConfig ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
