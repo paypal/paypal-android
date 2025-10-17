@@ -3,7 +3,6 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -25,7 +24,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val payPalWebLauncher: PayPalWebLauncher,
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val updateClientConfigAPI: UpdateClientConfigAPI,
-    private val dispatcher: CoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher
 ) {
 
     // for analytics tracking
@@ -44,7 +43,7 @@ class PayPalWebCheckoutClient internal constructor(
         payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
         sessionStore = PayPalWebCheckoutSessionStore(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
-        dispatcher = Dispatchers.Main
+        ioDispatcher = Dispatchers.IO,
     )
 
     /**
@@ -74,7 +73,9 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         // Call updateCCO for all funding sources (fire and forget)
-        updateCCO(request)
+        CoroutineScope(ioDispatcher).launch {
+            updateCCO(request)
+        }
 
         if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
             // TODO: consider returning an error immediately
@@ -96,52 +97,6 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
         }
         return result
-    }
-
-    /**
-     *
-     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
-     */
-    fun start(
-        activity: ComponentActivity,
-        request: PayPalWebCheckoutRequest,
-        callback: PayPalWebStartCallback
-    ) {
-        CoroutineScope(dispatcher).launch {
-            checkoutOrderId = request.orderId
-            analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
-
-            if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
-                val updateConfigResult = request.run {
-                    updateClientConfigAPI.updateClientConfig(
-                        orderId = orderId,
-                        fundingSource = fundingSource
-                    )
-                }
-                if (updateConfigResult is UpdateClientConfigResult.Failure) {
-                    // notify failure
-                    callback.onPayPalWebStartResult(
-                        PayPalPresentAuthChallengeResult.Failure(updateConfigResult.error)
-                    )
-                    return@launch
-                }
-            }
-
-            val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
-            when (result) {
-                is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    checkoutOrderId
-                )
-
-                is PayPalPresentAuthChallengeResult.Failure ->
-                    analytics.notify(
-                        CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                        checkoutOrderId
-                    )
-            }
-            callback.onPayPalWebStartResult(result)
-        }
     }
 
     /**
@@ -311,8 +266,7 @@ class PayPalWebCheckoutClient internal constructor(
             return result
         }
 
-    private fun updateCCO(request: PayPalWebCheckoutRequest) {
-        CoroutineScope(dispatcher).launch {
+    private suspend fun updateCCO(request: PayPalWebCheckoutRequest) {
             val fundingSource = when (request.fundingSource) {
                 PayPalWebCheckoutFundingSource.PAYPAL -> "payPal"
                 else -> request.fundingSource.value
@@ -323,6 +277,5 @@ class PayPalWebCheckoutClient internal constructor(
                 orderId = request.orderId,
                 fundingSource = PayPalWebCheckoutFundingSource.valueOf(fundingSource.uppercase())
             )
-        }
     }
 }
