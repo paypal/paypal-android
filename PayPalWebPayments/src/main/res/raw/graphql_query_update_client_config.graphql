@@ -1,0 +1,17 @@
+mutation UpdateClientConfig(
+    $orderID: String!,
+    $fundingSource: ButtonFundingSourceType!,
+    $integrationArtifact: IntegrationArtifactType!,
+    $userExperienceFlow: UserExperienceFlowType!,
+    $productFlow: ProductFlowType!,
+    $buttonSessionID: String
+) {
+    updateClientConfig(
+        token: $orderID
+        fundingSource: $fundingSource
+        integrationArtifact: $integrationArtifact,
+        userExperienceFlow: $userExperienceFlow,
+        productFlow: $productFlow,
+        buttonSessionID: $buttonSessionID
+    )
+}

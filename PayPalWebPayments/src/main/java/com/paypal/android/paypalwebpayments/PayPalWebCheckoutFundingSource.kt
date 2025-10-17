@@ -20,5 +20,5 @@ enum class PayPalWebCheckoutFundingSource(val value: String) {
     /**
      * PAYPAL will launch the web checkout for a one-time PayPal Checkout flow
      */
-    PAYPAL("paypal")
+    PAYPAL("paypal"),
 }
