@@ -2,14 +2,16 @@ public final class com/paypal/android/corepayments/APIClientError {
 	public static final field INSTANCE Lcom/paypal/android/corepayments/APIClientError;
 	public final fun clientIDNotFoundError (ILjava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun dataParsingError (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public static synthetic fun dataParsingError$default (Lcom/paypal/android/corepayments/APIClientError;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun getInvalidUrlRequest ()Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun getPayPalCheckoutError ()Lkotlin/jvm/functions/Function1;
 	public final fun getPayPalNativeCheckoutError ()Lkotlin/jvm/functions/Function2;
-	public final fun graphQLJSONParseError (Ljava/lang/String;Ljava/lang/Exception;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun graphQLJSONParseError (Ljava/lang/String;Ljava/lang/Throwable;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun httpURLConnectionError (ILjava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun noResponseData (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun serverResponseError (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun unknownError (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
+	public static synthetic fun unknownError$default (Lcom/paypal/android/corepayments/APIClientError;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/PayPalSDKError;
 	public final fun unknownHost (Ljava/lang/String;)Lcom/paypal/android/corepayments/PayPalSDKError;
 }
 
@@ -134,7 +136,6 @@ public final class com/paypal/android/corepayments/HttpResponse {
 	public final fun getStatus ()I
 	public fun hashCode ()I
 	public final fun isSuccessful ()Z
-	public final fun setSuccessful (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -213,18 +214,6 @@ public final class com/paypal/android/corepayments/PayPalSDKErrorCode : java/lan
 	public static fun values ()[Lcom/paypal/android/corepayments/PayPalSDKErrorCode;
 }
 
-public final class com/paypal/android/corepayments/PaymentsJSON {
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Lorg/json/JSONObject;)V
-	public final fun getJson ()Lorg/json/JSONObject;
-	public final fun getLinkHref (Ljava/lang/String;)Ljava/lang/String;
-	public final fun getString (Ljava/lang/String;)Ljava/lang/String;
-	public final fun optGetObject (Ljava/lang/String;)Lcom/paypal/android/corepayments/PaymentsJSON;
-	public final fun optMapObject (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
-	public final fun optMapObjectArray (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/util/List;
-	public final fun optString (Ljava/lang/String;)Ljava/lang/String;
-}
-
 public final class com/paypal/android/corepayments/ResourceLoader {
 	public fun <init> ()V
 	public final fun loadRawResource (Landroid/content/Context;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -256,14 +245,14 @@ public final class com/paypal/android/corepayments/graphql/GraphQLClient {
 	public static final field Companion Lcom/paypal/android/corepayments/graphql/GraphQLClient$Companion;
 	public static final field PAYPAL_DEBUG_ID Ljava/lang/String;
 	public fun <init> (Lcom/paypal/android/corepayments/CoreConfig;)V
-	public final fun send (Lorg/json/JSONObject;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun send$default (Lcom/paypal/android/corepayments/graphql/GraphQLClient;Lorg/json/JSONObject;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun sendInternal (Lcom/paypal/android/corepayments/graphql/GraphQLRequest;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class com/paypal/android/corepayments/graphql/GraphQLClient$Companion {
 }
 
 public final class com/paypal/android/corepayments/graphql/GraphQLError {
+	public static final field Companion Lcom/paypal/android/corepayments/graphql/GraphQLError$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -277,7 +266,23 @@ public final class com/paypal/android/corepayments/graphql/GraphQLError {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/paypal/android/corepayments/graphql/GraphQLError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/graphql/GraphQLError$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/graphql/GraphQLError;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/graphql/GraphQLError;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLError$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/paypal/android/corepayments/graphql/GraphQLExtension {
+	public static final field Companion Lcom/paypal/android/corepayments/graphql/GraphQLExtension$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -289,6 +294,86 @@ public final class com/paypal/android/corepayments/graphql/GraphQLExtension {
 	public final fun getCorrelationId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLExtension$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/graphql/GraphQLExtension$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/graphql/GraphQLExtension;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/graphql/GraphQLExtension;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLExtension$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLRequest {
+	public static final field Companion Lcom/paypal/android/corepayments/graphql/GraphQLRequest$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;)Lcom/paypal/android/corepayments/graphql/GraphQLRequest;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLRequest;Ljava/lang/String;Ljava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOperationName ()Ljava/lang/String;
+	public final fun getQuery ()Ljava/lang/String;
+	public final fun getVariables ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public synthetic fun <init> (Lkotlinx/serialization/KSerializer;)V
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/graphql/GraphQLRequest;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/graphql/GraphQLRequest;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLRequest$Companion {
+	public final fun serializer (Lkotlinx/serialization/KSerializer;)Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLResponse {
+	public static final field Companion Lcom/paypal/android/corepayments/graphql/GraphQLResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Ljava/util/List;)Lcom/paypal/android/corepayments/graphql/GraphQLResponse;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLResponse;Ljava/lang/Object;Lkotlinx/serialization/json/JsonObject;Ljava/util/List;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/Object;
+	public final fun getErrors ()Ljava/util/List;
+	public final fun getExtensions ()Lkotlinx/serialization/json/JsonObject;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public synthetic fun <init> (Lkotlinx/serialization/KSerializer;)V
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/graphql/GraphQLResponse;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/graphql/GraphQLResponse;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/graphql/GraphQLResponse$Companion {
+	public final fun serializer (Lkotlinx/serialization/KSerializer;)Lkotlinx/serialization/KSerializer;
 }
 
 public abstract class com/paypal/android/corepayments/graphql/GraphQLResult {
@@ -306,20 +391,15 @@ public final class com/paypal/android/corepayments/graphql/GraphQLResult$Failure
 }
 
 public final class com/paypal/android/corepayments/graphql/GraphQLResult$Success : com/paypal/android/corepayments/graphql/GraphQLResult {
-	public fun <init> ()V
-	public fun <init> (Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)V
-	public synthetic fun <init> (Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lorg/json/JSONObject;
-	public final fun component2 ()Ljava/util/List;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;
-	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;Lorg/json/JSONObject;Ljava/util/List;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;
+	public fun <init> (Lcom/paypal/android/corepayments/graphql/GraphQLResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/paypal/android/corepayments/graphql/GraphQLResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/graphql/GraphQLResponse;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lcom/paypal/android/corepayments/graphql/GraphQLResponse;Ljava/lang/String;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;Lcom/paypal/android/corepayments/graphql/GraphQLResponse;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/graphql/GraphQLResult$Success;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCorrelationId ()Ljava/lang/String;
-	public final fun getData ()Lorg/json/JSONObject;
-	public final fun getErrors ()Ljava/util/List;
-	public final fun getExtensions ()Ljava/util/List;
+	public final fun getResponse ()Lcom/paypal/android/corepayments/graphql/GraphQLResponse;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

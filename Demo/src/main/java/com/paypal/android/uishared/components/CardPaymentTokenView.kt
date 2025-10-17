@@ -16,6 +16,6 @@ fun CardPaymentTokenView(paymentToken: CardPaymentToken) {
         PropertyView(name = "ID", value = paymentToken.id)
         PropertyView(name = "Customer ID", value = paymentToken.customerId)
         PropertyView(name = "Card Brand", value = paymentToken.cardBrand)
-        PropertyView(name = "Card Last 4", value = paymentToken.cardLast4)
+        PropertyView(name = "Card Last 4", value = paymentToken.lastDigits)
     }
 }

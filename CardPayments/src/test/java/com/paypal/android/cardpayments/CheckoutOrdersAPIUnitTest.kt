@@ -6,7 +6,6 @@ import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.OrderStatus
-import com.paypal.android.corepayments.PaymentsJSON
 import com.paypal.android.corepayments.RestClient
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -14,7 +13,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.json.JSONException
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -42,7 +40,6 @@ class CheckoutOrdersAPIUnitTest {
 
     private val restClient = mockk<RestClient>(relaxed = true)
     private val requestFactory = mockk<CardRequestFactory>()
-    private val paymentsJSON = mockk<PaymentsJSON>()
 
     private val card = Card("4111111111111111", "01", "24", "123")
     private val orderId = "sample-order-id"
@@ -155,9 +152,7 @@ class CheckoutOrdersAPIUnitTest {
         runTest {
             // Status: OK
             val httpResponse = HttpResponse(200, headers, errorBody)
-            val parsingException = JSONException("Parsing Error")
             coEvery { restClient.send(apiRequest) } returns httpResponse
-            every { paymentsJSON.getString(any()) } throws parsingException
 
             val result = sut.confirmPaymentSource(cardRequest) as ConfirmPaymentSourceResult.Failure
             assertEquals(
