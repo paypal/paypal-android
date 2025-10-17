@@ -111,9 +111,13 @@ public final class com/paypal/android/cardpayments/CardAuthChallenge$Vault$Creat
 public final class com/paypal/android/cardpayments/CardClient {
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
 	public final fun approveOrder (Lcom/paypal/android/cardpayments/CardRequest;Lcom/paypal/android/cardpayments/CardApproveOrderCallback;)V
+	public final fun finishApproveOrder (Landroid/content/Intent;)Lcom/paypal/android/cardpayments/CardFinishApproveOrderResult;
 	public final fun finishApproveOrder (Landroid/content/Intent;Ljava/lang/String;)Lcom/paypal/android/cardpayments/CardFinishApproveOrderResult;
+	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/cardpayments/CardFinishVaultResult;
 	public final fun finishVault (Landroid/content/Intent;Ljava/lang/String;)Lcom/paypal/android/cardpayments/CardFinishVaultResult;
-	public final fun presentAuthChallenge (Landroidx/activity/ComponentActivity;Lcom/paypal/android/cardpayments/CardAuthChallenge;)Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult;
+	public final fun getInstanceState ()Ljava/lang/String;
+	public final fun presentAuthChallenge (Landroid/app/Activity;Lcom/paypal/android/cardpayments/CardAuthChallenge;)Lcom/paypal/android/cardpayments/CardPresentAuthChallengeResult;
+	public final fun restore (Ljava/lang/String;)V
 	public final fun vault (Lcom/paypal/android/cardpayments/CardVaultRequest;Lcom/paypal/android/cardpayments/CardVaultCallback;)V
 }
 

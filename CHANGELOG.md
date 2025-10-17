@@ -1,5 +1,42 @@
 # PayPal Android SDK Release Notes
 
+## 2.2.0 (2025-10-01)
+* CardPayments
+  * Migrate `CardClient.presentAuthChallenge()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
+* PayPalWebPayments
+  * Fix breaking change bug where `PayPalPresentAuthChallengeResult.authState` was marked as `internal`
+  * Migrate `PayPalWebCheckoutClient.start()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
+  * Migrate `PayPalWebCheckoutClient.vault()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
+
+## 2.1.2 (2025-09-26)
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutClient.finishStart(intent: Intent)` method
+    * Deprecate `PayPalWebCheckoutClient.finishStart(intent: Intent, authState: String)` method
+  * Add `PayPalWebCheckoutClient.finishVault(intent: Intent)` method
+    * Deprecate `PayPalWebCheckoutClient.finishVault(intent: Intent, authState: String)` method
+  * Add `PayPalWebCheckoutClient.instanceState` property
+  * Add `PayPalWebCheckoutClient.restore(instanceState: String)` method
+* CardPayments
+  * Add `CardClient.finishApproveOrder(intent: Intent)` method
+    * Deprecate `CardClient.finishApproveOrder(intent: Intent, authState: String)` method
+  * Add `CardClient.finishVault(intent: Intent)` method
+    * Deprecate `CardClient.finishVault(intent: Intent, authState: String)` method
+  * Add `CardClient.instanceState` property
+  * Add `CardClient.restore(instanceState: String)` method
+  * Deprecate `CardPresentAuthChalengeResult.authState` property
+  * Deprecate `PayPalPresentAuthChallengeResult.authState` property
+
+## ~2.1.1~
+  * This version is no longer supported. Please upgrade to the latest valid version.
+
+## ~2.1.0~
+  * This version is no longer supported. Please upgrade to the latest valid version.
+
+## 2.0.1 (2025-09-24)
+* PayPalWebPayments
+  * Fix issue with `PayPalWebCheckoutClient.finishStart()` that caused explicit user cancelation to return a `Failure` event, instead of `Canceled`
+  * Fix issue with `PayPalWebCheckoutClient.finishVault()` that caused explicit user cancelation ro return a `Success` event, instead of `Canceled`
+
 ## 2.0.0 (2025-03-18)
 * Breaking Changes
   * PayPalNativePayments

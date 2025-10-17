@@ -1,13 +1,28 @@
-name: Release
+name: Release On Merge To Main
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release'
-        required: true
+  push:
+    branches:
+      - main
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
+  # Extract version from build.gradle
+  extract_version:
+    name: Extract Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Get version from build.gradle
+        id: get_version
+        run: |
+          # Extract version from build.gradle
+          VERSION=$(grep -o '"sdkVersionName"\s*:\s*"[^"]*"' build.gradle | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+[^"]*')
+          echo "Current version in build.gradle: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
   #First we build
   build_aar:
     name: Build
@@ -96,17 +111,17 @@ jobs:
         with:
           module: FraudProtection
 
-  unit_test_finished:
-    needs: [unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_fraud_protection]
-    name: All Unit Test finished
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Unit test finished"
-
   # after build and unit tests are finished, publish all modules at once
   # to help reduce the probability of failure when interacting with sonatype servers
   publish_all_modules:
-    needs: [ unit_test_finished, build_aar ]
+    needs: [
+      unit_test_card,
+      unit_test_core,
+      unit_test_paypal_web,
+      unit_test_fraud_protection,
+      build_aar,
+      extract_version
+    ]
     name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
     steps:
@@ -122,9 +137,10 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Update Version
+      - name: Log Version
         run: |
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
+          # Use extracted version from build.gradle
+          echo "Using version from build.gradle: ${{ needs.extract_version.outputs.version }}"
       - name: Publish All Modules
         uses: ./.github/actions/publish_all_modules
         with:
@@ -135,8 +151,8 @@ jobs:
           signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
 
   # Once all releases are done, we bump version, tag it and prepare next
-  bump_version:
-    needs: [ publish_all_modules ]
+  publish_version_tag:
+    needs: [ publish_all_modules, extract_version ]
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
@@ -149,20 +165,16 @@ jobs:
           distribution: 'microsoft'
       - name: Set github user
         uses: ./.github/actions/set_github_user
-      - name: Update Version
+      - name: Tag and Release
         run: |
+          # Use extracted version from build.gradle
+          VERSION="${{ needs.extract_version.outputs.version }}"
+          echo "Using current version from build.gradle: $VERSION"
 
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} updateCHANGELOGVersion
-          ./gradlew -PversionParam=${{ github.event.inputs.version }} changeReleaseVersion
-
-          git add .
-          git commit -m 'Bump version to ${{ github.event.inputs.version }}'
-          git tag ${{ github.event.inputs.version }} -a -m 'Release ${{ github.event.inputs.version }}, by ${{ github.actor }}'
-
-          ./gradlew incrementSnapshotVersion
-          git add .
-          git commit -m 'Next version ready'
-          git push origin HEAD ${{ github.event.inputs.version }}
+          # CHANGELOG is already updated by the release PR process
+          # Just create the tag without modifying files
+          git tag $VERSION -a -m "Release $VERSION, automated from main branch, , by ${{ github.actor }}"
+          git push origin $VERSION
       - name: Save changelog entries to a file
         run: sed -e '1,/##/d' -e '/##/,$d' CHANGELOG.md > changelog_entries.md
       - name: Create GitHub release
@@ -171,8 +183,57 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: ${{ github.event.inputs.version }}
+          tag_name: ${{ needs.extract_version.outputs.version }}
+          release_name: ${{ needs.extract_version.outputs.version }}
           body_path: changelog_entries.md
           draft: false
           prerelease: false
+
+  # Create PR to sync changes from main to develop after successful release
+  sync_to_develop:
+    needs: [ publish_version_tag, extract_version ]
+    name: Sync Main to Develop
+    runs-on: ubuntu-latest
+    # Add permissions needed for PR creation and merge
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history to ensure branch creation works
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Create sync branch and PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.extract_version.outputs.version }}"
+          BRANCH_NAME="sync-main-to-develop-$VERSION"
+          PR_TITLE="Sync: Main to Develop after release $VERSION"
+          PR_BODY ="This PR syncs changes from the main branch to the develop branch after release of $VERSION"
+
+          # Create new branch from main
+          git checkout main
+          git pull origin main
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+
+          echo "Created branch $BRANCH_NAME from main"
+
+          # Create PR using GitHub CLI
+          PR_URL=$(gh pr create \
+            --base develop \
+            --head $BRANCH_NAME \
+            --title "$PR_TITLE" \
+            --body-file pr_body.md)
+
+          echo "Created PR: $PR_URL"
+
+          # Enable auto-merge for the PR
+          # Extract PR number from URL using GitHub CLI
+          echo "Enabling auto-merge for PR at $PR_URL"
+          gh pr merge $PR_URL --auto --merge --delete-branch
+
+          echo "Auto-merge enabled. PR will be merged automatically when all checks pass."

@@ -1,8 +1,8 @@
 package com.paypal.android.cardpayments
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import com.paypal.android.cardpayments.analytics.ApproveOrderEvent
 import com.paypal.android.cardpayments.analytics.CardAnalytics
@@ -25,7 +25,8 @@ class CardClient internal constructor(
     private val paymentMethodTokensAPI: DataVaultPaymentMethodTokensAPI,
     private val analytics: CardAnalytics,
     private val authChallengeLauncher: CardAuthLauncher,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val sessionStore: CardSessionStore = CardSessionStore()
 ) {
 
     // for analytics tracking
@@ -45,6 +46,20 @@ class CardClient internal constructor(
         CardAuthLauncher(),
         Dispatchers.Main
     )
+
+    /**
+     * Capture instance state for later restoration. This can be useful for recovery during a
+     * process kill.
+     */
+    val instanceState: String
+        get() = sessionStore.toBase64EncodedJSON()
+
+    /**
+     * Restore a feature client using instance state. @see [instanceState]
+     */
+    fun restore(instanceState: String) {
+        sessionStore.restore(instanceState)
+    }
 
     // NEXT MAJOR VERSION: Consider renaming approveOrder() to confirmPaymentSource()
 
@@ -132,16 +147,19 @@ class CardClient internal constructor(
 
     /**
      * Present an auth challenge received from a [CardClient.approveOrder] or [CardClient.vault] result.
-     * @param activity [ComponentActivity] activity reference used to present a Chrome Custom Tab.
+     * @param activity [Activity] activity reference used to present a Chrome Custom Tab.
      * @param authChallenge [CardAuthChallenge] auth challenge to present
      * (see [CardApproveOrderResult.AuthorizationRequired])
      */
     fun presentAuthChallenge(
-        activity: ComponentActivity,
+        activity: Activity,
         authChallenge: CardAuthChallenge
     ): CardPresentAuthChallengeResult {
         val result = authChallengeLauncher.presentAuthChallenge(activity, authChallenge)
         captureAuthChallengePresentationAnalytics(result, authChallenge)
+        if (result is CardPresentAuthChallengeResult.Success) {
+            sessionStore.authState = result.authState
+        }
         return result
     }
 
@@ -178,6 +196,21 @@ class CardClient internal constructor(
         }
     }
 
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.approveOrder]), call this method to see if a user has
+     * successfully approved their Credit (or Debit) card as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     * @param [authState] A continuation state received from [CardPresentAuthChallengeResult.Success]
+     * when calling [CardClient.presentAuthChallenge]. This is needed to properly verify that an
+     * authorization completed successfully.
+     */
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishApproveOrder(intent).",
+        replaceWith = ReplaceWith("finishApproveOrder(intent)")
+    )
     fun finishApproveOrder(intent: Intent, authState: String): CardFinishApproveOrderResult {
         val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
         when (result) {
@@ -197,6 +230,55 @@ class CardClient internal constructor(
         return result
     }
 
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.approveOrder]), call this method to see if a user has
+     * successfully approved their Credit (or Debit) card as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
+    fun finishApproveOrder(intent: Intent): CardFinishApproveOrderResult? =
+        sessionStore.authState?.let { authState ->
+            val result = authChallengeLauncher.completeApproveOrderAuthRequest(intent, authState)
+            when (result) {
+                is CardFinishApproveOrderResult.Success -> {
+                    analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_SUCCEEDED, approveOrderId)
+                    sessionStore.clear()
+                }
+
+                is CardFinishApproveOrderResult.Failure -> {
+                    analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_FAILED, approveOrderId)
+                    sessionStore.clear()
+                }
+
+                CardFinishApproveOrderResult.Canceled -> {
+                    analytics.notify(ApproveOrderEvent.AUTH_CHALLENGE_CANCELED, approveOrderId)
+                    sessionStore.clear()
+                }
+
+                else -> {
+                    // no analytics tracking required at the moment
+                }
+            }
+            result
+        }
+
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.vault]), call this method to see if a user has
+     * successfully authorized their Credit (or Debit) card for vaulting.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     * @param [authState] A continuation state received from [CardPresentAuthChallengeResult.Success]
+     * when calling [CardClient.vault]. This is needed to properly verify that an
+     * authorization completed successfully.
+     */
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishVault(intent).",
+        replaceWith = ReplaceWith("finishVault(intent)")
+    )
     fun finishVault(intent: Intent, authState: String): CardFinishVaultResult {
         val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
         when (result) {
@@ -215,4 +297,38 @@ class CardClient internal constructor(
         }
         return result
     }
+
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [CardClient.vault]), call this method to see if a user has
+     * successfully authorized their Credit (or Debit) card for vaulting.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
+    fun finishVault(intent: Intent): CardFinishVaultResult? =
+        sessionStore.authState?.let { authState ->
+            val result = authChallengeLauncher.completeVaultAuthRequest(intent, authState)
+            when (result) {
+                is CardFinishVaultResult.Success -> {
+                    analytics.notify(VaultEvent.AUTH_CHALLENGE_SUCCEEDED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                is CardFinishVaultResult.Failure -> {
+                    analytics.notify(VaultEvent.AUTH_CHALLENGE_FAILED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                CardFinishVaultResult.Canceled -> {
+                    analytics.notify(VaultEvent.AUTH_CHALLENGE_CANCELED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                else -> {
+                    // no analytics tracking required at the moment
+                }
+            }
+            result
+        }
 }
