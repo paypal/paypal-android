@@ -3,11 +3,16 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -18,7 +23,9 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
-    private val sessionStore: PayPalWebCheckoutSessionStore = PayPalWebCheckoutSessionStore()
+    private val sessionStore: PayPalWebCheckoutSessionStore,
+    private val updateClientConfigAPI: UpdateClientConfigAPI,
+    private val dispatcher: CoroutineDispatcher
 ) {
 
     // for analytics tracking
@@ -33,8 +40,11 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
-        PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        PayPalWebLauncher(urlScheme, configuration)
+        analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
+        payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
+        sessionStore = PayPalWebCheckoutSessionStore(),
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
+        dispatcher = Dispatchers.Main
     )
 
     /**
@@ -63,6 +73,13 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
+        // Call updateCCO for all funding sources (fire and forget)
+        updateCCO(request)
+
+        if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
+            // TODO: consider returning an error immediately
+        }
+
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
@@ -79,6 +96,52 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
         }
         return result
+    }
+
+    /**
+     *
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     */
+    fun start(
+        activity: ComponentActivity,
+        request: PayPalWebCheckoutRequest,
+        callback: PayPalWebStartCallback
+    ) {
+        CoroutineScope(dispatcher).launch {
+            checkoutOrderId = request.orderId
+            analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+
+            if (request.fundingSource == PayPalWebCheckoutFundingSource.CARD) {
+                val updateConfigResult = request.run {
+                    updateClientConfigAPI.updateClientConfig(
+                        orderId = orderId,
+                        fundingSource = fundingSource
+                    )
+                }
+                if (updateConfigResult is UpdateClientConfigResult.Failure) {
+                    // notify failure
+                    callback.onPayPalWebStartResult(
+                        PayPalPresentAuthChallengeResult.Failure(updateConfigResult.error)
+                    )
+                    return@launch
+                }
+            }
+
+            val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
+            when (result) {
+                is PayPalPresentAuthChallengeResult.Success -> analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+
+                is PayPalPresentAuthChallengeResult.Failure ->
+                    analytics.notify(
+                        CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                        checkoutOrderId
+                    )
+            }
+            callback.onPayPalWebStartResult(result)
+        }
     }
 
     /**
@@ -247,4 +310,19 @@ class PayPalWebCheckoutClient internal constructor(
             }
             return result
         }
+
+    private fun updateCCO(request: PayPalWebCheckoutRequest) {
+        CoroutineScope(dispatcher).launch {
+            val fundingSource = when (request.fundingSource) {
+                PayPalWebCheckoutFundingSource.PAYPAL -> "payPal"
+                else -> request.fundingSource.value
+            }
+            // ignore result; in the rare occasion this call fails, we will still allow
+            // the transaction to proceed
+            updateClientConfigAPI.updateClientConfig(
+                orderId = request.orderId,
+                fundingSource = PayPalWebCheckoutFundingSource.valueOf(fundingSource.uppercase())
+            )
+        }
+    }
 }
