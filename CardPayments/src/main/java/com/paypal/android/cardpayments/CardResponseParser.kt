@@ -1,79 +1,79 @@
 package com.paypal.android.cardpayments
 
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
-import com.paypal.android.cardpayments.model.PaymentSource
-import com.paypal.android.cardpayments.model.PurchaseUnit
+import com.paypal.android.cardpayments.model.ConfirmPaymentSourceResponse
+import com.paypal.android.cardpayments.model.ErrorResponse
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.OrderErrorDetail
-import com.paypal.android.corepayments.OrderStatus
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PaymentsJSON
-import org.json.JSONException
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 
 internal class CardResponseParser {
 
-    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResult =
-        try {
-            val bodyResponse = httpResponse.body!!
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
-            val json = PaymentsJSON(bodyResponse)
-            val status = json.getString("status")
-            val id = json.getString("id")
+    @OptIn(InternalSerializationApi::class)
+    fun parseConfirmPaymentSourceResponse(httpResponse: HttpResponse): ConfirmPaymentSourceResult {
+        val correlationId = httpResponse.headers["Paypal-Debug-Id"]
+        val error = parseError(httpResponse)
+        val responseBody = httpResponse.body?.takeIf { it.isNotBlank() }
+            ?: return ConfirmPaymentSourceResult.Failure(APIClientError.noResponseData(correlationId))
 
-            // this section is for 3DS
-            val payerActionHref = json.getLinkHref("payer-action")
-            ConfirmPaymentSourceResult.Success(
-                id,
-                OrderStatus.valueOf(status),
-                payerActionHref,
-                json.optMapObject("payment_source.card") { PaymentSource(it) },
-                json.optMapObjectArray("purchase_units") { PurchaseUnit(it) }
-            )
-        } catch (ignored: JSONException) {
-            val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-            val error = APIClientError.dataParsingError(correlationId)
-            ConfirmPaymentSourceResult.Failure(error)
-        }
+        return when {
+            error != null -> ConfirmPaymentSourceResult.Failure(error)
 
-    fun parseError(httpResponse: HttpResponse): PayPalSDKError? {
-        val result: PayPalSDKError?
-        if (httpResponse.isSuccessful) {
-            result = null
-        } else {
-
-            val correlationId = httpResponse.headers["Paypal-Debug-Id"]
-            val bodyResponse = httpResponse.body
-            if (bodyResponse.isNullOrBlank()) {
-                result = APIClientError.noResponseData(correlationId)
-            } else {
-                result = when (val status = httpResponse.status) {
-                    HttpResponse.STATUS_UNKNOWN_HOST -> {
-                        APIClientError.unknownHost(correlationId)
-                    }
-                    HttpResponse.STATUS_UNDETERMINED -> {
-                        APIClientError.unknownError(correlationId)
-                    }
-                    HttpResponse.SERVER_ERROR -> {
-                        APIClientError.serverResponseError(correlationId)
-                    }
-                    else -> {
-                        val json = PaymentsJSON(bodyResponse)
-                        val message = json.getString("message")
-
-                        val errorDetails = json.optMapObjectArray("details") {
-                            val issue = it.getString("issue")
-                            val description = it.getString("description")
-                            OrderErrorDetail(issue, description)
-                        }
-
-                        val description = "$message -> $errorDetails"
-                        APIClientError.httpURLConnectionError(status, description, correlationId)
-                    }
+            else -> {
+                try {
+                    val response =
+                        json.decodeFromString<ConfirmPaymentSourceResponse>(responseBody)
+                    ConfirmPaymentSourceResult.Success(
+                        orderId = response.id,
+                        status = response.status,
+                        payerActionHref = response.links?.firstOrNull { it.rel == "payer-action" }?.href,
+                        paymentSource = response.paymentSource?.card,
+                        purchaseUnits = response.purchaseUnits ?: emptyList()
+                    )
+                } catch (_: SerializationException) {
+                    ConfirmPaymentSourceResult.Failure(APIClientError.dataParsingError(correlationId))
                 }
             }
         }
-
-        return result
     }
+
+    fun parseError(httpResponse: HttpResponse): PayPalSDKError? {
+        val correlationId = httpResponse.headers["Paypal-Debug-Id"]
+        val bodyResponse = httpResponse.body
+        val status = httpResponse.status
+
+        return when {
+            httpResponse.isSuccessful -> null
+            bodyResponse.isNullOrBlank() -> APIClientError.noResponseData(correlationId)
+            status == HttpResponse.STATUS_UNKNOWN_HOST -> APIClientError.unknownHost(correlationId)
+            status == HttpResponse.STATUS_UNDETERMINED -> APIClientError.unknownError(correlationId)
+            status == HttpResponse.SERVER_ERROR -> APIClientError.serverResponseError(correlationId)
+            else -> parseDetailedError(bodyResponse, status, correlationId)
+        }
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    private fun parseDetailedError(
+        bodyResponse: String,
+        status: Int,
+        correlationId: String?
+    ): PayPalSDKError =
+        try {
+            val errorResponse = json.decodeFromString<ErrorResponse>(bodyResponse)
+            val errorDetails =
+                errorResponse.details?.map { OrderErrorDetail(it.issue, it.description) }
+            val description = "${errorResponse.message} -> $errorDetails"
+            APIClientError.httpURLConnectionError(status, description, correlationId)
+        } catch (_: SerializationException) {
+            APIClientError.dataParsingError(correlationId)
+        }
 }

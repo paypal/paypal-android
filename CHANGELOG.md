@@ -4,6 +4,7 @@
 
 * PayPalWebPayments
   * updates client config in web checkout
+* Migrates to kotlin serialization for all data serialization
 
 ## 2.2.0 (2025-10-01)
 * CardPayments
