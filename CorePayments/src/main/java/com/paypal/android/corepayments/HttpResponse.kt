@@ -21,5 +21,6 @@ data class HttpResponse(
         val SUCCESSFUL_STATUS_CODES = HttpURLConnection.HTTP_OK..299
     }
 
-    var isSuccessful: Boolean = status in SUCCESSFUL_STATUS_CODES
+    val isSuccessful: Boolean
+        get() = status in SUCCESSFUL_STATUS_CODES
 }

@@ -1,5 +1,9 @@
 # PayPal Android SDK Release Notes
 
+## Unreleased
+
+* Migrates to kotlin serialization for all data serialization
+
 ## 2.2.0 (2025-10-01)
 * CardPayments
   * Migrate `CardClient.presentAuthChallenge()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference

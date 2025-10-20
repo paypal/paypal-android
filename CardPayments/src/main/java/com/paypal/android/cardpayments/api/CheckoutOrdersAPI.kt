@@ -16,12 +16,6 @@ internal class CheckoutOrdersAPI(
     suspend fun confirmPaymentSource(cardRequest: CardRequest): ConfirmPaymentSourceResult {
         val apiRequest = requestFactory.createConfirmPaymentSourceRequest(cardRequest)
         val httpResponse = restClient.send(apiRequest)
-
-        val error = responseParser.parseError(httpResponse)
-        return if (error == null) {
-            responseParser.parseConfirmPaymentSourceResponse(httpResponse)
-        } else {
-            ConfirmPaymentSourceResult.Failure(error)
-        }
+        return responseParser.parseConfirmPaymentSourceResponse(httpResponse)
     }
 }
