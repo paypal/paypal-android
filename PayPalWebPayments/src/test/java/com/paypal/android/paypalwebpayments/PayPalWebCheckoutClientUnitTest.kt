@@ -9,6 +9,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
@@ -49,7 +50,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() launches PayPal web checkout`() {
+    fun `start() launches PayPal web checkout`() = runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -66,7 +67,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() notifies merchant of browser switch failure`() {
+    fun `start() notifies merchant of browser switch failure`() = runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -84,7 +85,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() executes updateCCO in fire-and-forget manner without blocking`() = runTest {
+    fun `start() waits for updateCCO to complete before launching web checkout`() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
@@ -99,23 +100,56 @@ class PayPalWebCheckoutClientUnitTest {
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
 
-        // Call start() - this should return immediately without waiting for updateCCO
+        // Call start() - this should wait for updateCCO to complete
         val result = sut.start(activity, request)
 
-        // Verify that start() completed immediately and returned the expected result
+        // Verify that start() completed and returned the expected result
         assertSame(launchResult, result)
 
-        // Verify that the main operation completed, but updateCCO hasn't been executed yet
-        // because we control the test dispatcher and haven't advanced it
-        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
-
-        // Now advance the dispatcher to allow the background coroutine to execute
-        advanceUntilIdle()
-
-        // Verify that updateCCO was eventually called, proving it runs independently
+        // Verify that both updateCCO and the web launcher were called
         coVerify(exactly = 1) {
             updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
         }
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+    }
+
+    @Test
+    fun `start() with callback executes asynchronously`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val sut = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = payPalWebLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = testDispatcher
+        )
+
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        var callbackResult: PayPalPresentAuthChallengeResult? = null
+        val callback = PayPalWebStartCallback { result ->
+            callbackResult = result
+        }
+
+        // Call start() with callback - this should return immediately
+        sut.start(activity, request, callback)
+
+        // Initially, callback should not have been called yet
+        assertEquals("Callback should not have been called yet", null, callbackResult)
+
+        // Advance the dispatcher to allow the background coroutine to complete
+        advanceUntilIdle()
+
+        // Verify that callback was called with the expected result
+        assertSame("Callback should have been called with the result", launchResult, callbackResult)
+
+        // Verify that both updateCCO and the web launcher were called
+        coVerify(exactly = 1) {
+            updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
+        }
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
     }
 
     @Test
@@ -224,7 +258,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state forwards success result from auth launcher`() {
+    fun `finishStart() with session auth state forwards success result from auth launcher`() =
+        runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -248,7 +283,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with restored session auth state forwards success result from auth launcher`() {
+    fun `finishStart() with restored session auth state forwards success result from auth launcher`() =
+        runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
@@ -281,7 +317,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state forwards error result from auth launcher`() {
+    fun `finishStart() with session auth state forwards error result from auth launcher`() =
+        runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -305,7 +342,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with restored session auth state forwards error result from auth launcher`() {
+    fun `finishStart() with restored session auth state forwards error result from auth launcher`() =
+        runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
@@ -338,7 +376,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state forwards cancellation result from auth launcher`() {
+    fun `finishStart() with session auth state forwards cancellation result from auth launcher`() =
+        runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -361,7 +400,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with restored session auth state forwards cancellation result from auth launcher`() {
+    fun `finishStart() with restored session auth state forwards cancellation result from auth launcher`() =
+        runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
 
@@ -393,7 +433,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state clears session to prevent delivering success event twice`() {
+    fun `finishStart() with session auth state clears session to prevent delivering success event twice`() =
+        runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -416,7 +457,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state clears session to prevent delivering error event twice`() {
+    fun `finishStart() with session auth state clears session to prevent delivering error event twice`() =
+        runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -439,7 +481,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `finishStart() with session auth state clears session to prevent delivering cancellation event twice`() {
+    fun `finishStart() with session auth state clears session to prevent delivering cancellation event twice`() =
+        runTest {
         val sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,

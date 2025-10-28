@@ -70,16 +70,14 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    fun start(
+    suspend fun start(
         activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        applicationScope.launch {
-            updateCCO(request)
-        }
+        updateCCO(request)
 
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
@@ -97,6 +95,24 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
         }
         return result
+    }
+
+    /**
+     * Confirm PayPal payment source for an order with callback.
+     *
+     * @param activity The activity to launch the PayPal web checkout from
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param callback [PayPalWebStartCallback] to receive the result
+     */
+    fun start(
+        activity: Activity,
+        request: PayPalWebCheckoutRequest,
+        callback: PayPalWebStartCallback
+    ) {
+        applicationScope.launch {
+            val result = start(activity, request)
+            callback.onPayPalWebStartResult(result)
+        }
     }
 
     /**
