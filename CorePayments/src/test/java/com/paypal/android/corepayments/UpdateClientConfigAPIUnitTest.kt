@@ -220,5 +220,4 @@ class UpdateClientConfigAPIUnitTest {
             mockGraphQLClient.send<UpdateClientConfigResponse, UpdateClientConfigVariables>(any())
         }
     }
-
 }
