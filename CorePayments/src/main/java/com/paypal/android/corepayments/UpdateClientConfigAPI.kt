@@ -50,13 +50,13 @@ class UpdateClientConfigAPI(
                 when (graphQLResponse) {
                     is GraphQLResult.Success -> {
                         val correlationId = graphQLResponse.correlationId
-                        val responseData = graphQLResponse.response.data
-                        if (responseData == null) {
-                            return UpdateClientConfigResult.Failure(
-                                APIClientError.noResponseData(correlationId)
+                        graphQLResponse.response.data?.let {
+                            UpdateClientConfigResult.Success
+                        } ?: UpdateClientConfigResult.Failure(
+                            APIClientError.noResponseData(
+                                correlationId
                             )
-                        }
-                        UpdateClientConfigResult.Success
+                        )
                     }
 
                     is GraphQLResult.Failure -> {
