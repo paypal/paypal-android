@@ -3,7 +3,9 @@ package com.paypal.android.paypalwebpayments
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,6 +14,9 @@ import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,6 +81,41 @@ class PayPalWebCheckoutClientUnitTest {
         val request = PayPalWebCheckoutRequest("fake-order-id")
         val result = sut.start(activity, request)
         assertSame(launchResult, result)
+    }
+
+    @Test
+    fun `start() executes updateCCO in fire-and-forget manner without blocking`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val sut = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = payPalWebLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = testDispatcher
+        )
+
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+
+        // Call start() - this should return immediately without waiting for updateCCO
+        val result = sut.start(activity, request)
+
+        // Verify that start() completed immediately and returned the expected result
+        assertSame(launchResult, result)
+
+        // Verify that the main operation completed, but updateCCO hasn't been executed yet
+        // because we control the test dispatcher and haven't advanced it
+        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+
+        // Now advance the dispatcher to allow the background coroutine to execute
+        advanceUntilIdle()
+
+        // Verify that updateCCO was eventually called, proving it runs independently
+        coVerify(exactly = 1) {
+            updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
+        }
     }
 
     @Test

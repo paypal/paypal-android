@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
@@ -11,6 +12,7 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
@@ -26,6 +28,9 @@ class PayPalWebCheckoutClient internal constructor(
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val ioDispatcher: CoroutineDispatcher
 ) {
+
+    // application scope to execute fire-and-forget tasks
+    private val applicationScope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -72,8 +77,7 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        // Call updateCCO for all funding sources (fire and forget)
-        CoroutineScope(ioDispatcher).launch {
+        applicationScope.launch {
             updateCCO(request)
         }
 
@@ -263,15 +267,11 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
     private suspend fun updateCCO(request: PayPalWebCheckoutRequest) {
-            val fundingSource = when (request.fundingSource) {
-                PayPalWebCheckoutFundingSource.PAYPAL -> "payPal"
-                else -> request.fundingSource.value
-            }
             // ignore result; in the rare occasion this call fails, we will still allow
             // the transaction to proceed
             updateClientConfigAPI.updateClientConfig(
                 orderId = request.orderId,
-                fundingSource = PayPalWebCheckoutFundingSource.valueOf(fundingSource.uppercase())
+                fundingSource = request.fundingSource.value,
             )
     }
 }
