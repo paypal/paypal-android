@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-* Migrates to kotlin serialization for all data serialization
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutClient.start(activity, request, callback)` method with asynchronous
+    callback support
+  * Deprecates `PayPalWebCheckoutClient.start(activity, request)`
 
 ## 2.2.0 (2025-10-01)
 * CardPayments
