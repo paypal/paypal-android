@@ -6,6 +6,10 @@ plugins {
     alias libs.plugins.binaryCompatibilityValidator
 }
 
+apiValidation {
+    nonPublicMarkers.add("androidx.annotation.RestrictTo")
+}
+
 android {
     namespace 'com.paypal.android.cardpayments'
     java {
