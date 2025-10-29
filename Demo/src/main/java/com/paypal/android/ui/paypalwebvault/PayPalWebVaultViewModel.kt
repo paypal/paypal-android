@@ -86,13 +86,15 @@ class PayPalWebVaultViewModel @Inject constructor(
     ) {
         vaultPayPalState = ActionState.Loading
 
-        when (val result = paypalClient.vault(activity, request)) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
-            }
+        paypalClient.vault(activity, request) { result ->
+            when (result) {
+                is PayPalPresentAuthChallengeResult.Success -> {
+                    // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
+                }
 
-            is PayPalPresentAuthChallengeResult.Failure ->
-                vaultPayPalState = ActionState.Failure(result.error)
+                is PayPalPresentAuthChallengeResult.Failure ->
+                    vaultPayPalState = ActionState.Failure(result.error)
+            }
         }
     }
 

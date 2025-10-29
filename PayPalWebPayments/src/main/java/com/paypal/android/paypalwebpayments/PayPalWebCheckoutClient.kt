@@ -28,8 +28,6 @@ class PayPalWebCheckoutClient internal constructor(
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val mainDispatcher: CoroutineDispatcher
 ) {
-
-    // application scope to execute fire-and-forget tasks
     private val applicationScope = CoroutineScope(SupervisorJob() + mainDispatcher)
 
     // for analytics tracking
