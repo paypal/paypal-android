@@ -45,6 +45,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
     }
@@ -56,6 +57,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -73,6 +75,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val sdkError = PayPalSDKError(123, "fake error description")
@@ -92,6 +95,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = testDispatcher,
             mainDispatcher = testDispatcher
         )
 
@@ -128,6 +132,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = testDispatcher,
             mainDispatcher = testDispatcher
         )
 
@@ -166,6 +171,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -183,6 +189,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val sdkError = PayPalSDKError(123, "fake error description")
@@ -203,6 +210,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val successResult =
@@ -222,6 +230,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val error = PayPalSDKError(123, "fake-error-description")
@@ -241,6 +250,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
@@ -259,6 +269,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         assertNull(sut.finishStart(intent))
@@ -272,6 +283,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -306,6 +318,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
@@ -316,6 +329,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -331,6 +345,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -365,6 +380,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
@@ -375,6 +391,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -390,6 +407,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -422,6 +440,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
@@ -432,6 +451,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -447,6 +467,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -471,6 +492,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -495,6 +517,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -517,6 +540,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val successResult =
@@ -537,6 +561,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val error = PayPalSDKError(123, "fake-error-description")
@@ -556,6 +581,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         every {
@@ -573,6 +599,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         every {
@@ -590,6 +617,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         assertNull(sut.finishVault(intent))
@@ -611,6 +639,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
@@ -620,6 +649,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -643,6 +673,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
@@ -652,6 +683,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -666,6 +698,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -696,6 +729,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
@@ -705,6 +739,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -719,6 +754,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -747,6 +783,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
@@ -756,6 +793,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         sut.restore(previousClient.instanceState)
@@ -770,6 +808,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -793,6 +832,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -815,6 +855,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
             mainDispatcher = Dispatchers.Main
         )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")

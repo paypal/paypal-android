@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -26,9 +27,10 @@ class PayPalWebCheckoutClient internal constructor(
     private val payPalWebLauncher: PayPalWebLauncher,
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val updateClientConfigAPI: UpdateClientConfigAPI,
+    private val ioDispatcher: CoroutineDispatcher,
     private val mainDispatcher: CoroutineDispatcher
 ) {
-    private val applicationScope = CoroutineScope(SupervisorJob() + mainDispatcher)
+    private val applicationScope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -46,7 +48,8 @@ class PayPalWebCheckoutClient internal constructor(
         payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
         sessionStore = PayPalWebCheckoutSessionStore(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
-        mainDispatcher = Dispatchers.Main,
+        ioDispatcher = Dispatchers.IO,
+        mainDispatcher = Dispatchers.Main
     )
 
     /**
@@ -112,7 +115,9 @@ class PayPalWebCheckoutClient internal constructor(
         applicationScope.launch {
             updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
             val result = start(activity, request)
-            callback.onPayPalWebStartResult(result)
+            withContext(mainDispatcher) {
+                callback.onPayPalWebStartResult(result)
+            }
         }
     }
 
@@ -121,10 +126,6 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    @Deprecated(
-        message = "Use vault(activity, request, callback) instead.",
-        replaceWith = ReplaceWith("vault(activity, request, callback)")
-    )
     fun vault(
         activity: Activity,
         request: PayPalWebVaultRequest
@@ -148,28 +149,6 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, vaultSetupTokenId)
         }
         return result
-    }
-
-    /**
-     * Vault PayPal as a payment method with callback.
-     *
-     * @param activity The activity to launch the PayPal web vault from
-     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
-     * @param callback [PayPalWebVaultCallback] to receive the result
-     */
-    fun vault(
-        activity: Activity,
-        request: PayPalWebVaultRequest,
-        callback: PayPalWebVaultCallback
-    ) {
-        applicationScope.launch {
-            updateClientConfigAPI.updateClientConfig(
-                request.setupTokenId,
-                PayPalWebCheckoutFundingSource.PAYPAL.value
-            )
-            val result = vault(activity, request)
-            callback.onPayPalWebVaultResult(result)
-        }
     }
 
     /**
