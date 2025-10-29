@@ -26,11 +26,11 @@ class PayPalWebCheckoutClient internal constructor(
     private val payPalWebLauncher: PayPalWebLauncher,
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val updateClientConfigAPI: UpdateClientConfigAPI,
-    private val ioDispatcher: CoroutineDispatcher
+    private val mainDispatcher: CoroutineDispatcher
 ) {
 
     // application scope to execute fire-and-forget tasks
-    private val applicationScope = CoroutineScope(SupervisorJob() + ioDispatcher)
+    private val applicationScope = CoroutineScope(SupervisorJob() + mainDispatcher)
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -48,7 +48,7 @@ class PayPalWebCheckoutClient internal constructor(
         payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
         sessionStore = PayPalWebCheckoutSessionStore(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
-        ioDispatcher = Dispatchers.IO,
+        mainDispatcher = Dispatchers.Main,
     )
 
     /**
@@ -70,14 +70,16 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    suspend fun start(
+    @Deprecated(
+        message = "Use start(activity, request, callback) instead.",
+        replaceWith = ReplaceWith("start(activity, request, callback)")
+    )
+    fun start(
         activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
-
-        updateCCO(request)
 
         val result = payPalWebLauncher.launchPayPalWebCheckout(activity, request)
         when (result) {
@@ -110,6 +112,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebStartCallback
     ) {
         applicationScope.launch {
+            updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
             val result = start(activity, request)
             callback.onPayPalWebStartResult(result)
         }
@@ -120,6 +123,10 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
+    @Deprecated(
+        message = "Use vault(activity, request, callback) instead.",
+        replaceWith = ReplaceWith("vault(activity, request, callback)")
+    )
     fun vault(
         activity: Activity,
         request: PayPalWebVaultRequest
@@ -143,6 +150,28 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, vaultSetupTokenId)
         }
         return result
+    }
+
+    /**
+     * Vault PayPal as a payment method with callback.
+     *
+     * @param activity The activity to launch the PayPal web vault from
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     * @param callback [PayPalWebVaultCallback] to receive the result
+     */
+    fun vault(
+        activity: Activity,
+        request: PayPalWebVaultRequest,
+        callback: PayPalWebVaultCallback
+    ) {
+        applicationScope.launch {
+            updateClientConfigAPI.updateClientConfig(
+                request.setupTokenId,
+                PayPalWebCheckoutFundingSource.PAYPAL.value
+            )
+            val result = vault(activity, request)
+            callback.onPayPalWebVaultResult(result)
+        }
     }
 
     /**
@@ -281,13 +310,4 @@ class PayPalWebCheckoutClient internal constructor(
             }
             return result
         }
-
-    private suspend fun updateCCO(request: PayPalWebCheckoutRequest) {
-            // ignore result; in the rare occasion this call fails, we will still allow
-            // the transaction to proceed
-            updateClientConfigAPI.updateClientConfig(
-                orderId = request.orderId,
-                fundingSource = request.fundingSource.value,
-            )
-    }
 }

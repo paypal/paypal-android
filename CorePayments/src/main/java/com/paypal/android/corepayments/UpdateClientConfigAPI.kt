@@ -29,7 +29,7 @@ class UpdateClientConfigAPI(
     }
 
     suspend fun updateClientConfig(
-        orderId: String,
+        tokenId: String,
         fundingSource: String
     ): UpdateClientConfigResult {
         return when (val result = resourceLoader.loadRawResource(
@@ -38,7 +38,7 @@ class UpdateClientConfigAPI(
         )) {
             is LoadRawResourceResult.Success -> {
                 val graphQLRequest = createUpdateClientConfigRequest(
-                    orderId = orderId,
+                    token = tokenId,
                     fundingSource = fundingSource,
                     query = result.value
                 )
@@ -53,9 +53,7 @@ class UpdateClientConfigAPI(
                         graphQLResponse.response.data?.let {
                             UpdateClientConfigResult.Success
                         } ?: UpdateClientConfigResult.Failure(
-                            APIClientError.noResponseData(
-                                correlationId
-                            )
+                            APIClientError.noResponseData(correlationId)
                         )
                     }
 
@@ -74,12 +72,12 @@ class UpdateClientConfigAPI(
     }
 
     private fun createUpdateClientConfigRequest(
-        orderId: String,
+        token: String,
         fundingSource: String,
         query: String
     ): GraphQLRequest<UpdateClientConfigVariables> {
         val variables = UpdateClientConfigVariables(
-            orderID = orderId,
+            token = token,
             fundingSource = fundingSource,
             integrationArtifact = Defaults.INTEGRATION_ARTIFACT,
             userExperienceFlow = Defaults.USER_EXPERIENCE_FLOW,
@@ -99,7 +97,7 @@ class UpdateClientConfigAPI(
 @Serializable
 @OptIn(InternalSerializationApi::class)
 data class UpdateClientConfigVariables(
-    val orderID: String,
+    val token: String,
     val fundingSource: String,
     val integrationArtifact: String,
     val userExperienceFlow: String,

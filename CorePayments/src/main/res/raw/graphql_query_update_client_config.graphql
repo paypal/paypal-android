@@ -1,5 +1,5 @@
 mutation UpdateClientConfig(
-    $orderID: String!,
+    $token: String!,
     $fundingSource: ButtonFundingSourceType!,
     $integrationArtifact: IntegrationArtifactType!,
     $userExperienceFlow: UserExperienceFlowType!,
@@ -7,7 +7,7 @@ mutation UpdateClientConfig(
     $buttonSessionID: String
 ) {
     updateClientConfig(
-        token: $orderID
+        token: $token
         fundingSource: $fundingSource
         integrationArtifact: $integrationArtifact,
         userExperienceFlow: $userExperienceFlow,

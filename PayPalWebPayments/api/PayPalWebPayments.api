@@ -38,9 +38,10 @@ public final class com/paypal/android/paypalwebpayments/PayPalWebCheckoutClient 
 	public final fun finishVault (Landroid/content/Intent;Ljava/lang/String;)Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFinishVaultResult;
 	public final fun getInstanceState ()Ljava/lang/String;
 	public final fun restore (Ljava/lang/String;)V
+	public final fun start (Landroid/app/Activity;Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;)Lcom/paypal/android/paypalwebpayments/PayPalPresentAuthChallengeResult;
 	public final fun start (Landroid/app/Activity;Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lcom/paypal/android/paypalwebpayments/PayPalWebStartCallback;)V
-	public final fun start (Landroid/app/Activity;Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun vault (Landroid/app/Activity;Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;)Lcom/paypal/android/paypalwebpayments/PayPalPresentAuthChallengeResult;
+	public final fun vault (Landroid/app/Activity;Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;Lcom/paypal/android/paypalwebpayments/PayPalWebVaultCallback;)V
 }
 
 public abstract class com/paypal/android/paypalwebpayments/PayPalWebCheckoutFinishStartResult {
@@ -124,6 +125,10 @@ public final class com/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest
 
 public abstract interface class com/paypal/android/paypalwebpayments/PayPalWebStartCallback {
 	public abstract fun onPayPalWebStartResult (Lcom/paypal/android/paypalwebpayments/PayPalPresentAuthChallengeResult;)V
+}
+
+public abstract interface class com/paypal/android/paypalwebpayments/PayPalWebVaultCallback {
+	public abstract fun onPayPalWebVaultResult (Lcom/paypal/android/paypalwebpayments/PayPalPresentAuthChallengeResult;)V
 }
 
 public final class com/paypal/android/paypalwebpayments/PayPalWebVaultRequest {

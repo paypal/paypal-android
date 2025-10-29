@@ -312,8 +312,8 @@ public final class com/paypal/android/corepayments/UpdateClientConfigVariables {
 	public final fun getButtonSessionId ()Ljava/lang/String;
 	public final fun getFundingSource ()Ljava/lang/String;
 	public final fun getIntegrationArtifact ()Ljava/lang/String;
-	public final fun getOrderID ()Ljava/lang/String;
 	public final fun getProductFlow ()Ljava/lang/String;
+	public final fun getToken ()Ljava/lang/String;
 	public final fun getUserExperienceFlow ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

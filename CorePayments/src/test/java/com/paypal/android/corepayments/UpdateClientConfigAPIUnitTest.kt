@@ -98,7 +98,7 @@ class UpdateClientConfigAPIUnitTest {
 
             val variables = capturedRequest.variables
             assertNotNull("Variables should not be null", variables)
-            assertEquals("Order ID should match", testOrderId, variables!!.orderID)
+            assertEquals("Order ID should match", testOrderId, variables!!.token)
             assertEquals("Funding source should match", testFundingSource, variables.fundingSource)
             assertEquals(
                 "Integration artifact should be default",
