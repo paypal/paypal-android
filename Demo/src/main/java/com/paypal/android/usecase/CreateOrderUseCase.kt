@@ -4,65 +4,72 @@ import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.DemoConstants.CANCEL_URL
 import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
+import com.paypal.android.api.model.serialization.Amount
+import com.paypal.android.api.model.serialization.Card
+import com.paypal.android.api.model.serialization.CardAttributes
+import com.paypal.android.api.model.serialization.NativeApp
+import com.paypal.android.api.model.serialization.OrderPaymentSource
+import com.paypal.android.api.model.serialization.OrderRequestBody
+import com.paypal.android.api.model.serialization.PayPalOrderExperienceContext
+import com.paypal.android.api.model.serialization.PayPalPaymentSource
+import com.paypal.android.api.model.serialization.PurchaseUnit
+import com.paypal.android.api.model.serialization.Vault
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.models.OrderRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 import javax.inject.Inject
 
 class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> =
-        withContext(Dispatchers.IO) {
-            val amountJSON = JSONObject()
-                .put("currency_code", "USD")
-                .put("value", "10.99")
-
-            val purchaseUnitJSON = JSONObject()
-                .put("amount", amountJSON)
-
-            val orderRequest = JSONObject()
-                .put("intent", request.intent)
-                .put("purchase_units", JSONArray().put(purchaseUnitJSON))
-
-            if (request.shouldVault) {
-                val vaultJSON = JSONObject()
-                    .put("store_in_vault", "ON_SUCCESS")
-
-                val cardAttributesJSON = JSONObject()
-                    .put("vault", vaultJSON)
-
-                val cardJSON = JSONObject()
-                    .put("attributes", cardAttributesJSON)
-
-                val paymentSourceJSON = JSONObject()
-                    .put("card", cardJSON)
-
-                orderRequest.put("payment_source", paymentSourceJSON)
+    suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
+        val paymentSource = when {
+            request.appSwitchWhenEligible -> {
+                OrderPaymentSource(
+                    paypal = PayPalPaymentSource(
+                        experienceContext = PayPalOrderExperienceContext(
+                            returnUrl = SUCCESS_URL,
+                            cancelUrl = CANCEL_URL,
+                            nativeApp = NativeApp(
+                                appUrl = APP_URL
+                            )
+                        )
+                    )
+                )
             }
-            if (request.appSwitchWhenEligible) {
-
-                val nativeAppJSON = JSONObject()
-                    .put("app_url", APP_URL)
-
-                val experienceContextJSON = JSONObject()
-                    .put("return_url", SUCCESS_URL)
-                    .put("cancel_url", CANCEL_URL)
-                    .put("native_app", nativeAppJSON)
-
-                val paypalJSON = JSONObject()
-                    .put("experience_context", experienceContextJSON)
-
-                val paymentSourceJSON = JSONObject()
-                    .put("paypal", paypalJSON)
-
-                orderRequest.put("payment_source", paymentSourceJSON)
+            request.shouldVault -> {
+                OrderPaymentSource(
+                    card = Card(
+                        attributes = CardAttributes(
+                            vault = Vault(
+                                storeInVault = "ON_SUCCESS"
+                            )
+                        )
+                    )
+                )
             }
-            sdkSampleServerAPI.createOrder(orderRequest)
+            else -> null
         }
+        return withContext(Dispatchers.IO) {
+            val amount = Amount(
+                currencyCode = "USD",
+                value = "10.99"
+            )
+
+            val purchaseUnit = PurchaseUnit(
+                amount = amount
+            )
+
+            val orderRequestBody = OrderRequestBody(
+                intent = request.intent,
+                purchaseUnits = listOf(purchaseUnit),
+                paymentSource = paymentSource
+            )
+
+            sdkSampleServerAPI.createOrder(orderRequestBody)
+        }
+    }
 }

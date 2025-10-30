@@ -13,10 +13,11 @@ androidxTestCore = "1.5.0"
 androidxTestRules = "1.5.0"
 androidxTestRunner = "1.5.2"
 androidxTestUiAutomator = "2.2.0"
-browserSwitch = "3.0.0-beta1"
+browserSwitch = "3.2.0"
 constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
+binaryCompatibilityValidator = "0.16.3"
 googleMaterial = "1.4.0"
 gradleNexusPublishPlugin = "1.1.0"
 gradlePlayPublisher = "3.8.4"
@@ -27,13 +28,14 @@ jsonAssert = "1.4.0"
 junit = "4.13.2"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
+kotlinxSerialization = "1.6.3"
 kotlinxCoroutinesAndroid = "1.6.1"
 lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
 navigationCompose = "2.7.5"
+retrofit2KotlinxSerializationConverter = "1.0.0"
 robolectric = "4.13"
-squareConverterGson = "2.11.0"
 squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
@@ -68,14 +70,15 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
+kotlinx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 lifecycle-commonJava8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
 lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidxLifecycleRuntimeKtx" }
 lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
-square-converterGson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "squareConverterGson" }
 square-loggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "squareLoggingInterceptor" }
 square-retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "squareRetrofit2" }
 strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "striktCore" }
@@ -93,3 +96,5 @@ gradlePlayPublisher = { id = "com.github.triplet.play", version.ref = "gradlePla
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinVersion" }
+binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }

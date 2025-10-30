@@ -1,68 +1,67 @@
 package com.paypal.android.corepayments.model
 
-import android.content.Context
-import androidx.annotation.RawRes
-import com.paypal.android.corepayments.LoadRawResourceResult
-import com.paypal.android.corepayments.R
-import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_ARTIFACT
-import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest.Companion.INTEGRATION_CHANNEL
-import org.json.JSONObject
+import androidx.annotation.RestrictTo
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Serializable
 
-internal data class PatchCcoWithAppSwitchEligibilityRequest(
-    val variables: Variables
-) {
-    suspend fun create(
-        context: Context,
-        resourceLoader: ResourceLoader = ResourceLoader()
-    ): JSONObject? {
-        @RawRes val resId = R.raw.graphql_query_patch_cco_app_switch_eligibility
-        val query = when (val result = resourceLoader.loadRawResource(context, resId)) {
-            is LoadRawResourceResult.Success -> result.value
-            is LoadRawResourceResult.Failure -> return null
-        }
-        val variablesJson = createVariablesJson(variables)
-        return JSONObject()
-            .put("query", query)
-            .put("variables", variablesJson)
-    }
-
-    private fun createVariablesJson(variables: Variables): JSONObject {
-        val experimentationContext = JSONObject()
-            .put("integrationChannel", variables.experimentationContext.integrationChannel)
-
-        return JSONObject()
-            .put("experimentationContext", experimentationContext)
-            .put(
-                "integrationArtifact",
-                INTEGRATION_ARTIFACT
-            )
-            .put("tokenType", variables.tokenType)
-            .put("contextId", variables.contextId)
-            .put("token", variables.token)
-            .put("osType", OS_TYPE)
-            .put("merchantOptInForAppSwitch", variables.merchantOptInForAppSwitch)
-            .put("paypalNativeAppInstalled", variables.paypalNativeAppInstalled)
-    }
-
-    companion object {
-        const val INTEGRATION_ARTIFACT =
-            "NATIVE_SDK" // TODO: use Mobile SDK artifact after backend changes
-        const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
-        const val OS_TYPE = "ANDROID"
-    }
-}
-
-data class Variables(
+/**
+ * Request data class for PatchCCO with App Switch Eligibility GraphQL operation.
+ * Uses Kotlin serialization for JSON handling.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@OptIn(InternalSerializationApi::class)
+@Serializable
+data class PatchCcoWithAppSwitchEligibilityRequest(
     val tokenType: String,
     val contextId: String,
     val token: String,
     val merchantOptInForAppSwitch: Boolean,
     val paypalNativeAppInstalled: Boolean,
-    val experimentationContext: ExperimentationContext = ExperimentationContext(),
+    val experimentationContext: ExperimentationContext,
+    val integrationArtifact: String,
+    val osType: String
 )
 
+/**
+ * Experimentation context for the patch CCO request
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@OptIn(InternalSerializationApi::class)
+@Serializable
 data class ExperimentationContext(
-    val integrationChannel: String = INTEGRATION_CHANNEL,
-    val integrationArtifact: String = INTEGRATION_ARTIFACT
+    val integrationChannel: String,
+    val integrationArtifact: String
+)
+
+/**
+ * Response data class for PatchCCO with App Switch Eligibility GraphQL operation
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@OptIn(InternalSerializationApi::class)
+@Serializable
+data class PatchCcoWithAppSwitchEligibilityResponse(
+    val external: ExternalData? = null
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@OptIn(InternalSerializationApi::class)
+@Serializable
+data class ExternalData(
+    val patchCcoWithAppSwitchEligibility: PatchCcoData? = null
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@OptIn(InternalSerializationApi::class)
+@Serializable
+data class PatchCcoData(
+    val appSwitchEligibility: AppSwitchEligibilityData? = null
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@OptIn(InternalSerializationApi::class)
+@Serializable
+data class AppSwitchEligibilityData(
+    val appSwitchEligible: Boolean = false,
+    val redirectURL: String? = null,
+    val ineligibleReason: String? = null
 )

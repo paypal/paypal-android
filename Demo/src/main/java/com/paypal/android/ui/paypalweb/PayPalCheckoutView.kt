@@ -144,7 +144,7 @@ private fun Step3_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckou
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",
             state = uiState.completeOrderState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.completeOrder(it) } },
+            onClick = { viewModel.completeOrder(context) },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

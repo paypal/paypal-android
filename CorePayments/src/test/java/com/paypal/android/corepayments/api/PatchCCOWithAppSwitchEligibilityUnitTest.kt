@@ -3,10 +3,16 @@ package com.paypal.android.corepayments.api
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.R
+import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest
+import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.TokenType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -30,6 +36,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     private lateinit var coreConfig: CoreConfig
     private lateinit var graphQLClient: GraphQLClient
     private lateinit var authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI
+    private lateinit var resourceLoader: ResourceLoader
     private lateinit var sut: PatchCCOWithAppSwitchEligibility
 
     private val testToken = "test-token-123"
@@ -41,9 +48,11 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
         graphQLClient = mockk(relaxed = true)
         authenticationSecureTokenServiceAPI = mockk(relaxed = true)
+        resourceLoader = mockk(relaxed = true)
         sut = PatchCCOWithAppSwitchEligibility(
             authenticationSecureTokenServiceAPI,
-            graphQLClient
+            graphQLClient,
+            resourceLoader
         )
     }
 

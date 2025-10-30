@@ -7,16 +7,23 @@ import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKErrorCode
+<<<<<<< HEAD
 import com.paypal.android.corepayments.common.Headers
 import io.mockk.CapturingSlot
+=======
+>>>>>>> develop
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.json.JSONObject
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.Serializable
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,78 +31,260 @@ import org.robolectric.RobolectricTestRunner
 import java.net.URL
 
 @ExperimentalCoroutinesApi
+@OptIn(InternalSerializationApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class GraphQLClientUnitTest {
 
-    private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
-    private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE)
+    // Test data and fixtures
+    @Serializable
+    private data class TestRequest(val id: String)
 
-    private val graphQLRequestBody = JSONObject("""{"fake":"json"}""")
+    @Serializable
+    private data class TestResponse(val result: String)
 
-    private lateinit var http: Http
-    private lateinit var httpRequestSlot: CapturingSlot<HttpRequest>
+    // Constants for tests
+    private val testQuery = "query { test }"
+    private val testVariables = TestRequest("test-id")
+    private val testOperationName = "TestOperation"
+    private val testCorrelationId = "test-correlation-id"
 
-    private lateinit var sut: GraphQLClient
-
+    // Mocks
+    private lateinit var mockHttp: Http
+    private lateinit var mockCoreConfig: CoreConfig
+    private lateinit var graphQLClient: GraphQLClient
     @Before
-    fun setUp() {
-        http = mockk(relaxed = true)
-        httpRequestSlot = slot()
+    fun setup() {
+        mockHttp = mockk(relaxed = true)
+        mockCoreConfig = mockk(relaxed = true)
+
+        // Setup mock environment for the CoreConfig
+        val mockEnvironment = mockk<Environment>(relaxed = true)
+        every { mockEnvironment.graphQLEndpoint } returns "https://test-api.paypal.com"
+        every { mockCoreConfig.environment } returns mockEnvironment
+
+        // Create the GraphQLClient with mocked dependencies
+        graphQLClient = GraphQLClient(mockCoreConfig, mockHttp)
     }
 
     @Test
-    fun `send sends an http request to sandbox environment`() = runTest {
-        sut = GraphQLClient(sandboxConfig, http)
-        sut.send(graphQLRequestBody)
-        coVerify { http.send(capture(httpRequestSlot)) }
+    fun `test successful GraphQL request and response`() = runTest {
+        // Arrange
+        val expectedUrl = URL("https://test-api.paypal.com/graphql?$testOperationName")
+        val graphQLRequest = GraphQLRequest(
+            query = testQuery,
+            variables = testVariables,
+            operationName = testOperationName
+        )
 
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.sandbox.paypal.com/graphql"), httpRequest.url)
-        assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
+        // Mock HTTP response
+        val successfulResponseJson = """
+            {
+                "data": {
+                    "result": "success"
+                }
+            }
+        """.trimIndent()
+
+        val headers = mapOf(GraphQLClient.PAYPAL_DEBUG_ID to testCorrelationId)
+        val mockResponse = HttpResponse(
+            status = 200,
+            body = successfulResponseJson,
+            headers = headers
+        )
+
+        // Capture the HttpRequest to verify it later
+        val httpRequestSlot = slot<HttpRequest>()
+        coEvery { mockHttp.send(capture(httpRequestSlot)) } returns mockResponse
+
+        // Act
+        val result = graphQLClient.send<TestResponse, TestRequest>(
+            graphQLRequest
+        )
+
+        // Assert
+        assertTrue(result is GraphQLResult.Success)
+        val successResult = result as GraphQLResult.Success<TestResponse>
+
+        // Verify response data
+        assertEquals(testCorrelationId, successResult.correlationId)
+        assertNotNull(successResult.response.data)
+        assertEquals("success", successResult.response.data?.result)
+
+        // Verify the HTTP request was created correctly
+        val capturedRequest = httpRequestSlot.captured
+        assertEquals(expectedUrl, capturedRequest.url)
+        assertEquals(HttpMethod.POST, capturedRequest.method)
+        val expectedRequestBody = """{"query":"$testQuery","variables":{"id":"test-id"}}"""
+        assertEquals(expectedRequestBody, capturedRequest.body)
+
+        // Verify HTTP send was called
+        coVerify(exactly = 1) { mockHttp.send(any()) }
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    @Test
+    fun `test HTTP error response handling`() = runTest {
+        // Arrange
+        val graphQLRequest = GraphQLRequest(
+            query = testQuery,
+            variables = testVariables
+        )
+
+        // Create an HTTP error response (non-200 status code)
+        val headers = mapOf(GraphQLClient.PAYPAL_DEBUG_ID to testCorrelationId)
+        val mockResponse = HttpResponse(
+            status = 400, // Bad Request
+            body = null,
+            headers = headers
+        )
+
+        coEvery { mockHttp.send(any()) } returns mockResponse
+
+        // Act
+        val result = graphQLClient.send<TestResponse, TestRequest>(
+            graphQLRequest
+        )
+
+        // Assert
+        assertTrue(result is GraphQLResult.Failure)
+        val failureResult = result as GraphQLResult.Failure
+
+        // Verify we get an error response for HTTP error
+        assertEquals(testCorrelationId, failureResult.error.correlationId)
+
+        // Verify HTTP send was called
+        coVerify(exactly = 1) { mockHttp.send(any()) }
     }
 
     @Test
-    fun `send sends an http request to sandbox environment with query name appended`() = runTest {
-        sut = GraphQLClient(sandboxConfig, http)
-        sut.send(graphQLRequestBody, "QueryName")
-        coVerify { http.send(capture(httpRequestSlot)) }
+    fun `test empty response body handling`() = runTest {
+        // Arrange
+        val graphQLRequest = GraphQLRequest(
+            query = testQuery,
+            variables = testVariables
+        )
 
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.sandbox.paypal.com/graphql?QueryName"), httpRequest.url)
-        assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
+        // Create a response with empty body but 200 status
+        val headers = mapOf(GraphQLClient.PAYPAL_DEBUG_ID to testCorrelationId)
+        val mockResponse = HttpResponse(
+            status = 200,
+            body = "", // Empty body
+            headers = headers
+        )
+
+        coEvery { mockHttp.send(any()) } returns mockResponse
+
+        // Act
+        val result = graphQLClient.send<TestResponse, TestRequest>(
+            graphQLRequest
+        )
+
+        // Assert
+        assertTrue(result is GraphQLResult.Failure)
+        val failureResult = result as GraphQLResult.Failure
+
+        // Verify we get an error about no response data
+        assertEquals(PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal, failureResult.error.code)
+        assertEquals(testCorrelationId, failureResult.error.correlationId)
+
+        // Verify HTTP send was called
+        coVerify(exactly = 1) { mockHttp.send(any()) }
     }
 
     @Test
-    fun `send sends an http request to live environment`() = runTest {
-        sut = GraphQLClient(liveConfig, http)
-        sut.send(graphQLRequestBody)
-        coVerify { http.send(capture(httpRequestSlot)) }
+    fun `test JSON parse error handling`() = runTest {
+        // Arrange
+        val graphQLRequest = GraphQLRequest(
+            query = testQuery,
+            variables = testVariables
+        )
 
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.paypal.com/graphql"), httpRequest.url)
-        assertEquals("https://www.paypal.com", httpRequest.headers["Origin"])
+        // Create a response with invalid JSON
+        val headers = mapOf(GraphQLClient.PAYPAL_DEBUG_ID to testCorrelationId)
+        val mockResponse = HttpResponse(
+            status = 200,
+            body = "{invalid json that will cause parsing error", // Invalid JSON
+            headers = headers
+        )
+
+        coEvery { mockHttp.send(any()) } returns mockResponse
+
+        // Act
+        val result = graphQLClient.send<TestResponse, TestRequest>(
+            graphQLRequest
+        )
+
+        // Assert
+        assertTrue(result is GraphQLResult.Failure)
+        val failureResult = result as GraphQLResult.Failure
+
+        // Verify we get an error about JSON parsing
+        assertEquals(
+            PayPalSDKErrorCode.GRAPHQL_JSON_INVALID_ERROR.ordinal,
+            failureResult.error.code
+        )
+        assertEquals(testCorrelationId, failureResult.error.correlationId)
+
+        // Verify HTTP send was called
+        coVerify(exactly = 1) { mockHttp.send(any()) }
     }
 
     @Test
-    fun `send sends an http request to live environment with query name appended`() = runTest {
-        sut = GraphQLClient(liveConfig, http)
-        sut.send(graphQLRequestBody, "QueryName")
-        coVerify { http.send(capture(httpRequestSlot)) }
+    fun `test invalid URL handling`() = runTest {
+        // Arrange - setup a situation where creating the URL will fail
+        // We'll use a mock environment with an invalid URL format
+        val invalidMockEnvironment = mockk<Environment>(relaxed = true)
+        every { invalidMockEnvironment.graphQLEndpoint } returns "invalid://endpoint"
 
-        val httpRequest = httpRequestSlot.captured
-        assertEquals(URL("https://www.paypal.com/graphql?QueryName"), httpRequest.url)
-        assertEquals("https://www.paypal.com", httpRequest.headers["Origin"])
+        val invalidMockCoreConfig = mockk<CoreConfig>(relaxed = true)
+        every { invalidMockCoreConfig.environment } returns invalidMockEnvironment
+
+        val invalidUrlClient = GraphQLClient(invalidMockCoreConfig, mockHttp)
+
+        val graphQLRequest = GraphQLRequest(
+            query = testQuery,
+            variables = testVariables,
+            operationName = "$" // Invalid character in URL
+        )
+
+        // Act
+        val result = invalidUrlClient.send<TestResponse, TestRequest>(
+            graphQLRequest
+        )
+
+        // Assert
+        assertTrue(result is GraphQLResult.Failure)
+        val failureResult = result as GraphQLResult.Failure
+
+        // Verify we get an error about invalid URL
+        assertEquals(PayPalSDKErrorCode.INVALID_URL_REQUEST.ordinal, failureResult.error.code)
+
+        // Verify HTTP send was not called (since URL creation failed)
+        coVerify(exactly = 0) { mockHttp.send(any()) }
     }
 
     @Test
-    fun `send forwards graphQL request body as an http request body`() = runTest {
-        sut = GraphQLClient(liveConfig, http)
-        sut.send(graphQLRequestBody)
-        coVerify { http.send(capture(httpRequestSlot)) }
+    fun `test request serialization failure`() = runTest {
 
-        val httpRequest = httpRequestSlot.captured
-        assertEquals("""{"fake":"json"}""", httpRequest.body)
+        data class NonSerializable(val s: String)
+
+        val graphQLRequest = GraphQLRequest(
+            query = testQuery,
+            variables = NonSerializable("non serializable")
+        )
+
+        // Act
+        val result: GraphQLResult<TestResponse> = graphQLClient.send(graphQLRequest)
+
+        // Assert
+        assertTrue(result is GraphQLResult.Failure)
+        val failureResult = result as GraphQLResult.Failure
+        assertEquals(PayPalSDKErrorCode.INVALID_URL_REQUEST.ordinal, failureResult.error.code)
+
+        // Verify HTTP send was NOT called since the request creation failed
+        coVerify(exactly = 0) { mockHttp.send(any()) }
     }
+<<<<<<< HEAD
 
     @Test
     fun `send sends an HTTP POST request`() = runTest {
@@ -221,4 +410,6 @@ internal class GraphQLClientUnitTest {
         assertEquals("application/json", httpRequest.headers["Accept"])
         assertEquals("https://www.sandbox.paypal.com", httpRequest.headers["Origin"])
     }
+=======
+>>>>>>> develop
 }

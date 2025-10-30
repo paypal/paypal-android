@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -7,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
@@ -19,6 +21,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -29,12 +34,17 @@ import kotlinx.coroutines.launch
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
-    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
+    private val sessionStore: PayPalWebCheckoutSessionStore,
     private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
     private val urlScheme: String,
-    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
+    private val updateClientConfigAPI: UpdateClientConfigAPI,
+    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
+    private val ioDispatcher: CoroutineDispatcher,
+    private val mainDispatcher: CoroutineDispatcher,
+
 ) {
+    private val applicationScope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -48,13 +58,33 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
-        PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        PayPalWebLauncher(),
-        PatchCCOWithAppSwitchEligibility(configuration),
-        DeviceInspector(context),
-        configuration,
-        urlScheme
+        analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
+        payPalWebLauncher = PayPalWebLauncher(),
+        sessionStore = PayPalWebCheckoutSessionStore(),
+        deviceInspector = DeviceInspector(context),
+        coreConfig = configuration,
+        urlScheme = urlScheme,
+        patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
+        ioDispatcher = Dispatchers.IO,
+        mainDispatcher = Dispatchers.Main
     )
+
+    /**
+     * Capture instance state for later restoration. This can be useful for recovery during a
+     * process kill.
+     */
+    val instanceState: String
+        get() = sessionStore.toBase64EncodedJSON()
+
+    /**
+     * Restore a feature client using instance state. @see [instanceState]
+     */
+    fun restore(instanceState: String) {
+        sessionStore.restore(instanceState)
+    }
+
+    //todo: check why above functions are never used
 
     /**
      * Confirm PayPal payment source for an order.
@@ -62,10 +92,9 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
     suspend fun start(
-        activity: ComponentActivity,
+        activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
-        checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         val launchUri = getLaunchUri(
@@ -76,6 +105,12 @@ class PayPalWebCheckoutClient internal constructor(
             fallbackUri = buildPayPalCheckoutUri(request.orderId, request.fundingSource)
         )
 
+        //todo: add required query strings to launchUri
+        //todo: updateCCO with app switch, update client config only when not enabled
+
+        // update client config before starting checkout
+        updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
+
         val result = payPalWebLauncher.launchWithUrl(
             activity = activity,
             uri = launchUri,
@@ -84,33 +119,46 @@ class PayPalWebCheckoutClient internal constructor(
             returnUrlScheme = urlScheme
         )
 
-        // Track analytics for auth challenge result
-        val analyticsEvent = when (result) {
-            is PayPalPresentAuthChallengeResult.Success ->
-                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
-            is PayPalPresentAuthChallengeResult.Failure ->
-                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success ->{
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+            is PayPalPresentAuthChallengeResult.Failure ->{
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    checkoutOrderId
+                )
+            }
         }
-        analytics.notify(analyticsEvent, request.orderId)
 
         return result
     }
 
     /**
      * Confirm PayPal payment source for an order with callback.
-     * Network operations are handled automatically by the Http layer.
      *
-     * @param activity the ComponentActivity to launch the auth challenge from
+     * @param activity The activity to launch the PayPal web checkout from
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
-     * @param callback callback to receive the result
+     * @param callback [PayPalWebStartCallback] to receive the result
      */
     fun start(
-        activity: ComponentActivity,
+        activity: Activity,
         request: PayPalWebCheckoutRequest,
-        callback: PayPalWebCheckoutCallback
+        callback: PayPalWebStartCallback
     ) {
-        CoroutineScope(mainDispatcher).launch {
-            callback.onPayPalWebCheckoutResult(start(activity, request))
+        applicationScope.launch {
+            updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
+            val result = start(activity, request)
+            withContext(mainDispatcher) {
+                callback.onPayPalWebStartResult(result)
+            }
         }
     }
 
@@ -120,7 +168,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
     suspend fun vault(
-        activity: ComponentActivity,
+        activity: Activity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = request.setupTokenId
@@ -142,14 +190,23 @@ class PayPalWebCheckoutClient internal constructor(
             returnUrlScheme = urlScheme
         )
 
-        // Track analytics for auth challenge result
-        val analyticsEvent = when (result) {
-            is PayPalPresentAuthChallengeResult.Success ->
-                VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
-            is PayPalPresentAuthChallengeResult.Failure ->
-                VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success ->{
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    vaultSetupTokenId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+            is PayPalPresentAuthChallengeResult.Failure ->{
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    vaultSetupTokenId
+                )
+            }
         }
-        analytics.notify(analyticsEvent, vaultSetupTokenId)
 
         return result
     }
@@ -183,6 +240,10 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
      * authorization completed successfully.
      */
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishStart(intent).",
+        replaceWith = ReplaceWith("finishStart(intent)")
+    )
     fun finishStart(intent: Intent, authState: String): PayPalWebCheckoutFinishStartResult {
         val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
         when (result) {
@@ -204,6 +265,40 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [PayPalWebCheckoutClient.start]), call this method to see if a user has
+     * successfully authorized a PayPal account as a payment source.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
+    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
+        sessionStore.authState?.let { authState ->
+            val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
+            when (result) {
+                is PayPalWebCheckoutFinishStartResult.Success -> {
+                    analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                    sessionStore.clear()
+                }
+
+                is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                    analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                    sessionStore.clear()
+                }
+
+                is PayPalWebCheckoutFinishStartResult.Failure -> {
+                    analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                    sessionStore.clear()
+                }
+
+                PayPalWebCheckoutFinishStartResult.NoResult -> {
+                    // no analytics tracking required at the moment
+                }
+            }
+            result
+        }
+
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
      * (@see [PayPalWebCheckoutClient.vault]), call this method to see if a user has
      * successfully authorized a PayPal account for vaulting.
      *
@@ -213,6 +308,10 @@ class PayPalWebCheckoutClient internal constructor(
      * when calling [PayPalWebCheckoutClient.vault]. This is needed to properly verify that an
      * authorization completed successfully.
      */
+    @Deprecated(
+        message = "Auth state is now captured internally by the SDK. Please migrate to finishVault(intent).",
+        replaceWith = ReplaceWith("finishVault(intent)")
+    )
     fun finishVault(intent: Intent, authState: String): PayPalWebCheckoutFinishVaultResult {
         val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
         // TODO: see if we can get setup token id from somewhere for tracking
@@ -250,6 +349,7 @@ class PayPalWebCheckoutClient internal constructor(
             .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
+            .appendQueryParameter("integration_artifact", UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT)
             .build()
     }
 
@@ -275,13 +375,13 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchWhenEligible: Boolean,
         fallbackUri: Uri
     ): Uri {
-        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
+        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled || true) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = context,
                 orderId = token,
                 tokenType = tokenType,
                 merchantOptInForAppSwitch = true,
-                paypalNativeAppInstalled = true // TODO: implement native app installed check
+                paypalNativeAppInstalled = true
             )
             when (patchCcoResult) {
                 is APIResult.Success -> patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
@@ -291,4 +391,37 @@ class PayPalWebCheckoutClient internal constructor(
             fallbackUri
         }
     }
+    /**
+     * After a merchant app has re-entered the foreground following an auth challenge
+     * (@see [PayPalWebCheckoutClient.vault]), call this method to see if a user has
+     * successfully authorized a PayPal account for vaulting.
+     *
+     * @param [intent] An Android intent that holds the deep link put the merchant app
+     * back into the foreground after an auth challenge.
+     */
+    fun finishVault(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
+        sessionStore.authState?.let { authState ->
+            val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
+            when (result) {
+                is PayPalWebCheckoutFinishVaultResult.Success -> {
+                    analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                is PayPalWebCheckoutFinishVaultResult.Failure -> {
+                    analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                PayPalWebCheckoutFinishVaultResult.Canceled -> {
+                    analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
+                    sessionStore.clear()
+                }
+
+                PayPalWebCheckoutFinishVaultResult.NoResult -> {
+                    // no analytics tracking required at the moment
+                }
+            }
+            return result
+        }
 }

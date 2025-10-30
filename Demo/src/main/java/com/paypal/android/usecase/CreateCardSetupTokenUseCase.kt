@@ -1,8 +1,10 @@
 package com.paypal.android.usecase
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import com.paypal.android.api.model.CardSetupToken
+import com.paypal.android.api.model.serialization.CardDetails
+import com.paypal.android.api.model.serialization.CardPaymentSource
+import com.paypal.android.api.model.serialization.CardSetupRequest
+import com.paypal.android.api.model.serialization.ExperienceContext
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.threedsecure.SCA
@@ -18,21 +20,18 @@ class CreateCardSetupTokenUseCase @Inject constructor(
         withContext(Dispatchers.IO) {
             // create a payment token with an empty card attribute; the merchant app will
             // provide the card's details through the SDK
-            // language=JSON
-            val request = """
-            {
-                "payment_source": {
-                    "card": {
-                        "verification_method": "${sca.name}",
-                        "experience_context": {
-                            "return_url": "com.paypal.android.demo://vault/success",
-                            "cancel_url": "com.paypal.android.demo://vault/cancel"
-                        }
-                    }
-                }
-            }
-            """
-            val jsonOrder = JsonParser.parseString(request) as JsonObject
-            sdkSampleServerAPI.createSetupToken(jsonOrder)
+            val cardSetupRequest = CardSetupRequest(
+                paymentSource = CardPaymentSource(
+                    card = CardDetails(
+                        verificationMethod = sca.name,
+                        experienceContext = ExperienceContext(
+                            returnUrl = "com.paypal.android.demo://vault/success",
+                            cancelUrl = "com.paypal.android.demo://vault/cancel"
+                        )
+                    )
+                )
+            )
+
+            sdkSampleServerAPI.createSetupToken(cardSetupRequest)
         }
 }

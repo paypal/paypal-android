@@ -1,20 +1,21 @@
 package com.paypal.android.api.services
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.paypal.android.api.model.CardPaymentToken
-import com.paypal.android.api.model.CardSetupToken
-import com.paypal.android.api.model.ClientId
 import com.paypal.android.api.model.Order
-import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
-import com.paypal.android.models.OrderRequest
+import com.paypal.android.api.model.serialization.CardSetupRequest
+import com.paypal.android.api.model.serialization.OrderRequestBody
+import com.paypal.android.api.model.serialization.OrderResponse
+import com.paypal.android.api.model.serialization.PayPalSetupRequestBody
+import com.paypal.android.api.model.serialization.PaymentTokenResponse
+import com.paypal.android.api.model.serialization.SetupTokenResponse
+import com.paypal.android.api.model.serialization.TokenRequest
+import com.paypal.android.api.model.serialization.toCardPaymentToken
+import com.paypal.android.api.model.serialization.toCardSetupToken
+import com.paypal.android.api.model.serialization.toOrder
+import com.paypal.android.api.model.serialization.toPayPalPaymentToken
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
-import org.json.JSONObject
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -26,8 +27,7 @@ private const val CONNECT_TIMEOUT_IN_SEC = 20L
 private const val READ_TIMEOUT_IN_SEC = 30L
 private const val WRITE_TIMEOUT_IN_SEC = 30L
 
-// To hardcode an clientId and orderId for this demo app, set the below values:
-private val DEFAULT_CLIENT_ID: String? = null // = "your-client-id"
+// To hardcode an orderId for this demo app, set the below value
 private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 
 // TODO: consider refactoring each method into a "use case"
@@ -38,54 +38,49 @@ class SDKSampleServerAPI {
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
         val SELECTED_MERCHANT_INTEGRATION = MerchantIntegration.DEFAULT
-        private fun optNonEmptyString(json: JSONObject?, key: String): String? = json?.let {
-            it.optString(key).ifEmpty {
-                null
-            }
-        }
+
+        val clientId: String
+            get() = SELECTED_MERCHANT_INTEGRATION.clientId
     }
 
     @JvmSuppressWildcards
     interface RetrofitService {
 
         @POST("/orders")
-        suspend fun createOrder(@Body jsonObject: JsonObject): Order
-
-        @POST("/orders")
-        suspend fun createOrder(@Body order: OrderRequest): Order
-
-        @GET("/client_id")
-        suspend fun fetchClientId(): ClientId
+        suspend fun createOrder(@Body orderRequestBody: OrderRequestBody): Order
 
         @POST("/orders/{orderId}/capture")
         suspend fun captureOrder(
             @Path("orderId") orderId: String,
             @Header("PayPal-Client-Metadata-Id") payPalClientMetadataId: String?
-        ): ResponseBody
+        ): OrderResponse
 
         @POST("/orders/{orderId}/authorize")
         suspend fun authorizeOrder(
             @Path("orderId") orderId: String,
             @Header("PayPal-Client-Metadata-Id") payPalClientMetadataId: String?
-        ): ResponseBody
+        ): OrderResponse
 
-        @POST("/setup_tokens")
-        suspend fun createSetupToken(@Body jsonObject: JsonObject): ResponseBody
+        @POST("/setup-tokens")
+        suspend fun createSetupToken(@Body setupRequest: CardSetupRequest): SetupTokenResponse
 
-        @POST("/payment_tokens")
-        suspend fun createPaymentToken(@Body jsonObject: JsonObject): ResponseBody
+        @POST("/setup-tokens")
+        suspend fun createPayPalSetupToken(@Body setupRequest: PayPalSetupRequestBody): SetupTokenResponse
+
+        @POST("/payment-tokens")
+        suspend fun createPaymentToken(@Body tokenRequest: TokenRequest): PaymentTokenResponse
 
         @GET("/setup-tokens/{setupTokenId}")
         suspend fun getSetupToken(
             @Path("setupTokenId") setupTokenId: String,
-        ): ResponseBody
+        ): SetupTokenResponse
     }
 
     private val serviceMap: Map<MerchantIntegration, RetrofitService>
 
     init {
         val serviceMap = mutableMapOf<MerchantIntegration, RetrofitService>()
-        val allMerchantIntegrations = MerchantIntegration.values()
+        val allMerchantIntegrations = MerchantIntegration.entries.toTypedArray()
         for (merchant in allMerchantIntegrations) {
             serviceMap[merchant] = createService(merchant.baseUrl)
         }
@@ -107,7 +102,7 @@ class SDKSampleServerAPI {
         val retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(KotlinSerializationConverterFactory.create())
             .build()
         return retrofit.create(RetrofitService::class.java)
     }
@@ -116,30 +111,15 @@ class SDKSampleServerAPI {
         serviceMap[merchantIntegration]
             ?: throw AssertionError("Couldn't find retrofit service for ${merchantIntegration.name}")
 
-    suspend fun fetchClientId(merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION) =
-        safeApiCall {
-            DEFAULT_CLIENT_ID ?: findService(merchantIntegration).fetchClientId().value
-        }
-
     suspend fun createOrder(
-        orderRequest: JSONObject,
+        orderRequestBody: OrderRequestBody,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
         if (DEFAULT_ORDER_ID != null) {
             Order(DEFAULT_ORDER_ID, "CREATED")
         } else {
-            val body = JsonParser.parseString(orderRequest.toString()) as JsonObject
-            findService(merchantIntegration).createOrder(body)
+            findService(merchantIntegration).createOrder(orderRequestBody)
         }
-    }
-
-    suspend fun createOrder(
-        orderRequest: OrderRequest,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ) = safeApiCall {
-        DEFAULT_ORDER_ID?.let {
-            Order(it, "CREATED")
-        } ?: findService(merchantIntegration).createOrder(orderRequest)
     }
 
     suspend fun captureOrder(
@@ -147,9 +127,9 @@ class SDKSampleServerAPI {
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response =
+        val orderResponse =
             findService(merchantIntegration).captureOrder(orderId, payPalClientMetadataId)
-        parseOrder(JSONObject(response.string()))
+        orderResponse.toOrder()
     }
 
     suspend fun authorizeOrder(
@@ -157,91 +137,53 @@ class SDKSampleServerAPI {
         payPalClientMetadataId: String? = null,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response =
+        val orderResponse =
             findService(merchantIntegration).authorizeOrder(orderId, payPalClientMetadataId)
-        parseOrder(JSONObject(response.string()))
+        orderResponse.toOrder()
     }
 
     suspend fun createSetupToken(
-        jsonObject: JsonObject,
+        setupRequest: CardSetupRequest,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response = findService(merchantIntegration).createSetupToken(jsonObject)
-        val responseJSON = JSONObject(response.string())
-
-        val customerJSON = responseJSON.getJSONObject("customer")
-        CardSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status"),
-        )
+        val setupTokenResponse = findService(merchantIntegration).createSetupToken(setupRequest)
+        setupTokenResponse.toCardSetupToken()
     }
 
     suspend fun getSetupToken(
         setupTokenId: String,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response = findService(merchantIntegration).getSetupToken(setupTokenId)
-        val responseJSON = JSONObject(response.string())
-        val customerJSON = responseJSON.getJSONObject("customer")
-        val cardJSON = responseJSON
-            .getJSONObject("payment_source")
-            .getJSONObject("card")
-        CardSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status"),
-            verificationStatus = cardJSON.getString("verification_status")
-        )
+        val setupTokenResponse = findService(merchantIntegration).getSetupToken(setupTokenId)
+        setupTokenResponse.toCardSetupToken()
     }
 
     suspend fun createPaymentToken(
-        jsonObject: JsonObject,
+        tokenRequest: TokenRequest,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response = findService(merchantIntegration).createPaymentToken(jsonObject)
-        val responseJSON = JSONObject(response.string())
-
-        val customerJSON = responseJSON.getJSONObject("customer")
-        val cardJSON = responseJSON
-            .getJSONObject("payment_source")
-            .getJSONObject("card")
-
-        CardPaymentToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            cardLast4 = cardJSON.getString("last_digits"),
-            cardBrand = cardJSON.getString("brand")
-        )
+        val paymentTokenResponse = findService(merchantIntegration).createPaymentToken(tokenRequest)
+        paymentTokenResponse.toCardPaymentToken()
     }
 
     suspend fun createPayPalPaymentToken(
-        jsonObject: JsonObject,
+        tokenRequest: TokenRequest,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response = findService(merchantIntegration).createPaymentToken(jsonObject)
-        val responseJSON = JSONObject(response.string())
-        val customerJSON = responseJSON.getJSONObject("customer")
-
-        PayPalPaymentToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-        )
+        val paymentTokenResponse = findService(merchantIntegration).createPaymentToken(tokenRequest)
+        paymentTokenResponse.toPayPalPaymentToken()
     }
 
     suspend fun createPayPalSetupToken(
-        jsonObject: JsonObject,
+        setupRequest: PayPalSetupRequestBody,
         merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
     ) = safeApiCall {
-        val response = findService(merchantIntegration).createSetupToken(jsonObject)
-
-        val responseJSON = JSONObject(response.string())
-        val customerJSON = responseJSON.getJSONObject("customer")
-
+        val setupTokenResponse =
+            findService(merchantIntegration).createPayPalSetupToken(setupRequest)
         PayPalSetupToken(
-            id = responseJSON.getString("id"),
-            customerId = customerJSON.getString("id"),
-            status = responseJSON.getString("status")
+            id = setupTokenResponse.id,
+            customerId = setupTokenResponse.customer.id,
+            status = setupTokenResponse.status
         )
     }
 
@@ -253,22 +195,5 @@ class SDKSampleServerAPI {
         SDKSampleServerResult.Success(apiCall.invoke())
     } catch (e: Throwable) {
         SDKSampleServerResult.Failure(SDKSampleServerException(e.message, e))
-    }
-
-    private fun parseOrder(json: JSONObject): Order {
-        val paymentSourceJson = json.optJSONObject("payment_source")
-        val cardJSON = paymentSourceJson?.optJSONObject("card")
-        val vaultJSON = cardJSON?.optJSONObject("attributes")?.optJSONObject("vault")
-        val vaultCustomerJSON = vaultJSON?.optJSONObject("customer")
-
-        return Order(
-            id = optNonEmptyString(json, "id"),
-            intent = optNonEmptyString(json, "intent"),
-            status = optNonEmptyString(json, "status"),
-            cardLast4 = optNonEmptyString(cardJSON, "last_digits"),
-            cardBrand = optNonEmptyString(cardJSON, "brand"),
-            vaultId = optNonEmptyString(vaultJSON, "id"),
-            customerId = optNonEmptyString(vaultCustomerJSON, "id")
-        )
     }
 }

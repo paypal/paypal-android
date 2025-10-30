@@ -1,6 +1,6 @@
 buildscript {
     ext.modules = [
-            "sdkVersionName"      : "2.0.1-SNAPSHOT",
+            "sdkVersionName"      : "2.2.1-SNAPSHOT",
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
             "androidTargetVersion": 35,
@@ -22,6 +22,7 @@ plugins {
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false
     alias libs.plugins.nexus.publishPlugin
+    alias libs.plugins.binaryCompatibilityValidator apply false
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo
@@ -29,6 +30,10 @@ version modules.sdkVersionName // we add it here so that nexus automatically cho
 nexusPublishing {
     repositories {
         sonatype {
+            // Ref: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuration
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+
             username = System.getenv('SONATYPE_NEXUS_USERNAME') ?: ''
             password = System.getenv('SONATYPE_NEXUS_PASSWORD') ?: ''
             repositoryDescription = "Paypal Android SDK"

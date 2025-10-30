@@ -3,11 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
-  workflow_run:
-    workflows: ["Release"]
-    types:
-      - completed
+      - develop
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:

@@ -4,22 +4,29 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.LoadRawResourceResult
+import com.paypal.android.corepayments.R
+import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.RestClient
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
 import com.paypal.android.corepayments.model.ExperimentationContext
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest
+import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.TokenType
-import com.paypal.android.corepayments.model.Variables
-import org.json.JSONObject
+import kotlinx.serialization.InternalSerializationApi
 
+@OptIn(InternalSerializationApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PatchCCOWithAppSwitchEligibility internal constructor(
     private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
     private val graphQLClient: GraphQLClient,
+    private val resourceLoader: ResourceLoader,
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
@@ -27,7 +34,8 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
             coreConfig,
             RestClient(coreConfig)
         ),
-        graphQLClient = GraphQLClient(coreConfig)
+        graphQLClient = GraphQLClient(coreConfig),
+        resourceLoader = ResourceLoader()
     )
 
     suspend operator fun invoke(
@@ -37,72 +45,95 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         merchantOptInForAppSwitch: Boolean,
         paypalNativeAppInstalled: Boolean
     ): APIResult<AppSwitchEligibility> {
-        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
-        if (tokenResult is APIResult.Failure) {
-            return APIResult.Failure(tokenResult.error)
-        }
-        val token = (tokenResult as APIResult.Success).data
+        // TODO: Determine if authentication is needed for new GraphQL client implementation
+        // val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
+        // if (tokenResult is APIResult.Failure) {
+        //     return APIResult.Failure(tokenResult.error)
+        // }
+        // val token = (tokenResult as APIResult.Success).data
 
-        val patchCcoWithAppSwitchEligibilityRequestBody = createRequest(
-            tokenType = tokenType,
-            orderId = orderId,
-            merchantOptInForAppSwitch = merchantOptInForAppSwitch,
-            paypalNativeAppInstalled = paypalNativeAppInstalled,
-            context = context
-        )
+        return when (val result = resourceLoader.loadRawResource(
+            context,
+            R.raw.graphql_query_patch_cco_app_switch_eligibility
+        )) {
+            is LoadRawResourceResult.Success -> {
+                val graphQLRequest = createGraphQLRequest(
+                    tokenType = tokenType,
+                    orderId = orderId,
+                    merchantOptInForAppSwitch = merchantOptInForAppSwitch,
+                    paypalNativeAppInstalled = paypalNativeAppInstalled,
+                    query = result.value
+                )
 
-        return if (patchCcoWithAppSwitchEligibilityRequestBody == null) {
-            APIResult.Failure(APIClientError.graphQLRequestLoadError())
-        } else {
-            when (val result = graphQLClient.send(
-                graphQLRequestBody = patchCcoWithAppSwitchEligibilityRequestBody,
-                headers = mapOf(Headers.AUTHORIZATION to "Bearer $token")
-            )) {
-                is GraphQLResult.Success -> {
-                    parseResponse(result.data)?.let { appSwitchEligibility ->
-                        APIResult.Success(data = appSwitchEligibility)
-                    } ?: APIResult.Failure(
-                        APIClientError.dataParsingError(result.correlationId)
-                    )
+                when (val graphQLResult = graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+                    graphQLRequest = graphQLRequest
+                )) {
+                    is GraphQLResult.Success -> {
+                        graphQLResult.response.data?.let { responseData ->
+                            parseResponse(responseData)?.let { appSwitchEligibility ->
+                                APIResult.Success(data = appSwitchEligibility)
+                            } ?: APIResult.Failure(
+                                APIClientError.dataParsingError(graphQLResult.correlationId)
+                            )
+                        } ?: APIResult.Failure(
+                            APIClientError.noResponseData(graphQLResult.correlationId)
+                        )
+                    }
+
+                    is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
                 }
+            }
 
-                is GraphQLResult.Failure -> APIResult.Failure(result.error)
+            is LoadRawResourceResult.Failure -> {
+                APIResult.Failure(APIClientError.graphQLRequestLoadError())
             }
         }
     }
 
-    private suspend fun createRequest(
+    private fun createGraphQLRequest(
         tokenType: TokenType,
         orderId: String,
         merchantOptInForAppSwitch: Boolean,
         paypalNativeAppInstalled: Boolean,
-        context: Context
-    ): JSONObject? {
-        val variables = Variables(
-            experimentationContext = ExperimentationContext(),
+        query: String
+    ): GraphQLRequest<PatchCcoWithAppSwitchEligibilityRequest> {
+        val variables = PatchCcoWithAppSwitchEligibilityRequest(
             tokenType = tokenType.name,
             contextId = orderId,
             token = orderId,
             merchantOptInForAppSwitch = merchantOptInForAppSwitch,
-            paypalNativeAppInstalled = paypalNativeAppInstalled
+            paypalNativeAppInstalled = paypalNativeAppInstalled,
+            experimentationContext = ExperimentationContext(
+                integrationChannel = INTEGRATION_CHANNEL,
+                integrationArtifact = UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT,
+            ),
+            integrationArtifact = UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT,
+            osType = OS_TYPE
         )
 
-        val patchCcoWithAppSwitchEligibilityRequestBody =
-            PatchCcoWithAppSwitchEligibilityRequest(variables).create(context)
-        return patchCcoWithAppSwitchEligibilityRequestBody
+        return GraphQLRequest(
+            query = query,
+            variables = variables,
+            operationName = "PatchCcoWithAppSwitchEligibility"
+        )
     }
 
-    fun parseResponse(data: JSONObject?): AppSwitchEligibility? {
-        val external = data?.optJSONObject("external")
-        val patchCco = external?.optJSONObject("patchCcoWithAppSwitchEligibility")
-        val appSwitchEligibilityJson = patchCco?.optJSONObject("appSwitchEligibility")
+    private fun parseResponse(response: PatchCcoWithAppSwitchEligibilityResponse): AppSwitchEligibility? {
+        val appSwitchEligibilityData = response.external
+            ?.patchCcoWithAppSwitchEligibility
+            ?.appSwitchEligibility
 
-        return appSwitchEligibilityJson?.let {
+        return appSwitchEligibilityData?.let {
             AppSwitchEligibility(
-                appSwitchEligible = it.optBoolean("appSwitchEligible"),
-                launchUrl = it.optString("redirectURL"),
-                ineligibleReason = it.optString("ineligibleReason")
+                appSwitchEligible = it.appSwitchEligible,
+                launchUrl = it.redirectURL,
+                ineligibleReason = it.ineligibleReason
             )
         }
+    }
+
+    companion object{
+        const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
+        const val OS_TYPE = "ANDROID"
     }
 }

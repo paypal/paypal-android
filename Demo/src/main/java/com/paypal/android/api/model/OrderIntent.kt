@@ -1,8 +1,11 @@
 package com.paypal.android.api.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * The intent to either capture payment immediately or authorize a payment for an order after order creation
  */
+@Serializable
 enum class OrderIntent {
     /**
      * The merchant intends to capture payment immediately after the customer makes a payment.

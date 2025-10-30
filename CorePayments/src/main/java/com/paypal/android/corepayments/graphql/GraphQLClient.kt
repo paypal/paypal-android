@@ -2,14 +2,20 @@ package com.paypal.android.corepayments.graphql
 
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
+import com.paypal.android.corepayments.APIClientError.graphQLJSONParseError
+import com.paypal.android.corepayments.APIClientError.invalidUrlRequest
+import com.paypal.android.corepayments.APIClientError.noResponseData
+import com.paypal.android.corepayments.APIClientError.unknownError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
-import com.paypal.android.corepayments.common.Headers
-import org.json.JSONException
-import org.json.JSONObject
-import java.net.HttpURLConnection
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
+import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
 
 /**
@@ -20,7 +26,13 @@ class GraphQLClient internal constructor(
     coreConfig: CoreConfig,
     private val http: Http = Http(),
 ) {
+    companion object {
+        const val PAYPAL_DEBUG_ID = "Paypal-Debug-Id"
+    }
+
     constructor(coreConfig: CoreConfig) : this(coreConfig, Http())
+
+    private val json = Json { ignoreUnknownKeys = true }
 
     private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
     private val graphQLURL = "$graphQLEndpoint/graphql"
@@ -32,34 +44,74 @@ class GraphQLClient internal constructor(
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 
-    suspend fun send(
-        graphQLRequestBody: JSONObject,
-        queryName: String? = null,
-        headers: Map<String, String>? = null
-    ): GraphQLResult {
-        val body = graphQLRequestBody.toString()
-        val urlString = if (queryName != null) "$graphQLURL?$queryName" else graphQLURL
-        headers?.forEach { (key, value) -> httpRequestHeaders.put(key, value) }
-        val httpRequest = HttpRequest(URL(urlString), HttpMethod.POST, body, httpRequestHeaders)
+    /**
+     * Implementation for sending GraphQL requests.
+     * Marked with @PublishedApi so it can be accessed from the inline public function.
+     */
+    @OptIn(InternalSerializationApi::class)
+    @PublishedApi
+    internal suspend fun <R, V> sendInternal(
+        graphQLRequest: GraphQLRequest<V>,
+        variablesSerializer: KSerializer<V>,
+        responseSerializer: KSerializer<R>,
+    ): GraphQLResult<R> {
+        val httpRequest = createHttpRequest(graphQLRequest, variablesSerializer)
+            ?: return GraphQLResult.Failure(error = invalidUrlRequest)
 
         val httpResponse = http.send(httpRequest)
-        val correlationId: String? = httpResponse.headers[Headers.PAYPAL_DEBUG_ID]
-        val status = httpResponse.status
-        return if (status == HttpURLConnection.HTTP_OK) {
-            if (httpResponse.body.isNullOrBlank()) {
-                val error = APIClientError.noResponseData(correlationId)
-                GraphQLResult.Failure(error)
-            } else {
-                try {
-                    val responseAsJSON = JSONObject(httpResponse.body)
-                    GraphQLResult.Success(responseAsJSON.getJSONObject("data"), correlationId = correlationId)
-                } catch (jsonParseError: JSONException) {
-                    val error = APIClientError.graphQLJSONParseError(correlationId, jsonParseError)
-                    GraphQLResult.Failure(error)
-                }
+        val correlationId = httpResponse.headers[PAYPAL_DEBUG_ID]
+
+        return when {
+            httpResponse.status != HTTP_OK -> {
+                GraphQLResult.Failure(APIClientError.serverResponseError(correlationId))
             }
-        } else {
-            GraphQLResult.Success(null, correlationId = correlationId)
+
+            httpResponse.body.isNullOrBlank() -> {
+                GraphQLResult.Failure(noResponseData(correlationId))
+            }
+
+            else -> runCatching {
+                val response = json.decodeFromString(
+                    deserializer = GraphQLResponse.serializer(responseSerializer),
+                    string = httpResponse.body
+                )
+                GraphQLResult.Success(response, correlationId = correlationId)
+            }.getOrElse { error ->
+                GraphQLResult.Failure(graphQLJSONParseError(correlationId, error))
+            }
         }
+    }
+
+    private fun <V> createHttpRequest(
+        graphQLRequest: GraphQLRequest<V>,
+        variablesSerializer: KSerializer<V>
+    ): HttpRequest? = runCatching {
+        val urlString = graphQLRequest.operationName?.let { "$graphQLURL?$it" } ?: graphQLURL
+        val requestBody =
+            json.encodeToString(GraphQLRequest.serializer(variablesSerializer), graphQLRequest)
+
+        HttpRequest(
+            url = URL(urlString),
+            method = HttpMethod.POST,
+            body = requestBody,
+            headers = httpRequestHeaders
+        )
+    }.getOrNull()
+
+    /**
+     * Public API for sending GraphQL requests.
+     * Uses reified type parameters for automatic serializer selection.
+     */
+    @OptIn(InternalSerializationApi::class)
+    suspend inline fun <reified R, reified V> send(
+        graphQLRequest: GraphQLRequest<V>
+    ): GraphQLResult<R> = runCatching {
+        sendInternal(graphQLRequest, serializer<V>(), serializer<R>())
+    }.getOrElse { throwable ->
+        val error = when (throwable) {
+            is SerializationException -> invalidUrlRequest
+            else -> unknownError()
+        }
+        GraphQLResult.Failure(error)
     }
 }
