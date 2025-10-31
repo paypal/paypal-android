@@ -20,7 +20,6 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -97,6 +96,9 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
+        // update client config before starting checkout
+        //updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
+
         val launchUri = getLaunchUri(
             context = activity.applicationContext,
             token = request.orderId,
@@ -106,10 +108,6 @@ class PayPalWebCheckoutClient internal constructor(
         )
 
         //todo: add required query strings to launchUri
-        //todo: updateCCO with app switch, update client config only when not enabled
-
-        // update client config before starting checkout
-        updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
 
         val result = payPalWebLauncher.launchWithUrl(
             activity = activity,
@@ -375,7 +373,7 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchWhenEligible: Boolean,
         fallbackUri: Uri
     ): Uri {
-        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled || true) {
+        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = context,
                 orderId = token,

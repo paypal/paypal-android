@@ -9,7 +9,6 @@ import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
@@ -102,13 +101,13 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
             contextId = orderId,
             token = orderId,
             merchantOptInForAppSwitch = merchantOptInForAppSwitch,
-            paypalNativeAppInstalled = paypalNativeAppInstalled,
             experimentationContext = ExperimentationContext(
                 integrationChannel = INTEGRATION_CHANNEL,
-                integrationArtifact = UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT,
             ),
             integrationArtifact = UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT,
-            osType = OS_TYPE
+            userExperienceFlow = UpdateClientConfigAPI.Defaults.USER_EXPERIENCE_FLOW,
+            osType = OS_TYPE,
+            paypalNativeAppInstalled = paypalNativeAppInstalled
         )
 
         return GraphQLRequest(

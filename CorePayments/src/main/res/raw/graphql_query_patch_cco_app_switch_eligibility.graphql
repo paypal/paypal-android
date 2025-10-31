@@ -3,9 +3,11 @@ mutation PatchCcoWithAppSwitchEligibility(
   $experimentationContext: externalExperimentationContextInput
   $osType: externalOSType!
   $merchantOptInForAppSwitch: Boolean!
+  $paypalNativeAppInstalled: Boolean!
   $token: externalToken!
   $tokenType: externalTokenType!
   $integrationArtifact: externalIntegrationArtifactType!
+  $userExperienceFlow: externalUserExperienceFlowType!
 ) {
   external {
     patchCcoWithAppSwitchEligibility(
@@ -13,6 +15,7 @@ mutation PatchCcoWithAppSwitchEligibility(
         contextId: $contextId
         experimentationContext: $experimentationContext
         merchantOptInForAppSwitch: $merchantOptInForAppSwitch
+        $paypalNativeAppInstalled: Boolean!
         osType: $osType
         token: $token
         tokenType: $tokenType
@@ -21,6 +24,7 @@ mutation PatchCcoWithAppSwitchEligibility(
         token: $token
         clientConfig: {
           integrationArtifact: $integrationArtifact
+          userExperienceFlow: $userExperienceFlow
         }
       }
     ) {

@@ -19,6 +19,7 @@ data class PatchCcoWithAppSwitchEligibilityRequest(
     val paypalNativeAppInstalled: Boolean,
     val experimentationContext: ExperimentationContext,
     val integrationArtifact: String,
+    val userExperienceFlow: String,
     val osType: String
 )
 
@@ -30,7 +31,6 @@ data class PatchCcoWithAppSwitchEligibilityRequest(
 @Serializable
 data class ExperimentationContext(
     val integrationChannel: String,
-    val integrationArtifact: String
 )
 
 /**

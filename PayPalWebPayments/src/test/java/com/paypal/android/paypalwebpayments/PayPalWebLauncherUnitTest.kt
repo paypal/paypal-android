@@ -48,7 +48,6 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-<<<<<<< HEAD
         sut.launchWithUrl(
             activity,
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
@@ -56,17 +55,6 @@ class PayPalWebLauncherUnitTest {
             TokenType.ORDER_ID,
             "com.example.app"
         )
-=======
-        val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.sandbox.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paypal&integration_artifact=MOBILE_SDK"
->>>>>>> develop
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -86,7 +74,6 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-<<<<<<< HEAD
         sut.launchWithUrl(
             activity,
             Uri.parse("https://www.paypal.com/checkoutnow"),
@@ -94,17 +81,6 @@ class PayPalWebLauncherUnitTest {
             TokenType.ORDER_ID,
             "com.example.app"
         )
-=======
-        val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paypal&integration_artifact=MOBILE_SDK"
->>>>>>> develop
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -124,7 +100,6 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-<<<<<<< HEAD
         sut.launchWithUrl(
             activity,
             Uri.parse("https://www.paypal.com/checkoutnow"),
@@ -132,17 +107,6 @@ class PayPalWebLauncherUnitTest {
             TokenType.ORDER_ID,
             "com.example.app"
         )
-=======
-        val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=credit&integration_artifact=MOBILE_SDK"
->>>>>>> develop
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -162,7 +126,6 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-<<<<<<< HEAD
         sut.launchWithUrl(
             activity,
             Uri.parse("https://www.paypal.com/checkoutnow"),
@@ -170,17 +133,6 @@ class PayPalWebLauncherUnitTest {
             TokenType.ORDER_ID,
             "com.example.app"
         )
-=======
-        val fundingSource = PayPalWebCheckoutFundingSource.PAY_LATER
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paylater&integration_artifact=MOBILE_SDK"
->>>>>>> develop
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -371,7 +323,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
         assertTrue(result is PayPalWebCheckoutFinishStartResult.Canceled)
@@ -405,7 +357,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, "pending request")
         assertTrue(result is PayPalWebCheckoutFinishVaultResult.Canceled)
     }
