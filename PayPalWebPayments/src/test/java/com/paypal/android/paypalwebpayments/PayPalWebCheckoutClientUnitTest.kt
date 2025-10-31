@@ -6,18 +6,16 @@ import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
-<<<<<<< HEAD
+import com.paypal.android.corepayments.UpdateClientConfigAPI
+import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
+import com.paypal.android.corepayments.model.AppSwitchEligibilityData
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import io.mockk.coEvery
-=======
-import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
->>>>>>> develop
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -29,10 +27,8 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-<<<<<<< HEAD
-=======
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
->>>>>>> develop
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -42,21 +38,17 @@ import org.robolectric.RobolectricTestRunner
 @Suppress("LargeClass")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-@Suppress("LargeClass")
 class PayPalWebCheckoutClientUnitTest {
 
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
-<<<<<<< HEAD
     private lateinit var patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility
     private lateinit var deviceInspector: DeviceInspector
     private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
     private val urlScheme = "com.example.app"
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val fakeAppSwitchUrl = "https://paypal.com/vault-app-switch"
-=======
     private val updateClientConfigAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
->>>>>>> develop
 
     private val intent = Intent()
 
@@ -66,43 +58,24 @@ class PayPalWebCheckoutClientUnitTest {
     @Before
     fun beforeEach() {
         payPalWebLauncher = mockk(relaxed = true)
-<<<<<<< HEAD
         patchCCOWithAppSwitchEligibility = mockk(relaxed = true)
         deviceInspector = mockk(relaxed = true)
         sut = PayPalWebCheckoutClient(
-            analytics,
-            payPalWebLauncher,
-            patchCCOWithAppSwitchEligibility,
-            deviceInspector,
-            coreConfig,
-            urlScheme,
-            testDispatcher
-=======
-        sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
+            sessionStore = PayPalWebCheckoutSessionStore(),     
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
->>>>>>> develop
+            ioDispatcher = testDispatcher,
+            mainDispatcher = testDispatcher,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            urlScheme = urlScheme
         )
     }
 
     @Test
-<<<<<<< HEAD
-    fun `start() fetches client token and launches PayPal web checkout`() = runTest {
-=======
     fun `start() launches PayPal web checkout`() = runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
->>>>>>> develop
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every {
             payPalWebLauncher.launchWithUrl(
@@ -131,17 +104,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() notifies merchant of browser switch failure`() = runTest {
-<<<<<<< HEAD
-=======
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
->>>>>>> develop
         val sdkError = PayPalSDKError(123, "fake error description")
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
         every {
@@ -159,10 +121,6 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(launchResult, result)
     }
 
-<<<<<<< HEAD
-    // Note: Authentication failure tests removed since authentication
-    // is now handled internally by PatchCCOWithAppSwitchEligibility
-
     @Test
     fun `vault() launches PayPal web checkout`() = runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -176,21 +134,38 @@ class PayPalWebCheckoutClientUnitTest {
             )
         } returns launchResult
 
-=======
+        val request = PayPalWebVaultRequest("fake-setup-token-id")
+        sut.vault(activity, request)
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                returnUrlScheme = urlScheme
+            )
+        }
+    }
+
     @Test
     fun `start() with callback calls updateCCO before launching web checkout`() = runTest {
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = testDispatcher,
-            mainDispatcher = testDispatcher
-        )
 
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+        every {
+            payPalWebLauncher.launchWithUrl(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns launchResult
+        coEvery {
+            updateClientConfigAPI.updateClientConfig(
+                any(),
+                any()
+            )
+        } coAnswers { UpdateClientConfigResult.Success }
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
         var callbackResult: PayPalPresentAuthChallengeResult? = null
@@ -211,23 +186,50 @@ class PayPalWebCheckoutClientUnitTest {
         coVerify(exactly = 1) {
             updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
         }
-        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity,
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
     }
 
     @Test
     fun `start() with callback executes asynchronously`() = runTest {
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val sut = PayPalWebCheckoutClient(
+        val standardDispatcher = StandardTestDispatcher(testScheduler)
+
+        val testClient = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = testDispatcher,
-            mainDispatcher = testDispatcher
+            ioDispatcher = standardDispatcher,
+            mainDispatcher = standardDispatcher,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            urlScheme = urlScheme
         )
 
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+        every {
+            payPalWebLauncher.launchWithUrl(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns launchResult
+        coEvery {
+            updateClientConfigAPI.updateClientConfig(
+                any(),
+                any()
+            )
+        } coAnswers { UpdateClientConfigResult.Success }
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
         var callbackResult: PayPalPresentAuthChallengeResult? = null
@@ -236,7 +238,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
         // Call start() with callback - this should return immediately
-        sut.start(activity, request, callback)
+        testClient.start(activity, request, callback)
 
         // Initially, callback should not have been called yet
         assertEquals("Callback should not have been called yet", null, callbackResult)
@@ -251,50 +253,20 @@ class PayPalWebCheckoutClientUnitTest {
         coVerify(exactly = 1) {
             updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
         }
-        verify(exactly = 1) { payPalWebLauncher.launchPayPalWebCheckout(activity, request) }
-    }
-
-    @Test
-    fun `vault() launches PayPal web checkout`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
->>>>>>> develop
-        val request = PayPalWebVaultRequest("fake-setup-token-id")
-        sut.vault(activity, request)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                activity,
+                any(),
+                any(),
+                any(),
+                any()
             )
         }
     }
 
+
     @Test
-<<<<<<< HEAD
     fun `vault() notifies merchant of browser switch failure`() = runTest {
-=======
-    fun `vault() notifies merchant of browser switch failure`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
->>>>>>> develop
         val sdkError = PayPalSDKError(123, "fake error description")
         val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
         every {
@@ -315,14 +287,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishStart() with merchant provided auth state forwards success result from auth launcher`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
         every {
@@ -335,14 +299,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishStart() with merchant provided auth state forwards error result from auth launcher`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
         every {
@@ -355,14 +311,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishStart() with merchant provided auth state forwards cancellation result from auth launcher`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
@@ -374,30 +322,22 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishStart() with session auth state returns null when start has not been called`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         assertNull(sut.finishStart(intent))
     }
 
     @Test
     fun `finishStart() with session auth state forwards success result from auth launcher`() =
         runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
@@ -415,7 +355,15 @@ class PayPalWebCheckoutClientUnitTest {
     fun `finishStart() with restored session auth state forwards success result from auth launcher`() =
         runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
@@ -423,26 +371,22 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns successResult
 
-        val previousClient = PayPalWebCheckoutClient(
+            val launchWithUrlClient = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
+                ioDispatcher = testDispatcher,
+                mainDispatcher = testDispatcher,
+                deviceInspector = deviceInspector,
+                coreConfig = coreConfig,
+                urlScheme = urlScheme,
+                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        previousClient.start(activity, request)
+            launchWithUrlClient.start(activity, request)
 
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
+            sut.restore(launchWithUrlClient.instanceState)
         val result = sut.finishStart(intent)
         assertSame(successResult, result)
     }
@@ -450,16 +394,16 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state forwards error result from auth launcher`() =
         runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
@@ -477,7 +421,15 @@ class PayPalWebCheckoutClientUnitTest {
     fun `finishStart() with restored session auth state forwards error result from auth launcher`() =
         runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
@@ -485,26 +437,8 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns failureResult
 
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        previousClient.start(activity, request)
-
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
+            sut.start(activity, request)
         val result = sut.finishStart(intent)
         assertSame(failureResult, result)
     }
@@ -512,16 +446,16 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state forwards cancellation result from auth launcher`() =
         runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
@@ -538,33 +472,37 @@ class PayPalWebCheckoutClientUnitTest {
     fun `finishStart() with restored session auth state forwards cancellation result from auth launcher`() =
         runTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns canceledResult
 
-        val previousClient = PayPalWebCheckoutClient(
+            val launchWithUrlClient = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
             ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
+                mainDispatcher = Dispatchers.Main,
+                deviceInspector = deviceInspector,
+                coreConfig = coreConfig,
+                urlScheme = urlScheme,
+                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        previousClient.start(activity, request)
+            launchWithUrlClient.start(activity, request)
 
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
+            sut.restore(launchWithUrlClient.instanceState)
         val result = sut.finishStart(intent)
         assertSame(canceledResult, result)
     }
@@ -572,16 +510,16 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state clears session to prevent delivering success event twice`() =
         runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
@@ -597,16 +535,16 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state clears session to prevent delivering error event twice`() =
         runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
@@ -622,16 +560,16 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state clears session to prevent delivering cancellation event twice`() =
         runTest {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebCheckout(any(), any()) } returns launchResult
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
 
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
@@ -645,14 +583,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishVault() with merchant provided auth forwards vault success from PayPal web launcher`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val successResult =
             PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
         every {
@@ -666,14 +596,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishVault() with merchant provided auth notifies merchant of vault failure`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         val error = PayPalSDKError(123, "fake-error-description")
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
@@ -686,14 +608,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishVault with merchant provided auth forwards vault cancellation`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
@@ -704,14 +618,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishVault with merchant provided auth forwards no result`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.NoResult
@@ -721,7 +627,6 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-<<<<<<< HEAD
     fun `start() uses app switch when enabled and app switch URL is available`() = runTest {
         // Given
         every { deviceInspector.isPayPalInstalled } returns true
@@ -1299,270 +1204,275 @@ class PayPalWebCheckoutClientUnitTest {
             assertSame(launchResult, result)
         }
 
+    @Test
+    fun `finishVault() with session auth state returns null when start has not been called`() {
+        assertNull(sut.finishVault(intent))
+    }
+
+    @Test
+    fun `finishVault() with session auth state forwards success result from auth launcher`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        val previousClient = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = payPalWebLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
+            mainDispatcher = Dispatchers.Main,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            urlScheme = urlScheme,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
+        )
+
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        val successResult =
+            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns successResult
+
+            previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+
+            sut.restore(previousClient.instanceState)
+            val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
+            assertSame("fake-approval-session-id", result.approvalSessionId)
+        }
+
+    @Test
+    fun `finishVault() with restored session auth state forwards success result from auth launcher`() =
+        runTest {
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        val previousClient = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = payPalWebLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            ioDispatcher = Dispatchers.Main,
+            mainDispatcher = Dispatchers.Main,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            urlScheme = urlScheme,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
+        )
+
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+            val successResult =
+                PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
+            every {
+                payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns successResult
+
+            previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+
+        sut.restore(previousClient.instanceState)
+        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
+        assertSame("fake-approval-session-id", result.approvalSessionId)
+    }
+
+    @Test
+    fun `finishVault() with session auth state forwards error result from auth launcher`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
+
+        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
+        assertSame(error, result.error)
+    }
+
+    @Test
+    fun `finishVault() with restored session auth state forwards error result from auth launcher`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
+
+            sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+
+            sut.restore(sut.instanceState)
+        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
+        assertSame(error, result.error)
+    }
+
+    @Test
+    fun `finishVault() with session auth state forwards cancellation result from auth launcher`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns PayPalWebCheckoutFinishVaultResult.Canceled
+
+        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+        val result = sut.finishVault(intent)
+        assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
+    }
+
+    @Test
+    fun `finishVault() with restored session auth state forwards cancellation result from auth launcher`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns PayPalWebCheckoutFinishVaultResult.Canceled
+
+            sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+
+            sut.restore(sut.instanceState)
+        val result = sut.finishVault(intent)
+        assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
+    }
+
+    @Test
+    fun `finishVault() with session auth state clears session to prevent delivering success event twice`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        val successResult =
+            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns successResult
+
+        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+        sut.finishVault(intent)
+        assertNull(sut.finishVault(intent))
+    }
+
+    @Test
+    fun `finishVault() with session auth state clears session to prevent delivering error event twice`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        val error = PayPalSDKError(123, "fake-error-description")
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
+
+        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+        sut.finishVault(intent)
+        assertNull(sut.finishVault(intent))
+    }
+
+    @Test
+    fun `finishVault() with session auth state clears session to prevent delivering cancellation event twice`() =
+        runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns PayPalWebCheckoutFinishVaultResult.Canceled
+
+        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+        sut.finishVault(intent)
+        assertNull(sut.finishVault(intent))
+    }
+
+    fun createAppSwithEligibility(launchUrl: String?) = AppSwitchEligibilityData(
+        appSwitchEligible = !launchUrl.isNullOrEmpty(),
+        redirectURL = launchUrl,
+        ineligibleReason = if (launchUrl.isNullOrEmpty()) "App switch not eligible" else null
+    )
+
     private fun createAppSwitchEligibilityResponse(redirectURL: String?): AppSwitchEligibility {
         return AppSwitchEligibility(
             appSwitchEligible = true,
             launchUrl = redirectURL,
             ineligibleReason = null
         )
-=======
-    fun `finishVault() with session auth state returns null when start has not been called`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        assertNull(sut.finishVault(intent))
     }
 
-    @Test
-    fun `finishVault() with session auth state forwards success result from auth launcher`() {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns successResult
-
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
-        assertSame("fake-approval-session-id", result.approvalSessionId)
-    }
-
-    @Test
-    fun `finishVault() with restored session auth state forwards success result from auth launcher`() {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns successResult
-
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
-        assertSame("fake-approval-session-id", result.approvalSessionId)
-    }
-
-    @Test
-    fun `finishVault() with session auth state forwards error result from auth launcher`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
-        assertSame(error, result.error)
-    }
-
-    @Test
-    fun `finishVault() with restored session auth state forwards error result from auth launcher`() {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
-        assertSame(error, result.error)
-    }
-
-    @Test
-    fun `finishVault() with session auth state forwards cancellation result from auth launcher`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-        val result = sut.finishVault(intent)
-        assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
-    }
-
-    @Test
-    fun `finishVault() with restored session auth state forwards cancellation result from auth launcher`() {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        sut.restore(previousClient.instanceState)
-        val result = sut.finishVault(intent)
-        assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
-    }
-
-    @Test
-    fun `finishVault() with session auth state clears session to prevent delivering success event twice`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns successResult
-
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-        sut.finishVault(intent)
-        assertNull(sut.finishVault(intent))
-    }
-
-    @Test
-    fun `finishVault() with session auth state clears session to prevent delivering error event twice`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-        sut.finishVault(intent)
-        assertNull(sut.finishVault(intent))
-    }
-
-    @Test
-    fun `finishVault() with session auth state clears session to prevent delivering cancellation event twice`() {
-        val sut = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every { payPalWebLauncher.launchPayPalWebVault(any(), any()) } returns launchResult
-
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
-        sut.finishVault(intent)
-        assertNull(sut.finishVault(intent))
->>>>>>> develop
-    }
 }
