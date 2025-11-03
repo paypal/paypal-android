@@ -1,6 +1,18 @@
 buildscript {
+    def versionProps = new Properties()
+    file("version.properties").withInputStream { versionProps.load(it) }
+
+    def major = versionProps.getProperty("major")
+    def minor = versionProps.getProperty("minor")
+    def patch = versionProps.getProperty("patch")
+
+    // Add -SNAPSHOT suffix if it's snapshot publish
+    def isSnapshotBuild = System.getenv('SNAPSHOT_BUILD') == 'true'
+    def suffix = isSnapshotBuild ? '-SNAPSHOT' : ''
+    def sdkVersion = "${major}.${minor}.${patch}${suffix}"
+
     ext.modules = [
-            "sdkVersionName"      : "2.3.0-SNAPSHOT",
+            "sdkVersionName": sdkVersion,
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
             "androidTargetVersion": 35,
@@ -148,7 +160,7 @@ task updateCHANGELOGVersion {
         def date = new Date()
         def formattedDate = date.format('yyyy-MM-dd')
         def changelogFile = new File('CHANGELOG.md')
-        def changelogFileText = changelogFile.text.replaceFirst("## unreleased", "## " + versionParam + " ($formattedDate)")
+        def changelogFileText = changelogFile.text.replaceFirst(/(?i)## unreleased/, "## " + versionParam + " ($formattedDate)")
         changelogFile.write(changelogFileText)
     }
 }
