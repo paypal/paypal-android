@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -40,9 +41,6 @@ class ApproveOrderViewModel @Inject constructor(
     private val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
-    companion object {
-        const val APP_RETURN_URL = "com.paypal.android.demo://example.com/returnUrl"
-    }
 
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
@@ -135,7 +133,7 @@ class ApproveOrderViewModel @Inject constructor(
             expirationYear = dateString.formattedYear,
             securityCode = cardSecurityCode
         )
-        CardRequest(orderId, card, APP_RETURN_URL, scaOption)
+        CardRequest(orderId, card, DemoConstants.RETURN_URL, scaOption)
     }
 
     private var createOrderState

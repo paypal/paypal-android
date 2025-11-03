@@ -48,10 +48,10 @@ class SessionStoreUnitTest {
 
     @Test
     fun `it should restore base64 encoded JSON properties`() {
-        val launchWithUrlStore = SessionStore()
-        launchWithUrlStore["example_key1"] = "example_value1"
-        launchWithUrlStore["example_key2"] = "example_value2"
-        val encodedState = launchWithUrlStore.toBase64EncodedJSON()
+        val previousStore = SessionStore()
+        previousStore["example_key1"] = "example_value1"
+        previousStore["example_key2"] = "example_value2"
+        val encodedState = previousStore.toBase64EncodedJSON()
 
         val sut = SessionStore()
         sut.restore(encodedState)

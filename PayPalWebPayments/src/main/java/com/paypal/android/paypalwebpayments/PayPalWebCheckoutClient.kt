@@ -17,7 +17,6 @@ import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -39,11 +38,9 @@ class PayPalWebCheckoutClient internal constructor(
     private val urlScheme: String,
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
-    private val ioDispatcher: CoroutineDispatcher,
-    private val mainDispatcher: CoroutineDispatcher,
 
 ) {
-    private val applicationScope = CoroutineScope(SupervisorJob() + ioDispatcher)
+    private val applicationScope = CoroutineScope(SupervisorJob())
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -65,8 +62,6 @@ class PayPalWebCheckoutClient internal constructor(
         urlScheme = urlScheme,
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
-        ioDispatcher = Dispatchers.IO,
-        mainDispatcher = Dispatchers.Main
     )
 
     /**
@@ -94,18 +89,21 @@ class PayPalWebCheckoutClient internal constructor(
         activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
+        checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         // update client config before starting checkout
         //updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
 
-        val launchUri = getLaunchUri(
-            context = activity.applicationContext,
-            token = request.orderId,
-            tokenType = TokenType.ORDER_ID,
-            appSwitchWhenEligible = request.appSwitchWhenEligible,
-            fallbackUri = buildPayPalCheckoutUri(request.orderId, request.fundingSource)
-        )
+        val launchUri = withContext(Dispatchers.IO) {
+            getLaunchUri(
+                context = activity.applicationContext,
+                token = request.orderId,
+                tokenType = TokenType.ORDER_ID,
+                appSwitchWhenEligible = request.appSwitchWhenEligible,
+                fallbackUri = buildPayPalCheckoutUri(request.orderId, request.fundingSource)
+            )
+        }
 
         //todo: add required query strings to launchUri
 
@@ -154,7 +152,7 @@ class PayPalWebCheckoutClient internal constructor(
         applicationScope.launch {
             updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
             val result = start(activity, request)
-            withContext(mainDispatcher) {
+            withContext(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(result)
             }
         }
@@ -172,13 +170,15 @@ class PayPalWebCheckoutClient internal constructor(
         vaultSetupTokenId = request.setupTokenId
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
-        val launchUri = getLaunchUri(
-            context = activity.applicationContext,
-            token = request.setupTokenId,
-            tokenType = TokenType.VAULT_ID,
-            appSwitchWhenEligible = request.appSwitchWhenEligible,
-            fallbackUri = buildPayPalVaultUri(request.setupTokenId)
-        )
+        val launchUri = withContext(Dispatchers.IO) {
+            getLaunchUri(
+                context = activity.applicationContext,
+                token = request.setupTokenId,
+                tokenType = TokenType.VAULT_ID,
+                appSwitchWhenEligible = request.appSwitchWhenEligible,
+                fallbackUri = buildPayPalVaultUri(request.setupTokenId)
+            )
+        }
 
         val result = payPalWebLauncher.launchWithUrl(
             activity = activity,
@@ -222,7 +222,7 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest,
         callback: PayPalWebVaultCallback
     ) {
-        CoroutineScope(mainDispatcher).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             callback.onPayPalWebVaultResult(vault(activity, request))
         }
     }
@@ -336,11 +336,7 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String?,
         funding: PayPalWebCheckoutFundingSource
     ): Uri {
-        val baseURL = when (coreConfig.environment) {
-            Environment.LIVE -> "https://www.paypal.com"
-            Environment.SANDBOX -> "https://www.sandbox.paypal.com"
-        }
-        return baseURL.toUri()
+        return baseUrl.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
@@ -354,16 +350,18 @@ class PayPalWebCheckoutClient internal constructor(
     private fun buildPayPalVaultUri(
         setupTokenId: String
     ): Uri {
-        return getBaseURL().toUri()
+        return baseUrl.toUri()
             .buildUpon()
+            .appendPath("agreements")
             .appendPath("approve")
             .appendQueryParameter("approval_session_id", setupTokenId)
             .build()
     }
 
-    private fun getBaseURL(): String = when (coreConfig.environment) {
-        Environment.LIVE -> "https://paypal.com/agreements/"
-        Environment.SANDBOX -> "https://sandbox.paypal.com/agreements"
+    private val baseUrl: String
+        get() = when (coreConfig.environment) {
+            Environment.LIVE -> "https://paypal.com/"
+            Environment.SANDBOX -> "https://sandbox.paypal.com/"
     }
 
     private suspend fun getLaunchUri(

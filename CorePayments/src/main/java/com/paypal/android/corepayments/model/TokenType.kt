@@ -6,6 +6,5 @@ import androidx.annotation.RestrictTo
 enum class TokenType {
     ORDER_ID,
     VAULT_ID,
-    CHECKOUT_TOKEN,
     BILLING_TOKEN
 }

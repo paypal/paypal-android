@@ -303,12 +303,12 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns successResult
 
-            val launchWithUrlStore = createCardClient(testScheduler)
+            val previousStore = createCardClient(testScheduler)
             val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
-            launchWithUrlStore.presentAuthChallenge(activity, authChallenge)
+            previousStore.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
-            sut.restore(launchWithUrlStore.instanceState)
+            sut.restore(previousStore.instanceState)
             val actual = sut.finishApproveOrder(intent)
             assertSame(successResult, actual)
         }
@@ -347,12 +347,12 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns failureResult
 
-            val launchWithUrlStore = createCardClient(testScheduler)
+            val previousStore = createCardClient(testScheduler)
             val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
-            launchWithUrlStore.presentAuthChallenge(activity, authChallenge)
+            previousStore.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
-            sut.restore(launchWithUrlStore.instanceState)
+            sut.restore(previousStore.instanceState)
             val actual = sut.finishApproveOrder(intent)
             assertSame(failureResult, actual)
         }
@@ -389,12 +389,12 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeApproveOrderAuthRequest(intent, "auth state")
             } returns canceledResult
 
-            val launchWithUrlStore = createCardClient(testScheduler)
+            val previousStore = createCardClient(testScheduler)
             val authChallenge = CardAuthChallenge.ApproveOrder(AUTH_CHALLENGE_URL, cardRequest)
-            launchWithUrlStore.presentAuthChallenge(activity, authChallenge)
+            previousStore.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
-            sut.restore(launchWithUrlStore.instanceState)
+            sut.restore(previousStore.instanceState)
             val result = sut.finishApproveOrder(intent)
             assertSame(canceledResult, result)
         }

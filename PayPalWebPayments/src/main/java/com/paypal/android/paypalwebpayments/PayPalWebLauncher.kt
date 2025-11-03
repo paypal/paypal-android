@@ -3,7 +3,6 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import androidx.core.net.toUri
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -11,7 +10,6 @@ import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.model.TokenType
-import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -47,7 +45,6 @@ internal class PayPalWebLauncher(
         return when (tokenType) {
             TokenType.ORDER_ID -> BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
             TokenType.VAULT_ID -> BrowserSwitchRequestCodes.PAYPAL_VAULT
-            TokenType.CHECKOUT_TOKEN -> BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
             TokenType.BILLING_TOKEN -> BrowserSwitchRequestCodes.PAYPAL_VAULT
         }
     }
@@ -59,7 +56,6 @@ internal class PayPalWebLauncher(
         when (tokenType) {
             TokenType.ORDER_ID -> put(METADATA_KEY_ORDER_ID, token)
             TokenType.VAULT_ID -> put(METADATA_KEY_SETUP_TOKEN_ID, token)
-            TokenType.CHECKOUT_TOKEN -> put(METADATA_KEY_ORDER_ID, token)
             TokenType.BILLING_TOKEN -> put(METADATA_KEY_SETUP_TOKEN_ID, token)
         }
     }
