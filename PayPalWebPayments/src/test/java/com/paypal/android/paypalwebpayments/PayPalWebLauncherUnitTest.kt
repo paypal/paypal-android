@@ -60,7 +60,7 @@ class PayPalWebLauncherUnitTest {
                 "token=fake-order-id" +
                 "&redirect_uri=custom_url_scheme" +
                 "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paypal"
+                "&fundingSource=paypal&integration_artifact=MOBILE_SDK"
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -88,7 +88,7 @@ class PayPalWebLauncherUnitTest {
                 "token=fake-order-id" +
                 "&redirect_uri=custom_url_scheme" +
                 "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paypal"
+                "&fundingSource=paypal&integration_artifact=MOBILE_SDK"
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -116,7 +116,7 @@ class PayPalWebLauncherUnitTest {
                 "token=fake-order-id" +
                 "&redirect_uri=custom_url_scheme" +
                 "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=credit"
+                "&fundingSource=credit&integration_artifact=MOBILE_SDK"
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
@@ -144,7 +144,7 @@ class PayPalWebLauncherUnitTest {
                 "token=fake-order-id" +
                 "&redirect_uri=custom_url_scheme" +
                 "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paylater"
+                "&fundingSource=paylater&integration_artifact=MOBILE_SDK"
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
