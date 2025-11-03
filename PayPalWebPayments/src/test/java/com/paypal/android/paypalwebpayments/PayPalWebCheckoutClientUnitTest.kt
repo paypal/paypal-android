@@ -24,9 +24,7 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -63,10 +61,8 @@ class PayPalWebCheckoutClientUnitTest {
         sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),     
+            sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = testDispatcher,
-            mainDispatcher = testDispatcher,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
@@ -199,15 +195,12 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() with callback executes asynchronously`() = runTest {
-        val standardDispatcher = StandardTestDispatcher(testScheduler)
 
         val testClient = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = standardDispatcher,
-            mainDispatcher = standardDispatcher,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
@@ -263,7 +256,6 @@ class PayPalWebCheckoutClientUnitTest {
             )
         }
     }
-
 
     @Test
     fun `vault() notifies merchant of browser switch failure`() = runTest {
@@ -376,8 +368,6 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-                ioDispatcher = testDispatcher,
-                mainDispatcher = testDispatcher,
                 deviceInspector = deviceInspector,
                 coreConfig = coreConfig,
                 urlScheme = urlScheme,
@@ -492,8 +482,6 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-                mainDispatcher = Dispatchers.Main,
                 deviceInspector = deviceInspector,
                 coreConfig = coreConfig,
                 urlScheme = urlScheme,
@@ -1219,8 +1207,6 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme,
@@ -1260,8 +1246,6 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
             updateClientConfigAPI = updateClientConfigAPI,
-            ioDispatcher = Dispatchers.Main,
-            mainDispatcher = Dispatchers.Main,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme,
@@ -1474,5 +1458,4 @@ class PayPalWebCheckoutClientUnitTest {
             ineligibleReason = null
         )
     }
-
 }

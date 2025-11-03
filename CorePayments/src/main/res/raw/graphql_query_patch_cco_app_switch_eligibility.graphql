@@ -15,7 +15,7 @@ mutation PatchCcoWithAppSwitchEligibility(
         contextId: $contextId
         experimentationContext: $experimentationContext
         merchantOptInForAppSwitch: $merchantOptInForAppSwitch
-        $paypalNativeAppInstalled: Boolean!
+        paypalNativeAppInstalled: $paypalNativeAppInstalled
         osType: $osType
         token: $token
         tokenType: $tokenType
@@ -33,6 +33,7 @@ mutation PatchCcoWithAppSwitchEligibility(
         redirectURL
         ineligibleReason
       }
+      patchCco
     }
   }
 }

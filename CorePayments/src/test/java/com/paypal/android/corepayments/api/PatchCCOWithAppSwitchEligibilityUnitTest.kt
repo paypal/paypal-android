@@ -109,9 +109,9 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         }
 
     @Test
-    fun `invoke sends GraphQL request with correct variables for CHECKOUT_TOKEN and true merchantOptIn`() =
+    fun `invoke sends GraphQL request with correct variables for BILLING_TOKEN and true merchantOptIn`() =
         runTest {
-            testGraphQLRequestVariables(TokenType.CHECKOUT_TOKEN, true, "CHECKOUT_TOKEN")
+            testGraphQLRequestVariables(TokenType.BILLING_TOKEN, true, "BILLING_TOKEN")
         }
 
     @Test

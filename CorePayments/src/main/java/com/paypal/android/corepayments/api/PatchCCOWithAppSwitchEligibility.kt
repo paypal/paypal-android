@@ -131,7 +131,7 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         }
     }
 
-    companion object{
+    companion object {
         const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
         const val OS_TYPE = "ANDROID"
     }

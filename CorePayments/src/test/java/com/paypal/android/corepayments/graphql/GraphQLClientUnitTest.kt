@@ -279,5 +279,4 @@ internal class GraphQLClientUnitTest {
         // Verify HTTP send was NOT called since the request creation failed
         coVerify(exactly = 0) { mockHttp.send(any()) }
     }
-
 }
