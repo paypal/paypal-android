@@ -4,10 +4,17 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -18,8 +25,12 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
-    private val sessionStore: PayPalWebCheckoutSessionStore = PayPalWebCheckoutSessionStore()
+    private val sessionStore: PayPalWebCheckoutSessionStore,
+    private val updateClientConfigAPI: UpdateClientConfigAPI,
+    private val ioDispatcher: CoroutineDispatcher,
+    private val mainDispatcher: CoroutineDispatcher
 ) {
+    private val applicationScope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -33,8 +44,12 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
-        PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        PayPalWebLauncher(urlScheme, configuration)
+        analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
+        payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
+        sessionStore = PayPalWebCheckoutSessionStore(),
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
+        ioDispatcher = Dispatchers.IO,
+        mainDispatcher = Dispatchers.Main
     )
 
     /**
@@ -56,6 +71,10 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
+    @Deprecated(
+        message = "Use start(activity, request, callback) instead.",
+        replaceWith = ReplaceWith("start(activity, request, callback)")
+    )
     fun start(
         activity: Activity,
         request: PayPalWebCheckoutRequest
@@ -79,6 +98,27 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, checkoutOrderId)
         }
         return result
+    }
+
+    /**
+     * Confirm PayPal payment source for an order with callback.
+     *
+     * @param activity The activity to launch the PayPal web checkout from
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param callback [PayPalWebStartCallback] to receive the result
+     */
+    fun start(
+        activity: Activity,
+        request: PayPalWebCheckoutRequest,
+        callback: PayPalWebStartCallback
+    ) {
+        applicationScope.launch {
+            updateClientConfigAPI.updateClientConfig(request.orderId, request.fundingSource.value)
+            val result = start(activity, request)
+            withContext(mainDispatcher) {
+                callback.onPayPalWebStartResult(result)
+            }
+        }
     }
 
     /**

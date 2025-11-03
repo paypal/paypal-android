@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -11,6 +12,7 @@ import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
 
@@ -83,13 +85,17 @@ internal class PayPalWebLauncher(
             Environment.LIVE -> "https://www.paypal.com"
             Environment.SANDBOX -> "https://www.sandbox.paypal.com"
         }
-        return Uri.parse(baseURL)
+        return baseURL.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
             .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
+            .appendQueryParameter(
+                "integration_artifact",
+                UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT
+            )
             .build()
     }
 
@@ -101,7 +107,7 @@ internal class PayPalWebLauncher(
             Environment.LIVE -> "https://paypal.com/agreements/approve"
             Environment.SANDBOX -> "https://sandbox.paypal.com/agreements/approve"
         }
-        return Uri.parse(baseURL)
+        return baseURL.toUri()
             .buildUpon()
             .appendQueryParameter("approval_session_id", setupTokenId)
             .build()

@@ -1,5 +1,12 @@
 # PayPal Android SDK Release Notes
 
+## 2.3.0 (2025-11-03)
+
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutClient.start(activity, request, callback)` method with asynchronous
+    callback support
+  * Deprecates `PayPalWebCheckoutClient.start(activity, request)`
+
 ## 2.2.0 (2025-10-01)
 * CardPayments
   * Migrate `CardClient.presentAuthChallenge()` method to take a plain `Activity` reference instead of a `ComponentActivity` reference
