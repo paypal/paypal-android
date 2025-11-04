@@ -540,12 +540,12 @@ class CardClientUnitTest {
             cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns successResult
 
-        val launchWithUrlClient = createCardClient(testScheduler)
+        val previousClient = createCardClient(testScheduler)
         val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
-        launchWithUrlClient.presentAuthChallenge(activity, authChallenge)
+        previousClient.presentAuthChallenge(activity, authChallenge)
 
         val sut = createCardClient(testScheduler)
-        sut.restore(launchWithUrlClient.instanceState)
+        sut.restore(previousClient.instanceState)
         val result = sut.finishVault(intent)
         assertSame(successResult, result)
     }
@@ -584,12 +584,12 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns failureResult
 
-            val launchWithUrlClient = createCardClient(testScheduler)
+            val previousClient = createCardClient(testScheduler)
             val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
-            launchWithUrlClient.presentAuthChallenge(activity, authChallenge)
+            previousClient.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
-            sut.restore(launchWithUrlClient.instanceState)
+            sut.restore(previousClient.instanceState)
             val result = sut.finishVault(intent)
             assertSame(failureResult, result)
         }
@@ -626,12 +626,12 @@ class CardClientUnitTest {
                 cardAuthLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns canceledResult
 
-            val launchWithUrlClient = createCardClient(testScheduler)
+            val previousClient = createCardClient(testScheduler)
             val authChallenge = CardAuthChallenge.Vault(AUTH_CHALLENGE_URL, cardVaultRequest)
-            launchWithUrlClient.presentAuthChallenge(activity, authChallenge)
+            previousClient.presentAuthChallenge(activity, authChallenge)
 
             val sut = createCardClient(testScheduler)
-            sut.restore(launchWithUrlClient.instanceState)
+            sut.restore(previousClient.instanceState)
             val result = sut.finishVault(intent)
             assertSame(canceledResult, result)
         }
