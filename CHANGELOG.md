@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## Unreleased
+## 2.3.0 (2025-11-03)
 
 * Add overloaded functions with callbacks for `start` and `vault` methods in
   `PayPalWebCheckoutClient`
