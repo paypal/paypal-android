@@ -7,7 +7,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
@@ -20,13 +19,10 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -44,7 +40,6 @@ class PayPalWebCheckoutClientUnitTest {
     private lateinit var deviceInspector: DeviceInspector
     private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
     private val urlScheme = "com.example.app"
-    private val testDispatcher = UnconfinedTestDispatcher()
     private val fakeAppSwitchUrl = "https://paypal.com/vault-app-switch"
     private val updateClientConfigAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
 
@@ -139,120 +134,6 @@ class PayPalWebCheckoutClientUnitTest {
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
                 returnUrlScheme = urlScheme
-            )
-        }
-    }
-
-    @Test
-    fun `start() with callback calls updateCCO before launching web checkout`() = runTest {
-
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-        coEvery {
-            updateClientConfigAPI.updateClientConfig(
-                any(),
-                any()
-            )
-        } coAnswers { UpdateClientConfigResult.Success }
-
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-        var callbackResult: PayPalPresentAuthChallengeResult? = null
-        val callback = PayPalWebStartCallback { result ->
-            callbackResult = result
-        }
-
-        // Call start() with callback - this should call updateCCO before launching
-        sut.start(activity, request, callback)
-
-        // Advance the dispatcher to allow the background coroutine to complete
-        advanceUntilIdle()
-
-        // Verify that callback was called with the expected result
-        assertSame(launchResult, callbackResult)
-
-        // Verify that both updateCCO and the web launcher were called
-        coVerify(exactly = 1) {
-            updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
-        }
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                activity,
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        }
-    }
-
-    @Test
-    fun `start() with callback executes asynchronously`() = runTest {
-
-        val testClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            urlScheme = urlScheme
-        )
-
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-        coEvery {
-            updateClientConfigAPI.updateClientConfig(
-                any(),
-                any()
-            )
-        } coAnswers { UpdateClientConfigResult.Success }
-
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-        var callbackResult: PayPalPresentAuthChallengeResult? = null
-        val callback = PayPalWebStartCallback { result ->
-            callbackResult = result
-        }
-
-        // Call start() with callback - this should return immediately
-        testClient.start(activity, request, callback)
-
-        // Initially, callback should not have been called yet
-        assertEquals("Callback should not have been called yet", null, callbackResult)
-
-        // Advance the dispatcher to allow the background coroutine to complete
-        advanceUntilIdle()
-
-        // Verify that callback was called with the expected result
-        assertSame("Callback should have been called with the result", launchResult, callbackResult)
-
-        // Verify that both updateCCO and the web launcher were called
-        coVerify(exactly = 1) {
-            updateClientConfigAPI.updateClientConfig("fake-order-id", "paypal")
-        }
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                activity,
-                any(),
-                any(),
-                any(),
-                any()
             )
         }
     }

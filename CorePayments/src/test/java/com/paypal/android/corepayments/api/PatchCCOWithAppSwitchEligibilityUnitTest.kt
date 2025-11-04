@@ -10,8 +10,8 @@ import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
-import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
+import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityVariables
 import com.paypal.android.corepayments.model.TokenType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -34,11 +34,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     private lateinit var context: Context
     private lateinit var coreConfig: CoreConfig
     private lateinit var graphQLClient: GraphQLClient
-    private lateinit var authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI
     private lateinit var resourceLoader: ResourceLoader
     private lateinit var sut: PatchCCOWithAppSwitchEligibility
-
-    private val testToken = "test-token-123"
     private val testOrderId = "test-order-id-456"
 
     @Before
@@ -46,10 +43,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         context = mockk(relaxed = true)
         coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
         graphQLClient = mockk(relaxed = true)
-        authenticationSecureTokenServiceAPI = mockk(relaxed = true)
         resourceLoader = mockk(relaxed = true)
         sut = PatchCCOWithAppSwitchEligibility(
-            authenticationSecureTokenServiceAPI,
             graphQLClient,
             resourceLoader
         )
@@ -66,16 +61,13 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponse
 
-        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityRequest>>()
+        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
 
         // When
         sut(
@@ -88,7 +80,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
 
         // Then
         coVerify {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 capture(requestSlot)
             )
         }
@@ -134,16 +126,13 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponse
 
-        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityRequest>>()
+        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
 
         // When
         sut(
@@ -156,7 +145,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
 
         // Then
         coVerify {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 capture(requestSlot)
             )
         }
@@ -183,11 +172,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponse
@@ -218,11 +204,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns failureResponse
@@ -246,7 +229,9 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         // Given
         val mockQuery = "query content"
         val successResponseWithNullData = GraphQLResult.Success(
-            response = com.paypal.android.corepayments.graphql.GraphQLResponse<PatchCcoWithAppSwitchEligibilityResponse>(
+            response = com.paypal.android.corepayments.graphql.GraphQLResponse<
+                    PatchCcoWithAppSwitchEligibilityResponse
+                    >(
                 data = null
             ),
             correlationId = "correlation-123"
@@ -257,11 +242,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponseWithNullData
@@ -296,11 +278,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponse
@@ -329,16 +308,13 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
                 any()
             )
         } returns LoadRawResourceResult.Success(mockQuery)
-        coEvery { authenticationSecureTokenServiceAPI.createLowScopedAccessToken() } returns APIResult.Success(
-            testToken
-        )
         coEvery {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponse
 
-        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityRequest>>()
+        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
 
         // When
         sut(
@@ -351,7 +327,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
 
         // Then
         coVerify {
-            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
+            graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 capture(requestSlot)
             )
         }
@@ -382,7 +358,12 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     //     assertTrue(result is APIResult.Failure)
     //     assertEquals(sdkError, (result as APIResult.Failure).error)
     //     // Verify GraphQL client was never called since authentication failed
-    //     coVerify(exactly = 0) { graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(any()) }
+    //     coVerify(exactly = 0) {
+    //         graphQLClient.send<
+    //             PatchCcoWithAppSwitchEligibilityResponse,
+    //             PatchCcoWithAppSwitchEligibilityRequest
+    //         >(any())
+    //     }
     // }
 
     private fun createSuccessfulGraphQLResult(): GraphQLResult.Success<PatchCcoWithAppSwitchEligibilityResponse> {

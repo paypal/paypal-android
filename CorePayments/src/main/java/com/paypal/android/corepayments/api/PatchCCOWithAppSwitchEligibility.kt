@@ -7,7 +7,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.RestClient
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
@@ -15,24 +14,19 @@ import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
 import com.paypal.android.corepayments.model.ExperimentationContext
-import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityRequest
 import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityResponse
+import com.paypal.android.corepayments.model.PatchCcoWithAppSwitchEligibilityVariables
 import com.paypal.android.corepayments.model.TokenType
 import kotlinx.serialization.InternalSerializationApi
 
 @OptIn(InternalSerializationApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PatchCCOWithAppSwitchEligibility internal constructor(
-    private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
-        authenticationSecureTokenServiceAPI = AuthenticationSecureTokenServiceAPI(
-            coreConfig,
-            RestClient(coreConfig)
-        ),
         graphQLClient = GraphQLClient(coreConfig),
         resourceLoader = ResourceLoader()
     )
@@ -44,59 +38,55 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         merchantOptInForAppSwitch: Boolean,
         paypalNativeAppInstalled: Boolean
     ): APIResult<AppSwitchEligibility> {
-        // TODO: Determine if authentication is needed for new GraphQL client implementation
-        // val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
-        // if (tokenResult is APIResult.Failure) {
-        //     return APIResult.Failure(tokenResult.error)
-        // }
-        // val token = (tokenResult as APIResult.Success).data
 
-        return when (val result = resourceLoader.loadRawResource(
-            context,
-            R.raw.graphql_query_patch_cco_app_switch_eligibility
-        )) {
-            is LoadRawResourceResult.Success -> {
-                val graphQLRequest = createGraphQLRequest(
-                    tokenType = tokenType,
-                    orderId = orderId,
-                    merchantOptInForAppSwitch = merchantOptInForAppSwitch,
-                    paypalNativeAppInstalled = paypalNativeAppInstalled,
-                    query = result.value
+        val graphQLRequest = createGraphQLRequest(
+            context = context,
+            tokenType = tokenType,
+            orderId = orderId,
+            merchantOptInForAppSwitch = merchantOptInForAppSwitch,
+            paypalNativeAppInstalled = paypalNativeAppInstalled
+        ) ?: return APIResult.Failure(
+            APIClientError.dataParsingError(correlationId = null)
+        )
+
+        val graphQLResult = graphQLClient.send<
+                PatchCcoWithAppSwitchEligibilityResponse,
+                PatchCcoWithAppSwitchEligibilityVariables>(graphQLRequest)
+        return when (graphQLResult) {
+            is GraphQLResult.Success -> {
+                graphQLResult.response.data?.let { responseData ->
+                    parseResponse(responseData)?.let { appSwitchEligibility ->
+                        APIResult.Success(data = appSwitchEligibility)
+                    } ?: APIResult.Failure(
+                        APIClientError.dataParsingError(graphQLResult.correlationId)
+                    )
+                } ?: APIResult.Failure(
+                    APIClientError.noResponseData(graphQLResult.correlationId)
                 )
-
-                when (val graphQLResult = graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityRequest>(
-                    graphQLRequest = graphQLRequest
-                )) {
-                    is GraphQLResult.Success -> {
-                        graphQLResult.response.data?.let { responseData ->
-                            parseResponse(responseData)?.let { appSwitchEligibility ->
-                                APIResult.Success(data = appSwitchEligibility)
-                            } ?: APIResult.Failure(
-                                APIClientError.dataParsingError(graphQLResult.correlationId)
-                            )
-                        } ?: APIResult.Failure(
-                            APIClientError.noResponseData(graphQLResult.correlationId)
-                        )
-                    }
-
-                    is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
-                }
             }
 
-            is LoadRawResourceResult.Failure -> {
-                APIResult.Failure(APIClientError.graphQLRequestLoadError())
-            }
+            is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
         }
     }
 
-    private fun createGraphQLRequest(
+    private suspend fun createGraphQLRequest(
+        context: Context,
         tokenType: TokenType,
         orderId: String,
         merchantOptInForAppSwitch: Boolean,
-        paypalNativeAppInstalled: Boolean,
-        query: String
-    ): GraphQLRequest<PatchCcoWithAppSwitchEligibilityRequest> {
-        val variables = PatchCcoWithAppSwitchEligibilityRequest(
+        paypalNativeAppInstalled: Boolean
+    ): GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>? {
+        val resourceResult = resourceLoader.loadRawResource(
+            context,
+            R.raw.graphql_query_patch_cco_app_switch_eligibility
+        )
+
+        val query = when (resourceResult) {
+            is LoadRawResourceResult.Success -> resourceResult.value
+            is LoadRawResourceResult.Failure -> return null
+        }
+
+        val variables = PatchCcoWithAppSwitchEligibilityVariables(
             tokenType = tokenType.name,
             contextId = orderId,
             token = orderId,

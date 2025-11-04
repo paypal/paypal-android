@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @OptIn(InternalSerializationApi::class)
 @Serializable
-data class PatchCcoWithAppSwitchEligibilityRequest(
+data class PatchCcoWithAppSwitchEligibilityVariables(
     val tokenType: String,
     val contextId: String,
     val token: String,
