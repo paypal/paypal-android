@@ -212,7 +212,7 @@ jobs:
           VERSION="${{ needs.extract_version.outputs.version }}"
           BRANCH_NAME="sync-main-to-develop-$VERSION"
           PR_TITLE="Sync: Main to Develop after release $VERSION"
-          PR_BODY ="This PR syncs changes from the main branch to the develop branch after release of $VERSION"
+          PR_BODY="This PR syncs changes from the main branch to the develop branch after release of $VERSION"
 
           # Create new branch from main
           git checkout main
@@ -227,7 +227,7 @@ jobs:
             --base develop \
             --head $BRANCH_NAME \
             --title "$PR_TITLE" \
-            --body-file pr_body.md)
+            --body "$PR_BODY")
 
           echo "Created PR: $PR_URL"
 

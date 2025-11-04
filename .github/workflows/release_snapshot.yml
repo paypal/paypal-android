@@ -121,8 +121,10 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Publish All Modules
+      - name: Publish All Modules with SNAPSHOT suffix
         uses: ./.github/actions/publish_all_modules
+        env:
+          SNAPSHOT_BUILD: true
         with:
           sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
