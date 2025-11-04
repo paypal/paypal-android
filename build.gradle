@@ -24,6 +24,13 @@ buildscript {
     ]
 }
 
+// Function to load version properties (reusable)
+def loadVersionProperties() {
+    def versionProps = new Properties()
+    file("version.properties").withInputStream { versionProps.load(it) }
+    return versionProps
+}
+
 plugins {
     alias libs.plugins.android.application apply false
     alias libs.plugins.android.library apply false
@@ -124,11 +131,26 @@ task incrementSnapshotVersion {
 //./gradlew -PversionParam=0.0.1 changeReleaseVersion
 task changeReleaseVersion {
     doLast {
-        def topLevelGradleFile = file('./build.gradle')
-        def topLevelGradleFileText = topLevelGradleFile.getText('UTF-8')
-        def updatedScript =
-                topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + versionParam + '",')
-        topLevelGradleFile.write(updatedScript, 'UTF-8')
+        def versionPropsFile = file('./version.properties')
+        def versionProps = loadVersionProperties()
+
+        // Parse the version parameter (e.g., "2.3.0")
+        def versionParts = versionParam.tokenize('.')
+        if (versionParts.size() != 3) {
+            throw new GradleException("Version parameter must be in format major.minor.patch (e.g., 2.3.0)")
+        }
+
+        // Update the version properties
+        versionProps.setProperty('major', versionParts[0])
+        versionProps.setProperty('minor', versionParts[1])
+        versionProps.setProperty('patch', versionParts[2])
+
+        // Write back to version.properties file
+        versionPropsFile.withOutputStream {
+            versionProps.store(it, "Updated by changeReleaseVersion task")
+        }
+
+        println "Updated version.properties to ${versionParam}"
     }
 }
 
