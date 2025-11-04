@@ -59,7 +59,7 @@ fun FeaturesView(
             FeatureOptions(cardFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
         stickyHeader {
-            FeatureGroupHeader("PayPal Web")
+            FeatureGroupHeader("PayPal")
         }
         item {
             FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)

@@ -1,7 +1,15 @@
 # PayPal Android SDK Release Notes
 
-## 2.3.0 (2025-11-03)
+## Unreleased
 
+* Add overloaded functions with callbacks for `start` and `vault` methods in
+  `PayPalWebCheckoutClient`
+* Modify `PayPalWebCheckoutRequest` to include `appSwitchWhenEligible` property to control app
+  switch behavior
+* Breaking Changes
+  * Make start and vault functions in `PayPalWebCheckoutClient` suspend functions
+
+## 2.3.0 (2025-11-03)
 * PayPalWebPayments
   * Add `PayPalWebCheckoutClient.start(activity, request, callback)` method with asynchronous
     callback support

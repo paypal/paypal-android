@@ -1,0 +1,39 @@
+mutation PatchCcoWithAppSwitchEligibility(
+  $contextId: String!
+  $experimentationContext: externalExperimentationContextInput
+  $osType: externalOSType!
+  $merchantOptInForAppSwitch: Boolean!
+  $paypalNativeAppInstalled: Boolean!
+  $token: externalToken!
+  $tokenType: externalTokenType!
+  $integrationArtifact: externalIntegrationArtifactType!
+  $userExperienceFlow: externalUserExperienceFlowType!
+) {
+  external {
+    patchCcoWithAppSwitchEligibility(
+      appSwitchEligibilityInput: {
+        contextId: $contextId
+        experimentationContext: $experimentationContext
+        merchantOptInForAppSwitch: $merchantOptInForAppSwitch
+        paypalNativeAppInstalled: $paypalNativeAppInstalled
+        osType: $osType
+        token: $token
+        tokenType: $tokenType
+      }
+      patchCcoInput: {
+        token: $token
+        clientConfig: {
+          integrationArtifact: $integrationArtifact
+          userExperienceFlow: $userExperienceFlow
+        }
+      }
+    ) {
+      appSwitchEligibility {
+        appSwitchEligible
+        redirectURL
+        ineligibleReason
+      }
+      patchCco
+    }
+  }
+}

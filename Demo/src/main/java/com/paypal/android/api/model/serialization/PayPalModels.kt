@@ -23,5 +23,11 @@ data class PayPalDetails(
 data class PayPalExperienceContext(
     val vaultInstruction: String,
     val returnUrl: String,
-    val cancelUrl: String
+    val cancelUrl: String,
+    val nativeApp: PayPalNativeApp? = null
+)
+
+@Serializable
+data class PayPalNativeApp(
+    val appUrl: String
 )

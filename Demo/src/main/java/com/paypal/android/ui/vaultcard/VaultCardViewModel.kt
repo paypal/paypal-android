@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
@@ -122,7 +123,7 @@ class VaultCardViewModel @Inject constructor(
     private fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
         val card = parseCard(_uiState.value)
-        val returnUrl = "com.paypal.android.demo://example.com/returnUrl"
+        val returnUrl = DemoConstants.RETURN_URL
         val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
         cardClient.vault(cardVaultRequest) { result ->
             when (result) {

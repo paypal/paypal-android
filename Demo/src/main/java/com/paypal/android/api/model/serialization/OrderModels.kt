@@ -23,7 +23,8 @@ data class Amount(
 
 @Serializable
 data class OrderPaymentSource(
-    val card: Card? = null
+    val card: Card? = null,
+    val paypal: PayPalPaymentSource? = null
 )
 
 @Serializable
@@ -39,4 +40,21 @@ data class CardAttributes(
 @Serializable
 data class Vault(
     val storeInVault: String
+)
+
+@Serializable
+data class PayPalPaymentSource(
+    val experienceContext: PayPalOrderExperienceContext
+)
+
+@Serializable
+data class PayPalOrderExperienceContext(
+    val returnUrl: String,
+    val cancelUrl: String,
+    val nativeApp: NativeApp
+)
+
+@Serializable
+data class NativeApp(
+    val appUrl: String
 )

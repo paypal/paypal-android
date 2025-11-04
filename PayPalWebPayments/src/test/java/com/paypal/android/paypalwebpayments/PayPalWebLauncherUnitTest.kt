@@ -9,8 +9,7 @@ import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
 import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.model.TokenType
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -35,9 +34,6 @@ class PayPalWebLauncherUnitTest {
     private val activity: FragmentActivity = mockk(relaxed = true)
     private val intent = Intent()
 
-    private val liveConfig = CoreConfig("live-client-id", Environment.LIVE)
-    private val sandboxConfig = CoreConfig("live-client-id", Environment.SANDBOX)
-
     @Before
     fun beforeEach() {
         browserSwitchClient = mockk(relaxed = true)
@@ -45,193 +41,196 @@ class PayPalWebLauncherUnitTest {
 
     @Test
     fun `launchPayPalWebCheckout() browser switches to SANDBOX PayPal web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-        val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.sandbox.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paypal&integration_artifact=MOBILE_SDK"
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
+            "fake-order-id",
+            TokenType.ORDER_ID,
+            "com.example.app"
+        )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { returnUrlScheme }.isEqualTo("com.example.app")
+            get { url }.isEqualTo(Uri.parse("https://www.sandbox.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
     @Test
     fun `launchPayPalWebCheckout() browser switches to LIVE PayPal web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-        val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paypal&integration_artifact=MOBILE_SDK"
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://www.paypal.com/checkoutnow"),
+            "fake-order-id",
+            TokenType.ORDER_ID,
+            "com.example.app"
+        )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { returnUrlScheme }.isEqualTo("com.example.app")
+            get { url }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
     @Test
     fun `launchPayPalWebCheckout() browser switches to PayPal Credit web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-        val fundingSource = PayPalWebCheckoutFundingSource.PAYPAL_CREDIT
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=credit&integration_artifact=MOBILE_SDK"
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://www.paypal.com/checkoutnow"),
+            "fake-order-id",
+            TokenType.ORDER_ID,
+            "com.example.app"
+        )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { returnUrlScheme }.isEqualTo("com.example.app")
+            get { url }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
     @Test
     fun `launchPayPalWebCheckout() browser switches to PayPal Pay Later web checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-        val fundingSource = PayPalWebCheckoutFundingSource.PAY_LATER
-        val request = PayPalWebCheckoutRequest("fake-order-id", fundingSource)
-        sut.launchPayPalWebCheckout(activity, request)
-
-        val expectedUrl = "https://www.paypal.com/checkoutnow?" +
-                "token=fake-order-id" +
-                "&redirect_uri=custom_url_scheme" +
-                "%3A%2F%2Fx-callback-url%2Fpaypal-sdk%2Fpaypal-checkout&native_xo=1" +
-                "&fundingSource=paylater&integration_artifact=MOBILE_SDK"
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://www.paypal.com/checkoutnow"),
+            "fake-order-id",
+            TokenType.ORDER_ID,
+            "com.example.app"
+        )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { returnUrlScheme }.isEqualTo("com.example.app")
+            get { url }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
         }
     }
 
     @Test
     fun `launchPayPalWebCheckout() returns an error when it cannot browser switch`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
             browserSwitchClient.start(any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-        val result = sut.launchPayPalWebCheckout(activity, request)
+        val result = sut.launchWithUrl(
+            activity,
+            Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
+            "fake-order-id",
+            TokenType.ORDER_ID,
+            "com.example.app"
+        )
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
     }
 
     @Test
     fun `launchPayPalWebVault() browser switches to SANDBOX PayPal vault checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-        val request = PayPalWebVaultRequest("fake-setup-token")
-        sut.launchPayPalWebVault(activity, request)
-
-        val expectedUrl = "https://sandbox.paypal.com/agreements/approve?" +
-                "approval_session_id=fake-setup-token"
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://sandbox.paypal.com/agreements/approve"),
+            "fake-setup-token",
+            TokenType.VAULT_ID,
+            "com.example.app"
+        )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { returnUrlScheme }.isEqualTo("com.example.app")
+            get { url }.isEqualTo(Uri.parse("https://sandbox.paypal.com/agreements/approve"))
             get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_VAULT)
         }
     }
 
     @Test
     fun `launchPayPalWebVault() browser switches to LIVE PayPal vault checkout`() {
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Started("pending request")
 
-        val request = PayPalWebVaultRequest("fake-setup-token")
-        sut.launchPayPalWebVault(activity, request)
-
-        val expectedUrl = "https://paypal.com/agreements/approve?" +
-                "approval_session_id=fake-setup-token"
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://paypal.com/agreements/approve"),
+            "fake-setup-token",
+            TokenType.VAULT_ID,
+            "com.example.app"
+        )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
-            get { url }.isEqualTo(Uri.parse(expectedUrl))
+            get { returnUrlScheme }.isEqualTo("com.example.app")
+            get { url }.isEqualTo(Uri.parse("https://paypal.com/agreements/approve"))
             get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_VAULT)
         }
     }
 
     @Test
     fun `launchPayPalWebVault() returns an error when it cannot browser switch`() {
-        sut = PayPalWebLauncher("custom_url_scheme", sandboxConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
             browserSwitchClient.start(any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
-        val vaultRequest = PayPalWebVaultRequest("fake-setup-token-id")
-        sut.launchPayPalWebVault(activity, vaultRequest)
-
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-        val result = sut.launchPayPalWebCheckout(activity, request)
+        val result = sut.launchWithUrl(
+            activity,
+            Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
+            "fake-order-id",
+            TokenType.ORDER_ID,
+            "com.example.app"
+        )
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
     }
@@ -248,7 +247,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishStartResult.Success
@@ -267,7 +266,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishStartResult.Failure
         val expectedDescription =
@@ -286,7 +285,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishStartResult.Failure
         val expectedDescription =
@@ -305,7 +304,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishStartResult.Failure
         val expectedDescription =
@@ -324,7 +323,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
 
         val result = sut.completeCheckoutAuthRequest(intent, "pending request")
         assertTrue(result is PayPalWebCheckoutFinishStartResult.Canceled)
@@ -341,7 +340,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Success
         assertEquals("fake-approval-session-id", result.approvalSessionId)
@@ -358,7 +357,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, "pending request")
         assertTrue(result is PayPalWebCheckoutFinishVaultResult.Canceled)
     }
@@ -374,7 +373,7 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.completeRequest(intent, "pending request")
         } returns browserSwitchResult
 
-        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, "pending request")
                 as PayPalWebCheckoutFinishVaultResult.Failure
         val expectedDescription =
@@ -441,5 +440,80 @@ class PayPalWebLauncherUnitTest {
         every { finalResult.requestCode } returns requestCode
         every { finalResult.requestUrl } returns Uri.parse("https://example.com/url")
         return finalResult
+    }
+
+    // LAUNCH WITH URL TESTS
+
+    @Test
+    fun `launchWithUrl() launches with ORDER_ID token type and correct request code`() {
+        sut = PayPalWebLauncher(browserSwitchClient)
+
+        val slot = slot<BrowserSwitchOptions>()
+        every {
+            browserSwitchClient.start(activity, capture(slot))
+        } returns BrowserSwitchStartResult.Started("pending request")
+
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://paypal.com/app-switch"),
+            "order-123",
+            TokenType.ORDER_ID,
+            "custom_url_scheme"
+        )
+
+        val browserSwitchOptions = slot.captured
+        expectThat(browserSwitchOptions) {
+            get { metadata?.get("order_id") }.isEqualTo("order-123")
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
+            get { url }.isEqualTo(Uri.parse("https://paypal.com/app-switch"))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_CHECKOUT)
+        }
+    }
+
+    @Test
+    fun `launchWithUrl() launches with VAULT_ID token type and correct request code`() {
+        sut = PayPalWebLauncher(browserSwitchClient)
+
+        val slot = slot<BrowserSwitchOptions>()
+        every {
+            browserSwitchClient.start(activity, capture(slot))
+        } returns BrowserSwitchStartResult.Started("pending request")
+
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://paypal.com/vault-switch"),
+            "setup-456",
+            TokenType.VAULT_ID,
+            "custom_url_scheme"
+        )
+
+        val browserSwitchOptions = slot.captured
+        expectThat(browserSwitchOptions) {
+            get { metadata?.get("setup_token_id") }.isEqualTo("setup-456")
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme")
+            get { url }.isEqualTo(Uri.parse("https://paypal.com/vault-switch"))
+            get { requestCode }.isEqualTo(BrowserSwitchRequestCodes.PAYPAL_VAULT)
+        }
+    }
+
+    @Test
+    fun `launchWithUrl() returns error when browser switch fails`() {
+        sut = PayPalWebLauncher(browserSwitchClient)
+
+        val browserSwitchError = Exception("error message from browser switch")
+        every {
+            browserSwitchClient.start(any(), any())
+        } returns BrowserSwitchStartResult.Failure(browserSwitchError)
+
+        val result =
+            sut.launchWithUrl(
+                activity,
+                Uri.parse("https://test.com"),
+                "token-123",
+                TokenType.ORDER_ID,
+                "custom_url_scheme"
+            )
+                    as PayPalPresentAuthChallengeResult.Failure
+        assertEquals("error message from browser switch", result.error.errorDescription)
     }
 }

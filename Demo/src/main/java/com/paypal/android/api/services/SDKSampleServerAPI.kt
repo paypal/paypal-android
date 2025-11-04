@@ -13,7 +13,6 @@ import com.paypal.android.api.model.serialization.toCardPaymentToken
 import com.paypal.android.api.model.serialization.toCardSetupToken
 import com.paypal.android.api.model.serialization.toOrder
 import com.paypal.android.api.model.serialization.toPayPalPaymentToken
-import com.paypal.android.models.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -49,9 +48,6 @@ class SDKSampleServerAPI {
 
         @POST("/orders")
         suspend fun createOrder(@Body orderRequestBody: OrderRequestBody): Order
-
-        @POST("/orders")
-        suspend fun createOrder(@Body order: OrderRequest): Order
 
         @POST("/orders/{orderId}/capture")
         suspend fun captureOrder(
@@ -124,15 +120,6 @@ class SDKSampleServerAPI {
         } else {
             findService(merchantIntegration).createOrder(orderRequestBody)
         }
-    }
-
-    suspend fun createOrder(
-        orderRequest: OrderRequest,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ) = safeApiCall {
-        DEFAULT_ORDER_ID?.let {
-            Order(it, "CREATED")
-        } ?: findService(merchantIntegration).createOrder(orderRequest)
     }
 
     suspend fun captureOrder(
