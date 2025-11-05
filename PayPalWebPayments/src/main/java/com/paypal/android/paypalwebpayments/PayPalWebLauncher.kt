@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchFinalResult
 import com.braintreepayments.api.BrowserSwitchOptions
@@ -30,13 +31,16 @@ internal class PayPalWebLauncher(
         uri: Uri,
         token: String,
         tokenType: TokenType,
-        returnUrlScheme: String
+        returnUrlScheme: String? = null,
+        appLinkUrl: String? = null
     ): PayPalPresentAuthChallengeResult {
+        val urlScheme = if (appLinkUrl != null) null else returnUrlScheme
         val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions()
             .url(uri)
             .requestCode(getRequestCode(tokenType))
-            .returnUrlScheme(returnUrlScheme)
+            .returnUrlScheme(urlScheme)
+            .appLinkUri(appLinkUrl?.toUri())
             .metadata(metadata)
         return launchBrowserSwitch(activity, options)
     }

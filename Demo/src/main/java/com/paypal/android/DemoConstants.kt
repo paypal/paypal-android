@@ -1,7 +1,7 @@
 package com.paypal.android
 
 object DemoConstants {
-    const val APP_URL = "com.paypal.android.demo://"
+    const val APP_URL = "https://ppcp-mobile-demo-sandbox-87bbd7f0a27f.herokuapp.com/"
     const val SUCCESS_URL = "${APP_URL}success"
     const val CANCEL_URL = "${APP_URL}cancel"
     const val VAULT_SUCCESS_URL = "${APP_URL}vault/success"

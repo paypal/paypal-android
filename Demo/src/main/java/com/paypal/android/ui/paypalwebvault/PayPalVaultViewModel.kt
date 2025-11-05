@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -35,7 +36,7 @@ class PayPalVaultViewModel @Inject constructor(
     }
 
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
-    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig, URL_SCHEME)
+    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
 
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
@@ -83,7 +84,8 @@ class PayPalVaultViewModel @Inject constructor(
             viewModelScope.launch {
                 val request = PayPalWebVaultRequest(
                     setupTokenId,
-                    appSwitchWhenEligible
+                    appSwitchWhenEligible,
+                    APP_URL
                 )
                 vaultSetupTokenWithRequest(activity, request)
             }
