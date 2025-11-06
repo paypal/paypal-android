@@ -42,6 +42,7 @@ class PayPalWebCheckoutClientUnitTest {
     private val urlScheme = "com.example.app"
     private val fakeAppSwitchUrl = "https://paypal.com/vault-app-switch"
     private val updateClientConfigAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
+    private val appLinkUrl = "https://example.com/"
 
     private val intent = Intent()
 
@@ -60,8 +61,7 @@ class PayPalWebCheckoutClientUnitTest {
             updateClientConfigAPI = updateClientConfigAPI,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            urlScheme = urlScheme
+            coreConfig = coreConfig
         )
     }
 
@@ -74,11 +74,12 @@ class PayPalWebCheckoutClientUnitTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns launchResult
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val request = PayPalWebCheckoutRequest("fake-order-id", appLinkUrl = appLinkUrl)
         sut.start(activity, request)
 
         // Verify launchWithUrl is called with correct parameters
@@ -88,7 +89,7 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnUrlScheme = urlScheme
+                appLinkUrl = appLinkUrl
             )
         }
     }
@@ -103,11 +104,13 @@ class PayPalWebCheckoutClientUnitTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns launchResult
 
-        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val appLinkUrl = "https://example.com/return"
+        val request = PayPalWebCheckoutRequest("fake-order-id", appLinkUrl = appLinkUrl)
         val result = sut.start(activity, request)
         assertSame(launchResult, result)
     }
@@ -125,7 +128,8 @@ class PayPalWebCheckoutClientUnitTest {
             )
         } returns launchResult
 
-        val request = PayPalWebVaultRequest("fake-setup-token-id")
+        val appLinkUrl = "https://example.com/vault/return"
+        val request = PayPalWebVaultRequest("fake-setup-token-id", appLinkUrl = appLinkUrl)
         sut.vault(activity, request)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
@@ -133,7 +137,7 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                appLinkUrl = appLinkUrl
             )
         }
     }
@@ -148,11 +152,13 @@ class PayPalWebCheckoutClientUnitTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns launchResult
 
-        val request = PayPalWebVaultRequest("fake-setup-token-id")
+        val appLinkUrl = "https://example.com/vault/return"
+        val request = PayPalWebVaultRequest("fake-setup-token-id", appLinkUrl = appLinkUrl)
         val result = sut.vault(activity, request) as PayPalPresentAuthChallengeResult.Failure
 
         assertSame(sdkError, result.error)
@@ -499,7 +505,12 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() uses app switch when enabled and app switch URL is available`() = runTest {
         // Given
         every { deviceInspector.isPayPalInstalled } returns true
-        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+        val appLinkUrl = "https://example.com/return"
+        val request = PayPalWebCheckoutRequest(
+            "fake-order-id",
+            appSwitchWhenEligible = true,
+            appLinkUrl = appLinkUrl
+        )
         val appSwitchResponse = createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
@@ -519,7 +530,7 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = any(),
                 tokenType = any(),
-                returnUrlScheme = urlScheme
+                appLinkUrl = any()
             )
         } returns launchResult
 
@@ -542,7 +553,7 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnUrlScheme = urlScheme
+                appLinkUrl = appLinkUrl
             )
         }
         assertSame(launchResult, result)
@@ -574,8 +585,7 @@ class PayPalWebCheckoutClientUnitTest {
                     activity = activity,
                     uri = any(),
                     token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnUrlScheme = urlScheme
+                    tokenType = TokenType.ORDER_ID
                 )
             }
             assertSame(launchResult, result)
@@ -608,7 +618,6 @@ class PayPalWebCheckoutClientUnitTest {
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
-                    returnUrlScheme = urlScheme
                 )
             }
             assertSame(launchResult, result)
@@ -618,7 +627,11 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() falls back to web checkout when app switch request fails`() = runTest {
         // Given
         every { deviceInspector.isPayPalInstalled } returns true
-        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            appSwitchWhenEligible = true,
+            appLinkUrl = appLinkUrl
+        )
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
         coEvery {
@@ -631,7 +644,8 @@ class PayPalWebCheckoutClientUnitTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                appLinkUrl
             )
         } returns launchResult
 
@@ -646,7 +660,8 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnUrlScheme = urlScheme
+                returnUrlScheme = null,
+                appLinkUrl = any()
             )
         }
         assertSame(launchResult, result)
@@ -660,6 +675,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         every {
             payPalWebLauncher.launchWithUrl(
+                any(),
                 any(),
                 any(),
                 any(),
@@ -681,7 +697,6 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnUrlScheme = urlScheme
             )
         }
         assertSame(launchResult, result)
@@ -723,7 +738,11 @@ class PayPalWebCheckoutClientUnitTest {
     fun `vault() uses app switch when enabled and app switch URL is available`() = runTest {
         // Given
         every { deviceInspector.isPayPalInstalled } returns true
-        val request = PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = true)
+        val request = PayPalWebVaultRequest(
+            "fake-setup-token-id",
+            appSwitchWhenEligible = true,
+            appLinkUrl = appLinkUrl
+        )
         val appSwitchResponse =
             createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
@@ -744,7 +763,8 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = fakeAppSwitchUrl.toUri(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                returnUrlScheme = null,
+                appLinkUrl = any()
             )
         } returns launchResult
 
@@ -767,7 +787,8 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                returnUrlScheme = null,
+                appLinkUrl = appLinkUrl
             )
         }
         assertSame(launchResult, result)
@@ -786,7 +807,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns APIResult.Success(appSwitchResponse)
 
         every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
         } returns launchResult
 
         // When
@@ -807,8 +828,7 @@ class PayPalWebCheckoutClientUnitTest {
                 activity = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                tokenType = TokenType.VAULT_ID
             )
         }
         assertSame(launchResult, result)
@@ -840,8 +860,7 @@ class PayPalWebCheckoutClientUnitTest {
                     activity = activity,
                     uri = any(),
                     token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnUrlScheme = urlScheme
+                    tokenType = TokenType.VAULT_ID
                 )
             }
             assertSame(launchResult, result)
@@ -864,6 +883,7 @@ class PayPalWebCheckoutClientUnitTest {
                 any(),
                 any(),
                 any(),
+                any(),
                 any()
             )
         } returns launchResult
@@ -877,8 +897,7 @@ class PayPalWebCheckoutClientUnitTest {
                 activity = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                tokenType = TokenType.VAULT_ID
             )
         }
         assertSame(launchResult, result)
@@ -912,8 +931,7 @@ class PayPalWebCheckoutClientUnitTest {
                 activity = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme
+                tokenType = TokenType.VAULT_ID
             )
         }
         assertSame(launchResult, result)
@@ -958,7 +976,7 @@ class PayPalWebCheckoutClientUnitTest {
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
             every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
             } returns launchResult
 
             // When
@@ -973,8 +991,7 @@ class PayPalWebCheckoutClientUnitTest {
                     activity = activity,
                     uri = any(),
                     token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnUrlScheme = urlScheme
+                    tokenType = TokenType.ORDER_ID
                 )
             }
             assertSame(launchResult, result)
@@ -1004,8 +1021,7 @@ class PayPalWebCheckoutClientUnitTest {
                     activity = activity,
                     uri = any(),
                     token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnUrlScheme = urlScheme
+                    tokenType = TokenType.VAULT_ID
                 )
             }
             assertSame(launchResult, result)
@@ -1035,8 +1051,7 @@ class PayPalWebCheckoutClientUnitTest {
                     activity = activity,
                     uri = any(),
                     token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnUrlScheme = urlScheme
+                    tokenType = TokenType.ORDER_ID
                 )
             }
             assertSame(launchResult, result)
@@ -1066,8 +1081,7 @@ class PayPalWebCheckoutClientUnitTest {
                     activity = activity,
                     uri = any(),
                     token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnUrlScheme = urlScheme
+                    tokenType = TokenType.VAULT_ID
                 )
             }
             assertSame(launchResult, result)
@@ -1090,7 +1104,6 @@ class PayPalWebCheckoutClientUnitTest {
             updateClientConfigAPI = updateClientConfigAPI,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
-            urlScheme = urlScheme,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
         )
 
@@ -1129,7 +1142,6 @@ class PayPalWebCheckoutClientUnitTest {
             updateClientConfigAPI = updateClientConfigAPI,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
-            urlScheme = urlScheme,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
         )
 
@@ -1325,6 +1337,190 @@ class PayPalWebCheckoutClientUnitTest {
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `start() with deprecated urlScheme constructor passes urlScheme to launcher`() = runTest {
+        val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
+        val clientWithUrlScheme = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = mockLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            urlScheme = urlScheme
+        )
+
+        val request = PayPalWebCheckoutRequest("fake-order-id")
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every {
+            mockLauncher.launchWithUrl(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns launchResult
+
+        // When
+        clientWithUrlScheme.start(activity, request)
+
+        // Then
+        verify {
+            mockLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = urlScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `vault() with deprecated urlScheme constructor passes urlScheme to launcher`() = runTest {
+        val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
+        val clientWithUrlScheme = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = mockLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            urlScheme = urlScheme
+        )
+
+        val request = PayPalWebVaultRequest("fake-setup-token-id")
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every {
+            mockLauncher.launchWithUrl(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns launchResult
+
+        // When
+        clientWithUrlScheme.vault(activity, request)
+
+        // Then
+        verify {
+            mockLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                returnUrlScheme = urlScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `start() with deprecated urlScheme constructor and appLinkUrl in request prioritizes appLinkUrl`() =
+        runTest {
+            val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
+            val clientWithUrlScheme = PayPalWebCheckoutClient(
+                analytics = analytics,
+                payPalWebLauncher = mockLauncher,
+                sessionStore = PayPalWebCheckoutSessionStore(),
+                updateClientConfigAPI = updateClientConfigAPI,
+                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+                deviceInspector = deviceInspector,
+                coreConfig = coreConfig,
+                urlScheme = urlScheme
+            )
+
+            val appLinkUrl = "https://example.com/return"
+            val request = PayPalWebCheckoutRequest("fake-order-id", appLinkUrl = appLinkUrl)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                mockLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+            // When
+            clientWithUrlScheme.start(activity, request)
+
+            // Then
+            verify {
+                mockLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = any(),
+                    token = "fake-order-id",
+                    tokenType = TokenType.ORDER_ID,
+                    returnUrlScheme = urlScheme,
+                    appLinkUrl = appLinkUrl
+                )
+            }
+        }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `vault() with deprecated urlScheme constructor and appLinkUrl in request prioritizes appLinkUrl`() =
+        runTest {
+            val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
+            val clientWithUrlScheme = PayPalWebCheckoutClient(
+                analytics = analytics,
+                payPalWebLauncher = mockLauncher,
+                sessionStore = PayPalWebCheckoutSessionStore(),
+                updateClientConfigAPI = updateClientConfigAPI,
+                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+                deviceInspector = deviceInspector,
+                coreConfig = coreConfig,
+                urlScheme = urlScheme
+            )
+
+            val appLinkUrl = "https://example.com/vault/return"
+            val request = PayPalWebVaultRequest("fake-setup-token-id", appLinkUrl = appLinkUrl)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                mockLauncher.launchWithUrl(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns launchResult
+
+            // When
+            clientWithUrlScheme.vault(activity, request)
+
+            // Then
+            verify {
+                mockLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = any(),
+                    token = "fake-setup-token-id",
+                    tokenType = TokenType.VAULT_ID,
+                    returnUrlScheme = urlScheme,
+                    appLinkUrl = appLinkUrl
+                )
+            }
+        }
 
     fun createAppSwithEligibility(launchUrl: String?) = AppSwitchEligibilityData(
         appSwitchEligible = !launchUrl.isNullOrEmpty(),

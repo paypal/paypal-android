@@ -22,5 +22,9 @@ constructor(
      *
      * @property [setupTokenId] ID for the setup token associated with the vault approval
      */
-    constructor(setupTokenId: String) : this(setupTokenId, false)
+    constructor(
+        setupTokenId: String,
+        appSwitchWhenEligible: Boolean = false,
+        appLinkUrl: String? = null
+    ) : this(setupTokenId, appSwitchWhenEligible, appLinkUrl, null)
 }
