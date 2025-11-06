@@ -1556,7 +1556,6 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnUrlScheme = urlScheme,
                 appLinkUrl = appLinkUrl
             )
         }
@@ -1614,7 +1613,6 @@ class PayPalWebCheckoutClientUnitTest {
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
-                returnUrlScheme = urlScheme,
                 appLinkUrl = appLinkUrl
             )
         }
