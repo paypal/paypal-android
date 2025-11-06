@@ -80,7 +80,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id", appLinkUrl = appLinkUrl)
-        sut.start(activity, request)
+        sut.startTemp(activity, request)
 
         // Verify launchWithUrl is called with correct parameters
         verify(exactly = 1) {
@@ -111,7 +111,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         val appLinkUrl = "https://example.com/return"
         val request = PayPalWebCheckoutRequest("fake-order-id", appLinkUrl = appLinkUrl)
-        val result = sut.start(activity, request)
+        val result = sut.startTemp(activity, request)
         assertSame(launchResult, result)
     }
 
@@ -130,7 +130,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         val appLinkUrl = "https://example.com/vault/return"
         val request = PayPalWebVaultRequest("fake-setup-token-id", appLinkUrl = appLinkUrl)
-        sut.vault(activity, request)
+        sut.vaultTemp(activity, request)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
                 activity = activity,
@@ -159,7 +159,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         val appLinkUrl = "https://example.com/vault/return"
         val request = PayPalWebVaultRequest("fake-setup-token-id", appLinkUrl = appLinkUrl)
-        val result = sut.vault(activity, request) as PayPalPresentAuthChallengeResult.Failure
+        val result = sut.vaultTemp(activity, request) as PayPalPresentAuthChallengeResult.Failure
 
         assertSame(sdkError, result.error)
     }
@@ -225,7 +225,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns successResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(activity, request)
+            sut.startTemp(activity, request)
         val result = sut.finishStart(intent)
         assertSame(successResult, result)
     }
@@ -261,7 +261,7 @@ class PayPalWebCheckoutClientUnitTest {
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
-            launchWithUrlClient.start(activity, request)
+            launchWithUrlClient.startTemp(activity, request)
 
             sut.restore(launchWithUrlClient.instanceState)
         val result = sut.finishStart(intent)
@@ -289,7 +289,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns failureResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(activity, request)
+            sut.startTemp(activity, request)
         val result = sut.finishStart(intent)
         assertSame(failureResult, result)
     }
@@ -315,7 +315,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns failureResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-            sut.start(activity, request)
+            sut.startTemp(activity, request)
         val result = sut.finishStart(intent)
         assertSame(failureResult, result)
     }
@@ -340,7 +340,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns canceledResult
 
         val request = PayPalWebCheckoutRequest("fake-order-id")
-        sut.start(activity, request)
+            sut.startTemp(activity, request)
         val result = sut.finishStart(intent)
         assertSame(canceledResult, result)
     }
@@ -375,7 +375,7 @@ class PayPalWebCheckoutClientUnitTest {
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
-            launchWithUrlClient.start(activity, request)
+            launchWithUrlClient.startTemp(activity, request)
 
             sut.restore(launchWithUrlClient.instanceState)
         val result = sut.finishStart(intent)
@@ -402,7 +402,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns successResult
 
-        sut.start(activity, PayPalWebCheckoutRequest("fake-order-id"))
+            sut.startTemp(activity, PayPalWebCheckoutRequest("fake-order-id"))
         sut.finishStart(intent)
         assertNull(sut.finishStart(intent))
     }
@@ -427,7 +427,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns failureResult
 
-        sut.start(activity, PayPalWebCheckoutRequest("fake-order-id"))
+            sut.startTemp(activity, PayPalWebCheckoutRequest("fake-order-id"))
         sut.finishStart(intent)
         assertNull(sut.finishStart(intent))
     }
@@ -451,7 +451,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns canceledResult
 
-        sut.start(activity, PayPalWebCheckoutRequest("fake-order-id"))
+            sut.startTemp(activity, PayPalWebCheckoutRequest("fake-order-id"))
         sut.finishStart(intent)
         assertNull(sut.finishStart(intent))
     }
@@ -535,7 +535,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.start(activity, request)
+        val result = sut.startTemp(activity, request)
 
         // Then
         coVerify {
@@ -577,7 +577,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.start(activity, request)
+            val result = sut.startTemp(activity, request)
 
             // Then
             verify {
@@ -609,7 +609,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.start(activity, request)
+            val result = sut.startTemp(activity, request)
 
             // Then
             verify {
@@ -650,7 +650,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.start(activity, request)
+        val result = sut.startTemp(activity, request)
 
         // Then
         coVerify { patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any()) }
@@ -685,7 +685,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.start(activity, request)
+        val result = sut.startTemp(activity, request)
 
         // Then
         coVerify(exactly = 0) {
@@ -718,7 +718,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns PayPalPresentAuthChallengeResult.Success("state")
 
         // When
-        sut.start(activity, request)
+        sut.startTemp(activity, request)
 
         // Then
         coVerify {
@@ -769,7 +769,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.vault(activity, request)
+        val result = sut.vaultTemp(activity, request)
 
         // Then
         coVerify {
@@ -811,7 +811,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.vault(activity, request)
+        val result = sut.vaultTemp(activity, request)
 
         // Then
         coVerify {
@@ -852,7 +852,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.vault(activity, request)
+            val result = sut.vaultTemp(activity, request)
 
             // Then
             verify {
@@ -889,7 +889,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.vault(activity, request)
+        val result = sut.vaultTemp(activity, request)
 
         // Then
         verify {
@@ -920,7 +920,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        val result = sut.vault(activity, request)
+        val result = sut.vaultTemp(activity, request)
 
         // Then
         coVerify(exactly = 0) {
@@ -953,7 +953,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns PayPalPresentAuthChallengeResult.Success("state")
 
         // When
-        sut.vault(activity, request)
+        sut.vaultTemp(activity, request)
 
         // Then
         coVerify {
@@ -980,7 +980,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.start(activity, request)
+            val result = sut.startTemp(activity, request)
 
             // Then
             coVerify(exactly = 0) {
@@ -1010,7 +1010,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.vault(activity, request)
+            val result = sut.vaultTemp(activity, request)
 
             // Then
             coVerify(exactly = 0) {
@@ -1040,7 +1040,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.start(activity, request)
+            val result = sut.startTemp(activity, request)
 
             // Then
             coVerify(exactly = 0) {
@@ -1070,7 +1070,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            val result = sut.vault(activity, request)
+            val result = sut.vaultTemp(activity, request)
 
             // Then
             coVerify(exactly = 0) {
@@ -1123,7 +1123,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns successResult
 
-            previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            previousClient.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
 
             sut.restore(previousClient.instanceState)
             val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
@@ -1161,7 +1161,7 @@ class PayPalWebCheckoutClientUnitTest {
                 payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns successResult
 
-            previousClient.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            previousClient.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
 
         sut.restore(previousClient.instanceState)
         val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
@@ -1187,7 +1187,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
 
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
         val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
         assertSame(error, result.error)
     }
@@ -1211,7 +1211,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
 
-            sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
 
             sut.restore(sut.instanceState)
         val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
@@ -1236,7 +1236,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
 
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
         val result = sut.finishVault(intent)
         assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
     }
@@ -1259,7 +1259,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
 
-            sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
 
             sut.restore(sut.instanceState)
         val result = sut.finishVault(intent)
@@ -1286,7 +1286,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns successResult
 
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
@@ -1310,7 +1310,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
 
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
@@ -1333,7 +1333,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
 
-        sut.vault(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultTemp(activity, PayPalWebVaultRequest("fake-setup-token-id"))
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
@@ -1368,7 +1368,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        clientWithUrlScheme.start(activity, request)
+        clientWithUrlScheme.startTemp(activity, request)
 
         // Then
         verify {
@@ -1413,7 +1413,7 @@ class PayPalWebCheckoutClientUnitTest {
         } returns launchResult
 
         // When
-        clientWithUrlScheme.vault(activity, request)
+        clientWithUrlScheme.vaultTemp(activity, request)
 
         // Then
         verify {
@@ -1460,7 +1460,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            clientWithUrlScheme.start(activity, request)
+            clientWithUrlScheme.startTemp(activity, request)
 
             // Then
             verify {
@@ -1507,7 +1507,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             // When
-            clientWithUrlScheme.vault(activity, request)
+            clientWithUrlScheme.vaultTemp(activity, request)
 
             // Then
             verify {

@@ -106,7 +106,59 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    suspend fun start(
+    @Deprecated(
+        message = "Use start(activity, request, callback) instead.",
+        replaceWith = ReplaceWith("start(activity, request, callback)")
+    )
+    fun start(
+        activity: Activity,
+        request: PayPalWebCheckoutRequest
+    ): PayPalPresentAuthChallengeResult {
+        checkoutOrderId = request.orderId
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+
+        val launchUri = buildPayPalCheckoutUri(
+            orderId = request.orderId,
+            funding = request.fundingSource,
+            redirectUrl = request.appLinkUrl ?: redirectUriPayPalCheckout
+        )
+
+        val result = payPalWebLauncher.launchWithUrl(
+            activity = activity,
+            uri = launchUri,
+            token = request.orderId,
+            tokenType = TokenType.ORDER_ID,
+            returnUrlScheme = urlScheme,
+            appLinkUrl = request.appLinkUrl
+        )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    checkoutOrderId
+                )
+            }
+        }
+        return result
+    }
+
+    /**
+     * Confirm PayPal payment source for an order.
+     *
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     */
+    suspend fun startTemp(
         activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
@@ -183,7 +235,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebStartCallback
     ) {
         applicationScope.launch {
-            val result = start(activity, request)
+            val result = startTemp(activity, request)
             withContext(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(result)
             }
@@ -195,7 +247,56 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    suspend fun vault(
+    @Deprecated(
+        message = "Use vault(activity, request, callback) instead.",
+        replaceWith = ReplaceWith("vault(activity, request, callback)")
+    )
+    fun vault(
+        activity: Activity,
+        request: PayPalWebVaultRequest
+    ): PayPalPresentAuthChallengeResult {
+        checkoutOrderId = request.setupTokenId
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+
+        val launchUri = buildPayPalVaultUri(request.setupTokenId)
+
+        val result = payPalWebLauncher.launchWithUrl(
+            activity = activity,
+            uri = launchUri,
+            token = request.setupTokenId,
+            tokenType = TokenType.VAULT_ID,
+            returnUrlScheme = urlScheme,
+            appLinkUrl = request.appLinkUrl
+        )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    vaultSetupTokenId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    vaultSetupTokenId
+                )
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Vault PayPal as a payment method.
+     *
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     */
+    suspend fun vaultTemp(
         activity: Activity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
@@ -257,19 +358,19 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebVaultCallback
     ) {
         CoroutineScope(Dispatchers.Main).launch {
-            callback.onPayPalWebVaultResult(vault(activity, request))
+            callback.onPayPalWebVaultResult(vaultTemp(activity, request))
         }
     }
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalWebCheckoutClient.start]), call this method to see if a user has
+     * (@see [PayPalWebCheckoutClient.startTemp]), call this method to see if a user has
      * successfully authorized a PayPal account as a payment source.
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
-     * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
+     * when calling [PayPalWebCheckoutClient.startTemp]. This is needed to properly verify that an
      * authorization completed successfully.
      */
     @Deprecated(
@@ -297,7 +398,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalWebCheckoutClient.start]), call this method to see if a user has
+     * (@see [PayPalWebCheckoutClient.startTemp]), call this method to see if a user has
      * successfully authorized a PayPal account as a payment source.
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
@@ -331,13 +432,13 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalWebCheckoutClient.vault]), call this method to see if a user has
+     * (@see [PayPalWebCheckoutClient.vaultTemp]), call this method to see if a user has
      * successfully authorized a PayPal account for vaulting.
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
-     * when calling [PayPalWebCheckoutClient.vault]. This is needed to properly verify that an
+     * when calling [PayPalWebCheckoutClient.vaultTemp]. This is needed to properly verify that an
      * authorization completed successfully.
      */
     @Deprecated(
@@ -425,7 +526,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalWebCheckoutClient.vault]), call this method to see if a user has
+     * (@see [PayPalWebCheckoutClient.vaultTemp]), call this method to see if a user has
      * successfully authorized a PayPal account for vaulting.
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app

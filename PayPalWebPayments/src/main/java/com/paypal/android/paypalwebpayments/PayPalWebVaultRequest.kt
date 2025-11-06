@@ -1,7 +1,7 @@
 package com.paypal.android.paypalwebpayments
 
 /**
- * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
+ * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vaultTemp].
  *
  * @property [setupTokenId] ID for the setup token associated with the vault approval
  * @property [approveVaultHref] URL for the approval web page
@@ -18,7 +18,7 @@ constructor(
 ) {
 
     /**
-     * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
+     * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vaultTemp].
      *
      * @property [setupTokenId] ID for the setup token associated with the vault approval
      */

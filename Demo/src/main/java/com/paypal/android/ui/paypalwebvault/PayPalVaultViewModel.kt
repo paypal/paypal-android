@@ -99,7 +99,7 @@ class PayPalVaultViewModel @Inject constructor(
         vaultPayPalState = ActionState.Loading
 
         viewModelScope.launch {
-            when (val result = paypalClient.vault(activity, request)) {
+            when (val result = paypalClient.vaultTemp(activity, request)) {
                 is PayPalPresentAuthChallengeResult.Success -> {
                     // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
                 }
