@@ -12,5 +12,6 @@ data class PayPalWebCheckoutRequest @JvmOverloads constructor(
     val orderId: String,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val appSwitchWhenEligible: Boolean = false,
-    val appLinkUrl: String? = null
+    val appLinkUrl: String? = null,
+    val fallbackUrlScheme: String? = null
 )

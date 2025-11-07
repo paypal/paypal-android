@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
 import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
@@ -116,17 +117,22 @@ class PayPalCheckoutViewModel @Inject constructor(
     private suspend fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
-                val checkoutRequest =
-                    PayPalWebCheckoutRequest(orderId, fundingSource, appSwitchWhenEligible, APP_URL)
+        val checkoutRequest = PayPalWebCheckoutRequest(
+            orderId,
+            fundingSource,
+            appSwitchWhenEligible,
+            APP_URL,
+            APP_FALLBACK_URL_SCHEME
+        )
         when (val startResult = paypalClient.startAsync(activity, checkoutRequest)) {
-                    is PayPalPresentAuthChallengeResult.Success -> {
-                        // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
-                    }
-
-                    is PayPalPresentAuthChallengeResult.Failure ->
-                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
-                }
+            is PayPalPresentAuthChallengeResult.Success -> {
+                // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
             }
+
+            is PayPalPresentAuthChallengeResult.Failure ->
+                payPalWebCheckoutState = ActionState.Failure(startResult.error)
+        }
+    }
 
     fun completeOrder(context: Context) {
         val orderId = createdOrder?.id

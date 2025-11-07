@@ -129,7 +129,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
-            returnUrlScheme = urlScheme,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
             appLinkUrl = request.appLinkUrl
         )
 
@@ -198,7 +198,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
-            returnUrlScheme = urlScheme,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
             appLinkUrl = request.appLinkUrl
         )
 

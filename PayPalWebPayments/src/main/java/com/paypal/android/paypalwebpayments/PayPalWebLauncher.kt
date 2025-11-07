@@ -34,12 +34,11 @@ internal class PayPalWebLauncher(
         returnUrlScheme: String? = null,
         appLinkUrl: String? = null
     ): PayPalPresentAuthChallengeResult {
-        val urlScheme = if (appLinkUrl != null) null else returnUrlScheme
         val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions()
             .url(uri)
             .requestCode(getRequestCode(tokenType))
-            .returnUrlScheme(urlScheme)
+            .returnUrlScheme(returnUrlScheme)
             .appLinkUri(appLinkUrl?.toUri())
             .metadata(metadata)
         return launchBrowserSwitch(activity, options)
