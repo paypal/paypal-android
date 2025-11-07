@@ -168,6 +168,7 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         val launchUri = withContext(Dispatchers.IO) {
+            // perform updateCCO and getLaunchUri in parallel
             val updateConfigDeferred = async {
                 updateClientConfigAPI.updateClientConfig(
                     request.orderId,
