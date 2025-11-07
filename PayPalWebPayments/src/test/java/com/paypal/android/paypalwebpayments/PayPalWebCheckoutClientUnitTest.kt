@@ -1674,6 +1674,226 @@ class PayPalWebCheckoutClientUnitTest {
         sut.vault(activity, request, callback)
     }
 
+    // Tests for fallbackUrlScheme functionality
+
+    @Test
+    fun `startAsync() uses fallbackUrlScheme when provided`() = runTest {
+        val fallbackScheme = "com.example.fallback"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.startAsync(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    fun `startAsync() uses default urlScheme when fallbackUrlScheme is null`() = runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            fallbackUrlScheme = null
+        )
+        sut.startAsync(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = null,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `start() with deprecated method uses fallbackUrlScheme when provided`() {
+        val fallbackScheme = "com.example.fallback"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.start(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    fun `start() with callback uses fallbackUrlScheme when provided`() {
+        val fallbackScheme = "com.example.fallback"
+        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.start(activity, request, callback)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    fun `vaultAsync() uses fallbackUrlScheme when provided`() = runTest {
+        val fallbackScheme = "com.example.fallback"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.vaultAsync(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    fun `vaultAsync() uses default urlScheme when fallbackUrlScheme is null`() = runTest {
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            fallbackUrlScheme = null
+        )
+        sut.vaultAsync(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                returnUrlScheme = null,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `vault() with deprecated method uses fallbackUrlScheme when provided`() {
+        val fallbackScheme = "com.example.fallback"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.vault(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = any(),
+                token = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = null
+            )
+        }
+    }
+
+    @Test
+    fun `vault() with callback uses fallbackUrlScheme when provided`() {
+        // This test verifies the callback method can be called with fallbackUrlScheme without throwing
+        val fallbackScheme = "com.example.fallback"
+        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+        val request = PayPalWebVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+
+        // This should not throw an exception
+        sut.vault(activity, request, callback)
+    }
+
+    @Test
+    fun `vault() with callback uses default urlScheme when fallbackUrlScheme is null`() {
+        // This test verifies the callback method can be called with null fallbackUrlScheme without throwing
+        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+        val request = PayPalWebVaultRequest(
+            setupTokenId = "fake-setup-token-id",
+            fallbackUrlScheme = null
+        )
+
+        // This should not throw an exception
+        sut.vault(activity, request, callback)
+    }
+
     fun createAppSwithEligibility(launchUrl: String?) = AppSwitchEligibilityData(
         appSwitchEligible = !launchUrl.isNullOrEmpty(),
         redirectURL = launchUrl,

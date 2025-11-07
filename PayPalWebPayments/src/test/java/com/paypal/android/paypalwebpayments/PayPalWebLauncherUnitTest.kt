@@ -505,7 +505,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchWithUrl() with appLinkUrl sets appLinkUri and nullifies returnUrlScheme`() {
+    fun `launchWithUrl() with appLinkUrl sets appLinkUri and returnUrlScheme`() {
         sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
@@ -526,7 +526,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("order-123")
-            get { returnUrlScheme }.isEqualTo(null) // Should be null when appLinkUrl is provided
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme") // Should use provided returnUrlScheme as fallback
             get { url }.isEqualTo(Uri.parse("https://paypal.com/checkout"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
             get { appLinkUri }.isEqualTo(appLinkUrl.toUri())
@@ -583,7 +583,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("setup-456")
-            get { returnUrlScheme }.isEqualTo(null) // Should be null when appLinkUrl is provided
+            get { returnUrlScheme }.isEqualTo("custom_url_scheme") // Should use provided returnUrlScheme as fallback
             get { url }.isEqualTo(Uri.parse("https://paypal.com/vault"))
             get { requestCode }.isEqualTo(PAYPAL_VAULT)
             get { appLinkUri }.isEqualTo(appLinkUrl.toUri())

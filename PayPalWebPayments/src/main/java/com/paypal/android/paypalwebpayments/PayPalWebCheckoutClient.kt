@@ -267,7 +267,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
-            returnUrlScheme = urlScheme,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
             appLinkUrl = request.appLinkUrl
         )
 
@@ -320,7 +320,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
-            returnUrlScheme = urlScheme,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
             appLinkUrl = request.appLinkUrl
         )
 
