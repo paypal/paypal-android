@@ -2,12 +2,17 @@
 
 ## Unreleased
 
-* Add overloaded functions with callbacks for `start` and `vault` methods in
-  `PayPalWebCheckoutClient`
-* Modify `PayPalWebCheckoutRequest` to include `appSwitchWhenEligible` property to control app
+* Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to include to control app
   switch behavior
-* Breaking Changes
-  * Make start and vault functions in `PayPalWebCheckoutClient` suspend functions
+* Adds new property `appSwitchWhenEligible`in `PayPalWebVaultRequest` to include to control app
+  switch behavior
+* Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
+  used to recognize app after approving order
+* Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be
+  used to recognize app after vaulting
+* Deprecates `urlScheme` property in `PayPalWebCheckoutClient`
+* Adds new functions `startAsync` and `vaultAsync` in `PayPalWebCheckoutClient` to support Kotlin
+  coroutines
 
 ## 2.3.0 (2025-11-03)
 * PayPalWebPayments
