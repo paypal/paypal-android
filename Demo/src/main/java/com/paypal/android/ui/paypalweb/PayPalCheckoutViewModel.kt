@@ -108,13 +108,11 @@ class PayPalCheckoutViewModel @Inject constructor(
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            viewModelScope.launch {
-                startCheckoutWithOrderId(activity, orderId)
-            }
+            startCheckoutWithOrderId(activity, orderId)
         }
     }
 
-    private suspend fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
         val checkoutRequest = PayPalWebCheckoutRequest(
@@ -124,13 +122,16 @@ class PayPalCheckoutViewModel @Inject constructor(
             APP_URL,
             APP_FALLBACK_URL_SCHEME
         )
-        when (val startResult = paypalClient.startAsync(activity, checkoutRequest)) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
-            }
 
-            is PayPalPresentAuthChallengeResult.Failure ->
-                payPalWebCheckoutState = ActionState.Failure(startResult.error)
+        paypalClient.start(activity, checkoutRequest) { startResult ->
+            when (startResult) {
+                is PayPalPresentAuthChallengeResult.Success -> {
+                    // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+                }
+
+                is PayPalPresentAuthChallengeResult.Failure ->
+                    payPalWebCheckoutState = ActionState.Failure(startResult.error)
+            }
         }
     }
 
