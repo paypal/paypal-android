@@ -15,5 +15,4 @@ sealed class BrowserSwitchFinishResult() {
     object RequestCodeDoesNotMatch : BrowserSwitchFinishResult()
     object DeepLinkNotPresent : BrowserSwitchFinishResult()
     object DeepLinkDoesNotMatch : BrowserSwitchFinishResult()
-    object PendingStateInvalid : BrowserSwitchFinishResult()
 }
