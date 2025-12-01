@@ -112,18 +112,6 @@ public final class com/paypal/android/corepayments/UpdateClientConfigAPI$Default
 	public static final field USER_EXPERIENCE_FLOW Ljava/lang/String;
 }
 
-public final class com/paypal/android/corepayments/UpdateClientConfigResponse {
-	public static final field Companion Lcom/paypal/android/corepayments/UpdateClientConfigResponse$Companion;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/UpdateClientConfigResponse;
-	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/UpdateClientConfigResponse;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/UpdateClientConfigResponse;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getUpdateClientConfig ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/paypal/android/corepayments/UpdateClientConfigResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/paypal/android/corepayments/UpdateClientConfigResponse$$serializer;
 	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -137,9 +125,6 @@ public final class com/paypal/android/corepayments/UpdateClientConfigResponse$$s
 
 public final class com/paypal/android/corepayments/UpdateClientConfigResponse$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public abstract class com/paypal/android/corepayments/UpdateClientConfigResult {
 }
 
 public final class com/paypal/android/corepayments/UpdateClientConfigResult$Failure : com/paypal/android/corepayments/UpdateClientConfigResult {
@@ -156,29 +141,6 @@ public final class com/paypal/android/corepayments/UpdateClientConfigResult$Fail
 public final class com/paypal/android/corepayments/UpdateClientConfigResult$Success : com/paypal/android/corepayments/UpdateClientConfigResult {
 	public static final field INSTANCE Lcom/paypal/android/corepayments/UpdateClientConfigResult$Success;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/corepayments/UpdateClientConfigVariables {
-	public static final field Companion Lcom/paypal/android/corepayments/UpdateClientConfigVariables$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/UpdateClientConfigVariables;
-	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/UpdateClientConfigVariables;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/UpdateClientConfigVariables;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getButtonSessionId ()Ljava/lang/String;
-	public final fun getFundingSource ()Ljava/lang/String;
-	public final fun getIntegrationArtifact ()Ljava/lang/String;
-	public final fun getProductFlow ()Ljava/lang/String;
-	public final fun getToken ()Ljava/lang/String;
-	public final fun getUserExperienceFlow ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

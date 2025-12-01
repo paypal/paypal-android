@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
+import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -29,13 +31,8 @@ class PayPalVaultViewModel @Inject constructor(
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
 ) : ViewModel() {
-
-    companion object {
-        const val URL_SCHEME = "com.paypal.android.demo"
-    }
-
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
-    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig, URL_SCHEME)
+    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
 
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
@@ -83,7 +80,9 @@ class PayPalVaultViewModel @Inject constructor(
             viewModelScope.launch {
                 val request = PayPalWebVaultRequest(
                     setupTokenId,
-                    appSwitchWhenEligible
+                    appSwitchWhenEligible,
+                    APP_URL,
+                    APP_FALLBACK_URL_SCHEME
                 )
                 vaultSetupTokenWithRequest(activity, request)
             }
@@ -96,8 +95,8 @@ class PayPalVaultViewModel @Inject constructor(
     ) {
         vaultPayPalState = ActionState.Loading
 
-        viewModelScope.launch {
-            when (val result = paypalClient.vault(activity, request)) {
+        paypalClient.vault(activity, request) { result ->
+            when (result) {
                 is PayPalPresentAuthChallengeResult.Success -> {
                     // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
                 }

@@ -4,8 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -31,15 +31,16 @@ import kotlinx.coroutines.withContext
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
+@Suppress("TooManyFunctions") // Necessary due to multiple method variations for backward compatibility
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
-    private val urlScheme: String,
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
+    private val urlScheme: String? = null,
 
 ) {
     private val applicationScope = CoroutineScope(SupervisorJob())
@@ -55,13 +56,35 @@ class PayPalWebCheckoutClient internal constructor(
      * @param configuration a [CoreConfig] object
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
-    constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
+    @Deprecated(
+        message = "Use PayPalWebCheckoutClient(context, configuration) instead.",
+        replaceWith = ReplaceWith("PayPalWebCheckoutClient(context, configuration)")
+    )
+    constructor(
+        context: Context,
+        configuration: CoreConfig,
+        urlScheme: String
+    ) : this(
         analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         payPalWebLauncher = PayPalWebLauncher(),
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
         urlScheme = urlScheme,
+        patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
+    )
+
+    constructor(
+        context: Context,
+        configuration: CoreConfig
+    ) : this(
+        analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
+        payPalWebLauncher = PayPalWebLauncher(),
+        sessionStore = PayPalWebCheckoutSessionStore(),
+        deviceInspector = DeviceInspector(context),
+        coreConfig = configuration,
+        urlScheme = null,
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
@@ -85,14 +108,69 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    suspend fun start(
+    @Deprecated(
+        message = "Use start(activity, request, callback) for callback-based flows, includes app switching feature",
+        replaceWith = ReplaceWith("start(activity, request, callback)")
+    )
+    fun start(
         activity: Activity,
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
+        val launchUri = buildPayPalCheckoutUri(
+            orderId = request.orderId,
+            funding = request.fundingSource,
+            redirectUrl = request.appLinkUrl ?: redirectUriPayPalCheckout
+        )
+
+        val result = payPalWebLauncher.launchWithUrl(
+            activity = activity,
+            uri = launchUri,
+            token = request.orderId,
+            tokenType = TokenType.ORDER_ID,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+            appLinkUrl = request.appLinkUrl
+        )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    checkoutOrderId
+                )
+            }
+        }
+        return result
+    }
+
+    /**
+     * Confirm PayPal payment source for an order.
+     *
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     */
+    @VisibleForTesting
+    internal suspend fun startAsync(
+        activity: Activity,
+        request: PayPalWebCheckoutRequest
+    ): PayPalPresentAuthChallengeResult {
+
+        checkoutOrderId = request.orderId
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+
         val launchUri = withContext(Dispatchers.IO) {
+            // perform updateCCO and getLaunchUri in parallel
             val updateConfigDeferred = async {
                 updateClientConfigAPI.updateClientConfig(
                     request.orderId,
@@ -105,7 +183,11 @@ class PayPalWebCheckoutClient internal constructor(
                     token = request.orderId,
                     tokenType = TokenType.ORDER_ID,
                     appSwitchWhenEligible = request.appSwitchWhenEligible,
-                    fallbackUri = buildPayPalCheckoutUri(request.orderId, request.fundingSource)
+                    fallbackUri = buildPayPalCheckoutUri(
+                        orderId = request.orderId,
+                        funding = request.fundingSource,
+                        request.appLinkUrl ?: redirectUriPayPalCheckout
+                    )
                 )
             }
 
@@ -118,7 +200,8 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
-            returnUrlScheme = urlScheme
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+            appLinkUrl = request.appLinkUrl
         )
 
         when (result) {
@@ -156,7 +239,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebStartCallback
     ) {
         applicationScope.launch {
-            val result = start(activity, request)
+            val result = startAsync(activity, request)
             withContext(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(result)
             }
@@ -168,7 +251,57 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
      */
-    suspend fun vault(
+    @Deprecated(
+        message = "Use vault(activity, request, callback) for callback-based flows, includes app switching feature",
+        replaceWith = ReplaceWith("vault(activity, request, callback)")
+    )
+    fun vault(
+        activity: Activity,
+        request: PayPalWebVaultRequest
+    ): PayPalPresentAuthChallengeResult {
+        checkoutOrderId = request.setupTokenId
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+
+        val launchUri = buildPayPalVaultUri(request.setupTokenId)
+
+        val result = payPalWebLauncher.launchWithUrl(
+            activity = activity,
+            uri = launchUri,
+            token = request.setupTokenId,
+            tokenType = TokenType.VAULT_ID,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+            appLinkUrl = request.appLinkUrl
+        )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    vaultSetupTokenId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    vaultSetupTokenId
+                )
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Vault PayPal as a payment method.
+     *
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     */
+    @VisibleForTesting
+    internal suspend fun vaultAsync(
         activity: Activity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
@@ -190,7 +323,8 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
-            returnUrlScheme = urlScheme
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+            appLinkUrl = request.appLinkUrl
         )
 
         when (result) {
@@ -228,8 +362,8 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest,
         callback: PayPalWebVaultCallback
     ) {
-        CoroutineScope(Dispatchers.Main).launch {
-            callback.onPayPalWebVaultResult(vault(activity, request))
+        applicationScope.launch(Dispatchers.Main) {
+            callback.onPayPalWebVaultResult(vaultAsync(activity, request))
         }
     }
 
@@ -336,17 +470,19 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    private val redirectUriPayPalCheckout = "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout"
+    private val redirectUriPayPalCheckout
+        get() = urlScheme?.let { "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout" }
 
     private fun buildPayPalCheckoutUri(
         orderId: String?,
-        funding: PayPalWebCheckoutFundingSource
+        funding: PayPalWebCheckoutFundingSource,
+        redirectUrl: String?
     ): Uri {
         return baseUrl.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
-            .appendQueryParameter("redirect_uri", redirectUriPayPalCheckout)
+            .appendQueryParameter("redirect_uri", redirectUrl)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
             .appendQueryParameter("integration_artifact", UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT)
@@ -386,18 +522,8 @@ class PayPalWebCheckoutClient internal constructor(
                 paypalNativeAppInstalled = true
             )
             when (patchCcoResult) {
-                is APIResult.Success -> {
-                    Log.d("PayPalWebCheckoutClient", "App switch response: ${patchCcoResult.data}")
-                    patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
-                }
-
-                is APIResult.Failure -> {
-                    Log.e(
-                        "PayPalWebCheckoutClient",
-                        "App switch eligibility check failed: ${patchCcoResult.error}"
-                    )
-                    fallbackUri
-                }
+                is APIResult.Success -> patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
+                is APIResult.Failure -> fallbackUri
             }
         } else {
             fallbackUri

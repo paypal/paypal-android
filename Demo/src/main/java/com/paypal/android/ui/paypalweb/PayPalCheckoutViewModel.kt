@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
+import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -43,7 +45,7 @@ class PayPalCheckoutViewModel @Inject constructor(
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val paypalClient =
-        PayPalWebCheckoutClient(applicationContext, coreConfig, "com.paypal.android.demo")
+        PayPalWebCheckoutClient(applicationContext, coreConfig)
 
     private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()
@@ -106,26 +108,32 @@ class PayPalCheckoutViewModel @Inject constructor(
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            viewModelScope.launch {
-                startCheckoutWithOrderId(activity, orderId)
-            }
+            startCheckoutWithOrderId(activity, orderId)
         }
     }
 
-    private suspend fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
-                val checkoutRequest =
-                    PayPalWebCheckoutRequest(orderId, fundingSource, appSwitchWhenEligible)
-                when (val startResult = paypalClient.start(activity, checkoutRequest)) {
-                    is PayPalPresentAuthChallengeResult.Success -> {
-                        // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
-                    }
+        val checkoutRequest = PayPalWebCheckoutRequest(
+            orderId,
+            fundingSource,
+            appSwitchWhenEligible,
+            APP_URL,
+            APP_FALLBACK_URL_SCHEME
+        )
 
-                    is PayPalPresentAuthChallengeResult.Failure ->
-                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
+        paypalClient.start(activity, checkoutRequest) { startResult ->
+            when (startResult) {
+                is PayPalPresentAuthChallengeResult.Success -> {
+                    // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
                 }
+
+                is PayPalPresentAuthChallengeResult.Failure ->
+                    payPalWebCheckoutState = ActionState.Failure(startResult.error)
             }
+        }
+    }
 
     fun completeOrder(context: Context) {
         val orderId = createdOrder?.id
