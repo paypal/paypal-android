@@ -80,7 +80,7 @@ internal class PayPalWebLauncher(
             }
         }
 
-    private fun buildPayPalCheckoutUri(
+    public fun buildPayPalCheckoutUri(
         orderId: String?,
         config: CoreConfig,
         funding: PayPalWebCheckoutFundingSource

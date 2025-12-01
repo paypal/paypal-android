@@ -2,8 +2,10 @@ package com.paypal.android.ui.paypalweb
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
@@ -13,6 +15,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.paypalwebpayments.PayPalAuthResult
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
@@ -157,4 +160,19 @@ class PayPalWebViewModel @Inject constructor(
                 }
             }
         }
+
+    fun handleAuthResult(authResult: PayPalAuthResult) {
+        paypalClient.handleAuthResult(authResult)
+    }
+
+    suspend fun getCheckoutUrl(): Uri {
+        val orderId = createdOrder?.id
+        return if (orderId == null) {
+            // TODO: come up with better error handling
+            throw Error("checkout URL could not be built")
+        } else {
+            val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource)
+            paypalClient.getCheckoutUrl(checkoutRequest)
+        }
+    }
 }

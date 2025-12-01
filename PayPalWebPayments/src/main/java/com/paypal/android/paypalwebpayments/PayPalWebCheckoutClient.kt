@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -23,6 +24,7 @@ import kotlinx.coroutines.withContext
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
 class PayPalWebCheckoutClient internal constructor(
+    private val config: CoreConfig,
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
     private val sessionStore: PayPalWebCheckoutSessionStore,
@@ -44,6 +46,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
+        config = configuration,
         analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
         sessionStore = PayPalWebCheckoutSessionStore(),
@@ -287,4 +290,17 @@ class PayPalWebCheckoutClient internal constructor(
             }
             return result
         }
+
+    fun handleAuthResult(authResult: PayPalAuthResult) {
+        // TODO: implement
+        // this method should serve the same purpose as finishCheckout()/finishVault()
+    }
+
+    fun getCheckoutUrl(checkoutRequest: PayPalWebCheckoutRequest): Uri {
+        return payPalWebLauncher.buildPayPalCheckoutUri(
+            checkoutRequest.orderId,
+            config,
+            checkoutRequest.fundingSource
+        )
+    }
 }

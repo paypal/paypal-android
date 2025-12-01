@@ -1,5 +1,6 @@
 package com.paypal.android.ui.paypalweb
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +14,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.paypalwebpayments.PayPalActivityResultContract
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
@@ -28,6 +31,7 @@ import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import kotlinx.coroutines.launch
 
 @Composable
 fun PayPalWebView(
@@ -35,6 +39,12 @@ fun PayPalWebView(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(PayPalActivityResultContract()) {
+        viewModel.handleAuthResult(it)
+    }
+
     LaunchedEffect(scrollState.maxValue) {
         // continuously scroll to bottom of the list when event state is updated
         scrollState.animateScrollTo(scrollState.maxValue)
@@ -60,7 +70,16 @@ fun PayPalWebView(
     ) {
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
-            Step2_StartPayPalWebCheckout(uiState, viewModel)
+            Step2_StartPayPalWebCheckout(
+                uiState,
+                viewModel,
+                launchCheckout = {
+                    scope.launch {
+                        val checkoutUrl = viewModel.getCheckoutUrl()
+                        launcher.launch(checkoutUrl)
+                    }
+                }
+            )
         }
         if (uiState.isPayPalWebCheckoutSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
@@ -96,8 +115,11 @@ private fun Step1_CreateOrder(uiState: PayPalWebUiState, viewModel: PayPalWebVie
 }
 
 @Composable
-private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: PayPalWebViewModel) {
-    val context = LocalContext.current
+private fun Step2_StartPayPalWebCheckout(
+    uiState: PayPalWebUiState,
+    viewModel: PayPalWebViewModel,
+    launchCheckout: () -> Unit
+) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -110,7 +132,7 @@ private fun Step2_StartPayPalWebCheckout(uiState: PayPalWebUiState, viewModel: P
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startWebCheckout(it) } },
+            onClick = { launchCheckout() },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

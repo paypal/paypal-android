@@ -52,6 +52,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.kotlinx.coroutinesAndroid
     implementation libs.android.material
+    implementation libs.androidx.browser
 
     testImplementation libs.junit
     testImplementation libs.mockk
