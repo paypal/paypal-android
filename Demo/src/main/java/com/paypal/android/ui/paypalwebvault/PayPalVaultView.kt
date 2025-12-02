@@ -3,6 +3,7 @@ package com.paypal.android.ui.paypalwebvault
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -12,10 +13,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.R
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.BooleanOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
@@ -28,7 +32,7 @@ import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
 @Composable
-fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
+fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
@@ -68,13 +72,19 @@ fun PayPalWebVaultView(viewModel: PayPalWebVaultViewModel = hiltViewModel()) {
 
 @Composable
 private fun Step1_CreateSetupToken(
-    uiState: PayPalWebVaultUiState,
-    viewModel: PayPalWebVaultViewModel
+    uiState: PayPalVaultUiState,
+    viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create Setup Token")
+        BooleanOptionList(
+            title = stringResource(id = R.string.app_switch_when_available),
+            selectedOption = uiState.appSwitchWhenEligible,
+            onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
+            modifier = Modifier.fillMaxWidth()
+        )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
             successTitle = "SETUP TOKEN CREATED",
@@ -91,8 +101,8 @@ private fun Step1_CreateSetupToken(
 
 @Composable
 private fun Step2_VaultPayPal(
-    uiState: PayPalWebVaultUiState,
-    viewModel: PayPalWebVaultViewModel
+    uiState: PayPalVaultUiState,
+    viewModel: PayPalVaultViewModel
 ) {
     val context = LocalContext.current
     Column(
@@ -119,8 +129,8 @@ private fun Step2_VaultPayPal(
 
 @Composable
 private fun Step3_CreatePaymentToken(
-    uiState: PayPalWebVaultUiState,
-    viewModel: PayPalWebVaultViewModel
+    uiState: PayPalVaultUiState,
+    viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,

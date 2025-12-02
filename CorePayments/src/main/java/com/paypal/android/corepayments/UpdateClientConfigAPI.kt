@@ -96,6 +96,7 @@ class UpdateClientConfigAPI(
 
 @Serializable
 @OptIn(InternalSerializationApi::class)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class UpdateClientConfigVariables(
     val token: String,
     val fundingSource: String,
@@ -107,10 +108,12 @@ data class UpdateClientConfigVariables(
 
 @Serializable
 @OptIn(InternalSerializationApi::class)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class UpdateClientConfigResponse(
     val updateClientConfig: String
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class UpdateClientConfigResult {
     data object Success : UpdateClientConfigResult()
     data class Failure(val error: PayPalSDKError) : UpdateClientConfigResult()

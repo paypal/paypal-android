@@ -1,7 +1,18 @@
 # PayPal Android SDK Release Notes
 
-## 2.3.0 (2025-11-03)
+## Unreleased
 
+* Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch
+  behavior
+* Adds new property `appSwitchWhenEligible`in `PayPalWebVaultRequest` to control app switch behavior
+* Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
+  used to re-open app after approving order
+* Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be
+  used to re-open app after vaulting
+* Deprecates `urlScheme` property in `PayPalWebCheckoutClient` instead use `fallbackUrlScheme` in
+  `PayPalWebCheckoutRequest` and `PayPalWebVaultRequest`
+
+## 2.3.0 (2025-11-03)
 * PayPalWebPayments
   * Add `PayPalWebCheckoutClient.start(activity, request, callback)` method with asynchronous
     callback support

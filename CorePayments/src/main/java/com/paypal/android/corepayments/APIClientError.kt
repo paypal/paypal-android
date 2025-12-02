@@ -9,9 +9,10 @@ import androidx.annotation.RestrictTo
 object APIClientError {
 
     // 0. An unknown error occurred.
-    fun unknownError(correlationId: String? = null) = PayPalSDKError(
+    fun unknownError(correlationId: String? = null, throwable: Throwable? = null) = PayPalSDKError(
         code = PayPalSDKErrorCode.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support.",
+        reason = throwable,
         correlationId = correlationId
     )
 
@@ -91,4 +92,9 @@ object APIClientError {
         )
         return error
     }
+
+    fun graphQLRequestLoadError() = PayPalSDKError(
+        code = PayPalSDKErrorCode.GRAPHQL_CREATE_REQUEST_ERROR.ordinal,
+        errorDescription = "Error creating GraphQL request"
+    )
 }

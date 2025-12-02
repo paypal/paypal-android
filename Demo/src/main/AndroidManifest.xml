@@ -28,6 +28,17 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="ppcp-mobile-demo-sandbox-87bbd7f0a27f.herokuapp.com"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
     </application>
 
