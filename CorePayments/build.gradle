@@ -73,6 +73,7 @@ android {
 dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
+    implementation libs.androidx.browser
     implementation libs.kotlin.stdLib
     implementation libs.kotlinx.coroutinesAndroid
     implementation libs.kotlinx.serializationJson
