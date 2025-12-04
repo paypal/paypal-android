@@ -10,7 +10,14 @@ sealed class BrowserSwitchFinishResult() {
         val requestCode: Int,
         val requestUrl: Uri,
         val requestMetadata: JSONObject?,
-    ) : BrowserSwitchFinishResult()
+    ) : BrowserSwitchFinishResult() {
+        constructor(returnUrl: Uri, originalOptions: BrowserSwitchOptions) : this(
+            returnUrl = returnUrl,
+            requestCode = originalOptions.requestCode,
+            requestUrl = originalOptions.targetUri,
+            requestMetadata = originalOptions.metadata
+        )
+    }
 
     object RequestCodeDoesNotMatch : BrowserSwitchFinishResult()
     object DeepLinkNotPresent : BrowserSwitchFinishResult()

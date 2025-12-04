@@ -2,7 +2,9 @@ package com.paypal.android.corepayments.browserswitch
 
 import android.content.Context
 import android.content.Intent
+import androidx.annotation.RestrictTo
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BrowserSwitchClient(
     private val chromeCustomTabsClient: ChromeCustomTabsClient = ChromeCustomTabsClient()
 ) {
@@ -12,8 +14,7 @@ class BrowserSwitchClient(
     ): BrowserSwitchStartResult {
         val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
         chromeCustomTabsClient.launch(context, cctOptions)
-        val pendingState = BrowserSwitchPendingState(options)
-        return BrowserSwitchStartResult.Success(pendingState)
+        return BrowserSwitchStartResult.Success
     }
 
     fun finish(
