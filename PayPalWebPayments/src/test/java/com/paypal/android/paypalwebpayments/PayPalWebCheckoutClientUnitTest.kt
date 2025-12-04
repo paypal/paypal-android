@@ -16,6 +16,7 @@ import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -72,6 +73,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Before
     fun beforeEach() {
+        MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
         sut = PayPalWebCheckoutClient(
             analytics = analytics,
