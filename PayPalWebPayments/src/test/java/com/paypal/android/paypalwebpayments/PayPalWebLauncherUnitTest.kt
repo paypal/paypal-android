@@ -4,12 +4,11 @@ import android.content.Intent
 import android.net.Uri
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchFinalResult
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_VAULT
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import com.paypal.android.corepayments.model.TokenType
 import io.mockk.every
 import io.mockk.mockk
@@ -47,7 +46,7 @@ class PayPalWebLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
-        } returns BrowserSwitchStartResult.Started("pending request")
+        } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
             activity,
@@ -61,7 +60,7 @@ class PayPalWebLauncherUnitTest {
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
             get { returnUrlScheme }.isEqualTo("com.example.app")
-            get { url }.isEqualTo(Uri.parse("https://www.sandbox.paypal.com/checkoutnow"))
+            get { targetUri }.isEqualTo(Uri.parse("https://www.sandbox.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
         }
     }
@@ -73,7 +72,7 @@ class PayPalWebLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
-        } returns BrowserSwitchStartResult.Started("pending request")
+        } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
             activity,
@@ -87,7 +86,7 @@ class PayPalWebLauncherUnitTest {
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
             get { returnUrlScheme }.isEqualTo("com.example.app")
-            get { url }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
+            get { targetUri }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
         }
     }
@@ -99,7 +98,7 @@ class PayPalWebLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
-        } returns BrowserSwitchStartResult.Started("pending request")
+        } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
             activity,
@@ -113,7 +112,7 @@ class PayPalWebLauncherUnitTest {
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
             get { returnUrlScheme }.isEqualTo("com.example.app")
-            get { url }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
+            get { targetUri }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
         }
     }
@@ -125,7 +124,7 @@ class PayPalWebLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
-        } returns BrowserSwitchStartResult.Started("pending request")
+        } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
             activity,
@@ -139,7 +138,7 @@ class PayPalWebLauncherUnitTest {
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
             get { returnUrlScheme }.isEqualTo("com.example.app")
-            get { url }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
+            get { targetUri }.isEqualTo(Uri.parse("https://www.paypal.com/checkoutnow"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
         }
     }
@@ -171,7 +170,7 @@ class PayPalWebLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
-        } returns BrowserSwitchStartResult.Started("pending request")
+        } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
             activity,
@@ -185,7 +184,7 @@ class PayPalWebLauncherUnitTest {
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
             get { returnUrlScheme }.isEqualTo("com.example.app")
-            get { url }.isEqualTo(Uri.parse("https://sandbox.paypal.com/agreements/approve"))
+            get { targetUri }.isEqualTo(Uri.parse("https://sandbox.paypal.com/agreements/approve"))
             get { requestCode }.isEqualTo(PAYPAL_VAULT)
         }
     }
@@ -197,7 +196,7 @@ class PayPalWebLauncherUnitTest {
         val slot = slot<BrowserSwitchOptions>()
         every {
             browserSwitchClient.start(activity, capture(slot))
-        } returns BrowserSwitchStartResult.Started("pending request")
+        } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
             activity,
@@ -211,7 +210,7 @@ class PayPalWebLauncherUnitTest {
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
             get { returnUrlScheme }.isEqualTo("com.example.app")
-            get { url }.isEqualTo(Uri.parse("https://paypal.com/agreements/approve"))
+            get { targetUri }.isEqualTo(Uri.parse("https://paypal.com/agreements/approve"))
             get { requestCode }.isEqualTo(PAYPAL_VAULT)
         }
     }
@@ -245,7 +244,7 @@ class PayPalWebLauncherUnitTest {
         )
 
         every {
-            browserSwitchClient.completeRequest(intent, "pending request")
+            browserSwitchClient.finish(intent, "pending request")
         } returns browserSwitchResult
 
         sut = PayPalWebLauncher(browserSwitchClient)
