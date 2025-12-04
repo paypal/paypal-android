@@ -19,13 +19,19 @@ import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,26 +42,37 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PayPalWebCheckoutClientUnitTest {
 
+    @MockK
     private val activity: FragmentActivity = mockk(relaxed = true)
+
+    @MockK
     private val analytics = mockk<PayPalWebAnalytics>(relaxed = true)
-    private lateinit var patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility
-    private lateinit var deviceInspector: DeviceInspector
+
+    @MockK
+    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility =
+        mockk(relaxed = true)
+
+    @MockK
+    private val deviceInspector: DeviceInspector = mockk(relaxed = true)
     private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
     private val urlScheme = "com.example.app"
     private val fakeAppSwitchUrl = "https://paypal.com/vault-app-switch"
-    private val updateClientConfigAPI = mockk<UpdateClientConfigAPI>(relaxed = true)
+
+    @MockK
+    private val updateClientConfigAPI: UpdateClientConfigAPI = mockk(relaxed = true)
     private val appLinkUrl = "https://example.com/"
 
     private val intent = Intent()
 
-    private lateinit var payPalWebLauncher: PayPalWebLauncher
+    @MockK
+    private val payPalWebLauncher: PayPalWebLauncher = mockk(relaxed = true)
     private lateinit var sut: PayPalWebCheckoutClient
+
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun beforeEach() {
-        payPalWebLauncher = mockk(relaxed = true)
-        patchCCOWithAppSwitchEligibility = mockk(relaxed = true)
-        deviceInspector = mockk(relaxed = true)
+        Dispatchers.setMain(testDispatcher)
         sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -65,6 +82,11 @@ class PayPalWebCheckoutClientUnitTest {
             deviceInspector = deviceInspector,
             coreConfig = coreConfig
         )
+    }
+
+    @After
+    fun afterEach() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -1755,9 +1777,8 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() with callback uses fallbackUrlScheme when provided`() {
+    fun `startAsync() with fallbackUrlScheme uses fallbackUrlScheme when provided`() = runTest {
         val fallbackScheme = "com.example.fallback"
-        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every {
             payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
@@ -1767,7 +1788,7 @@ class PayPalWebCheckoutClientUnitTest {
             orderId = "fake-order-id",
             fallbackUrlScheme = fallbackScheme
         )
-        sut.start(activity, request, callback)
+        sut.startAsync(activity, request)
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(

@@ -41,9 +41,9 @@ class PayPalWebCheckoutClient internal constructor(
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val urlScheme: String? = null,
+    private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 
 ) {
-    private val applicationScope = CoroutineScope(SupervisorJob())
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
