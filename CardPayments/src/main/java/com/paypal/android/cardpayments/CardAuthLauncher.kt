@@ -75,7 +75,7 @@ internal class CardAuthLauncher(
             CardFinishApproveOrderResult.Failure(invalidAuthStateError)
         } else {
             val requestCode = BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
-            when (val finalResult = browserSwitchClient.finish(intent, requestCode, pendingState)) {
+            when (val finalResult = pendingState.match(intent, requestCode)) {
                 is BrowserSwitchFinishResult.Success -> parseApproveOrderSuccessResult(finalResult)
                 is BrowserSwitchFinishResult.DeepLinkNotPresent,
                 is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
@@ -91,7 +91,7 @@ internal class CardAuthLauncher(
             CardFinishVaultResult.Failure(invalidAuthStateError)
         } else {
             val requestCode = BrowserSwitchRequestCodes.CARD_VAULT
-            when (val finalResult = browserSwitchClient.finish(intent, requestCode, pendingState)) {
+            when (val finalResult = pendingState.match(intent, requestCode)) {
                 is BrowserSwitchFinishResult.Success -> parseVaultSuccessResult(finalResult)
                 is BrowserSwitchFinishResult.DeepLinkNotPresent,
                 is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,

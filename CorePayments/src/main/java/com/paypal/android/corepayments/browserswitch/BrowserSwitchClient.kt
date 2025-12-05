@@ -16,34 +16,4 @@ class BrowserSwitchClient(
         chromeCustomTabsClient.launch(context, cctOptions)
         return BrowserSwitchStartResult.Success
     }
-
-    fun finish(
-        intent: Intent,
-        requestCode: Int,
-        pendingState: BrowserSwitchPendingState
-    ): BrowserSwitchFinishResult {
-        val originalOptions = pendingState.originalOptions
-        if (requestCode != originalOptions.requestCode) {
-            return BrowserSwitchFinishResult.RequestCodeDoesNotMatch
-        }
-
-        val deepLinkUri = intent.data
-        if (deepLinkUri == null) {
-            return BrowserSwitchFinishResult.DeepLinkNotPresent
-        }
-
-        val deepLinkScheme = deepLinkUri.scheme.orEmpty()
-        val isMatchingDeepLink =
-            deepLinkScheme.equals(originalOptions.returnUrlScheme, ignoreCase = true)
-        return if (isMatchingDeepLink) {
-            BrowserSwitchFinishResult.Success(
-                returnUrl = deepLinkUri,
-                requestCode = originalOptions.requestCode,
-                requestUrl = originalOptions.targetUri,
-                requestMetadata = originalOptions.metadata
-            )
-        } else {
-            BrowserSwitchFinishResult.DeepLinkDoesNotMatch
-        }
-    }
 }
