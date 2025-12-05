@@ -90,7 +90,7 @@ internal class PayPalWebLauncher(
             PayPalWebCheckoutFinishStartResult.Failure(invalidAuthStateError, null)
         } else {
             val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
-            when (val finalResult = browserSwitchClient.finish(intent, requestCode, pendingState)) {
+            when (val finalResult = pendingState.match(intent, requestCode)) {
                 is BrowserSwitchFinishResult.Success -> parseWebCheckoutSuccessResult(finalResult)
                 is BrowserSwitchFinishResult.DeepLinkNotPresent,
                 is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
@@ -109,7 +109,7 @@ internal class PayPalWebLauncher(
             PayPalWebCheckoutFinishVaultResult.Failure(invalidAuthStateError)
         } else {
             val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
-            when (val finalResult = browserSwitchClient.finish(intent, requestCode, pendingState)) {
+            when (val finalResult = pendingState.match(intent, requestCode)) {
                 is BrowserSwitchFinishResult.Success -> parseVaultSuccessResult(finalResult)
                 is BrowserSwitchFinishResult.DeepLinkNotPresent,
                 is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
