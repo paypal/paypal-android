@@ -2,12 +2,14 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Intent
 import android.net.Uri
+import android.provider.Browser
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_VAULT
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import com.paypal.android.corepayments.model.TokenType
 import io.mockk.every
@@ -237,6 +239,16 @@ class PayPalWebLauncherUnitTest {
 
     @Test
     fun `completeCheckoutAuthRequest() parses successful checkout result`() {
+        val originalOptions = BrowserSwitchOptions(
+            targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
+            requestCode = PAYPAL_CHECKOUT,
+            returnUrlScheme = "com.example.app",
+            appLinkUrl = null,
+            metadata = createCheckoutMetadata("fake-order-id")
+        )
+        val pendingState = BrowserSwitchPendingState(originalOptions)
+        intent.data = createCheckoutDeepLinkUrl("fake-payer-id")
+
         val browserSwitchResult = createCheckoutSuccessBrowserSwitchResult(
             requestCode = PAYPAL_CHECKOUT,
             orderId = "fake-order-id",
