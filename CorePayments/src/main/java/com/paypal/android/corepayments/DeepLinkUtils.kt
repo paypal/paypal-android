@@ -7,17 +7,22 @@ import androidx.core.net.toUri
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class DeepLink(val uri: Uri, val originalOptions: BrowserSwitchOptions)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardApproveOrderComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
     DeepLink(uri, originalOptions)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardVaultComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
     DeepLink(uri, originalOptions)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PayPalVaultComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
     DeepLink(uri, originalOptions)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PayPalCheckoutComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
     DeepLink(uri, originalOptions)
 
@@ -32,21 +37,27 @@ sealed class CaptureDeepLinkResult<out T : DeepLink> {
 }
 
 // Ref: https://stackoverflow.com/a/33158859
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> isCardApproveOrder(klass: Class<T>) =
     klass.isAssignableFrom(CardApproveOrderComplete::class.java)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> isCardVault(klass: Class<T>) =
     klass.isAssignableFrom(CardVaultComplete::class.java)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> isPayPalCheckout(klass: Class<T>) =
     klass.isAssignableFrom(PayPalCheckoutComplete::class.java)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> isPayPalVault(klass: Class<T>) =
     klass.isAssignableFrom(PayPalVaultComplete::class.java)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun isCustomSchemeMatch(uri: Uri, options: BrowserSwitchOptions) =
     uri.scheme.orEmpty().equals(options.returnUrlScheme, ignoreCase = true)
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun isAppLinkMatch(uri: Uri, options: BrowserSwitchOptions): Boolean {
     val appLinkUrl = options.appLinkUrl?.toUri()
     if (appLinkUrl != null) {
@@ -57,6 +68,7 @@ fun isAppLinkMatch(uri: Uri, options: BrowserSwitchOptions): Boolean {
     return false
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> getRequestCode(): Int? {
     val klass = T::class.java
     return if (isCardApproveOrder(klass)) {
@@ -72,6 +84,7 @@ inline fun <reified T : DeepLink> getRequestCode(): Int? {
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> buildDeepLink(
     uri: Uri,
     originalOptions: BrowserSwitchOptions
@@ -92,6 +105,7 @@ inline fun <reified T : DeepLink> buildDeepLink(
 
 // TODO: see if we can resolve ReturnCount lint error instead of suppressing it
 @Suppress("ReturnCount")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 inline fun <reified T : DeepLink> captureDeepLink(
     intent: Intent,
     authState: String
