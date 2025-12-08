@@ -1,7 +1,6 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Context
-import android.content.Intent
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

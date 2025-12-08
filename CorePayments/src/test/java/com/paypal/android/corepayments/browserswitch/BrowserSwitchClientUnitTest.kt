@@ -1,19 +1,16 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Context
-import android.content.Intent
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
 import io.mockk.verify
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.skyscreamer.jsonassert.JSONAssert
 
 @RunWith(RobolectricTestRunner::class)
 class BrowserSwitchClientUnitTest {
