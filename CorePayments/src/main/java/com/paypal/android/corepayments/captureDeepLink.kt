@@ -44,10 +44,10 @@ inline fun <reified T : DeepLink> isPayPalCheckout(klass: Class<T>) =
 inline fun <reified T : DeepLink> isPayPalVault(klass: Class<T>) =
     klass.isAssignableFrom(PayPalVaultComplete::class.java)
 
-fun isCustomSchemeMatch(options: BrowserSwitchOptions, uri: Uri) =
+fun isCustomSchemeMatch(uri: Uri, options: BrowserSwitchOptions) =
     uri.scheme.orEmpty().equals(options.returnUrlScheme, ignoreCase = true)
 
-fun isAppLinkMatch(options: BrowserSwitchOptions, uri: Uri): Boolean {
+fun isAppLinkMatch(uri: Uri, options: BrowserSwitchOptions): Boolean {
     val appLinkUrl = options.appLinkUrl?.toUri()
     if (appLinkUrl != null) {
         val hasMatchingScheme = uri.scheme?.equals(appLinkUrl.scheme) ?: false
@@ -55,6 +55,39 @@ fun isAppLinkMatch(options: BrowserSwitchOptions, uri: Uri): Boolean {
         return hasMatchingScheme && hasMatchingHost
     }
     return false
+}
+
+inline fun <reified T : DeepLink> getRequestCode(): Int? {
+    val klass = T::class.java
+    return if (isCardApproveOrder(klass)) {
+        BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
+    } else if (isCardVault(klass)) {
+        BrowserSwitchRequestCodes.CARD_VAULT
+    } else if (isPayPalVault(klass)) {
+        BrowserSwitchRequestCodes.PAYPAL_VAULT
+    } else if (isPayPalCheckout(klass)) {
+        BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
+    } else {
+        null
+    }
+}
+
+inline fun <reified T : DeepLink> buildDeepLink(
+    uri: Uri,
+    originalOptions: BrowserSwitchOptions
+): DeepLink? {
+    val klass = T::class.java
+    return if (isCardApproveOrder(klass)) {
+        CardApproveOrderComplete(uri, originalOptions)
+    } else if (isCardVault(klass)) {
+        CardVaultComplete(uri, originalOptions)
+    } else if (isPayPalVault(klass)) {
+        PayPalVaultComplete(uri, originalOptions)
+    } else if (isPayPalCheckout(klass)) {
+        PayPalCheckoutComplete(uri, originalOptions)
+    } else {
+        null
+    }
 }
 
 inline fun <reified T : DeepLink> captureDeepLink(
@@ -67,19 +100,7 @@ inline fun <reified T : DeepLink> captureDeepLink(
     }
 
     val options = pendingState.originalOptions
-    val klass = T::class.java
-    val requestCode = if (isCardApproveOrder(klass)) {
-        BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
-    } else if (isCardVault(klass)) {
-        BrowserSwitchRequestCodes.CARD_VAULT
-    } else if (isPayPalVault(klass)) {
-        BrowserSwitchRequestCodes.PAYPAL_VAULT
-    } else if (isPayPalCheckout(klass)) {
-        BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
-    } else {
-        null
-    }
-
+    val requestCode = getRequestCode<T>()
     if (requestCode != options.requestCode) {
         return CaptureDeepLinkResult.RequestCodeDoesNotMatch
     }
@@ -90,20 +111,9 @@ inline fun <reified T : DeepLink> captureDeepLink(
     }
 
     val isMatchingDeepLink =
-        isCustomSchemeMatch(options, deepLinkUri) || isAppLinkMatch(options, deepLinkUri)
+        isCustomSchemeMatch(deepLinkUri, options) || isAppLinkMatch(deepLinkUri, options)
     return if (isMatchingDeepLink) {
-        val deepLink = if (isCardApproveOrder(klass)) {
-            CardApproveOrderComplete(deepLinkUri, options)
-        } else if (isCardVault(klass)) {
-            CardVaultComplete(deepLinkUri, options)
-        } else if (isPayPalVault(klass)) {
-            PayPalVaultComplete(deepLinkUri, options)
-        } else if (isPayPalCheckout(klass)) {
-            PayPalCheckoutComplete(deepLinkUri, options)
-        } else {
-            null
-        }
-
+        val deepLink = buildDeepLink<T>(deepLinkUri, options)
         if (deepLink is T) {
             CaptureDeepLinkResult.Success(deepLink)
         } else {
