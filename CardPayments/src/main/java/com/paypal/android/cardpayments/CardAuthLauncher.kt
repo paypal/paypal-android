@@ -9,6 +9,7 @@ import com.paypal.android.corepayments.browserswitch.BrowserSwitchFinishResult
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
+import com.paypal.android.corepayments.captureDeepLink
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
@@ -90,9 +91,14 @@ internal class CardAuthLauncher(
             val invalidAuthStateError = PayPalSDKError(0, "Auth State Invalid.")
             CardFinishVaultResult.Failure(invalidAuthStateError)
         } else {
+            when (captureDeepLink<CardVaultComplete>(intent, pendingState)) {
+
+            }
             val requestCode = BrowserSwitchRequestCodes.CARD_VAULT
             when (val finalResult = pendingState.match(intent, requestCode)) {
-                is BrowserSwitchFinishResult.Success -> parseVaultSuccessResult(finalResult)
+                is BrowserSwitchFinishResult.Success ->
+                    parseVaultSuccessResult(pendingState.originalOptions)
+
                 is BrowserSwitchFinishResult.DeepLinkNotPresent,
                 is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
                 is BrowserSwitchFinishResult.RequestCodeDoesNotMatch -> CardFinishVaultResult.NoResult
@@ -100,23 +106,22 @@ internal class CardAuthLauncher(
         }
     }
 
-    private fun parseVaultSuccessResult(result: BrowserSwitchFinishResult.Success): CardFinishVaultResult =
-        if (result.requestCode == BrowserSwitchRequestCodes.CARD_VAULT) {
-            val setupTokenId = result.requestMetadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
-            if (setupTokenId == null) {
-                CardFinishVaultResult.Failure(CardError.unknownError)
-            } else {
-                // TODO: see if there's a way that we can require the merchant to make their
-                // return and cancel urls conform to a strict schema
-                CardFinishVaultResult.Success(
-                    setupTokenId,
-                    null,
-                    didAttemptThreeDSecureAuthentication = true
-                )
-            }
+    private fun parseVaultSuccessResult(
+        originalOptions: BrowserSwitchOptions
+    ): CardFinishVaultResult {
+        val setupTokenId = originalOptions.metadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
+        return if (setupTokenId == null) {
+            CardFinishVaultResult.Failure(CardError.unknownError)
         } else {
-            CardFinishVaultResult.NoResult
+            // TODO: see if there's a way that we can require the merchant to make their
+            // return and cancel urls conform to a strict schema
+            CardFinishVaultResult.Success(
+                setupTokenId,
+                null,
+                didAttemptThreeDSecureAuthentication = true
+            )
         }
+    }
 
     private fun parseApproveOrderSuccessResult(
         finalResult: BrowserSwitchFinishResult.Success

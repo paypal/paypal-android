@@ -93,7 +93,7 @@ class BrowserSwitchClientUnitTest {
         val result = sut.finish(intent, 123, pendingState)
 
         val successResult = result as? BrowserSwitchFinishResult.Success
-        assertEquals("example.return.url.scheme://domain/path".toUri(), successResult?.returnUrl)
+        assertEquals("example.return.url.scheme://domain/path".toUri(), successResult?.deepLinkUri)
         assertEquals(123, successResult?.requestCode)
         assertEquals("https://example.com/uri".toUri(), successResult?.requestUrl)
         JSONAssert.assertEquals(
@@ -112,7 +112,7 @@ class BrowserSwitchClientUnitTest {
         val result = sut.finish(intent, 123, pendingState)
 
         val successResult = result as? BrowserSwitchFinishResult.Success
-        assertEquals("EXAMPLE.RETURN.URL.SCHEME://domain/path".toUri(), successResult?.returnUrl)
+        assertEquals("EXAMPLE.RETURN.URL.SCHEME://domain/path".toUri(), successResult?.deepLinkUri)
         assertEquals(123, successResult?.requestCode)
         assertEquals("https://example.com/uri".toUri(), successResult?.requestUrl)
         JSONAssert.assertEquals(
