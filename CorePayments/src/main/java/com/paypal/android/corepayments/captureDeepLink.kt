@@ -22,7 +22,7 @@ class PayPalCheckoutComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
     DeepLink(uri, originalOptions)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class CaptureDeepLinkResult<out T : DeepLink>() {
+sealed class CaptureDeepLinkResult<out T : DeepLink> {
     data class Success<T : DeepLink>(val deepLink: T) : CaptureDeepLinkResult<T>()
     object RequestCodeDoesNotMatch : CaptureDeepLinkResult<Nothing>()
     object DeepLinkNotPresent : CaptureDeepLinkResult<Nothing>()
