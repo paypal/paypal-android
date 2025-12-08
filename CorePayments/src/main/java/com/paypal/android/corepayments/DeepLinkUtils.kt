@@ -28,11 +28,17 @@ class PayPalCheckoutComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CaptureDeepLinkResult<out T : DeepLink> {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Success<T : DeepLink>(val deepLink: T) : CaptureDeepLinkResult<T>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object RequestCodeDoesNotMatch : CaptureDeepLinkResult<Nothing>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object DeepLinkNotPresent : CaptureDeepLinkResult<Nothing>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object DeepLinkDoesNotMatch : CaptureDeepLinkResult<Nothing>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object UnknownError : CaptureDeepLinkResult<Nothing>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object AuthStateInvalid : CaptureDeepLinkResult<Nothing>()
 }
 

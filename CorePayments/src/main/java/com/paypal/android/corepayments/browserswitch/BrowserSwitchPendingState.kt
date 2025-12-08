@@ -6,12 +6,6 @@ import androidx.core.net.toUri
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
 
-const val KEY_TARGET_URI = "targetUri"
-const val KEY_REQUEST_CODE = "requestCode"
-const val KEY_RETURN_URL_SCHEME = "returnUrlScheme"
-const val KEY_APP_LINK_URL = "appLinkUrl"
-const val KEY_METADATA = "metadata"
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) {
 
@@ -27,7 +21,15 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
         return Base64.encodeToString(jsonBytes, flags)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        const val KEY_TARGET_URI = "targetUri"
+        const val KEY_REQUEST_CODE = "requestCode"
+        const val KEY_RETURN_URL_SCHEME = "returnUrlScheme"
+        const val KEY_APP_LINK_URL = "appLinkUrl"
+        const val KEY_METADATA = "metadata"
+
         fun fromBase64(base64EncodedJSON: String): BrowserSwitchPendingState? {
             val data = Base64.decode(base64EncodedJSON, Base64.DEFAULT)
             val requestJSONString = String(data, StandardCharsets.UTF_8)
