@@ -6,9 +6,14 @@ import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
-import kotlin.text.equals
 
 sealed class DeepLink(val uri: Uri, val originalOptions: BrowserSwitchOptions)
+
+class CardApproveOrderComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
+    DeepLink(uri, originalOptions)
+
+class CardVaultComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
+    DeepLink(uri, originalOptions)
 
 class PayPalVaultComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
     DeepLink(uri, originalOptions)
@@ -27,6 +32,12 @@ sealed class CaptureDeepLinkResult<out T : DeepLink>() {
 }
 
 // Ref: https://stackoverflow.com/a/33158859
+inline fun <reified T : DeepLink> isCardApproveOrder(klass: Class<T>) =
+    klass.isAssignableFrom(CardApproveOrderComplete::class.java)
+
+inline fun <reified T : DeepLink> isCardVault(klass: Class<T>) =
+    klass.isAssignableFrom(CardVaultComplete::class.java)
+
 inline fun <reified T : DeepLink> isPayPalCheckout(klass: Class<T>) =
     klass.isAssignableFrom(PayPalCheckoutComplete::class.java)
 
@@ -57,7 +68,11 @@ inline fun <reified T : DeepLink> captureDeepLink(
 
     val options = pendingState.originalOptions
     val klass = T::class.java
-    val requestCode = if (isPayPalVault(klass)) {
+    val requestCode = if (isCardApproveOrder(klass)) {
+        BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
+    } else if (isCardVault(klass)) {
+        BrowserSwitchRequestCodes.CARD_VAULT
+    } else if (isPayPalVault(klass)) {
         BrowserSwitchRequestCodes.PAYPAL_VAULT
     } else if (isPayPalCheckout(klass)) {
         BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
@@ -77,13 +92,18 @@ inline fun <reified T : DeepLink> captureDeepLink(
     val isMatchingDeepLink =
         isCustomSchemeMatch(options, deepLinkUri) || isAppLinkMatch(options, deepLinkUri)
     return if (isMatchingDeepLink) {
-        val deepLink = if (isPayPalVault(klass)) {
+        val deepLink = if (isCardApproveOrder(klass)) {
+            CardApproveOrderComplete(deepLinkUri, options)
+        } else if (isCardVault(klass)) {
+            CardVaultComplete(deepLinkUri, options)
+        } else if (isPayPalVault(klass)) {
             PayPalVaultComplete(deepLinkUri, options)
         } else if (isPayPalCheckout(klass)) {
             PayPalCheckoutComplete(deepLinkUri, options)
         } else {
             null
         }
+
         if (deepLink is T) {
             CaptureDeepLinkResult.Success(deepLink)
         } else {

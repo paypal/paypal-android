@@ -3,9 +3,10 @@ package com.paypal.android.cardpayments
 import android.app.Activity
 import android.content.Intent
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
-import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.CaptureDeepLinkResult
+import com.paypal.android.corepayments.CardApproveOrderComplete
+import com.paypal.android.corepayments.CardVaultComplete
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
-import com.paypal.android.corepayments.browserswitch.BrowserSwitchFinishResult
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
@@ -69,46 +70,21 @@ internal class CardAuthLauncher(
     fun completeApproveOrderAuthRequest(
         intent: Intent,
         authState: String
-    ): CardFinishApproveOrderResult {
-        val pendingState = BrowserSwitchPendingState.fromBase64(authState)
-        return if (pendingState == null) {
-            val invalidAuthStateError = PayPalSDKError(0, "Auth State Invalid.")
-            CardFinishApproveOrderResult.Failure(invalidAuthStateError)
-        } else {
-            val requestCode = BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
-            when (val finalResult = pendingState.match(intent, requestCode)) {
-                is BrowserSwitchFinishResult.Success -> parseApproveOrderSuccessResult(finalResult)
-                is BrowserSwitchFinishResult.DeepLinkNotPresent,
-                is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
-                is BrowserSwitchFinishResult.RequestCodeDoesNotMatch -> CardFinishApproveOrderResult.NoResult
-            }
-        }
+    ) = when (val result = captureDeepLink<CardApproveOrderComplete>(intent, authState)) {
+        is CaptureDeepLinkResult.Success -> parseApproveOrderSuccessResult(result.deepLink)
+        else -> CardFinishApproveOrderResult.NoResult
     }
 
-    fun completeVaultAuthRequest(intent: Intent, authState: String): CardFinishVaultResult {
-        val pendingState = BrowserSwitchPendingState.fromBase64(authState)
-        return if (pendingState == null) {
-            val invalidAuthStateError = PayPalSDKError(0, "Auth State Invalid.")
-            CardFinishVaultResult.Failure(invalidAuthStateError)
-        } else {
-            when (captureDeepLink<CardVaultComplete>(intent, pendingState)) {
-
-            }
-            val requestCode = BrowserSwitchRequestCodes.CARD_VAULT
-            when (val finalResult = pendingState.match(intent, requestCode)) {
-                is BrowserSwitchFinishResult.Success ->
-                    parseVaultSuccessResult(pendingState.originalOptions)
-
-                is BrowserSwitchFinishResult.DeepLinkNotPresent,
-                is BrowserSwitchFinishResult.DeepLinkDoesNotMatch,
-                is BrowserSwitchFinishResult.RequestCodeDoesNotMatch -> CardFinishVaultResult.NoResult
-            }
+    fun completeVaultAuthRequest(intent: Intent, authState: String) =
+        when (val result = captureDeepLink<CardVaultComplete>(intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(result.deepLink)
+            else -> CardFinishVaultResult.NoResult
         }
-    }
 
     private fun parseVaultSuccessResult(
-        originalOptions: BrowserSwitchOptions
+        deepLink: CardVaultComplete
     ): CardFinishVaultResult {
+        val originalOptions = deepLink.originalOptions
         val setupTokenId = originalOptions.metadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
         return if (setupTokenId == null) {
             CardFinishVaultResult.Failure(CardError.unknownError)
@@ -124,19 +100,17 @@ internal class CardAuthLauncher(
     }
 
     private fun parseApproveOrderSuccessResult(
-        finalResult: BrowserSwitchFinishResult.Success
-    ): CardFinishApproveOrderResult =
-        if (finalResult.requestCode == BrowserSwitchRequestCodes.CARD_APPROVE_ORDER) {
-            val orderId = finalResult.requestMetadata?.optString(METADATA_KEY_ORDER_ID)
-            if (orderId == null) {
-                CardFinishApproveOrderResult.Failure(CardError.unknownError)
-            } else {
-                CardFinishApproveOrderResult.Success(
-                    orderId = orderId,
-                    didAttemptThreeDSecureAuthentication = true
-                )
-            }
+        deepLink: CardApproveOrderComplete
+    ): CardFinishApproveOrderResult {
+        val originalOptions = deepLink.originalOptions
+        val orderId = originalOptions.metadata?.optString(METADATA_KEY_ORDER_ID)
+        return if (orderId == null) {
+            CardFinishApproveOrderResult.Failure(CardError.unknownError)
         } else {
-            CardFinishApproveOrderResult.NoResult
+            CardFinishApproveOrderResult.Success(
+                orderId = orderId,
+                didAttemptThreeDSecureAuthentication = true
+            )
         }
+    }
 }
