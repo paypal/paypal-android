@@ -1,6 +1,5 @@
 package com.paypal.android.corepayments.browserswitch
 
-import android.content.Intent
 import android.util.Base64
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
@@ -26,30 +25,6 @@ data class BrowserSwitchPendingState(val originalOptions: BrowserSwitchOptions) 
         val jsonBytes: ByteArray? = json.toString().toByteArray(StandardCharsets.UTF_8)
         val flags = Base64.DEFAULT or Base64.NO_WRAP
         return Base64.encodeToString(jsonBytes, flags)
-    }
-
-    // TODO: consider renaming this method; "match" sounds like it returns a boolean
-    fun match(
-        intent: Intent,
-        requestCode: Int,
-    ): BrowserSwitchFinishResult {
-        if (requestCode != originalOptions.requestCode) {
-            return BrowserSwitchFinishResult.RequestCodeDoesNotMatch
-        }
-
-        val deepLinkUri = intent.data
-        if (deepLinkUri == null) {
-            return BrowserSwitchFinishResult.DeepLinkNotPresent
-        }
-
-        val deepLinkScheme = deepLinkUri.scheme.orEmpty()
-        val isMatchingDeepLink =
-            deepLinkScheme.equals(originalOptions.returnUrlScheme, ignoreCase = true)
-        return if (isMatchingDeepLink) {
-            BrowserSwitchFinishResult.Success(deepLinkUri = deepLinkUri)
-        } else {
-            BrowserSwitchFinishResult.DeepLinkDoesNotMatch
-        }
     }
 
     companion object {
