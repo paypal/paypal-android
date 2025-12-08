@@ -90,6 +90,8 @@ inline fun <reified T : DeepLink> buildDeepLink(
     }
 }
 
+// TODO: see if we can resolve ReturnCount lint error instead of suppressing it
+@Suppress("ReturnCount")
 inline fun <reified T : DeepLink> captureDeepLink(
     intent: Intent,
     authState: String
