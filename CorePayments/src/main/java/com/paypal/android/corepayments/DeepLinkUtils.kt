@@ -8,56 +8,25 @@ import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class DeepLink(val uri: Uri, val originalOptions: BrowserSwitchOptions)
+data class DeepLinkV2(val uri: Uri, val originalOptions: BrowserSwitchOptions)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardApproveOrderComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
-    DeepLink(uri, originalOptions)
+sealed class CaptureDeepLinkResultV2 {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Success(val deepLink: DeepLinkV2) : CaptureDeepLinkResultV2()
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardVaultComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
-    DeepLink(uri, originalOptions)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object RequestCodeDoesNotMatch : CaptureDeepLinkResultV2()
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PayPalVaultComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
-    DeepLink(uri, originalOptions)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object DeepLinkNotPresent : CaptureDeepLinkResultV2()
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PayPalCheckoutComplete(uri: Uri, originalOptions: BrowserSwitchOptions) :
-    DeepLink(uri, originalOptions)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object DeepLinkDoesNotMatch : CaptureDeepLinkResultV2()
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class CaptureDeepLinkResult<out T : DeepLink> {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Success<T : DeepLink>(val deepLink: T) : CaptureDeepLinkResult<T>()
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object RequestCodeDoesNotMatch : CaptureDeepLinkResult<Nothing>()
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object DeepLinkNotPresent : CaptureDeepLinkResult<Nothing>()
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object DeepLinkDoesNotMatch : CaptureDeepLinkResult<Nothing>()
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object UnknownError : CaptureDeepLinkResult<Nothing>()
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object AuthStateInvalid : CaptureDeepLinkResult<Nothing>()
+    object AuthStateInvalid : CaptureDeepLinkResultV2()
 }
-
-// Ref: https://stackoverflow.com/a/33158859
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> isCardApproveOrder(klass: Class<T>) =
-    klass.isAssignableFrom(CardApproveOrderComplete::class.java)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> isCardVault(klass: Class<T>) =
-    klass.isAssignableFrom(CardVaultComplete::class.java)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> isPayPalCheckout(klass: Class<T>) =
-    klass.isAssignableFrom(PayPalCheckoutComplete::class.java)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> isPayPalVault(klass: Class<T>) =
-    klass.isAssignableFrom(PayPalVaultComplete::class.java)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun isCustomSchemeMatch(uri: Uri, options: BrowserSwitchOptions) =
@@ -74,74 +43,34 @@ fun isAppLinkMatch(uri: Uri, options: BrowserSwitchOptions): Boolean {
     return false
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> getRequestCode(): Int? {
-    val klass = T::class.java
-    return if (isCardApproveOrder(klass)) {
-        BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
-    } else if (isCardVault(klass)) {
-        BrowserSwitchRequestCodes.CARD_VAULT
-    } else if (isPayPalVault(klass)) {
-        BrowserSwitchRequestCodes.PAYPAL_VAULT
-    } else if (isPayPalCheckout(klass)) {
-        BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
-    } else {
-        null
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> buildDeepLink(
-    uri: Uri,
-    originalOptions: BrowserSwitchOptions
-): DeepLink? {
-    val klass = T::class.java
-    return if (isCardApproveOrder(klass)) {
-        CardApproveOrderComplete(uri, originalOptions)
-    } else if (isCardVault(klass)) {
-        CardVaultComplete(uri, originalOptions)
-    } else if (isPayPalVault(klass)) {
-        PayPalVaultComplete(uri, originalOptions)
-    } else if (isPayPalCheckout(klass)) {
-        PayPalCheckoutComplete(uri, originalOptions)
-    } else {
-        null
-    }
-}
-
 // TODO: see if we can resolve ReturnCount lint error instead of suppressing it
 @Suppress("ReturnCount")
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-inline fun <reified T : DeepLink> captureDeepLink(
+fun captureDeepLinkV2(
+    requestCode: Int,
     intent: Intent,
     authState: String
-): CaptureDeepLinkResult<T> {
+): CaptureDeepLinkResultV2 {
     val pendingState = BrowserSwitchPendingState.fromBase64(authState)
     if (pendingState == null) {
-        return CaptureDeepLinkResult.AuthStateInvalid
+        return CaptureDeepLinkResultV2.AuthStateInvalid
     }
 
     val options = pendingState.originalOptions
-    val requestCode = getRequestCode<T>()
     if (requestCode != options.requestCode) {
-        return CaptureDeepLinkResult.RequestCodeDoesNotMatch
+        return CaptureDeepLinkResultV2.RequestCodeDoesNotMatch
     }
 
     val deepLinkUri = intent.data
     if (deepLinkUri == null) {
-        return CaptureDeepLinkResult.DeepLinkNotPresent
+        return CaptureDeepLinkResultV2.DeepLinkNotPresent
     }
 
     val isMatchingDeepLink =
         isCustomSchemeMatch(deepLinkUri, options) || isAppLinkMatch(deepLinkUri, options)
     return if (isMatchingDeepLink) {
-        val deepLink = buildDeepLink<T>(deepLinkUri, options)
-        if (deepLink is T) {
-            CaptureDeepLinkResult.Success(deepLink)
-        } else {
-            CaptureDeepLinkResult.UnknownError
-        }
+        val deepLink = DeepLinkV2(deepLinkUri, pendingState.originalOptions)
+        CaptureDeepLinkResultV2.Success(deepLink)
     } else {
-        CaptureDeepLinkResult.DeepLinkDoesNotMatch
+        CaptureDeepLinkResultV2.DeepLinkDoesNotMatch
     }
 }
