@@ -2,6 +2,7 @@ package com.paypal.android.cardpayments
 
 import android.net.Uri
 import android.os.Parcelable
+import androidx.core.net.toUri
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -17,13 +18,13 @@ sealed class CardAuthChallenge {
     internal class ApproveOrder(
         override val url: Uri,
         val request: CardRequest,
-        override val returnUrlScheme: String? = Uri.parse(request.returnUrl).scheme
+        override val returnUrlScheme: String? = request.returnUrl.toUri().scheme
     ) : CardAuthChallenge(), Parcelable
 
     @Parcelize
     internal class Vault(
         override val url: Uri,
         val request: CardVaultRequest,
-        override val returnUrlScheme: String? = Uri.parse(request.returnUrl).scheme
+        override val returnUrlScheme: String? = request.returnUrl?.toUri()?.scheme
     ) : CardAuthChallenge(), Parcelable
 }

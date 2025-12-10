@@ -2,12 +2,13 @@ package com.paypal.android.cardpayments
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
-import com.braintreepayments.api.BrowserSwitchClient
-import com.braintreepayments.api.BrowserSwitchFinalResult
-import com.braintreepayments.api.BrowserSwitchOptions
-import com.braintreepayments.api.BrowserSwitchStartResult
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -64,7 +65,7 @@ class CardAuthLauncherUnitTest {
     @Test
     fun `presentAuthChallenge() browser switches to approve order auth challenge url`() {
         val slot = slot<BrowserSwitchOptions>()
-        val browserSwitchResult = BrowserSwitchStartResult.Started("pending request")
+        val browserSwitchResult = BrowserSwitchStartResult.Success
         every { browserSwitchClient.start(activity, capture(slot)) } returns browserSwitchResult
 
         val returnUrl = "merchant.app://return.com/deep-link"
@@ -79,14 +80,14 @@ class CardAuthLauncherUnitTest {
         val metadata = browserSwitchOptions.metadata
         assertEquals("fake-order-id", metadata?.getString("order_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
-        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
+        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.targetUri)
         assertEquals(BrowserSwitchRequestCodes.CARD_APPROVE_ORDER, browserSwitchOptions.requestCode)
     }
 
     @Test
     fun `presentAuthChallenge() browser switches to vault auth challenge url`() {
         val slot = slot<BrowserSwitchOptions>()
-        val browserSwitchResult = BrowserSwitchStartResult.Started("pending request")
+        val browserSwitchResult = BrowserSwitchStartResult.Success
         every { browserSwitchClient.start(activity, capture(slot)) } returns browserSwitchResult
 
         val returnUrl = "merchant.app://return.com/deep-link"
@@ -101,7 +102,7 @@ class CardAuthLauncherUnitTest {
         val metadata = browserSwitchOptions.metadata
         assertEquals("fake-setup-token-id", metadata?.getString("setup_token_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
-        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.url)
+        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.targetUri)
         assertEquals(BrowserSwitchRequestCodes.CARD_VAULT, browserSwitchOptions.requestCode)
     }
 
@@ -113,17 +114,17 @@ class CardAuthLauncherUnitTest {
         val domain = "example.com"
         val successDeepLink =
             "$scheme://$domain/return_url?state=undefined&code=undefined&liability_shift=NO"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
-            approveOrderMetadata,
-            Uri.parse(successDeepLink)
+        val options = BrowserSwitchOptions(
+            targetUri = "https://fake.com/destination".toUri(),
+            requestCode = BrowserSwitchRequestCodes.CARD_APPROVE_ORDER,
+            returnUrlScheme = scheme,
+            appLinkUrl = null,
+            metadata = approveOrderMetadata
         )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
+        val authState = BrowserSwitchPendingState(options).toBase64EncodedJSON()
+        intent.data = successDeepLink.toUri()
 
-        val result = sut.completeApproveOrderAuthRequest(intent, "pending request")
+        val result = sut.completeApproveOrderAuthRequest(intent, authState)
                 as CardFinishApproveOrderResult.Success
 
         assertEquals("fake-order-id", result.orderId)
@@ -138,32 +139,19 @@ class CardAuthLauncherUnitTest {
         val scheme = "com.paypal.android.demo"
         val domain = "example.com"
         val successDeepLink = "$scheme://$domain/success"
-
-        val finalResult = createBrowserSwitchSuccessFinalResult(
-            BrowserSwitchRequestCodes.CARD_VAULT,
-            vaultMetadata,
-            Uri.parse(successDeepLink)
+        val options = BrowserSwitchOptions(
+            targetUri = "https://fake.com/destination".toUri(),
+            requestCode = BrowserSwitchRequestCodes.CARD_VAULT,
+            returnUrlScheme = scheme,
+            appLinkUrl = null,
+            metadata = vaultMetadata
         )
-        every {
-            browserSwitchClient.completeRequest(intent, "pending request")
-        } returns finalResult
+        val authState = BrowserSwitchPendingState(options).toBase64EncodedJSON()
+        intent.data = successDeepLink.toUri()
 
         val result =
-            sut.completeVaultAuthRequest(intent, "pending request") as CardFinishVaultResult.Success
+            sut.completeVaultAuthRequest(intent, authState) as CardFinishVaultResult.Success
         assertEquals("fake-setup-token-id", result.setupTokenId)
         assertNull(result.status)
-    }
-
-    private fun createBrowserSwitchSuccessFinalResult(
-        requestCode: Int,
-        metadata: JSONObject,
-        deepLinkUrl: Uri
-    ): BrowserSwitchFinalResult.Success {
-        val finalResult = mockk<BrowserSwitchFinalResult.Success>(relaxed = true)
-        every { finalResult.returnUrl } returns deepLinkUrl
-        every { finalResult.requestMetadata } returns metadata
-        every { finalResult.requestCode } returns requestCode
-        every { finalResult.requestUrl } returns Uri.parse("https://example.com/url")
-        return finalResult
     }
 }
