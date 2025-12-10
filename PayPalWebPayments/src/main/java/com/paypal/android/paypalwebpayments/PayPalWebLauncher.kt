@@ -86,9 +86,12 @@ internal class PayPalWebLauncher(
         authState: String
     ): PayPalWebCheckoutFinishStartResult {
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
-        return when (val captured = captureDeepLink(requestCode, intent, authState)) {
-            is CaptureDeepLinkResult.Success -> parseWebCheckoutSuccessResult(captured.deepLink)
-            else -> PayPalWebCheckoutFinishStartResult.NoResult
+        return when (val result = captureDeepLink(requestCode, intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseWebCheckoutSuccessResult(result.deepLink)
+            is CaptureDeepLinkResult.Failure ->
+                PayPalWebCheckoutFinishStartResult.Failure(result.reason, orderId = null)
+
+            is CaptureDeepLinkResult.Ignore -> PayPalWebCheckoutFinishStartResult.NoResult
         }
     }
 
@@ -97,9 +100,12 @@ internal class PayPalWebLauncher(
         authState: String
     ): PayPalWebCheckoutFinishVaultResult {
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
-        return when (val captured = captureDeepLink(requestCode, intent, authState)) {
-            is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(captured.deepLink)
-            else -> PayPalWebCheckoutFinishVaultResult.NoResult
+        return when (val result = captureDeepLink(requestCode, intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(result.deepLink)
+            is CaptureDeepLinkResult.Failure ->
+                PayPalWebCheckoutFinishVaultResult.Failure(result.reason)
+
+            is CaptureDeepLinkResult.Ignore -> PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
 
