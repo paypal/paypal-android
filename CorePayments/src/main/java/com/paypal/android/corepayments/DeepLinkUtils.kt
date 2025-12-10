@@ -30,6 +30,7 @@ sealed class CaptureDeepLinkResult {
 
 // TODO: see if we can resolve ReturnCount lint error instead of suppressing it
 @Suppress("ReturnCount")
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun captureDeepLink(
     requestCode: Int,
     intent: Intent,
