@@ -8,55 +8,55 @@ import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class DeepLinkV2(val uri: Uri, val originalOptions: BrowserSwitchOptions)
+data class DeepLink(val uri: Uri, val originalOptions: BrowserSwitchOptions)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class CaptureDeepLinkResultV2 {
+sealed class CaptureDeepLinkResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Success(val deepLink: DeepLinkV2) : CaptureDeepLinkResultV2()
+    data class Success(val deepLink: DeepLink) : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object RequestCodeDoesNotMatch : CaptureDeepLinkResultV2()
+    object RequestCodeDoesNotMatch : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object DeepLinkNotPresent : CaptureDeepLinkResultV2()
+    object DeepLinkNotPresent : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object DeepLinkDoesNotMatch : CaptureDeepLinkResultV2()
+    object DeepLinkDoesNotMatch : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object AuthStateInvalid : CaptureDeepLinkResultV2()
+    object AuthStateInvalid : CaptureDeepLinkResult()
 }
 
 // TODO: see if we can resolve ReturnCount lint error instead of suppressing it
 @Suppress("ReturnCount")
-fun captureDeepLinkV2(
+fun captureDeepLink(
     requestCode: Int,
     intent: Intent,
     authState: String
-): CaptureDeepLinkResultV2 {
+): CaptureDeepLinkResult {
     val pendingState = BrowserSwitchPendingState.fromBase64(authState)
     if (pendingState == null) {
-        return CaptureDeepLinkResultV2.AuthStateInvalid
+        return CaptureDeepLinkResult.AuthStateInvalid
     }
 
     val options = pendingState.originalOptions
     if (requestCode != options.requestCode) {
-        return CaptureDeepLinkResultV2.RequestCodeDoesNotMatch
+        return CaptureDeepLinkResult.RequestCodeDoesNotMatch
     }
 
     val deepLinkUri = intent.data
     if (deepLinkUri == null) {
-        return CaptureDeepLinkResultV2.DeepLinkNotPresent
+        return CaptureDeepLinkResult.DeepLinkNotPresent
     }
 
     val isMatchingDeepLink =
         isCustomSchemeMatch(deepLinkUri, options) || isAppLinkMatch(deepLinkUri, options)
     return if (isMatchingDeepLink) {
-        val deepLink = DeepLinkV2(deepLinkUri, pendingState.originalOptions)
-        CaptureDeepLinkResultV2.Success(deepLink)
+        val deepLink = DeepLink(deepLinkUri, pendingState.originalOptions)
+        CaptureDeepLinkResult.Success(deepLink)
     } else {
-        CaptureDeepLinkResultV2.DeepLinkDoesNotMatch
+        CaptureDeepLinkResult.DeepLinkDoesNotMatch
     }
 }
 
