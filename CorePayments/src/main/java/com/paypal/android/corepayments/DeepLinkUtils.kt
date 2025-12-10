@@ -28,21 +28,6 @@ sealed class CaptureDeepLinkResultV2 {
     object AuthStateInvalid : CaptureDeepLinkResultV2()
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun isCustomSchemeMatch(uri: Uri, options: BrowserSwitchOptions) =
-    uri.scheme.orEmpty().equals(options.returnUrlScheme, ignoreCase = true)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun isAppLinkMatch(uri: Uri, options: BrowserSwitchOptions): Boolean {
-    val appLinkUrl = options.appLinkUrl?.toUri()
-    if (appLinkUrl != null) {
-        val hasMatchingScheme = uri.scheme?.equals(appLinkUrl.scheme) ?: false
-        val hasMatchingHost = uri.host?.equals(appLinkUrl.host) ?: false
-        return hasMatchingScheme && hasMatchingHost
-    }
-    return false
-}
-
 // TODO: see if we can resolve ReturnCount lint error instead of suppressing it
 @Suppress("ReturnCount")
 fun captureDeepLinkV2(
@@ -73,4 +58,17 @@ fun captureDeepLinkV2(
     } else {
         CaptureDeepLinkResultV2.DeepLinkDoesNotMatch
     }
+}
+
+private fun isCustomSchemeMatch(uri: Uri, options: BrowserSwitchOptions) =
+    uri.scheme.orEmpty().equals(options.returnUrlScheme, ignoreCase = true)
+
+private fun isAppLinkMatch(uri: Uri, options: BrowserSwitchOptions): Boolean {
+    val appLinkUrl = options.appLinkUrl?.toUri()
+    if (appLinkUrl != null) {
+        val hasMatchingScheme = uri.scheme?.equals(appLinkUrl.scheme) ?: false
+        val hasMatchingHost = uri.host?.equals(appLinkUrl.host) ?: false
+        return hasMatchingScheme && hasMatchingHost
+    }
+    return false
 }
