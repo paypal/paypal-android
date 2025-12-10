@@ -4,13 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
-import com.paypal.android.corepayments.CaptureDeepLinkResultV2
-import com.paypal.android.corepayments.DeepLinkV2
+import com.paypal.android.corepayments.CaptureDeepLinkResult
+import com.paypal.android.corepayments.DeepLink
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
-import com.paypal.android.corepayments.captureDeepLinkV2
+import com.paypal.android.corepayments.captureDeepLink
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import org.json.JSONObject
@@ -86,8 +86,8 @@ internal class PayPalWebLauncher(
         authState: String
     ): PayPalWebCheckoutFinishStartResult {
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
-        return when (val captured = captureDeepLinkV2(requestCode, intent, authState)) {
-            is CaptureDeepLinkResultV2.Success -> parseWebCheckoutSuccessResult(captured.deepLink)
+        return when (val captured = captureDeepLink(requestCode, intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseWebCheckoutSuccessResult(captured.deepLink)
             else -> PayPalWebCheckoutFinishStartResult.NoResult
         }
     }
@@ -97,14 +97,14 @@ internal class PayPalWebLauncher(
         authState: String
     ): PayPalWebCheckoutFinishVaultResult {
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
-        return when (val captured = captureDeepLinkV2(requestCode, intent, authState)) {
-            is CaptureDeepLinkResultV2.Success -> parseVaultSuccessResult(captured.deepLink)
+        return when (val captured = captureDeepLink(requestCode, intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(captured.deepLink)
             else -> PayPalWebCheckoutFinishVaultResult.NoResult
         }
     }
 
     private fun parseWebCheckoutSuccessResult(
-        deepLink: DeepLinkV2
+        deepLink: DeepLink
     ): PayPalWebCheckoutFinishStartResult {
         val metadata = deepLink.originalOptions.metadata
         return if (metadata == null) {
@@ -128,7 +128,7 @@ internal class PayPalWebLauncher(
     }
 
     private fun parseVaultSuccessResult(
-        deepLink: DeepLinkV2
+        deepLink: DeepLink
     ): PayPalWebCheckoutFinishVaultResult {
         val requestMetadata = deepLink.originalOptions.metadata
         return if (requestMetadata == null) {

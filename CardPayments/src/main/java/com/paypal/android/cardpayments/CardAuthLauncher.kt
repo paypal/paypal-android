@@ -3,13 +3,13 @@ package com.paypal.android.cardpayments
 import android.app.Activity
 import android.content.Intent
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
-import com.paypal.android.corepayments.CaptureDeepLinkResultV2
-import com.paypal.android.corepayments.DeepLinkV2
+import com.paypal.android.corepayments.CaptureDeepLinkResult
+import com.paypal.android.corepayments.DeepLink
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
-import com.paypal.android.corepayments.captureDeepLinkV2
+import com.paypal.android.corepayments.captureDeepLink
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
@@ -71,21 +71,21 @@ internal class CardAuthLauncher(
         authState: String
     ): CardFinishApproveOrderResult {
         val requestCode = BrowserSwitchRequestCodes.CARD_APPROVE_ORDER
-        return when (val result = captureDeepLinkV2(requestCode, intent, authState)) {
-            is CaptureDeepLinkResultV2.Success -> parseApproveOrderSuccessResult(result.deepLink)
+        return when (val result = captureDeepLink(requestCode, intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseApproveOrderSuccessResult(result.deepLink)
             else -> CardFinishApproveOrderResult.NoResult
         }
     }
 
     fun completeVaultAuthRequest(intent: Intent, authState: String): CardFinishVaultResult {
         val requestCode = BrowserSwitchRequestCodes.CARD_VAULT
-        return when (val result = captureDeepLinkV2(requestCode, intent, authState)) {
-            is CaptureDeepLinkResultV2.Success -> parseVaultSuccessResult(result.deepLink)
+        return when (val result = captureDeepLink(requestCode, intent, authState)) {
+            is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(result.deepLink)
             else -> CardFinishVaultResult.NoResult
         }
     }
 
-    private fun parseVaultSuccessResult(deepLink: DeepLinkV2): CardFinishVaultResult {
+    private fun parseVaultSuccessResult(deepLink: DeepLink): CardFinishVaultResult {
         val originalOptions = deepLink.originalOptions
         val setupTokenId = originalOptions.metadata?.optString(METADATA_KEY_SETUP_TOKEN_ID)
         return if (setupTokenId == null) {
@@ -101,7 +101,7 @@ internal class CardAuthLauncher(
         }
     }
 
-    private fun parseApproveOrderSuccessResult(deepLink: DeepLinkV2): CardFinishApproveOrderResult {
+    private fun parseApproveOrderSuccessResult(deepLink: DeepLink): CardFinishApproveOrderResult {
         val originalOptions = deepLink.originalOptions
         val orderId = originalOptions.metadata?.optString(METADATA_KEY_ORDER_ID)
         return if (orderId == null) {
