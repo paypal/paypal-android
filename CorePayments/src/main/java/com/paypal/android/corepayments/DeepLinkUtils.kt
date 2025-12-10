@@ -16,16 +16,10 @@ sealed class CaptureDeepLinkResult {
     data class Success(val deepLink: DeepLink) : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object RequestCodeDoesNotMatch : CaptureDeepLinkResult()
+    data class Failure(val reason: PayPalSDKError) : CaptureDeepLinkResult()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object DeepLinkNotPresent : CaptureDeepLinkResult()
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object DeepLinkDoesNotMatch : CaptureDeepLinkResult()
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object AuthStateInvalid : CaptureDeepLinkResult()
+    data class Ignore(val debugMessage: String) : CaptureDeepLinkResult()
 }
 
 // TODO: see if we can resolve ReturnCount lint error instead of suppressing it
@@ -38,17 +32,21 @@ fun captureDeepLink(
 ): CaptureDeepLinkResult {
     val pendingState = BrowserSwitchPendingState.fromBase64(authState)
     if (pendingState == null) {
-        return CaptureDeepLinkResult.AuthStateInvalid
+        // TODO: remove error codes and error description from project; the built in
+        // Throwable type already has a message property and error codes are only required
+        // for iOS Error protocol conformance
+        val reason = PayPalSDKError(0, "Auth state invalid.")
+        return CaptureDeepLinkResult.Failure(reason)
     }
 
     val options = pendingState.originalOptions
     if (requestCode != options.requestCode) {
-        return CaptureDeepLinkResult.RequestCodeDoesNotMatch
+        return CaptureDeepLinkResult.Ignore("Request code does not match.")
     }
 
     val deepLinkUri = intent.data
     if (deepLinkUri == null) {
-        return CaptureDeepLinkResult.DeepLinkNotPresent
+        return CaptureDeepLinkResult.Ignore("Intent data is null.")
     }
 
     val isMatchingDeepLink =
@@ -57,7 +55,8 @@ fun captureDeepLink(
         val deepLink = DeepLink(deepLinkUri, pendingState.originalOptions)
         CaptureDeepLinkResult.Success(deepLink)
     } else {
-        CaptureDeepLinkResult.DeepLinkDoesNotMatch
+        val message = "Deep link custom scheme or host is not associated with the original request."
+        CaptureDeepLinkResult.Ignore(message)
     }
 }
 
