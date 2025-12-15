@@ -1,8 +1,8 @@
 package com.paypal.android.usecase
 
-import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
 import com.paypal.android.DemoConstants.APP_URL
-import com.paypal.android.api.model.DeepLinkStrategy
+import com.paypal.android.DemoConstants.CANCEL_URL
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
 import com.paypal.android.api.model.serialization.Card
@@ -26,28 +26,20 @@ class CreateOrderUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
-        val returnUrl = when (request.deepLinkStrategy) {
-            DeepLinkStrategy.APP_LINK -> "$APP_URL/success"
-            DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_FALLBACK_URL_SCHEME/success"
-        }
-        val cancelUrl = when (request.deepLinkStrategy) {
-            DeepLinkStrategy.APP_LINK -> "$APP_URL/cancel"
-            DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_FALLBACK_URL_SCHEME/cancel"
-        }
-
         val paymentSource = when {
             request.appSwitchWhenEligible -> {
                 OrderPaymentSource(
                     paypal = PayPalPaymentSource(
                         experienceContext = PayPalOrderExperienceContext(
-                            returnUrl = returnUrl,
-                            cancelUrl = cancelUrl,
-                            nativeApp = NativeApp(appUrl = APP_URL)
+                            returnUrl = SUCCESS_URL,
+                            cancelUrl = CANCEL_URL,
+                            nativeApp = NativeApp(
+                                appUrl = APP_URL
+                            )
                         )
                     )
                 )
             }
-
             request.shouldVault -> {
                 OrderPaymentSource(
                     card = Card(
@@ -59,7 +51,6 @@ class CreateOrderUseCase @Inject constructor(
                     )
                 )
             }
-
             else -> null
         }
         return withContext(Dispatchers.IO) {

@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
 import com.paypal.android.DemoConstants.APP_URL
-import com.paypal.android.api.model.DeepLinkStrategy
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -65,11 +64,8 @@ class PayPalVaultViewModel @Inject constructor(
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createPayPalSetupTokenUseCase(
-                appSwitchWhenEligible,
-                // TODO: add deep link strategy configuration
-                DeepLinkStrategy.APP_LINK
-            ).mapToActionState()
+            createSetupTokenState =
+                createPayPalSetupTokenUseCase(appSwitchWhenEligible).mapToActionState()
         }
     }
 

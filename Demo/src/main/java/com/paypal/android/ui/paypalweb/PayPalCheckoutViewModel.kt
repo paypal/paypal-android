@@ -103,8 +103,7 @@ class PayPalCheckoutViewModel @Inject constructor(
                 OrderRequest(
                     intent = intentOption,
                     shouldVault = false,
-                    appSwitchWhenEligible = appSwitchWhenEligible,
-                    deepLinkStrategy = deepLinkStrategy
+                    appSwitchWhenEligible = appSwitchWhenEligible
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -123,12 +122,11 @@ class PayPalCheckoutViewModel @Inject constructor(
     private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
-        val appLinkUrl = if (deepLinkStrategy == DeepLinkStrategy.APP_LINK) APP_URL else null
         val checkoutRequest = PayPalWebCheckoutRequest(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            appLinkUrl,
+            APP_URL,
             APP_FALLBACK_URL_SCHEME
         )
 
