@@ -12,6 +12,7 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.DeepLinkConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
@@ -115,13 +116,14 @@ class PayPalCheckoutViewModel @Inject constructor(
     private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
-        val checkoutRequest = PayPalWebCheckoutRequest(
-            orderId,
-            fundingSource,
-            appSwitchWhenEligible,
-            APP_URL,
-            APP_FALLBACK_URL_SCHEME
-        )
+        val fallbackDeepLinkConfig =
+            DeepLinkConfig.CustomUrlScheme(scheme = APP_FALLBACK_URL_SCHEME)
+        val deepLinkConfig = if (appSwitchWhenEligible) {
+            DeepLinkConfig.AppLink(url = APP_URL, fallback = fallbackDeepLinkConfig)
+        } else {
+            fallbackDeepLinkConfig
+        }
+        val checkoutRequest = PayPalWebCheckoutRequest(orderId, fundingSource, deepLinkConfig)
 
         paypalClient.start(activity, checkoutRequest) { startResult ->
             when (startResult) {
