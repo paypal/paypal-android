@@ -1,8 +1,8 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
 import com.paypal.android.DemoConstants.APP_URL
-import com.paypal.android.DemoConstants.CANCEL_URL
-import com.paypal.android.DemoConstants.SUCCESS_URL
+import com.paypal.android.api.model.DeepLinkStrategy
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.model.serialization.PayPalDetails
 import com.paypal.android.api.model.serialization.PayPalExperienceContext
@@ -19,13 +19,24 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(appSwitchEnabled: Boolean): SDKSampleServerResult<PayPalSetupToken, Exception> =
+    suspend operator fun invoke(
+        appSwitchEnabled: Boolean,
+        deepLinkStrategy: DeepLinkStrategy
+    ): SDKSampleServerResult<PayPalSetupToken, Exception> =
         withContext(Dispatchers.IO) {
+            val returnUrl = when (deepLinkStrategy) {
+                DeepLinkStrategy.APP_LINK -> "$APP_URL/success"
+                DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_FALLBACK_URL_SCHEME/success"
+            }
+            val cancelUrl = when (deepLinkStrategy) {
+                DeepLinkStrategy.APP_LINK -> "$APP_URL/cancel"
+                DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_FALLBACK_URL_SCHEME/cancel"
+            }
 
             val experienceContext = PayPalExperienceContext(
                 vaultInstruction = "ON_PAYER_APPROVAL",
-                returnUrl = SUCCESS_URL,
-                cancelUrl = CANCEL_URL,
+                returnUrl = returnUrl,
+                cancelUrl = cancelUrl,
                 nativeApp = PayPalNativeApp(
                     appUrl = APP_URL
                 )
