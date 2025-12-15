@@ -73,10 +73,16 @@ android {
     // https://developer.android.com/build/build-variants#groovy
     signingConfigs {
         release {
-            storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'debug.keystore')
-            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'android'
-            keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'androiddebugkey'
-            keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'android'
+            storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'keystores/debug.keystore')
+            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'debugkeystore'
+            keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'debug_key'
+            keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'debugonly'
+        }
+        debug {
+            storeFile file('keystores/debug.keystore')
+            storePassword 'debugkeystore'
+            keyAlias 'debug_key'
+            keyPassword 'debugonly'
         }
     }
     buildTypes {
