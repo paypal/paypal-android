@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
 import com.paypal.android.DemoConstants.APP_URL
+import com.paypal.android.api.model.DeepLinkStrategy
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -60,6 +61,12 @@ class PayPalCheckoutViewModel @Inject constructor(
         get() = _uiState.value.appSwitchWhenEligible
         set(value) {
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
+        }
+
+    var deepLinkStrategy: DeepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
         }
 
     private var createOrderState

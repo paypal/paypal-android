@@ -41,12 +41,18 @@
     </string-array>
 
     <string name="pay_pal_funding_source_title">FUNDING SOURCE</string>
-    <string name="app_switch_when_available">APP SWITCH WHEN AVAILABLE</string>
+    <string name="app_switch_when_available">PAYPAL APP SWITCH?</string>
     <string name="launch_paypal">Launch PayPal</string>
     <string-array name="pay_pal_funding_source_options">
         <item>PAYPAL_CREDIT</item>
         <item>PAY_LATER</item>
         <item>PAYPAL</item>
+    </string-array>
+
+    <string name="deep_link_strategy_title">DEEP LINK STRATEGY</string>
+    <string-array name="deep_link_strategy_options">
+        <item>APP_LINK</item>
+        <item>CUSTOM_URL_SCHEME</item>
     </string-array>
 
 </resources>
