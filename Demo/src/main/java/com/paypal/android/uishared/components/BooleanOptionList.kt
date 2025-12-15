@@ -15,7 +15,7 @@ fun BooleanOptionList(
     onSelectedOptionChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val options = listOf("YES", "NO")
+    val options = listOf("NO", "YES")
     val selectedOptionString = if (selectedOption) "YES" else "NO"
     OptionList(
         title = title,
