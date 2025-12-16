@@ -1,7 +1,8 @@
 [versions]
-androidGradlePlugin = "8.7.1"
+androidGradlePlugin = "8.9.1"
+androidxActivity = "1.12.0"
 androidxAppcompat = "1.3.1"
-androidxBrowser="1.7.0"
+androidxBrowser = "1.9.0"
 androidxComposeBom = "2024.10.01"
 androidxCoreKtx = "1.6.0"
 androidxEspressoCore = "3.4.0"
@@ -28,8 +29,9 @@ jsonAssert = "1.4.0"
 junit = "4.13.2"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
-kotlinxSerialization = "1.6.3"
+kotlinxSerialization = "1.6.0"
 kotlinxCoroutinesAndroid = "1.6.1"
+kotlinxSerializationCore = "1.6.0"
 lifecycleRuntimeCompose = "2.8.6"
 lifecycleViewModelCompose = "2.5.1"
 mockk = "1.13.5"
@@ -40,6 +42,7 @@ squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
 striktMockk = "0.30.1"
+activityCompose = "1.12.1"
 
 [libraries]
 android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
@@ -57,6 +60,9 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 androidx-test-uiAutomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "androidxTestUiAutomator" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+compose-runtimeSaveable = { group = "androidx.compose.runtime", name = "runtime-saveable" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-uiTestJunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 compose-uiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 compose-uiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -70,6 +76,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 kotlinx-serializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 lifecycle-commonJava8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "androidxLifecycleCommonJava" }
 lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
@@ -85,6 +92,7 @@ strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "strikt
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-formatting", version.ref = "detektVersion" }
 detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

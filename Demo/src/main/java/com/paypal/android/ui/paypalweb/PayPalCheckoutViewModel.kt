@@ -62,13 +62,19 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var useComposableApi: Boolean
+        get() = _uiState.value.useComposableApi
+        set(value) {
+            _uiState.update { it.copy(useComposableApi = value) }
+        }
+
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
             _uiState.update { it.copy(createOrderState = value) }
         }
 
-    private val createdOrder: Order?
+    val createdOrder: Order?
         get() = (createOrderState as? ActionState.Success)?.value
 
     private var payPalWebCheckoutState

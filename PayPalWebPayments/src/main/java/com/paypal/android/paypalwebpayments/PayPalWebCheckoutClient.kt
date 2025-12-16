@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
@@ -169,31 +170,7 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
-        val launchUri = withContext(Dispatchers.IO) {
-            // perform updateCCO and getLaunchUri in parallel
-            val updateConfigDeferred = async {
-                updateClientConfigAPI.updateClientConfig(
-                    request.orderId,
-                    request.fundingSource.value
-                )
-            }
-            val launchUriDeferred = async {
-                getLaunchUri(
-                    context = activity.applicationContext,
-                    token = request.orderId,
-                    tokenType = TokenType.ORDER_ID,
-                    appSwitchWhenEligible = request.appSwitchWhenEligible,
-                    fallbackUri = buildPayPalCheckoutUri(
-                        orderId = request.orderId,
-                        funding = request.fundingSource,
-                        request.appLinkUrl ?: redirectUriPayPalCheckout
-                    )
-                )
-            }
-
-            updateConfigDeferred.await() // waits for completion, ignores result
-            launchUriDeferred.await() // returns launch URI
-        }
+        val launchUri = updateCCOAndGetLaunchUri(request, activity)
 
         val result = payPalWebLauncher.launchWithUrl(
             activity = activity,
@@ -224,6 +201,52 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
         return result
+    }
+
+    suspend fun launchWithAuthTab(
+        context: Context,
+        request: PayPalWebCheckoutRequest,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+    ) {
+        checkoutOrderId = request.orderId
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+        val launchUri = updateCCOAndGetLaunchUri(request, context)
+        payPalWebLauncher.launchWithUrl(
+            uri = launchUri,
+            tokenType = TokenType.ORDER_ID,
+            activityResultLauncher = activityResultLauncher,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+            appLinkUrl = request.appLinkUrl,
+        )
+    }
+
+    suspend fun updateCCOAndGetLaunchUri(
+        request: PayPalWebCheckoutRequest,
+        context: Context
+    ): Uri = withContext(Dispatchers.IO) {
+        // perform updateCCO and getLaunchUri in parallel
+        val updateConfigDeferred = async {
+            updateClientConfigAPI.updateClientConfig(
+                request.orderId,
+                request.fundingSource.value
+            )
+        }
+        val launchUriDeferred = async {
+            getLaunchUri(
+                context = context,
+                token = request.orderId,
+                tokenType = TokenType.ORDER_ID,
+                appSwitchWhenEligible = request.appSwitchWhenEligible,
+                fallbackUri = buildPayPalCheckoutUri(
+                    orderId = request.orderId,
+                    funding = request.fundingSource,
+                    request.appLinkUrl ?: redirectUriPayPalCheckout
+                )
+            )
+        }
+
+        updateConfigDeferred.await() // waits for completion, ignores result
+        launchUriDeferred.await() // returns launch URI
     }
 
     /**

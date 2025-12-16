@@ -13,6 +13,7 @@ data class PayPalUiState(
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val appSwitchWhenEligible: Boolean = false,
+    val useComposableApi: Boolean = false,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success

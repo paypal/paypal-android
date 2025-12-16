@@ -9,7 +9,7 @@ apiValidation {
 }
 
 android {
-    namespace 'com.paypal.android.paypalwebpayments'
+    namespace 'com.paypal.android.paypalwebpayments.compose'
     java {
         toolchain {
             languageVersion = modules.kotlinToolchainLanguageVersion
@@ -41,33 +41,53 @@ android {
         jvmTarget = modules.kotlinJvmTarget
     }
 
-    namespace 'com.paypal.android.paypalwebpayments'
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
+
+    lintOptions {
+        lintConfig file('../lint.xml')
+        abortOnError true
+        warningsAsErrors true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+    }
 }
 
 dependencies {
-    api project(':CorePayments')
+    // PayPal SDK dependencies
+    api project(':PayPalWebPayments')
 
+    // Kotlin
     implementation libs.kotlin.stdLib
+    implementation libs.kotlinx.coroutinesAndroid
+
+    // Compose dependencies
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.runtime
+    implementation libs.compose.runtimeSaveable
+    implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
+    implementation libs.lifecycle.runtimeCompose
+    implementation libs.androidx.browser
+    debugImplementation libs.compose.uiTooling
+
+    // AndroidX
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
-    implementation libs.kotlinx.coroutinesAndroid
-    implementation libs.android.material
     implementation libs.androidx.activity.compose
-
-    testImplementation libs.junit
-    testImplementation libs.mockk
-    testImplementation libs.robolectric
-    testImplementation libs.kotlinx.coroutinesTest
-    testImplementation libs.strikt.core
-    testImplementation libs.strikt.mockk
-
-    androidTestImplementation libs.androidx.test.junit
-    androidTestImplementation libs.androidx.test.espresso
 }
 
-project.ext.name = "paypal-web-payments"
+project.ext.name = "paypal-web-payments-compose"
 project.ext.version = rootProject.version
-project.ext.pom_name = "PayPal SDK - Web Payments"
-project.ext.pom_desc = "Library for PayPal web payments"
+project.ext.pom_name = "PayPal SDK - Web Payments Compose"
+project.ext.pom_desc = "Jetpack Compose extensions for PayPal Web Payments"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")

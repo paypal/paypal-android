@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResultLauncher
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CaptureDeepLinkResult
 import com.paypal.android.corepayments.PayPalCheckoutComplete
@@ -144,5 +145,22 @@ internal class PayPalWebLauncher(
                 }
             }
         }
+    }
+
+    fun launchWithUrl(
+        uri: Uri,
+        tokenType: TokenType,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+        returnUrlScheme: String?,
+        appLinkUrl: String?
+    ) {
+        val options = BrowserSwitchOptions(
+            targetUri = uri,
+            requestCode = getRequestCode(tokenType),
+            returnUrlScheme = returnUrlScheme,
+            appLinkUrl = appLinkUrl
+        )
+
+        browserSwitchClient.start(activityResultLauncher, options)
     }
 }

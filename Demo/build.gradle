@@ -20,6 +20,13 @@ android {
         }
     }
 
+    configurations.all {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0'
+            force 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
+        }
+    }
+
     defaultConfig {
         applicationId "com.paypal.android"
         compileSdk modules.androidCompileSdk
@@ -103,9 +110,19 @@ kapt {
 }
 
 dependencies {
+    constraints {
+        implementation(libs.kotlinx.serialization.core) {
+            because 'Kotlin 1.9.24 is not compatible with kotlinx-serialization 1.7.x'
+        }
+        implementation(libs.kotlinx.serializationJson) {
+            because 'Kotlin 1.9.24 is not compatible with kotlinx-serialization 1.7.x'
+        }
+    }
+
     implementation project(':CardPayments')
     implementation project(':FraudProtection')
     implementation project(':PayPalWebPayments')
+    implementation project(':PayPalWebPaymentsCompose')
     implementation project(':PaymentButtons')
     implementation project(':Venmo')
 
