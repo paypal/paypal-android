@@ -1,13 +1,13 @@
 package com.paypal.android.paypalwebpayments.compose
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.paypal.android.corepayments.CoreConfig
@@ -31,46 +31,6 @@ private fun OnLifecycleOwnerResumeEffect(callback: suspend () -> Unit) {
     }
 }
 
-/**
- * A launcher for PayPal checkout flows with simplified callback handling.
- *
- * This class provides a higher-level API for launching PayPal checkout and vault flows
- * with automatic state management and result callbacks.
- *
- * Example usage:
- * ```
- * @Composable
- * fun PayPalCheckoutScreen() {
- *     val launcher = rememberPayPalCheckoutLauncher(
- *         configuration = coreConfig,
- *         onCheckoutSuccess = { result ->
- *             // Handle successful checkout
- *             println("Order approved: ${result.orderId}")
- *         },
- *         onCheckoutCanceled = {
- *             // Handle user cancellation
- *             println("User canceled checkout")
- *         },
- *         onCheckoutError = { error ->
- *             // Handle error
- *             println("Checkout failed: ${error.message}")
- *         }
- *     )
- *
- *     Button(onClick = {
- *         val request = PayPalWebCheckoutRequest(
- *             orderId = "ORDER-123",
- *             fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
- *         )
- *         launcher.launchCheckout(request)
- *     }) {
- *         Text("Pay with PayPal")
- *     }
- * }
- * ```
- *
- * @property state The underlying PayPalWebCheckoutState
- */
 @Stable
 class PayPalCheckoutLauncher internal constructor(
     val state: PayPalWebCheckoutState,
@@ -83,14 +43,6 @@ class PayPalCheckoutLauncher internal constructor(
     private val onVaultError: (Throwable) -> Unit
 ) {
 
-    /**
-     * Launches a PayPal checkout flow.
-     *
-     * @param request The checkout request containing order details
-     * @param onPresentationResult Optional callback for the auth challenge presentation result.
-     *        This is called immediately after the browser/app is launched, before the user
-     *        completes the flow.
-     */
     fun launchCheckout(
         request: PayPalWebCheckoutRequest,
         onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
@@ -100,14 +52,6 @@ class PayPalCheckoutLauncher internal constructor(
         }
     }
 
-    /**
-     * Launches a PayPal vault flow.
-     *
-     * @param request The vault request containing setup token details
-     * @param onPresentationResult Optional callback for the auth challenge presentation result.
-     *        This is called immediately after the browser/app is launched, before the user
-     *        completes the flow.
-     */
     fun launchVault(
         request: PayPalWebVaultRequest,
         onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
@@ -152,56 +96,6 @@ class PayPalCheckoutLauncher internal constructor(
     }
 }
 
-/**
- * Remember a [PayPalCheckoutLauncher] with callbacks for checkout flow results.
- *
- * This function creates a launcher that automatically handles the PayPal checkout flow
- * lifecycle and invokes the appropriate callback based on the result.
- *
- * Example usage:
- * ```
- * @Composable
- * fun PayPalCheckoutScreen(
- *     orderId: String,
- *     onPaymentComplete: (String) -> Unit
- * ) {
- *     val launcher = rememberPayPalCheckoutLauncher(
- *         configuration = remember { CoreConfig("your-client-id") },
- *         onCheckoutSuccess = { result ->
- *             onPaymentComplete(result.orderId)
- *         },
- *         onCheckoutCanceled = {
- *             // Show cancellation message
- *         },
- *         onCheckoutError = { error ->
- *             // Show error message
- *         }
- *     )
- *
- *     Button(onClick = {
- *         launcher.launchCheckout(
- *             PayPalWebCheckoutRequest(
- *                 orderId = orderId,
- *                 fundingSource = PayPalWebCheckoutFundingSource.PAYPAL
- *             )
- *         )
- *     }) {
- *         Text("Pay with PayPal")
- *     }
- * }
- * ```
- *
- * **Note**: Deep link handling is automatic. No Activity-level integration required.
- *
- * @param configuration The CoreConfig for the PayPal SDK
- * @param onCheckoutSuccess Callback invoked when checkout completes successfully
- * @param onCheckoutCanceled Callback invoked when user cancels checkout
- * @param onCheckoutError Callback invoked when checkout fails
- * @param onVaultSuccess Callback invoked when vault completes successfully
- * @param onVaultCanceled Callback invoked when user cancels vault
- * @param onVaultError Callback invoked when vault fails
- * @return A [PayPalCheckoutLauncher] for launching PayPal flows
- */
 @Composable
 fun rememberPayPalCheckoutLauncher(
     configuration: CoreConfig,
@@ -213,7 +107,9 @@ fun rememberPayPalCheckoutLauncher(
     onVaultError: (Throwable) -> Unit = {}
 ): PayPalCheckoutLauncher {
     val state = rememberPayPalWebCheckoutClient(configuration)
-    val activity = LocalContext.current as ComponentActivity
+    val activity = requireNotNull(LocalActivity.current as? ComponentActivity) {
+        "rememberPayPalCheckoutLauncher must be called in the context of a ComponentActivity"
+    }
 
     val launcher = remember(
         state,

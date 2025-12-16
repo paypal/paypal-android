@@ -1,12 +1,13 @@
 package com.paypal.android.paypalwebpayments.compose
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.browser.customtabs.CustomTabsClient
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -227,14 +228,15 @@ class PayPalWebCheckoutState internal constructor(
     }
 
     /**
-     * Starts a PayPal web checkout flow using AuthTab for handling the auth challenge.
+     * Starts a PayPal web checkout flow using AuthTab, which gracefully falls back to custom chrome tab.
      *
      * @param request The checkout request containing order details
+     * @param onResult Optional callback for the auth challenge presentation result
      */
     fun launchWithAuthTab(
         context: Context,
         request: PayPalWebCheckoutRequest,
-        onResult: (PayPalPresentAuthChallengeResult) -> Unit
+        onResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
     ) {
         _checkoutState.value = CheckoutState.Starting
         scope.launch {
@@ -252,14 +254,11 @@ class PayPalWebCheckoutState internal constructor(
 fun rememberPayPalWebCheckoutClient(
     configuration: CoreConfig
 ): PayPalWebCheckoutState {
-    val isAuthTabSupported = isAuthTabSupported(LocalContext.current)
     val context = LocalContext.current
-    val activity = context as ComponentActivity
+    val activity = requireNotNull(LocalActivity.current as? ComponentActivity) {
+        "rememberPayPalWebCheckoutClient must be called in the context of a ComponentActivity"
+    }
     val scope = rememberCoroutineScope()
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            println("Karthik: AuthTab Result: $result")
-        }
 
     // Remember the client instance across recompositions
     val client = remember(configuration) {
@@ -277,9 +276,24 @@ fun rememberPayPalWebCheckoutClient(
         )
     ) { mutableStateOf("") }
 
+    // Create the state wrapper first (without launcher)
+    val stateRef = remember { mutableStateOf<PayPalWebCheckoutState?>(null) }
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            println("Karthik: Launcher called back with result : $result")
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.let { intent ->
+                    stateRef.value?.handleCheckoutReturn(intent)
+                }
+            }
+        }
+
     // Create the state wrapper
     val state = remember(client, scope, activity, launcher) {
-        PayPalWebCheckoutState(client, scope, activity, launcher)
+        PayPalWebCheckoutState(client, scope, activity, launcher).also {
+            stateRef.value = it
+        }
     }
 
     // Register onNewIntent listener for automatic deep link handling
@@ -302,10 +316,4 @@ fun rememberPayPalWebCheckoutClient(
     }
 
     return state
-}
-
-fun isAuthTabSupported(context: Context): Boolean {
-    val packageName = CustomTabsClient.getPackageName(context, null)
-    return packageName?.let { CustomTabsClient.isAuthTabSupported(context, it) }
-        ?: false
 }
