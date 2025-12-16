@@ -50,6 +50,8 @@ public final class com/paypal/android/paypalwebpayments/compose/PayPalWebCheckou
 	public final fun getCheckoutState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClient ()Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutClient;
 	public final fun getVaultState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun launchVaultWithAuthTab (Landroid/content/Context;Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun launchVaultWithAuthTab$default (Lcom/paypal/android/paypalwebpayments/compose/PayPalWebCheckoutState;Landroid/content/Context;Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun launchWithAuthTab (Landroid/content/Context;Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun launchWithAuthTab$default (Lcom/paypal/android/paypalwebpayments/compose/PayPalWebCheckoutState;Landroid/content/Context;Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun resetCheckoutState ()V

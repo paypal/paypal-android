@@ -56,7 +56,7 @@ class PayPalCheckoutLauncher internal constructor(
         request: PayPalWebVaultRequest,
         onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
     ) {
-        state.vault(activity, request) { result ->
+        state.launchVaultWithAuthTab(activity.applicationContext, request) { result ->
             onPresentationResult(result)
         }
     }

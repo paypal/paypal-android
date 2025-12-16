@@ -61,6 +61,12 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var useComposableApi: Boolean
+        get() = _uiState.value.useComposableApi
+        set(value) {
+            _uiState.update { it.copy(useComposableApi = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
@@ -69,7 +75,7 @@ class PayPalVaultViewModel @Inject constructor(
         }
     }
 
-    private val createdSetupToken: PayPalSetupToken?
+    val createdSetupToken: PayPalSetupToken?
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
     fun vaultSetupToken(activity: ComponentActivity) {

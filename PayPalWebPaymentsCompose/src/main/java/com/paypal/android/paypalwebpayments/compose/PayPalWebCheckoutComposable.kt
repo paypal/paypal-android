@@ -248,6 +248,28 @@ class PayPalWebCheckoutState internal constructor(
             }
         }
     }
+
+    /**
+     * Starts a PayPal vault flow using AuthTab, which gracefully falls back to custom chrome tab.
+     *
+     * @param request The vault request containing setup token details
+     * @param onResult Optional callback for the auth challenge presentation result
+     */
+    fun launchVaultWithAuthTab(
+        context: Context,
+        request: PayPalWebVaultRequest,
+        onResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
+    ) {
+        _vaultState.value = VaultState.Starting
+        scope.launch {
+            try {
+                client.vault(context, request, authTabLauncher)
+                _vaultState.value = VaultState.AuthChallengePresented
+            } catch (e: Exception) {
+                _vaultState.value = VaultState.Error(e)
+            }
+        }
+    }
 }
 
 @Composable

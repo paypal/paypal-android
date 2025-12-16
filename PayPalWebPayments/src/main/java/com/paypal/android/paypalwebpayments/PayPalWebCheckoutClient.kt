@@ -372,6 +372,33 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
+    suspend fun vault(
+        context: Context,
+        request: PayPalWebVaultRequest,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+    ) {
+        vaultSetupTokenId = request.setupTokenId
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+
+        val launchUri = withContext(Dispatchers.IO) {
+            getLaunchUri(
+                context = context,
+                token = request.setupTokenId,
+                tokenType = TokenType.VAULT_ID,
+                appSwitchWhenEligible = request.appSwitchWhenEligible,
+                fallbackUri = buildPayPalVaultUri(request.setupTokenId)
+            )
+        }
+
+        payPalWebLauncher.launchWithUrl(
+            uri = launchUri,
+            tokenType = TokenType.VAULT_ID,
+            activityResultLauncher = activityResultLauncher,
+            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+            appLinkUrl = request.appLinkUrl,
+        )
+    }
+
     /**
      * Vault PayPal as a payment method with callback.
      * Network operations are handled automatically by the Http layer.
