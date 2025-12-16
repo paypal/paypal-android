@@ -203,7 +203,7 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    suspend fun launchWithAuthTab(
+    suspend fun start(
         context: Context,
         request: PayPalWebCheckoutRequest,
         activityResultLauncher: ActivityResultLauncher<Intent>,
@@ -220,7 +220,7 @@ class PayPalWebCheckoutClient internal constructor(
         )
     }
 
-    suspend fun updateCCOAndGetLaunchUri(
+    private suspend fun updateCCOAndGetLaunchUri(
         request: PayPalWebCheckoutRequest,
         context: Context
     ): Uri = withContext(Dispatchers.IO) {
