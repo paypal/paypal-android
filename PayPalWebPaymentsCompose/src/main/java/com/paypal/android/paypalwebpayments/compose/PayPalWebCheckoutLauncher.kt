@@ -12,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
@@ -44,24 +43,19 @@ class PayPalCheckoutLauncher internal constructor(
         request: PayPalWebCheckoutRequest,
         onResult: (PayPalWebCheckoutFinishStartResult) -> Unit
     ) {
-        println("Kartik: PayPalCheckoutLauncher.start called with request: $request")
         pendingCheckoutCallback = onResult
         state.launchWithAuthTab(activity.applicationContext, request)
     }
 
     fun vault(
         request: PayPalWebVaultRequest,
-        onResult: (PayPalWebCheckoutFinishVaultResult) -> Unit,
-        onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
+        onResult: (PayPalWebCheckoutFinishVaultResult) -> Unit
     ) {
         pendingVaultCallback = onResult
-        state.launchVaultWithAuthTab(activity.applicationContext, request) { result ->
-            onPresentationResult(result)
-        }
+        state.launchVaultWithAuthTab(activity.applicationContext, request)
     }
 
     internal fun handleCheckoutResult(result: PayPalWebCheckoutFinishStartResult) {
-        println("Kartik: handleCheckoutResult called with $result")
         pendingCheckoutCallback?.invoke(result)
         pendingCheckoutCallback = null
         state.resetCheckoutState()

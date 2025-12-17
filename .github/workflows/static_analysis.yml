@@ -48,7 +48,7 @@ jobs:
 
   diffuse:
     name: Diffuse AAR Analysis
-    runs-on: macos-26
+    runs-on: macOS-26
     steps:
       # Set up environment to assemble SDK
       - name: Set up Java

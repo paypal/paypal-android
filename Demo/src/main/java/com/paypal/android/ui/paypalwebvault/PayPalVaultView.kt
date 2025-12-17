@@ -1,6 +1,5 @@
 package com.paypal.android.ui.paypalwebvault
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,34 +49,6 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    val context = LocalContext.current
-
-    // State for Composable API vault
-    var composableApiVaultState: ActionState<PayPalVaultResult, Exception> by remember {
-        mutableStateOf(ActionState.Idle)
-    }
-
-    // Setup Composable API launcher
-    val coreConfig = remember {
-        CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
-    }
-
-    val payPalLauncher = rememberPayPalCheckoutLauncher(
-        configuration = coreConfig
-    )
-
-    // Only setup lifecycle hooks for standard API
-    if (!uiState.useComposableApi) {
-        OnLifecycleOwnerResumeEffect {
-            val intent = context.getActivityOrNull()?.intent
-            intent?.let { viewModel.completeAuthChallenge(it) }
-        }
-
-        OnNewIntentEffect { newIntent ->
-            viewModel.completeAuthChallenge(newIntent)
-        }
-    }
-
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -92,14 +61,11 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
         if (uiState.isCreateSetupTokenSuccessful) {
             Step2_VaultPayPal(
                 uiState = uiState,
-                viewModel = viewModel,
-                payPalLauncher = payPalLauncher,
-                composableApiVaultState = composableApiVaultState,
-                onComposableApiVaultStateChange = { composableApiVaultState = it }
+                viewModel = viewModel
             )
         }
         val isVaultSuccessful = if (uiState.useComposableApi) {
-            composableApiVaultState is ActionState.Success
+            uiState.isComposableApiVaultSuccessful
         } else {
             uiState.isVaultPayPalSuccessful
         }
@@ -109,13 +75,6 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
-
-// Data class to hold vault result for Composable API
-data class PayPalVaultResult(
-    val approvalSessionId: String
-)
-
-private const val TAG = "PayPalVaultView"
 
 @Composable
 private fun Step1_CreateSetupToken(
@@ -155,12 +114,31 @@ private fun Step1_CreateSetupToken(
 @Composable
 private fun Step2_VaultPayPal(
     uiState: PayPalVaultUiState,
-    viewModel: PayPalVaultViewModel,
-    payPalLauncher: com.paypal.android.paypalwebpayments.compose.PayPalCheckoutLauncher,
-    composableApiVaultState: ActionState<PayPalVaultResult, Exception>,
-    onComposableApiVaultStateChange: (ActionState<PayPalVaultResult, Exception>) -> Unit
+    viewModel: PayPalVaultViewModel
 ) {
     val context = LocalContext.current
+
+    // Setup Composable API launcher
+    val coreConfig = remember {
+        CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
+    }
+
+    val payPalLauncher = rememberPayPalCheckoutLauncher(
+        configuration = coreConfig
+    )
+
+    // Only setup lifecycle hooks for standard API
+    if (!uiState.useComposableApi) {
+        OnLifecycleOwnerResumeEffect {
+            val intent = context.getActivityOrNull()?.intent
+            intent?.let { viewModel.completeAuthChallenge(it) }
+        }
+
+        OnNewIntentEffect { newIntent ->
+            viewModel.completeAuthChallenge(newIntent)
+        }
+    }
+
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -171,19 +149,14 @@ private fun Step2_VaultPayPal(
             ActionButtonColumn(
                 defaultTitle = "VAULT PAYPAL (Composable API)",
                 successTitle = "PAYPAL VAULTED",
-                state = composableApiVaultState,
+                state = uiState.composableApiVaultState,
                 onClick = {
                     val setupTokenId = viewModel.createdSetupToken?.id
                     if (setupTokenId == null) {
-                        onComposableApiVaultStateChange(
+                        viewModel.composableApiVaultState =
                             ActionState.Failure(Exception("Create a setup token to continue."))
-                        )
                     } else {
-                        Log.d(
-                            TAG,
-                            "Composable API: Launching vault for setupTokenId: $setupTokenId"
-                        )
-                        onComposableApiVaultStateChange(ActionState.Loading)
+                        viewModel.composableApiVaultState = ActionState.Loading
                         val request = PayPalWebVaultRequest(
                             setupTokenId = setupTokenId,
                             appSwitchWhenEligible = uiState.appSwitchWhenEligible,
@@ -195,38 +168,23 @@ private fun Step2_VaultPayPal(
                             onResult = { result ->
                                 when (result) {
                                     is PayPalWebCheckoutFinishVaultResult.Success -> {
-                                        onComposableApiVaultStateChange(
-                                            ActionState.Success(
-                                                PayPalVaultResult(approvalSessionId = result.approvalSessionId)
-                                            )
-                                        )
+                                        viewModel.composableApiVaultState =
+                                            ActionState.Success(result)
                                     }
 
                                     PayPalWebCheckoutFinishVaultResult.Canceled -> {
-                                        onComposableApiVaultStateChange(
-                                            ActionState.Failure(
-                                                Exception("USER CANCELED")
-                                            )
-                                        )
+                                        viewModel.composableApiVaultState =
+                                            ActionState.Failure(Exception("USER CANCELED"))
                                     }
 
                                     is PayPalWebCheckoutFinishVaultResult.Failure -> {
-                                        onComposableApiVaultStateChange(
-                                            ActionState.Failure(
-                                                if (result.error is Exception) result.error else Exception(
-                                                    result.error.message,
-                                                    result.error
-                                                )
-                                            )
-                                        )
+                                        viewModel.composableApiVaultState =
+                                            ActionState.Failure(result.error)
                                     }
 
                                     PayPalWebCheckoutFinishVaultResult.NoResult -> { /* No-op */
                                     }
                                 }
-                            },
-                            onPresentationResult = { result ->
-                                Log.d(TAG, "Composable API: Presentation result: $result")
                             }
                         )
                     }
@@ -236,9 +194,7 @@ private fun Step2_VaultPayPal(
                 when (state) {
                     is CompletedActionState.Failure -> ErrorView(error = state.value)
                     is CompletedActionState.Success -> state.value.run {
-                        PayPalWebVaultResultView(
-                            result = PayPalWebCheckoutFinishVaultResult.Success(approvalSessionId)
-                        )
+                        PayPalWebVaultResultView(result = state.value)
                     }
                 }
             }

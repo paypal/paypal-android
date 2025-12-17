@@ -10,14 +10,22 @@ data class PayPalUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
+    val composableApiCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val appSwitchWhenEligible: Boolean = false,
     val useComposableApi: Boolean = false,
 ) {
+    val isCheckoutSuccessful: Boolean = when {
+        useComposableApi -> isComposableApiCheckoutSuccessful
+        else -> isPayPalWebCheckoutSuccessful
+    }
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
 
     val isPayPalWebCheckoutSuccessful: Boolean
         get() = payPalWebCheckoutState is ActionState.Success
+
+    val isComposableApiCheckoutSuccessful: Boolean
+        get() = composableApiCheckoutState is ActionState.Success
 }

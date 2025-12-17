@@ -83,6 +83,12 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(payPalWebCheckoutState = value) }
         }
 
+    var composableApiCheckoutState
+        get() = _uiState.value.composableApiCheckoutState
+        set(value) {
+            _uiState.update { it.copy(composableApiCheckoutState = value) }
+        }
+
     private var completeOrderState
         get() = _uiState.value.completeOrderState
         set(value) {

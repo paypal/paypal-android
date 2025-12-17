@@ -19,6 +19,14 @@ class AuthTabClient {
             .build()
 
         when {
+            redirectHost != null && redirectPath != null -> {
+                authTabIntent.launch(
+                    activityResultLauncher,
+                    options.launchUri,
+                    redirectHost,
+                    redirectPath
+                )
+            }
             returnUrlScheme != null -> {
                 authTabIntent.launch(
                     activityResultLauncher,

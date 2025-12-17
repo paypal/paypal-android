@@ -1,6 +1,5 @@
 package com.paypal.android.ui.paypalweb
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -55,35 +51,6 @@ fun PayPalCheckoutView(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    val context = LocalContext.current
-
-    // State for Composable API checkout
-    var composableApiCheckoutState: ActionState<PayPalCheckoutResult, Exception> by remember {
-        mutableStateOf(ActionState.Idle)
-    }
-
-    // Setup Composable API launcher with logging
-    val coreConfig = remember {
-        CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
-    }
-
-    val payPalLauncher = rememberPayPalCheckoutLauncher(
-        configuration = coreConfig
-    )
-
-    // Only setup lifecycle hooks for standard API
-    if (!uiState.useComposableApi) {
-        OnLifecycleOwnerResumeEffect {
-            println("Karthik OnLifecycleOwnerResumeEffect called")
-            val intent = context.getActivityOrNull()?.intent
-            intent?.let { viewModel.completeAuthChallenge(it) }
-        }
-
-        OnNewIntentEffect { newIntent ->
-            viewModel.completeAuthChallenge(newIntent)
-        }
-    }
-
     val contentPadding = UIConstants.paddingMedium
     Column(
         verticalArrangement = UIConstants.spacingLarge,
@@ -96,31 +63,15 @@ fun PayPalCheckoutView(
         if (uiState.isCreateOrderSuccessful) {
             Step2_StartPayPalCheckout(
                 uiState = uiState,
-                viewModel = viewModel,
-                payPalLauncher = payPalLauncher,
-                composableApiCheckoutState = composableApiCheckoutState,
-                onComposableApiCheckoutStateChange = { composableApiCheckoutState = it }
+                viewModel = viewModel
             )
         }
-        val isCheckoutSuccessful = if (uiState.useComposableApi) {
-            composableApiCheckoutState is ActionState.Success
-        } else {
-            uiState.isPayPalWebCheckoutSuccessful
-        }
-        if (isCheckoutSuccessful) {
+        if (uiState.isCheckoutSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
-
-// Data class to hold checkout result for Composable API
-data class PayPalCheckoutResult(
-    val orderId: String?,
-    val payerId: String?
-)
-
-private const val TAG = "PayPalCheckoutView"
 
 @Composable
 private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
@@ -163,12 +114,22 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
 @Composable
 private fun Step2_StartPayPalCheckout(
     uiState: PayPalUiState,
-    viewModel: PayPalCheckoutViewModel,
-    payPalLauncher: com.paypal.android.paypalwebpayments.compose.PayPalCheckoutLauncher,
-    composableApiCheckoutState: ActionState<PayPalCheckoutResult, Exception>,
-    onComposableApiCheckoutStateChange: (ActionState<PayPalCheckoutResult, Exception>) -> Unit
+    viewModel: PayPalCheckoutViewModel
 ) {
     val context = LocalContext.current
+
+    // Only setup lifecycle hooks for standard API
+    if (!uiState.useComposableApi) {
+        OnLifecycleOwnerResumeEffect {
+            val intent = context.getActivityOrNull()?.intent
+            intent?.let { viewModel.completeAuthChallenge(it) }
+        }
+
+        OnNewIntentEffect { newIntent ->
+            viewModel.completeAuthChallenge(newIntent)
+        }
+    }
+
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
@@ -179,20 +140,21 @@ private fun Step2_StartPayPalCheckout(
         )
 
         if (uiState.useComposableApi) {
-            // Use Composable API launcher
+            val payPalLauncher = rememberPayPalCheckoutLauncher(
+                CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
+            )
+
             ActionButtonColumn(
                 defaultTitle = "START CHECKOUT (Composable API)",
                 successTitle = "CHECKOUT COMPLETE",
-                state = composableApiCheckoutState,
+                state = uiState.composableApiCheckoutState,
                 onClick = {
                     val orderId = viewModel.createdOrder?.id
                     if (orderId == null) {
-                        onComposableApiCheckoutStateChange(
+                        viewModel.composableApiCheckoutState =
                             ActionState.Failure(Exception("Create an order to continue."))
-                        )
                     } else {
-                        Log.d(TAG, "Composable API: Launching checkout for orderId: $orderId")
-                        onComposableApiCheckoutStateChange(ActionState.Loading)
+                        viewModel.composableApiCheckoutState = ActionState.Loading
                         val request = PayPalWebCheckoutRequest(
                             orderId = orderId,
                             fundingSource = uiState.fundingSource,
@@ -205,36 +167,18 @@ private fun Step2_StartPayPalCheckout(
                             onResult = { result ->
                                 when (result) {
                                     is PayPalWebCheckoutFinishStartResult.Success -> {
-                                        println("Karthik onCheckoutSuccess called with result: $result")
-                                        onComposableApiCheckoutStateChange(
-                                            ActionState.Success(
-                                                PayPalCheckoutResult(
-                                                    orderId = result.orderId,
-                                                    payerId = result.payerId
-                                                )
-                                            )
-                                        )
+                                        viewModel.composableApiCheckoutState =
+                                            ActionState.Success(result)
                                     }
 
                                     is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                                        println("Karthik onCheckoutCanceled called")
-                                        onComposableApiCheckoutStateChange(
-                                            ActionState.Failure(
-                                                Exception("USER CANCELED")
-                                            )
-                                        )
+                                        viewModel.composableApiCheckoutState =
+                                            ActionState.Failure(Exception("USER CANCELED"))
                                     }
 
                                     is PayPalWebCheckoutFinishStartResult.Failure -> {
-                                        println("Karthik onCheckoutError called with error: ${result.error}")
-                                        onComposableApiCheckoutStateChange(
-                                            ActionState.Failure(
-                                                if (result.error is Exception) result.error else Exception(
-                                                    result.error.message,
-                                                    result.error
-                                                )
-                                            )
-                                        )
+                                        viewModel.composableApiCheckoutState =
+                                            ActionState.Failure(result.error)
                                     }
 
                                     PayPalWebCheckoutFinishStartResult.NoResult -> { /* No-op */
@@ -254,7 +198,6 @@ private fun Step2_StartPayPalCheckout(
                 }
             }
         } else {
-            // Use standard API
             ActionButtonColumn(
                 defaultTitle = "START CHECKOUT",
                 successTitle = "CHECKOUT COMPLETE",

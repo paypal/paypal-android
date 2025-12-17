@@ -49,6 +49,12 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(vaultPayPalState = value) }
         }
 
+    var composableApiVaultState
+        get() = _uiState.value.composableApiVaultState
+        set(value) {
+            _uiState.update { it.copy(composableApiVaultState = value) }
+        }
+
     private var createPaymentTokenState
         get() = _uiState.value.createPaymentTokenState
         set(value) {
