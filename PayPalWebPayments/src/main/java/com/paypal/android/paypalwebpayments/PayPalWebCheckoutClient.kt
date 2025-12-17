@@ -207,17 +207,38 @@ class PayPalWebCheckoutClient internal constructor(
         context: Context,
         request: PayPalWebCheckoutRequest,
         activityResultLauncher: ActivityResultLauncher<Intent>,
-    ) {
+    ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
         val launchUri = updateCCOAndGetLaunchUri(request, context)
-        payPalWebLauncher.launchWithUrl(
+        val result = payPalWebLauncher.launchWithUrl(
             uri = launchUri,
+            token = request.orderId,
             tokenType = TokenType.ORDER_ID,
             activityResultLauncher = activityResultLauncher,
             returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
             appLinkUrl = request.appLinkUrl,
         )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId
+                )
+
+                // update auth state value in session store
+                sessionStore.authState = result.authState
+            }
+
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    checkoutOrderId
+                )
+            }
+        }
+        return result
     }
 
     private suspend fun updateCCOAndGetLaunchUri(
@@ -392,6 +413,7 @@ class PayPalWebCheckoutClient internal constructor(
 
         payPalWebLauncher.launchWithUrl(
             uri = launchUri,
+            token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
             activityResultLauncher = activityResultLauncher,
             returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,

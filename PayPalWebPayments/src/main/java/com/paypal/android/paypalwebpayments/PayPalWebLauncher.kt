@@ -149,18 +149,33 @@ internal class PayPalWebLauncher(
 
     fun launchWithUrl(
         uri: Uri,
+        token: String,
         tokenType: TokenType,
         activityResultLauncher: ActivityResultLauncher<Intent>,
         returnUrlScheme: String?,
         appLinkUrl: String?
-    ) {
+    ): PayPalPresentAuthChallengeResult {
+        val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions(
             targetUri = uri,
             requestCode = getRequestCode(tokenType),
             returnUrlScheme = returnUrlScheme,
-            appLinkUrl = appLinkUrl
+            appLinkUrl = appLinkUrl,
+            metadata = metadata
         )
 
-        browserSwitchClient.start(activityResultLauncher, options)
+        val result = browserSwitchClient.start(activityResultLauncher, options)
+
+        return when (result) {
+            is BrowserSwitchStartResult.Success -> {
+                val pendingState = BrowserSwitchPendingState(options)
+                PayPalPresentAuthChallengeResult.Success(pendingState.toBase64EncodedJSON())
+            }
+
+            is BrowserSwitchStartResult.Failure -> {
+                val error = PayPalWebCheckoutError.browserSwitchError(result.error)
+                PayPalPresentAuthChallengeResult.Failure(error)
+            }
+        }
     }
 }

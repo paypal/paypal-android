@@ -235,13 +235,14 @@ internal class PayPalWebCheckoutState(
      */
     fun launchWithAuthTab(
         context: Context,
-        request: PayPalWebCheckoutRequest,
-        onResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
+        request: PayPalWebCheckoutRequest
     ) {
         _checkoutState.value = CheckoutState.Starting
         scope.launch {
             try {
-                client.start(context, request, authTabLauncher)
+                client.start(context, request, authTabLauncher).also {
+                    println("Karthik: launchWithAuthTab client.start completed with result : $it")
+                }
                 _checkoutState.value = CheckoutState.AuthChallengePresented
             } catch (e: Exception) {
                 _checkoutState.value = CheckoutState.Error(e)

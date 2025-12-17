@@ -240,10 +240,6 @@ private fun Step2_StartPayPalCheckout(
                                     PayPalWebCheckoutFinishStartResult.NoResult -> { /* No-op */
                                     }
                                 }
-                            },
-                            onPresentationResult = { result ->
-                                println("Karthik launch checkout callback result: $result")
-                                Log.d(TAG, "Composable API: Presentation result: $result")
                             }
                         )
                     }

@@ -22,7 +22,7 @@ class BrowserSwitchClient(
     fun start(
         activityResultLauncher: ActivityResultLauncher<Intent>,
         options: BrowserSwitchOptions
-    ) {
+    ): BrowserSwitchStartResult {
         val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
         authTabClient.launchAuthTab(
             options = cctOptions,
@@ -30,5 +30,6 @@ class BrowserSwitchClient(
             appLinkUrl = options.appLinkUrl,
             returnUrlScheme = options.returnUrlScheme
         )
+        return BrowserSwitchStartResult.Success
     }
 }

@@ -42,13 +42,11 @@ class PayPalCheckoutLauncher internal constructor(
 
     fun start(
         request: PayPalWebCheckoutRequest,
-        onResult: (PayPalWebCheckoutFinishStartResult) -> Unit,
-        onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
+        onResult: (PayPalWebCheckoutFinishStartResult) -> Unit
     ) {
+        println("Kartik: PayPalCheckoutLauncher.start called with request: $request")
         pendingCheckoutCallback = onResult
-        state.launchWithAuthTab(activity.applicationContext, request) { result ->
-            onPresentationResult(result)
-        }
+        state.launchWithAuthTab(activity.applicationContext, request)
     }
 
     fun vault(
@@ -63,6 +61,7 @@ class PayPalCheckoutLauncher internal constructor(
     }
 
     internal fun handleCheckoutResult(result: PayPalWebCheckoutFinishStartResult) {
+        println("Kartik: handleCheckoutResult called with $result")
         pendingCheckoutCallback?.invoke(result)
         pendingCheckoutCallback = null
         state.resetCheckoutState()
