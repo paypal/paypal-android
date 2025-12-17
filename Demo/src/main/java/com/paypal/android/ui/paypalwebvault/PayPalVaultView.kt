@@ -65,26 +65,7 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
     }
 
     val payPalLauncher = rememberPayPalCheckoutLauncher(
-        configuration = coreConfig,
-        onVaultSuccess = { result ->
-            Log.d(
-                TAG,
-                "Composable API: onVaultSuccess - approvalSessionId: ${result.approvalSessionId}"
-            )
-            composableApiVaultState = ActionState.Success(
-                PayPalVaultResult(approvalSessionId = result.approvalSessionId)
-            )
-        },
-        onVaultCanceled = {
-            Log.d(TAG, "Composable API: onVaultCanceled - User canceled vault")
-            composableApiVaultState = ActionState.Failure(Exception("USER CANCELED"))
-        },
-        onVaultError = { error ->
-            Log.e(TAG, "Composable API: onVaultError - ${error.message}", error)
-            composableApiVaultState = ActionState.Failure(
-                if (error is Exception) error else Exception(error.message, error)
-            )
-        }
+        configuration = coreConfig
     )
 
     // Only setup lifecycle hooks for standard API
@@ -209,9 +190,45 @@ private fun Step2_VaultPayPal(
                             appLinkUrl = DemoConstants.APP_URL,
                             fallbackUrlScheme = DemoConstants.APP_FALLBACK_URL_SCHEME
                         )
-                        payPalLauncher.launchVault(request) { result ->
-                            Log.d(TAG, "Composable API: Presentation result: $result")
-                        }
+                        payPalLauncher.vault(
+                            request = request,
+                            onResult = { result ->
+                                when (result) {
+                                    is PayPalWebCheckoutFinishVaultResult.Success -> {
+                                        onComposableApiVaultStateChange(
+                                            ActionState.Success(
+                                                PayPalVaultResult(approvalSessionId = result.approvalSessionId)
+                                            )
+                                        )
+                                    }
+
+                                    PayPalWebCheckoutFinishVaultResult.Canceled -> {
+                                        onComposableApiVaultStateChange(
+                                            ActionState.Failure(
+                                                Exception("USER CANCELED")
+                                            )
+                                        )
+                                    }
+
+                                    is PayPalWebCheckoutFinishVaultResult.Failure -> {
+                                        onComposableApiVaultStateChange(
+                                            ActionState.Failure(
+                                                if (result.error is Exception) result.error else Exception(
+                                                    result.error.message,
+                                                    result.error
+                                                )
+                                            )
+                                        )
+                                    }
+
+                                    PayPalWebCheckoutFinishVaultResult.NoResult -> { /* No-op */
+                                    }
+                                }
+                            },
+                            onPresentationResult = { result ->
+                                Log.d(TAG, "Composable API: Presentation result: $result")
+                            }
+                        )
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

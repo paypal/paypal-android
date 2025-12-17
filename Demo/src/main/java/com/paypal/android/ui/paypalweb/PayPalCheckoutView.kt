@@ -28,6 +28,7 @@ import com.paypal.android.DemoConstants
 import com.paypal.android.R
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
 import com.paypal.android.paypalwebpayments.compose.rememberPayPalCheckoutLauncher
 import com.paypal.android.uishared.components.ActionButtonColumn
@@ -67,32 +68,7 @@ fun PayPalCheckoutView(
     }
 
     val payPalLauncher = rememberPayPalCheckoutLauncher(
-        configuration = coreConfig,
-        onCheckoutSuccess = { result ->
-            println("Karthik onCheckoutSuccess called with result: $result")
-            Log.d(
-                TAG,
-                "Composable API: onCheckoutSuccess - orderId: ${result.orderId}, payerId: ${result.payerId}"
-            )
-            composableApiCheckoutState = ActionState.Success(
-                PayPalCheckoutResult(
-                    orderId = result.orderId,
-                    payerId = result.payerId
-                )
-            )
-        },
-        onCheckoutCanceled = {
-            println("Karthik onCheckoutCanceled called")
-            Log.d(TAG, "Composable API: onCheckoutCanceled - User canceled checkout")
-            composableApiCheckoutState = ActionState.Failure(Exception("USER CANCELED"))
-        },
-        onCheckoutError = { error ->
-            println("Karthik onCheckoutError called with error: $error")
-            Log.e(TAG, "Composable API: onCheckoutError - ${error.message}", error)
-            composableApiCheckoutState = ActionState.Failure(
-                if (error is Exception) error else Exception(error.message, error)
-            )
-        }
+        configuration = coreConfig
     )
 
     // Only setup lifecycle hooks for standard API
@@ -224,10 +200,52 @@ private fun Step2_StartPayPalCheckout(
                             appLinkUrl = DemoConstants.APP_URL,
                             fallbackUrlScheme = DemoConstants.APP_FALLBACK_URL_SCHEME
                         )
-                        payPalLauncher.launchCheckout(request) { result ->
-                            println("Karthik launch checkout callback result: $result")
-                            Log.d(TAG, "Composable API: Presentation result: $result")
-                        }
+                        payPalLauncher.start(
+                            request = request,
+                            onResult = { result ->
+                                when (result) {
+                                    is PayPalWebCheckoutFinishStartResult.Success -> {
+                                        println("Karthik onCheckoutSuccess called with result: $result")
+                                        onComposableApiCheckoutStateChange(
+                                            ActionState.Success(
+                                                PayPalCheckoutResult(
+                                                    orderId = result.orderId,
+                                                    payerId = result.payerId
+                                                )
+                                            )
+                                        )
+                                    }
+
+                                    is PayPalWebCheckoutFinishStartResult.Canceled -> {
+                                        println("Karthik onCheckoutCanceled called")
+                                        onComposableApiCheckoutStateChange(
+                                            ActionState.Failure(
+                                                Exception("USER CANCELED")
+                                            )
+                                        )
+                                    }
+
+                                    is PayPalWebCheckoutFinishStartResult.Failure -> {
+                                        println("Karthik onCheckoutError called with error: ${result.error}")
+                                        onComposableApiCheckoutStateChange(
+                                            ActionState.Failure(
+                                                if (result.error is Exception) result.error else Exception(
+                                                    result.error.message,
+                                                    result.error
+                                                )
+                                            )
+                                        )
+                                    }
+
+                                    PayPalWebCheckoutFinishStartResult.NoResult -> { /* No-op */
+                                    }
+                                }
+                            },
+                            onPresentationResult = { result ->
+                                println("Karthik launch checkout callback result: $result")
+                                Log.d(TAG, "Composable API: Presentation result: $result")
+                            }
+                        )
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

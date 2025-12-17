@@ -12,9 +12,9 @@ import androidx.browser.auth.AuthTabIntent.RESULT_UNKNOWN_CODE
 import androidx.browser.auth.AuthTabIntent.RESULT_VERIFICATION_FAILED
 import androidx.browser.auth.AuthTabIntent.RESULT_VERIFICATION_TIMED_OUT
 
-class PayPalAuthResult(val resultCode: Int, val resultUri: Uri?)
+internal class PayPalAuthResult(val resultCode: Int, val resultUri: Uri?)
 
-class PayPalActivityResultContract : ActivityResultContract<Uri, PayPalAuthResult>() {
+internal class PayPalActivityResultContract : ActivityResultContract<Uri, PayPalAuthResult>() {
 
     override fun createIntent(context: Context, input: Uri): Intent {
         val intent = AuthTabIntent.Builder().build().intent

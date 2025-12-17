@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class PayPalWebCheckoutState internal constructor(
+internal class PayPalWebCheckoutState(
     val client: PayPalWebCheckoutClient,
     private val scope: CoroutineScope,
     private val activity: ComponentActivity,
@@ -57,7 +57,7 @@ class PayPalWebCheckoutState internal constructor(
     /**
      * Sealed class representing the state of a PayPal checkout flow.
      */
-    sealed class CheckoutState {
+    internal sealed class CheckoutState {
         /**
          * Initial state, no checkout flow in progress.
          */
@@ -92,7 +92,7 @@ class PayPalWebCheckoutState internal constructor(
     /**
      * Sealed class representing the state of a PayPal vault flow.
      */
-    sealed class VaultState {
+    internal sealed class VaultState {
         /**
          * Initial state, no vault flow in progress.
          */
@@ -273,7 +273,7 @@ class PayPalWebCheckoutState internal constructor(
 }
 
 @Composable
-fun rememberPayPalWebCheckoutClient(
+internal fun rememberPayPalWebCheckoutClient(
     configuration: CoreConfig
 ): PayPalWebCheckoutState {
     val context = LocalContext.current

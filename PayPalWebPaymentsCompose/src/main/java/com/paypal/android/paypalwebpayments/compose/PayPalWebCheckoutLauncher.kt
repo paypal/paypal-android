@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
@@ -33,103 +34,60 @@ private fun OnLifecycleOwnerResumeEffect(callback: suspend () -> Unit) {
 
 @Stable
 class PayPalCheckoutLauncher internal constructor(
-    val state: PayPalWebCheckoutState,
-    private val activity: ComponentActivity,
-    private val onCheckoutSuccess: (PayPalWebCheckoutFinishStartResult.Success) -> Unit,
-    private val onCheckoutCanceled: () -> Unit,
-    private val onCheckoutError: (Throwable) -> Unit,
-    private val onVaultSuccess: (PayPalWebCheckoutFinishVaultResult.Success) -> Unit,
-    private val onVaultCanceled: () -> Unit,
-    private val onVaultError: (Throwable) -> Unit
+    internal val state: PayPalWebCheckoutState,
+    private val activity: ComponentActivity
 ) {
+    private var pendingCheckoutCallback: ((PayPalWebCheckoutFinishStartResult) -> Unit)? = null
+    private var pendingVaultCallback: ((PayPalWebCheckoutFinishVaultResult) -> Unit)? = null
 
-    fun launchCheckout(
+    fun start(
         request: PayPalWebCheckoutRequest,
+        onResult: (PayPalWebCheckoutFinishStartResult) -> Unit,
         onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
     ) {
+        pendingCheckoutCallback = onResult
         state.launchWithAuthTab(activity.applicationContext, request) { result ->
             onPresentationResult(result)
         }
     }
 
-    fun launchVault(
+    fun vault(
         request: PayPalWebVaultRequest,
+        onResult: (PayPalWebCheckoutFinishVaultResult) -> Unit,
         onPresentationResult: (PayPalPresentAuthChallengeResult) -> Unit = {}
     ) {
+        pendingVaultCallback = onResult
         state.launchVaultWithAuthTab(activity.applicationContext, request) { result ->
             onPresentationResult(result)
         }
     }
 
-    /**
-     * Resets the checkout state to allow launching a new checkout flow.
-     */
-    fun resetCheckoutState() {
+    internal fun handleCheckoutResult(result: PayPalWebCheckoutFinishStartResult) {
+        pendingCheckoutCallback?.invoke(result)
+        pendingCheckoutCallback = null
         state.resetCheckoutState()
     }
 
-    /**
-     * Resets the vault state to allow launching a new vault flow.
-     */
-    fun resetVaultState() {
-        state.resetVaultState()
-    }
-
-    internal fun handleCheckoutResult(result: PayPalWebCheckoutFinishStartResult) {
-        when (result) {
-            is PayPalWebCheckoutFinishStartResult.Success -> onCheckoutSuccess(result)
-            is PayPalWebCheckoutFinishStartResult.Canceled -> onCheckoutCanceled()
-            is PayPalWebCheckoutFinishStartResult.Failure -> onCheckoutError(result.error)
-            PayPalWebCheckoutFinishStartResult.NoResult -> { /* No-op */
-            }
-        }
-    }
-
     internal fun handleVaultResult(result: PayPalWebCheckoutFinishVaultResult) {
-        when (result) {
-            is PayPalWebCheckoutFinishVaultResult.Success -> onVaultSuccess(result)
-            PayPalWebCheckoutFinishVaultResult.Canceled -> onVaultCanceled()
-            is PayPalWebCheckoutFinishVaultResult.Failure -> onVaultError(result.error)
-            PayPalWebCheckoutFinishVaultResult.NoResult -> { /* No-op */
-            }
-        }
+        pendingVaultCallback?.invoke(result)
+        pendingVaultCallback = null
+        state.resetVaultState()
     }
 }
 
 @Composable
 fun rememberPayPalCheckoutLauncher(
-    configuration: CoreConfig,
-    onCheckoutSuccess: (PayPalWebCheckoutFinishStartResult.Success) -> Unit = {},
-    onCheckoutCanceled: () -> Unit = {},
-    onCheckoutError: (Throwable) -> Unit = {},
-    onVaultSuccess: (PayPalWebCheckoutFinishVaultResult.Success) -> Unit = {},
-    onVaultCanceled: () -> Unit = {},
-    onVaultError: (Throwable) -> Unit = {}
+    configuration: CoreConfig
 ): PayPalCheckoutLauncher {
     val state = rememberPayPalWebCheckoutClient(configuration)
     val activity = requireNotNull(LocalActivity.current as? ComponentActivity) {
         "rememberPayPalCheckoutLauncher must be called in the context of a ComponentActivity"
     }
 
-    val launcher = remember(
-        state,
-        activity,
-        onCheckoutSuccess,
-        onCheckoutCanceled,
-        onCheckoutError,
-        onVaultSuccess,
-        onVaultCanceled,
-        onVaultError
-    ) {
+    val launcher = remember(state, activity) {
         PayPalCheckoutLauncher(
             state = state,
-            activity = activity,
-            onCheckoutSuccess = onCheckoutSuccess,
-            onCheckoutCanceled = onCheckoutCanceled,
-            onCheckoutError = onCheckoutError,
-            onVaultSuccess = onVaultSuccess,
-            onVaultCanceled = onVaultCanceled,
-            onVaultError = onVaultError
+            activity = activity
         )
     }
 
@@ -138,18 +96,29 @@ fun rememberPayPalCheckoutLauncher(
         state.checkoutState.collect { checkoutState ->
             when (checkoutState) {
                 is PayPalWebCheckoutState.CheckoutState.Success -> {
-                    // Pass the existing result object which has orderId and payerId
                     launcher.handleCheckoutResult(checkoutState.result)
                 }
 
                 is PayPalWebCheckoutState.CheckoutState.Canceled -> {
-                    // Invoke canceled callback directly since we don't have orderId
-                    onCheckoutCanceled()
+                    launcher.handleCheckoutResult(PayPalWebCheckoutFinishStartResult.Canceled(null))
                 }
 
                 is PayPalWebCheckoutState.CheckoutState.Error -> {
-                    // Invoke error callback directly since we don't have orderId or PayPalSDKError
-                    onCheckoutError(checkoutState.error)
+                    val sdkError = if (checkoutState.error is PayPalSDKError) {
+                        checkoutState.error
+                    } else {
+                        PayPalSDKError(
+                            code = 500,
+                            errorDescription = checkoutState.error.message ?: "Unknown error",
+                            reason = checkoutState.error
+                        )
+                    }
+                    launcher.handleCheckoutResult(
+                        PayPalWebCheckoutFinishStartResult.Failure(
+                            sdkError,
+                            null
+                        )
+                    )
                 }
 
                 else -> { /* No action for Idle, Starting, AuthChallengePresented */
@@ -163,18 +132,24 @@ fun rememberPayPalCheckoutLauncher(
         state.vaultState.collect { vaultState ->
             when (vaultState) {
                 is PayPalWebCheckoutState.VaultState.Success -> {
-                    // Pass the existing result object which has approvalSessionId
                     launcher.handleVaultResult(vaultState.result)
                 }
 
                 is PayPalWebCheckoutState.VaultState.Canceled -> {
-                    // Invoke canceled callback directly
-                    onVaultCanceled()
+                    launcher.handleVaultResult(PayPalWebCheckoutFinishVaultResult.Canceled)
                 }
 
                 is PayPalWebCheckoutState.VaultState.Error -> {
-                    // Invoke error callback directly
-                    onVaultError(vaultState.error)
+                    val sdkError = if (vaultState.error is PayPalSDKError) {
+                        vaultState.error
+                    } else {
+                        PayPalSDKError(
+                            code = 500,
+                            errorDescription = vaultState.error.message ?: "Unknown error",
+                            reason = vaultState.error
+                        )
+                    }
+                    launcher.handleVaultResult(PayPalWebCheckoutFinishVaultResult.Failure(sdkError))
                 }
 
                 else -> { /* No action for Idle, Starting, AuthChallengePresented */
@@ -193,8 +168,7 @@ fun rememberPayPalCheckoutLauncher(
             kotlinx.coroutines.delay(300)
             // If still in AuthChallengePresented state, user canceled
             if (state.checkoutState.value is PayPalWebCheckoutState.CheckoutState.AuthChallengePresented) {
-                state.resetCheckoutState()
-                onCheckoutCanceled()
+                launcher.handleCheckoutResult(PayPalWebCheckoutFinishStartResult.Canceled(null))
             }
         }
 
@@ -202,8 +176,7 @@ fun rememberPayPalCheckoutLauncher(
         if (state.vaultState.value is PayPalWebCheckoutState.VaultState.AuthChallengePresented) {
             kotlinx.coroutines.delay(300)
             if (state.vaultState.value is PayPalWebCheckoutState.VaultState.AuthChallengePresented) {
-                state.resetVaultState()
-                onVaultCanceled()
+                launcher.handleVaultResult(PayPalWebCheckoutFinishVaultResult.Canceled)
             }
         }
     }
