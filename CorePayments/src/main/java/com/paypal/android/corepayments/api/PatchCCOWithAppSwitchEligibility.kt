@@ -41,43 +41,14 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         merchantOptInForAppSwitch: Boolean,
         paypalNativeAppInstalled: Boolean
     ): APIResult<AppSwitchEligibility> {
-        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
-        if (tokenResult is APIResult.Failure) {
-            return APIResult.Failure(tokenResult.error)
-        }
-
         val graphQLRequest = createGraphQLRequest(
             context = context,
             tokenType = tokenType,
             orderId = orderId,
             merchantOptInForAppSwitch = merchantOptInForAppSwitch,
             paypalNativeAppInstalled = paypalNativeAppInstalled
-        ) ?: return APIResult.Failure(
-            APIClientError.dataParsingError(correlationId = null)
-        )
-
-        val token = (tokenResult as APIResult.Success).data
-        val graphQLResult = graphQLClient.send<
-                PatchCcoWithAppSwitchEligibilityResponse,
-                PatchCcoWithAppSwitchEligibilityVariables>(
-            graphQLRequest,
-            additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $token")
-        )
-        return when (graphQLResult) {
-            is GraphQLResult.Success -> {
-                graphQLResult.response.data?.let { responseData ->
-                    parseResponse(responseData)?.let { appSwitchEligibility ->
-                        APIResult.Success(data = appSwitchEligibility)
-                    } ?: APIResult.Failure(
-                        APIClientError.dataParsingError(graphQLResult.correlationId)
-                    )
-                } ?: APIResult.Failure(
-                    APIClientError.noResponseData(graphQLResult.correlationId)
-                )
-            }
-
-            is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
-        }
+        ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
+        return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
     }
 
     private suspend fun createGraphQLRequest(
@@ -129,6 +100,37 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
                 launchUrl = it.redirectURL,
                 ineligibleReason = it.ineligibleReason
             )
+        }
+    }
+
+    private suspend fun sendGraphQLRequestWithLSATAuthentication(
+        graphQLRequest: GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>
+    ): APIResult<AppSwitchEligibility> {
+        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
+        if (tokenResult is APIResult.Failure) {
+            return APIResult.Failure(tokenResult.error)
+        }
+        val token = (tokenResult as APIResult.Success).data
+        val graphQLResult = graphQLClient.send<
+                PatchCcoWithAppSwitchEligibilityResponse,
+                PatchCcoWithAppSwitchEligibilityVariables>(
+            graphQLRequest,
+            additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $token")
+        )
+        return when (graphQLResult) {
+            is GraphQLResult.Success -> {
+                graphQLResult.response.data?.let { responseData ->
+                    parseResponse(responseData)?.let { appSwitchEligibility ->
+                        APIResult.Success(data = appSwitchEligibility)
+                    } ?: APIResult.Failure(
+                        APIClientError.dataParsingError(graphQLResult.correlationId)
+                    )
+                } ?: APIResult.Failure(
+                    APIClientError.noResponseData(graphQLResult.correlationId)
+                )
+            }
+
+            is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
         }
     }
 
