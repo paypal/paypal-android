@@ -35,6 +35,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     private lateinit var coreConfig: CoreConfig
     private lateinit var graphQLClient: GraphQLClient
     private lateinit var resourceLoader: ResourceLoader
+    private lateinit var tokenServiceAPI: AuthenticationSecureTokenServiceAPI
+
     private lateinit var sut: PatchCCOWithAppSwitchEligibility
     private val testOrderId = "test-order-id-456"
 
@@ -44,9 +46,11 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
         graphQLClient = mockk(relaxed = true)
         resourceLoader = mockk(relaxed = true)
+        tokenServiceAPI = mockk(relaxed = true)
         sut = PatchCCOWithAppSwitchEligibility(
             graphQLClient,
-            resourceLoader
+            resourceLoader,
+            tokenServiceAPI
         )
     }
 
