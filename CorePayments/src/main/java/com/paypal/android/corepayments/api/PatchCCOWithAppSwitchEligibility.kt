@@ -8,6 +8,7 @@ import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.UpdateClientConfigAPI
+import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
@@ -24,11 +25,13 @@ import kotlinx.serialization.InternalSerializationApi
 class PatchCCOWithAppSwitchEligibility internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
+    private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
         graphQLClient = GraphQLClient(coreConfig),
-        resourceLoader = ResourceLoader()
+        resourceLoader = ResourceLoader(),
+        authenticationSecureTokenServiceAPI = AuthenticationSecureTokenServiceAPI(coreConfig),
     )
 
     suspend operator fun invoke(
@@ -38,6 +41,10 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         merchantOptInForAppSwitch: Boolean,
         paypalNativeAppInstalled: Boolean
     ): APIResult<AppSwitchEligibility> {
+        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
+        if (tokenResult is APIResult.Failure) {
+            return APIResult.Failure(tokenResult.error)
+        }
 
         val graphQLRequest = createGraphQLRequest(
             context = context,
@@ -49,9 +56,13 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
             APIClientError.dataParsingError(correlationId = null)
         )
 
+        val token = (tokenResult as APIResult.Success).data
         val graphQLResult = graphQLClient.send<
                 PatchCcoWithAppSwitchEligibilityResponse,
-                PatchCcoWithAppSwitchEligibilityVariables>(graphQLRequest)
+                PatchCcoWithAppSwitchEligibilityVariables>(
+            graphQLRequest,
+            additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $token")
+        )
         return when (graphQLResult) {
             is GraphQLResult.Success -> {
                 graphQLResult.response.data?.let { responseData ->
