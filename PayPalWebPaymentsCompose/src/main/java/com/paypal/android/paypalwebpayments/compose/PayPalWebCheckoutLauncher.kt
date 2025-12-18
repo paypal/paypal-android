@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,10 +30,10 @@ private fun OnLifecycleOwnerResumeEffect(callback: suspend () -> Unit) {
     }
 }
 
-@Stable
 class PayPalCheckoutLauncher internal constructor(
     internal val state: PayPalWebCheckoutState,
-    private val activity: ComponentActivity
+    private val activity: ComponentActivity,
+    private val activityResultLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
 ) {
     private var pendingCheckoutCallback: ((PayPalWebCheckoutFinishStartResult) -> Unit)? = null
     private var pendingVaultCallback: ((PayPalWebCheckoutFinishVaultResult) -> Unit)? = null
@@ -44,7 +43,7 @@ class PayPalCheckoutLauncher internal constructor(
         onResult: (PayPalWebCheckoutFinishStartResult) -> Unit
     ) {
         pendingCheckoutCallback = onResult
-        state.launchWithAuthTab(activity.applicationContext, request)
+        state.launchWithAuthTab(activity.applicationContext, request, activityResultLauncher)
     }
 
     fun vault(
@@ -52,7 +51,7 @@ class PayPalCheckoutLauncher internal constructor(
         onResult: (PayPalWebCheckoutFinishVaultResult) -> Unit
     ) {
         pendingVaultCallback = onResult
-        state.launchVaultWithAuthTab(activity.applicationContext, request)
+        state.launchVaultWithAuthTab(activity.applicationContext, request, activityResultLauncher)
     }
 
     internal fun handleCheckoutResult(result: PayPalWebCheckoutFinishStartResult) {
@@ -72,21 +71,22 @@ class PayPalCheckoutLauncher internal constructor(
 fun rememberPayPalCheckoutLauncher(
     configuration: CoreConfig
 ): PayPalCheckoutLauncher {
-    val state = rememberPayPalWebCheckoutClient(configuration)
+    val clientWithLauncher = rememberPayPalWebCheckoutClient(configuration)
     val activity = requireNotNull(LocalActivity.current as? ComponentActivity) {
         "rememberPayPalCheckoutLauncher must be called in the context of a ComponentActivity"
     }
 
-    val launcher = remember(state, activity) {
+    val launcher = remember(clientWithLauncher.state, activity) {
         PayPalCheckoutLauncher(
-            state = state,
-            activity = activity
+            state = clientWithLauncher.state,
+            activity = activity,
+            activityResultLauncher = clientWithLauncher.launcher
         )
     }
 
     // Observe checkout state flow and invoke callbacks
     LaunchedEffect(launcher) {
-        state.checkoutState.collect { checkoutState ->
+        clientWithLauncher.state.checkoutState.collect { checkoutState ->
             when (checkoutState) {
                 is PayPalWebCheckoutState.CheckoutState.Success -> {
                     launcher.handleCheckoutResult(checkoutState.result)
@@ -122,7 +122,7 @@ fun rememberPayPalCheckoutLauncher(
 
     // Observe vault state flow and invoke callbacks
     LaunchedEffect(launcher) {
-        state.vaultState.collect { vaultState ->
+        clientWithLauncher.state.vaultState.collect { vaultState ->
             when (vaultState) {
                 is PayPalWebCheckoutState.VaultState.Success -> {
                     launcher.handleVaultResult(vaultState.result)
@@ -154,21 +154,21 @@ fun rememberPayPalCheckoutLauncher(
     // Handle user closing browser/CCT without completing checkout
     OnLifecycleOwnerResumeEffect {
         // Check if we were waiting for checkout result
-        if (state.checkoutState.value is PayPalWebCheckoutState.CheckoutState.AuthChallengePresented) {
+        if (clientWithLauncher.state.checkoutState.value is PayPalWebCheckoutState.CheckoutState.AuthChallengePresented) {
             // Activity resumed but we're still in AuthChallengePresented state
             // This means the browser/CCT was closed without a deep link
             // Wait a short time to allow OnNewIntentEffect to process any pending deep links
             kotlinx.coroutines.delay(300)
             // If still in AuthChallengePresented state, user canceled
-            if (state.checkoutState.value is PayPalWebCheckoutState.CheckoutState.AuthChallengePresented) {
+            if (clientWithLauncher.state.checkoutState.value is PayPalWebCheckoutState.CheckoutState.AuthChallengePresented) {
                 launcher.handleCheckoutResult(PayPalWebCheckoutFinishStartResult.Canceled(null))
             }
         }
 
         // Check if we were waiting for vault result
-        if (state.vaultState.value is PayPalWebCheckoutState.VaultState.AuthChallengePresented) {
+        if (clientWithLauncher.state.vaultState.value is PayPalWebCheckoutState.VaultState.AuthChallengePresented) {
             kotlinx.coroutines.delay(300)
-            if (state.vaultState.value is PayPalWebCheckoutState.VaultState.AuthChallengePresented) {
+            if (clientWithLauncher.state.vaultState.value is PayPalWebCheckoutState.VaultState.AuthChallengePresented) {
                 launcher.handleVaultResult(PayPalWebCheckoutFinishVaultResult.Canceled)
             }
         }

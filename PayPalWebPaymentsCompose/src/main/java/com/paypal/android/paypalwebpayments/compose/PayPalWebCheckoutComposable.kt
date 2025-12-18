@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 internal class PayPalWebCheckoutState(
     val client: PayPalWebCheckoutClient,
     private val scope: CoroutineScope,
-    private val activityResultLauncher: ActivityResultLauncher<Intent>,
 ) {
     private val _checkoutState = MutableStateFlow<CheckoutState>(CheckoutState.Idle)
 
@@ -180,7 +179,8 @@ internal class PayPalWebCheckoutState(
 
     fun launchWithAuthTab(
         context: Context,
-        request: PayPalWebCheckoutRequest
+        request: PayPalWebCheckoutRequest,
+        activityResultLauncher: ActivityResultLauncher<Intent>
     ) {
         _checkoutState.value = CheckoutState.Starting
         scope.launch {
@@ -195,7 +195,8 @@ internal class PayPalWebCheckoutState(
 
     fun launchVaultWithAuthTab(
         context: Context,
-        request: PayPalWebVaultRequest
+        request: PayPalWebVaultRequest,
+        activityResultLauncher: ActivityResultLauncher<Intent>
     ) {
         _vaultState.value = VaultState.Starting
         scope.launch {
@@ -209,10 +210,15 @@ internal class PayPalWebCheckoutState(
     }
 }
 
+internal data class PayPalWebCheckoutClientWithLauncher(
+    val state: PayPalWebCheckoutState,
+    val launcher: ActivityResultLauncher<Intent>
+)
+
 @Composable
 internal fun rememberPayPalWebCheckoutClient(
     configuration: CoreConfig
-): PayPalWebCheckoutState {
+): PayPalWebCheckoutClientWithLauncher {
     val context = LocalContext.current
     // Validate we're in a ComponentActivity context
     requireNotNull(LocalActivity.current as? ComponentActivity) {
@@ -238,7 +244,9 @@ internal fun rememberPayPalWebCheckoutClient(
         )
     }
 
-    lateinit var state: PayPalWebCheckoutState
+    val state: PayPalWebCheckoutState = remember(client, scope) {
+        PayPalWebCheckoutState(client, scope)
+    }
 
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -249,14 +257,10 @@ internal fun rememberPayPalWebCheckoutClient(
             }
         }
 
-    state = remember(client, scope, launcher) {
-        PayPalWebCheckoutState(client, scope, launcher)
-    }
-
     OnNewIntentEffect { intent ->
         state.handleCheckoutReturn(intent)
         state.handleVaultReturn(intent)
     }
 
-    return state
+    return PayPalWebCheckoutClientWithLauncher(state, launcher)
 }

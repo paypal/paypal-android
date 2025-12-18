@@ -7,10 +7,8 @@ public final class com/paypal/android/paypalwebpayments/compose/BuildConfig {
 
 public final class com/paypal/android/paypalwebpayments/compose/PayPalCheckoutLauncher {
 	public static final field $stable I
-	public final fun start (Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun start$default (Lcom/paypal/android/paypalwebpayments/compose/PayPalCheckoutLauncher;Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun vault (Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun vault$default (Lcom/paypal/android/paypalwebpayments/compose/PayPalCheckoutLauncher;Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun start (Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutRequest;Lkotlin/jvm/functions/Function1;)V
+	public final fun vault (Lcom/paypal/android/paypalwebpayments/PayPalWebVaultRequest;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class com/paypal/android/paypalwebpayments/compose/PayPalWebCheckoutLauncherKt {
