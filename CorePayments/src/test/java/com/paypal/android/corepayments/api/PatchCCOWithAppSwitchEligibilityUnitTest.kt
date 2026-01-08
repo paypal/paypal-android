@@ -140,7 +140,6 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             )
         } returns successResponse
 
-
         // When
         sut(
             context = context,
