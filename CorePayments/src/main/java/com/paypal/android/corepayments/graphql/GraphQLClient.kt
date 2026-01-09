@@ -52,10 +52,11 @@ class GraphQLClient internal constructor(
     @PublishedApi
     internal suspend fun <R, V> sendInternal(
         graphQLRequest: GraphQLRequest<V>,
+        additionalHeaders: Map<String, String>?,
         variablesSerializer: KSerializer<V>,
         responseSerializer: KSerializer<R>,
     ): GraphQLResult<R> {
-        val httpRequest = createHttpRequest(graphQLRequest, variablesSerializer)
+        val httpRequest = createHttpRequest(graphQLRequest, variablesSerializer, additionalHeaders)
             ?: return GraphQLResult.Failure(error = invalidUrlRequest)
 
         val httpResponse = http.send(httpRequest)
@@ -84,17 +85,19 @@ class GraphQLClient internal constructor(
 
     private fun <V> createHttpRequest(
         graphQLRequest: GraphQLRequest<V>,
-        variablesSerializer: KSerializer<V>
+        variablesSerializer: KSerializer<V>,
+        additionalHeaders: Map<String, String>?
     ): HttpRequest? = runCatching {
         val urlString = graphQLRequest.operationName?.let { "$graphQLURL?$it" } ?: graphQLURL
         val requestBody =
             json.encodeToString(GraphQLRequest.serializer(variablesSerializer), graphQLRequest)
 
+        val combinedHeaders = httpRequestHeaders + (additionalHeaders ?: emptyMap())
         HttpRequest(
             url = URL(urlString),
             method = HttpMethod.POST,
             body = requestBody,
-            headers = httpRequestHeaders
+            headers = combinedHeaders.toMutableMap()
         )
     }.getOrNull()
 
@@ -104,9 +107,10 @@ class GraphQLClient internal constructor(
      */
     @OptIn(InternalSerializationApi::class)
     suspend inline fun <reified R, reified V> send(
-        graphQLRequest: GraphQLRequest<V>
+        graphQLRequest: GraphQLRequest<V>,
+        additionalHeaders: Map<String, String>? = null
     ): GraphQLResult<R> = runCatching {
-        sendInternal(graphQLRequest, serializer<V>(), serializer<R>())
+        sendInternal(graphQLRequest, additionalHeaders, serializer<V>(), serializer<R>())
     }.getOrElse { throwable ->
         val error = when (throwable) {
             is SerializationException -> invalidUrlRequest
