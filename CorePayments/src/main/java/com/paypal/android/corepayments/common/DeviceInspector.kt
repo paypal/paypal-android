@@ -1,7 +1,9 @@
 package com.paypal.android.corepayments.common
 
 import android.content.Context
+import android.content.Intent
 import androidx.annotation.RestrictTo
+import androidx.core.net.toUri
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DeviceInspector(private val context: Context) {
@@ -15,8 +17,13 @@ class DeviceInspector(private val context: Context) {
     }.getOrDefault(false)
 
     fun isDeepLinkConfiguredInManifest(context: Context, returnUrlScheme: String): Boolean {
-        // TODO: implement
-        return false
+        val testUri = "${returnUrlScheme}://".toUri()
+        val deepLinkIntent = Intent(Intent.ACTION_VIEW, testUri)
+        deepLinkIntent.addCategory(Intent.CATEGORY_DEFAULT)
+        deepLinkIntent.addCategory(Intent.CATEGORY_BROWSABLE)
+        val candidateActivities =
+            context.packageManager.queryIntentActivities(deepLinkIntent, 0)
+        return candidateActivities.isNotEmpty()
     }
 
     companion object {
