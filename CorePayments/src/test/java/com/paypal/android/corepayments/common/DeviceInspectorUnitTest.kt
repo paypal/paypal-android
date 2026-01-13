@@ -65,12 +65,6 @@ class DeviceInspectorUnitTest {
     }
 
     @Test
-    fun `isDeepLinkConfiguredInManifest returns false by default`() {
-        val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app.returnscheme")
-        assertFalse(result)
-    }
-
-    @Test
     fun `isDeepLinkConfiguredInManifest queries for intent with correct action, data, and categories`() {
         val intentSlot = slot<Intent>()
         every {
@@ -94,5 +88,15 @@ class DeviceInspectorUnitTest {
 
         val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app.returnscheme")
         assertTrue(result)
+    }
+
+    @Test
+    fun `isDeepLinkConfiguredInManifest returns false when no matching activities found`() {
+        every {
+            packageManager.queryIntentActivities(any<Intent>(), 0)
+        } returns emptyList()
+
+        val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app.returnscheme")
+        assertFalse(result)
     }
 }
