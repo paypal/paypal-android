@@ -1,15 +1,18 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import io.mockk.mockk
 import io.mockk.verify
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -42,5 +45,18 @@ class BrowserSwitchClientUnitTest {
 
         assertTrue(result is BrowserSwitchStartResult.Success)
         verify { chromeCustomTabsClient.launch(context, expectedCCTOptions) }
+    }
+
+    @Test
+    fun `it should fail to launch when the source activity context is finishing`() {
+        val activityController = Robolectric.buildActivity(ComponentActivity::class.java)
+        val activity = activityController.get()
+
+        activity.finish()
+        val result = sut.start(context, browserSwitchOptions)
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        val expected = "Unable to launch Chrome Custom Tab while the source Activity is finishing."
+        assertEquals(expected, message)
     }
 }
