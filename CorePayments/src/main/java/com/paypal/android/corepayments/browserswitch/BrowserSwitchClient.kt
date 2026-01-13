@@ -16,12 +16,17 @@ class BrowserSwitchClient(
         if (activity != null && activity.isFinishing) {
             val message =
                 "Unable to launch Chrome Custom Tab while the source Activity is finishing."
-            val activityFinishingError = Exception(message)
-            return BrowserSwitchStartResult.Failure(activityFinishingError)
+            return BrowserSwitchStartResult.Failure(Exception(message))
         }
 
         val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
-        chromeCustomTabsClient.launch(context, cctOptions)
-        return BrowserSwitchStartResult.Success
+        return when (chromeCustomTabsClient.launch(context, cctOptions)) {
+            LaunchChromeCustomTabResult.Success -> BrowserSwitchStartResult.Success
+            LaunchChromeCustomTabResult.ActivityNotFound -> {
+                val message =
+                    "Unable to launch Chrome Custom Tab on device without a web browser."
+                return BrowserSwitchStartResult.Failure(Exception(message))
+            }
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.paypal.android.corepayments.browserswitch
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
@@ -41,12 +40,29 @@ class BrowserSwitchClientUnitTest {
 
     @Test
     fun `it should launch a chrome custom tab on success`() {
+        every {
+            chromeCustomTabsClient.launch(any(), any())
+        } returns LaunchChromeCustomTabResult.Success
+
         val result = sut.start(appContext, browserSwitchOptions)
         val expectedCCTOptions =
             ChromeCustomTabOptions(launchUri = "https://example.com/uri".toUri())
 
         assertTrue(result is BrowserSwitchStartResult.Success)
         verify { chromeCustomTabsClient.launch(appContext, expectedCCTOptions) }
+    }
+
+    @Test
+    fun `it should fail to launch when no browser activity is present on the device`() {
+        every {
+            chromeCustomTabsClient.launch(any(), any())
+        } returns LaunchChromeCustomTabResult.ActivityNotFound
+
+        val result = sut.start(appContext, browserSwitchOptions)
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        val expected = "Unable to launch Chrome Custom Tab on device without a web browser."
+        assertEquals(expected, message)
     }
 
     @Test
@@ -59,18 +75,6 @@ class BrowserSwitchClientUnitTest {
         assertTrue(result is BrowserSwitchStartResult.Failure)
         val message = (result as BrowserSwitchStartResult.Failure).error.message
         val expected = "Unable to launch Chrome Custom Tab while the source Activity is finishing."
-        assertEquals(expected, message)
-    }
-
-    @Test
-    fun `it should fail to launch when no browser activity is present on the device`() {
-        every {
-            chromeCustomTabsClient.launch(any(), any())
-        } throws ActivityNotFoundException("no browser on device")
-        val result = sut.start(appContext, browserSwitchOptions)
-        assertTrue(result is BrowserSwitchStartResult.Failure)
-        val message = (result as BrowserSwitchStartResult.Failure).error.message
-        val expected = "Unable to launch Chrome Custom Tab on device without a web browser."
         assertEquals(expected, message)
     }
 }

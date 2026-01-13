@@ -5,19 +5,26 @@ import android.content.Context
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
-import kotlin.jvm.Throws
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ChromeCustomTabOptions(
-    val launchUri: Uri
-)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ChromeCustomTabsClient {
 
-    @Throws(ActivityNotFoundException::class)
-    fun launch(context: Context, options: ChromeCustomTabOptions) {
+    fun launch(context: Context, options: ChromeCustomTabOptions): LaunchChromeCustomTabResult {
         val customTabsIntent = CustomTabsIntent.Builder().build()
-        customTabsIntent.launchUrl(context, options.launchUri)
+        return try {
+            customTabsIntent.launchUrl(context, options.launchUri)
+            LaunchChromeCustomTabResult.Success
+        } catch (_: ActivityNotFoundException) {
+            LaunchChromeCustomTabResult.ActivityNotFound
+        }
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class ChromeCustomTabOptions(val launchUri: Uri)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class LaunchChromeCustomTabResult {
+    object Success : LaunchChromeCustomTabResult()
+    object ActivityNotFound : LaunchChromeCustomTabResult()
 }
