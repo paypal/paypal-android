@@ -65,4 +65,11 @@ class DeviceInspectorUnitTest {
         val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app")
         assertFalse(result)
     }
+
+    @Test
+    fun `isDeepLinkConfiguredInManifest returns true when deep link is configured in manifest`() {
+        // TODO: set up mock to simulate deep link configured in manifest
+        val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app")
+        assertTrue(result)
+    }
 }
