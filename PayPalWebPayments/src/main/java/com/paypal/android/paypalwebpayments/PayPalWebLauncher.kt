@@ -21,7 +21,7 @@ internal class PayPalWebLauncher(
     private val browserSwitchClient: BrowserSwitchClient
 ) {
 
-    constructor(context: Context): this(BrowserSwitchClient(context))
+    constructor(context: Context) : this(BrowserSwitchClient(context))
 
     companion object {
         private const val METADATA_KEY_ORDER_ID = "order_id"

@@ -17,7 +17,7 @@ class DeviceInspector(private val context: Context) {
     }.getOrDefault(false)
 
     fun isDeepLinkConfiguredInManifest(returnUrlScheme: String): Boolean {
-        val testUri = "${returnUrlScheme}://".toUri()
+        val testUri = "$returnUrlScheme://".toUri()
         val deepLinkIntent = Intent(Intent.ACTION_VIEW, testUri)
         deepLinkIntent.addCategory(Intent.CATEGORY_DEFAULT)
         deepLinkIntent.addCategory(Intent.CATEGORY_BROWSABLE)
