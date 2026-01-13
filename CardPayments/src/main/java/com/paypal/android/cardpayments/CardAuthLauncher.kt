@@ -1,6 +1,7 @@
 package com.paypal.android.cardpayments
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CaptureDeepLinkResult
@@ -13,8 +14,10 @@ import com.paypal.android.corepayments.captureDeepLink
 import org.json.JSONObject
 
 internal class CardAuthLauncher(
-    private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
+    private val browserSwitchClient: BrowserSwitchClient
 ) {
+
+    constructor(context: Context): this(BrowserSwitchClient(context))
 
     companion object {
         private const val METADATA_KEY_ORDER_ID = "order_id"

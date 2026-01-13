@@ -71,7 +71,7 @@ class DeviceInspectorUnitTest {
             packageManager.queryIntentActivities(capture(intentSlot), 0)
         } returns listOf(ResolveInfo())
 
-        sut.isDeepLinkConfiguredInManifest(context, "com.example.app.returnscheme")
+        sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
 
         val capturedIntent = intentSlot.captured
         assertEquals(Intent.ACTION_VIEW, capturedIntent.action)
@@ -86,7 +86,7 @@ class DeviceInspectorUnitTest {
             packageManager.queryIntentActivities(any<Intent>(), 0)
         } returns listOf(ResolveInfo())
 
-        val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app.returnscheme")
+        val result = sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
         assertTrue(result)
     }
 
@@ -96,7 +96,7 @@ class DeviceInspectorUnitTest {
             packageManager.queryIntentActivities(any<Intent>(), 0)
         } returns emptyList()
 
-        val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app.returnscheme")
+        val result = sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
         assertFalse(result)
     }
 }

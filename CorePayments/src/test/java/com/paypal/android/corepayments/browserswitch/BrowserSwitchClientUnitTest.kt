@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.corepayments.common.DeviceInspector
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -30,12 +31,14 @@ class BrowserSwitchClientUnitTest {
     )
 
     private lateinit var chromeCustomTabsClient: ChromeCustomTabsClient
+    private lateinit var deviceInspector: DeviceInspector
     private lateinit var sut: BrowserSwitchClient
 
     @Before
     fun beforeEach() {
-        chromeCustomTabsClient = mockk<ChromeCustomTabsClient>(relaxed = true)
-        sut = BrowserSwitchClient(chromeCustomTabsClient)
+        chromeCustomTabsClient = mockk(relaxed = true)
+        deviceInspector = mockk(relaxed = true)
+        sut = BrowserSwitchClient(chromeCustomTabsClient, deviceInspector)
     }
 
     @Test

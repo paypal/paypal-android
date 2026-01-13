@@ -43,7 +43,7 @@ class CardClient internal constructor(
         CheckoutOrdersAPI(configuration),
         DataVaultPaymentMethodTokensAPI(context.applicationContext, configuration),
         CardAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        CardAuthLauncher(),
+        CardAuthLauncher(context),
         Dispatchers.Main
     )
 

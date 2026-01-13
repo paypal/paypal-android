@@ -3,19 +3,25 @@ package com.paypal.android.corepayments.browserswitch
 import android.app.Activity
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.paypal.android.corepayments.common.DeviceInspector
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class BrowserSwitchClient(
-    private val chromeCustomTabsClient: ChromeCustomTabsClient = ChromeCustomTabsClient()
+class BrowserSwitchClient internal constructor(
+    private val chromeCustomTabsClient: ChromeCustomTabsClient,
+    private val deviceInspector: DeviceInspector
 ) {
+
+    constructor(context: Context) : this(ChromeCustomTabsClient(), DeviceInspector(context))
+
     fun start(
         context: Context,
         options: BrowserSwitchOptions
     ): BrowserSwitchStartResult {
         val activity = context as? Activity
+        val returnUrlScheme = options.returnUrlScheme
         return if (activity != null && activity.isFinishing) {
             Failure.ActivityIsFinishing
-        } else if (isManifestDeepLinkConfigInvalid(context, options)) {
+        } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
             Failure.ManifestDeepLinkConfigurationInvalid
         } else {
             val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
@@ -26,12 +32,9 @@ class BrowserSwitchClient(
         }
     }
 
-    private fun isManifestDeepLinkConfigInvalid(
-        context: Context,
-        options: BrowserSwitchOptions
-    ): Boolean {
-        return false
-    }
+    // check for invalid deep link configuration in AndroidManifest.xml
+    private fun hasValidDeepLinkConfig(returnUrlScheme: String) =
+        deviceInspector.isDeepLinkConfiguredInManifest(returnUrlScheme)
 
     companion object {
         object Failure {

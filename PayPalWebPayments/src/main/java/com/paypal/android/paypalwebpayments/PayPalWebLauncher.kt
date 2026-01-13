@@ -1,6 +1,7 @@
 package com.paypal.android.paypalwebpayments
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
@@ -17,8 +18,10 @@ import org.json.JSONObject
 
 // TODO: consider renaming PayPalWebLauncher to PayPalAuthChallengeLauncher
 internal class PayPalWebLauncher(
-    private val browserSwitchClient: BrowserSwitchClient = BrowserSwitchClient(),
+    private val browserSwitchClient: BrowserSwitchClient
 ) {
+
+    constructor(context: Context): this(BrowserSwitchClient(context))
 
     companion object {
         private const val METADATA_KEY_ORDER_ID = "order_id"
