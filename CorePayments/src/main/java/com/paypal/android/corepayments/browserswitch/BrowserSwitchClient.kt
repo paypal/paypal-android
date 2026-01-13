@@ -14,19 +14,36 @@ class BrowserSwitchClient(
     ): BrowserSwitchStartResult {
         val activity = context as? Activity
         return if (activity != null && activity.isFinishing) {
-            val message =
-                "Unable to launch Chrome Custom Tab while the source Activity is finishing."
-            BrowserSwitchStartResult.Failure(Exception(message))
+            FailureReasons.ActivityIsFinishing
+        } else if (isManifestDeepLinkConfigInvalid(context, options)) {
+            FailureReasons.ManifestDeepLinkConfigurationInvalid
         } else {
             val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
             when (chromeCustomTabsClient.launch(context, cctOptions)) {
                 LaunchChromeCustomTabResult.Success -> BrowserSwitchStartResult.Success
-                LaunchChromeCustomTabResult.ActivityNotFound -> {
-                    val message =
-                        "Unable to launch Chrome Custom Tab on device without a web browser."
-                    BrowserSwitchStartResult.Failure(Exception(message))
-                }
+                LaunchChromeCustomTabResult.ActivityNotFound -> FailureReasons.NoWebBrowser
             }
+        }
+    }
+
+    private fun isManifestDeepLinkConfigInvalid(
+        context: Context,
+        options: BrowserSwitchOptions
+    ): Boolean {
+        return false
+    }
+
+    companion object {
+        object FailureReasons {
+            val ActivityIsFinishing = BrowserSwitchStartResult.Failure(
+                Exception("Unable to launch Chrome Custom Tab while the source Activity is finishing.")
+            )
+            val NoWebBrowser = BrowserSwitchStartResult.Failure(
+                Exception("Unable to launch Chrome Custom Tab on device without a web browser.")
+            )
+            val ManifestDeepLinkConfigurationInvalid = BrowserSwitchStartResult.Failure(
+                Exception("TODO: implement")
+            )
         }
     }
 }
