@@ -14,6 +14,11 @@ class DeviceInspector(private val context: Context) {
         true
     }.getOrDefault(false)
 
+    fun isDeepLinkConfiguredInManifest(context: Context, returnUrlScheme: String): Boolean {
+        // TODO: implement
+        return false
+    }
+
     companion object {
         const val PAYPAL_APP_PACKAGE = "com.paypal.android.p2pmobile"
     }
