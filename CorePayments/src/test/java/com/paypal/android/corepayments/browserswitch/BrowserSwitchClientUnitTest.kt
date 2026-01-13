@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class BrowserSwitchClientUnitTest {
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val appContext: Context = ApplicationProvider.getApplicationContext()
 
     private val browserSwitchOptions = BrowserSwitchOptions(
         targetUri = "https://example.com/uri".toUri(),
@@ -39,12 +39,12 @@ class BrowserSwitchClientUnitTest {
 
     @Test
     fun `it should launch a chrome custom tab on success`() {
-        val result = sut.start(context, browserSwitchOptions)
+        val result = sut.start(appContext, browserSwitchOptions)
         val expectedCCTOptions =
             ChromeCustomTabOptions(launchUri = "https://example.com/uri".toUri())
 
         assertTrue(result is BrowserSwitchStartResult.Success)
-        verify { chromeCustomTabsClient.launch(context, expectedCCTOptions) }
+        verify { chromeCustomTabsClient.launch(appContext, expectedCCTOptions) }
     }
 
     @Test
@@ -53,7 +53,7 @@ class BrowserSwitchClientUnitTest {
         val activity = activityController.get()
 
         activity.finish()
-        val result = sut.start(context, browserSwitchOptions)
+        val result = sut.start(activity, browserSwitchOptions)
         assertTrue(result is BrowserSwitchStartResult.Failure)
         val message = (result as BrowserSwitchStartResult.Failure).error.message
         val expected = "Unable to launch Chrome Custom Tab while the source Activity is finishing."
