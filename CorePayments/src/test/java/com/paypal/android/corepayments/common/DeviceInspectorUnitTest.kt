@@ -59,4 +59,10 @@ class DeviceInspectorUnitTest {
 
         assertFalse(result)
     }
+
+    @Test
+    fun `isDeepLinkConfiguredInManifest returns false by default`() {
+        val result = sut.isDeepLinkConfiguredInManifest(context, "com.example.app")
+        assertFalse(result)
+    }
 }
