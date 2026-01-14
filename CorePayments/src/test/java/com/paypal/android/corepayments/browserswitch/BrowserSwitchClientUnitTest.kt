@@ -44,6 +44,9 @@ class BrowserSwitchClientUnitTest {
     @Test
     fun `it should launch a chrome custom tab on success`() {
         every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns true
+        every {
             chromeCustomTabsClient.launch(any(), any())
         } returns LaunchChromeCustomTabResult.Success
 
@@ -57,6 +60,9 @@ class BrowserSwitchClientUnitTest {
 
     @Test
     fun `it should fail to launch when no browser activity is present on the device`() {
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns true
         every {
             chromeCustomTabsClient.launch(any(), any())
         } returns LaunchChromeCustomTabResult.ActivityNotFound
@@ -78,6 +84,35 @@ class BrowserSwitchClientUnitTest {
         assertTrue(result is BrowserSwitchStartResult.Failure)
         val message = (result as BrowserSwitchStartResult.Failure).error.message
         val expected = "Unable to launch Chrome Custom Tab while the source Activity is finishing."
+        assertEquals(expected, message)
+    }
+
+    @Test
+    fun `it should fail to launch when the AndroidManifest is not properly configured for deep linking`() {
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
+        } returns false
+
+        val result = sut.start(appContext, browserSwitchOptions)
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        val expected = "This app is not correctly configured to handle deep links from the return url scheme provided."
+        assertEquals(expected, message)
+    }
+
+    @Test
+    fun `it should fail when return url scheme and app link url are both null`() {
+        val invalidOptions = BrowserSwitchOptions(
+            targetUri = "https://example.com/uri".toUri(),
+            requestCode = 123,
+            returnUrlScheme = null,
+            metadata = JSONObject().put("example_prop", "example_value"),
+            appLinkUrl = null
+        )
+        val result = sut.start(appContext, invalidOptions)
+        assertTrue(result is BrowserSwitchStartResult.Failure)
+        val message = (result as BrowserSwitchStartResult.Failure).error.message
+        val expected = "The properties 'returnUrlScheme' and 'appLinkUrl' cannot both be null."
         assertEquals(expected, message)
     }
 }

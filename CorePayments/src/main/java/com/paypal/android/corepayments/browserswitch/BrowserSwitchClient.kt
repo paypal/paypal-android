@@ -19,8 +19,11 @@ class BrowserSwitchClient internal constructor(
     ): BrowserSwitchStartResult {
         val activity = context as? Activity
         val returnUrlScheme = options.returnUrlScheme
+        val appLinkUrl = options.appLinkUrl
         return if (activity != null && activity.isFinishing) {
             Failure.ActivityIsFinishing
+        } else if (returnUrlScheme == null && appLinkUrl == null) {
+            Failure.ReturnUrlSchemeAndAppLinkUrlBothNull
         } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
             Failure.ManifestDeepLinkConfigurationInvalid
         } else {
@@ -41,11 +44,14 @@ class BrowserSwitchClient internal constructor(
             val ActivityIsFinishing = BrowserSwitchStartResult.Failure(
                 Exception("Unable to launch Chrome Custom Tab while the source Activity is finishing.")
             )
+            val ReturnUrlSchemeAndAppLinkUrlBothNull = BrowserSwitchStartResult.Failure(
+                Exception("The properties 'returnUrlScheme' and 'appLinkUrl' cannot both be null.")
+            )
             val NoWebBrowser = BrowserSwitchStartResult.Failure(
                 Exception("Unable to launch Chrome Custom Tab on device without a web browser.")
             )
             val ManifestDeepLinkConfigurationInvalid = BrowserSwitchStartResult.Failure(
-                Exception("TODO: implement")
+                Exception("This app is not correctly configured to handle deep links from the return url scheme provided.")
             )
         }
     }
