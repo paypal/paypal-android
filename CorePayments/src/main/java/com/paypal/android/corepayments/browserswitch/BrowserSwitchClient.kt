@@ -39,7 +39,7 @@ class BrowserSwitchClient internal constructor(
     private fun hasValidDeepLinkConfig(returnUrlScheme: String) =
         deviceInspector.isDeepLinkConfiguredInManifest(returnUrlScheme)
 
-    companion object {
+    internal companion object {
         object Failure {
             val ActivityIsFinishing = BrowserSwitchStartResult.Failure(
                 Exception(
