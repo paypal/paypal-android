@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
+import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
 import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -82,7 +82,7 @@ class PayPalVaultViewModel @Inject constructor(
                     setupTokenId,
                     appSwitchWhenEligible,
                     APP_URL,
-                    APP_FALLBACK_URL_SCHEME
+                    APP_CUSTOM_URL_SCHEME
                 )
                 vaultSetupTokenWithRequest(activity, request)
             }

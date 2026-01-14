@@ -13,9 +13,7 @@ import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import com.paypal.android.corepayments.captureDeepLink
 import org.json.JSONObject
 
-internal class CardAuthLauncher(
-    private val browserSwitchClient: BrowserSwitchClient
-) {
+internal class CardAuthLauncher(private val browserSwitchClient: BrowserSwitchClient) {
 
     constructor(context: Context) : this(BrowserSwitchClient(context))
 

@@ -132,7 +132,7 @@ class ApproveOrderViewModel @Inject constructor(
             expirationYear = dateString.formattedYear,
             securityCode = cardSecurityCode
         )
-        CardRequest(orderId, card, DemoConstants.APP_URL, scaOption)
+        CardRequest(orderId, card, DemoConstants.APP_CUSTOM_URL_SCHEME, scaOption)
     }
 
     private var createOrderState
