@@ -16,7 +16,6 @@ import kotlinx.parcelize.Parcelize
 data class CardRequest @JvmOverloads constructor(
     val orderId: String,
     val card: Card,
-    // TODO: consider renaming to returnUrlScheme
     val returnUrl: String,
     val sca: SCA = SCA.SCA_WHEN_REQUIRED,
 ) : Parcelable

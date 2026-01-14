@@ -50,7 +50,7 @@ internal class CardAuthLauncher(private val browserSwitchClient: BrowserSwitchCl
             targetUri = authChallenge.url,
             requestCode = requestCode,
             returnUrlScheme = authChallenge.returnUrlScheme,
-            appLinkUrl = null,
+            appLinkUrl = authChallenge.appLinkUrl,
             metadata = metadata
         )
 
