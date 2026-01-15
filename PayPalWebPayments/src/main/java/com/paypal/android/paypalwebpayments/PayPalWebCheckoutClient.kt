@@ -275,11 +275,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebStartCallback
     ) {
         applicationScope.launch {
-            // when appLinkUrl is not provided don't use authTabLauncher since it requires app link setup
-            val result = if (request.appLinkUrl != null)
-                startAsync(activity, request, activityResultLauncher)
-            else
-                startAsync(activity, request)
+            val result = startAsync(activity, request, activityResultLauncher)
             withContext(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(result)
             }
