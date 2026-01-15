@@ -6,8 +6,7 @@ import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ChromeCustomTabsClient {
+internal class ChromeCustomTabsClient {
 
     fun launch(context: Context, options: ChromeCustomTabOptions): LaunchChromeCustomTabResult {
         val customTabsIntent = CustomTabsIntent.Builder().build()
@@ -20,11 +19,9 @@ class ChromeCustomTabsClient {
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ChromeCustomTabOptions(val launchUri: Uri)
+internal data class ChromeCustomTabOptions(val launchUri: Uri)
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class LaunchChromeCustomTabResult {
+internal sealed class LaunchChromeCustomTabResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Success : LaunchChromeCustomTabResult()
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
