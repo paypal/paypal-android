@@ -63,13 +63,13 @@ class CardAuthLauncherUnitTest {
     }
 
     @Test
-    fun `presentAuthChallenge() browser switches to approve order auth challenge url`() {
+    fun `presentAuthChallenge() browser switches to approve order auth challenge url with custom scheme return url`() {
         val slot = slot<BrowserSwitchOptions>()
         val browserSwitchResult = BrowserSwitchStartResult.Success
         every { browserSwitchClient.start(activity, capture(slot)) } returns browserSwitchResult
 
-        val returnUrl = "merchant.app://return.com/deep-link"
-        val cardRequest = CardRequest("fake-order-id", card, returnUrl)
+        val customSchemeReturnUrl = "merchant.app://return.com/deep-link"
+        val cardRequest = CardRequest("fake-order-id", card, customSchemeReturnUrl)
         val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
 
         sut = CardAuthLauncher(browserSwitchClient)
@@ -80,18 +80,42 @@ class CardAuthLauncherUnitTest {
         val metadata = browserSwitchOptions.metadata
         assertEquals("fake-order-id", metadata?.getString("order_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
+        assertNull(browserSwitchOptions.appLinkUrl)
         assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.targetUri)
         assertEquals(BrowserSwitchRequestCodes.CARD_APPROVE_ORDER, browserSwitchOptions.requestCode)
     }
 
     @Test
-    fun `presentAuthChallenge() browser switches to vault auth challenge url`() {
+    fun `presentAuthChallenge() browser switches to approve order auth challenge url with app link return url`() {
         val slot = slot<BrowserSwitchOptions>()
         val browserSwitchResult = BrowserSwitchStartResult.Success
         every { browserSwitchClient.start(activity, capture(slot)) } returns browserSwitchResult
 
-        val returnUrl = "merchant.app://return.com/deep-link"
-        val vaultRequest = CardVaultRequest("fake-setup-token-id", card, returnUrl)
+        val appLinkReturnUrl = "https://merchant.com/app-link"
+        val cardRequest = CardRequest("fake-order-id", card, appLinkReturnUrl)
+        val cardAuthChallenge = CardAuthChallenge.ApproveOrder(url, cardRequest)
+
+        sut = CardAuthLauncher(browserSwitchClient)
+        val status = sut.presentAuthChallenge(activity, authChallenge = cardAuthChallenge)
+        assertTrue(status is CardPresentAuthChallengeResult.Success)
+
+        val browserSwitchOptions = slot.captured
+        val metadata = browserSwitchOptions.metadata
+        assertEquals("fake-order-id", metadata?.getString("order_id"))
+        assertNull(browserSwitchOptions.returnUrlScheme)
+        assertEquals("https://merchant.com/app-link", browserSwitchOptions.appLinkUrl)
+        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.targetUri)
+        assertEquals(BrowserSwitchRequestCodes.CARD_APPROVE_ORDER, browserSwitchOptions.requestCode)
+    }
+
+    @Test
+    fun `presentAuthChallenge() browser switches to vault auth challenge url with custom scheme return url`() {
+        val slot = slot<BrowserSwitchOptions>()
+        val browserSwitchResult = BrowserSwitchStartResult.Success
+        every { browserSwitchClient.start(activity, capture(slot)) } returns browserSwitchResult
+
+        val customSchemeReturnUrl = "merchant.app://return.com/deep-link"
+        val vaultRequest = CardVaultRequest("fake-setup-token-id", card, customSchemeReturnUrl)
         val vaultAuthRequest = CardAuthChallenge.Vault(url, vaultRequest)
 
         sut = CardAuthLauncher(browserSwitchClient)
@@ -102,6 +126,29 @@ class CardAuthLauncherUnitTest {
         val metadata = browserSwitchOptions.metadata
         assertEquals("fake-setup-token-id", metadata?.getString("setup_token_id"))
         assertEquals("merchant.app", browserSwitchOptions.returnUrlScheme)
+        assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.targetUri)
+        assertEquals(BrowserSwitchRequestCodes.CARD_VAULT, browserSwitchOptions.requestCode)
+    }
+
+    @Test
+    fun `presentAuthChallenge() browser switches to vault auth challenge url with app links return url`() {
+        val slot = slot<BrowserSwitchOptions>()
+        val browserSwitchResult = BrowserSwitchStartResult.Success
+        every { browserSwitchClient.start(activity, capture(slot)) } returns browserSwitchResult
+
+        val appLinksReturnUrl = "https://merchant.com/app-link"
+        val vaultRequest = CardVaultRequest("fake-setup-token-id", card, appLinksReturnUrl)
+        val vaultAuthRequest = CardAuthChallenge.Vault(url, vaultRequest)
+
+        sut = CardAuthLauncher(browserSwitchClient)
+        val status = sut.presentAuthChallenge(activity, authChallenge = vaultAuthRequest)
+        assertTrue(status is CardPresentAuthChallengeResult.Success)
+
+        val browserSwitchOptions = slot.captured
+        val metadata = browserSwitchOptions.metadata
+        assertEquals("fake-setup-token-id", metadata?.getString("setup_token_id"))
+        assertNull(browserSwitchOptions.returnUrlScheme)
+        assertEquals("https://merchant.com/app-link", browserSwitchOptions.appLinkUrl)
         assertEquals(Uri.parse("https://fake.com/destination"), browserSwitchOptions.targetUri)
         assertEquals(BrowserSwitchRequestCodes.CARD_VAULT, browserSwitchOptions.requestCode)
     }
