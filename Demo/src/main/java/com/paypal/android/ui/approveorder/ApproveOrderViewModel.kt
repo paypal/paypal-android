@@ -72,7 +72,17 @@ class ApproveOrderViewModel @Inject constructor(
     private fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
-        val cardRequest = mapUIStateToCardRequestWithOrderId(orderId)
+        val cardRequest = uiState.value.run {
+            // expiration date in UI State needs to be formatted because it uses a visual transformation
+            val dateString = DateString(cardExpirationDate)
+            val card = Card(
+                number = cardNumber,
+                expirationMonth = dateString.formattedMonth,
+                expirationYear = dateString.formattedYear,
+                securityCode = cardSecurityCode
+            )
+            CardRequest(orderId, card, DemoConstants.APP_URL, scaOption)
+        }
         cardClient.approveOrder(cardRequest) { result ->
             when (result) {
                 is CardApproveOrderResult.Success -> {
@@ -82,13 +92,11 @@ class ApproveOrderViewModel @Inject constructor(
                     approveOrderState = ActionState.Success(orderInfo)
                 }
 
-                is CardApproveOrderResult.AuthorizationRequired -> {
+                is CardApproveOrderResult.AuthorizationRequired ->
                     presentAuthChallenge(activity, result.authChallenge)
-                }
 
-                is CardApproveOrderResult.Failure -> {
+                is CardApproveOrderResult.Failure ->
                     approveOrderState = ActionState.Failure(result.error)
-                }
             }
         }
     }
@@ -121,18 +129,6 @@ class ApproveOrderViewModel @Inject constructor(
                     completeOrderUseCase(orderId, intentOption, cmid).mapToActionState()
             }
         }
-    }
-
-    private fun mapUIStateToCardRequestWithOrderId(orderId: String) = uiState.value.run {
-        // expiration date in UI State needs to be formatted because it uses a visual transformation
-        val dateString = DateString(cardExpirationDate)
-        val card = Card(
-            number = cardNumber,
-            expirationMonth = dateString.formattedMonth,
-            expirationYear = dateString.formattedYear,
-            securityCode = cardSecurityCode
-        )
-        CardRequest(orderId, card, DemoConstants.APP_URL, scaOption)
     }
 
     private var createOrderState
