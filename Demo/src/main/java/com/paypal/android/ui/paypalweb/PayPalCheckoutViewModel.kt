@@ -4,10 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
-import com.paypal.android.DemoConstants.APP_URL
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -62,6 +63,12 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var useAuthTabLauncher: Boolean
+        get() = _uiState.value.useAuthTabLauncher
+        set(value) {
+            _uiState.update { it.copy(useAuthTabLauncher = value) }
+        }
+
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
@@ -103,34 +110,54 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
     }
 
-    fun startCheckout(activity: ComponentActivity) {
+    fun startCheckout(
+        activity: ComponentActivity,
+        activityResultLauncher: ActivityResultLauncher<Intent>?
+    ) {
         val orderId = createdOrder?.id
         if (orderId == null) {
             payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            startCheckoutWithOrderId(activity, orderId)
+            startCheckoutWithOrderId(activity, orderId, activityResultLauncher)
         }
     }
 
-    private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
+    private fun startCheckoutWithOrderId(
+        activity: ComponentActivity,
+        orderId: String,
+        activityResultLauncher: ActivityResultLauncher<Intent>?
+    ) {
         payPalWebCheckoutState = ActionState.Loading
 
         val checkoutRequest = PayPalWebCheckoutRequest(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            APP_URL,
+            SUCCESS_URL,
             APP_FALLBACK_URL_SCHEME
         )
 
-        paypalClient.start(activity, checkoutRequest) { startResult ->
-            when (startResult) {
-                is PayPalPresentAuthChallengeResult.Success -> {
-                    // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
-                }
+        if (useAuthTabLauncher && activityResultLauncher != null) {
+            paypalClient.start(activity, checkoutRequest, activityResultLauncher) { startResult ->
+                when (startResult) {
+                    is PayPalPresentAuthChallengeResult.Success -> {
+                        // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+                    }
 
-                is PayPalPresentAuthChallengeResult.Failure ->
-                    payPalWebCheckoutState = ActionState.Failure(startResult.error)
+                    is PayPalPresentAuthChallengeResult.Failure ->
+                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
+                }
+            }
+        } else {
+            paypalClient.start(activity, checkoutRequest) { startResult ->
+                when (startResult) {
+                    is PayPalPresentAuthChallengeResult.Success -> {
+                        // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+                    }
+
+                    is PayPalPresentAuthChallengeResult.Failure ->
+                        payPalWebCheckoutState = ActionState.Failure(startResult.error)
+                }
             }
         }
     }
@@ -174,4 +201,9 @@ class PayPalCheckoutViewModel @Inject constructor(
                 }
             }
         }
+
+    fun onAuthTabClosed() {
+        val error = Exception("Cancelled by user")
+        payPalWebCheckoutState = ActionState.Failure(error)
+    }
 }

@@ -1,5 +1,8 @@
 package com.paypal.android.ui.paypalweb
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,11 +49,13 @@ fun PayPalCheckoutView(
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
-        intent?.let { viewModel.completeAuthChallenge(it) }
+        if (!uiState.useAuthTabLauncher)
+            intent?.let { viewModel.completeAuthChallenge(it) }
     }
 
     OnNewIntentEffect { newIntent ->
-        viewModel.completeAuthChallenge(newIntent)
+        if (!uiState.useAuthTabLauncher)
+            viewModel.completeAuthChallenge(newIntent)
     }
 
     val contentPadding = UIConstants.paddingMedium
@@ -107,10 +112,29 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
 @Composable
 private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
     val context = LocalContext.current
+
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                result.data?.let { viewModel.completeAuthChallenge(it) }
+            }
+
+            Activity.RESULT_CANCELED -> viewModel.onAuthTabClosed()
+        }
+    }
+
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 2, title = stringResource(R.string.launch_paypal))
+        BooleanOptionList(
+            title = "Use Auth Tab Launcher",
+            selectedOption = uiState.useAuthTabLauncher,
+            onSelectedOptionChange = { value -> viewModel.useAuthTabLauncher = value },
+            modifier = Modifier.fillMaxWidth()
+        )
         StartPayPalWebCheckoutForm(
             fundingSource = uiState.fundingSource,
             onFundingSourceChange = { value -> viewModel.fundingSource = value },
@@ -119,7 +143,12 @@ private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalC
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startCheckout(it) } },
+            onClick = {
+                context.getActivityOrNull()?.let { activity ->
+                    val launcher = if (uiState.useAuthTabLauncher) activityResultLauncher else null
+                    viewModel.startCheckout(activity, launcher)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

@@ -13,6 +13,7 @@ data class ChromeCustomTabOptions(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ChromeCustomTabsClient {
     fun launch(context: Context, options: ChromeCustomTabOptions) {
+        println("Karthik: launching Chrome Custom Tab with URL: ${options.launchUri}")
         val customTabsIntent = CustomTabsIntent.Builder().build()
         customTabsIntent.launchUrl(context, options.launchUri)
     }

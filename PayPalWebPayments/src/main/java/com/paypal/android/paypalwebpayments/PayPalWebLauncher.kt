@@ -3,6 +3,7 @@ package com.paypal.android.paypalwebpayments
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResultLauncher
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CaptureDeepLinkResult
 import com.paypal.android.corepayments.DeepLink
@@ -44,6 +45,39 @@ internal class PayPalWebLauncher(
             metadata = metadata
         )
         return launchBrowserSwitch(activity, options)
+    }
+
+
+    fun launchWithUrl(
+        uri: Uri,
+        token: String,
+        tokenType: TokenType,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+        returnUrlScheme: String?,
+        appLinkUrl: String?
+    ): PayPalPresentAuthChallengeResult {
+        val metadata = getMetadata(token, tokenType)
+        val options = BrowserSwitchOptions(
+            targetUri = uri,
+            requestCode = getRequestCode(tokenType),
+            returnUrlScheme = returnUrlScheme,
+            appLinkUrl = appLinkUrl,
+            metadata = metadata
+        )
+
+        val result = browserSwitchClient.start(activityResultLauncher, options)
+
+        return when (result) {
+            is BrowserSwitchStartResult.Success -> {
+                val pendingState = BrowserSwitchPendingState(options)
+                PayPalPresentAuthChallengeResult.Success(pendingState.toBase64EncodedJSON())
+            }
+
+            is BrowserSwitchStartResult.Failure -> {
+                val error = PayPalWebCheckoutError.browserSwitchError(result.error)
+                PayPalPresentAuthChallengeResult.Failure(error)
+            }
+        }
     }
 
     private fun getRequestCode(tokenType: TokenType): Int {

@@ -77,6 +77,7 @@ dependencies {
     implementation libs.kotlin.stdLib
     implementation libs.kotlinx.coroutinesAndroid
     implementation libs.kotlinx.serializationJson
+    implementation libs.androidx.activity.ktx
 
     testImplementation libs.json
     testImplementation libs.jsonAssert
