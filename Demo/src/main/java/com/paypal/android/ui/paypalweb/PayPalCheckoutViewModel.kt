@@ -7,8 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.APP_FALLBACK_URL_SCHEME
 import com.paypal.android.DemoConstants.SUCCESS_URL
+import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -134,7 +134,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             fundingSource,
             appSwitchWhenEligible,
             SUCCESS_URL,
-            APP_FALLBACK_URL_SCHEME
+            APP_CUSTOM_URL_SCHEME
         )
 
         if (useAuthTabLauncher && activityResultLauncher != null) {

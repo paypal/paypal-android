@@ -67,7 +67,7 @@ class PayPalWebCheckoutClient internal constructor(
         urlScheme: String
     ) : this(
         analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        payPalWebLauncher = PayPalWebLauncher(),
+        payPalWebLauncher = PayPalWebLauncher(context),
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
@@ -81,7 +81,7 @@ class PayPalWebCheckoutClient internal constructor(
         configuration: CoreConfig
     ) : this(
         analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
-        payPalWebLauncher = PayPalWebLauncher(),
+        payPalWebLauncher = PayPalWebLauncher(context),
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,

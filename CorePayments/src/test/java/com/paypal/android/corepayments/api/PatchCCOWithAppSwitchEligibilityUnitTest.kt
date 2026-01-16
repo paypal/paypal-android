@@ -25,6 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.collections.mapOf
 
 @ExperimentalCoroutinesApi
 @OptIn(kotlinx.serialization.InternalSerializationApi::class)
@@ -35,6 +36,8 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     private lateinit var coreConfig: CoreConfig
     private lateinit var graphQLClient: GraphQLClient
     private lateinit var resourceLoader: ResourceLoader
+    private lateinit var tokenServiceAPI: AuthenticationSecureTokenServiceAPI
+
     private lateinit var sut: PatchCCOWithAppSwitchEligibility
     private val testOrderId = "test-order-id-456"
 
@@ -44,10 +47,15 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
         graphQLClient = mockk(relaxed = true)
         resourceLoader = mockk(relaxed = true)
+        tokenServiceAPI = mockk(relaxed = true)
         sut = PatchCCOWithAppSwitchEligibility(
             graphQLClient,
-            resourceLoader
+            resourceLoader,
+            tokenServiceAPI
         )
+        coEvery {
+            tokenServiceAPI.createLowScopedAccessToken()
+        } returns APIResult.Success("fake-token")
     }
 
     @Test
@@ -63,7 +71,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         } returns LoadRawResourceResult.Success(mockQuery)
         coEvery {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
-                any()
+                any(), any()
             )
         } returns successResponse
 
@@ -81,7 +89,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         // Then
         coVerify {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
-                capture(requestSlot)
+                capture(requestSlot), any()
             )
         }
         val capturedRequest = requestSlot.captured
@@ -132,8 +140,6 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
             )
         } returns successResponse
 
-        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
-
         // When
         sut(
             context = context,
@@ -144,9 +150,11 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         )
 
         // Then
+        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
         coVerify {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
-                capture(requestSlot)
+                capture(requestSlot),
+                mapOf("Authorization" to "Bearer fake-token")
             )
         }
         val capturedRequest = requestSlot.captured
@@ -174,6 +182,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         } returns LoadRawResourceResult.Success(mockQuery)
         coEvery {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
+                any(),
                 any()
             )
         } returns successResponse
@@ -206,7 +215,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         } returns LoadRawResourceResult.Success(mockQuery)
         coEvery {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
-                any()
+                any(), any()
             )
         } returns failureResponse
 
@@ -303,18 +312,13 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         val mockQuery = "query content"
         val successResponse = createSuccessfulGraphQLResult()
         coEvery {
-            resourceLoader.loadRawResource(
-                any(),
-                any()
-            )
+            resourceLoader.loadRawResource(any(), any())
         } returns LoadRawResourceResult.Success(mockQuery)
         coEvery {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
                 any()
             )
         } returns successResponse
-
-        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
 
         // When
         sut(
@@ -326,9 +330,11 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
         )
 
         // Then
+        val requestSlot = slot<GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>>()
         coVerify {
             graphQLClient.send<PatchCcoWithAppSwitchEligibilityResponse, PatchCcoWithAppSwitchEligibilityVariables>(
-                capture(requestSlot)
+                capture(requestSlot),
+                mapOf("Authorization" to "Bearer fake-token")
             )
         }
         val variables = requestSlot.captured.variables!!

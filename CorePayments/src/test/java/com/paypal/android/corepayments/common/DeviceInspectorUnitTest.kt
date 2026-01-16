@@ -1,10 +1,14 @@
 package com.paypal.android.corepayments.common
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -57,6 +61,42 @@ class DeviceInspectorUnitTest {
 
         val result = sut.isPayPalInstalled
 
+        assertFalse(result)
+    }
+
+    @Test
+    fun `isDeepLinkConfiguredInManifest queries for intent with correct action, data, and categories`() {
+        val intentSlot = slot<Intent>()
+        every {
+            packageManager.queryIntentActivities(capture(intentSlot), 0)
+        } returns listOf(ResolveInfo())
+
+        sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
+
+        val capturedIntent = intentSlot.captured
+        assertEquals(Intent.ACTION_VIEW, capturedIntent.action)
+        assertEquals("com.example.app.returnscheme://", capturedIntent.data.toString())
+        assertTrue(capturedIntent.hasCategory(Intent.CATEGORY_DEFAULT))
+        assertTrue(capturedIntent.hasCategory(Intent.CATEGORY_BROWSABLE))
+    }
+
+    @Test
+    fun `isDeepLinkConfiguredInManifest returns true when deep link is configured in manifest`() {
+        every {
+            packageManager.queryIntentActivities(any<Intent>(), 0)
+        } returns listOf(ResolveInfo())
+
+        val result = sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isDeepLinkConfiguredInManifest returns false when no matching activities found`() {
+        every {
+            packageManager.queryIntentActivities(any<Intent>(), 0)
+        } returns emptyList()
+
+        val result = sut.isDeepLinkConfiguredInManifest("com.example.app.returnscheme")
         assertFalse(result)
     }
 }
