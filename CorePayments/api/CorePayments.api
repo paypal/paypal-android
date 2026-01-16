@@ -169,24 +169,6 @@ public final class com/paypal/android/corepayments/browserswitch/AuthTabClient {
 	public static synthetic fun launchAuthTab$default (Lcom/paypal/android/corepayments/browserswitch/AuthTabClient;Lcom/paypal/android/corepayments/browserswitch/ChromeCustomTabOptions;Landroidx/activity/result/ActivityResultLauncher;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
-public final class com/paypal/android/corepayments/browserswitch/BrowserSwitchClient$Companion {
-}
-
-public final class com/paypal/android/corepayments/browserswitch/BrowserSwitchClient$Companion$Failure {
-	public static final field INSTANCE Lcom/paypal/android/corepayments/browserswitch/BrowserSwitchClient$Companion$Failure;
-	public final fun getActivityIsFinishing ()Lcom/paypal/android/corepayments/browserswitch/BrowserSwitchStartResult$Failure;
-	public final fun getManifestDeepLinkConfigurationInvalid ()Lcom/paypal/android/corepayments/browserswitch/BrowserSwitchStartResult$Failure;
-	public final fun getNoWebBrowser ()Lcom/paypal/android/corepayments/browserswitch/BrowserSwitchStartResult$Failure;
-}
-
-public final class com/paypal/android/corepayments/browserswitch/LaunchChromeCustomTabResult$ActivityNotFound : com/paypal/android/corepayments/browserswitch/LaunchChromeCustomTabResult {
-	public static final field INSTANCE Lcom/paypal/android/corepayments/browserswitch/LaunchChromeCustomTabResult$ActivityNotFound;
-}
-
-public final class com/paypal/android/corepayments/browserswitch/LaunchChromeCustomTabResult$Success : com/paypal/android/corepayments/browserswitch/LaunchChromeCustomTabResult {
-	public static final field INSTANCE Lcom/paypal/android/corepayments/browserswitch/LaunchChromeCustomTabResult$Success;
-}
-
 public final class com/paypal/android/corepayments/common/DeviceInspector$Companion {
 }
 

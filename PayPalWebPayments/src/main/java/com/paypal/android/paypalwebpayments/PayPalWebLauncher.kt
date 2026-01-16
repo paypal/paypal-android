@@ -49,8 +49,6 @@ internal class PayPalWebLauncher(
         )
         return launchBrowserSwitch(activity, options)
     }
-
-
     fun launchWithUrl(
         uri: Uri,
         token: String,

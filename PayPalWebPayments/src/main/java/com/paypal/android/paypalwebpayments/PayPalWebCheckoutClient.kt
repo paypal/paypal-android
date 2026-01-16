@@ -218,17 +218,20 @@ class PayPalWebCheckoutClient internal constructor(
             )
         }
 
+        handleAuthChallengeResult(result)
+        return result
+    }
+
+    private fun handleAuthChallengeResult(result: PayPalPresentAuthChallengeResult) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                     checkoutOrderId
                 )
-
                 // update auth state value in session store
                 sessionStore.authState = result.authState
             }
-
             is PayPalPresentAuthChallengeResult.Failure -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
@@ -236,8 +239,6 @@ class PayPalWebCheckoutClient internal constructor(
                 )
             }
         }
-
-        return result
     }
 
     /**
@@ -281,9 +282,6 @@ class PayPalWebCheckoutClient internal constructor(
             }
         }
     }
-
-
-
     /**
      * Vault PayPal as a payment method.
      *

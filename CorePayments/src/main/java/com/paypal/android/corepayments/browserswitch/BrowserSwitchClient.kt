@@ -71,7 +71,6 @@ class BrowserSwitchClient(
         }
     }
 
-
     fun start(
         activityResultLauncher: ActivityResultLauncher<Intent>,
         options: BrowserSwitchOptions

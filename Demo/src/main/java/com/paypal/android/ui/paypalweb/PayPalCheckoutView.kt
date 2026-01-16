@@ -49,13 +49,17 @@ fun PayPalCheckoutView(
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
-        if (!uiState.useAuthTabLauncher)
-            intent?.let { viewModel.completeAuthChallenge(it) }
+        if (!uiState.useAuthTabLauncher) {
+            intent?.let {
+                viewModel.completeAuthChallenge(it)
+            }
+        }
     }
 
     OnNewIntentEffect { newIntent ->
-        if (!uiState.useAuthTabLauncher)
+        if (!uiState.useAuthTabLauncher) {
             viewModel.completeAuthChallenge(newIntent)
+        }
     }
 
     val contentPadding = UIConstants.paddingMedium

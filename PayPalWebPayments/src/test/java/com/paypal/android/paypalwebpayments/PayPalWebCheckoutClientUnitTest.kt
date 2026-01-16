@@ -597,7 +597,13 @@ class PayPalWebCheckoutClientUnitTest {
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
             coEvery {
-                patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             } returns APIResult.Success(appSwitchResponse)
 
             every {
@@ -635,7 +641,13 @@ class PayPalWebCheckoutClientUnitTest {
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
             coEvery {
-                patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             } returns APIResult.Success(appSwitchResponse)
 
             every {
@@ -675,7 +687,13 @@ class PayPalWebCheckoutClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
         coEvery {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         } returns APIResult.Failure(PayPalSDKError(1001, "Test failure"))
 
         every {
@@ -693,7 +711,15 @@ class PayPalWebCheckoutClientUnitTest {
         val result = sut.startAsync(activity, request)
 
         // Then
-        coVerify { patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any()) }
+        coVerify {
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
+        }
         verify {
             payPalWebLauncher.launchWithUrl(
                 activity = activity,
@@ -729,7 +755,13 @@ class PayPalWebCheckoutClientUnitTest {
 
         // Then
         coVerify(exactly = 0) {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         }
         verify {
             payPalWebLauncher.launchWithUrl(
@@ -750,7 +782,13 @@ class PayPalWebCheckoutClientUnitTest {
         val appSwitchResponse = createAppSwitchEligibilityResponse("https://test.com")
 
         coEvery {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         } returns APIResult.Success(appSwitchResponse)
 
         every {
@@ -849,7 +887,13 @@ class PayPalWebCheckoutClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
         coEvery {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         } returns APIResult.Success(appSwitchResponse)
 
         every {
@@ -897,7 +941,13 @@ class PayPalWebCheckoutClientUnitTest {
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
             coEvery {
-                patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             } returns APIResult.Success(appSwitchResponse)
 
             every {
@@ -933,7 +983,13 @@ class PayPalWebCheckoutClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
 
         coEvery {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         } returns APIResult.Failure(PayPalSDKError(1001, "Test vault failure"))
 
         every {
@@ -983,7 +1039,13 @@ class PayPalWebCheckoutClientUnitTest {
 
         // Then
         coVerify(exactly = 0) {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         }
         verify {
             payPalWebLauncher.launchWithUrl(
@@ -1004,7 +1066,13 @@ class PayPalWebCheckoutClientUnitTest {
         val appSwitchResponse = createAppSwitchEligibilityResponse("https://test.com")
 
         coEvery {
-            patchCCOWithAppSwitchEligibility(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any<TokenType>(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any()
+            )
         } returns APIResult.Success(appSwitchResponse)
 
         every {
@@ -1056,7 +1124,13 @@ class PayPalWebCheckoutClientUnitTest {
 
             // Then
             coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility.invoke(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             }
             verify {
                 payPalWebLauncher.launchWithUrl(
@@ -1092,7 +1166,13 @@ class PayPalWebCheckoutClientUnitTest {
 
             // Then
             coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility.invoke(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             }
             verify {
                 payPalWebLauncher.launchWithUrl(
@@ -1128,7 +1208,13 @@ class PayPalWebCheckoutClientUnitTest {
 
             // Then
             coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility.invoke(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             }
             verify {
                 payPalWebLauncher.launchWithUrl(
@@ -1164,7 +1250,13 @@ class PayPalWebCheckoutClientUnitTest {
 
             // Then
             coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(context = any(), orderId = any(), tokenType = any<TokenType>(), merchantOptInForAppSwitch = any(), paypalNativeAppInstalled = any())
+                patchCCOWithAppSwitchEligibility.invoke(
+                    context = any(),
+                    orderId = any(),
+                    tokenType = any<TokenType>(),
+                    merchantOptInForAppSwitch = any(),
+                    paypalNativeAppInstalled = any()
+                )
             }
             verify {
                 payPalWebLauncher.launchWithUrl(

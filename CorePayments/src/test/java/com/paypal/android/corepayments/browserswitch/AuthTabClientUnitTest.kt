@@ -1,7 +1,6 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.net.toUri
 import io.mockk.mockk
