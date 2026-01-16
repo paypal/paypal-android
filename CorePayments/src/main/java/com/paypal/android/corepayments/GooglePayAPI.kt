@@ -3,10 +3,11 @@ package com.paypal.android.corepayments
 import android.content.Context
 import androidx.annotation.RawRes
 import com.paypal.android.corepayments.graphql.GraphQLClient
+import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
-import org.json.JSONException
-import org.json.JSONObject
+import kotlinx.serialization.InternalSerializationApi
 
+@OptIn(InternalSerializationApi::class)
 class GooglePayAPI(
     private val coreConfig: CoreConfig,
     private val applicationContext: Context,
@@ -24,130 +25,123 @@ class GooglePayAPI(
         @RawRes val resId = R.raw.graphql_google_pay_config_sandbox
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success -> sendGraphQLGooglePayConfigRequest(result.value)
-            is LoadRawResourceResult.Failure -> TODO("signal error")
+            is LoadRawResourceResult.Failure -> {
+                val error = PayPalSDKError(
+                    code = 0,
+                    errorDescription = "Failed to load GraphQL query"
+                )
+                GetGooglePayConfigResult.Failure(error)
+            }
         }
     }
 
     private suspend fun sendGraphQLGooglePayConfigRequest(
-        query: String,
+        query: String
     ): GetGooglePayConfigResult {
         // TODO: allow this to be provided as a param
-        val merchantId = ""
+        val merchantId = listOf("")
         // TODO: allow this to be provided as a param
         val buyerCountry = "US"
-
         // TODO: see if we need this
         val merchantOrigin = "com.paypal.android.sdk"
 
-        val variables = JSONObject()
-            .put("clientId", coreConfig.clientId)
-            .put("merchantId", merchantId)
-            .put("merchantOrigin", merchantOrigin)
-            .put("buyerCountry", buyerCountry)
+        val variables = GetGooglePayConfigVariables(
+            clientId = coreConfig.clientId,
+            merchantId = merchantId,
+            merchantOrigin = merchantOrigin,
+            buyerCountry = buyerCountry
+        )
 
-        val graphQLRequest = JSONObject()
-            .put("query", query)
-            .put("variables", variables)
-        val graphQLResponse =
-            graphQLClient.send(graphQLRequest, queryName = "GetGooglePayConfig")
+        val graphQLRequest = GraphQLRequest(
+            query = query,
+            variables = variables,
+            operationName = "GetGooglePayConfig"
+        )
+
+        val graphQLResponse = graphQLClient.send<
+                GetGooglePayConfigResponse,
+                GetGooglePayConfigVariables
+                >(graphQLRequest)
+
         return when (graphQLResponse) {
             is GraphQLResult.Success -> {
-                val responseJSON = graphQLResponse.data
-                if (responseJSON == null) {
-                    TODO("handle null response error")
+                val responseData = graphQLResponse.response.data
+                if (responseData == null) {
+                    val error = APIClientError.noResponseData(graphQLResponse.correlationId)
+                    GetGooglePayConfigResult.Failure(error)
                 } else {
-                    parseSuccessfulUpdateSuccessJSON(responseJSON, graphQLResponse.correlationId)
+                    val configData = responseData.googlePayConfig
+                    val config = GooglePayConfig(
+                        isEligible = configData.isEligible,
+                        allowedPaymentMethods = configData.allowedPaymentMethods,
+                        merchantInfo = configData.merchantInfo
+                    )
+                    GetGooglePayConfigResult.Success(config)
                 }
             }
 
             is GraphQLResult.Failure -> {
-                TODO("handle graphql failure error")
+                GetGooglePayConfigResult.Failure(graphQLResponse.error)
             }
-        }
-    }
-
-    private fun parseSuccessfulUpdateSuccessJSON(
-        responseBody: JSONObject,
-        correlationId: String?
-    ): GetGooglePayConfigResult {
-        return try {
-            val googlePayConfigJSON = responseBody.getJSONObject("googlePayConfig")
-            val isEligible = googlePayConfigJSON.getBoolean("isEligible")
-            val allowedPaymentMethods =
-                googlePayConfigJSON.optJSONArray("allowedPaymentMethods")
-            val merchantInfo =
-                googlePayConfigJSON.optJSONObject("merchantInfo")
-            GetGooglePayConfigResult.Success(
-                GooglePayConfig(isEligible, allowedPaymentMethods, merchantInfo)
-            )
-        } catch (jsonError: JSONException) {
-            val message = "Update Setup Token Failed: GraphQL JSON body was invalid."
-            val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
-            GetGooglePayConfigResult.Failure(error)
         }
     }
 
     suspend fun confirmOrder(
         orderId: String,
-        paymentMethodData: JSONObject
+        paymentMethodData: GooglePayPaymentMethodData
     ): ApproveGooglePayPaymentResult {
         @RawRes val resId = R.raw.graphql_approve_google_pay_payment
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success ->
                 sendGraphQLApproveGooglePayPaymentRequest(result.value, orderId, paymentMethodData)
 
-            is LoadRawResourceResult.Failure -> TODO("signal error")
+            is LoadRawResourceResult.Failure -> {
+                val error = PayPalSDKError(
+                    code = 0,
+                    errorDescription = "Failed to load GraphQL mutation"
+                )
+                ApproveGooglePayPaymentResult.Failure(error)
+            }
         }
     }
 
     private suspend fun sendGraphQLApproveGooglePayPaymentRequest(
         query: String,
         orderId: String,
-        paymentMethodData: JSONObject
+        paymentMethodData: GooglePayPaymentMethodData
     ): ApproveGooglePayPaymentResult {
-        val variables = JSONObject()
-            .put("paymentMethodData", paymentMethodData)
-            .put("clientID", coreConfig.clientId)
-            .put("orderID", orderId)
-            .put("productFlow", "CUSTOM_DIGITAL_WALLET")
+        val variables = ApproveGooglePayPaymentVariables(
+            paymentMethodData = paymentMethodData,
+            clientID = coreConfig.clientId,
+            orderID = orderId,
+            productFlow = "CUSTOM_DIGITAL_WALLET"
+        )
 
-        val graphQLRequest = JSONObject()
-            .put("query", query)
-            .put("variables", variables)
-        val graphQLResponse =
-            graphQLClient.send(graphQLRequest, queryName = "ApproveGooglePayPayment")
+        val graphQLRequest = GraphQLRequest(
+            query = query,
+            variables = variables,
+            operationName = "ApproveGooglePayPayment"
+        )
+
+        val graphQLResponse = graphQLClient.send<
+                ApproveGooglePayPaymentResponse,
+                ApproveGooglePayPaymentVariables
+                >(graphQLRequest)
 
         return when (graphQLResponse) {
             is GraphQLResult.Success -> {
-                val responseJSON = graphQLResponse.data
-                if (responseJSON == null) {
-                    TODO("handle null response error")
+                val responseData = graphQLResponse.response.data
+                if (responseData == null) {
+                    val error = APIClientError.noResponseData(graphQLResponse.correlationId)
+                    ApproveGooglePayPaymentResult.Failure(error)
                 } else {
-                    parseSuccessfulApproveGooglePayPaymentJSON(
-                        responseJSON,
-                        graphQLResponse.correlationId
-                    )
+                    ApproveGooglePayPaymentResult.Success(status = responseData.status)
                 }
             }
 
             is GraphQLResult.Failure -> {
-                TODO("handle graphql failure error")
+                ApproveGooglePayPaymentResult.Failure(graphQLResponse.error)
             }
-        }
-    }
-
-    private fun parseSuccessfulApproveGooglePayPaymentJSON(
-        responseBody: JSONObject,
-        correlationId: String?
-    ): ApproveGooglePayPaymentResult {
-        return try {
-            val approveGooglePayPaymentJSON = responseBody.getJSONObject("approveGooglePayPayment")
-            val status = approveGooglePayPaymentJSON.getString("status")
-            ApproveGooglePayPaymentResult.Success(status = status)
-        } catch (jsonError: JSONException) {
-            val message = "Approve Google Pay Payment: GraphQL JSON body was invalid."
-            val error = PayPalSDKError(0, message, correlationId, reason = jsonError)
-            ApproveGooglePayPaymentResult.Failure(error)
         }
     }
 }

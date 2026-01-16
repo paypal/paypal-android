@@ -22,8 +22,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.wallet.contract.TaskResultContracts
 import com.paypal.android.corepayments.ApproveGooglePayPaymentResult
-import com.paypal.android.ui.paypalweb.PayPalWebUiState
-import com.paypal.android.ui.paypalweb.PayPalWebViewModel
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView

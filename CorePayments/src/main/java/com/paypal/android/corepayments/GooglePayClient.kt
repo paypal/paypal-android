@@ -3,12 +3,15 @@ package com.paypal.android.corepayments
 import android.content.Context
 import android.util.Log
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
 import com.google.android.gms.wallet.contract.ApiTaskResult
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -24,9 +27,10 @@ class GooglePayClient(
     suspend fun start(): Task<PaymentData> {
         return when (val result = googlePayAPI.getGooglePayConfig()) {
             is GetGooglePayConfigResult.Failure -> {
-                Log.d("GooglePayClient", "Failure")
-                Log.d("GooglePayClient", "${result.error}")
-                TODO("handle error")
+                Log.e(TAG, "Failed to get Google Pay config: ${result.error}")
+                Tasks.forException(
+                    Exception("Failed to get Google Pay config: ${result.error.errorDescription}")
+                )
             }
 
             is GetGooglePayConfigResult.Success -> {
@@ -35,13 +39,16 @@ class GooglePayClient(
         }
     }
 
-    private suspend fun loadPaymentData(googlePayConfig: GooglePayConfig): Task<PaymentData> {
+    private fun loadPaymentData(googlePayConfig: GooglePayConfig): Task<PaymentData> {
         if (googlePayConfig.isEligible) {
             val paymentDataRequestJSON = createPaymentDataRequest(googlePayConfig)
             val paymentDataRequest = PaymentDataRequest.fromJson(paymentDataRequestJSON.toString())
             return paymentsClient.loadPaymentData(paymentDataRequest)
         } else {
-            TODO("Handle GooglePay ineligibility")
+            Log.e(TAG, "Google Pay is not eligible for this transaction")
+            return Tasks.forException(
+                Exception("Google Pay is not eligible for this transaction")
+            )
         }
     }
 
@@ -67,11 +74,20 @@ class GooglePayClient(
             .put("totalPrice", "1.00")
             .put("totalPriceLabel", "Total")
 
+        // Convert typed data to JSON for Google SDK
+        val json = Json { ignoreUnknownKeys = true }
+        val allowedPaymentMethodsJSON = googlePayConfig.allowedPaymentMethods?.let {
+            JSONArray(json.encodeToString(it))
+        }
+        val merchantInfoJSON = googlePayConfig.merchantInfo?.let {
+            JSONObject(json.encodeToString(it))
+        }
+
         val request = JSONObject()
             .put("apiVersion", 2)
             .put("apiVersionMinor", 0)
-            .put("allowedPaymentMethods", googlePayConfig.allowedPaymentMethods)
-            .put("merchantInfo", googlePayConfig.merchantInfo)
+            .put("allowedPaymentMethods", allowedPaymentMethodsJSON)
+            .put("merchantInfo", merchantInfoJSON)
             .put("callbackIntents", JSONArray(listOf("PAYMENT_AUTHORIZATION")))
             .put("transactionInfo", transactionInfo)
         return request
@@ -87,8 +103,22 @@ class GooglePayClient(
             return ApproveGooglePayPaymentResult.Failure(error)
         }
 
+        // Parse Google Pay response to typed data
         val paymentDataJSON = JSONObject(paymentData.toJson())
-        val paymentMethodData = paymentDataJSON.getJSONObject("paymentMethodData")
+        val paymentMethodDataJSON = paymentDataJSON.getJSONObject("paymentMethodData")
+
+        val json = Json { ignoreUnknownKeys = true }
+        val paymentMethodData = try {
+            json.decodeFromString<GooglePayPaymentMethodData>(paymentMethodDataJSON.toString())
+        } catch (e: Exception) {
+            val error = PayPalSDKError(
+                code = 0,
+                errorDescription = "Failed to parse payment method data: ${e.message}",
+                reason = e
+            )
+            return ApproveGooglePayPaymentResult.Failure(error)
+        }
+
         return googlePayAPI.confirmOrder(
             orderId = orderId,
             paymentMethodData = paymentMethodData
@@ -96,6 +126,8 @@ class GooglePayClient(
     }
 
     companion object {
+        private const val TAG = "GooglePayClient"
+
         fun createPaymentsClient(context: Context): PaymentsClient {
             val walletOptions = Wallet.WalletOptions.Builder()
                 .setEnvironment(WalletConstants.ENVIRONMENT_TEST)

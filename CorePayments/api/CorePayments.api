@@ -31,6 +31,176 @@ public final class com/paypal/android/corepayments/Address$Creator : android/os/
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/paypal/android/corepayments/AllowedPaymentMethod {
+	public static final field Companion Lcom/paypal/android/corepayments/AllowedPaymentMethod$Companion;
+	public fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;Lcom/paypal/android/corepayments/TokenizationSpecification;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;Lcom/paypal/android/corepayments/TokenizationSpecification;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;
+	public final fun component3 ()Lcom/paypal/android/corepayments/TokenizationSpecification;
+	public final fun copy (Ljava/lang/String;Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;Lcom/paypal/android/corepayments/TokenizationSpecification;)Lcom/paypal/android/corepayments/AllowedPaymentMethod;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/AllowedPaymentMethod;Ljava/lang/String;Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;Lcom/paypal/android/corepayments/TokenizationSpecification;ILjava/lang/Object;)Lcom/paypal/android/corepayments/AllowedPaymentMethod;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParameters ()Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;
+	public final fun getTokenizationSpecification ()Lcom/paypal/android/corepayments/TokenizationSpecification;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/AllowedPaymentMethod$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/AllowedPaymentMethod$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/AllowedPaymentMethod;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/AllowedPaymentMethod;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/AllowedPaymentMethod$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/AllowedPaymentMethodParameters {
+	public static final field Companion Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Lcom/paypal/android/corepayments/BillingAddressParameters;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Lcom/paypal/android/corepayments/BillingAddressParameters;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/Boolean;
+	public final fun component4 ()Ljava/lang/Boolean;
+	public final fun component5 ()Lcom/paypal/android/corepayments/BillingAddressParameters;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Lcom/paypal/android/corepayments/BillingAddressParameters;)Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;Ljava/util/List;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Lcom/paypal/android/corepayments/BillingAddressParameters;ILjava/lang/Object;)Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllowedAuthMethods ()Ljava/util/List;
+	public final fun getAllowedCardNetworks ()Ljava/util/List;
+	public final fun getAssuranceDetailsRequired ()Ljava/lang/Boolean;
+	public final fun getBillingAddressParameters ()Lcom/paypal/android/corepayments/BillingAddressParameters;
+	public final fun getBillingAddressRequired ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/AllowedPaymentMethodParameters$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/AllowedPaymentMethodParameters;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/AllowedPaymentMethodParameters$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract class com/paypal/android/corepayments/ApproveGooglePayPaymentResult {
+}
+
+public final class com/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure : com/paypal/android/corepayments/ApproveGooglePayPaymentResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success : com/paypal/android/corepayments/ApproveGooglePayPaymentResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStatus ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/BillingAddress {
+	public static final field Companion Lcom/paypal/android/corepayments/BillingAddress$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/BillingAddress;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/BillingAddress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/BillingAddress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress1 ()Ljava/lang/String;
+	public final fun getAddress2 ()Ljava/lang/String;
+	public final fun getAddress3 ()Ljava/lang/String;
+	public final fun getAdministrativeArea ()Ljava/lang/String;
+	public final fun getCountryCode ()Ljava/lang/String;
+	public final fun getLocality ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhoneNumber ()Ljava/lang/String;
+	public final fun getPostalCode ()Ljava/lang/String;
+	public final fun getSortingCode ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/BillingAddress$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/BillingAddress$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/BillingAddress;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/BillingAddress;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/BillingAddress$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/BillingAddressParameters {
+	public static final field Companion Lcom/paypal/android/corepayments/BillingAddressParameters$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/BillingAddressParameters;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/BillingAddressParameters;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/BillingAddressParameters;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFormat ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/BillingAddressParameters$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/BillingAddressParameters$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/BillingAddressParameters;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/BillingAddressParameters;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/BillingAddressParameters$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/paypal/android/corepayments/BrowserSwitchRequestCodes {
 	public static final field CARD_APPROVE_ORDER I
 	public static final field CARD_VAULT I
@@ -70,6 +240,131 @@ public final class com/paypal/android/corepayments/Environment : java/lang/Enum 
 	public static fun values ()[Lcom/paypal/android/corepayments/Environment;
 }
 
+public abstract class com/paypal/android/corepayments/GetGooglePayConfigResult {
+}
+
+public final class com/paypal/android/corepayments/GetGooglePayConfigResult$Failure : com/paypal/android/corepayments/GetGooglePayConfigResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/corepayments/GetGooglePayConfigResult$Failure;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/GetGooglePayConfigResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/corepayments/GetGooglePayConfigResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/GetGooglePayConfigResult$Success : com/paypal/android/corepayments/GetGooglePayConfigResult {
+	public fun <init> (Lcom/paypal/android/corepayments/GooglePayConfig;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/GooglePayConfig;
+	public final fun copy (Lcom/paypal/android/corepayments/GooglePayConfig;)Lcom/paypal/android/corepayments/GetGooglePayConfigResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/GetGooglePayConfigResult$Success;Lcom/paypal/android/corepayments/GooglePayConfig;ILjava/lang/Object;)Lcom/paypal/android/corepayments/GetGooglePayConfigResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Lcom/paypal/android/corepayments/GooglePayConfig;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/GooglePayAPI {
+	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
+	public fun <init> (Lcom/paypal/android/corepayments/CoreConfig;Landroid/content/Context;Lcom/paypal/android/corepayments/graphql/GraphQLClient;Lcom/paypal/android/corepayments/ResourceLoader;)V
+	public final fun confirmOrder (Ljava/lang/String;Lcom/paypal/android/corepayments/GooglePayPaymentMethodData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getGooglePayConfig (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/paypal/android/corepayments/GooglePayClient {
+	public static final field Companion Lcom/paypal/android/corepayments/GooglePayClient$Companion;
+	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
+	public fun <init> (Lcom/paypal/android/corepayments/GooglePayAPI;Lcom/google/android/gms/wallet/PaymentsClient;)V
+	public final fun confirmOrder (Ljava/lang/String;Lcom/google/android/gms/wallet/contract/ApiTaskResult;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun start (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/paypal/android/corepayments/GooglePayClient$Companion {
+	public final fun createPaymentsClient (Landroid/content/Context;)Lcom/google/android/gms/wallet/PaymentsClient;
+}
+
+public final class com/paypal/android/corepayments/GooglePayConfig {
+	public fun <init> (ZLjava/util/List;Lcom/paypal/android/corepayments/MerchantInfoData;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lcom/paypal/android/corepayments/MerchantInfoData;
+	public final fun copy (ZLjava/util/List;Lcom/paypal/android/corepayments/MerchantInfoData;)Lcom/paypal/android/corepayments/GooglePayConfig;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/GooglePayConfig;ZLjava/util/List;Lcom/paypal/android/corepayments/MerchantInfoData;ILjava/lang/Object;)Lcom/paypal/android/corepayments/GooglePayConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllowedPaymentMethods ()Ljava/util/List;
+	public final fun getMerchantInfo ()Lcom/paypal/android/corepayments/MerchantInfoData;
+	public fun hashCode ()I
+	public final fun isEligible ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/GooglePayPaymentMethodData {
+	public static final field Companion Lcom/paypal/android/corepayments/GooglePayPaymentMethodData$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/GooglePaymentInfo;Lcom/paypal/android/corepayments/TokenizationData;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcom/paypal/android/corepayments/GooglePaymentInfo;
+	public final fun component4 ()Lcom/paypal/android/corepayments/TokenizationData;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/GooglePaymentInfo;Lcom/paypal/android/corepayments/TokenizationData;)Lcom/paypal/android/corepayments/GooglePayPaymentMethodData;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/GooglePayPaymentMethodData;Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/GooglePaymentInfo;Lcom/paypal/android/corepayments/TokenizationData;ILjava/lang/Object;)Lcom/paypal/android/corepayments/GooglePayPaymentMethodData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getInfo ()Lcom/paypal/android/corepayments/GooglePaymentInfo;
+	public final fun getTokenizationData ()Lcom/paypal/android/corepayments/TokenizationData;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/GooglePayPaymentMethodData$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/GooglePayPaymentMethodData$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/GooglePayPaymentMethodData;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/GooglePayPaymentMethodData;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/GooglePayPaymentMethodData$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/GooglePaymentInfo {
+	public static final field Companion Lcom/paypal/android/corepayments/GooglePaymentInfo$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/BillingAddress;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/BillingAddress;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcom/paypal/android/corepayments/BillingAddress;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/BillingAddress;)Lcom/paypal/android/corepayments/GooglePaymentInfo;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/GooglePaymentInfo;Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/BillingAddress;ILjava/lang/Object;)Lcom/paypal/android/corepayments/GooglePaymentInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBillingAddress ()Lcom/paypal/android/corepayments/BillingAddress;
+	public final fun getCardDetails ()Ljava/lang/String;
+	public final fun getCardNetwork ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/GooglePaymentInfo$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/GooglePaymentInfo$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/GooglePaymentInfo;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/GooglePaymentInfo;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/GooglePaymentInfo$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/paypal/android/corepayments/HttpResponse$Companion {
 	public final fun getSUCCESSFUL_STATUS_CODES ()Lkotlin/ranges/IntRange;
 }
@@ -99,10 +394,178 @@ public final class com/paypal/android/corepayments/LoadRawResourceResult$Success
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/paypal/android/corepayments/MerchantInfoData {
+	public static final field Companion Lcom/paypal/android/corepayments/MerchantInfoData$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/MerchantInfoData;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/MerchantInfoData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/MerchantInfoData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMerchantId ()Ljava/lang/String;
+	public final fun getMerchantOrigin ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/MerchantInfoData$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/MerchantInfoData$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/MerchantInfoData;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/MerchantInfoData;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/MerchantInfoData$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/paypal/android/corepayments/PayPalSDKError : java/lang/Exception {
 	public final fun getCode ()I
 	public final fun getCorrelationId ()Ljava/lang/String;
 	public final fun getErrorDescription ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/ShippingAddress {
+	public static final field Companion Lcom/paypal/android/corepayments/ShippingAddress$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/ShippingAddress;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ShippingAddress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ShippingAddress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress1 ()Ljava/lang/String;
+	public final fun getAddress2 ()Ljava/lang/String;
+	public final fun getAddress3 ()Ljava/lang/String;
+	public final fun getAdministrativeArea ()Ljava/lang/String;
+	public final fun getCountryCode ()Ljava/lang/String;
+	public final fun getLocality ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhoneNumber ()Ljava/lang/String;
+	public final fun getPostalCode ()Ljava/lang/String;
+	public final fun getSortingCode ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/ShippingAddress$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/ShippingAddress$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/ShippingAddress;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/ShippingAddress;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/ShippingAddress$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/TokenizationData {
+	public static final field Companion Lcom/paypal/android/corepayments/TokenizationData$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/TokenizationData;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/TokenizationData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/TokenizationData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getToken ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/TokenizationData$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/TokenizationData$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/TokenizationData;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/TokenizationData;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/TokenizationData$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/TokenizationParameters {
+	public static final field Companion Lcom/paypal/android/corepayments/TokenizationParameters$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/corepayments/TokenizationParameters;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/TokenizationParameters;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/TokenizationParameters;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGateway ()Ljava/lang/String;
+	public final fun getGatewayMerchantId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/TokenizationParameters$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/TokenizationParameters$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/TokenizationParameters;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/TokenizationParameters;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/TokenizationParameters$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/TokenizationSpecification {
+	public static final field Companion Lcom/paypal/android/corepayments/TokenizationSpecification$Companion;
+	public fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/TokenizationParameters;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/TokenizationParameters;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcom/paypal/android/corepayments/TokenizationParameters;
+	public final fun copy (Ljava/lang/String;Lcom/paypal/android/corepayments/TokenizationParameters;)Lcom/paypal/android/corepayments/TokenizationSpecification;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/TokenizationSpecification;Ljava/lang/String;Lcom/paypal/android/corepayments/TokenizationParameters;ILjava/lang/Object;)Lcom/paypal/android/corepayments/TokenizationSpecification;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParameters ()Lcom/paypal/android/corepayments/TokenizationParameters;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/TokenizationSpecification$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcom/paypal/android/corepayments/TokenizationSpecification$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/paypal/android/corepayments/TokenizationSpecification;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/paypal/android/corepayments/TokenizationSpecification;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/paypal/android/corepayments/TokenizationSpecification$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/paypal/android/corepayments/UpdateClientConfigAPI$Defaults {
