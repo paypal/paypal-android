@@ -24,6 +24,7 @@ import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
+import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,7 +133,8 @@ class VaultCardViewModel @Inject constructor(
     private fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
         val card = parseCard(_uiState.value)
-        val cardVaultRequest = CardVaultRequest(setupTokenId, card, APP_URL)
+        val returnUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+        val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
         cardClient.vault(cardVaultRequest) { result ->
             when (result) {
                 is CardVaultResult.Success -> {

@@ -27,6 +27,7 @@ import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,7 +84,8 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            CardRequest(orderId, card, DemoConstants.APP_URL, scaOption)
+            val returnUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+            CardRequest(orderId, card, returnUrl, scaOption)
         }
         cardClient.approveOrder(cardRequest) { result ->
             when (result) {

@@ -6,6 +6,11 @@ import com.paypal.android.uishared.enums.DeepLinkStrategy
 
 object ReturnUrlFactory {
 
+    fun createGenericReturnUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
+        DeepLinkStrategy.APP_LINKS -> APP_URL
+        DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://"
+    }
+
     fun createCheckoutSuccessUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
         DeepLinkStrategy.APP_LINKS -> "$APP_URL/success"
         DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://success"

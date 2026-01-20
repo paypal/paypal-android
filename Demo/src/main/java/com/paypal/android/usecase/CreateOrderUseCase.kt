@@ -30,10 +30,7 @@ class CreateOrderUseCase @Inject constructor(
         val paymentSource = when {
             request.appSwitchWhenEligible -> {
                 val deepLinkStrategy = request.deepLinkStrategy
-                val appUrl = when (deepLinkStrategy) {
-                    DeepLinkStrategy.APP_LINKS -> APP_URL
-                    DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://"
-                }
+                val appUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
                 OrderPaymentSource(
                     paypal = PayPalPaymentSource(
                         experienceContext = PayPalOrderExperienceContext(
