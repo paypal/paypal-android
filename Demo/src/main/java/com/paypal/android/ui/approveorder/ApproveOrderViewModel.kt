@@ -22,6 +22,7 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
+import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
@@ -186,6 +187,12 @@ class ApproveOrderViewModel @Inject constructor(
         get() = _uiState.value.shouldVault
         set(value) {
             _uiState.update { it.copy(shouldVault = value) }
+        }
+
+    var deepLinkStrategy: DeepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
         }
 
     fun prefillCard(testCard: TestCard) {
