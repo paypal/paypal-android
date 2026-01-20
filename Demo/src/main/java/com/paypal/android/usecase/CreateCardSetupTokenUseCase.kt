@@ -1,6 +1,5 @@
 package com.paypal.android.usecase
 
-import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.model.serialization.CardDetails
 import com.paypal.android.api.model.serialization.CardPaymentSource
@@ -19,7 +18,10 @@ class CreateCardSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
-    suspend operator fun invoke(sca: SCA, deepLinkStrategy: DeepLinkStrategy): SDKSampleServerResult<CardSetupToken, Exception> =
+    suspend operator fun invoke(
+        sca: SCA,
+        deepLinkStrategy: DeepLinkStrategy
+    ): SDKSampleServerResult<CardSetupToken, Exception> =
         withContext(Dispatchers.IO) {
             // create a payment token with an empty card attribute; the merchant app will
             // provide the card's details through the SDK
