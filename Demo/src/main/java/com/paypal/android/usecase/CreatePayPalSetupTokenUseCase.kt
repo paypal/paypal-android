@@ -1,7 +1,5 @@
 package com.paypal.android.usecase
 
-import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
-import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.model.serialization.PayPalDetails
 import com.paypal.android.api.model.serialization.PayPalExperienceContext

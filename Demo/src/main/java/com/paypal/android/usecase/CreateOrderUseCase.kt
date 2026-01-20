@@ -1,7 +1,5 @@
 package com.paypal.android.usecase
 
-import com.paypal.android.DemoConstants.APP_URL
-import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
 import com.paypal.android.api.model.serialization.Card
@@ -16,7 +14,6 @@ import com.paypal.android.api.model.serialization.Vault
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.models.OrderRequest
-import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.utils.ReturnUrlFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
