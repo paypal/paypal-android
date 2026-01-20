@@ -20,6 +20,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.ui.approveorder.SetupTokenInfo
+import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
@@ -47,7 +48,7 @@ class VaultCardViewModel @Inject constructor(
     private var createSetupTokenState
         get() = _uiState.value.createSetupTokenState
         set(value) {
-            _uiState.update { it.copy(createSetupTokenState = value) }
+            _uiState.update { it.copy(createSetupTokenState = value,) }
         }
 
     private val createdSetupToken: CardSetupToken?
@@ -56,37 +57,43 @@ class VaultCardViewModel @Inject constructor(
     private var updateSetupTokenState
         get() = _uiState.value.updateSetupTokenState
         set(value) {
-            _uiState.update { it.copy(updateSetupTokenState = value) }
+            _uiState.update { it.copy(updateSetupTokenState = value,) }
         }
 
     private var createPaymentTokenState
         get() = _uiState.value.createPaymentTokenState
         set(value) {
-            _uiState.update { it.copy(createPaymentTokenState = value) }
+            _uiState.update { it.copy(createPaymentTokenState = value,) }
         }
 
     var cardNumber: String
         get() = _uiState.value.cardNumber
         set(value) {
-            _uiState.update { it.copy(cardNumber = value) }
+            _uiState.update { it.copy(cardNumber = value,) }
         }
 
     var cardExpirationDate: String
         get() = _uiState.value.cardExpirationDate
         set(value) {
-            _uiState.update { it.copy(cardExpirationDate = value) }
+            _uiState.update { it.copy(cardExpirationDate = value,) }
         }
 
     var cardSecurityCode: String
         get() = _uiState.value.cardSecurityCode
         set(value) {
-            _uiState.update { it.copy(cardSecurityCode = value) }
+            _uiState.update { it.copy(cardSecurityCode = value,) }
         }
 
     var scaOption: SCA
         get() = _uiState.value.scaOption
         set(value) {
-            _uiState.update { it.copy(scaOption = value) }
+            _uiState.update { it.copy(scaOption = value,) }
+        }
+
+    var deepLinkStrategy: DeepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
         }
 
     fun prefillCard(testCard: TestCard) {
@@ -95,7 +102,7 @@ class VaultCardViewModel @Inject constructor(
             currentState.copy(
                 cardNumber = card.number,
                 cardExpirationDate = card.run { "$expirationMonth$expirationYear" },
-                cardSecurityCode = card.securityCode
+                cardSecurityCode = card.securityCode,
             )
         }
     }
