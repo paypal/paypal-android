@@ -40,25 +40,31 @@ class PayPalVaultViewModel @Inject constructor(
     private var createSetupTokenState
         get() = _uiState.value.createSetupTokenState
         set(value) {
-            _uiState.update { it.copy(createSetupTokenState = value) }
+            _uiState.update { it.copy(createSetupTokenState = value,) }
         }
 
     private var vaultPayPalState
         get() = _uiState.value.vaultPayPalState
         set(value) {
-            _uiState.update { it.copy(vaultPayPalState = value) }
+            _uiState.update { it.copy(vaultPayPalState = value,) }
         }
 
     private var createPaymentTokenState
         get() = _uiState.value.createPaymentTokenState
         set(value) {
-            _uiState.update { it.copy(createPaymentTokenState = value) }
+            _uiState.update { it.copy(createPaymentTokenState = value,) }
         }
 
     var appSwitchWhenEligible: Boolean
         get() = _uiState.value.appSwitchWhenEligible
         set(value) {
-            _uiState.update { it.copy(appSwitchWhenEligible = value) }
+            _uiState.update { it.copy(appSwitchWhenEligible = value,) }
+        }
+
+    var deepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
         }
 
     fun createSetupToken() {
