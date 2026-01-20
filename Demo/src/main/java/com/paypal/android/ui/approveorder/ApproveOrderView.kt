@@ -89,7 +89,7 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
         StepHeader(stepNumber = 1, title = "Create Order")
         CreateOrderWithVaultOptionForm(
             orderIntent = uiState.intentOption,
-            shouldVault = uiState.shouldVault,
+            shouldVault = uiState.shouldVaultOption,
             onIntentOptionChanged = { value -> viewModel.intentOption = value },
             onShouldVaultChanged = { value -> viewModel.shouldVault = value },
         )

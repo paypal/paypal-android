@@ -1,8 +1,7 @@
 package com.paypal.android.usecase
 
 import com.paypal.android.DemoConstants.APP_URL
-import com.paypal.android.DemoConstants.CANCEL_URL
-import com.paypal.android.DemoConstants.SUCCESS_URL
+import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
 import com.paypal.android.api.model.serialization.Card
@@ -17,6 +16,8 @@ import com.paypal.android.api.model.serialization.Vault
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.utils.ReturnUrlFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,29 +29,28 @@ class CreateOrderUseCase @Inject constructor(
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
         val paymentSource = when {
             request.appSwitchWhenEligible -> {
+                val deepLinkStrategy = request.deepLinkStrategy
+                val appUrl = when (deepLinkStrategy) {
+                    DeepLinkStrategy.APP_LINKS -> APP_URL
+                    DeepLinkStrategy.CUSTOM_URL_SCHEME -> "${APP_CUSTOM_URL_SCHEME}://"
+                }
                 OrderPaymentSource(
                     paypal = PayPalPaymentSource(
                         experienceContext = PayPalOrderExperienceContext(
-                            returnUrl = SUCCESS_URL,
-                            cancelUrl = CANCEL_URL,
-                            nativeApp = NativeApp(
-                                appUrl = APP_URL
-                            )
+                            returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(deepLinkStrategy),
+                            cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(deepLinkStrategy),
+                            nativeApp = NativeApp(appUrl = appUrl)
                         )
                     )
                 )
             }
-            request.shouldVault -> {
+
+            request.shouldVaultOnSuccess -> {
                 OrderPaymentSource(
-                    card = Card(
-                        attributes = CardAttributes(
-                            vault = Vault(
-                                storeInVault = "ON_SUCCESS"
-                            )
-                        )
-                    )
+                    card = Card(attributes = CardAttributes(vault = Vault(storeInVault = "ON_SUCCESS")))
                 )
             }
+
             else -> null
         }
         return withContext(Dispatchers.IO) {

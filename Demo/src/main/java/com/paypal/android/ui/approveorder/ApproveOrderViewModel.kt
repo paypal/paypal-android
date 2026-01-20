@@ -53,7 +53,8 @@ class ApproveOrderViewModel @Inject constructor(
         viewModelScope.launch {
             createOrderState = ActionState.Loading
             val orderRequest = uiState.value.run {
-                OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
+                val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
+                OrderRequest(intentOption, shouldVault, false, deepLinkStrategy = deepLinkStrategy)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -184,9 +185,9 @@ class ApproveOrderViewModel @Inject constructor(
         }
 
     var shouldVault: StoreInVaultOption
-        get() = _uiState.value.shouldVault
+        get() = _uiState.value.shouldVaultOption
         set(value) {
-            _uiState.update { it.copy(shouldVault = value) }
+            _uiState.update { it.copy(shouldVaultOption = value) }
         }
 
     var deepLinkStrategy: DeepLinkStrategy

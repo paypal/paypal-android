@@ -101,8 +101,9 @@ class PayPalCheckoutViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(
                     intent = intentOption,
-                    shouldVault = false,
-                    appSwitchWhenEligible = appSwitchWhenEligible
+                    shouldVaultOnSuccess = false,
+                    appSwitchWhenEligible = appSwitchWhenEligible,
+                    deepLinkStrategy = deepLinkStrategy
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()

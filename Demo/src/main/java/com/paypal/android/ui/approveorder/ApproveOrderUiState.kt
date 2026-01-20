@@ -18,7 +18,7 @@ data class ApproveOrderUiState(
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
+    val shouldVaultOption: StoreInVaultOption = StoreInVaultOption.NO,
     val deepLinkStrategy: DeepLinkStrategy = DeepLinkStrategy.APP_LINKS
 ) {
     val isCreateOrderSuccessful: Boolean
