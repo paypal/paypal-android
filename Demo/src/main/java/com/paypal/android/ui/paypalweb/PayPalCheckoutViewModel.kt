@@ -53,19 +53,25 @@ class PayPalCheckoutViewModel @Inject constructor(
     var intentOption: OrderIntent
         get() = _uiState.value.intentOption
         set(value) {
-            _uiState.update { it.copy(intentOption = value) }
+            _uiState.update { it.copy(intentOption = value,) }
         }
 
     var appSwitchWhenEligible: Boolean
         get() = _uiState.value.appSwitchWhenEligible
         set(value) {
-            _uiState.update { it.copy(appSwitchWhenEligible = value) }
+            _uiState.update { it.copy(appSwitchWhenEligible = value,) }
+        }
+
+    var deepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
         }
 
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
-            _uiState.update { it.copy(createOrderState = value) }
+            _uiState.update { it.copy(createOrderState = value,) }
         }
 
     private val createdOrder: Order?
@@ -74,19 +80,19 @@ class PayPalCheckoutViewModel @Inject constructor(
     private var payPalWebCheckoutState
         get() = _uiState.value.payPalWebCheckoutState
         set(value) {
-            _uiState.update { it.copy(payPalWebCheckoutState = value) }
+            _uiState.update { it.copy(payPalWebCheckoutState = value,) }
         }
 
     private var completeOrderState
         get() = _uiState.value.completeOrderState
         set(value) {
-            _uiState.update { it.copy(completeOrderState = value) }
+            _uiState.update { it.copy(completeOrderState = value,) }
         }
 
     var fundingSource: PayPalWebCheckoutFundingSource
         get() = _uiState.value.fundingSource
         set(value) {
-            _uiState.update { it.copy(fundingSource = value) }
+            _uiState.update { it.copy(fundingSource = value,) }
         }
 
     fun createOrder() {

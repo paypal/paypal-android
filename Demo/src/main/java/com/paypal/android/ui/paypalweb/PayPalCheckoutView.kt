@@ -23,6 +23,7 @@ import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.BooleanOptionList
 import com.paypal.android.uishared.components.CreateOrderForm
+import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
@@ -87,6 +88,12 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
         CreateOrderForm(
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
+        )
+        EnumOptionList(
+            title = stringResource(id = R.string.deep_link_strategy_title),
+            stringArrayResId = R.array.deep_link_strategy_options,
+            onSelectedOptionChange = { value -> viewModel.deepLinkStrategy = value },
+            selectedOption = uiState.deepLinkStrategy
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
