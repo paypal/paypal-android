@@ -89,7 +89,7 @@ class GooglePayViewModel @Inject constructor(
                 }
 
                 is ApproveGooglePayPaymentResult.Failure -> {
-                    // TODO: handle error
+                    googlePayState = ActionState.Failure(confirmOrderResult.error)
                 }
             }
         }
