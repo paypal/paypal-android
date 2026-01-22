@@ -1571,7 +1571,7 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(launchResult, result)
 
         // Verify analytics was called with CheckoutEvent
-        verify { analytics.notify(any<CheckoutEvent>(), "fake-order-id") }
+        verify { analytics.notify(any<CheckoutEvent>(), "fake-order-id", any()) }
 
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
@@ -1628,7 +1628,7 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(launchResult, result)
 
         // Verify analytics was called with VaultEvent
-        verify { analytics.notify(any<VaultEvent>(), any()) }
+        verify { analytics.notify(any<VaultEvent>(), any(), any()) }
 
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
@@ -1929,5 +1929,313 @@ class PayPalWebCheckoutClientUnitTest {
             launchUrl = redirectURL,
             ineligibleReason = null
         )
+    }
+
+    // MARK: - Analytics Tests for appSwitchEnabled
+
+    @Test
+    fun `startAsync() sends analytics with appSwitchEnabled true when app switch is used`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns true
+            val request = PayPalWebCheckoutRequest(
+                "fake-order-id",
+                appSwitchWhenEligible = true,
+                appLinkUrl = appLinkUrl
+            )
+            val appSwitchResponse = createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            coEvery {
+                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
+            } returns APIResult.Success(appSwitchResponse)
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            sut.startAsync(activity, request)
+
+            // Then
+            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", true) }
+            verify {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    "fake-order-id",
+                    true
+                )
+            }
+        }
+
+    @Test
+    fun `startAsync() sends analytics with appSwitchEnabled false when app switch is not used`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns false
+            val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = false)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            sut.startAsync(activity, request)
+
+            // Then
+            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
+            verify {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    "fake-order-id",
+                    false
+                )
+            }
+        }
+
+    @Test
+    fun `startAsync() sends analytics with appSwitchEnabled false when PayPal app not installed`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns false
+            val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = true)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            sut.startAsync(activity, request)
+
+            // Then
+            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", true) }
+        }
+
+    @Test
+    fun `finishStart() sends analytics with appSwitchEnabled value from start`() = runTest {
+        // Given
+        every { deviceInspector.isPayPalInstalled } returns true
+        val request = PayPalWebCheckoutRequest(
+            "fake-order-id",
+            appSwitchWhenEligible = true,
+            appLinkUrl = appLinkUrl
+        )
+        val appSwitchResponse = createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        val successResult =
+            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
+
+        coEvery {
+            patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
+        } returns APIResult.Success(appSwitchResponse)
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns successResult
+
+        // When
+        sut.startAsync(activity, request)
+        sut.finishStart(intent)
+
+        // Then
+        verify { analytics.notify(CheckoutEvent.SUCCEEDED, "fake-order-id", true) }
+    }
+
+    @Test
+    fun `finishStart() sends analytics with appSwitchEnabled false for canceled event`() = runTest {
+        // Given
+        every { deviceInspector.isPayPalInstalled } returns false
+        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = false)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns canceledResult
+
+        // When
+        sut.startAsync(activity, request)
+        sut.finishStart(intent)
+
+        // Then
+        verify { analytics.notify(CheckoutEvent.CANCELED, "fake-order-id", false) }
+    }
+
+    @Test
+    fun `finishStart() sends analytics with appSwitchEnabled false for failed event`() = runTest {
+        // Given
+        every { deviceInspector.isPayPalInstalled } returns false
+        val request = PayPalWebCheckoutRequest("fake-order-id", appSwitchWhenEligible = false)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        val error = PayPalSDKError(123, "fake-error-description")
+        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        every {
+            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
+        } returns failureResult
+
+        // When
+        sut.startAsync(activity, request)
+        sut.finishStart(intent)
+
+        // Then
+        verify { analytics.notify(CheckoutEvent.FAILED, "fake-order-id", false) }
+    }
+
+    @Test
+    fun `vaultAsync() sends analytics with appSwitchEnabled true when app switch is used`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns true
+            val request = PayPalWebVaultRequest(
+                "fake-setup-token-id",
+                appSwitchWhenEligible = true,
+                appLinkUrl = appLinkUrl
+            )
+            val appSwitchResponse = createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            coEvery {
+                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
+            } returns APIResult.Success(appSwitchResponse)
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            sut.vaultAsync(activity, request)
+
+            // Then
+            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", true) }
+            verify {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    "fake-setup-token-id",
+                    true
+                )
+            }
+        }
+
+    @Test
+    fun `vaultAsync() sends analytics with appSwitchEnabled false when app switch is not used`() =
+        runTest {
+            // Given
+            every { deviceInspector.isPayPalInstalled } returns false
+            val request =
+                PayPalWebVaultRequest("fake-setup-token-id", appSwitchWhenEligible = false)
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            // When
+            sut.vaultAsync(activity, request)
+
+            // Then
+            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
+            verify {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    "fake-setup-token-id",
+                    false
+                )
+            }
+        }
+
+    @Test
+    fun `finishVault() sends analytics with appSwitchEnabled value from vault`() = runTest {
+        // Given
+        every { deviceInspector.isPayPalInstalled } returns true
+        val request = PayPalWebVaultRequest(
+            "fake-setup-token-id",
+            appSwitchWhenEligible = true,
+            appLinkUrl = appLinkUrl
+        )
+        val appSwitchResponse = createAppSwitchEligibilityResponse(fakeAppSwitchUrl)
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        val successResult = PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
+
+        coEvery {
+            patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
+        } returns APIResult.Success(appSwitchResponse)
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        every {
+            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
+        } returns successResult
+
+        // When
+        sut.vaultAsync(activity, request)
+        sut.finishVault(intent)
+
+        // Then
+        verify { analytics.notify(VaultEvent.SUCCEEDED, "fake-setup-token-id", true) }
+    }
+
+    @Test
+    fun `deprecated start() sends analytics with appSwitchEnabled false`() {
+        // Given
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest("fake-order-id", appLinkUrl = appLinkUrl)
+
+        // When
+        sut.start(activity, request)
+
+        // Then
+        verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
+        verify {
+            analytics.notify(
+                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                "fake-order-id",
+                false
+            )
+        }
+    }
+
+    @Test
+    fun `deprecated vault() sends analytics with appSwitchEnabled false`() {
+        // Given
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebVaultRequest("fake-setup-token-id", appLinkUrl = appLinkUrl)
+
+        // When
+        sut.vault(activity, request)
+
+        // Then
+        verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
+        verify {
+            analytics.notify(
+                VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                "fake-setup-token-id",
+                false
+            )
+        }
     }
 }
