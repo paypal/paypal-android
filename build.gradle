@@ -71,11 +71,12 @@ dependencies {
     detektPlugins libs.detekt.rulesLibraries
 
     // Ref: https://kotlinlang.org/docs/dokka-gradle.html#aggregate-documentation-output-in-multi-project-builds
-    dokka(project(":CorePayments:"))
-    dokka(project(":CardPayments:"))
-    dokka(project(":FraudProtection:"))
-    dokka(project(":PaymentButtons:"))
-    dokka(project(":PayPalWebPayments:"))
+    dokka project(":CorePayments")
+    dokka project(":CardPayments")
+    dokka project(":FraudProtection")
+    dokka project(":PaymentButtons")
+    dokka project(":PayPalWebPayments")
+    dokkaPlugin libs.dokka.android
 }
 
 detekt {
