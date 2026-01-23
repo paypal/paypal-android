@@ -73,8 +73,15 @@ class BrowserSwitchClient(
 
     fun start(
         activityResultLauncher: ActivityResultLauncher<Intent>,
-        options: BrowserSwitchOptions
+        options: BrowserSwitchOptions,
+        context: Context
     ): BrowserSwitchStartResult {
+        // Check if Chrome supports auth tabs
+        if (!deviceInspector.isAuthTabSupported) {
+            // Fallback to custom tab implementation
+            return start(context, options)
+        }
+
         val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
         authTabClient.launchAuthTab(
             options = cctOptions,

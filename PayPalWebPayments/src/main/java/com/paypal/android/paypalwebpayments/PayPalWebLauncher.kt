@@ -55,7 +55,8 @@ internal class PayPalWebLauncher(
         tokenType: TokenType,
         activityResultLauncher: ActivityResultLauncher<Intent>,
         returnUrlScheme: String?,
-        appLinkUrl: String?
+        appLinkUrl: String?,
+        context: Context
     ): PayPalPresentAuthChallengeResult {
         val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions(
@@ -66,7 +67,7 @@ internal class PayPalWebLauncher(
             metadata = metadata
         )
 
-        val result = browserSwitchClient.start(activityResultLauncher, options)
+        val result = browserSwitchClient.start(activityResultLauncher, options, context)
 
         return when (result) {
             is BrowserSwitchStartResult.Success -> {

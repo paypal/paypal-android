@@ -7,8 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
+import com.paypal.android.DemoConstants.SUCCESS_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -47,6 +47,9 @@ class PayPalCheckoutViewModel @Inject constructor(
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val paypalClient =
         PayPalWebCheckoutClient(applicationContext, coreConfig)
+
+    val isAuthTabSupported: Boolean
+        get() = paypalClient.isAuthTabSupported
 
     private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()

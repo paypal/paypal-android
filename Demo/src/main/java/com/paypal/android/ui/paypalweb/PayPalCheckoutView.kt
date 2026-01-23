@@ -49,7 +49,10 @@ fun PayPalCheckoutView(
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
-        if (!uiState.useAuthTabLauncher) {
+        // Handle result via lifecycle only if:
+        // 1. Not using auth tab launcher (user preference), OR
+        // 2. Using auth tab launcher but device doesn't support it (fallback case)
+        if (!uiState.useAuthTabLauncher || !viewModel.isAuthTabSupported) {
             intent?.let {
                 viewModel.completeAuthChallenge(it)
             }
@@ -57,7 +60,10 @@ fun PayPalCheckoutView(
     }
 
     OnNewIntentEffect { newIntent ->
-        if (!uiState.useAuthTabLauncher) {
+        // Handle result via lifecycle only if:
+        // 1. Not using auth tab launcher (user preference), OR
+        // 2. Using auth tab launcher but device doesn't support it (fallback case)
+        if (!uiState.useAuthTabLauncher || !viewModel.isAuthTabSupported) {
             viewModel.completeAuthChallenge(newIntent)
         }
     }

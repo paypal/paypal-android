@@ -91,6 +91,13 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     /**
+     * Check if the device supports auth tabs for Chrome browser.
+     * When true, auth tab launcher flow is available. When false, falls back to custom tabs.
+     */
+    val isAuthTabSupported: Boolean
+        get() = deviceInspector.isAuthTabSupported
+
+    /**
      * Capture instance state for later restoration. This can be useful for recovery during a
      * process kill.
      */
@@ -205,7 +212,8 @@ class PayPalWebCheckoutClient internal constructor(
                 tokenType = TokenType.ORDER_ID,
                 activityResultLauncher = activityResultLauncher,
                 returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
-                appLinkUrl = request.appLinkUrl
+                appLinkUrl = request.appLinkUrl,
+                context = activity
             )
         } else {
             payPalWebLauncher.launchWithUrl(
