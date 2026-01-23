@@ -599,7 +599,7 @@ class PayPalWebLauncherUnitTest {
         val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activityResultLauncher, capture(slot))
+            browserSwitchClient.start(activityResultLauncher, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         val result = sut.launchWithUrl(
@@ -608,7 +608,8 @@ class PayPalWebLauncherUnitTest {
             tokenType = TokenType.ORDER_ID,
             activityResultLauncher = activityResultLauncher,
             returnUrlScheme = "com.example.app",
-            appLinkUrl = "https://example.com/return"
+            appLinkUrl = "https://example.com/return",
+            context = activity
         )
 
         assertTrue(result is PayPalPresentAuthChallengeResult.Success)
@@ -629,7 +630,7 @@ class PayPalWebLauncherUnitTest {
         val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activityResultLauncher, capture(slot))
+            browserSwitchClient.start(activityResultLauncher, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         val result = sut.launchWithUrl(
@@ -638,7 +639,8 @@ class PayPalWebLauncherUnitTest {
             tokenType = TokenType.VAULT_ID,
             activityResultLauncher = activityResultLauncher,
             returnUrlScheme = "com.example.app",
-            appLinkUrl = "https://example.com/vault/return"
+            appLinkUrl = "https://example.com/vault/return",
+            context = activity
         )
 
         assertTrue(result is PayPalPresentAuthChallengeResult.Success)
@@ -659,7 +661,7 @@ class PayPalWebLauncherUnitTest {
         val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
         val browserSwitchError = Exception("Auth tab launch failed")
         every {
-            browserSwitchClient.start(activityResultLauncher, any())
+            browserSwitchClient.start(activityResultLauncher, any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
         val result = sut.launchWithUrl(
@@ -668,7 +670,8 @@ class PayPalWebLauncherUnitTest {
             tokenType = TokenType.ORDER_ID,
             activityResultLauncher = activityResultLauncher,
             returnUrlScheme = "com.example.app",
-            appLinkUrl = null
+            appLinkUrl = null,
+            context = activity
         ) as PayPalPresentAuthChallengeResult.Failure
 
         assertEquals("Auth tab launch failed", result.error.errorDescription)
@@ -681,7 +684,7 @@ class PayPalWebLauncherUnitTest {
         val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activityResultLauncher, capture(slot))
+            browserSwitchClient.start(activityResultLauncher, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         val result = sut.launchWithUrl(
@@ -690,7 +693,8 @@ class PayPalWebLauncherUnitTest {
             tokenType = TokenType.ORDER_ID,
             activityResultLauncher = activityResultLauncher,
             returnUrlScheme = "com.example.app",
-            appLinkUrl = null
+            appLinkUrl = null,
+            context = activity
         )
 
         assertTrue(result is PayPalPresentAuthChallengeResult.Success)
