@@ -19,16 +19,16 @@ dependencyResolutionManagement {
         mavenCentral()
         mavenLocal()
         maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
     }
 }
 
 rootProject.name = "AndroidSDK"
-include ':CardPayments'
-include ':CorePayments'
-include ':Demo'
-include ':FraudProtection'
-include ':PayPalWebPayments'
-include ':PaymentButtons'
-include ':Venmo'
+include(":CardPayments")
+include(":CorePayments")
+include(":Demo")
+include(":FraudProtection")
+include(":PayPalWebPayments")
+include(":PaymentButtons")
+include(":Venmo")
