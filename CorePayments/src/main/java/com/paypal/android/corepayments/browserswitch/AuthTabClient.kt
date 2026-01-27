@@ -36,7 +36,7 @@ class AuthTabClient {
             }
 
             else -> {
-                throw IllegalArgumentException("Either appLinkUrl or returnUrlScheme must not be null")
+                throw IllegalArgumentException("Either appLinkUrl or returnUrlScheme must be provided")
             }
         }
     }

@@ -1,7 +1,9 @@
 package com.paypal.android.ui.paypalweb
 
 import android.app.Activity
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -47,12 +49,24 @@ fun PayPalCheckoutView(
     }
 
     val context = LocalContext.current
+
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                result.data?.let { viewModel.completeAuthChallenge(it) }
+            }
+
+            Activity.RESULT_CANCELED -> viewModel.onAuthTabClosed()
+        }
+    }
+
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
         // Handle result via lifecycle only if:
         // 1. Not using auth tab launcher (user preference), OR
         // 2. Using auth tab launcher but device doesn't support it (fallback case)
-        // checking for auth tab support here to prevent race condition in completing auth challenge from activity result callabck when auth tab is supported
         if (!uiState.useAuthTabLauncher || !viewModel.isAuthTabSupported) {
             intent?.let {
                 viewModel.completeAuthChallenge(it)
@@ -64,6 +78,7 @@ fun PayPalCheckoutView(
         // Handle result via lifecycle only if:
         // 1. Not using auth tab launcher (user preference), OR
         // 2. Using auth tab launcher but device doesn't support it (fallback case)
+        // Check for auth tab support is required to prevent race condition between completingAuthChallenge from activity result launcher
         if (!uiState.useAuthTabLauncher || !viewModel.isAuthTabSupported) {
             viewModel.completeAuthChallenge(newIntent)
         }
@@ -79,7 +94,7 @@ fun PayPalCheckoutView(
     ) {
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
-            Step2_StartPayPalCheckout(uiState, viewModel)
+            Step2_StartPayPalCheckout(uiState, viewModel, activityResultLauncher)
         }
         if (uiState.isPayPalWebCheckoutSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
@@ -121,20 +136,12 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
 }
 
 @Composable
-private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+private fun Step2_StartPayPalCheckout(
+    uiState: PayPalUiState,
+    viewModel: PayPalCheckoutViewModel,
+    activityResultLauncher: ActivityResultLauncher<Intent>
+) {
     val context = LocalContext.current
-
-    val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                result.data?.let { viewModel.completeAuthChallenge(it) }
-            }
-
-            Activity.RESULT_CANCELED -> viewModel.onAuthTabClosed()
-        }
-    }
 
     Column(
         verticalArrangement = UIConstants.spacingMedium,
