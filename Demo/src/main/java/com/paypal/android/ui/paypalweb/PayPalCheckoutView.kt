@@ -78,7 +78,8 @@ fun PayPalCheckoutView(
         // Handle result via lifecycle only if:
         // 1. Not using auth tab launcher (user preference), OR
         // 2. Using auth tab launcher but device doesn't support it (fallback case)
-        // Check for auth tab support is required to prevent race condition between completingAuthChallenge from activity result launcher
+        // Check for auth tab support is required to prevent race condition between
+        // completingAuthChallenge from activity result launcher
         if (!uiState.useAuthTabLauncher || !viewModel.isAuthTabSupported) {
             viewModel.completeAuthChallenge(newIntent)
         }

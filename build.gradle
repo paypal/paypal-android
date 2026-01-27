@@ -15,7 +15,7 @@ buildscript {
             "sdkVersionName": sdkVersion,
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
-            "androidTargetVersion": 35,
+            "androidTargetVersion": 36,
             "androidCompileSdk": 36,
             "sourceCompatibility": JavaVersion.VERSION_1_8,
             "targetCompatibility": JavaVersion.VERSION_1_8,

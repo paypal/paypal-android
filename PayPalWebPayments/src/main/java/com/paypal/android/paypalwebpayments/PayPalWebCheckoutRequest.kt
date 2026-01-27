@@ -9,8 +9,9 @@ package com.paypal.android.paypalwebpayments
  * @param appLinkUrl The app link URL to use for browser switch, or null to use default.
  *   Example values: "$myAppScheme://$myAppHost/$myPath", "https://$myDomain/$myPath"
  *
- *   **IMPORTANT:** When using auth tab launcher flow (passing `ActivityResultLauncher` to [PayPalWebCheckoutClient.start]),
- *   this URL must match the success URL specified in the `experience_context` when creating the order
+ *   **IMPORTANT:** When using auth tab launcher flow (passing `ActivityResultLauncher` to
+ *   [PayPalWebCheckoutClient.start]), this URL must match the success URL specified in the
+ *   `experience_context` when creating the order
  *   on your server. The auth tab uses this URL to determine when the authentication flow is complete
  *   and automatically close the browser tab. If the URLs don't match, the browser tab will not close
  *   automatically after successful authentication.
