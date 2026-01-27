@@ -274,7 +274,8 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param activity The activity to launch the PayPal web checkout from
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
-     * @param activityResultLauncher The ActivityResultLauncher to use for browser switching
+     * @param activityResultLauncher The ActivityResultLauncher to use for browser switching. Must be
+     *        initialized before the activity, check [registerForActivityResult()](https://developer.android.com/training/basics/intents/result#register).
      * @param callback [PayPalWebStartCallback] to receive the result
      */
     fun start(
