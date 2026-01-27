@@ -50,7 +50,9 @@ class CardAuthLauncherUnitTest {
     fun `presentAuthChallenge() returns an error for approve order when it cannot browser switch`() {
         val browserSwitchResult =
             BrowserSwitchStartResult.Failure(Exception("error message from browser switch"))
-        every { browserSwitchClient.start(any(), any()) } returns browserSwitchResult
+        every {
+            browserSwitchClient.start(any<FragmentActivity>(), any<BrowserSwitchOptions>())
+        } returns browserSwitchResult
 
         val returnUrl = "merchant.app://return.com/deep-link"
         val cardRequest = CardRequest("fake-order-id", card, returnUrl)

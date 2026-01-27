@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
@@ -90,6 +91,13 @@ class PayPalWebCheckoutClient internal constructor(
     )
 
     /**
+     * Check if the device supports auth tabs for Chrome browser.
+     * When true, auth tab launcher flow is available. When false, falls back to custom tabs.
+     */
+    val isAuthTabSupported: Boolean
+        get() = deviceInspector.isAuthTabSupported
+
+    /**
      * Capture instance state for later restoration. This can be useful for recovery during a
      * process kill.
      */
@@ -159,11 +167,13 @@ class PayPalWebCheckoutClient internal constructor(
      * Confirm PayPal payment source for an order.
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param activityResultLauncher Optional ActivityResultLauncher to use for browser switching
      */
     @VisibleForTesting
     internal suspend fun startAsync(
         activity: Activity,
-        request: PayPalWebCheckoutRequest
+        request: PayPalWebCheckoutRequest,
+        activityResultLauncher: ActivityResultLauncher<Intent>? = null
     ): PayPalPresentAuthChallengeResult {
 
         checkoutOrderId = request.orderId
@@ -195,26 +205,41 @@ class PayPalWebCheckoutClient internal constructor(
             launchUriDeferred.await() // returns launch URI
         }
 
-        val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
-            uri = launchUri,
-            token = request.orderId,
-            tokenType = TokenType.ORDER_ID,
-            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
-            appLinkUrl = request.appLinkUrl
-        )
+        val result = if (activityResultLauncher != null) {
+            payPalWebLauncher.launchWithUrl(
+                uri = launchUri,
+                token = request.orderId,
+                tokenType = TokenType.ORDER_ID,
+                activityResultLauncher = activityResultLauncher,
+                returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+                appLinkUrl = request.appLinkUrl,
+                context = activity
+            )
+        } else {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = launchUri,
+                token = request.orderId,
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
+                appLinkUrl = request.appLinkUrl
+            )
+        }
 
+        handleAuthChallengeResult(result)
+        return result
+    }
+
+    private fun handleAuthChallengeResult(result: PayPalPresentAuthChallengeResult) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                     checkoutOrderId
                 )
-
                 // update auth state value in session store
                 sessionStore.authState = result.authState
             }
-
             is PayPalPresentAuthChallengeResult.Failure -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
@@ -222,8 +247,6 @@ class PayPalWebCheckoutClient internal constructor(
                 )
             }
         }
-
-        return result
     }
 
     /**
@@ -246,6 +269,29 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
+    /**
+     * Confirm PayPal payment source for an order with callback and custom activity result launcher.
+     *
+     * @param activity The activity to launch the PayPal web checkout from
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param activityResultLauncher The ActivityResultLauncher to use for browser switching. Must be
+     *        initialized before the activity starts, check
+     *        [registerForActivityResult()](https://developer.android.com/training/basics/intents/result#register).
+     * @param callback [PayPalWebStartCallback] to receive the result
+     */
+    fun start(
+        activity: Activity,
+        request: PayPalWebCheckoutRequest,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+        callback: PayPalWebStartCallback
+    ) {
+        applicationScope.launch {
+            val result = startAsync(activity, request, activityResultLauncher)
+            withContext(Dispatchers.Main) {
+                callback.onPayPalWebStartResult(result)
+            }
+        }
+    }
     /**
      * Vault PayPal as a payment method.
      *
@@ -409,8 +455,8 @@ class PayPalWebCheckoutClient internal constructor(
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      */
-    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
-        sessionStore.authState?.let { authState ->
+    fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? {
+        return sessionStore.authState?.let { authState ->
             val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
             when (result) {
                 is PayPalWebCheckoutFinishStartResult.Success -> {
@@ -434,6 +480,7 @@ class PayPalWebCheckoutClient internal constructor(
             }
             result
         }
+    }
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge

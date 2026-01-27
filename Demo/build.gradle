@@ -8,6 +8,7 @@ plugins {
     alias libs.plugins.kotlinKapt
     alias libs.plugins.kotlinParcelize
     alias libs.plugins.kotlinSerialization
+    alias libs.plugins.kotlinComposeCompiler
 }
 
 def paypalProperties = loadPropertiesFromFile("paypal.properties")
@@ -40,7 +41,7 @@ android {
 
     composeOptions {
         // Ref: https://developer.android.com/jetpack/androidx/releases/compose-kotlin#pre-release_kotlin_compatibility
-        kotlinCompilerExtensionVersion "1.5.14"
+        kotlinCompilerExtensionVersion "1.5.15"
     }
 
     buildTypes {

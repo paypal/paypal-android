@@ -1,7 +1,9 @@
 package com.paypal.android.corepayments.browserswitch
 
 import android.content.Context
+import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.common.DeviceInspector
@@ -31,14 +33,16 @@ class BrowserSwitchClientUnitTest {
     )
 
     private lateinit var chromeCustomTabsClient: ChromeCustomTabsClient
+    private lateinit var authTabClient: AuthTabClient
     private lateinit var deviceInspector: DeviceInspector
     private lateinit var sut: BrowserSwitchClient
 
     @Before
     fun beforeEach() {
         chromeCustomTabsClient = mockk(relaxed = true)
+        authTabClient = mockk(relaxed = true)
         deviceInspector = mockk(relaxed = true)
-        sut = BrowserSwitchClient(chromeCustomTabsClient, deviceInspector)
+        sut = BrowserSwitchClient(chromeCustomTabsClient, authTabClient, deviceInspector)
     }
 
     @Test
@@ -56,6 +60,92 @@ class BrowserSwitchClientUnitTest {
 
         assertTrue(result is BrowserSwitchStartResult.Success)
         verify { chromeCustomTabsClient.launch(appContext, expectedCCTOptions) }
+    }
+
+    @Test
+    fun `start with activity result launcher launches auth tab`() {
+        every { deviceInspector.isAuthTabSupported } returns true
+
+        val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
+        val options = BrowserSwitchOptions(
+            targetUri = "https://example.com/auth".toUri(),
+            requestCode = 123,
+            returnUrlScheme = "com.example.app",
+            metadata = JSONObject(),
+            appLinkUrl = null
+        )
+
+        val result = sut.start(activityResultLauncher, options, appContext)
+
+        assertTrue(result is BrowserSwitchStartResult.Success)
+        verify {
+            authTabClient.launchAuthTab(
+                options = ChromeCustomTabOptions(launchUri = "https://example.com/auth".toUri()),
+                activityResultLauncher = activityResultLauncher,
+                appLinkUrl = null,
+                returnUrlScheme = "com.example.app"
+            )
+        }
+    }
+
+    @Test
+    fun `start with activity result launcher and appLinkUrl passes appLinkUrl to auth tab`() {
+        every { deviceInspector.isAuthTabSupported } returns true
+
+        val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
+        val options = BrowserSwitchOptions(
+            targetUri = "https://example.com/auth".toUri(),
+            requestCode = 123,
+            returnUrlScheme = null,
+            metadata = JSONObject(),
+            appLinkUrl = "https://example.com/return"
+        )
+
+        val result = sut.start(activityResultLauncher, options, appContext)
+
+        assertTrue(result is BrowserSwitchStartResult.Success)
+        verify {
+            authTabClient.launchAuthTab(
+                options = ChromeCustomTabOptions(launchUri = "https://example.com/auth".toUri()),
+                activityResultLauncher = activityResultLauncher,
+                appLinkUrl = "https://example.com/return",
+                returnUrlScheme = null
+            )
+        }
+    }
+
+    @Test
+    fun `start with activity result launcher falls back to custom tabs when auth tabs not supported`() {
+        every { deviceInspector.isAuthTabSupported } returns false
+        every {
+            deviceInspector.isDeepLinkConfiguredInManifest("com.example.app")
+        } returns true
+        every {
+            chromeCustomTabsClient.launch(any(), any())
+        } returns LaunchChromeCustomTabResult.Success
+
+        val activityResultLauncher = mockk<ActivityResultLauncher<Intent>>(relaxed = true)
+        val options = BrowserSwitchOptions(
+            targetUri = "https://example.com/auth".toUri(),
+            requestCode = 123,
+            returnUrlScheme = "com.example.app",
+            metadata = JSONObject(),
+            appLinkUrl = null
+        )
+
+        val result = sut.start(activityResultLauncher, options, appContext)
+
+        assertTrue(result is BrowserSwitchStartResult.Success)
+        // Verify it fell back to custom tabs instead of auth tab
+        verify {
+            chromeCustomTabsClient.launch(
+                appContext,
+                ChromeCustomTabOptions(launchUri = "https://example.com/auth".toUri())
+            )
+        }
+        verify(exactly = 0) {
+            authTabClient.launchAuthTab(any(), any(), any(), any())
+        }
     }
 
     @Test

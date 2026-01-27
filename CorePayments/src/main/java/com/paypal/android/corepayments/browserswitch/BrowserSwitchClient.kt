@@ -2,16 +2,23 @@ package com.paypal.android.corepayments.browserswitch
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.common.DeviceInspector
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class BrowserSwitchClient internal constructor(
+class BrowserSwitchClient(
     private val chromeCustomTabsClient: ChromeCustomTabsClient,
+    private val authTabClient: AuthTabClient,
     private val deviceInspector: DeviceInspector
 ) {
 
-    constructor(context: Context) : this(ChromeCustomTabsClient(), DeviceInspector(context))
+    constructor(context: Context) : this(
+        ChromeCustomTabsClient(),
+        AuthTabClient(),
+        DeviceInspector(context)
+    )
 
     fun start(
         context: Context,
@@ -62,5 +69,26 @@ class BrowserSwitchClient internal constructor(
                 )
             )
         }
+    }
+
+    fun start(
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+        options: BrowserSwitchOptions,
+        context: Context
+    ): BrowserSwitchStartResult {
+        // Check if Chrome supports auth tabs
+        if (!deviceInspector.isAuthTabSupported) {
+            // Fallback to custom tab implementation
+            return start(context, options)
+        }
+
+        val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
+        authTabClient.launchAuthTab(
+            options = cctOptions,
+            activityResultLauncher = activityResultLauncher,
+            appLinkUrl = options.appLinkUrl,
+            returnUrlScheme = options.returnUrlScheme
+        )
+        return BrowserSwitchStartResult.Success
     }
 }
