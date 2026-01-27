@@ -75,7 +75,7 @@ class AuthTabClientUnitTest {
             )
         }
 
-        assert(exception.message == "Either appLinkUrl or returnUrlScheme must not be null")
+        assert(exception.message == "Either appLinkUrl or returnUrlScheme must be provided")
     }
 
     @Test
