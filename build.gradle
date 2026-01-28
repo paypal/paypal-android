@@ -109,9 +109,11 @@ dokka {
     // Ref: https://kotlinlang.org/docs/dokka-gradle.html#generate-documentation
     // Ref: https://kotlinlang.org/docs/dokka-plugins.html#configure-dokka-plugins
     // Ref: https://github.com/Kotlin/dokka/tree/2.1.0/dokka-subprojects/plugin-versioning#configuration
-    html {
-        pluginsConfiguration {
-            version = modules.sdkVersionName
+    dokkaPublications {
+        html {
+            pluginsConfiguration {
+                version = modules.sdkVersionName
+            }
         }
     }
 }
