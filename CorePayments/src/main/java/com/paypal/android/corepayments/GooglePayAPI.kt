@@ -135,7 +135,7 @@ class GooglePayAPI(
                     val error = APIClientError.noResponseData(graphQLResponse.correlationId)
                     ApproveGooglePayPaymentResult.Failure(error)
                 } else {
-                    ApproveGooglePayPaymentResult.Success(status = responseData.status)
+                    ApproveGooglePayPaymentResult.Success(status = responseData.approveGooglePayPayment.status)
                 }
             }
 
