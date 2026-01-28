@@ -109,11 +109,24 @@ dokka {
     // Ref: https://kotlinlang.org/docs/dokka-gradle.html#generate-documentation
     // Ref: https://kotlinlang.org/docs/dokka-plugins.html#configure-dokka-plugins
     // Ref: https://github.com/Kotlin/dokka/tree/2.1.0/dokka-subprojects/plugin-versioning#configuration
+    def docVersionDir = "docs/version"
+    def currentVersion = modules.sdkVersionName
+
+    def currentDocsDir = "$docVersionDir/$currentVersion"
+
     dokkaPublications {
         html {
-            pluginsConfiguration {
-                version = modules.sdkVersionName
+            outputDirectory.set(file(currentDocsDir))
+            def versioningConfiguration = """
+            {
+                "version": "$currentVersion",
+                "olderVersionsDir": "$docVersionDir",
+                "renderVersionsNavigationOnAllPages": true
             }
+            """
+            pluginsMapConfiguration.set(
+                ["org.jetbrains.dokka.versioning.VersioningPlugin": versioningConfiguration]
+            )
         }
     }
 }
