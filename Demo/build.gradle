@@ -64,6 +64,12 @@ android {
         warningsAsErrors true
     }
 
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
     sourceSets {
         androidTest {
             java.srcDirs += "src/androidTestShared/java"
@@ -157,6 +163,8 @@ dependencies {
 
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
+    androidTestImplementation libs.androidx.test.espresso.contrib
+    androidTestImplementation libs.androidx.test.espresso.intents
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.test.rules
     androidTestImplementation libs.androidx.test.uiAutomator
