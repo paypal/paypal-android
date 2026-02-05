@@ -1,6 +1,3 @@
-import org.jetbrains.dokka.versioning.VersioningPlugin
-import org.jetbrains.dokka.versioning.VersioningConfiguration
-
 buildscript {
     def versionProps = new Properties()
     file("version.properties").withInputStream { versionProps.load(it) }
@@ -25,9 +22,6 @@ buildscript {
             "kotlinJvmTarget": JavaVersion.VERSION_1_8.toString(),
             "kotlinToolchainLanguageVersion": JavaLanguageVersion.of(17)
     ]
-    dependencies {
-        classpath libs.dokka.versioning
-    }
 }
 
 // Function to load version properties (reusable)
@@ -83,7 +77,6 @@ dependencies {
     dokka project(":PaymentButtons")
     dokka project(":PayPalWebPayments")
     dokkaPlugin libs.dokka.android
-    dokkaPlugin libs.dokka.versioning
 }
 
 detekt {
@@ -101,17 +94,6 @@ detekt {
         html {
             enabled = true
             destination = file("build/reports/detekt_report.html")
-        }
-    }
-}
-
-dokka {
-    // Ref: https://kotlinlang.org/docs/dokka-gradle.html#generate-documentation
-    // Ref: https://kotlinlang.org/docs/dokka-plugins.html#configure-dokka-plugins
-    // Ref: https://github.com/Kotlin/dokka/tree/2.1.0/dokka-subprojects/plugin-versioning#configuration
-    html {
-        pluginsConfiguration {
-            version = modules.sdkVersionName
         }
     }
 }
