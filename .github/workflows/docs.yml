@@ -1,0 +1,52 @@
+name: Docs
+on:
+  workflow_dispatch:
+
+# sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# however, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set git username and email
+        run: |
+          git config user.name paypalsdks
+          git config user.email sdks@paypal.com
+      - name: Generate documentation
+        run: |
+          ./ci generate_docs
+      - name: Publish to Github Pages
+        run: |
+          # pull latest from gh-pages origin or create a new orphaned gh-pages branch
+          git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
+
+          # make sure the gh-pages branch is checked out
+          git checkout gh-pages
+
+          # Remove all existing content except docs directory
+          find . -maxdepth 1 ! -name '.git' ! -name 'docs' ! -name '.' -exec rm -rf {} +
+          
+          # copy generated docs to root and remove docs folder
+          cp -R docs/* . && rm -rf docs
+
+          # apply and push changes
+          git add -A
+          git commit -m ""
+          git push origin gh-pages
