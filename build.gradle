@@ -79,6 +79,14 @@ dependencies {
     dokkaPlugin libs.dokka.android
 }
 
+dokka {
+    dokkaPublications {
+        html {
+            outputDirectory.set(file('docs/'))
+        }
+    }
+}
+
 detekt {
     toolVersion = libs.versions.detektVersion.get()
     config = files("detekt/detekt-config.yml")
