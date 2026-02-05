@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -22,10 +21,12 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
+import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +53,8 @@ class ApproveOrderViewModel @Inject constructor(
         viewModelScope.launch {
             createOrderState = ActionState.Loading
             val orderRequest = uiState.value.run {
-                OrderRequest(intentOption, shouldVault == StoreInVaultOption.ON_SUCCESS)
+                val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
+                OrderRequest(intentOption, shouldVault, false, deepLinkStrategy = deepLinkStrategy)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -81,7 +83,8 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            CardRequest(orderId, card, DemoConstants.APP_URL, scaOption)
+            val returnUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+            CardRequest(orderId, card, returnUrl, scaOption)
         }
         cardClient.approveOrder(cardRequest) { result ->
             when (result) {
@@ -183,9 +186,15 @@ class ApproveOrderViewModel @Inject constructor(
         }
 
     var shouldVault: StoreInVaultOption
-        get() = _uiState.value.shouldVault
+        get() = _uiState.value.shouldVaultOption
         set(value) {
-            _uiState.update { it.copy(shouldVault = value) }
+            _uiState.update { it.copy(shouldVaultOption = value) }
+        }
+
+    var deepLinkStrategy: DeepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
         }
 
     fun prefillCard(testCard: TestCard) {

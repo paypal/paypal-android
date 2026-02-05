@@ -61,11 +61,19 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var deepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState =
-                createPayPalSetupTokenUseCase(appSwitchWhenEligible).mapToActionState()
+            createSetupTokenState = createPayPalSetupTokenUseCase(
+                appSwitchWhenEligible,
+                deepLinkStrategy
+            ).mapToActionState()
         }
     }
 

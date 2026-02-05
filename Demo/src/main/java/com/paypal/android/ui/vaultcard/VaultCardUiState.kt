@@ -4,6 +4,7 @@ import com.paypal.android.api.model.CardPaymentToken
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.ui.approveorder.SetupTokenInfo
 import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.state.ActionState
 
 data class VaultCardUiState(
@@ -14,6 +15,7 @@ data class VaultCardUiState(
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val scaOption: SCA = SCA.SCA_WHEN_REQUIRED,
+    val deepLinkStrategy: DeepLinkStrategy = DeepLinkStrategy.APP_LINKS,
 ) {
     val isCreateSetupTokenSuccessful: Boolean
         get() = createSetupTokenState is ActionState.Success
