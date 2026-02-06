@@ -65,7 +65,7 @@ class CardClientUnitTest {
 
     private val activity = mockk<FragmentActivity>(relaxed = true)
 
-    private val approveOrderCallback = mockk<CardApproveOrderCallback>()
+    private val approveOrderCallback = mockk<CardApproveOrderCallback>(relaxed = true)
 
     private val intent = Intent()
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -157,7 +157,7 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        val callback = mockk<CardVaultCallback>()
+        val callback = mockk<CardVaultCallback>(relaxed = true)
         sut.vault(cardVaultRequest, callback)
         advanceUntilIdle()
 
@@ -178,7 +178,7 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns UpdateSetupTokenResult.Failure(error)
 
-        val callback = mockk<CardVaultCallback>()
+        val callback = mockk<CardVaultCallback>(relaxed = true)
         sut.vault(cardVaultRequest, callback)
         advanceUntilIdle()
 
@@ -202,7 +202,7 @@ class CardClientUnitTest {
             paymentMethodTokensAPI.updateSetupToken("fake-setup-token-id", card)
         } returns updateSetupTokenResult
 
-        val callback = mockk<CardVaultCallback>()
+        val callback = mockk<CardVaultCallback>(relaxed = true)
         sut.vault(cardVaultRequest, callback)
         advanceUntilIdle()
 
