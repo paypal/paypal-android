@@ -34,6 +34,12 @@
         <item>CAPTURE</item>
     </string-array>
 
+    <string name="deep_link_strategy_title">DEEP LINK STRATEGY</string>
+    <string-array name="deep_link_strategy_options">
+        <item>APP_LINKS</item>
+        <item>CUSTOM_URL_SCHEME</item>
+    </string-array>
+
     <string name="store_in_vault">STORE IN VAULT</string>
     <string-array name="store_in_vault_options">
         <item>NO</item>

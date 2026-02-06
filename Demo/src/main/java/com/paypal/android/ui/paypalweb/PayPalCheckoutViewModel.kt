@@ -62,6 +62,12 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var deepLinkStrategy
+        get() = _uiState.value.deepLinkStrategy
+        set(value) {
+            _uiState.update { it.copy(deepLinkStrategy = value) }
+        }
+
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
@@ -95,8 +101,9 @@ class PayPalCheckoutViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(
                     intent = intentOption,
-                    shouldVault = false,
-                    appSwitchWhenEligible = appSwitchWhenEligible
+                    shouldVaultOnSuccess = false,
+                    appSwitchWhenEligible = appSwitchWhenEligible,
+                    deepLinkStrategy = deepLinkStrategy
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
