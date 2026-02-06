@@ -26,6 +26,7 @@ hiltVersion = "2.51.1"
 json = "20220320"
 jsonAssert = "1.4.0"
 junit = "4.13.2"
+testParameterInjector = "1.16"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
 kotlinxSerialization = "1.6.3"
@@ -69,6 +70,7 @@ hilt-navigationCompose = { group = "androidx.hilt", name = "hilt-navigation-comp
 json = { group = "org.json", name = "json", version.ref = "json" }
 jsonAssert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonAssert" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+testParameterInjector = { group = "com.google.testparameterinjector", name = "test-parameter-injector", version.ref = "testParameterInjector" }
 kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
