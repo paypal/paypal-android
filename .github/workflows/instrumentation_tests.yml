@@ -3,11 +3,13 @@ on: [ pull_request, workflow_dispatch ]
 concurrency:
   group: instrumentation-tests-${{ github.event.number }}
   cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   instrumentation_test_job:
     name: Android Instrumentation Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
