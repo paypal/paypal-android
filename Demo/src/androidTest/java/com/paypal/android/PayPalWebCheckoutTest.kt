@@ -19,6 +19,11 @@ class PayPalWebCheckoutTest {
 
     private val robot by lazy { PayPalCheckoutRobot(composeTestRule) }
 
+    companion object {
+        private const val TEST_EMAIL = "test@testng.com"
+        private const val TEST_PASSWORD = "Testing1"
+    }
+
     private fun setupDeepLinkStrategy(strategy: DeepLinkStrategy) {
         if (strategy == DeepLinkStrategy.APP_LINKS) {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -75,7 +80,7 @@ class PayPalWebCheckoutTest {
                 intent = intent,
                 deepLinkStrategy = deepLinkStrategy
             )
-            .startCheckout()
+            .startCheckoutWithLogin(TEST_EMAIL, TEST_PASSWORD)
             .completeOrder()
     }
 }

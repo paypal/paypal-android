@@ -12,6 +12,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.paypal.android.MainActivity
+import com.paypal.android.loginToPayPal
 import com.paypal.android.uishared.enums.DeepLinkStrategy
 
 /**
@@ -107,7 +108,7 @@ class PayPalCheckoutRobot(
         composeTestRule.onNodeWithText(strategyText).performClick()
     }
 
-    fun startCheckout() = apply {
+    fun startCheckoutWithLogin(email: String, password: String) = apply {
         // Wait for Step 2 to appear
         composeTestRule.waitUntilExactlyOneExists(
             hasText("Launch PayPal"),
@@ -120,10 +121,26 @@ class PayPalCheckoutRobot(
 
         // Get UiDevice instance for interacting with Chrome Custom Tab
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-
-        // Wait for Chrome Custom Tab or PayPal app to open
-        // Look for common PayPal web elements like "Review Order", "Pay Now", or "Continue"
         val webTimeout = 30_000L
+
+        // Wait for PayPal login page to load
+        Log.d(TAG, "⏳ Waiting for PayPal login page to load...")
+        Thread.sleep(3000) // Give browser time to fully load
+
+        // Enter PayPal credentials
+        Log.d(TAG, "🔐 Entering PayPal credentials...")
+        val loginSuccess = loginToPayPal(email, password, webTimeout)
+
+        if (loginSuccess) {
+            Log.d(TAG, "✅ Successfully logged into PayPal")
+        } else {
+            Log.w(TAG, "⚠️ Login may have failed or user was already logged in")
+        }
+
+        // Wait for review order page after login
+        Thread.sleep(3000) // Wait for page to load after login
+
+        // Look for common PayPal web elements like "Review Order", "Pay Now", or "Continue"
         val reviewOrderButton = device.wait(
             Until.findObject(By.textContains("Review")),
             webTimeout
@@ -156,7 +173,7 @@ class PayPalCheckoutRobot(
         composeTestRule.waitUntilExactlyOneExists(hasText("Order ID"), waitTimeoutMs)
         composeTestRule.waitUntilExactlyOneExists(hasText("Payer ID"), waitTimeoutMs)
 
-        Log.d(TAG, "🚀 PayPal checkout started and completed successfully")
+        Log.d(TAG, "🚀 PayPal checkout with login completed successfully")
     }
 
     fun completeOrder() = apply {
