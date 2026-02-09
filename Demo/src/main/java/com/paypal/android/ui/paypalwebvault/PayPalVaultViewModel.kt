@@ -14,6 +14,7 @@ import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
+import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
@@ -89,7 +90,7 @@ class PayPalVaultViewModel @Inject constructor(
                 val request = PayPalWebVaultRequest(
                     setupTokenId,
                     appSwitchWhenEligible,
-                    APP_URL,
+                    if (deepLinkStrategy == DeepLinkStrategy.APP_LINKS) APP_URL else null,
                     APP_CUSTOM_URL_SCHEME
                 )
                 vaultSetupTokenWithRequest(activity, request)
