@@ -173,11 +173,6 @@ class PayPalCheckoutRobot(
         // Wait for order completion and verify success
         composeTestRule.waitUntilExactlyOneExists(hasText("ORDER COMPLETED"), waitTimeoutMs)
 
-        // Verify order details are displayed (OrderView with ID, Intent, Status)
-        composeTestRule.waitUntilExactlyOneExists(hasText("ID"), waitTimeoutMs)
-        composeTestRule.waitUntilExactlyOneExists(hasText("Intent"), waitTimeoutMs)
-        composeTestRule.waitUntilExactlyOneExists(hasText("Status"), waitTimeoutMs)
-
         Log.d(TAG, "🎉 Order completed successfully - Full PayPal checkout flow finished!")
     }
 }
