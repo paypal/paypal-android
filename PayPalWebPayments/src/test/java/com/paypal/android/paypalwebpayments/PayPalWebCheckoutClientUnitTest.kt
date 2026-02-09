@@ -1930,4 +1930,247 @@ class PayPalWebCheckoutClientUnitTest {
             ineligibleReason = null
         )
     }
+
+    // MARK: - Tests for redirect URI with appLinkUrl and fallbackUrlScheme
+
+    @Test
+    fun `startAsync() uses appLinkUrl in redirect_uri when appLinkUrl is provided`() = runTest {
+        val testAppLinkUrl = "https://example.com/return"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            appLinkUrl = testAppLinkUrl
+        )
+        sut.startAsync(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = match { uri ->
+                    uri.getQueryParameter("redirect_uri") == testAppLinkUrl
+                },
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = null,
+                appLinkUrl = testAppLinkUrl
+            )
+        }
+    }
+
+    @Test
+    fun `startAsync() uses fallbackUrlScheme in redirect_uri when fallbackUrlScheme is provided`() =
+        runTest {
+            val fallbackScheme = "com.example.fallback"
+            val expectedRedirectUri = "$fallbackScheme://x-callback-url/paypal-sdk/paypal-checkout"
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            val request = PayPalWebCheckoutRequest(
+                orderId = "fake-order-id",
+                fallbackUrlScheme = fallbackScheme
+            )
+            sut.startAsync(activity, request)
+
+            verify(exactly = 1) {
+                payPalWebLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = match { uri ->
+                        uri.getQueryParameter("redirect_uri") == expectedRedirectUri
+                    },
+                    token = "fake-order-id",
+                    tokenType = TokenType.ORDER_ID,
+                    returnUrlScheme = fallbackScheme,
+                    appLinkUrl = null
+                )
+            }
+        }
+
+    @Test
+    fun `startAsync() prioritizes appLinkUrl over fallbackUrlScheme in redirect_uri`() = runTest {
+        val testAppLinkUrl = "https://example.com/return"
+        val fallbackScheme = "com.example.fallback"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            appLinkUrl = testAppLinkUrl,
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.startAsync(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = match { uri ->
+                    uri.getQueryParameter("redirect_uri") == testAppLinkUrl
+                },
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = testAppLinkUrl
+            )
+        }
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `startAsync() with urlScheme uses urlScheme in redirect_uri when no appLinkUrl or fallbackUrlScheme`() =
+        runTest {
+            val testUrlScheme = "com.example.app"
+            val expectedRedirectUri = "$testUrlScheme://x-callback-url/paypal-sdk/paypal-checkout"
+            val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
+            val clientWithUrlScheme = PayPalWebCheckoutClient(
+                analytics = analytics,
+                payPalWebLauncher = mockLauncher,
+                sessionStore = PayPalWebCheckoutSessionStore(),
+                updateClientConfigAPI = updateClientConfigAPI,
+                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+                deviceInspector = deviceInspector,
+                coreConfig = coreConfig,
+                urlScheme = testUrlScheme
+            )
+
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                mockLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            val request = PayPalWebCheckoutRequest(
+                orderId = "fake-order-id",
+                appLinkUrl = null,
+                fallbackUrlScheme = null
+            )
+            clientWithUrlScheme.startAsync(activity, request)
+
+            verify(exactly = 1) {
+                mockLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = match { uri ->
+                        uri.getQueryParameter("redirect_uri") == expectedRedirectUri
+                    },
+                    token = "fake-order-id",
+                    tokenType = TokenType.ORDER_ID,
+                    returnUrlScheme = testUrlScheme,
+                    appLinkUrl = null
+                )
+            }
+        }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `startAsync() with urlScheme prioritizes fallbackUrlScheme over urlScheme in redirect_uri`() =
+        runTest {
+            val testUrlScheme = "com.example.app"
+            val fallbackScheme = "com.example.fallback"
+            val expectedRedirectUri = "$fallbackScheme://x-callback-url/paypal-sdk/paypal-checkout"
+            val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
+            val clientWithUrlScheme = PayPalWebCheckoutClient(
+                analytics = analytics,
+                payPalWebLauncher = mockLauncher,
+                sessionStore = PayPalWebCheckoutSessionStore(),
+                updateClientConfigAPI = updateClientConfigAPI,
+                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+                deviceInspector = deviceInspector,
+                coreConfig = coreConfig,
+                urlScheme = testUrlScheme
+            )
+
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                mockLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+            } returns launchResult
+
+            val request = PayPalWebCheckoutRequest(
+                orderId = "fake-order-id",
+                appLinkUrl = null,
+                fallbackUrlScheme = fallbackScheme
+            )
+            clientWithUrlScheme.startAsync(activity, request)
+
+            verify(exactly = 1) {
+                mockLauncher.launchWithUrl(
+                    activity = activity,
+                    uri = match { uri ->
+                        uri.getQueryParameter("redirect_uri") == expectedRedirectUri
+                    },
+                    token = "fake-order-id",
+                    tokenType = TokenType.ORDER_ID,
+                    returnUrlScheme = fallbackScheme,
+                    appLinkUrl = null
+                )
+            }
+        }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `deprecated start() uses appLinkUrl in redirect_uri when appLinkUrl is provided`() {
+        val testAppLinkUrl = "https://example.com/return"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            appLinkUrl = testAppLinkUrl
+        )
+        sut.start(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = match { uri ->
+                    uri.getQueryParameter("redirect_uri") == testAppLinkUrl
+                },
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = null,
+                appLinkUrl = testAppLinkUrl
+            )
+        }
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `deprecated start() uses fallbackUrlScheme in redirect_uri when fallbackUrlScheme is provided`() {
+        val fallbackScheme = "com.example.fallback"
+        val expectedRedirectUri = "$fallbackScheme://x-callback-url/paypal-sdk/paypal-checkout"
+        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any(), any())
+        } returns launchResult
+
+        val request = PayPalWebCheckoutRequest(
+            orderId = "fake-order-id",
+            fallbackUrlScheme = fallbackScheme
+        )
+        sut.start(activity, request)
+
+        verify(exactly = 1) {
+            payPalWebLauncher.launchWithUrl(
+                activity = activity,
+                uri = match { uri ->
+                    uri.getQueryParameter("redirect_uri") == expectedRedirectUri
+                },
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnUrlScheme = fallbackScheme,
+                appLinkUrl = null
+            )
+        }
+    }
 }

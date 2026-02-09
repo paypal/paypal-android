@@ -122,7 +122,7 @@ class PayPalWebCheckoutClient internal constructor(
         val launchUri = buildPayPalCheckoutUri(
             orderId = request.orderId,
             funding = request.fundingSource,
-            redirectUrl = request.appLinkUrl ?: redirectUriPayPalCheckout
+            redirectUrl = request.appLinkUrl ?: redirectUriCustomScheme(request.fallbackUrlScheme)
         )
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -186,7 +186,7 @@ class PayPalWebCheckoutClient internal constructor(
                     fallbackUri = buildPayPalCheckoutUri(
                         orderId = request.orderId,
                         funding = request.fundingSource,
-                        request.appLinkUrl ?: redirectUriPayPalCheckout
+                        request.appLinkUrl ?: redirectUriCustomScheme(request.fallbackUrlScheme)
                     )
                 )
             }
@@ -470,8 +470,11 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    private val redirectUriPayPalCheckout
-        get() = urlScheme?.let { "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout" }
+    private fun redirectUriCustomScheme(scheme: String?): String? {
+        return if (scheme != null)
+            "$scheme://x-callback-url/paypal-sdk/paypal-checkout"
+        else urlScheme?.let { "$it://x-callback-url/paypal-sdk/paypal-checkout" }
+    }
 
     private fun buildPayPalCheckoutUri(
         orderId: String?,

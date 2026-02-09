@@ -20,6 +20,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
+import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
@@ -126,7 +127,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            APP_URL,
+            if (deepLinkStrategy == DeepLinkStrategy.APP_LINKS) APP_URL else null,
             APP_CUSTOM_URL_SCHEME
         )
 
