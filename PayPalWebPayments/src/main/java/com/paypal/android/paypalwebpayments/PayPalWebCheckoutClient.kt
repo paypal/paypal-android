@@ -472,9 +472,11 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     private fun redirectUrlWithCustomScheme(scheme: String?): String? {
-        return if (scheme != null)
+        return if (scheme != null) {
             "$scheme://x-callback-url/paypal-sdk/paypal-checkout"
-        else urlScheme?.let { "$it://x-callback-url/paypal-sdk/paypal-checkout" }
+        } else {
+            urlScheme?.let { "$it://x-callback-url/paypal-sdk/paypal-checkout" }
+        }
     }
 
     private fun buildPayPalCheckoutUri(
