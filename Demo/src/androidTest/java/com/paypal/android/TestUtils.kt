@@ -401,3 +401,54 @@ fun loginToPayPal(email: String, password: String, timeout: Long = 30_000L): Boo
     Log.d(tag, "✅ PayPal login completed successfully")
     return true
 }
+
+/**
+ * Dismisses Chrome's first-time setup dialog if present.
+ * This dialog appears when Chrome/WebView is launched for the first time on a fresh emulator.
+ * The dialog prompts "Make Chrome your own" with options to add account or use without account.
+ *
+ * @param timeout Timeout in milliseconds (default 5 seconds)
+ * @return true if dialog was found and dismissed, false if dialog not present
+ */
+fun dismissChromeFirstTimeSetup(timeout: Long = 5_000L): Boolean {
+    val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    val tag = "ChromeSetupUtils"
+
+    Log.d(tag, "🔍 Checking for Chrome first-time setup dialog...")
+
+    // Look for "Make Chrome your own" text or similar first-time setup indicators
+    val setupDialog = device.wait(
+        Until.findObject(By.textContains("Make Chrome your own")),
+        timeout
+    ) ?: device.wait(
+        Until.findObject(By.textContains("Sign in to get your bookmarks")),
+        timeout
+    )
+
+    if (setupDialog != null) {
+        Log.d(tag, "✅ Found Chrome first-time setup dialog, dismissing it")
+
+        // Look for "Use without an account" button
+        val useWithoutAccountButton = device.findObject(By.text("Use without an account"))
+            ?: device.findObject(By.textContains("without an account"))
+            ?: device.findObject(By.textContains("No thanks"))
+            ?: device.findObject(By.text("Skip"))
+
+        if (useWithoutAccountButton != null) {
+            Log.d(tag, "✅ Clicking 'Use without an account' button")
+            useWithoutAccountButton.click()
+            Thread.sleep(1000) // Wait for dialog to dismiss
+            Log.d(tag, "✅ Chrome first-time setup dismissed successfully")
+            return true
+        } else {
+            Log.w(tag, "⚠️ Could not find 'Use without an account' button")
+            // Try pressing back button as fallback
+            device.pressBack()
+            Thread.sleep(500)
+            return false
+        }
+    } else {
+        Log.d(tag, "ℹ️ Chrome first-time setup dialog not present")
+        return false
+    }
+}

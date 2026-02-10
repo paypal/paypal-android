@@ -12,6 +12,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.paypal.android.MainActivity
+import com.paypal.android.dismissChromeFirstTimeSetup
 import com.paypal.android.uishared.enums.DeepLinkStrategy
 
 /**
@@ -122,9 +123,16 @@ class PayPalCheckoutRobot(
         composeTestRule.waitUntilExactlyOneExists(hasText("START CHECKOUT"), waitTimeoutMs)
         composeTestRule.onNodeWithText("START CHECKOUT").performClick()
 
+        // Wait for browser to open
+        Log.d(TAG, "⏳ Waiting for browser to open...")
+        Thread.sleep(2000) // Give browser time to start
+
+        // Dismiss Chrome first-time setup if present (common in CI environments)
+        dismissChromeFirstTimeSetup()
+
         // Wait for PayPal login page to load
         Log.d(TAG, "⏳ Waiting for PayPal login page to load...")
-        Thread.sleep(3000) // Give browser time to fully load
+        Thread.sleep(2000) // Give PayPal page time to fully load
 
         // Delegate to web page robot for login
         Log.d(TAG, "🔐 Entering PayPal credentials...")
