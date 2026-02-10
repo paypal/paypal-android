@@ -298,6 +298,7 @@ fun isOnPasswordPage(timeout: Long = 3_000L): Boolean {
  * 2. Not logged in - enters credentials
  * 3. One-time code page - clicks "Try another way" -> "Use password instead"
  * 4. Direct password page - enters password directly
+ * 5. Single page login - username and password on same page
  *
  * @param email The email address to use for login
  * @param password The password to use for login
@@ -306,6 +307,7 @@ fun isOnPasswordPage(timeout: Long = 3_000L): Boolean {
  */
 fun loginToPayPal(email: String, password: String, timeout: Long = 30_000L): Boolean {
     val tag = "PayPalLoginUtils"
+    val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     Log.d(tag, "🔐 Starting PayPal login flow")
 
     // Wait a moment for page to load
@@ -319,43 +321,77 @@ fun loginToPayPal(email: String, password: String, timeout: Long = 30_000L): Boo
 
     // Scenario 2: Check if on login page (not logged in)
     if (isOnLoginPage(timeout = 5000L)) {
-        Log.d(tag, "📧 On login page, entering email")
-        val emailEntered = enterPayPalEmail(email, timeout)
-        if (!emailEntered) {
-            Log.e(tag, "❌ Failed to enter email")
-            return false
-        }
+        // Check if password field is ALSO present (single-page login form)
+        val passwordFieldPresent = device.findObject(By.res("password")) != null ||
+                device.findObject(By.res("login_passwordField")) != null
 
-        // Wait for next page after email
-        Thread.sleep(2000)
+        if (passwordFieldPresent) {
+            // Scenario 2a: Single-page login form (username and password on same page)
+            Log.d(
+                tag,
+                "📧🔑 Single-page login form detected - both email and password fields present"
+            )
 
-        // Scenario 2a: Check if on one-time code page
-        if (isOnOneTimeCodePage(timeout = 5000L)) {
-            Log.d(tag, "📱 On one-time code page, clicking 'Try another way'")
-            val tryAnotherWayClicked = clickTryAnotherWay(timeout = 5000L)
-            if (tryAnotherWayClicked) {
-                Log.d(tag, "✅ Clicked 'Try another way'")
+            // Enter email
+            val emailField = device.findObject(By.res("email"))
+                ?: device.findObject(By.res("login_emailField"))
+                ?: device.findObject(By.clazz("android.widget.EditText"))
 
-                // Click "Use password instead" from the modal
-                val usePasswordClicked = clickUsePasswordInstead(timeout = 5000L)
-                if (usePasswordClicked) {
-                    Log.d(tag, "✅ Clicked 'Use password instead' button")
-                } else {
-                    Log.w(tag, "⚠️ Could not find 'Use password instead' button")
-                }
+            if (emailField != null) {
+                Log.d(tag, "✅ Entering email: $email")
+                emailField.text = email
+                Thread.sleep(1000)
+            } else {
+                Log.e(tag, "❌ Could not find email field")
+                return false
             }
-        } else if (isOnPasswordPage(timeout = 5000L)) {
-            // Scenario 2b: Directly on password page
-            Log.d(tag, "🔑 Directly on password page")
-        } else {
-            Log.w(tag, "⚠️ Unexpected page after entering email")
-        }
 
-        // Enter password
-        val passwordEntered = enterPayPalPassword(password, timeout)
-        if (!passwordEntered) {
-            Log.e(tag, "❌ Failed to enter password")
-            return false
+            // Enter password directly
+            val passwordEntered = enterPayPalPassword(password, timeout)
+            if (!passwordEntered) {
+                Log.e(tag, "❌ Failed to enter password")
+                return false
+            }
+        } else {
+            // Scenario 2b: Multi-page login form (email on first page)
+            Log.d(tag, "📧 Multi-page login form - entering email first")
+            val emailEntered = enterPayPalEmail(email, timeout)
+            if (!emailEntered) {
+                Log.e(tag, "❌ Failed to enter email")
+                return false
+            }
+
+            // Wait for next page after email
+            Thread.sleep(2000)
+
+            // Scenario 2b-i: Check if on one-time code page
+            if (isOnOneTimeCodePage(timeout = 5000L)) {
+                Log.d(tag, "📱 On one-time code page, clicking 'Try another way'")
+                val tryAnotherWayClicked = clickTryAnotherWay(timeout = 5000L)
+                if (tryAnotherWayClicked) {
+                    Log.d(tag, "✅ Clicked 'Try another way'")
+
+                    // Click "Use password instead" from the modal
+                    val usePasswordClicked = clickUsePasswordInstead(timeout = 5000L)
+                    if (usePasswordClicked) {
+                        Log.d(tag, "✅ Clicked 'Use password instead' button")
+                    } else {
+                        Log.w(tag, "⚠️ Could not find 'Use password instead' button")
+                    }
+                }
+            } else if (isOnPasswordPage(timeout = 5000L)) {
+                // Scenario 2b-ii: Directly on password page
+                Log.d(tag, "🔑 Directly on password page")
+            } else {
+                Log.w(tag, "⚠️ Unexpected page after entering email")
+            }
+
+            // Enter password
+            val passwordEntered = enterPayPalPassword(password, timeout)
+            if (!passwordEntered) {
+                Log.e(tag, "❌ Failed to enter password")
+                return false
+            }
         }
     } else {
         Log.w(tag, "⚠️ Not on login page or review order page - unexpected state")
