@@ -30,6 +30,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
+
+        // Pass environment variables to instrumentation tests
+        testInstrumentationRunnerArguments([
+                "SANDBOX_ACCOUNT_USERNAME": System.getenv("SANDBOX_ACCOUNT_USERNAME") ?: "",
+                "SANDBOX_ACCOUNT_PASSWORD": System.getenv("SANDBOX_ACCOUNT_PASSWORD") ?: ""
+        ])
     }
 
     buildFeatures {
