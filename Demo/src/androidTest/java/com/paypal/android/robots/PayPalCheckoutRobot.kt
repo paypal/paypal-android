@@ -12,7 +12,6 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.paypal.android.MainActivity
-import com.paypal.android.loginToPayPal
 import com.paypal.android.uishared.enums.DeepLinkStrategy
 
 /**
@@ -24,6 +23,10 @@ class PayPalCheckoutRobot(
 ) {
 
     private val waitTimeoutMs = 15_000L
+    private val device: UiDevice by lazy {
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    }
+    private val webPageRobot = PayPalWebPageRobot()
 
     companion object {
         private const val TAG = "PayPalCheckoutRobot"
@@ -78,8 +81,8 @@ class PayPalCheckoutRobot(
     }
 
     fun createOrder(
-        appSwitchEnabled: Boolean = false,
-        intent: String = "CAPTURE",
+        appSwitchEnabled: Boolean,
+        intent: String,
         deepLinkStrategy: DeepLinkStrategy
     ) = apply {
         setAppSwitch(appSwitchEnabled)
@@ -119,17 +122,13 @@ class PayPalCheckoutRobot(
         composeTestRule.waitUntilExactlyOneExists(hasText("START CHECKOUT"), waitTimeoutMs)
         composeTestRule.onNodeWithText("START CHECKOUT").performClick()
 
-        // Get UiDevice instance for interacting with Chrome Custom Tab
-        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        val webTimeout = 30_000L
-
         // Wait for PayPal login page to load
         Log.d(TAG, "⏳ Waiting for PayPal login page to load...")
         Thread.sleep(3000) // Give browser time to fully load
 
-        // Enter PayPal credentials
+        // Delegate to web page robot for login
         Log.d(TAG, "🔐 Entering PayPal credentials...")
-        val loginSuccess = loginToPayPal(email, password, webTimeout)
+        val loginSuccess = webPageRobot.performLogin(email, password)
 
         if (loginSuccess) {
             Log.d(TAG, "✅ Successfully logged into PayPal")
@@ -140,31 +139,11 @@ class PayPalCheckoutRobot(
         // Wait for review order page after login
         Thread.sleep(3000) // Wait for page to load after login
 
-        // Look for common PayPal web elements like "Review Order", "Pay Now", or "Continue"
-        val reviewOrderButton = device.wait(
-            Until.findObject(By.textContains("Review")),
-            webTimeout
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Continue")),
-            webTimeout
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Pay Now")),
-            webTimeout
-        )
-
-        if (reviewOrderButton != null) {
-            Log.d(TAG, "✅ Found PayPal checkout button in browser")
-            reviewOrderButton.click()
-            Thread.sleep(2000) // Wait for click to process
-        } else {
-            Log.w(
-                TAG,
-                "⚠️ Could not find PayPal checkout button - may be in app switch or sandbox mode"
-            )
-        }
+        // Delegate to web page robot to complete review order
+        webPageRobot.completeReviewOrder()
 
         // Wait for return to app and checkout completion
-        device.wait(Until.hasObject(By.pkg("com.paypal.android")), webTimeout)
+        device.wait(Until.hasObject(By.pkg("com.paypal.android")), 30_000L)
 
         // Wait for checkout to complete and verify success
         composeTestRule.waitUntilExactlyOneExists(hasText("CHECKOUT COMPLETE"), waitTimeoutMs)
