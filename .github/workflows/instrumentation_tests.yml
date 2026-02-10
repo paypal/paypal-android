@@ -9,7 +9,7 @@ jobs:
   instrumentation_test_job:
     name: Android Instrumentation Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
