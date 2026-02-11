@@ -3,12 +3,21 @@ package com.paypal.android.robots
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 
 /**
  * Robot for interacting with PayPal web pages (login, checkout) in browser/Chrome Custom Tab.
  * This robot encapsulates all web page interactions using UiAutomator.
+ *
+ * Handles multiple login scenarios:
+ * - Already logged in (session active)
+ * - Direct one-time code page (email remembered from previous session)
+ * - Single-page login (email + password on same page)
+ * - Two-step login (email -> next -> password)
+ * - One-time code redirect after email entry (requires "Try another way" navigation)
  */
 class PayPalWebPageRobot {
 
@@ -21,18 +30,78 @@ class PayPalWebPageRobot {
 
         // Timeout constants
         private const val WEB_TIMEOUT_MS = 30_000L
-        private const val PAGE_DETECTION_TIMEOUT_MS = 3_000L
         private const val LOGIN_FLOW_TIMEOUT_MS = 5_000L
         private const val NAVIGATION_TIMEOUT_MS = 10_000L
+
+        // Delay constants
+        private const val PAGE_LOAD_DELAY_MS = 2_000L
+        private const val POST_EMAIL_DELAY_MS = 3_000L
+        private const val MODAL_APPEAR_DELAY_MS = 2_000L
+        private const val INPUT_CLEAR_DELAY_MS = 500L
+        private const val INPUT_REGISTER_DELAY_MS = 1_000L
+        private const val BUTTON_CLICK_DELAY_MS = 2_000L
+        private const val LOGIN_PROCESS_DELAY_MS = 3_000L
+
+        // UI Selectors - Email field
+        private val EMAIL_FIELD_SELECTORS = listOf(
+            By.res("email"),
+            By.res("login_emailField")
+        )
+
+        // UI Selectors - Password field
+        private val PASSWORD_FIELD_SELECTORS = listOf(
+            By.res("password"),
+            By.res("login_passwordField")
+        )
+
+        // UI Selectors - Buttons
+        private val NEXT_BUTTON_SELECTORS = listOf(
+            By.text("Next"),
+            By.textContains("Continue"),
+            By.res("btnNext")
+        )
+
+        private val LOGIN_BUTTON_SELECTORS = listOf(
+            By.text("Log In"),
+            By.textContains("Sign In"),
+            By.res("btnLogin")
+        )
+
+        private val REVIEW_ORDER_SELECTORS = listOf(
+            By.textContains("Review"),
+            By.textContains("Continue"),
+            By.textContains("Pay Now")
+        )
+
+        private val TRY_ANOTHER_WAY_SELECTORS = listOf(
+            By.text("Try another way"),
+            By.textContains("another way"),
+            By.textContains("different")
+        )
+
+        private val USE_PASSWORD_SELECTORS = listOf(
+            By.text("Use password instead"),
+            By.textContains("password instead"),
+            By.textContains("Use password")
+        )
+
+        private val ONE_TIME_CODE_SELECTORS = listOf(
+            By.textContains("one-time code"),
+            By.textContains("Get a Code"),
+            By.text("Try another way")
+        )
     }
+
+    // ========== Public API ==========
 
     /**
      * Performs the complete PayPal login flow.
      * Intelligently handles different scenarios:
      * 1. Already logged in - skips login
-     * 2. Not logged in - enters credentials
-     * 3. One-time code page - clicks "Try another way" -> "Use password instead"
-     * 4. Direct password page - enters password directly
+     * 2. Direct one-time code page - navigates to password, enters password
+     * 3. Single-page login - enters email and password directly
+     * 4. Two-step login - enters email, clicks next, enters password
+     * 5. One-time code after email - navigates to password login via "Try another way"
      *
      * @param email The PayPal account email
      * @param password The PayPal account password
@@ -41,89 +110,48 @@ class PayPalWebPageRobot {
     fun performLogin(email: String, password: String): Boolean {
         Log.d(TAG, "🔐 Starting PayPal login flow")
 
-        // Wait a moment for page to load
-        Thread.sleep(2000)
+        waitForPageLoad()
 
-        // Scenario 1: Check if already on review order page (already logged in)
+        // Scenario 1: Already logged in
         if (isOnReviewOrderPage()) {
             Log.d(TAG, "✅ User already logged in, skipping login flow")
             return true
         }
 
-        // Scenario 2: Check if on login page (not logged in)
-        if (isOnLoginPage()) {
-            Log.d(TAG, "📧 On login page, entering email")
-            val emailEntered = enterEmail(email)
-            if (!emailEntered) {
-                Log.e(TAG, "❌ Failed to enter email")
+        // Scenario 2: On one-time code page (email already entered in previous session)
+        if (isOnOneTimeCodePage()) {
+            Log.d(TAG, "📱 Landed directly on one-time code page")
+            if (!handleOneTimeCodeNavigation()) {
                 return false
             }
-
-            // Wait for next page after email
-            Thread.sleep(3000)
-
-            // Scenario 2a: Check if on one-time code page
-            if (isOnOneTimeCodePage()) {
-                Log.d(TAG, "📱 On one-time code page, clicking 'Try another way'")
-                val tryAnotherWayClicked = clickTryAnotherWay()
-                if (tryAnotherWayClicked) {
-                    Log.d(TAG, "✅ Clicked 'Try another way'")
-
-                    // Wait for modal to appear
-                    Thread.sleep(2000)
-
-                    // Click "Use password instead" from the modal
-                    val usePasswordClicked = clickUsePasswordInstead()
-                    if (usePasswordClicked) {
-                        Log.d(TAG, "✅ Clicked 'Use password instead' button")
-                    } else {
-                        Log.w(TAG, "⚠️ Could not find 'Use password instead' button")
-                    }
-                } else {
-                    Log.w(TAG, "⚠️ Failed to click 'Try another way' button")
-                }
-            } else if (isOnPasswordPage()) {
-                // Scenario 2b: Directly on password page
-                Log.d(TAG, "🔑 Directly on password page")
-            } else {
-                Log.w(TAG, "⚠️ Unexpected page after entering email")
-            }
-
-            // Enter password
-            val passwordEntered = enterPassword(password)
-            if (!passwordEntered) {
+            // After navigating from one-time code, enter password
+            if (!enterPassword(password)) {
                 Log.e(TAG, "❌ Failed to enter password")
                 return false
             }
-        } else {
+            Log.d(TAG, "✅ PayPal login completed successfully")
+            return true
+        }
+
+        // Scenario 3: On login page - handle normal login
+        if (!isOnLoginPage()) {
             Log.w(TAG, "⚠️ Not on login page or review order page - unexpected state")
             return false
         }
 
-        Log.d(TAG, "✅ PayPal login completed successfully")
-        return true
+        return handleLoginFlow(email, password)
     }
 
     /**
-     * Completes the PayPal review order page by clicking appropriate buttons
+     * Completes the PayPal review order page by clicking the checkout button
      */
     fun completeReviewOrder() {
-        // Look for common PayPal web elements like "Review Order", "Pay Now", or "Continue"
-        val reviewOrderButton = device.wait(
-            Until.findObject(By.textContains("Review")),
-            WEB_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Continue")),
-            WEB_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Pay Now")),
-            WEB_TIMEOUT_MS
-        )
+        val reviewOrderButton = findElement(REVIEW_ORDER_SELECTORS, WEB_TIMEOUT_MS)
 
         if (reviewOrderButton != null) {
             Log.d(TAG, "✅ Found PayPal checkout button in browser")
             reviewOrderButton.click()
-            Thread.sleep(2000) // Wait for click to process
+            Thread.sleep(BUTTON_CLICK_DELAY_MS)
         } else {
             Log.w(
                 TAG,
@@ -132,21 +160,79 @@ class PayPalWebPageRobot {
         }
     }
 
+    // ========== Login Flow Orchestration ==========
+
+    private fun handleLoginFlow(email: String, password: String): Boolean {
+        Log.d(TAG, "📧 On login page, entering email")
+
+        if (!enterEmail(email)) {
+            Log.e(TAG, "❌ Failed to enter email")
+            return false
+        }
+
+        if (!handlePasswordNavigation()) {
+            return false
+        }
+
+        if (!enterPassword(password)) {
+            Log.e(TAG, "❌ Failed to enter password")
+            return false
+        }
+
+        Log.d(TAG, "✅ PayPal login completed successfully")
+        return true
+    }
+
+    private fun handlePasswordNavigation(): Boolean {
+        // Check if password field is already visible (single-page login)
+        if (isOnPasswordPage()) {
+            Log.d(TAG, "🔑 Single-page login - password field already visible, skipping navigation")
+            return true
+        }
+
+        // Wait for next page after email (two-step login)
+        Thread.sleep(POST_EMAIL_DELAY_MS)
+
+        // Check if on one-time code page
+        if (isOnOneTimeCodePage()) {
+            return handleOneTimeCodeNavigation()
+        }
+
+        // Check if on password page after clicking Next
+        if (isOnPasswordPage()) {
+            Log.d(TAG, "🔑 Directly on password page")
+            return true
+        }
+
+        Log.w(TAG, "⚠️ Unexpected page after entering email")
+        return true // Continue anyway, enterPassword will fail if no password field
+    }
+
+    private fun handleOneTimeCodeNavigation(): Boolean {
+        Log.d(TAG, "📱 On one-time code page, clicking 'Try another way'")
+
+        if (!clickTryAnotherWay()) {
+            Log.w(TAG, "⚠️ Failed to click 'Try another way' button")
+            return true // Continue anyway, may still work
+        }
+
+        Log.d(TAG, "✅ Clicked 'Try another way'")
+        Thread.sleep(MODAL_APPEAR_DELAY_MS)
+
+        if (clickUsePasswordInstead()) {
+            Log.d(TAG, "✅ Clicked 'Use password instead' button")
+        } else {
+            Log.w(TAG, "⚠️ Could not find 'Use password instead' button")
+        }
+
+        return true
+    }
+
     // ========== Page Detection Methods ==========
 
     private fun isOnReviewOrderPage(): Boolean {
-        val reviewOrderIndicators = device.wait(
-            Until.findObject(By.textContains("Review")),
-            LOGIN_FLOW_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Continue")),
-            LOGIN_FLOW_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Pay Now")),
-            LOGIN_FLOW_TIMEOUT_MS
-        )
-
-        val isOnPage = reviewOrderIndicators != null
+        val element = findElement(REVIEW_ORDER_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
+        val isOnPage = element != null
         if (isOnPage) {
             Log.d(TAG, "✅ Already on review order page - user is logged in")
         }
@@ -154,14 +240,7 @@ class PayPalWebPageRobot {
     }
 
     private fun isOnLoginPage(): Boolean {
-        val emailField = device.wait(
-            Until.findObject(By.res("email")),
-            LOGIN_FLOW_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.res("login_emailField")),
-            LOGIN_FLOW_TIMEOUT_MS
-        )
-
+        val emailField = findElement(EMAIL_FIELD_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
         val isOnPage = emailField != null
         if (isOnPage) {
             Log.d(TAG, "✅ On login page - email field found")
@@ -171,19 +250,8 @@ class PayPalWebPageRobot {
 
     private fun isOnOneTimeCodePage(): Boolean {
         Log.d(TAG, "🔍 Checking if on one-time code page...")
-
-        val oneTimeCodeIndicators = device.wait(
-            Until.findObject(By.textContains("one-time code")),
-            LOGIN_FLOW_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Get a Code")),
-            LOGIN_FLOW_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.text("Try another way")),
-            LOGIN_FLOW_TIMEOUT_MS
-        )
-
-        val isOnPage = oneTimeCodeIndicators != null
+        val element = findElement(ONE_TIME_CODE_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
+        val isOnPage = element != null
         if (isOnPage) {
             Log.d(TAG, "✅ Detected one-time code page")
         } else {
@@ -193,14 +261,7 @@ class PayPalWebPageRobot {
     }
 
     private fun isOnPasswordPage(): Boolean {
-        val passwordField = device.wait(
-            Until.findObject(By.res("password")),
-            LOGIN_FLOW_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.res("login_passwordField")),
-            LOGIN_FLOW_TIMEOUT_MS
-        )
-
+        val passwordField = findElement(PASSWORD_FIELD_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
         val isOnPage = passwordField != null
         if (isOnPage) {
             Log.d(TAG, "✅ On password page")
@@ -211,138 +272,163 @@ class PayPalWebPageRobot {
     // ========== Form Input Methods ==========
 
     private fun enterEmail(email: String): Boolean {
-        // Look for email/username input field
-        val emailField = device.wait(
-            Until.findObject(By.res("email")),
-            WEB_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.res("login_emailField")),
-            WEB_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.clazz("android.widget.EditText")),
+        val emailField = findElement(
+            EMAIL_FIELD_SELECTORS + By.clazz("android.widget.EditText"),
             WEB_TIMEOUT_MS
         )
 
-        if (emailField != null) {
-            Log.d(TAG, "✅ Found email field, entering: $email")
-            emailField.text = email
-            Thread.sleep(1000) // Wait for input to register
-
-            // Look for Next or Continue button
-            val nextButton = device.findObject(By.text("Next"))
-                ?: device.findObject(By.textContains("Continue"))
-                ?: device.findObject(By.res("btnNext"))
-
-            if (nextButton != null) {
-                nextButton.click()
-                Log.d(TAG, "✅ Clicked Next button")
-                Thread.sleep(2000) // Wait for navigation to password page
-                return true
-            } else {
-                Log.w(TAG, "⚠️ Could not find Next/Continue button")
-                return false
-            }
-        } else {
+        if (emailField == null) {
             Log.w(TAG, "⚠️ Could not find email field")
             return false
         }
+
+        // Always clear and re-enter email for test consistency
+        clearAndEnterText(emailField, email, "Email")
+        Log.d(TAG, "✅ Entered email: $email")
+
+        // Check if password field is already visible (single-page login)
+        if (isOnPasswordPage()) {
+            Log.d(TAG, "✅ Password field already visible - single-page login detected")
+            return true
+        }
+
+        // Look for Next or Continue button (two-step login)
+        return clickNextButton()
     }
 
     private fun enterPassword(password: String): Boolean {
-        // Wait for password field
-        val passwordField = device.wait(
-            Until.findObject(By.res("password")),
-            WEB_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.res("login_passwordField")),
-            WEB_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.clazz("android.widget.EditText")),
+        val passwordField = findElement(
+            PASSWORD_FIELD_SELECTORS + By.clazz("android.widget.EditText"),
             WEB_TIMEOUT_MS
         )
 
-        if (passwordField != null) {
-            Log.d(TAG, "✅ Found password field, entering password")
-            passwordField.text = password
-            Thread.sleep(1000) // Wait for input to register
-
-            // Look for Login button
-            val loginButton = device.findObject(By.text("Log In"))
-                ?: device.findObject(By.textContains("Sign In"))
-                ?: device.findObject(By.res("btnLogin"))
-
-            if (loginButton != null) {
-                loginButton.click()
-                Log.d(TAG, "✅ Clicked Login button")
-                Thread.sleep(3000) // Wait for login to process
-                return true
-            } else {
-                Log.w(TAG, "⚠️ Could not find Login/Sign In button")
-                return false
-            }
-        } else {
+        if (passwordField == null) {
             Log.w(TAG, "⚠️ Could not find password field")
             return false
         }
+
+        // Always clear and re-enter password for test consistency
+        clearAndEnterText(passwordField, password, "Password")
+        Log.d(TAG, "✅ Entered password")
+
+        // Click login button
+        return clickLoginButton()
     }
 
     // ========== Navigation Methods ==========
 
+    private fun clickNextButton(): Boolean {
+        val nextButton = findElementNoWait(NEXT_BUTTON_SELECTORS)
+
+        if (nextButton == null) {
+            Log.w(TAG, "⚠️ Could not find Next/Continue button")
+            return false
+        }
+
+        nextButton.click()
+        Log.d(TAG, "✅ Clicked Next button")
+        Thread.sleep(BUTTON_CLICK_DELAY_MS)
+        return true
+    }
+
+    private fun clickLoginButton(): Boolean {
+        val loginButton = findElementNoWait(LOGIN_BUTTON_SELECTORS)
+
+        if (loginButton == null) {
+            Log.w(TAG, "⚠️ Could not find Login/Sign In button")
+            return false
+        }
+
+        loginButton.click()
+        Log.d(TAG, "✅ Clicked Login button")
+        Thread.sleep(LOGIN_PROCESS_DELAY_MS)
+        return true
+    }
+
     private fun clickTryAnotherWay(): Boolean {
         Log.d(TAG, "🔍 Looking for 'Try another way' button...")
+        val button = findElement(TRY_ANOTHER_WAY_SELECTORS, NAVIGATION_TIMEOUT_MS)
 
-        // Wait for "Try another way" button to appear
-        val tryAnotherWayButton = device.wait(
-            Until.findObject(By.text("Try another way")),
-            NAVIGATION_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("another way")),
-            NAVIGATION_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("different")),
-            NAVIGATION_TIMEOUT_MS
-        )
-
-        if (tryAnotherWayButton != null) {
-            Log.d(TAG, "✅ Found 'Try another way' button, clicking it")
-            tryAnotherWayButton.click()
-            Thread.sleep(2000) // Wait for navigation
-            return true
-        } else {
+        if (button == null) {
             Log.w(
                 TAG,
                 "❌ 'Try another way' button not found after waiting ${NAVIGATION_TIMEOUT_MS}ms"
             )
             return false
         }
+
+        Log.d(TAG, "✅ Found 'Try another way' button, clicking it")
+        button.click()
+        Thread.sleep(BUTTON_CLICK_DELAY_MS)
+        return true
     }
 
     private fun clickUsePasswordInstead(): Boolean {
         Log.d(TAG, "🔍 Looking for 'Use password instead' button...")
+        val button = findElement(USE_PASSWORD_SELECTORS, NAVIGATION_TIMEOUT_MS)
 
-        // Wait for "Use password instead" button to appear
-        val usePasswordButton = device.wait(
-            Until.findObject(By.text("Use password instead")),
-            NAVIGATION_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("password instead")),
-            NAVIGATION_TIMEOUT_MS
-        ) ?: device.wait(
-            Until.findObject(By.textContains("Use password")),
-            NAVIGATION_TIMEOUT_MS
-        )
-
-        if (usePasswordButton != null) {
-            Log.d(TAG, "✅ Found 'Use password instead' button, clicking it")
-            usePasswordButton.click()
-            Thread.sleep(2000) // Wait for password page to load
-            return true
-        } else {
+        if (button == null) {
             Log.w(
                 TAG,
                 "❌ 'Use password instead' button not found after waiting ${NAVIGATION_TIMEOUT_MS}ms"
             )
             return false
         }
+
+        Log.d(TAG, "✅ Found 'Use password instead' button, clicking it")
+        button.click()
+        Thread.sleep(BUTTON_CLICK_DELAY_MS)
+        return true
+    }
+
+    // ========== Utility Methods ==========
+
+    /**
+     * Finds an element using multiple selectors with a timeout.
+     * Tries each selector in order until one is found.
+     */
+    private fun findElement(selectors: List<BySelector>, timeout: Long): UiObject2? {
+        for (selector in selectors) {
+            val element = device.wait(Until.findObject(selector), timeout)
+            if (element != null) {
+                return element
+            }
+        }
+        return null
+    }
+
+    /**
+     * Finds an element using multiple selectors without waiting.
+     * Returns immediately if found or null if not found.
+     */
+    private fun findElementNoWait(selectors: List<BySelector>): UiObject2? {
+        for (selector in selectors) {
+            val element = device.findObject(selector)
+            if (element != null) {
+                return element
+            }
+        }
+        return null
+    }
+
+    /**
+     * Clears an input field and enters new text with appropriate delays
+     */
+    private fun clearAndEnterText(field: UiObject2, text: String, fieldName: String) {
+        val currentText = field.text ?: ""
+        if (currentText.isNotEmpty()) {
+            Log.d(TAG, "📧 $fieldName field pre-filled with: $currentText, clearing and re-entering")
+        }
+        field.clear()
+        Thread.sleep(INPUT_CLEAR_DELAY_MS)
+        field.text = text
+        Thread.sleep(INPUT_REGISTER_DELAY_MS)
+    }
+
+    /**
+     * Waits for initial page load
+     */
+    private fun waitForPageLoad() {
+        Thread.sleep(PAGE_LOAD_DELAY_MS)
     }
 }
