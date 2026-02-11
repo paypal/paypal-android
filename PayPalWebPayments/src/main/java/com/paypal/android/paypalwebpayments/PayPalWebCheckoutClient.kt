@@ -471,6 +471,16 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
+    /**
+     * Construct a redirect URL with the provided custom scheme if null then use deprecated
+     * urlScheme from constructor. Deprecated urlScheme is still supported for backward
+     * compatibility, but providing a custom scheme in the request is now the recommended approach.
+     * Deprecated urlScheme will eventually be removed in a future major version,
+     * so providing a custom scheme in the request is recommended for forward compatibility.
+     * This check is needed for now to cover all possible scenarios of how the client might be
+     * used, but can be removed once urlScheme is fully deprecated and removed.
+     * This URL will be used to return to the app after the PayPal web flow is completed.
+     */
     private fun redirectUrlWithCustomScheme(scheme: String?): String? {
         return if (scheme != null) {
             "$scheme://x-callback-url/paypal-sdk/paypal-checkout"
