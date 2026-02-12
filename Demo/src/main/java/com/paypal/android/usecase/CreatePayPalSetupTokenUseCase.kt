@@ -8,7 +8,7 @@ import com.paypal.android.api.model.serialization.PayPalSetupRequestBody
 import com.paypal.android.api.model.serialization.PayPalSource
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.utils.ReturnUrlFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,14 +20,14 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 
     suspend operator fun invoke(
         appSwitchEnabled: Boolean,
-        deepLinkStrategy: DeepLinkStrategy
+        returnToAppStrategy: ReturnToAppStrategy
     ): SDKSampleServerResult<PayPalSetupToken, Exception> =
         withContext(Dispatchers.IO) {
-            val appUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+            val appUrl = ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy)
             val experienceContext = PayPalExperienceContext(
                 vaultInstruction = "ON_PAYER_APPROVAL",
-                returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(deepLinkStrategy),
-                cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(deepLinkStrategy),
+                returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(returnToAppStrategy),
+                cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(returnToAppStrategy),
                 nativeApp = PayPalNativeApp(appUrl = appUrl)
             )
 

@@ -8,7 +8,7 @@ import com.paypal.android.api.model.serialization.ExperienceContext
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.threedsecure.SCA
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.utils.ReturnUrlFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +20,7 @@ class CreateCardSetupTokenUseCase @Inject constructor(
 
     suspend operator fun invoke(
         sca: SCA,
-        deepLinkStrategy: DeepLinkStrategy
+        returnToAppStrategy: ReturnToAppStrategy
     ): SDKSampleServerResult<CardSetupToken, Exception> =
         withContext(Dispatchers.IO) {
             // create a payment token with an empty card attribute; the merchant app will
@@ -30,8 +30,8 @@ class CreateCardSetupTokenUseCase @Inject constructor(
                     card = CardDetails(
                         verificationMethod = sca.name,
                         experienceContext = ExperienceContext(
-                            returnUrl = ReturnUrlFactory.createVaultSuccessUrl(deepLinkStrategy),
-                            cancelUrl = ReturnUrlFactory.createVaultCancelUrl(deepLinkStrategy)
+                            returnUrl = ReturnUrlFactory.createVaultSuccessUrl(returnToAppStrategy),
+                            cancelUrl = ReturnUrlFactory.createVaultCancelUrl(returnToAppStrategy)
                         )
                     )
                 )
