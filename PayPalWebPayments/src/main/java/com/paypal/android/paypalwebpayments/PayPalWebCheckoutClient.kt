@@ -165,7 +165,6 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      */
-    @Suppress("LongMethod")
     @VisibleForTesting
     internal suspend fun startAsync(
         activity: Activity,
@@ -598,5 +597,4 @@ class PayPalWebCheckoutClient internal constructor(
             is ReturnToAppStrategy.CustomUrlScheme ->
                 "${this.urlScheme}://x-callback-url/paypal-sdk/paypal-checkout"
         }
-
 }
