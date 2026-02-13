@@ -190,28 +190,33 @@ We refactored the `PayPalWebClient` API to improve the developer experience. Use
   private fun launchPayPalCheckout() {
     val checkoutRequest: PayPalWebCheckoutRequest = TODO("Create a PayPal checkout request.")
 -   payPalClient.start(checkoutRequest)
-+   when (val result = paypalClient.start(this, checkoutRequest)) {
-+     is PayPalPresentAuthChallengeResult.Success -> {
-+       // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
-+       // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
-+       // balancing call to finishStart()
++   paypalClient.start(this, checkoutRequest) { result ->
++     when (result) {
++       is PayPalPresentAuthChallengeResult.Success -> {
++         // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
++         // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
++         // balancing call to finishStart()
++       }
++       is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +     }
-+     is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
   }
   
   private fun launchPayPalVault() {
     val vaultRequest: PayPalWebVaultRequest = TODO("Create a card vault request.")
 -   payPalClient.vault(vaultRequest)
-+   when (val result = paypalClient.vault(this, vaultRequest)) {
-+     is PayPalPresentAuthChallengeResult.Success -> {
-+       // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
-+       // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
-+       // balancing call to finishVault()
++   paypalClient.vault(this, vaultRequest) { result ->
++     when (result) {
++       is PayPalPresentAuthChallengeResult.Success -> {
++         // Auth Challenge presentation succeeded. Once the user has completed the auth challenge and
++         // the merchant app has re-entered the foreground via onResume() or onNewIntent(), make a
++         // balancing call to finishVault()
++       }
++       is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +     }
-+     is PayPalPresentAuthChallengeResult.Failure -> TODO("Handle Present Auth Challenge Failure")
 +   }
   }
+}
 
 + fun checkForPayPalAuthCompletion(intent: Intent) {
 +   // check for checkout completion
