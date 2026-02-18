@@ -1,5 +1,7 @@
 package com.paypal.android.corepayments
 
+import androidx.annotation.RestrictTo
+
 /**
  * Strategy for returning to the app after browser-based checkout flows.
  *
@@ -22,3 +24,14 @@ sealed class ReturnToAppStrategy {
      */
     data class CustomUrlScheme(val urlScheme: String) : ReturnToAppStrategy()
 }
+
+/**
+ * Builds return URL from return to app strategy.
+ */
+val ReturnToAppStrategy.returnUrl: String
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    get() = when (this) {
+        is ReturnToAppStrategy.AppLink -> this.appLinkUrl
+        is ReturnToAppStrategy.CustomUrlScheme ->
+            "${this.urlScheme}://x-callback-url/paypal-sdk/paypal-checkout"
+    }

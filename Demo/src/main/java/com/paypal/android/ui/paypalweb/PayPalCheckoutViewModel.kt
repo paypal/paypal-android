@@ -61,7 +61,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
-    var returnToAppStrategy: ReturnToAppStrategyOption
+    var returnToAppStrategyOption: ReturnToAppStrategyOption
         get() = _uiState.value.returnToAppStrategyOption
         set(value) {
             _uiState.update { it.copy(returnToAppStrategyOption = value) }
@@ -125,7 +125,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            returnToAppStrategy.toReturnToAppStrategy()
+            returnToAppStrategyOption.toReturnToAppStrategy()
         )
 
         paypalClient.start(activity, checkoutRequest) { startResult ->

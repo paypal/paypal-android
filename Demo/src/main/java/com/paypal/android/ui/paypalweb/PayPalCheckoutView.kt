@@ -92,7 +92,7 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
         EnumOptionList(
             title = stringResource(id = R.string.return_to_app_strategy_title),
             stringArrayResId = R.array.deep_link_strategy_options,
-            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
+            onSelectedOptionChange = { value -> viewModel.returnToAppStrategyOption = value },
             selectedOption = uiState.returnToAppStrategyOption
         )
         ActionButtonColumn(

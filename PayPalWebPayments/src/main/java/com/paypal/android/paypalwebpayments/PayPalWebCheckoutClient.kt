@@ -9,8 +9,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -18,9 +16,11 @@ import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
+import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -123,7 +123,7 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
-            ?: return PayPalPresentAuthChallengeResult.Failure(noReturnToAppStrategyError)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
         val launchUri = buildPayPalCheckoutUri(
             orderId = request.orderId,
@@ -175,7 +175,7 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
-            ?: return PayPalPresentAuthChallengeResult.Failure(noReturnToAppStrategyError)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
         val launchUri = withContext(Dispatchers.IO) {
             // perform updateCCO and getLaunchUri in parallel
@@ -270,7 +270,7 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
-            ?: return PayPalPresentAuthChallengeResult.Failure(noReturnToAppStrategyError)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
         val launchUri = buildPayPalVaultUri(request.setupTokenId)
 
@@ -318,7 +318,7 @@ class PayPalWebCheckoutClient internal constructor(
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
-            ?: return PayPalPresentAuthChallengeResult.Failure(noReturnToAppStrategyError)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
         val launchUri = withContext(Dispatchers.IO) {
             getLaunchUri(
@@ -582,19 +582,4 @@ class PayPalWebCheckoutClient internal constructor(
             ReturnToAppStrategy.CustomUrlScheme(urlScheme)
         }
     }
-
-    private val noReturnToAppStrategyError = PayPalSDKError(
-        code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
-        errorDescription = "ReturnToAppStrategy or urlScheme is required. "
-    )
-
-    /**
-     * builds return URL from return to app strategy.
-     */
-    private val ReturnToAppStrategy.returnUrl: String
-        get() = when (this) {
-            is ReturnToAppStrategy.AppLink -> this.appLinkUrl
-            is ReturnToAppStrategy.CustomUrlScheme ->
-                "${this.urlScheme}://x-callback-url/paypal-sdk/paypal-checkout"
-        }
 }
