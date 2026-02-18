@@ -24,7 +24,7 @@ case $command_name in
     echo "Usage: ./ci <command>"
     echo ""
     echo "Available commands:"
-    echo "  generate_docs    Generate DocC reference documentation locally"
+    echo "  generate_docs    Generate Dokka reference documentation locally"
     echo "  serve_docs       Start a local web server to view the documentation"
     ;;
 esac
