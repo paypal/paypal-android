@@ -14,11 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate Version Name
-        run: |
-          # Ref: https://github.com/orgs/community/discussions/48373#discussioncomment-7543209
-          # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-          echo "Validating version name to make sure it adheres to semantic versioning..."
-          echo "${{ github.event.inputs.versionName }}" | grep -P '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+         env: 
+             VERSION_INPUT: ${{ github.event.inputs.versionName }}
+         run: |
+             # Ref: https://github.com/orgs/community/discussions/48373#discussioncomment-7543209                                                                                                 
+             # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string                                                                                    
+             echo "Validating version name to make sure it adheres to semantic versioning..."                                                                                                     
+             echo "$VERSION_INPUT" | grep -P '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'     
       - name: Checkout Repository
         uses: actions/checkout@v5
         with:
