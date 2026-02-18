@@ -6,8 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
-import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -20,7 +18,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
@@ -63,10 +61,10 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
-    var deepLinkStrategy
-        get() = _uiState.value.deepLinkStrategy
+    var returnToAppStrategyOption: ReturnToAppStrategyOption
+        get() = _uiState.value.returnToAppStrategyOption
         set(value) {
-            _uiState.update { it.copy(deepLinkStrategy = value) }
+            _uiState.update { it.copy(returnToAppStrategyOption = value) }
         }
 
     private var createOrderState
@@ -104,7 +102,7 @@ class PayPalCheckoutViewModel @Inject constructor(
                     intent = intentOption,
                     shouldVaultOnSuccess = false,
                     appSwitchWhenEligible = appSwitchWhenEligible,
-                    deepLinkStrategy = deepLinkStrategy
+                    returnToAppStrategy = returnToAppStrategyOption
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -127,8 +125,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            if (deepLinkStrategy == DeepLinkStrategy.APP_LINKS) APP_URL else null,
-            APP_CUSTOM_URL_SCHEME
+            returnToAppStrategyOption.toReturnToAppStrategy()
         )
 
         paypalClient.start(activity, checkoutRequest) { startResult ->

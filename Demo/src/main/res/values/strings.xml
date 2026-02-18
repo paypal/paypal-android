@@ -35,6 +35,7 @@
     </string-array>
 
     <string name="deep_link_strategy_title">DEEP LINK STRATEGY</string>
+    <string name="return_to_app_strategy_title">RETURN TO APP STRATEGY</string>
     <string-array name="deep_link_strategy_options">
         <item>APP_LINKS</item>
         <item>CUSTOM_URL_SCHEME</item>

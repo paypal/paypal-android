@@ -21,4 +21,10 @@ internal object PayPalWebCheckoutError {
         code = PayPalWebCheckoutErrorCode.BROWSER_SWITCH.ordinal,
         errorDescription = cause.message ?: "Unable to Browser Switch"
     )
+
+    // 3. ReturnToAppStrategy or urlScheme is required
+    val noReturnToAppStrategyError = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
+        errorDescription = "ReturnToAppStrategy or urlScheme is required. "
+    )
 }

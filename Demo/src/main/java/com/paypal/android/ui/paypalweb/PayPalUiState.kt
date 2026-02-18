@@ -4,7 +4,7 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 
 data class PayPalUiState(
@@ -14,7 +14,7 @@ data class PayPalUiState(
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val appSwitchWhenEligible: Boolean = false,
-    val deepLinkStrategy: DeepLinkStrategy = DeepLinkStrategy.APP_LINKS,
+    val returnToAppStrategyOption: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success

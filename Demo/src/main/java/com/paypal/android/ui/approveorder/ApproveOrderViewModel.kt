@@ -21,7 +21,7 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
@@ -54,7 +54,7 @@ class ApproveOrderViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault, false, deepLinkStrategy = deepLinkStrategy)
+                OrderRequest(intentOption, shouldVault, false)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -83,7 +83,8 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            val returnUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+            val returnUrl =
+                ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategyOption.toReturnToAppStrategy())
             CardRequest(orderId, card, returnUrl, scaOption)
         }
         cardClient.approveOrder(cardRequest) { result ->
@@ -191,10 +192,10 @@ class ApproveOrderViewModel @Inject constructor(
             _uiState.update { it.copy(shouldVaultOption = value) }
         }
 
-    var deepLinkStrategy: DeepLinkStrategy
-        get() = _uiState.value.deepLinkStrategy
+    var returnToAppStrategy: ReturnToAppStrategyOption
+        get() = _uiState.value.returnToAppStrategyOption
         set(value) {
-            _uiState.update { it.copy(deepLinkStrategy = value) }
+            _uiState.update { it.copy(returnToAppStrategyOption = value) }
         }
 
     fun prefillCard(testCard: TestCard) {
