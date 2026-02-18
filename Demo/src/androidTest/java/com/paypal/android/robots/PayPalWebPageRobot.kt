@@ -101,34 +101,34 @@ class PayPalWebPageRobot {
 
         waitForPageLoad()
 
-        // Scenario 1: Already logged in
-        if (isOnReviewOrderPage()) {
-            Log.d(TAG, "✅ User already logged in, skipping login flow")
-            return true
-        }
-
-        // Scenario 2: On one-time code page (email already entered in previous session)
-        if (isOnOneTimeCodePage()) {
-            Log.d(TAG, "📱 Landed directly on one-time code page")
-            if (!handleOneTimeCodeNavigation()) {
-                return false
+        // Determine which scenario we're in and handle accordingly
+        val result = when {
+            // Scenario 1: Already logged in
+            isOnReviewOrderPage() -> {
+                Log.d(TAG, "✅ User already logged in, skipping login flow")
+                true
             }
-            // After navigating from one-time code, enter password
-            if (!enterPassword(password)) {
-                Log.e(TAG, "❌ Failed to enter password")
-                return false
+            // Scenario 2: On one-time code page (email already entered in previous session)
+            isOnOneTimeCodePage() -> {
+                Log.d(TAG, "📱 Landed directly on one-time code page")
+                val success = handleOneTimeCodeNavigation() && enterPassword(password)
+                if (success) {
+                    Log.d(TAG, "✅ PayPal login completed successfully")
+                } else {
+                    Log.e(TAG, "❌ Failed to complete one-time code flow")
+                }
+                success
             }
-            Log.d(TAG, "✅ PayPal login completed successfully")
-            return true
+            // Scenario 3: On login page - handle normal login
+            isOnLoginPage() -> handleLoginFlow(email, password)
+            // Unexpected state
+            else -> {
+                Log.w(TAG, "⚠️ Not on login page or review order page - unexpected state")
+                false
+            }
         }
 
-        // Scenario 3: On login page - handle normal login
-        if (!isOnLoginPage()) {
-            Log.w(TAG, "⚠️ Not on login page or review order page - unexpected state")
-            return false
-        }
-
-        return handleLoginFlow(email, password)
+        return result
     }
 
     /**
@@ -154,22 +154,15 @@ class PayPalWebPageRobot {
     private fun handleLoginFlow(email: String, password: String): Boolean {
         Log.d(TAG, "📧 On login page, entering email")
 
-        if (!enterEmail(email)) {
-            Log.e(TAG, "❌ Failed to enter email")
-            return false
+        val success = enterEmail(email) && handlePasswordNavigation() && enterPassword(password)
+
+        if (!success) {
+            Log.e(TAG, "❌ Failed to complete login flow")
+        } else {
+            Log.d(TAG, "✅ PayPal login completed successfully")
         }
 
-        if (!handlePasswordNavigation()) {
-            return false
-        }
-
-        if (!enterPassword(password)) {
-            Log.e(TAG, "❌ Failed to enter password")
-            return false
-        }
-
-        Log.d(TAG, "✅ PayPal login completed successfully")
-        return true
+        return success
     }
 
     private fun handlePasswordNavigation(): Boolean {
@@ -183,18 +176,17 @@ class PayPalWebPageRobot {
         Thread.sleep(DELAY_2000_MS)
 
         // Check if on one-time code page
-        if (isOnOneTimeCodePage()) {
-            return handleOneTimeCodeNavigation()
+        return if (isOnOneTimeCodePage()) {
+            handleOneTimeCodeNavigation()
+        } else {
+            // Check if on password page after clicking Next
+            if (isOnPasswordPage()) {
+                Log.d(TAG, "🔑 Directly on password page")
+            } else {
+                Log.w(TAG, "⚠️ Unexpected page after entering email")
+            }
+            true // Continue anyway, enterPassword will fail if no password field
         }
-
-        // Check if on password page after clicking Next
-        if (isOnPasswordPage()) {
-            Log.d(TAG, "🔑 Directly on password page")
-            return true
-        }
-
-        Log.w(TAG, "⚠️ Unexpected page after entering email")
-        return true // Continue anyway, enterPassword will fail if no password field
     }
 
     private fun handleOneTimeCodeNavigation(): Boolean {
@@ -275,13 +267,13 @@ class PayPalWebPageRobot {
         Log.d(TAG, "✅ Entered email: $email")
 
         // Check if password field is already visible (single-page login)
-        if (isOnPasswordPage()) {
+        return if (isOnPasswordPage()) {
             Log.d(TAG, "✅ Password field already visible - single-page login detected")
-            return true
+            true
+        } else {
+            // Look for Next or Continue button (two-step login)
+            clickNextButton()
         }
-
-        // Look for Next or Continue button (two-step login)
-        return clickNextButton()
     }
 
     private fun enterPassword(password: String): Boolean {

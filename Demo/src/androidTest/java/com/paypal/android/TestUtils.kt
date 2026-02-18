@@ -53,7 +53,7 @@ fun dismissChromeFirstTimeSetup(timeout: Long = 5_000L): Boolean {
         timeout
     )
 
-    if (setupDialog != null) {
+    return if (setupDialog != null) {
         Log.d(tag, "✅ Found Chrome first-time setup dialog, dismissing it")
 
         // Look for "Use without an account" button
@@ -67,17 +67,17 @@ fun dismissChromeFirstTimeSetup(timeout: Long = 5_000L): Boolean {
             useWithoutAccountButton.click()
             Thread.sleep(1000) // Wait for dialog to dismiss
             Log.d(tag, "✅ Chrome first-time setup dismissed successfully")
-            return true
+            true
         } else {
             Log.w(tag, "⚠️ Could not find 'Use without an account' button")
             // Try pressing back button as fallback
             device.pressBack()
             Thread.sleep(500)
-            return false
+            false
         }
     } else {
         Log.d(tag, "ℹ️ Chrome first-time setup dialog not present")
-        return false
+        false
     }
 }
 
@@ -93,7 +93,7 @@ fun clearChromeCache(): Boolean {
 
     Log.d(tag, "🧹 Clearing Chrome cache to force PayPal login...")
 
-    try {
+    return try {
         // Clear Chrome app data
         val result = executeShellCommandWithOutput(
             instrumentation,
@@ -105,13 +105,13 @@ fun clearChromeCache(): Boolean {
         if (result.contains("Success", ignoreCase = true)) {
             Log.d(tag, "✅ Chrome cache cleared successfully")
             Thread.sleep(1000) // Wait for cache clear to complete
-            return true
+            true
         } else {
             Log.w(tag, "⚠️ Chrome cache clear may have failed: $result")
-            return false
+            false
         }
     } catch (e: Exception) {
         Log.e(tag, "❌ Error clearing Chrome cache: ${e.message}")
-        return false
+        false
     }
 }

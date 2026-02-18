@@ -3,16 +3,10 @@ package com.paypal.android
 import androidx.test.platform.app.InstrumentationRegistry
 
 /**
- * Test configuration for androidTest only.
- * These values are not accessible from main source code.
- *
  * Credentials are loaded from instrumentation test arguments which are populated from
  * environment variables in build.gradle:
  * - SANDBOX_ACCOUNT_USERNAME: PayPal sandbox account email
  * - SANDBOX_ACCOUNT_PASSWORD: PayPal sandbox account password
- *
- * In CI: Set these as GitHub secrets
- * Locally: Set these in your environment or they will use fallback test values
  */
 object TestConfig {
     private const val SANDBOX_ACCOUNT_USERNAME = "SANDBOX_ACCOUNT_USERNAME"
