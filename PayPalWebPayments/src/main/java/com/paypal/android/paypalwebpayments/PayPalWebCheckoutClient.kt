@@ -9,15 +9,18 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
+import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -119,10 +122,13 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
+        val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
+
         val launchUri = buildPayPalCheckoutUri(
             orderId = request.orderId,
             funding = request.fundingSource,
-            redirectUrl = request.appLinkUrl ?: redirectUriPayPalCheckout
+            returnUrl = returnToAppStrategy.returnUrl
         )
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -130,8 +136,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
-            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
-            appLinkUrl = request.appLinkUrl
+            returnToAppStrategy = returnToAppStrategy
         )
 
         when (result) {
@@ -169,6 +174,9 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.orderId
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
 
+        val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
+
         val launchUri = withContext(Dispatchers.IO) {
             // perform updateCCO and getLaunchUri in parallel
             val updateConfigDeferred = async {
@@ -186,7 +194,7 @@ class PayPalWebCheckoutClient internal constructor(
                     fallbackUri = buildPayPalCheckoutUri(
                         orderId = request.orderId,
                         funding = request.fundingSource,
-                        request.appLinkUrl ?: redirectUriPayPalCheckout
+                        returnUrl = returnToAppStrategy.returnUrl
                     )
                 )
             }
@@ -200,8 +208,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
-            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
-            appLinkUrl = request.appLinkUrl
+            returnToAppStrategy = returnToAppStrategy
         )
 
         when (result) {
@@ -262,6 +269,9 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = request.setupTokenId
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
+        val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
+
         val launchUri = buildPayPalVaultUri(request.setupTokenId)
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -269,8 +279,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
-            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
-            appLinkUrl = request.appLinkUrl
+            returnToAppStrategy = returnToAppStrategy
         )
 
         when (result) {
@@ -308,6 +317,9 @@ class PayPalWebCheckoutClient internal constructor(
         vaultSetupTokenId = request.setupTokenId
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
 
+        val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
+            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
+
         val launchUri = withContext(Dispatchers.IO) {
             getLaunchUri(
                 context = activity.applicationContext,
@@ -323,8 +335,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
-            returnUrlScheme = request.fallbackUrlScheme ?: urlScheme,
-            appLinkUrl = request.appLinkUrl
+            returnToAppStrategy = returnToAppStrategy
         )
 
         when (result) {
@@ -470,19 +481,16 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    private val redirectUriPayPalCheckout
-        get() = urlScheme?.let { "$urlScheme://x-callback-url/paypal-sdk/paypal-checkout" }
-
     private fun buildPayPalCheckoutUri(
         orderId: String?,
         funding: PayPalWebCheckoutFundingSource,
-        redirectUrl: String?
+        returnUrl: String?
     ): Uri {
         return baseUrl.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
-            .appendQueryParameter("redirect_uri", redirectUrl)
+            .appendQueryParameter("redirect_uri", returnUrl)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
             .appendQueryParameter("integration_artifact", UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT)
@@ -562,4 +570,16 @@ class PayPalWebCheckoutClient internal constructor(
             }
             return result
         }
+
+    /**
+     * Resolves the return to app strategy from request or falls back to urlScheme.
+     * if both are not available then throws error
+     */
+    private fun resolveReturnToAppStrategy(
+        requestStrategy: ReturnToAppStrategy?
+    ): ReturnToAppStrategy? {
+        return requestStrategy ?: urlScheme?.let {
+            ReturnToAppStrategy.CustomUrlScheme(urlScheme)
+        }
+    }
 }

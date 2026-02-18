@@ -26,13 +26,15 @@ class CreateOrderUseCase @Inject constructor(
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
         val paymentSource = when {
             request.appSwitchWhenEligible -> {
-                val deepLinkStrategy = request.deepLinkStrategy
-                val appUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+                val returnToAppStrategy = request.returnToAppStrategy.toReturnToAppStrategy()
+                val appUrl = ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy)
                 OrderPaymentSource(
                     paypal = PayPalPaymentSource(
                         experienceContext = PayPalOrderExperienceContext(
-                            returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(deepLinkStrategy),
-                            cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(deepLinkStrategy),
+                            returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(
+                                returnToAppStrategy
+                            ),
+                            cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(returnToAppStrategy),
                             nativeApp = NativeApp(appUrl = appUrl)
                         )
                     )

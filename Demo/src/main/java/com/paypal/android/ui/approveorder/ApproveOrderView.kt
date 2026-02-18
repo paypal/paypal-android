@@ -96,8 +96,8 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
         EnumOptionList(
             title = stringResource(id = R.string.deep_link_strategy_title),
             stringArrayResId = R.array.deep_link_strategy_options,
-            onSelectedOptionChange = { value -> viewModel.deepLinkStrategy = value },
-            selectedOption = uiState.deepLinkStrategy
+            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
+            selectedOption = uiState.returnToAppStrategyOption
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",

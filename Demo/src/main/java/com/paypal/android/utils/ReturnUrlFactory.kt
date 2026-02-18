@@ -1,33 +1,31 @@
 package com.paypal.android.utils
 
-import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
-import com.paypal.android.DemoConstants.APP_URL
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.corepayments.ReturnToAppStrategy
 
 object ReturnUrlFactory {
 
-    fun createGenericReturnUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
-        DeepLinkStrategy.APP_LINKS -> APP_URL
-        DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://"
+    fun createGenericReturnUrl(strategy: ReturnToAppStrategy) = when (strategy) {
+        is ReturnToAppStrategy.AppLink -> strategy.appLinkUrl
+        is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://"
     }
 
-    fun createCheckoutSuccessUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
-        DeepLinkStrategy.APP_LINKS -> "$APP_URL/success"
-        DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://success"
+    fun createCheckoutSuccessUrl(strategy: ReturnToAppStrategy) = when (strategy) {
+        is ReturnToAppStrategy.AppLink -> "${strategy.appLinkUrl}/success"
+        is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://success"
     }
 
-    fun createCheckoutCancelUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
-        DeepLinkStrategy.APP_LINKS -> "$APP_URL/cancel"
-        DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://cancel"
+    fun createCheckoutCancelUrl(strategy: ReturnToAppStrategy) = when (strategy) {
+        is ReturnToAppStrategy.AppLink -> "${strategy.appLinkUrl}/cancel"
+        is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://cancel"
     }
 
-    fun createVaultSuccessUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
-        DeepLinkStrategy.APP_LINKS -> "$APP_URL/vault/success"
-        DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://vault/success"
+    fun createVaultSuccessUrl(strategy: ReturnToAppStrategy) = when (strategy) {
+        is ReturnToAppStrategy.AppLink -> "${strategy.appLinkUrl}/vault/success"
+        is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://vault/success"
     }
 
-    fun createVaultCancelUrl(deepLinkStrategy: DeepLinkStrategy) = when (deepLinkStrategy) {
-        DeepLinkStrategy.APP_LINKS -> "$APP_URL/vault/success"
-        DeepLinkStrategy.CUSTOM_URL_SCHEME -> "$APP_CUSTOM_URL_SCHEME://vault/success"
+    fun createVaultCancelUrl(strategy: ReturnToAppStrategy) = when (strategy) {
+        is ReturnToAppStrategy.AppLink -> "${strategy.appLinkUrl}/vault/success"
+        is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://vault/success"
     }
 }
