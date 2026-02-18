@@ -452,3 +452,38 @@ fun dismissChromeFirstTimeSetup(timeout: Long = 5_000L): Boolean {
         return false
     }
 }
+
+/**
+ * Clears Chrome cache to force PayPal login
+ * This is useful for testing login flows by removing cached sessions
+ *
+ * @return true if cache was cleared successfully, false otherwise
+ */
+fun clearChromeCache(): Boolean {
+    val tag = "ChromeCacheUtils"
+    val instrumentation = InstrumentationRegistry.getInstrumentation()
+
+    Log.d(tag, "🧹 Clearing Chrome cache to force PayPal login...")
+
+    try {
+        // Clear Chrome app data
+        val result = executeShellCommandWithOutput(
+            instrumentation,
+            "pm clear com.android.chrome"
+        )
+
+        Log.d(tag, "Chrome cache clear result: $result")
+
+        if (result.contains("Success", ignoreCase = true)) {
+            Log.d(tag, "✅ Chrome cache cleared successfully")
+            Thread.sleep(1000) // Wait for cache clear to complete
+            return true
+        } else {
+            Log.w(tag, "⚠️ Chrome cache clear may have failed: $result")
+            return false
+        }
+    } catch (e: Exception) {
+        Log.e(tag, "❌ Error clearing Chrome cache: ${e.message}")
+        return false
+    }
+}

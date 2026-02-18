@@ -54,19 +54,18 @@ class PayPalWebCheckoutTest {
     }
 
     @Test
-    fun shouldNavigateToPayPalCheckoutScreen() {
-        robot
-            .navigateToPayPalCheckout()
-            .verifyOnCheckoutScreen()
-    }
-
-    @Test
     fun shouldCreateOrderWithIntentAndAppSwitch(
         @TestParameter("AUTHORIZE", "CAPTURE") intent: String,
         @TestParameter appSwitchEnabled: Boolean,
-        @TestParameter deepLinkStrategy: DeepLinkStrategy
+        @TestParameter deepLinkStrategy: DeepLinkStrategy,
+        @TestParameter forceLogin: Boolean
     ) {
         setupDeepLinkStrategy(deepLinkStrategy)
+
+        // Clear Chrome cache to force login if requested
+        if (forceLogin) {
+            clearChromeCache()
+        }
 
         robot
             .navigateToPayPalCheckout()
