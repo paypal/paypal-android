@@ -28,19 +28,8 @@ class PayPalWebPageRobot {
     companion object {
         private const val TAG = "PayPalWebPageRobot"
 
-        // Timeout constants
-        private const val WEB_TIMEOUT_MS = 30_000L
-        private const val LOGIN_FLOW_TIMEOUT_MS = 5_000L
-        private const val NAVIGATION_TIMEOUT_MS = 10_000L
-
-        // Delay constants
-        private const val PAGE_LOAD_DELAY_MS = 2_000L
-        private const val POST_EMAIL_DELAY_MS = 3_000L
-        private const val MODAL_APPEAR_DELAY_MS = 2_000L
-        private const val INPUT_CLEAR_DELAY_MS = 500L
-        private const val INPUT_REGISTER_DELAY_MS = 1_000L
-        private const val BUTTON_CLICK_DELAY_MS = 2_000L
-        private const val LOGIN_PROCESS_DELAY_MS = 3_000L
+        private const val TIMEOUT_5000_MS = 5_000L
+        private const val DELAY_2000_MS = 2_000L
 
         // UI Selectors - Email field
         private val EMAIL_FIELD_SELECTORS = listOf(
@@ -146,12 +135,12 @@ class PayPalWebPageRobot {
      * Completes the PayPal review order page by clicking the checkout button
      */
     fun completeReviewOrder() {
-        val reviewOrderButton = findElement(REVIEW_ORDER_SELECTORS, WEB_TIMEOUT_MS)
+        val reviewOrderButton = findElement(REVIEW_ORDER_SELECTORS)
 
         if (reviewOrderButton != null) {
             Log.d(TAG, "✅ Found PayPal checkout button in browser")
             reviewOrderButton.click()
-            Thread.sleep(BUTTON_CLICK_DELAY_MS)
+            Thread.sleep(DELAY_2000_MS)
         } else {
             Log.w(
                 TAG,
@@ -191,7 +180,7 @@ class PayPalWebPageRobot {
         }
 
         // Wait for next page after email (two-step login)
-        Thread.sleep(POST_EMAIL_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
 
         // Check if on one-time code page
         if (isOnOneTimeCodePage()) {
@@ -217,7 +206,7 @@ class PayPalWebPageRobot {
         }
 
         Log.d(TAG, "✅ Clicked 'Try another way'")
-        Thread.sleep(MODAL_APPEAR_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
 
         if (clickUsePasswordInstead()) {
             Log.d(TAG, "✅ Clicked 'Use password instead' button")
@@ -231,7 +220,7 @@ class PayPalWebPageRobot {
     // ========== Page Detection Methods ==========
 
     private fun isOnReviewOrderPage(): Boolean {
-        val element = findElement(REVIEW_ORDER_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
+        val element = findElement(REVIEW_ORDER_SELECTORS)
         val isOnPage = element != null
         if (isOnPage) {
             Log.d(TAG, "✅ Already on review order page - user is logged in")
@@ -240,7 +229,7 @@ class PayPalWebPageRobot {
     }
 
     private fun isOnLoginPage(): Boolean {
-        val emailField = findElement(EMAIL_FIELD_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
+        val emailField = findElement(EMAIL_FIELD_SELECTORS)
         val isOnPage = emailField != null
         if (isOnPage) {
             Log.d(TAG, "✅ On login page - email field found")
@@ -250,7 +239,7 @@ class PayPalWebPageRobot {
 
     private fun isOnOneTimeCodePage(): Boolean {
         Log.d(TAG, "🔍 Checking if on one-time code page...")
-        val element = findElement(ONE_TIME_CODE_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
+        val element = findElement(ONE_TIME_CODE_SELECTORS)
         val isOnPage = element != null
         if (isOnPage) {
             Log.d(TAG, "✅ Detected one-time code page")
@@ -261,7 +250,7 @@ class PayPalWebPageRobot {
     }
 
     private fun isOnPasswordPage(): Boolean {
-        val passwordField = findElement(PASSWORD_FIELD_SELECTORS, LOGIN_FLOW_TIMEOUT_MS)
+        val passwordField = findElement(PASSWORD_FIELD_SELECTORS)
         val isOnPage = passwordField != null
         if (isOnPage) {
             Log.d(TAG, "✅ On password page")
@@ -273,8 +262,7 @@ class PayPalWebPageRobot {
 
     private fun enterEmail(email: String): Boolean {
         val emailField = findElement(
-            EMAIL_FIELD_SELECTORS + By.clazz("android.widget.EditText"),
-            WEB_TIMEOUT_MS
+            EMAIL_FIELD_SELECTORS + By.clazz("android.widget.EditText")
         )
 
         if (emailField == null) {
@@ -298,8 +286,7 @@ class PayPalWebPageRobot {
 
     private fun enterPassword(password: String): Boolean {
         val passwordField = findElement(
-            PASSWORD_FIELD_SELECTORS + By.clazz("android.widget.EditText"),
-            WEB_TIMEOUT_MS
+            PASSWORD_FIELD_SELECTORS + By.clazz("android.widget.EditText")
         )
 
         if (passwordField == null) {
@@ -327,7 +314,7 @@ class PayPalWebPageRobot {
 
         nextButton.click()
         Log.d(TAG, "✅ Clicked Next button")
-        Thread.sleep(BUTTON_CLICK_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
         return true
     }
 
@@ -341,43 +328,43 @@ class PayPalWebPageRobot {
 
         loginButton.click()
         Log.d(TAG, "✅ Clicked Login button")
-        Thread.sleep(LOGIN_PROCESS_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
         return true
     }
 
     private fun clickTryAnotherWay(): Boolean {
         Log.d(TAG, "🔍 Looking for 'Try another way' button...")
-        val button = findElement(TRY_ANOTHER_WAY_SELECTORS, NAVIGATION_TIMEOUT_MS)
+        val button = findElement(TRY_ANOTHER_WAY_SELECTORS)
 
         if (button == null) {
             Log.w(
                 TAG,
-                "❌ 'Try another way' button not found after waiting ${NAVIGATION_TIMEOUT_MS}ms"
+                "❌ 'Try another way' button not found after waiting ${TIMEOUT_5000_MS}ms"
             )
             return false
         }
 
         Log.d(TAG, "✅ Found 'Try another way' button, clicking it")
         button.click()
-        Thread.sleep(BUTTON_CLICK_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
         return true
     }
 
     private fun clickUsePasswordInstead(): Boolean {
         Log.d(TAG, "🔍 Looking for 'Use password instead' button...")
-        val button = findElement(USE_PASSWORD_SELECTORS, NAVIGATION_TIMEOUT_MS)
+        val button = findElement(USE_PASSWORD_SELECTORS)
 
         if (button == null) {
             Log.w(
                 TAG,
-                "❌ 'Use password instead' button not found after waiting ${NAVIGATION_TIMEOUT_MS}ms"
+                "❌ 'Use password instead' button not found after waiting ${TIMEOUT_5000_MS}ms"
             )
             return false
         }
 
         Log.d(TAG, "✅ Found 'Use password instead' button, clicking it")
         button.click()
-        Thread.sleep(BUTTON_CLICK_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
         return true
     }
 
@@ -387,9 +374,9 @@ class PayPalWebPageRobot {
      * Finds an element using multiple selectors with a timeout.
      * Tries each selector in order until one is found.
      */
-    private fun findElement(selectors: List<BySelector>, timeout: Long): UiObject2? {
+    private fun findElement(selectors: List<BySelector>): UiObject2? {
         for (selector in selectors) {
-            val element = device.wait(Until.findObject(selector), timeout)
+            val element = device.wait(Until.findObject(selector), TIMEOUT_5000_MS)
             if (element != null) {
                 return element
             }
@@ -420,15 +407,15 @@ class PayPalWebPageRobot {
             Log.d(TAG, "📧 $fieldName field pre-filled with: $currentText, clearing and re-entering")
         }
         field.clear()
-        Thread.sleep(INPUT_CLEAR_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
         field.text = text
-        Thread.sleep(INPUT_REGISTER_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
     }
 
     /**
      * Waits for initial page load
      */
     private fun waitForPageLoad() {
-        Thread.sleep(PAGE_LOAD_DELAY_MS)
+        Thread.sleep(DELAY_2000_MS)
     }
 }
