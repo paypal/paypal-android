@@ -13,6 +13,28 @@ jobs:
     name: Create Release PR
     runs-on: ubuntu-latest
     steps:
+      - name: Validate Version Name
+        env:
+          VERSION_INPUT: ${{ github.event.inputs.versionName }}
+        run: |
+          # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string                                                                                    
+          SEMVER_REGEX='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+
+          # Ref: https://stackoverflow.com/a/17368090
+          MAX_VERSION_INPUT_SIZE=255
+          echo "Validating length of version name is less than ${MAX_VERSION_INPUT_SIZE} characters..."                                                                                                     
+          if [ ${#VERSION_INPUT} -gt $MAX_VERSION_INPUT_SIZE ]; then
+            echo "Version name "${VERSION_INPUT}" too long."
+            exit 1
+          fi
+
+          # Ref: https://github.com/orgs/community/discussions/48373#discussioncomment-7543209                                                                                                 
+          echo "Validating version name to make sure it adheres to semantic versioning..."                                                                                                     
+          if ! echo "$VERSION_INPUT" | grep -P "${SEMVER_REGEX}"; then
+            echo "Version name "${VERSION_INPUT}" invalid."
+            exit 2
+          fi
+
       - name: Checkout Repository
         uses: actions/checkout@v5
         with:
@@ -35,18 +57,18 @@ jobs:
           git reset --hard develop
 
           # Update version in build.gradle
-          ./gradlew -PversionParam=${{ github.event.inputs.versionName }} changeReleaseVersion
+          ./gradlew -PversionParam="${{ github.event.inputs.versionName }}" changeReleaseVersion
           
           # Update CHANGELOG with the version and date
           DATE=$(date +%Y-%m-%d)
-          ./gradlew -PversionParam=${{ github.event.inputs.versionName }} updateCHANGELOGVersion
+          ./gradlew -PversionParam="${{ github.event.inputs.versionName }}" updateCHANGELOGVersion
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Prepare release ${{ github.event.inputs.versionName }}"
-          branch: release/${{ github.event.inputs.versionName }}
+          branch: "release/${{ github.event.inputs.versionName }}"
           delete-branch: true
           title: "Release ${{ github.event.inputs.versionName }}"
           body: |
