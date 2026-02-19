@@ -85,3 +85,6 @@ paypal.properties
 
 # vim
 *.swp
+
+# docs
+docs/
