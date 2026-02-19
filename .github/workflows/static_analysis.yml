@@ -81,7 +81,7 @@ jobs:
       - name: Assemble Release AAR on Current Branch
         run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Current Branch Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: current-aar
           path: |

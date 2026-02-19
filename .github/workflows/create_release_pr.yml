@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate Version Name
-        env: 
+        env:
           VERSION_INPUT: ${{ github.event.inputs.versionName }}
         run: |
           # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string                                                                                    
@@ -51,33 +51,37 @@ jobs:
         uses: ./.github/actions/set_github_user
 
       - name: Update Version Files
+        env:
+          VERSION_INPUT: ${{ github.event.inputs.versionName }}
         run: |
           # Ref: https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#keep-a-branch-up-to-date-with-another
           git fetch origin develop:develop
           git reset --hard develop
 
           # Update version in build.gradle
-          ./gradlew -PversionParam="${{ github.event.inputs.versionName }}" changeReleaseVersion
+          ./gradlew -PversionParam="${VERSION_INPUT}" changeReleaseVersion
           
           # Update CHANGELOG with the version and date
           DATE=$(date +%Y-%m-%d)
-          ./gradlew -PversionParam="${{ github.event.inputs.versionName }}" updateCHANGELOGVersion
+          ./gradlew -PversionParam="${VERSION_INPUT}" updateCHANGELOGVersion
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
+        env:
+          VERSION_INPUT: ${{ github.event.inputs.versionName }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Prepare release ${{ github.event.inputs.versionName }}"
-          branch: "release/${{ github.event.inputs.versionName }}"
+          commit-message: "Prepare release ${VERSION_INPUT}"
+          branch: "release/${VERSION_INPUT}"
           delete-branch: true
-          title: "Release ${{ github.event.inputs.versionName }}"
+          title: "Release ${VERSION_INPUT}"
           body: |
-            ## Release PR for version ${{ github.event.inputs.versionName }}
+            ## Release PR for version ${VERSION_INPUT}
             
-            This PR prepares the codebase for releasing version ${{ github.event.inputs.versionName }}.
+            This PR prepares the codebase for releasing version ${VERSION_INPUT}
             
             ### Changes:
-            - Updated version in build.gradle to ${{ github.event.inputs.versionName }}
+            - Updated version in build.gradle to ${VERSION_INPUT}
             - Updated CHANGELOG.md with release date
             
             Once this PR is merged, the [Release On Merge To Main] workflow will automatically publish the SDK to Maven Central.
