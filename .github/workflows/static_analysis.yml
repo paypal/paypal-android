@@ -95,7 +95,7 @@ jobs:
       - name: Install Diffuse
         run: brew install JakeWharton/repo/diffuse
       - name: Download Workflow Artifacts 
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
