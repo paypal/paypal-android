@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Validate Version Name
         env:
-          VERSION_INPUT: ${{ github.event.inputs.versionName }}
+          VERSION_NAME: ${{ github.event.inputs.versionName }}
         run: |
           # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string                                                                                    
           SEMVER_REGEX='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
@@ -23,17 +23,21 @@ jobs:
           # Ref: https://stackoverflow.com/a/17368090
           MAX_VERSION_INPUT_SIZE=255
           echo "Validating length of version name is less than ${MAX_VERSION_INPUT_SIZE} characters..."                                                                                                     
-          if [ ${#VERSION_INPUT} -gt $MAX_VERSION_INPUT_SIZE ]; then
-            echo "Version name "${VERSION_INPUT}" too long."
+          if [ ${#VERSION_NAME} -gt $MAX_VERSION_INPUT_SIZE ]; then
+            echo "Version name "${VERSION_NAME}" too long."
             exit 1
           fi
 
           # Ref: https://github.com/orgs/community/discussions/48373#discussioncomment-7543209                                                                                                 
           echo "Validating version name to make sure it adheres to semantic versioning..."                                                                                                     
-          if ! echo "$VERSION_INPUT" | grep -P "${SEMVER_REGEX}"; then
-            echo "Version name "${VERSION_INPUT}" invalid."
+          if ! echo "$VERSION_NAME" | grep -P "${SEMVER_REGEX}"; then
+            echo "Version name "${VERSION_NAME}" invalid."
             exit 2
           fi
+
+          # append validated version input to action runner environment
+          # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#example-of-writing-an-environment-variable-to-github_env
+          echo "VALIDATED_VERSION_NAME=${VERSION_NAME}" >> "$GITHUB_ENV"
 
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -51,37 +55,33 @@ jobs:
         uses: ./.github/actions/set_github_user
 
       - name: Update Version Files
-        env:
-          VERSION_INPUT: ${{ github.event.inputs.versionName }}
         run: |
           # Ref: https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#keep-a-branch-up-to-date-with-another
           git fetch origin develop:develop
           git reset --hard develop
 
           # Update version in build.gradle
-          ./gradlew -PversionParam="${VERSION_INPUT}" changeReleaseVersion
+          ./gradlew -PversionParam="${VALIDATED_VERSION_NAME}" changeReleaseVersion
           
           # Update CHANGELOG with the version and date
           DATE=$(date +%Y-%m-%d)
-          ./gradlew -PversionParam="${VERSION_INPUT}" updateCHANGELOGVersion
+          ./gradlew -PversionParam="${VALIDATED_VERSION_NAME}" updateCHANGELOGVersion
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
-        env:
-          VERSION_INPUT: ${{ github.event.inputs.versionName }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Prepare release ${{ env.VERSION_INPUT }}"
-          branch: "release/${{ env.VERSION_INPUT }}"
+          commit-message: "Prepare release ${{ env.VALIDATED_VERSION_NAME }}"
+          branch: "release/${{ env.VALIDATED_VERSION_NAME }}"
           delete-branch: true
-          title: "Release ${{ env.VERSION_INPUT }}"
+          title: "Release ${{ env.VALIDATED_VERSION_NAME }}"
           body: |
-            ## Release PR for version ${{ env.VERSION_INPUT }}
+            ## Release PR for version ${{ env.VALIDATED_VERSION_NAME }}
             
-            This PR prepares the codebase for releasing version ${{ env.VERSION_INPUT }}
+            This PR prepares the codebase for releasing version ${{ env.VALIDATED_VERSION_NAME }}
             
             ### Changes:
-            - Updated version in build.gradle to ${{ env.VERSION_INPUT }}
+            - Updated version in build.gradle to ${{ env.VALIDATED_VERSION_NAME }}
             - Updated CHANGELOG.md with release date
             
             Once this PR is merged, the [Release On Merge To Main] workflow will automatically publish the SDK to Maven Central.
