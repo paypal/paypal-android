@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## Unreleased
+## 123.456.789-alpha (2026-02-19)
 
 * Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch
   behavior
