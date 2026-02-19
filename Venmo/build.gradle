@@ -44,9 +44,12 @@ android {
 }
 
 dependencies {
+    api project(':CorePayments')
+
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.android.material
+    implementation libs.kotlinx.coroutinesAndroid
 
     testImplementation libs.junit
 
