@@ -71,17 +71,17 @@ jobs:
           VERSION_INPUT: ${{ github.event.inputs.versionName }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Prepare release ${VERSION_INPUT}"
-          branch: "release/${VERSION_INPUT}"
+          commit-message: "Prepare release ${{ env.VERSION_INPUT }}"
+          branch: "release/${{ env.VERSION_INPUT }}"
           delete-branch: true
-          title: "Release ${VERSION_INPUT}"
+          title: "Release ${{ env.VERSION_INPUT }}"
           body: |
-            ## Release PR for version ${VERSION_INPUT}
+            ## Release PR for version ${{ env.VERSION_INPUT }}
             
-            This PR prepares the codebase for releasing version ${VERSION_INPUT}
+            This PR prepares the codebase for releasing version ${{ env.VERSION_INPUT }}
             
             ### Changes:
-            - Updated version in build.gradle to ${VERSION_INPUT}
+            - Updated version in build.gradle to ${{ env.VERSION_INPUT }}
             - Updated CHANGELOG.md with release date
             
             Once this PR is merged, the [Release On Merge To Main] workflow will automatically publish the SDK to Maven Central.
