@@ -92,6 +92,12 @@ private fun Step_CreateSetupToken(
             onSelectedOptionChange = { value -> viewModel.scaOption = value },
             selectedOption = uiState.scaOption
         )
+        EnumOptionList(
+            title = stringResource(id = R.string.deep_link_strategy_title),
+            stringArrayResId = R.array.deep_link_strategy_options,
+            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
+            selectedOption = uiState.returnToAppStrategy
+        )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
             successTitle = "SETUP TOKEN CREATED",

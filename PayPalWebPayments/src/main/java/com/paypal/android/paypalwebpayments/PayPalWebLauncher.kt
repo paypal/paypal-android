@@ -7,6 +7,7 @@ import android.net.Uri
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CaptureDeepLinkResult
 import com.paypal.android.corepayments.DeepLink
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
@@ -35,15 +36,14 @@ internal class PayPalWebLauncher(
         uri: Uri,
         token: String,
         tokenType: TokenType,
-        returnUrlScheme: String? = null,
-        appLinkUrl: String? = null
+        returnToAppStrategy: ReturnToAppStrategy,
     ): PayPalPresentAuthChallengeResult {
         val metadata = getMetadata(token, tokenType)
         val options = BrowserSwitchOptions(
             targetUri = uri,
             requestCode = getRequestCode(tokenType),
-            returnUrlScheme = returnUrlScheme,
-            appLinkUrl = appLinkUrl,
+            returnUrlScheme = (returnToAppStrategy as? ReturnToAppStrategy.CustomUrlScheme)?.urlScheme,
+            appLinkUrl = (returnToAppStrategy as? ReturnToAppStrategy.AppLink)?.appLinkUrl,
             metadata = metadata
         )
         return launchBrowserSwitch(activity, options)

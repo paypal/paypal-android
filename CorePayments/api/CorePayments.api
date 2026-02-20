@@ -105,6 +105,31 @@ public final class com/paypal/android/corepayments/PayPalSDKError : java/lang/Ex
 	public final fun getErrorDescription ()Ljava/lang/String;
 }
 
+public abstract class com/paypal/android/corepayments/ReturnToAppStrategy {
+}
+
+public final class com/paypal/android/corepayments/ReturnToAppStrategy$AppLink : com/paypal/android/corepayments/ReturnToAppStrategy {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/ReturnToAppStrategy$AppLink;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ReturnToAppStrategy$AppLink;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ReturnToAppStrategy$AppLink;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppLinkUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/ReturnToAppStrategy$CustomUrlScheme : com/paypal/android/corepayments/ReturnToAppStrategy {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/ReturnToAppStrategy$CustomUrlScheme;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ReturnToAppStrategy$CustomUrlScheme;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ReturnToAppStrategy$CustomUrlScheme;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrlScheme ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/paypal/android/corepayments/UpdateClientConfigAPI$Defaults {
 	public static final field INSTANCE Lcom/paypal/android/corepayments/UpdateClientConfigAPI$Defaults;
 	public static final field INTEGRATION_ARTIFACT Ljava/lang/String;

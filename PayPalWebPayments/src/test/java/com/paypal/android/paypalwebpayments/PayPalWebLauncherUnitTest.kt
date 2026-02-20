@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes.PAYPAL_VAULT
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
@@ -54,7 +55,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
 
         val browserSwitchOptions = slot.captured
@@ -80,7 +81,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://www.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
 
         val browserSwitchOptions = slot.captured
@@ -106,7 +107,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://www.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
 
         val browserSwitchOptions = slot.captured
@@ -132,7 +133,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://www.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
 
         val browserSwitchOptions = slot.captured
@@ -158,7 +159,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
@@ -178,7 +179,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://sandbox.paypal.com/agreements/approve"),
             "fake-setup-token",
             TokenType.VAULT_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
 
         val browserSwitchOptions = slot.captured
@@ -204,7 +205,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://paypal.com/agreements/approve"),
             "fake-setup-token",
             TokenType.VAULT_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
 
         val browserSwitchOptions = slot.captured
@@ -230,7 +231,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://www.sandbox.paypal.com/checkoutnow"),
             "fake-order-id",
             TokenType.ORDER_ID,
-            "com.example.app"
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
         )
                 as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
@@ -416,7 +417,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://paypal.com/app-switch"),
             "order-123",
             TokenType.ORDER_ID,
-            "custom_url_scheme"
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
         )
 
         val browserSwitchOptions = slot.captured
@@ -442,7 +443,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://paypal.com/vault-switch"),
             "setup-456",
             TokenType.VAULT_ID,
-            "custom_url_scheme"
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
         )
 
         val browserSwitchOptions = slot.captured
@@ -469,14 +470,14 @@ class PayPalWebLauncherUnitTest {
                 Uri.parse("https://test.com"),
                 "token-123",
                 TokenType.ORDER_ID,
-                "custom_url_scheme"
+                ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
             )
                     as PayPalPresentAuthChallengeResult.Failure
         assertEquals("error message from browser switch", result.error.errorDescription)
     }
 
     @Test
-    fun `launchWithUrl() with appLinkUrl sets appLinkUri and returnUrlScheme`() {
+    fun `launchWithUrl() with AppLink sets appLinkUri and returnUrlScheme`() {
         sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
@@ -490,14 +491,13 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://paypal.com/checkout"),
             "order-123",
             TokenType.ORDER_ID,
-            "custom_url_scheme",
-            appLinkUrl
+            ReturnToAppStrategy.AppLink(appLinkUrl)
         )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("order-123")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme") // Should use provided returnUrlScheme as fallback
+            get { returnUrlScheme }.isEqualTo(null)
             get { targetUri }.isEqualTo(Uri.parse("https://paypal.com/checkout"))
             get { requestCode }.isEqualTo(PAYPAL_CHECKOUT)
             get { this.appLinkUrl }.isEqualTo(appLinkUrl)
@@ -505,7 +505,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchWithUrl() with null appLinkUrl uses returnUrlScheme`() {
+    fun `launchWithUrl() with null AppLink uses returnUrlScheme`() {
         sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
@@ -518,8 +518,7 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://paypal.com/checkout"),
             "order-123",
             TokenType.ORDER_ID,
-            "custom_url_scheme",
-            null
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
         )
 
         val browserSwitchOptions = slot.captured
@@ -533,7 +532,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `launchWithUrl() with vault token and appLinkUrl works correctly`() {
+    fun `launchWithUrl() with vault token and AppLink works correctly`() {
         sut = PayPalWebLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
@@ -547,14 +546,13 @@ class PayPalWebLauncherUnitTest {
             Uri.parse("https://paypal.com/vault"),
             "setup-456",
             TokenType.VAULT_ID,
-            "custom_url_scheme",
-            appLinkUrl
+            ReturnToAppStrategy.AppLink(appLinkUrl)
         )
 
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("setup-456")
-            get { returnUrlScheme }.isEqualTo("custom_url_scheme") // Should use provided returnUrlScheme as fallback
+            get { returnUrlScheme }.isEqualTo(null)
             get { targetUri }.isEqualTo(Uri.parse("https://paypal.com/vault"))
             get { requestCode }.isEqualTo(PAYPAL_VAULT)
             get { this.appLinkUrl }.isEqualTo(appLinkUrl)
@@ -570,13 +568,13 @@ class PayPalWebLauncherUnitTest {
             browserSwitchClient.start(activity, capture(slot))
         } returns BrowserSwitchStartResult.Success
 
-        // Call with old signature (should default appLinkUrl to null)
+        // Call with CustomUrlScheme
         sut.launchWithUrl(
             activity,
             Uri.parse("https://paypal.com/checkout"),
             "order-123",
             TokenType.ORDER_ID,
-            "custom_url_scheme"
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme")
         )
 
         val browserSwitchOptions = slot.captured

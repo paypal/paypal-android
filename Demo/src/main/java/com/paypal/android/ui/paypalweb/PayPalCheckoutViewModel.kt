@@ -6,8 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
-import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -20,6 +18,7 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
@@ -62,6 +61,12 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var returnToAppStrategyOption: ReturnToAppStrategyOption
+        get() = _uiState.value.returnToAppStrategyOption
+        set(value) {
+            _uiState.update { it.copy(returnToAppStrategyOption = value) }
+        }
+
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
@@ -95,8 +100,9 @@ class PayPalCheckoutViewModel @Inject constructor(
             val orderRequest = _uiState.value.run {
                 OrderRequest(
                     intent = intentOption,
-                    shouldVault = false,
-                    appSwitchWhenEligible = appSwitchWhenEligible
+                    shouldVaultOnSuccess = false,
+                    appSwitchWhenEligible = appSwitchWhenEligible,
+                    returnToAppStrategy = returnToAppStrategyOption
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -119,8 +125,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            APP_URL,
-            APP_CUSTOM_URL_SCHEME
+            returnToAppStrategyOption.toReturnToAppStrategy()
         )
 
         paypalClient.start(activity, checkoutRequest) { startResult ->

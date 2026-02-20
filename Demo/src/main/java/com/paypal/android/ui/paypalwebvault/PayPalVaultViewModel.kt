@@ -5,8 +5,6 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.APP_CUSTOM_URL_SCHEME
-import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -14,6 +12,7 @@ import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
@@ -61,11 +60,19 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(appSwitchWhenEligible = value) }
         }
 
+    var returnToAppStrategy: ReturnToAppStrategyOption
+        get() = _uiState.value.returnToAppStrategy
+        set(value) {
+            _uiState.update { it.copy(returnToAppStrategy = value) }
+        }
+
     fun createSetupToken() {
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
-            createSetupTokenState =
-                createPayPalSetupTokenUseCase(appSwitchWhenEligible).mapToActionState()
+            createSetupTokenState = createPayPalSetupTokenUseCase(
+                appSwitchWhenEligible,
+                returnToAppStrategy.toReturnToAppStrategy()
+            ).mapToActionState()
         }
     }
 
@@ -74,6 +81,7 @@ class PayPalVaultViewModel @Inject constructor(
 
     fun vaultSetupToken(activity: ComponentActivity) {
         val setupTokenId = createdSetupToken?.id
+
         if (setupTokenId == null) {
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
@@ -81,8 +89,7 @@ class PayPalVaultViewModel @Inject constructor(
                 val request = PayPalWebVaultRequest(
                     setupTokenId,
                     appSwitchWhenEligible,
-                    APP_URL,
-                    APP_CUSTOM_URL_SCHEME
+                    returnToAppStrategy.toReturnToAppStrategy()
                 )
                 vaultSetupTokenWithRequest(activity, request)
             }

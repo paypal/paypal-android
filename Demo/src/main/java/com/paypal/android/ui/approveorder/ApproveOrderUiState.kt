@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.cardpayments.threedsecure.SCA
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 
@@ -17,7 +18,8 @@ data class ApproveOrderUiState(
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
+    val shouldVaultOption: StoreInVaultOption = StoreInVaultOption.NO,
+    val returnToAppStrategyOption: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success

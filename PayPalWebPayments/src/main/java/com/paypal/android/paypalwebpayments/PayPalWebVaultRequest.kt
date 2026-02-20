@@ -1,20 +1,20 @@
 package com.paypal.android.paypalwebpayments
 
+import com.paypal.android.corepayments.ReturnToAppStrategy
+
 /**
  * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
  *
  * @property [setupTokenId] ID for the setup token associated with the vault approval
- * @property [approveVaultHref] URL for the approval web page
  * @property [appSwitchWhenEligible] whether to switch to the PayPal app when eligible
- * @property [appLinkUrl] The app link URL to use for returning to app
- * @property [fallbackUrlScheme] The fallback custom URL scheme to use when app link is not configured properly
+ * @property [returnToAppStrategy] Strategy for returning to the app after checkout flow
+ * @property [approveVaultHref] URL for the approval web page
  */
 data class PayPalWebVaultRequest @Deprecated("Use PayPalWebVaultRequest(setupTokenId) instead.")
 constructor(
     val setupTokenId: String,
     val appSwitchWhenEligible: Boolean = false,
-    val appLinkUrl: String? = null,
-    val fallbackUrlScheme: String? = null,
+    val returnToAppStrategy: ReturnToAppStrategy? = null,
     @Deprecated("The approveVaultHref property is no longer required and will be ignored.")
     val approveVaultHref: String? = null // NEXT_MAJOR_VERSION: - Remove this property
 ) {
@@ -27,7 +27,6 @@ constructor(
     constructor(
         setupTokenId: String,
         appSwitchWhenEligible: Boolean = false,
-        appLinkUrl: String? = null,
-        fallbackUrlScheme: String? = null
-    ) : this(setupTokenId, appSwitchWhenEligible, appLinkUrl, fallbackUrlScheme, null)
+        returnToAppStrategy: ReturnToAppStrategy? = null
+    ) : this(setupTokenId, appSwitchWhenEligible, returnToAppStrategy, null)
 }

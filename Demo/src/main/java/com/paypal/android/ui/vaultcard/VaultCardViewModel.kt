@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.DemoConstants.APP_URL
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
@@ -20,9 +19,11 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.ui.approveorder.SetupTokenInfo
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
+import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,13 +90,19 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(scaOption = value) }
         }
 
+    var returnToAppStrategy: ReturnToAppStrategyOption
+        get() = _uiState.value.returnToAppStrategy
+        set(value) {
+            _uiState.update { it.copy(returnToAppStrategy = value) }
+        }
+
     fun prefillCard(testCard: TestCard) {
         val card = testCard.card
         _uiState.update { currentState ->
             currentState.copy(
                 cardNumber = card.number,
                 cardExpirationDate = card.run { "$expirationMonth$expirationYear" },
-                cardSecurityCode = card.securityCode
+                cardSecurityCode = card.securityCode,
             )
         }
     }
@@ -104,7 +111,12 @@ class VaultCardViewModel @Inject constructor(
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
             val sca = _uiState.value.scaOption
-            createSetupTokenState = createSetupTokenUseCase(sca).mapToActionState()
+            val returnToAppStrategy = _uiState.value.returnToAppStrategy
+            createSetupTokenState =
+                createSetupTokenUseCase(
+                    sca,
+                    returnToAppStrategy.toReturnToAppStrategy()
+                ).mapToActionState()
         }
     }
 
@@ -123,7 +135,9 @@ class VaultCardViewModel @Inject constructor(
     private fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
         val card = parseCard(_uiState.value)
-        val cardVaultRequest = CardVaultRequest(setupTokenId, card, APP_URL)
+        val returnUrl =
+            ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy.toReturnToAppStrategy())
+        val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
         cardClient.vault(cardVaultRequest) { result ->
             when (result) {
                 is CardVaultResult.Success -> {

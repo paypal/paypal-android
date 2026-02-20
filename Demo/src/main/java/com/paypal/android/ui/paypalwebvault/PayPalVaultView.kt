@@ -20,6 +20,7 @@ import com.paypal.android.R
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.BooleanOptionList
+import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
@@ -84,6 +85,12 @@ private fun Step1_CreateSetupToken(
             selectedOption = uiState.appSwitchWhenEligible,
             onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
             modifier = Modifier.fillMaxWidth()
+        )
+        EnumOptionList(
+            title = stringResource(id = R.string.return_to_app_strategy_title),
+            stringArrayResId = R.array.deep_link_strategy_options,
+            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
+            selectedOption = uiState.returnToAppStrategy
         )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
