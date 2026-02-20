@@ -1995,7 +1995,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `startAsync() sends analytics with appSwitchEnabled false when PayPal app not installed`() =
+    fun `startAsync() sends analytics with appSwitchEnabled true when PayPal app not installed`() =
         runTest {
             // Given
             every { deviceInspector.isPayPalInstalled } returns false
