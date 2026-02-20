@@ -48,7 +48,7 @@ jobs:
 
   diffuse:
     name: Diffuse AAR Analysis
-    runs-on: macOS-13
+    runs-on: macos-26
     steps:
       # Set up environment to assemble SDK
       - name: Set up Java
@@ -81,7 +81,7 @@ jobs:
       - name: Assemble Release AAR on Current Branch
         run: ./gradlew clean assembleRelease -x :Demo:assembleRelease # we exclude Demo module in assemble
       - name: Upload Current Branch Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: current-aar
           path: |
@@ -95,7 +95,7 @@ jobs:
       - name: Install Diffuse
         run: brew install JakeWharton/repo/diffuse
       - name: Download Workflow Artifacts 
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
