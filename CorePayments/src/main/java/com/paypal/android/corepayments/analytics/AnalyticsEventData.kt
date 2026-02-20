@@ -6,5 +6,6 @@ internal data class AnalyticsEventData(
     val eventName: String,
     val timestamp: Long,
     val orderId: String?,
-    val buttonType: String? = null
+    val buttonType: String? = null,
+    val appSwitchEnabled: Boolean
 )
