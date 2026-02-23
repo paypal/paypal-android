@@ -56,7 +56,8 @@ class TrackingEventsAPIUnitTest {
             eventName = "fake-event",
             timestamp = 123L,
             orderId = "fake-order-id",
-            buttonType = "paypal"
+            buttonType = "paypal",
+            appSwitchEnabled = false
         )
         sut.sendEvent(event, deviceData)
 

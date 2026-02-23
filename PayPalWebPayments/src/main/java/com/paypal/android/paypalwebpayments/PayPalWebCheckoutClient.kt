@@ -51,6 +51,7 @@ class PayPalWebCheckoutClient internal constructor(
     // for analytics tracking
     private var checkoutOrderId: String? = null
     private var vaultSetupTokenId: String? = null
+    private var appSwitchEnabled: Boolean = false
 
     /**
      * Create a new instance of [PayPalWebCheckoutClient].
@@ -120,7 +121,8 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = request.orderId
-        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+        appSwitchEnabled = false
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
@@ -143,7 +145,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    checkoutOrderId
+                    checkoutOrderId,
+                    appSwitchEnabled
                 )
 
                 // update auth state value in session store
@@ -153,7 +156,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Failure -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    checkoutOrderId
+                    checkoutOrderId,
+                    appSwitchEnabled
                 )
             }
         }
@@ -172,7 +176,8 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
 
         checkoutOrderId = request.orderId
-        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId)
+        appSwitchEnabled = request.appSwitchWhenEligible
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
@@ -215,7 +220,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    checkoutOrderId
+                    checkoutOrderId,
+                    appSwitchEnabled
                 )
 
                 // update auth state value in session store
@@ -225,7 +231,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Failure -> {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    checkoutOrderId
+                    checkoutOrderId,
+                    appSwitchEnabled
                 )
             }
         }
@@ -266,8 +273,9 @@ class PayPalWebCheckoutClient internal constructor(
         activity: Activity,
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
-        checkoutOrderId = request.setupTokenId
-        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+        vaultSetupTokenId = request.setupTokenId
+        appSwitchEnabled = request.appSwitchWhenEligible
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
@@ -286,7 +294,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    vaultSetupTokenId
+                    vaultSetupTokenId,
+                    appSwitchEnabled
                 )
 
                 // update auth state value in session store
@@ -296,7 +305,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Failure -> {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    vaultSetupTokenId
+                    vaultSetupTokenId,
+                    appSwitchEnabled
                 )
             }
         }
@@ -315,7 +325,8 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = request.setupTokenId
-        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId)
+        appSwitchEnabled = request.appSwitchWhenEligible
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
@@ -342,7 +353,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Success -> {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    vaultSetupTokenId
+                    vaultSetupTokenId,
+                    appSwitchEnabled
                 )
 
                 // update auth state value in session store
@@ -352,7 +364,8 @@ class PayPalWebCheckoutClient internal constructor(
             is PayPalPresentAuthChallengeResult.Failure -> {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    vaultSetupTokenId
+                    vaultSetupTokenId,
+                    appSwitchEnabled
                 )
             }
         }
@@ -397,13 +410,13 @@ class PayPalWebCheckoutClient internal constructor(
         val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success ->
-                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId, appSwitchEnabled)
 
             is PayPalWebCheckoutFinishStartResult.Canceled ->
-                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId, appSwitchEnabled)
 
             is PayPalWebCheckoutFinishStartResult.Failure ->
-                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId, appSwitchEnabled)
 
             PayPalWebCheckoutFinishStartResult.NoResult -> {
                 // no analytics tracking required at the moment
@@ -425,17 +438,29 @@ class PayPalWebCheckoutClient internal constructor(
             val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
             when (result) {
                 is PayPalWebCheckoutFinishStartResult.Success -> {
-                    analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId)
+                    analytics.notify(
+                        CheckoutEvent.SUCCEEDED,
+                        checkoutOrderId,
+                        appSwitchEnabled
+                    )
                     sessionStore.clear()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                    analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId)
+                    analytics.notify(
+                        CheckoutEvent.CANCELED,
+                        checkoutOrderId,
+                        appSwitchEnabled
+                    )
                     sessionStore.clear()
                 }
 
                 is PayPalWebCheckoutFinishStartResult.Failure -> {
-                    analytics.notify(CheckoutEvent.FAILED, checkoutOrderId)
+                    analytics.notify(
+                        CheckoutEvent.FAILED,
+                        checkoutOrderId,
+                        appSwitchEnabled
+                    )
                     sessionStore.clear()
                 }
 
@@ -466,13 +491,13 @@ class PayPalWebCheckoutClient internal constructor(
         // TODO: see if we can get setup token id from somewhere for tracking
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
-                analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
+                analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId, appSwitchEnabled)
 
             is PayPalWebCheckoutFinishVaultResult.Failure ->
-                analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
+                analytics.notify(VaultEvent.FAILED, vaultSetupTokenId, appSwitchEnabled)
 
             PayPalWebCheckoutFinishVaultResult.Canceled ->
-                analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
+                analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId, appSwitchEnabled)
 
             PayPalWebCheckoutFinishVaultResult.NoResult -> {
                 // no analytics tracking required at the moment
@@ -530,10 +555,18 @@ class PayPalWebCheckoutClient internal constructor(
                 paypalNativeAppInstalled = true
             )
             when (patchCcoResult) {
-                is APIResult.Success -> patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
-                is APIResult.Failure -> fallbackUri
+                is APIResult.Success -> {
+                    appSwitchEnabled = patchCcoResult.data.appSwitchEligible
+                    patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
+                }
+
+                is APIResult.Failure -> {
+                    appSwitchEnabled = false
+                    fallbackUri
+                }
             }
         } else {
+            appSwitchEnabled = false
             fallbackUri
         }
     }
@@ -550,17 +583,17 @@ class PayPalWebCheckoutClient internal constructor(
             val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
             when (result) {
                 is PayPalWebCheckoutFinishVaultResult.Success -> {
-                    analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId)
+                    analytics.notify(VaultEvent.SUCCEEDED, vaultSetupTokenId, appSwitchEnabled)
                     sessionStore.clear()
                 }
 
                 is PayPalWebCheckoutFinishVaultResult.Failure -> {
-                    analytics.notify(VaultEvent.FAILED, vaultSetupTokenId)
+                    analytics.notify(VaultEvent.FAILED, vaultSetupTokenId, appSwitchEnabled)
                     sessionStore.clear()
                 }
 
                 PayPalWebCheckoutFinishVaultResult.Canceled -> {
-                    analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId)
+                    analytics.notify(VaultEvent.CANCELED, vaultSetupTokenId, appSwitchEnabled)
                     sessionStore.clear()
                 }
 
