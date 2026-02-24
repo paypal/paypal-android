@@ -2,9 +2,9 @@ package com.paypal.android
 
 import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.paypal.android.robots.DeviceSettingsRobot
 import com.paypal.android.robots.PayPalCheckoutRobot
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import org.junit.After
@@ -22,29 +22,12 @@ class PayPalWebCheckoutTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val robot by lazy { PayPalCheckoutRobot(composeTestRule) }
-
-    private fun setupReturnToAppStrategyOption(strategy: ReturnToAppStrategyOption) {
-        if (strategy == ReturnToAppStrategyOption.APP_LINKS) {
-            val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val context = instrumentation.targetContext
-            val packageName = context.packageName
-
-            // Extract the actual app package name (remove .test suffix for the main app)
-            val appPackageName = packageName.removeSuffix(".test")
-
-            setupAppLinks(appPackageName)
-        }
-    }
+    private val checkoutRobot by lazy { PayPalCheckoutRobot(composeTestRule) }
+    private val deviceSettingsRobot = DeviceSettingsRobot()
 
     @After
     fun tearDown() {
-        // Reset app links after each test to ensure test isolation
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val context = instrumentation.targetContext
-        val packageName = context.packageName.removeSuffix(".test")
-
-        resetAppLinks(packageName)
+        deviceSettingsRobot.resetAppLinksToDefaults()
     }
 
     @Test
@@ -61,22 +44,17 @@ class PayPalWebCheckoutTest {
         ) returnToAppStrategy: ReturnToAppStrategyOption,
         @TestParameter forceLogin: Boolean
     ) {
-        Log.d(TAG, "════════════════════════════════════════════════════════════════")
-        Log.d(TAG, "🚀 Starting test with parameters:")
-        Log.d(TAG, "   Intent: $intent")
-        Log.d(TAG, "   App Switch Enabled: $appSwitchEnabled")
-        Log.d(TAG, "   Return to App Strategy: $returnToAppStrategy")
-        Log.d(TAG, "   Force Login: $forceLogin")
-        Log.d(TAG, "════════════════════════════════════════════════════════════════")
 
-        setupReturnToAppStrategyOption(returnToAppStrategy)
-
-        // Clear Chrome cache to force login if requested
-        if (forceLogin) {
-            clearChromeCache()
+        if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
+            deviceSettingsRobot.setupAppLinksForCurrentApp()
         }
 
-        robot
+        // Clear browser cache to force login if requested
+        if (forceLogin) {
+            deviceSettingsRobot.clearBrowserCache()
+        }
+
+        checkoutRobot
             .navigateToPayPalCheckout()
             .createOrder(
                 appSwitchEnabled = appSwitchEnabled,

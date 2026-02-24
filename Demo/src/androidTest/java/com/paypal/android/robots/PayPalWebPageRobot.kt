@@ -7,6 +7,7 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import com.paypal.android.test.TestConstants
 
 /**
  * Robot for interacting with PayPal web pages (login, checkout) in browser/Chrome Custom Tab.
@@ -27,9 +28,6 @@ class PayPalWebPageRobot {
 
     companion object {
         private const val TAG = "PayPalWebPageRobot"
-
-        private const val TIMEOUT_5000_MS = 5_000L
-        private const val DELAY_2000_MS = 2_000L
 
         // UI Selectors - Email field
         private val EMAIL_FIELD_SELECTORS = listOf(
@@ -140,7 +138,7 @@ class PayPalWebPageRobot {
         if (reviewOrderButton != null) {
             Log.d(TAG, "✅ Found PayPal checkout button in browser")
             reviewOrderButton.click()
-            Thread.sleep(DELAY_2000_MS)
+            Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         } else {
             Log.w(
                 TAG,
@@ -173,7 +171,7 @@ class PayPalWebPageRobot {
         }
 
         // Wait for next page after email (two-step login)
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
 
         // Check if on one-time code page
         return if (isOnOneTimeCodePage()) {
@@ -198,7 +196,7 @@ class PayPalWebPageRobot {
         }
 
         Log.d(TAG, "✅ Clicked 'Try another way'")
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
 
         if (clickUsePasswordInstead()) {
             Log.d(TAG, "✅ Clicked 'Use password instead' button")
@@ -306,7 +304,7 @@ class PayPalWebPageRobot {
 
         nextButton.click()
         Log.d(TAG, "✅ Clicked Next button")
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -320,7 +318,7 @@ class PayPalWebPageRobot {
 
         loginButton.click()
         Log.d(TAG, "✅ Clicked Login button")
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -331,14 +329,14 @@ class PayPalWebPageRobot {
         if (button == null) {
             Log.w(
                 TAG,
-                "❌ 'Try another way' button not found after waiting ${TIMEOUT_5000_MS}ms"
+                "❌ 'Try another way' button not found after waiting ${TestConstants.TIMEOUT_SHORT_MS}ms"
             )
             return false
         }
 
         Log.d(TAG, "✅ Found 'Try another way' button, clicking it")
         button.click()
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -349,14 +347,14 @@ class PayPalWebPageRobot {
         if (button == null) {
             Log.w(
                 TAG,
-                "❌ 'Use password instead' button not found after waiting ${TIMEOUT_5000_MS}ms"
+                "❌ 'Use password instead' button not found after waiting ${TestConstants.TIMEOUT_SHORT_MS}ms"
             )
             return false
         }
 
         Log.d(TAG, "✅ Found 'Use password instead' button, clicking it")
         button.click()
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -368,7 +366,7 @@ class PayPalWebPageRobot {
      */
     private fun findElement(selectors: List<BySelector>): UiObject2? {
         for (selector in selectors) {
-            val element = device.wait(Until.findObject(selector), TIMEOUT_5000_MS)
+            val element = device.wait(Until.findObject(selector), TestConstants.TIMEOUT_SHORT_MS)
             if (element != null) {
                 return element
             }
@@ -399,15 +397,15 @@ class PayPalWebPageRobot {
             Log.d(TAG, "📧 $fieldName field pre-filled with: $currentText, clearing and re-entering")
         }
         field.clear()
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         field.text = text
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
     }
 
     /**
      * Waits for initial page load
      */
     private fun waitForPageLoad() {
-        Thread.sleep(DELAY_2000_MS)
+        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
     }
 }
