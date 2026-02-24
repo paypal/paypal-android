@@ -10,7 +10,7 @@ import com.paypal.android.executeShellCommandWithOutput
 class DeviceSettingsRobot {
 
     companion object {
-        private const val TAG = "DeviceRobot"
+        private const val TAG = "DeviceSettingsRobot"
     }
 
     private val chromeRobot = ChromeRobot()
@@ -33,8 +33,14 @@ class DeviceSettingsRobot {
         val context = instrumentation.targetContext
         val appPackageName = context.packageName.removeSuffix(".test")
 
-        Log.d(TAG, "🔄 Resetting device configuration to defaults...")
-        resetAppLinks(appPackageName)
+        Log.d(TAG, "🔄 Resetting app links to defaults...")
+
+        executeShellCommandWithOutput(
+            instrumentation,
+            "pm set-app-links --package $appPackageName 0 all"
+        )
+
+        Log.d(TAG, "Reset app links complete")
     }
 
     fun setupAppLinksForCurrentApp() {
@@ -58,25 +64,5 @@ class DeviceSettingsRobot {
             instrumentation,
             "pm set-app-links-user-selection --package $appPackageName true all"
         )
-
-        Log.d(TAG, "🔗 App links setup completed for package: $appPackageName")
-    }
-
-    /**
-     * Resets app links for the specified package
-     * Disables app links handling to ensure test isolation
-     *
-     * @param appPackageName The package name of the app to reset (without .test suffix)
-     */
-    fun resetAppLinks(appPackageName: String) {
-        val tag = "AppLinksUtils"
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-
-        Log.d(tag, "🧹 Resetting app links for package: $appPackageName")
-        val resetResult = executeShellCommandWithOutput(
-            instrumentation,
-            "pm set-app-links --package $appPackageName 0 all"
-        )
-        Log.d(tag, "App links reset result: $resetResult")
     }
 }

@@ -13,7 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-class PayPalWebCheckoutTest {
+class PayPalCheckoutTest {
 
     companion object {
         private const val TAG = "PayPalWebCheckoutTest"
