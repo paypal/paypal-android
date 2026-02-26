@@ -28,6 +28,7 @@ class VenmoClient(
     fun startVenmo(
         activity: ComponentActivity,
         orderId: String,
+        returnUrl: String,
         buyerCountry: String = "US",
         currency: String = "USD"
     ) {
@@ -80,7 +81,8 @@ class VenmoClient(
                 .appendQueryParameter("env", "sandbox")
                 .appendQueryParameter("facilitatorAccessToken", "")
                 .appendQueryParameter("fundingSource", "venmo")
-                .appendQueryParameter("orderId", orderId)
+                .appendQueryParameter("orderID", orderId)
+                .appendQueryParameter("pageUrl", returnUrl)
                 .build()
             activity.startActivity(Intent(Intent.ACTION_VIEW, appSwitchUri))
 

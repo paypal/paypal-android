@@ -12,6 +12,7 @@ import com.paypal.android.models.OrderRequest
 import com.paypal.android.uishared.enums.DeepLinkStrategy
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.utils.ReturnUrlFactory
 import com.paypal.android.venmo.VenmoClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -69,7 +70,9 @@ class PayWithVenmoViewModel @Inject constructor(
         if (orderId == null) {
             payWithVenmoState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            venmoClient.startVenmo(activity, orderId)
+            val deepLinkStrategy = DeepLinkStrategy.CUSTOM_URL_SCHEME
+            val returnUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
+            venmoClient.startVenmo(activity, orderId, returnUrl)
         }
     }
 }
