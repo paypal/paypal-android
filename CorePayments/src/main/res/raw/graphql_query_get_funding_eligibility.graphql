@@ -1,44 +1,14 @@
 query GetFundingEligibility(
-  $clientID: String!
-  $merchantID: [String]
-  $buyerCountry: CountryCodes
-  $currency: SupportedCountryCurrencies
-  $intent: FundingEligibilityIntent
-  $commit: Boolean
-  $vault: Boolean
-  $disableFunding: [SupportedPaymentMethodsType]
-  $disableCard: [SupportedCardsType]
+  $merchantID: [String],
+  $enableFunding: [SupportedPaymentMethodsType]
 ) {
-  fundingEligibility(
-    clientId: $clientID
-    buyerCountry: $buyerCountry
-    currency: $currency
-    intent: $intent
-    commit: $commit
-    vault: $vault
-    disableFunding: $disableFunding
-    disableCard: $disableCard
-    merchantId: $merchantID
-  ) {
-    card {
-      eligible
-      branded
+    fundingEligibility(
+        merchantId: $merchantID,
+        enableFunding: $enableFunding
+    ) {
+        venmo {
+            eligible
+            reasons
+        }
     }
-    credit {
-      eligible
-      reasons
-    }
-    venmo {
-      eligible
-      reasons
-    }
-    paypal {
-       eligible
-       reasons
-   }
-   paylater {
-   eligible
-   reasons
-   }
-}
 }

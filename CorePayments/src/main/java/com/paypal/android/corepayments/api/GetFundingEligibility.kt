@@ -39,21 +39,13 @@ class GetFundingEligibility internal constructor(
         currency: String? = null
     ): APIResult<FundingEligibility> {
         val graphQLRequest = createGraphQLRequest(
-            context = context,
-            clientId = clientId,
-            merchantId = merchantId,
-            buyerCountry = buyerCountry,
-            currency = currency
+            context = context
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
     }
 
     private suspend fun createGraphQLRequest(
-        context: Context,
-        clientId: String,
-        merchantId: List<String>?,
-        buyerCountry: String?,
-        currency: String?
+        context: Context
     ): GraphQLRequest<GetFundingEligibilityVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             context,
@@ -66,10 +58,8 @@ class GetFundingEligibility internal constructor(
         }
 
         val variables = GetFundingEligibilityVariables(
-            clientID = clientId,
-            merchantID = "V9YP27HFNG2LW",
-            buyerCountry = buyerCountry,
-            currency = currency
+            merchantID = listOf("V9YP27HFNG2LW"),
+            enableFunding = listOf("VENMO"),
         )
 
         return GraphQLRequest(
@@ -84,7 +74,6 @@ class GetFundingEligibility internal constructor(
 
         return fundingEligibilityData?.let {
             FundingEligibility(
-                cardEligible = it.card?.eligible ?: false,
                 venmoEligible = it.venmo?.eligible ?: false
             )
         }
