@@ -8,20 +8,57 @@ import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.UpdateClientConfigResult
+import com.paypal.android.corepayments.api.GetFundingEligibility
+import com.paypal.android.corepayments.model.APIResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class VenmoClient(
     private val ccoAPI: UpdateClientConfigAPI,
+    private val getFundingEligibility: GetFundingEligibility,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
 
-    constructor(context: Context, config: CoreConfig) : this(UpdateClientConfigAPI(context, config))
+    constructor(context: Context, config: CoreConfig) : this(
+        UpdateClientConfigAPI(context, config),
+        GetFundingEligibility(config)
+    )
 
-    fun startVenmo(activity: ComponentActivity, orderId: String) {
+    fun startVenmo(
+        activity: ComponentActivity,
+        orderId: String,
+        buyerCountry: String = "US",
+        currency: String = "USD"
+    ) {
         applicationScope.launch {
-            // we don't seem to need the result
+            // Check funding eligibility for Venmo
+            val eligibilityResult = getFundingEligibility(
+                context = activity,
+                clientId = activity.applicationContext.packageName,
+                buyerCountry = buyerCountry,
+                currency = currency
+            )
+
+            when (eligibilityResult) {
+                is APIResult.Success -> {
+                    val fundingEligibility = eligibilityResult.data
+                    if (!fundingEligibility.venmoEligible) {
+                        Log.d("venmo", "Venmo is not eligible for this transaction")
+                        return@launch
+                    }
+                }
+
+                is APIResult.Failure -> {
+                    Log.d(
+                        "venmo",
+                        "Failed to check funding eligibility: ${eligibilityResult.error}"
+                    )
+                    return@launch
+                }
+            }
+
+            // Venmo is eligible, proceed with CCO update
             val ccoUpdateResult = ccoAPI.updateClientConfig(tokenId = orderId, fundingSource = "venmo")
             when (ccoUpdateResult) {
                 UpdateClientConfigResult.Success -> {
