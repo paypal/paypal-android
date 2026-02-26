@@ -15,12 +15,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class VenmoClient(
+    private val coreConfig: CoreConfig,
     private val ccoAPI: UpdateClientConfigAPI,
     private val getFundingEligibility: GetFundingEligibility,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
 
     constructor(context: Context, config: CoreConfig) : this(
+        coreConfig = config,
         UpdateClientConfigAPI(context, config),
         GetFundingEligibility(config)
     )
@@ -36,7 +38,7 @@ class VenmoClient(
             // Check funding eligibility for Venmo
             val eligibilityResult = getFundingEligibility(
                 context = activity,
-                clientId = activity.applicationContext.packageName,
+                clientId = coreConfig.clientId,
                 buyerCountry = buyerCountry,
                 currency = currency
             )

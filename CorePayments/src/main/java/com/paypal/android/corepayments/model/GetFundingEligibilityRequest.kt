@@ -12,15 +12,8 @@ import kotlinx.serialization.Serializable
 @OptIn(InternalSerializationApi::class)
 @Serializable
 data class GetFundingEligibilityVariables(
-    val clientID: String,
-    val merchantID: String,
-    val buyerCountry: String? = null,
-    val currency: String? = null,
-    val intent: String? = null,
-    val commit: Boolean? = null,
-    val vault: Boolean? = null,
-    val disableFunding: List<String>? = null,
-    val disableCard: List<String>? = null
+    val merchantID: List<String>,
+    val enableFunding: List<String>
 )
 
 /**
@@ -37,16 +30,7 @@ data class GetFundingEligibilityResponse(
 @OptIn(InternalSerializationApi::class)
 @Serializable
 data class FundingEligibilityData(
-    val card: CardEligibilityData? = null,
     val venmo: VenmoEligibilityData? = null
-)
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@OptIn(InternalSerializationApi::class)
-@Serializable
-data class CardEligibilityData(
-    val eligible: Boolean = false,
-    val branded: Boolean? = null
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
