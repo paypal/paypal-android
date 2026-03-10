@@ -35,13 +35,14 @@ plugins {
     alias libs.plugins.android.application apply false
     alias libs.plugins.android.library apply false
     alias libs.plugins.dagger.hilt apply false
-    alias libs.plugins.detekt
     alias libs.plugins.gradlePlayPublisher apply false
     alias libs.plugins.kotlinAndroid apply false
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false
-    alias libs.plugins.nexus.publishPlugin
     alias libs.plugins.binaryCompatibilityValidator apply false
+    alias libs.plugins.detekt
+    alias libs.plugins.dokka
+    alias libs.plugins.nexus.publishPlugin
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo
@@ -65,13 +66,25 @@ nexusPublishing {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 dependencies {
     detektPlugins libs.detekt.formatting
     detektPlugins libs.detekt.rulesLibraries
+
+    // Ref: https://kotlinlang.org/docs/dokka-gradle.html#aggregate-documentation-output-in-multi-project-builds
+    dokka project(":CorePayments")
+    dokka project(":CardPayments")
+    dokka project(":FraudProtection")
+    dokka project(":PaymentButtons")
+    dokka project(":PayPalWebPayments")
+    dokkaPlugin libs.dokka.android
+}
+
+dokka {
+    dokkaPublications {
+        html {
+            outputDirectory.set(file('docs/'))
+        }
+    }
 }
 
 detekt {
