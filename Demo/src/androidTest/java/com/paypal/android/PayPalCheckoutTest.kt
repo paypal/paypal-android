@@ -42,16 +42,10 @@ class PayPalCheckoutTest {
             "CUSTOM_URL_SCHEME",
             "APP_LINKS"
         ) returnToAppStrategy: ReturnToAppStrategyOption,
-        @TestParameter forceLogin: Boolean
     ) {
 
         if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
             deviceSettingsRobot.setupAppLinksForCurrentApp()
-        }
-
-        // Clear browser cache to force login if requested
-        if (forceLogin) {
-            deviceSettingsRobot.clearBrowserCache()
         }
 
         checkoutRobot
