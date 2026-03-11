@@ -14,16 +14,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-class PayPalCheckoutTest {
+class PayPalVaultTest {
 
     companion object {
-        private const val TAG = "PayPalWebCheckoutTest"
+        private const val TAG = "PayPalVaultTest"
     }
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val checkoutRobot by lazy { PayPalCheckoutRobot(composeTestRule) }
+    private val robot by lazy { PayPalCheckoutRobot(composeTestRule) }
+
     private val deviceSettingsRobot = DeviceSettingsRobot()
 
     @Before
@@ -37,8 +38,7 @@ class PayPalCheckoutTest {
     }
 
     @Test
-    fun shouldCreateOrderWithIntentAndAppSwitch(
-        @TestParameter("AUTHORIZE", "CAPTURE") intent: String,
+    fun shouldVaultWith(
         @TestParameter appSwitchEnabled: Boolean,
         /*
           * Want to run CUSTOM_URL_SCHEME tests first to ensure app links are configured before they are executed
@@ -47,22 +47,20 @@ class PayPalCheckoutTest {
         @TestParameter(
             "CUSTOM_URL_SCHEME",
             "APP_LINKS"
-        ) returnToAppStrategy: ReturnToAppStrategyOption,
+        ) returnToAppStrategy: ReturnToAppStrategyOption
     ) {
-
         if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
             deviceSettingsRobot.setupAppLinksForCurrentApp()
         }
 
-        checkoutRobot
-            .navigateToPayPalCheckout()
-            .createOrder(
+        robot
+            .navigateToPayPalVault()
+            .vaultWithAppSwitch(
                 appSwitchEnabled = appSwitchEnabled,
-                intent = intent,
                 returnToAppStrategy = returnToAppStrategy
             )
-            .startCheckoutWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
-            .completeOrder()
+            .startVaultWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
+            .createPaymentToken()
 
         Log.d(TAG, "✅ Test completed successfully!")
     }

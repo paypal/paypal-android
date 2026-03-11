@@ -8,6 +8,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.paypal.android.test.TestConstants
+import com.paypal.android.test.TestConstants.TIMEOUT_LONG_MS
 
 /**
  * Robot for interacting with PayPal web pages (login, checkout) in browser/Chrome Custom Tab.
@@ -97,7 +98,8 @@ class PayPalWebPageRobot {
     fun performLogin(email: String, password: String): Boolean {
         Log.d(TAG, "🔐 Starting PayPal login flow")
 
-        waitForPageLoad()
+        // Wait for page to load and stabilize
+        device.waitForWindowUpdate(null, 1000L)
 
         // Determine which scenario we're in and handle accordingly
         val result = when {
@@ -138,13 +140,13 @@ class PayPalWebPageRobot {
         if (reviewOrderButton != null) {
             Log.d(TAG, "✅ Found PayPal checkout button in browser")
             reviewOrderButton.click()
-            Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         } else {
             Log.w(
                 TAG,
                 "⚠️ Could not find PayPal checkout button - may be in app switch or sandbox mode"
             )
         }
+        device.waitForWindowUpdate(null, TIMEOUT_LONG_MS)
     }
 
     // ========== Login Flow Orchestration ==========
@@ -170,9 +172,6 @@ class PayPalWebPageRobot {
             return true
         }
 
-        // Wait for next page after email (two-step login)
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
-
         // Check if on one-time code page
         return if (isOnOneTimeCodePage()) {
             handleOneTimeCodeNavigation()
@@ -196,7 +195,6 @@ class PayPalWebPageRobot {
         }
 
         Log.d(TAG, "✅ Clicked 'Try another way'")
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
 
         if (clickUsePasswordInstead()) {
             Log.d(TAG, "✅ Clicked 'Use password instead' button")
@@ -304,7 +302,6 @@ class PayPalWebPageRobot {
 
         nextButton.click()
         Log.d(TAG, "✅ Clicked Next button")
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -318,7 +315,6 @@ class PayPalWebPageRobot {
 
         loginButton.click()
         Log.d(TAG, "✅ Clicked Login button")
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -336,7 +332,6 @@ class PayPalWebPageRobot {
 
         Log.d(TAG, "✅ Found 'Try another way' button, clicking it")
         button.click()
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -354,7 +349,6 @@ class PayPalWebPageRobot {
 
         Log.d(TAG, "✅ Found 'Use password instead' button, clicking it")
         button.click()
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         return true
     }
 
@@ -397,15 +391,7 @@ class PayPalWebPageRobot {
             Log.d(TAG, "📧 $fieldName field pre-filled with: $currentText, clearing and re-entering")
         }
         field.clear()
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
         field.text = text
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
     }
 
-    /**
-     * Waits for initial page load
-     */
-    private fun waitForPageLoad() {
-        Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
-    }
 }
