@@ -19,7 +19,7 @@ import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
  * Provides API for testing PayPal checkout workflows
  */
 @OptIn(ExperimentalTestApi::class)
-class PayPalCheckoutRobot(
+class DemoRobot(
     private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>
 ) {
 
@@ -31,6 +31,17 @@ class PayPalCheckoutRobot(
 
     companion object {
         private const val TAG = "PayPalCheckoutRobot"
+    }
+
+    private fun waitForAppToReturn() {
+        Log.d(TAG, "⏳ Waiting for app to return from browser...")
+        val appReturned =
+            device.wait(Until.hasObject(By.pkg("com.paypal.android")), TIMEOUT_LONG_MS)
+        if (appReturned) {
+            Log.d(TAG, "✅ App returned from browser")
+        } else {
+            Log.w(TAG, "⚠️ Timeout waiting for app to return from browser")
+        }
     }
 
     fun navigateToPayPalCheckout() = apply {
@@ -130,21 +141,13 @@ class PayPalCheckoutRobot(
         }
 
         // Wait for web page to stabilize before interacting
-        Log.d(TAG, "⏳ Waiting for PayPal review page to load...")
         device.waitForWindowUpdate(null, TIMEOUT_LONG_MS)
 
         // Delegate to web page robot to complete review order
         webPageRobot.completeReviewOrder()
 
         // Wait for return to app and checkout completion
-        Log.d(TAG, "⏳ Waiting for app to return from browser...")
-        val appReturned =
-            device.wait(Until.hasObject(By.pkg("com.paypal.android")), TIMEOUT_LONG_MS)
-        if (appReturned) {
-            Log.d(TAG, "✅ App returned from browser")
-        } else {
-            Log.w(TAG, "⚠️ Timeout waiting for app to return from browser")
-        }
+        waitForAppToReturn()
 
         composeTestRule.waitUntilExactlyOneExists(hasText("CHECKOUT COMPLETE"), TIMEOUT_LONG_MS)
 
@@ -232,17 +235,14 @@ class PayPalCheckoutRobot(
             Log.w(TAG, "⚠️ Login may have failed or user was already logged in")
         }
 
+        // Wait for web page to stabilize before interacting
+        device.waitForWindowUpdate(null, TIMEOUT_LONG_MS)
+
         // Delegate to web page robot to complete review setup token
         webPageRobot.completeReviewOrder()
 
         // Wait for return to app and vault completion
-        Log.d(TAG, "⏳ Waiting for app to return from browser...")
-        val appReturned = device.wait(Until.hasObject(By.pkg("com.paypal.android")), 30_000L)
-        if (appReturned != null) {
-            Log.d(TAG, "✅ App returned from browser")
-        } else {
-            Log.w(TAG, "⚠️ Timeout waiting for app to return from browser")
-        }
+        waitForAppToReturn()
 
         // Wait for vault to complete and verify success
         composeTestRule.waitUntilExactlyOneExists(hasText("PAYPAL VAULTED"))

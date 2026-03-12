@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.paypal.android.robots.DemoRobot
 import com.paypal.android.robots.DeviceSettingsRobot
-import com.paypal.android.robots.PayPalCheckoutRobot
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import org.junit.After
 import org.junit.Before
@@ -23,7 +23,7 @@ class PayPalVaultTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val robot by lazy { PayPalCheckoutRobot(composeTestRule) }
+    private val robot by lazy { DemoRobot(composeTestRule) }
 
     private val deviceSettingsRobot = DeviceSettingsRobot()
 
