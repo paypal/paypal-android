@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments
 
 import androidx.annotation.RestrictTo
+import com.paypal.android.corepayments.common.Headers
 import java.net.URL
 import java.util.Locale
 
@@ -33,14 +34,17 @@ class RestClient internal constructor(
         val body = apiRequest.body
 
         // default headers
-        val headers: MutableMap<String, String> = mutableMapOf(
-            "Accept-Encoding" to "gzip",
-            "Accept-Language" to language
+        val headers: MutableMap<String, String> =
+            apiRequest.headers?.toMutableMap() ?: mutableMapOf()
+        headers.putAll(
+            from = mapOf("Accept-Encoding" to "gzip", "Accept-Language" to language)
         )
 
-        // use client-id-only Basic authentication
-        val credentials = "${configuration.clientId}:"
-        headers["Authorization"] = "Basic ${credentials.base64encoded()}"
+        if (!headers.containsKey(Headers.AUTHORIZATION)) {
+            // override auth header with client-id-only Basic authentication
+            val credentials = "${configuration.clientId}:"
+            headers[Headers.AUTHORIZATION] = "Basic ${credentials.base64encoded()}"
+        }
 
         if (method == HttpMethod.POST) {
             headers["Content-Type"] = "application/json"

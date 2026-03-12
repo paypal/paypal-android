@@ -11,17 +11,19 @@ internal data class TrackingEventRequestV4(
     val requestUUID: String,
 
     @SerialName("user_events")
-    val userEvents: UserEvents
+    val userEvents: List<UserEvent>
 )
 
 @InternalSerializationApi
 @Serializable
-internal data class UserEvents(
+internal data class UserEvent(
+    val user: User,
+
     @SerialName("common_event_params")
     val commonEventParams: CommonEventParams,
 
-    // NOTE: empty for now; we aren't passing sessionId, etc. and these fields aren't required
-    val user: User = User()
+    @SerialName("event_params")
+    val eventParams: EventParams,
 )
 
 @InternalSerializationApi
@@ -64,7 +66,7 @@ internal class SdkCommonTrackingParams(
     val appId: String,
     @SerialName("app_name")
     val appName: String,
-    @SerialName("partner_client_id")
+    @SerialName("client_id")
     val clientId: String,
     @SerialName("c_sdk_ver")
     val clientSDKVersion: String,
@@ -75,7 +77,12 @@ internal class SdkCommonTrackingParams(
     @SerialName("mobile_device_model")
     val deviceModel: String,
     @SerialName("merchant_sdk_env")
-    val environment: String
+    val environment: String,
+    @SerialName("is_simulator")
+    val isSimulator: Boolean,
+    @SerialName("merchant_app_version")
+    val merchantAppVersion: String?,
+    val platform: String,
 )
 
 @InternalSerializationApi
@@ -118,28 +125,37 @@ internal data class TrackingEventParams(
     val clientSDKVersion: String,
     @SerialName("client_os")
     val clientOS: String,
+
     @SerialName("comp")
     val component: String,
+
     @SerialName("device_manufacturer")
     val deviceManufacturer: String,
+
     @SerialName("mobile_device_model")
     val deviceModel: String,
     @SerialName("merchant_sdk_env")
     val environment: String,
+
     @SerialName("event_name")
     val eventName: String,
+
     @SerialName("event_source")
     val eventSource: String,
+
     @SerialName("is_simulator")
     val isSimulator: Boolean,
     @SerialName("mapv")
     val merchantAppVersion: String?,
     @SerialName("platform")
     val platform: String,
+
     @SerialName("t")
     val timestamp: String,
+
     @SerialName("tenant_name")
     val tenantName: String,
+
     @SerialName("order_id")
     val orderId: String? = null,
     @SerialName("button_type")
