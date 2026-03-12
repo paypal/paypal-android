@@ -6,7 +6,7 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-internal class TrackingEventsAPI constructor(
+internal class TrackingEventsAPI(
     private val coreConfig: CoreConfig,
     private val restClient: RestClient
 ) {

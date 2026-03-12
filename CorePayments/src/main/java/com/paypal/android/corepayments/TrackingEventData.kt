@@ -4,6 +4,91 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@InternalSerializationApi
+@Serializable
+internal data class TrackingEventRequestV4(
+    @SerialName("request_uuid")
+    val requestUUID: String,
+
+    @SerialName("user_events")
+    val userEvents: UserEvents
+)
+
+@InternalSerializationApi
+@Serializable
+internal data class UserEvents(
+    @SerialName("common_event_params")
+    val commonEventParams: CommonEventParams,
+
+    // NOTE: empty for now; we aren't passing sessionId, etc. and these fields aren't required
+    val user: User = User()
+)
+
+@InternalSerializationApi
+@Serializable
+internal class User()
+
+@InternalSerializationApi
+@Serializable
+internal class CommonEventParams(
+    @SerialName("tenant_name")
+    val tenantName: String,
+
+    @SerialName("event_source")
+    val eventSource: String,
+
+    val params: SdkCommonTrackingParams
+)
+
+@InternalSerializationApi
+@Serializable
+internal class EventParams(
+    @SerialName("event_name")
+    val eventName: String,
+    @SerialName("event_time")
+    val eventTime: String,
+    @SerialName("client_event_key")
+    val clientEventKey: String,
+    @SerialName("component")
+    val component: String,
+    @SerialName("space_key")
+    val spaceKey: String,
+
+    val params: SdkEventParams
+)
+
+@InternalSerializationApi
+@Serializable
+internal class SdkCommonTrackingParams(
+    @SerialName("app_id")
+    val appId: String,
+    @SerialName("app_name")
+    val appName: String,
+    @SerialName("partner_client_id")
+    val clientId: String,
+    @SerialName("c_sdk_ver")
+    val clientSDKVersion: String,
+    @SerialName("client_os")
+    val clientOS: String,
+    @SerialName("device_manufacturer")
+    val deviceManufacturer: String,
+    @SerialName("mobile_device_model")
+    val deviceModel: String,
+    @SerialName("merchant_sdk_env")
+    val environment: String
+)
+
+@InternalSerializationApi
+@Serializable
+internal class SdkEventParams(
+    @SerialName("order_id")
+    val orderId: String? = null,
+    @SerialName("button_type")
+    val buttonType: String? = null,
+    @SerialName("app_switch_enabled")
+    val appSwitchEnabled: Boolean = false
+)
+
 /**
  * Data classes for Kotlin serialization of tracking events REST API request
  */
