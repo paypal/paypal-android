@@ -24,7 +24,6 @@ class ChromeRobot {
      * @return true if dialog was found and dismissed, false if dialog not present
      */
     fun dismissFirstTimeSetupIfPresent(): Boolean {
-        // todo: check if on chrome
         Log.d(TAG, "🔍 Attempting to dismiss Chrome first-time setup dialog...")
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
@@ -50,11 +49,13 @@ class ChromeRobot {
                 Log.d(TAG, "✅ Clicking 'Use without an account' button")
                 useWithoutAccountButton.click()
                 Log.d(TAG, "✅ Chrome first-time setup dismissed successfully")
+                device.waitForIdle()
                 true
             } else {
                 Log.w(TAG, "⚠️ Could not find 'Use without an account' button")
                 // Try pressing back button as fallback
                 device.pressBack()
+                device.waitForIdle()
                 false
             }
         } else {

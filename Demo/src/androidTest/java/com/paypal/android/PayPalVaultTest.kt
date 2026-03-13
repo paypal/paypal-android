@@ -29,6 +29,7 @@ class PayPalVaultTest {
 
     @Before
     fun setUp() {
+        deviceSettingsRobot.disablePasswordManagers()
         deviceSettingsRobot.resetAppLinksToDefaults()
     }
 

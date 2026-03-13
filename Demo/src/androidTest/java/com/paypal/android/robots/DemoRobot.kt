@@ -2,10 +2,12 @@ package com.paypal.android.robots
 
 import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
@@ -27,7 +29,6 @@ class DemoRobot(
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     }
     private val webPageRobot = PayPalWebPageRobot()
-    private val chromeRobot = ChromeRobot()
 
     companion object {
         private const val TAG = "PayPalCheckoutRobot"
@@ -124,27 +125,16 @@ class DemoRobot(
         )
 
         // Click on "START CHECKOUT" button
-        composeTestRule.waitUntilExactlyOneExists(hasText("START CHECKOUT"), TIMEOUT_LONG_MS)
-        composeTestRule.onNodeWithText("START CHECKOUT").performClick()
+        composeTestRule.onNode(hasScrollAction())
+            .performScrollToNode(hasText("START CHECKOUT"))
 
-        // Dismiss Chrome first-time setup if present (common in CI environments)
-        chromeRobot.dismissFirstTimeSetupIfPresent()
+        composeTestRule
+            .waitUntilExactlyOneExists(hasText("START CHECKOUT"), TIMEOUT_LONG_MS)
+        composeTestRule.onNodeWithText("START CHECKOUT").performClick()
 
         // Delegate to web page robot for login
         Log.d(TAG, "🔐 Entering PayPal credentials...")
-        val loginSuccess = webPageRobot.performLogin(email, password)
-
-        if (loginSuccess) {
-            Log.d(TAG, "✅ Successfully logged into PayPal")
-        } else {
-            Log.w(TAG, "⚠️ Login may have failed or user was already logged in")
-        }
-
-        // Wait for web page to stabilize before interacting
-        device.waitForWindowUpdate(null, TIMEOUT_LONG_MS)
-
-        // Delegate to web page robot to complete review order
-        webPageRobot.completeReviewOrder()
+        webPageRobot.checkout(email, password)
 
         // Wait for return to app and checkout completion
         waitForAppToReturn()
@@ -193,20 +183,23 @@ class DemoRobot(
 
         Log.d(
             TAG,
-            "✅ Setup token created successfully with appSwitch: $appSwitchEnabled, returnToAppStrategy: $returnToAppStrategy"
+            "✅ Setup token created successfully with appSwitch: $appSwitchEnabled, " +
+                    "returnToAppStrategy: $returnToAppStrategy"
         )
     }
 
     fun clickCreateSetupToken() = apply {
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("CREATE SETUP TOKEN")
+            hasText("CREATE SETUP TOKEN"),
+            TIMEOUT_LONG_MS
         )
         composeTestRule.onNodeWithText("CREATE SETUP TOKEN").performClick()
     }
 
     fun verifySetupTokenCreated() = apply {
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("SETUP TOKEN CREATED")
+            hasText("SETUP TOKEN CREATED"),
+            TIMEOUT_LONG_MS
         )
         composeTestRule.waitUntilExactlyOneExists(
             hasText("Vault PayPal")
@@ -223,29 +216,13 @@ class DemoRobot(
         composeTestRule.waitUntilExactlyOneExists(hasText("VAULT PAYPAL"))
         composeTestRule.onNodeWithText("VAULT PAYPAL").performClick()
 
-        chromeRobot.dismissFirstTimeSetupIfPresent()
-
-        // Delegate to web page robot for login
-        Log.d(TAG, "🔐 Entering PayPal credentials...")
-        val loginSuccess = webPageRobot.performLogin(email, password)
-
-        if (loginSuccess) {
-            Log.d(TAG, "✅ Successfully logged into PayPal")
-        } else {
-            Log.w(TAG, "⚠️ Login may have failed or user was already logged in")
-        }
-
-        // Wait for web page to stabilize before interacting
-        device.waitForWindowUpdate(null, TIMEOUT_LONG_MS)
-
-        // Delegate to web page robot to complete review setup token
-        webPageRobot.completeReviewOrder()
+        webPageRobot.checkout(email, password)
 
         // Wait for return to app and vault completion
         waitForAppToReturn()
 
         // Wait for vault to complete and verify success
-        composeTestRule.waitUntilExactlyOneExists(hasText("PAYPAL VAULTED"))
+        composeTestRule.waitUntilExactlyOneExists(hasText("PAYPAL VAULTED"), TIMEOUT_LONG_MS)
         composeTestRule.waitUntilExactlyOneExists(hasText("Approval Session ID"))
 
         Log.d(TAG, "🚀 PayPal vault with login completed successfully")

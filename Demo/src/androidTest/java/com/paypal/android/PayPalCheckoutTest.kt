@@ -28,6 +28,7 @@ class PayPalCheckoutTest {
 
     @Before
     fun setUp() {
+        deviceSettingsRobot.disablePasswordManagers()
         deviceSettingsRobot.resetAppLinksToDefaults()
     }
 
