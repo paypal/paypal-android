@@ -1,42 +1,36 @@
 # PayPal Android SDK Integration Guide
 
-## Overview
+This guide shows you how to accept Card and PayPal payments in your Android application.
 
-This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, initialize clients, process one-time payments, and vault payment methods for future use. Before you begin, review the Prerequisites section to make sure your environment is ready.
+## How the PayPal Android SDK works
+
+The SDK handles the client-side portion of your payment integration. For card payments, the SDK securely attaches card data to an existing Order–card data is sent directly to PayPal and will never be seen by your server. For PayPal payments, the SDK may open the PayPal app (or a Chrome Custom Tab) to allow your customers to log in and approve a payment using their personal PayPal account. After approval, PayPal sends a deep-link redirect back into your app to notify success. Your app can then capture or authorize the Order with a confirmed payment source using the Orders v2 API.
 
 <PlaceholderImage description="End-to-end flow diagram showing the three actors: your Android app (SDK), your server, and PayPal APIs. Arrows show: app collects payment details → app calls SDK → SDK contacts PayPal → PayPal returns result to SDK → SDK returns result to app → app calls your server to capture/authorize." />
 
 ---
 
-## How the PayPal Android SDK works
+## Before you Start
 
-The SDK handles the client-side portion of your payment integration. For card payments, the SDK submits card data directly to PayPal using encrypted channels and returns a result your server uses to capture or authorize the order. For PayPal payments, the SDK opens a Chrome Custom Tab (or the PayPal app if installed) so the customer can log in and approve the payment. When the customer finishes, PayPal redirects them back to your app using a deep link. Your server then captures or authorizes the approved order using the Orders v2 API.
+In order to accept payments with the PayPal Mobile SDK, make sure you have completed the following steps:
 
----
-
-## Prerequisites
-
-Before you integrate the SDK, make sure you have the following:
-
-- A PayPal developer account at [developer.paypal.com](https://developer.paypal.com)
-- A sandbox client ID from the [PayPal Developer Dashboard](https://developer.paypal.com/api/rest/#link-getstarted)
-- A server-side integration that can create PayPal orders and capture or authorize them (see [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/))
-- For card vaulting or PayPal vaulting: a server that can create setup tokens and payment tokens (see [PayPal vaulting documentation](https://developer.paypal.com/docs/))
-- Android Studio with a project targeting Android SDK 23 or higher
-- Kotlin or Java project (the SDK supports both languages)
+1. Create a PayPal developer account at [developer.paypal.com](https://developer.paypal.com)
+1. Obtain a Sandbox Client ID from the [PayPal Developer Dashboard](https://developer.paypal.com/api/rest/#link-getstarted)
+1. Launch a web server that can Create, Authorize, and Capture PayPal Orders (see [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/))
+    - (Optional) Enable Setup Token and Payment Token creation on your web server (see [PayPal vaulting documentation](https://developer.paypal.com/docs/))
 
 ---
 
 ## Project setup
 
+Add individual SDK payment method modules to your Android application using Gradle.
+
 ### Add SDK dependencies
 
-Add the modules you need to your app-level `build.gradle` file. Use the current release version.
+Add the following dependencies to your app-level `build.gradle` file (use the current release version):
 
 ```groovy
 dependencies {
-    // Required: add at least one payment module
-
     // For card payments (card-present and card-not-present)
     implementation 'com.paypal.android:card-payments:2.3.0'
 
@@ -54,9 +48,7 @@ dependencies {
 }
 ```
 
-All modules are published to Maven Central under the `com.paypal.android` group.
-
-**Snapshot builds**
+#### Snapshot Builds
 
 To test upcoming features before they ship, use snapshot builds. First, add the snapshot repository to your top-level `build.gradle`:
 
