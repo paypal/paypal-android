@@ -162,11 +162,11 @@ App Links use HTTPS URLs with domain verification (`android:autoVerify="true"`).
 
 ## App architecture
 
-### Recommended architecture
+The PayPal SDK for Android is optimized for use with Android Jetpack.
 
-The Demo app uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which hosts a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active ViewModel.
+### Single-Activity Architecture (Recommended)
 
-This single-entry-point pattern is recommended because it avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the browser-switch intent-filters.
+In a single-activity Android app using Jetpack Compose Navigation, all SDK flows live within `MainActivity`. Individual payment screens are composable destinations. Deep links are received by `MainActivity` and are dispatched to the active ViewModel. This single entry-point pattern is recommended because it avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the deep link intent-filters.
 
 ```kotlin
 // MainActivity is the only activity; it uses launchMode="singleTop"
@@ -174,7 +174,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // NavHost contains all payment flow composables
+            // A top-level composable contains all payment flow screens
             DemoApp()
         }
     }
@@ -183,7 +183,7 @@ class MainActivity : ComponentActivity() {
 
 ### Process death recovery
 
-Android may stop your app process while the customer is in the external browser completing authentication. When the customer returns, Android launches a fresh process and delivers the deep link intent. If your SDK client objects were destroyed during the process stop, they have no auth state and cannot process the return.
+Android may [stop your app's process](https://developer.android.com/guide/components/activities/process-lifecycle) while the customer is completing payment method authorization. When the customer returns, Android launches a fresh process and delivers the deep link intent. To complete a payment flow after your application is revived by the system in response to a deep link, your SDK clients will need to be manually restored to complete in-progress payment flows.
 
 The SDK provides `instanceState` and `restore()` on both `CardClient` and `PayPalWebCheckoutClient` to handle this case.
 
