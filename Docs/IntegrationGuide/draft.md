@@ -187,7 +187,7 @@ Android may [stop your app's process](https://developer.android.com/guide/compon
 
 The SDK provides `instanceState` and `restore()` on both `CardClient` and `PayPalWebCheckoutClient` to handle this case.
 
-**Save state before browser-switch:**
+**Save state before process kill:**
 
 ```kotlin
 // In your ViewModel or activity
@@ -212,7 +212,7 @@ The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClie
 
 ## Initialize the SDK
 
-Create a `CoreConfig` object with your client ID and environment. Then create the module clients you need. The Demo app creates clients inside ViewModel constructors so they are scoped to the screen lifecycle.
+Create a `CoreConfig` object with your client ID and environment, then create the payment method clients you need. The Demo app creates clients inside ViewModel constructors so they are scoped to the lifecycle of the screen.
 
 ```kotlin
 import com.paypal.android.corepayments.CoreConfig
@@ -222,16 +222,13 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.fraudprotection.PayPalDataCollector
 
 // Create configuration (use Environment.LIVE for production)
-val coreConfig = CoreConfig(
-    clientId = BuildConfig.CLIENT_ID,
-    environment = Environment.SANDBOX
-)
+val coreConfig = CoreConfig(clientId = BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
 
 // Create the card payments client
-val cardClient = CardClient(context, coreConfig)
+val cardClient = CardClient(applicationContext, coreConfig)
 
 // Create the PayPal web checkout / vault client
-val paypalClient = PayPalWebCheckoutClient(context, coreConfig)
+val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
 
 // Create the fraud protection data collector (optional)
 val payPalDataCollector = PayPalDataCollector(coreConfig)
