@@ -83,7 +83,7 @@ def paypalProperties = loadPropertiesFromFile("paypal.properties")
 
 android {
     defaultConfig {
-        buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
+        buildConfigField("String", "CLIENT_ID", "\"${paypalProperties["CLIENT_ID"]}\"")
     }
 }
 
@@ -100,13 +100,13 @@ Access the client ID at runtime using `BuildConfig.CLIENT_ID`.
 
 ### Configure deep links
 
-PayPal web checkout and PayPal vault flows use a browser-switch — the SDK opens a Chrome Custom Tab or the PayPal app, and PayPal redirects the customer back to your app when they finish. Be sure to configure your app to receive this redirect.
+The SDK may open the PayPal app or a Chrome Custom Tab to confirm a payment source. PayPal redirects the customer back to your app when payment method is approved by your customer. Be sure to configure your app to receive this redirect.
 
-The SDK supports two return URL strategies. Choose one or configure both as a fallback:
+The SDK supports two return URL strategies: app links and custom url schemes.
 
 **Option 1: Custom URL Scheme**
 
-Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs to use `android:launchMode="singleTop"` so that the OS delivers the return intent to the existing activity instance rather than creating a new one.
+Register a custom URL scheme in your app's `AndroidManifest.xml`. Your activity needs to use `android:launchMode="singleTop"` so that the OS delivers the return intent to the existing activity instance rather than creating a new one.
 
 ```xml
 <activity
@@ -120,37 +120,43 @@ Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs 
         <category android:name="android.intent.category.LAUNCHER" />
     </intent-filter>
 
-    <!-- Custom URL scheme for browser-switch return -->
+    <!-- Custom URL Scheme -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW"/>
-        <data android:scheme="com.example.myapp"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="com.myapp.android"/>
     </intent-filter>
 </activity>
 ```
 
-Use this scheme as your `fallbackUrlScheme` in SDK requests: `"com.example.myapp"`.
-
 **Option 2: Android App Links (HTTPS)**
 
-App Links use HTTPS URLs with domain verification (`android:autoVerify="true"`). This requires you to host a `/.well-known/assetlinks.json` file on your domain.
+App Links use HTTPS URLs with domain verification (`android:autoVerify="true"`). This requires you to host a `/.well-known/assetlinks.json` file [on your domain](https://developer.android.com/studio/write/app-link-indexing).
 
 ```xml
-<intent-filter android:autoVerify="true">
-    <action android:name="android.intent.action.VIEW" />
-    <category android:name="android.intent.category.DEFAULT" />
-    <category android:name="android.intent.category.BROWSABLE" />
-    <data
-        android:host="your-app-domain.example.com"
-        android:pathPrefix="/"
-        android:scheme="https" />
-</intent-filter>
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:launchMode="singleTop">
+
+    <!-- Standard launcher intent-filter -->
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+
+    <!-- App Links -->
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:host="myapp.com" android:pathPrefix="/" android:scheme="https" />
+    </intent-filter>
+</activity>
 ```
 
-Use your HTTPS URL as the `appLinkUrl` in SDK requests: `"https://your-app-domain.example.com"`.
-
-> **Architecture warning:** Only the activity that declares these intent-filters can receive browser-switch returns. Based on the Demo app pattern in `Demo/src/main/AndroidManifest.xml`, a single activity (`MainActivity`) owns both intent-filters. If your app has multiple activities, route all SDK flows through the activity that declares the deep link intent-filters.
+> **Architecture warning:** The activity that declares these intent-filters will be the only recipient of deep links back into your app. If your app has multiple activities, route all SDK flows through the activity that declares the deep link intent-filters.
 
 ---
 
