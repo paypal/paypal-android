@@ -210,17 +210,50 @@ The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClie
 
 ---
 
+### Jetpack Compose Lifecycle Utilities for Deep Linking
+
+The following composables can be helpful when handling a deep link back into your app:
+
+```kotlin
+// extension for finding a reference to the composable's host activity
+fun Context.getActivityOrNull(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.getActivityOrNull()
+    else -> null
+}
+
+@Composable
+fun OnLifecycleOwnerResumeEffect(callback: () -> Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+    LaunchedEffect(lifecycleState) {
+        if (lifecycleState == Lifecycle.State.RESUMED) {
+            callback()
+        }
+    }
+}
+
+@Composable
+fun OnNewIntentEffect(callback: (newIntent: Intent) -> Unit) {
+    val context = LocalContext.current
+    // pass "Unit" to register listener only once
+    DisposableEffect(Unit) {
+        val listener = Consumer<Intent> { newIntent ->
+            callback(newIntent)
+        }
+        context.getActivityOrNull()?.addOnNewIntentListener(listener)
+        onDispose {
+            context.getActivityOrNull()?.removeOnNewIntentListener(listener)
+        }
+    }
+}
+```
+
 ## Initialize the SDK
 
 Create a `CoreConfig` object with your client ID and environment, then create the payment method clients you need. The Demo app creates clients inside ViewModel constructors so they are scoped to the lifecycle of the screen.
 
 ```kotlin
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
-import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.fraudprotection.PayPalDataCollector
-
 // Create configuration (use Environment.LIVE for production)
 val coreConfig = CoreConfig(clientId = BuildConfig.CLIENT_ID, environment = Environment.SANDBOX)
 
@@ -260,12 +293,6 @@ Your server creates a PayPal order and returns the order ID to your app. Call yo
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.cardpayments.Card
-import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.CardApproveOrderResult
-import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
-import com.paypal.android.cardpayments.threedsecure.SCA
-
 // Build the Card object from customer input
 val card = Card(
     number = "4111111111111111",          // customer's card number
@@ -291,8 +318,6 @@ cardClient.approveOrder(cardRequest) { result ->
     when (result) {
         is CardApproveOrderResult.Success -> {
             // No 3D Secure challenge was needed; tell your server to capture/authorize
-            val orderStatus = result.status   // nullable String — check before use
-            val attempted3DS = result.didAttemptThreeDSecureAuthentication
             captureOrderOnServer(result.orderId)
         }
 
@@ -328,7 +353,7 @@ After `approveOrder` returns `Success`, tell your server to capture or authorize
 ```kotlin
 // Optional: collect device data to help reduce fraud risk before capturing
 val dataCollectorRequest = PayPalDataCollectorRequest(
-    hasUserLocationConsent = false  // set to true only if user consented to location data
+    hasUserLocationConsent = false  // set to true only if user has explicitly consented to location data
 )
 val clientMetadataId = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
 
@@ -344,7 +369,6 @@ When 3D Secure authentication is required, the SDK opens a Chrome Custom Tab. Af
 Register two effects in your composable to handle the return. Both are needed because Android can deliver the intent in two ways depending on whether the activity was in the foreground.
 
 ```kotlin
-import com.paypal.android.cardpayments.CardFinishApproveOrderResult
 
 // In your composable screen
 OnLifecycleOwnerResumeEffect {
@@ -365,7 +389,6 @@ fun completeAuthChallenge(intent: Intent) {
         when (result) {
             is CardFinishApproveOrderResult.Success -> {
                 // Authentication succeeded; capture/authorize the order on your server
-                val orderStatus = result.status  // nullable — check before use
                 captureOrderOnServer(result.orderId)
             }
 
@@ -377,7 +400,7 @@ fun completeAuthChallenge(intent: Intent) {
                 resetToIdleState()
 
             CardFinishApproveOrderResult.NoResult -> {
-                // This intent was not for this auth session
+                // The intent is not associated with this auth challenge
                 // Re-enable the pay button so the customer can retry
                 resetToIdleState()
             }
