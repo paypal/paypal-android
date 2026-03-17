@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, initialize clients, process one-time payments, and vault payment methods for future use. Before you begin, review the Prerequisites section to make sure your environment is ready.
+This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, process one-time payments, and vault payment methods for future use. Before you begin, review the Prerequisites section to make sure your environment is ready.
 
 <PlaceholderImage description="End-to-end flow diagram showing the three actors: your Android app (SDK), your server, and PayPal APIs. Arrows show: app collects payment details → app calls SDK → SDK contacts PayPal → PayPal returns result to SDK → SDK returns result to app → app calls your server to capture/authorize." />
 
@@ -37,7 +37,7 @@ Add the modules you need to your app-level `build.gradle` file. Use the current 
 dependencies {
     // Required: add at least one payment module
 
-    // For card payments (card-present and card-not-present)
+    // For card payments
     implementation 'com.paypal.android:card-payments:2.3.0'
 
     // For PayPal web checkout and PayPal vaulting
@@ -48,9 +48,6 @@ dependencies {
 
     // Optional: PayPal payment button UI components
     implementation 'com.paypal.android:payment-buttons:2.3.0'
-
-    // Optional: Venmo payments
-    implementation 'com.paypal.android:venmo:2.3.0'
 }
 ```
 
@@ -68,47 +65,15 @@ repositories {
 }
 ```
 
-Then reference the snapshot version:
+Then reference the latest snapshot version:
 
 ```groovy
 implementation 'com.paypal.android:card-payments:2.3.0-SNAPSHOT'
 ```
 
-### Configure build settings
-
-Do not hardcode your client ID in source code. Store it in a `paypal.properties` file that you exclude from version control, then inject it at build time.
-
-Create `paypal.properties` in your project root (add this file to `.gitignore`):
-
-```properties
-CLIENT_ID=your-sandbox-client-id-here
-```
-
-In your app-level `build.gradle`, load the properties file and inject the value as a `BuildConfig` field:
-
-```groovy
-def paypalProperties = loadPropertiesFromFile("paypal.properties")
-
-android {
-    defaultConfig {
-        buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
-    }
-}
-
-def loadPropertiesFromFile(filePath) {
-    def result = new Properties()
-    try {
-        result.load(new FileInputStream(rootProject.file(filePath)))
-    } catch (e) { /* file not found; ignore */ }
-    return result
-}
-```
-
-Access the client ID at runtime using `BuildConfig.CLIENT_ID`.
-
 ### Configure deep links
 
-PayPal web checkout and PayPal vault flows use a browser-switch — the SDK opens a Chrome Custom Tab or the PayPal app, and PayPal redirects the customer back to your app when they finish. Be sure to configure your app to receive this redirect.
+The SDK opens a Chrome Custom Tab or the PayPal app for certain flows (PayPal web checkout, PayPal vaulting, 3D Secure card authentication). When the customer finishes, PayPal redirects them back to your app using a deep link. Configure your app to receive this redirect.
 
 The SDK supports two return URL strategies. Choose one or configure both as a fallback:
 
@@ -128,7 +93,7 @@ Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs 
         <category android:name="android.intent.category.LAUNCHER" />
     </intent-filter>
 
-    <!-- Custom URL scheme for browser-switch return -->
+    <!-- Custom URL scheme for returning to app -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW"/>
         <data android:scheme="com.example.myapp"/>
@@ -158,74 +123,18 @@ App Links use HTTPS URLs with domain verification (`android:autoVerify="true"`).
 
 Use your HTTPS URL as the `appLinkUrl` in SDK requests: `"https://your-app-domain.example.com"`.
 
-> **Architecture warning:** Only the activity that declares these intent-filters can receive browser-switch returns. Based on the Demo app pattern in `Demo/src/main/AndroidManifest.xml`, a single activity (`MainActivity`) owns both intent-filters. If your app has multiple activities, route all SDK flows through the activity that declares the deep link intent-filters.
-
----
-
-## App architecture
-
-### Recommended architecture
-
-The Demo app uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which hosts a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active ViewModel.
-
-This single-entry-point pattern is recommended because it avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the browser-switch intent-filters.
-
-```kotlin
-// MainActivity is the only activity; it uses launchMode="singleTop"
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            // NavHost contains all payment flow composables
-            DemoApp()
-        }
-    }
-}
-```
-
-### Process death recovery
-
-Android may stop your app process while the customer is in the external browser completing authentication. When the customer returns, Android launches a fresh process and delivers the deep link intent. If your SDK client objects were destroyed during the process stop, they have no auth state and cannot process the return.
-
-The SDK provides `instanceState` and `restore()` on both `CardClient` and `PayPalWebCheckoutClient` to handle this case.
-
-**Save state before browser-switch:**
-
-```kotlin
-// In your ViewModel or activity
-val savedCardClientState = cardClient.instanceState
-// Persist this string (for example, in SavedStateHandle or SharedPreferences)
-savedStateHandle["card_client_state"] = savedCardClientState
-```
-
-**Restore state after process death:**
-
-```kotlin
-// When recreating your client (for example, in ViewModel init)
-val cardClient = CardClient(context, coreConfig)
-savedStateHandle.get<String>("card_client_state")?.let { savedState ->
-    cardClient.restore(savedState)
-}
-```
-
-The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClient`.
+> **Architecture warning:** Only the activity that declares these intent-filters can receive deep links back into the host application. If your app has multiple activities, route all SDK flows through the activity that declares the deep link intent-filters.
 
 ---
 
 ## Initialize the SDK
 
-Create a `CoreConfig` object with your client ID and environment. Then create the module clients you need. The Demo app creates clients inside ViewModel constructors so they are scoped to the screen lifecycle.
+Create a `CoreConfig` object with your client ID and environment. Then create a client for each payment method you need.
 
 ```kotlin
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
-import com.paypal.android.cardpayments.CardClient
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
-import com.paypal.android.fraudprotection.PayPalDataCollector
-
 // Create configuration (use Environment.LIVE for production)
 val coreConfig = CoreConfig(
-    clientId = BuildConfig.CLIENT_ID,
+    clientId = "your-client-id",
     environment = Environment.SANDBOX
 )
 
@@ -248,6 +157,58 @@ val payPalDataCollector = PayPalDataCollector(coreConfig)
 
 ---
 
+## Process death recovery
+
+Android may stop your app process while the customer is in the external browser completing authentication. When the customer returns, Android launches a fresh process and delivers the deep link intent. If your SDK client objects were destroyed during the process stop, they have no auth state and cannot process the return.
+
+The SDK provides `instanceState` and `restore()` on both `CardClient` and `PayPalWebCheckoutClient` to handle this case.
+
+**Save state before leaving the app:**
+
+```kotlin
+// In your Activity, ViewModel, or wherever you manage SDK clients
+val savedCardClientState = cardClient.instanceState
+// Persist this string (for example, in SavedStateHandle or SharedPreferences)
+savedStateHandle["card_client_state"] = savedCardClientState
+```
+
+**Restore state after process death:**
+
+```kotlin
+// When recreating your client
+val cardClient = CardClient(context, coreConfig)
+savedStateHandle.get<String>("card_client_state")?.let { savedState ->
+    cardClient.restore(savedState)
+}
+```
+
+The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClient`.
+
+---
+
+## Demo app architecture
+
+The [Demo app](Demo/) included in this repository uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which hosts a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active screen.
+
+This single-entry-point pattern avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the deep link intent-filters.
+
+> **Note:** Your app's architecture may differ from the Demo app. The key requirement is that deep link intent-filters are declared on the activity that handles SDK return flows. The patterns shown in this guide are not prescriptive — adapt them to fit your app's architecture.
+
+```kotlin
+// MainActivity is the only activity; it uses launchMode="singleTop"
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            // NavHost contains all payment flow composables
+            DemoApp()
+        }
+    }
+}
+```
+
+---
+
 ## Accept a card payment
 
 Use this flow when a customer pays with a credit or debit card. The flow has three steps: your server creates an order, the SDK approves the order with the card, and your server captures or authorizes the order.
@@ -265,12 +226,6 @@ Your server creates a PayPal order and returns the order ID to your app. Call yo
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.cardpayments.Card
-import com.paypal.android.cardpayments.CardRequest
-import com.paypal.android.cardpayments.CardApproveOrderResult
-import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
-import com.paypal.android.cardpayments.threedsecure.SCA
-
 // Build the Card object from customer input
 val card = Card(
     number = "4111111111111111",          // customer's card number
@@ -283,7 +238,7 @@ val card = Card(
 
 // Build the request
 // returnUrl must match a URL scheme registered in your AndroidManifest.xml
-val returnUrl = "com.example.myapp://"   // or your HTTPS app link URL
+val returnUrl = "com.example.myapp://"    // or your HTTPS app link URL
 val cardRequest = CardRequest(
     orderId = orderId,                    // order ID from your server
     card = card,
@@ -296,8 +251,6 @@ cardClient.approveOrder(cardRequest) { result ->
     when (result) {
         is CardApproveOrderResult.Success -> {
             // No 3D Secure challenge was needed; tell your server to capture/authorize
-            val orderStatus = result.status   // nullable String — check before use
-            val attempted3DS = result.didAttemptThreeDSecureAuthentication
             captureOrderOnServer(result.orderId)
         }
 
@@ -346,45 +299,44 @@ yourServer.captureOrder(orderId, clientMetadataId)
 
 When 3D Secure authentication is required, the SDK opens a Chrome Custom Tab. After the customer completes authentication, PayPal redirects them back to your app using the `returnUrl` you provided.
 
-Register two effects in your composable to handle the return. Both are needed because Android can deliver the intent in two ways depending on whether the activity was in the foreground.
+Override `onResume()` and `onNewIntent()` in your activity to handle the return. Both are needed because Android can deliver the intent in two ways depending on whether the activity was in the foreground.
 
 ```kotlin
-import com.paypal.android.cardpayments.CardFinishApproveOrderResult
+class MainActivity : ComponentActivity() {
 
-// In your composable screen
-OnLifecycleOwnerResumeEffect {
-    // Called when the activity returns to the foreground (covers the common case)
-    val intent = context.getActivityOrNull()?.intent
-    intent?.let { viewModel.completeAuthChallenge(it) }
-}
+    override fun onResume() {
+        super.onResume()
+        // Called when the activity returns to the foreground
+        handleReturnIntent(intent)
+    }
 
-OnNewIntentEffect { newIntent ->
-    // Called when a new intent arrives at the singleTop activity
-    viewModel.completeAuthChallenge(newIntent)
-}
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Called when a new intent arrives at the singleTop activity
+        handleReturnIntent(intent)
+    }
 
-// In your ViewModel
-fun completeAuthChallenge(intent: Intent) {
-    cardClient.finishApproveOrder(intent)?.let { result ->
-        // finishApproveOrder returns null if the intent is not for this auth session
-        when (result) {
-            is CardFinishApproveOrderResult.Success -> {
-                // Authentication succeeded; capture/authorize the order on your server
-                val orderStatus = result.status  // nullable — check before use
-                captureOrderOnServer(result.orderId)
-            }
+    private fun handleReturnIntent(intent: Intent) {
+        cardClient.finishApproveOrder(intent)?.let { result ->
+            // finishApproveOrder returns null if the intent is not for this auth session
+            when (result) {
+                is CardFinishApproveOrderResult.Success -> {
+                    // Authentication succeeded; capture/authorize the order on your server
+                    captureOrderOnServer(result.orderId)
+                }
 
-            is CardFinishApproveOrderResult.Failure ->
-                showError(result.error.errorDescription)
+                is CardFinishApproveOrderResult.Failure ->
+                    showError(result.error.errorDescription)
 
-            CardFinishApproveOrderResult.Canceled ->
-                // Customer canceled 3D Secure; re-enable the pay button
-                resetToIdleState()
+                CardFinishApproveOrderResult.Canceled ->
+                    // Customer canceled 3D Secure; re-enable the pay button
+                    resetToIdleState()
 
-            CardFinishApproveOrderResult.NoResult -> {
-                // This intent was not for this auth session
-                // Re-enable the pay button so the customer can retry
-                resetToIdleState()
+                CardFinishApproveOrderResult.NoResult -> {
+                    // This intent was not for this auth session
+                    // Re-enable the pay button so the customer can retry
+                    resetToIdleState()
+                }
             }
         }
     }
@@ -414,11 +366,6 @@ Your server creates a setup token and returns the setup token ID. See the [PayPa
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.cardpayments.Card
-import com.paypal.android.cardpayments.CardVaultRequest
-import com.paypal.android.cardpayments.CardVaultResult
-import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
-
 val card = Card(
     number = "4111111111111111",
     expirationMonth = "01",
@@ -438,7 +385,6 @@ cardClient.vault(cardVaultRequest) { result ->
     when (result) {
         is CardVaultResult.Success -> {
             // Card attached; tell your server to create a payment token
-            val setupTokenStatus = result.status   // nullable — check before use
             createPaymentTokenOnServer(result.setupTokenId)
         }
 
@@ -471,16 +417,13 @@ fun createPaymentToken(setupTokenId: String) {
 
 ### Deep link return
 
-Handle the deep link return with the same dual-effect pattern used in the card payment flow.
+Handle the deep link return using the same `onResume()` / `onNewIntent()` pattern used in the card payment flow. Call `finishVault()` instead of `finishApproveOrder()`.
 
 ```kotlin
-import com.paypal.android.cardpayments.CardFinishVaultResult
-
-fun completeAuthChallenge(intent: Intent) {
+private fun handleVaultReturnIntent(intent: Intent) {
     cardClient.finishVault(intent)?.let { result ->
         when (result) {
             is CardFinishVaultResult.Success -> {
-                val setupTokenStatus = result.status  // nullable — check before use
                 createPaymentTokenOnServer(result.setupTokenId)
             }
 
@@ -520,10 +463,6 @@ Your server creates a PayPal order and returns the order ID. See the [Orders v2 
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
-
 val checkoutRequest = PayPalWebCheckoutRequest(
     orderId = orderId,                                           // from your server
     fundingSource = PayPalWebCheckoutFundingSource.PAYPAL,       // PAYPAL, PAYPAL_CREDIT, or PAY_LATER
@@ -570,23 +509,10 @@ fun capturePayPalOrder(orderId: String?) {
 
 ### Deep link return
 
-Register both effects in your composable. Call `finishStart()` in your ViewModel.
+Override `onResume()` and `onNewIntent()` in your activity to handle the return. Call `finishStart()` to complete the PayPal checkout flow.
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
-
-// In your composable
-OnLifecycleOwnerResumeEffect {
-    val intent = context.getActivityOrNull()?.intent
-    intent?.let { viewModel.completeAuthChallenge(it) }
-}
-
-OnNewIntentEffect { newIntent ->
-    viewModel.completeAuthChallenge(newIntent)
-}
-
-// In your ViewModel
-fun completeAuthChallenge(intent: Intent) {
+private fun handlePayPalReturnIntent(intent: Intent) {
     paypalClient.finishStart(intent)?.let { result ->
         // finishStart returns null if the intent is not for this auth session
         when (result) {
@@ -597,12 +523,10 @@ fun completeAuthChallenge(intent: Intent) {
             }
 
             is PayPalWebCheckoutFinishStartResult.Failure -> {
-                val orderId = result.orderId    // nullable — check before use
                 showError(result.error.errorDescription)
             }
 
             is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                val orderId = result.orderId    // nullable — check before use
                 resetToIdleState()
             }
 
@@ -634,9 +558,6 @@ Your server creates a PayPal setup token and returns the setup token ID.
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
-
 val vaultRequest = PayPalWebVaultRequest(
     setupTokenId = setupTokenId,                                 // from your server
     appSwitchWhenEligible = true,                                // switch to PayPal app if installed
@@ -669,9 +590,7 @@ fun createPayPalPaymentToken(approvalSessionId: String) {
 ### Deep link return
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
-
-fun completeAuthChallenge(intent: Intent) {
+private fun handlePayPalVaultReturnIntent(intent: Intent) {
     paypalClient.finishVault(intent)?.let { result ->
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
@@ -700,7 +619,7 @@ After creating the payment token on your server, store the token ID for future c
 
 Use the sandbox environment during development. Set `environment = Environment.SANDBOX` in your `CoreConfig`.
 
-The Demo app connects to a hosted sample server for testing purposes. Your integration connects to your own server, which calls the PayPal sandbox APIs.
+The [Demo app](Demo/) connects to a hosted sample server for testing purposes. Your integration connects to your own server, which calls the PayPal sandbox APIs.
 
 **Test sandbox accounts**
 
@@ -718,7 +637,7 @@ Create sandbox test accounts in the [PayPal Developer Dashboard](https://develop
 
 **Test process death recovery**
 
-1. Start a checkout flow that requires browser-switch (PayPal web checkout or card 3D Secure).
+1. Start a checkout flow that opens a Chrome Custom Tab (PayPal web checkout or card 3D Secure).
 2. After the Chrome Custom Tab opens, use Android Studio's "Stop app" button to stop the process.
 3. Return to the app by selecting the notification or using the back button from the browser.
 4. Verify that your `restore()` call rebuilds the SDK client state and that `finishStart()` or `finishApproveOrder()` returns the correct result.
@@ -730,7 +649,7 @@ Create sandbox test accounts in the [PayPal Developer Dashboard](https://develop
 Before going live, complete the following:
 
 - [ ] Replace `Environment.SANDBOX` with `Environment.LIVE` in your `CoreConfig`
-- [ ] Replace your sandbox client ID with your live client ID in `paypal.properties`
+- [ ] Replace your sandbox client ID with your live client ID
 - [ ] Verify deep link configuration works in a release build (not just debug)
 - [ ] If using App Links, confirm your `assetlinks.json` file is hosted and verified on your live domain
 - [ ] Test process death recovery on a physical device running a live-like build
