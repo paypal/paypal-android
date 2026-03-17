@@ -419,7 +419,7 @@ After capturing or authorizing the order on your server, show a confirmation to 
 
 Vaulting stores a card as a reusable payment method. Use this flow when you want to charge a customer in the future without asking them to re-enter their card details.
 
-The vault flow has three steps: your server creates a setup token, the SDK attaches the card to the setup token, and your server creates a payment token from the setup token.
+The vault flow has three steps: your server creates a setup token, the SDK attaches card data to the setup token, and your server creates a payment token from the setup token.
 
 ### What you'll do
 
@@ -432,11 +432,6 @@ Your server creates a setup token and returns the setup token ID. See the [PayPa
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.cardpayments.Card
-import com.paypal.android.cardpayments.CardVaultRequest
-import com.paypal.android.cardpayments.CardVaultResult
-import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
-
 val card = Card(
     number = "4111111111111111",
     expirationMonth = "01",
@@ -456,7 +451,6 @@ cardClient.vault(cardVaultRequest) { result ->
     when (result) {
         is CardVaultResult.Success -> {
             // Card attached; tell your server to create a payment token
-            val setupTokenStatus = result.status   // nullable — check before use
             createPaymentTokenOnServer(result.setupTokenId)
         }
 
@@ -489,7 +483,7 @@ fun createPaymentToken(setupTokenId: String) {
 
 ### Deep link return
 
-Handle the deep link return with the same dual-effect pattern used in the card payment flow.
+Handle the deep link return with the same pattern used in the card payment flow:
 
 ```kotlin
 import com.paypal.android.cardpayments.CardFinishVaultResult
@@ -498,7 +492,6 @@ fun completeAuthChallenge(intent: Intent) {
     cardClient.finishVault(intent)?.let { result ->
         when (result) {
             is CardFinishVaultResult.Success -> {
-                val setupTokenStatus = result.status  // nullable — check before use
                 createPaymentTokenOnServer(result.setupTokenId)
             }
 
