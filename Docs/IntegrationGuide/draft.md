@@ -261,7 +261,7 @@ val coreConfig = CoreConfig(clientId = BuildConfig.CLIENT_ID, environment = Envi
 val cardClient = CardClient(applicationContext, coreConfig)
 
 // Create the PayPal web checkout / vault client
-val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
+val payPalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
 
 // Create the fraud protection data collector (optional)
 val payPalDataCollector = PayPalDataCollector(coreConfig)
@@ -516,13 +516,13 @@ After creating the payment token on your server, store the token ID. Use it for 
 
 ## Accept a PayPal payment
 
-Use this flow when a customer pays with their PayPal account. The SDK opens a Chrome Custom Tab or the PayPal app (if installed and the customer opts in) for the customer to log in and approve the payment.
+Use this flow when a customer wants to pay with their PayPal account. The SDK opens the PayPal app (or a Chrome Custom Tab) for the customer to log in and approve the payment.
 
 <PlaceholderImage description="Sequence diagram for PayPal web checkout: 1) App calls server to create order → server returns orderId. 2) App calls PayPalWebCheckoutClient.start() → SDK opens Chrome Custom Tab or PayPal app → customer logs in and approves. 3) PayPal deep-links back to app → app calls finishStart() → SDK returns orderId and payerId. 4) App calls server to capture/authorize." />
 
 ### What you'll do
 
-Call `paypalClient.start()` with an order ID, then handle the deep link return to get the approval result.
+Call `payPalClient.start()` with an order ID, then handle the deep link return to get the approval result.
 
 ### Server call
 
@@ -531,19 +531,15 @@ Your server creates a PayPal order and returns the order ID. See the [Orders v2 
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
-
 val checkoutRequest = PayPalWebCheckoutRequest(
-    orderId = orderId,                                           // from your server
-    fundingSource = PayPalWebCheckoutFundingSource.PAYPAL,       // PAYPAL, PAYPAL_CREDIT, or PAY_LATER
-    appSwitchWhenEligible = true,                                // switch to PayPal app if installed
-    appLinkUrl = "https://your-app-domain.example.com",          // HTTPS return URL (or null)
-    fallbackUrlScheme = "com.example.myapp"                      // custom scheme fallback (or null)
+    orderId = orderId,                                     // from your server
+    fundingSource = PayPalWebCheckoutFundingSource.PAYPAL, // PAYPAL, PAYPAL_CREDIT, or PAY_LATER
+    appSwitchWhenEligible = true,                          // switch to PayPal app if installed
+    appLinkUrl = "https://myapp.com",                      // HTTPS return URL (or null)
+    fallbackUrlScheme = "com.example.myapp"                // custom scheme fallback (or null)
 )
 
-paypalClient.start(activity, checkoutRequest) { startResult ->
+payPalClient.start(activity, checkoutRequest) { startResult ->
     when (startResult) {
         is PayPalPresentAuthChallengeResult.Success -> {
             // Chrome Custom Tab or PayPal app opened
@@ -566,16 +562,16 @@ paypalClient.start(activity, checkoutRequest) { startResult ->
 
 ### Handle the result
 
-After the flow completes, capture or authorize the order on your server.
+After the flow completes, capture or authorize the order on your server:
 
 ```kotlin
 // After finishStart returns Success
-fun capturePayPalOrder(orderId: String?) {
+fun capturePayPalOrder(orderId: String) {
     if (orderId == null) {
         showError("Order ID is missing")
-        return
+    } else {
+        yourServer.captureOrder(orderId)
     }
-    yourServer.captureOrder(orderId)
 }
 ```
 
@@ -598,22 +594,19 @@ OnNewIntentEffect { newIntent ->
 
 // In your ViewModel
 fun completeAuthChallenge(intent: Intent) {
-    paypalClient.finishStart(intent)?.let { result ->
+    payPalClient.finishStart(intent)?.let { result ->
         // finishStart returns null if the intent is not for this auth session
         when (result) {
             is PayPalWebCheckoutFinishStartResult.Success -> {
                 val orderId = result.orderId    // nullable — check before use
-                val payerId = result.payerId    // nullable — check before use
                 capturePayPalOrder(orderId)
             }
 
             is PayPalWebCheckoutFinishStartResult.Failure -> {
-                val orderId = result.orderId    // nullable — check before use
                 showError(result.error.errorDescription)
             }
 
             is PayPalWebCheckoutFinishStartResult.Canceled -> {
-                val orderId = result.orderId    // nullable — check before use
                 resetToIdleState()
             }
 
@@ -636,7 +629,7 @@ Vaulting a PayPal account stores it as a reusable payment method. Use this flow 
 
 ### What you'll do
 
-Call `paypalClient.vault()` with a setup token, then handle the deep link return.
+Call `payPalClient.vault()` with a setup token, then handle the deep link return.
 
 ### Server call
 
@@ -645,17 +638,14 @@ Your server creates a PayPal setup token and returns the setup token ID.
 ### SDK method call
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
-import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
-
 val vaultRequest = PayPalWebVaultRequest(
-    setupTokenId = setupTokenId,                                 // from your server
-    appSwitchWhenEligible = true,                                // switch to PayPal app if installed
-    appLinkUrl = "https://your-app-domain.example.com",          // HTTPS return URL (or null)
-    fallbackUrlScheme = "com.example.myapp"                      // custom scheme fallback (or null)
+    setupTokenId = setupTokenId,            // from your server
+    appSwitchWhenEligible = true,           // switch to PayPal app if installed
+    appLinkUrl = "https://myapp.com",       // HTTPS return URL (or null)
+    fallbackUrlScheme = "com.example.myapp" // custom scheme fallback (or null)
 )
 
-paypalClient.vault(activity, vaultRequest) { result ->
+payPalClient.vault(activity, vaultRequest) { result ->
     when (result) {
         is PayPalPresentAuthChallengeResult.Success -> {
             // Browser opened; wait for deep link return
@@ -680,10 +670,8 @@ fun createPayPalPaymentToken(approvalSessionId: String) {
 ### Deep link return
 
 ```kotlin
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
-
 fun completeAuthChallenge(intent: Intent) {
-    paypalClient.finishVault(intent)?.let { result ->
+    payPalClient.finishVault(intent)?.let { result ->
         when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
                 createPayPalPaymentToken(result.approvalSessionId)
@@ -729,7 +717,7 @@ Create sandbox test accounts in the [PayPal Developer Dashboard](https://develop
 
 **Test process death recovery**
 
-1. Start a checkout flow that requires browser-switch (PayPal web checkout or card 3D Secure).
+1. Start a checkout flow that requires authorization via PayPal app or Chrome Custom Tab (PayPal web checkout or card 3D Secure).
 2. After the Chrome Custom Tab opens, use Android Studio's "Stop app" button to stop the process.
 3. Return to the app by selecting the notification or using the back button from the browser.
 4. Verify that your `restore()` call rebuilds the SDK client state and that `finishStart()` or `finishApproveOrder()` returns the correct result.
