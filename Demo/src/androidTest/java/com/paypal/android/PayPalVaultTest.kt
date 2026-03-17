@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.paypal.android.robots.DemoRobot
 import com.paypal.android.robots.DeviceSettingsRobot
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
+import com.paypal.android.utils.TestConfig
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

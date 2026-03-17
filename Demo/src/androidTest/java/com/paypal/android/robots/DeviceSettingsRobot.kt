@@ -3,7 +3,7 @@ package com.paypal.android.robots
 import android.os.Build
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
-import com.paypal.android.executeShellCommandWithOutput
+import com.paypal.android.utils.executeShellCommandWithOutput
 
 /**
  * Provides API for device-related operations such as app links configuration
