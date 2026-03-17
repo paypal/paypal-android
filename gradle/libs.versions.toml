@@ -4,16 +4,16 @@ androidxAppcompat = "1.3.1"
 androidxBrowser="1.7.0"
 androidxComposeBom = "2024.10.01"
 androidxCoreKtx = "1.6.0"
-androidxEspressoCore = "3.4.0"
+androidxEspressoCore = "3.7.0"
 androidxFragmentKtx = "1.6.0"
-androidxJUnit = "1.1.5"
+androidxJUnit = "1.3.0"
 androidxLifecycleCommonJava = "2.4.1"
 androidxLifecycleRuntimeKtx = "2.4.1"
 androidxPreferenceKtx = "1.1.1"
-androidxTestCore = "1.5.0"
-androidxTestRules = "1.5.0"
-androidxTestRunner = "1.5.2"
-androidxTestUiAutomator = "2.2.0"
+androidxTestCore = "1.7.0"
+androidxTestRules = "1.7.0"
+androidxTestRunner = "1.7.0"
+androidxTestUiAutomator = "2.3.0"
 constraintLayout = "2.1.0"
 daggerHilt = "2.51.1"
 detektVersion = "1.22.0"
@@ -26,6 +26,7 @@ hiltVersion = "2.51.1"
 json = "20220320"
 jsonAssert = "1.4.0"
 junit = "4.13.2"
+testParameterInjector = "1.16"
 kotlinVersion = "1.9.24"
 kotlinxAndroidCoroutinesTest = "1.6.1"
 kotlinxSerialization = "1.6.3"
@@ -40,6 +41,7 @@ squareLoggingInterceptor = "4.9.2"
 squareRetrofit2 = "2.9.0"
 striktCore = "0.30.1"
 striktMockk = "0.30.1"
+dokkaVersion = "2.1.0"
 
 [libraries]
 android-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
@@ -51,6 +53,8 @@ androidx-fragmentKtx = { group = "androidx.fragment", name = "fragment-ktx", ver
 androidx-preferenceKtx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidxPreferenceKtx" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspressoCore" }
+androidx-test-espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "androidxEspressoCore" }
+androidx-test-espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "androidxEspressoCore" }
 androidx-test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJUnit" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
@@ -67,6 +71,7 @@ hilt-navigationCompose = { group = "androidx.hilt", name = "hilt-navigation-comp
 json = { group = "org.json", name = "json", version.ref = "json" }
 jsonAssert = { group = "org.skyscreamer", name = "jsonassert", version.ref = "jsonAssert" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+testParameterInjector = { group = "com.google.testparameterinjector", name = "test-parameter-injector", version.ref = "testParameterInjector" }
 kotlin-stdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinVersion" }
 kotlinx-coroutinesAndroid = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxAndroidCoroutinesTest" }
@@ -85,6 +90,7 @@ strikt-core = { group = "io.strikt", name = "strikt-core", version.ref = "strikt
 strikt-mockk = { group = "io.strikt", name = "strikt-mockk", version.ref = "striktMockk" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name="detekt-formatting", version.ref = "detektVersion" }
 detekt-rulesLibraries = { group = "io.gitlab.arturbosch.detekt", name = "detekt-rules-libraries", version.ref = "detektVersion" }
+dokka-android = { group = "org.jetbrains.dokka", name = "android-documentation-plugin", version.ref = "dokkaVersion"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -98,3 +104,4 @@ kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinVersion" }
 binaryCompatibilityValidator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokkaVersion"}

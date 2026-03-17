@@ -50,7 +50,9 @@ The PayPal SDK uses a client ID for authentication. This can be found in your [P
 
 ## Documentation
 
-Documentation for the project can be found [here](https://developer.paypal.com/docs/checkout/advanced/android/).
+Official documentation for the project can be found [here](https://developer.paypal.com/docs/checkout/advanced/android/).
+
+For reference documentation, visit [paypal.github.io/paypal-android](https://paypal.github.io/paypal-android/).
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.

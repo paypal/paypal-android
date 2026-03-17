@@ -30,6 +30,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
+
+        // Pass environment variables to instrumentation tests
+        testInstrumentationRunnerArguments([
+                "SANDBOX_ACCOUNT_USERNAME": System.getenv("SANDBOX_ACCOUNT_USERNAME") ?: "test@testng.com",
+                "SANDBOX_ACCOUNT_PASSWORD": System.getenv("SANDBOX_ACCOUNT_PASSWORD") ?: "Testing1"
+        ])
     }
 
     buildFeatures {
@@ -62,6 +68,12 @@ android {
         lintConfig file('../lint.xml')
         abortOnError true
         warningsAsErrors true
+    }
+
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
     }
 
     sourceSets {
@@ -157,9 +169,12 @@ dependencies {
 
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
+    androidTestImplementation libs.androidx.test.espresso.contrib
+    androidTestImplementation libs.androidx.test.espresso.intents
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.test.rules
     androidTestImplementation libs.androidx.test.uiAutomator
+    androidTestImplementation libs.testParameterInjector
 
     // compose ui-test
     androidTestImplementation libs.compose.uiTestJunit4
