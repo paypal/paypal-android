@@ -52,4 +52,3 @@ fun logPageHierarchy() {
         Log.w(TAG, "⚠️ Failed to log page hierarchy: ${e.message}")
     }
 }
-

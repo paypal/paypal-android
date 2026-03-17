@@ -233,5 +233,4 @@ class PayPalWebPageRobot {
         device.waitForIdle()
         return true
     }
-
 }
