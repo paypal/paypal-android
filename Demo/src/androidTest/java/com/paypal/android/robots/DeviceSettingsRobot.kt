@@ -1,5 +1,6 @@
 package com.paypal.android.robots
 
+import android.os.Build
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.paypal.android.executeShellCommandWithOutput
@@ -64,5 +65,38 @@ class DeviceSettingsRobot {
             instrumentation,
             "pm set-app-links-user-selection --package $appPackageName true all"
         )
+    }
+
+    fun disablePasswordManagers() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+
+        // For all Android versions
+        instrumentation.uiAutomation.executeShellCommand(
+            "settings put secure autofill_service null"
+        ).close()
+        instrumentation.uiAutomation.executeShellCommand(
+            "settings put secure autofill_field_classification 0"
+        ).close()
+        instrumentation.uiAutomation.executeShellCommand(
+            "settings put secure autofill_feature_field_classification 0"
+        ).close()
+
+        // Android 14+ — Credential Manager (the one you're hitting)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            instrumentation.uiAutomation.executeShellCommand(
+                "settings put secure credential_manager_enabled 0"
+            ).close()
+            instrumentation.uiAutomation.executeShellCommand(
+                "settings put secure credential_service null"
+            ).close()
+            instrumentation.uiAutomation.executeShellCommand(
+                "settings put secure credential_service_primary null"
+            ).close()
+        }
+
+        // Also clear GMS state which caches credential UI triggers
+        instrumentation.uiAutomation.executeShellCommand(
+            "pm clear com.google.android.gms"
+        ).close()
     }
 }

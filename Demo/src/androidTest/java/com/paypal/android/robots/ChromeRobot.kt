@@ -48,14 +48,14 @@ class ChromeRobot {
             if (useWithoutAccountButton != null) {
                 Log.d(TAG, "✅ Clicking 'Use without an account' button")
                 useWithoutAccountButton.click()
-                Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
                 Log.d(TAG, "✅ Chrome first-time setup dismissed successfully")
+                device.waitForIdle()
                 true
             } else {
                 Log.w(TAG, "⚠️ Could not find 'Use without an account' button")
                 // Try pressing back button as fallback
                 device.pressBack()
-                Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
+                device.waitForIdle()
                 false
             }
         } else {
@@ -84,7 +84,6 @@ class ChromeRobot {
 
             if (result.contains("Success", ignoreCase = true)) {
                 Log.d(TAG, "✅ Chrome cache cleared successfully")
-                Thread.sleep(TestConstants.TIMEOUT_SHORT_MS)
                 true
             } else {
                 Log.w(TAG, "⚠️ Chrome cache clear may have failed: $result")

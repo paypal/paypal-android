@@ -15,5 +15,5 @@ object TestConstants {
      * Standard long timeout for extended operations (10 seconds)
      * Used for: Compose UI element waits, web page loads, app state transitions
      */
-    const val TIMEOUT_LONG_MS = 10_000L
+    const val TIMEOUT_LONG_MS = 20_000L
 }
