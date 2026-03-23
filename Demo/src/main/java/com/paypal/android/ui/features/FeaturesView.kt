@@ -41,6 +41,10 @@ private val payPalFeatures = listOf(
     Feature.PAYPAL_VAULT
 )
 
+private val otherFeatures = listOf(
+    Feature.GOOGLE_PAY
+)
+
 @ExperimentalFoundationApi
 @Composable
 fun FeaturesView(
@@ -63,6 +67,12 @@ fun FeaturesView(
         }
         item {
             FeatureOptions(payPalFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
+        }
+        stickyHeader {
+            FeatureGroupHeader("Other")
+        }
+        item {
+            FeatureOptions(otherFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
     }
 }

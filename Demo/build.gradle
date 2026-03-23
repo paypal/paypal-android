@@ -126,6 +126,7 @@ dependencies {
     implementation project(':FraudProtection')
     implementation project(':PayPalPayments')
     implementation project(':PaymentButtons')
+    implementation project(':GooglePay')
     implementation project(':Venmo')
 
     implementation libs.kotlin.stdLib
