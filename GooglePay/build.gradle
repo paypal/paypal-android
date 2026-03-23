@@ -2,7 +2,6 @@ plugins {
     alias libs.plugins.android.library
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.binaryCompatibilityValidator
-    alias libs.plugins.dokka
 }
 
 apiValidation {
@@ -10,7 +9,7 @@ apiValidation {
 }
 
 android {
-    namespace 'com.paypal.android.paypalwebpayments'
+    namespace 'com.paypal.android.googlepay'
     java {
         toolchain {
             languageVersion = modules.kotlinToolchainLanguageVersion
@@ -46,26 +45,19 @@ android {
 dependencies {
     api project(':CorePayments')
 
-    implementation libs.kotlin.stdLib
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
-    implementation libs.kotlinx.coroutinesAndroid
     implementation libs.android.material
 
     testImplementation libs.junit
-    testImplementation libs.mockk
-    testImplementation libs.robolectric
-    testImplementation libs.kotlinx.coroutinesTest
-    testImplementation libs.strikt.core
-    testImplementation libs.strikt.mockk
 
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
 }
 
-project.ext.name = "paypal-web-payments"
+project.ext.name = "google-pay"
 project.ext.version = rootProject.version
-project.ext.pom_name = "PayPal SDK - Web Payments"
-project.ext.pom_desc = "Library for PayPal web payments"
+project.ext.pom_name = "PayPal SDK - Google Pay"
+project.ext.pom_desc = "Library for Google Pay"
 
 apply from: rootProject.file("gradle/gradle-publish.gradle")
