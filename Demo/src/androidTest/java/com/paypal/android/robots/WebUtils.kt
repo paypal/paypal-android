@@ -7,7 +7,7 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
-import com.paypal.android.utils.TestConstants
+import com.paypal.android.utils.TestConstants.TIMEOUT_SHORT_MS
 
 private const val TAG = "WebUtils"
 val device: UiDevice by lazy {
@@ -16,7 +16,7 @@ val device: UiDevice by lazy {
 
 fun findElement(selectors: List<BySelector>): UiObject2? {
     for (selector in selectors) {
-        val element = device.wait(Until.findObject(selector), TestConstants.TIMEOUT_SHORT_MS)
+        val element = device.wait(Until.findObject(selector), TIMEOUT_SHORT_MS)
         if (element != null) {
             return element
         }

@@ -7,6 +7,7 @@ import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.robots.DemoRobot
 import com.paypal.android.robots.DeviceSettingsRobot
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
+import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.utils.TestCard
 import org.junit.After
 import org.junit.Before
@@ -15,19 +16,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-class CardVaultTest {
+class CardApproveOrderTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val robot by lazy { DemoRobot(composeTestRule) }
-
     private val deviceSettingsRobot = DeviceSettingsRobot()
+    private val demoRobot by lazy { DemoRobot(composeTestRule) }
 
     @Before
     fun setUp() {
-        deviceSettingsRobot.disablePasswordManagers()
         deviceSettingsRobot.resetAppLinksToDefaults()
+        deviceSettingsRobot.disablePasswordManagers()
     }
 
     @After
@@ -36,60 +36,53 @@ class CardVaultTest {
     }
 
     @Test
-    fun shouldVaultCardWith3DS(
+    fun shouldApproveOrderWithCardWith3DS(
+        @TestParameter("AUTHORIZE", "CAPTURE") intent: String,
+        @TestParameter("VISA_3DS_SUCCESSFUL_AUTH") testCard: TestCard,
         @TestParameter sca: SCA,
-        /*
-          * Want to run CUSTOM_URL_SCHEME tests first to ensure app links are configured before they are executed
-          * since app links configuration takes time, running CUSTOM_URL_SCHEME gives extra time
-         */
+        @TestParameter storeInVaultOption: StoreInVaultOption,
         @TestParameter(
             "CUSTOM_URL_SCHEME",
             "APP_LINKS"
         ) returnToAppStrategy: ReturnToAppStrategyOption,
-        @TestParameter("VISA_3DS_SUCCESSFUL_AUTH") testCard: TestCard
     ) {
         if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
             deviceSettingsRobot.setupAppLinksForCurrentApp()
         }
 
-        robot.navigateToCardVault()
-            .createSetupToken(
-                returnToAppStrategy = returnToAppStrategy,
-                sca = sca
-            )
+        demoRobot.navigateToApproveOrder()
+            .createOrder(intent, returnToAppStrategy)
+            .setStoreInVaultOption(storeInVaultOption)
             .pickTestCard(testCard.displayName)
-            .vaultCard()
+            .setSCA(sca)
+            .clickApproveOrder()
             .verify3DSChallenge()
-            .verifyCardVaulted()
-            .createPaymentToken()
+            .completeOrder(intent)
     }
 
     @Test
-    fun shouldVaultCardWithout3DS(
-        /*
-        * Want to run CUSTOM_URL_SCHEME tests first to ensure app links are configured before they are executed
-        * since app links configuration takes time, running CUSTOM_URL_SCHEME gives extra time
-        */
+    fun shouldApproveOrderWithCardWithout3DS(
+        @TestParameter("AUTHORIZE", "CAPTURE") intent: String,
+        @TestParameter(
+            "VISA_VAULT_WITH_PURCHASE_NO_3DS",
+            "VISA_NO_3DS",
+        ) testCard: TestCard,
+        @TestParameter storeInVaultOption: StoreInVaultOption,
         @TestParameter(
             "CUSTOM_URL_SCHEME",
             "APP_LINKS"
         ) returnToAppStrategy: ReturnToAppStrategyOption,
-        @TestParameter(
-            "VISA_VAULT_WITH_PURCHASE_NO_3DS",
-            "VISA_NO_3DS",
-        ) testCard: TestCard
     ) {
         if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
             deviceSettingsRobot.setupAppLinksForCurrentApp()
         }
-        robot.navigateToCardVault()
-            .createSetupToken(
-                returnToAppStrategy = ReturnToAppStrategyOption.CUSTOM_URL_SCHEME,
-                sca = SCA.SCA_WHEN_REQUIRED
-            )
+
+        demoRobot.navigateToApproveOrder()
+            .createOrder(intent, returnToAppStrategy)
+            .setStoreInVaultOption(storeInVaultOption)
             .pickTestCard(testCard.displayName)
-            .vaultCard()
-            .verifyCardVaulted()
-            .createPaymentToken()
+            .setSCA(SCA.SCA_WHEN_REQUIRED)
+            .clickApproveOrder()
+            .completeOrder(intent)
     }
 }

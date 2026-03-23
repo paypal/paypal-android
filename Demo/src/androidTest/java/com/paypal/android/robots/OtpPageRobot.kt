@@ -24,37 +24,50 @@ class OtpPageRobot {
         )
     }
 
-    fun verifyOtpPage(otpCode: String): Boolean {
-        Log.d(TAG, "🔍 Verifying OTP page is displayed and functional...")
-        return when {
-            chromeRobot.chromeAPPClosed() -> {
-                Log.d(
-                    TAG,
-                    "✅ Chrome app closed before entering OTP, 3DS verification not required"
-                )
-                true
+    fun verifyOtpPage(otpCode: String, maxRetries: Int = 3): Boolean {
+        repeat(maxRetries) {
+            Log.d(TAG, "🔍 Verifying OTP page is displayed (attempt ${it + 1})...")
+            val success = when {
+                chromeRobot.chromeAPPClosed() -> {
+                    Log.d(
+                        TAG,
+                        "✅ Chrome app closed before entering OTP, 3DS verification not required"
+                    )
+                    true
+                }
+
+                enterOtpCode(otpCode) && clickSubmitButton() -> {
+                    Log.d(TAG, "✅ OTP entered and submit clicked successfully")
+                    true
+                }
+
+                chromeRobot.dismissFirstTimeSetupIfPresent() && enterOtpCode(otpCode) && clickSubmitButton() -> {
+                    Log.d(
+                        TAG,
+                        "✅ OTP entered and submit clicked successfully after dismissing Chrome setup"
+                    )
+                    true
+                }
+
+                else -> {
+                    Log.w(
+                        TAG,
+                        "⚠️ OTP verification did not complete successfully on attempt ${it + 1}, retrying..."
+                    )
+                    device.waitForIdle()
+                    logPageHierarchy()
+                    false
+                }
             }
 
-            enterOtpCode(otpCode) && clickSubmitButton() -> {
-                Log.d(TAG, "✅ OTP entered and submit clicked successfully")
-                true
+            if (success) {
+                return true
             }
+            device.waitForIdle()
+        }
 
-            chromeRobot.dismissFirstTimeSetupIfPresent() && enterOtpCode(otpCode) && clickSubmitButton() -> {
-                Log.d(
-                    TAG,
-                    "✅ OTP entered and submit clicked successfully after dismissing Chrome setup"
-                )
-                true
-            }
-
-            else -> {
-                device.waitForIdle()
-                logPageHierarchy()
-                Log.e(TAG, "❌ Failed to enter OTP or click submit")
-                false
-            }
-            }
+        Log.e(TAG, "❌ OTP verification failed after $maxRetries attempts")
+        return false
     }
 
     private fun clickSubmitButton(): Boolean {
