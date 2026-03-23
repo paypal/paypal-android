@@ -4,9 +4,10 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
 
 object ReturnUrlFactory {
 
-    fun createGenericReturnUrl(strategy: ReturnToAppStrategy) = when (strategy) {
-        is ReturnToAppStrategy.AppLink -> strategy.appLinkUrl
-        is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://"
+    fun createGenericReturnUrl(strategy: ReturnToAppStrategy, path: String? = null) =
+        when (strategy) {
+            is ReturnToAppStrategy.AppLink -> strategy.appLinkUrl + path?.let { "/$it" }
+            is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://" + path.orEmpty()
     }
 
     fun createCheckoutSuccessUrl(strategy: ReturnToAppStrategy) = when (strategy) {
