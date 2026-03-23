@@ -86,7 +86,7 @@ class ApproveOrderViewModel @Inject constructor(
             val returnUrl =
                 ReturnUrlFactory.createGenericReturnUrl(
                     returnToAppStrategyOption.toReturnToAppStrategy(),
-                    "returnPath"
+                    "return-path"
                 )
             CardRequest(orderId, card, returnUrl, scaOption)
         }
