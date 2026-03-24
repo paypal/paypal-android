@@ -96,7 +96,7 @@ Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs 
     <!-- Custom URL scheme for returning to app -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW"/>
-        <data android:scheme="com.example.myapp"/>
+        <data android:scheme="com.example.your-app-domain"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
     </intent-filter>
