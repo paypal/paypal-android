@@ -93,7 +93,7 @@ private fun Step_CreateSetupToken(
             selectedOption = uiState.scaOption
         )
         EnumOptionList(
-            title = stringResource(id = R.string.deep_link_strategy_title),
+            title = stringResource(id = R.string.return_to_app_strategy_title),
             stringArrayResId = R.array.deep_link_strategy_options,
             onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
             selectedOption = uiState.returnToAppStrategy

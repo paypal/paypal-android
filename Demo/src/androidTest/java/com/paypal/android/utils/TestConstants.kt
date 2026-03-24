@@ -1,4 +1,4 @@
-package com.paypal.android.test
+package com.paypal.android.utils
 
 /**
  * Centralized constants for all test timing values

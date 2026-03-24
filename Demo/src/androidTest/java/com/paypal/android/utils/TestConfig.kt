@@ -1,4 +1,4 @@
-package com.paypal.android
+package com.paypal.android.utils
 
 import androidx.test.platform.app.InstrumentationRegistry
 

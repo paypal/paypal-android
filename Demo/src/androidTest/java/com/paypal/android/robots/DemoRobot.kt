@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,8 +15,9 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.paypal.android.MainActivity
-import com.paypal.android.test.TestConstants.TIMEOUT_LONG_MS
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
+import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.utils.TestConstants.TIMEOUT_LONG_MS
 
 /**
  * Provides API for testing PayPal checkout workflows
@@ -25,13 +27,15 @@ class DemoRobot(
     private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>
 ) {
 
+    private val otpPageRobot: OtpPageRobot by lazy { OtpPageRobot() }
+    private val chromeRobot: ChromeRobot by lazy { ChromeRobot() }
     private val device: UiDevice by lazy {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     }
     private val webPageRobot = PayPalWebPageRobot()
 
     companion object {
-        private const val TAG = "PayPalCheckoutRobot"
+        private const val TAG = "DemoRobot"
     }
 
     private fun waitForAppToReturn() {
@@ -79,9 +83,8 @@ class DemoRobot(
     }
 
     fun verifyOrderCreated() = apply {
-        composeTestRule.waitUntilExactlyOneExists(hasText("ORDER CREATED"), TIMEOUT_LONG_MS)
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("Launch PayPal"),
+            hasText("ORDER CREATED"),
             TIMEOUT_LONG_MS
         )
     }
@@ -117,6 +120,18 @@ class DemoRobot(
         composeTestRule.onNodeWithText(strategyText).performClick()
     }
 
+    fun setStoreInVaultOption(storeInVaultOption: StoreInVaultOption) = apply {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("STORE IN VAULT"),
+            TIMEOUT_LONG_MS
+        )
+        val optionText = when (storeInVaultOption) {
+            StoreInVaultOption.ON_SUCCESS -> "ON_SUCCESS"
+            StoreInVaultOption.NO -> "NO"
+        }
+        composeTestRule.onNodeWithText(optionText).performClick()
+    }
+
     fun startCheckoutWithLogin(email: String, password: String) = apply {
         // Wait for Step 2 to appear
         composeTestRule.waitUntilExactlyOneExists(
@@ -133,7 +148,7 @@ class DemoRobot(
         composeTestRule.onNodeWithText("START CHECKOUT").performClick()
 
         // Delegate to web page robot for login
-        Log.d(TAG, "🔐 Entering PayPal credentials...")
+        Log.d(TAG, "🚪 Starting PayPal checkout with login for email: $email")
         webPageRobot.checkout(email, password)
 
         // Wait for return to app and checkout completion
@@ -148,18 +163,29 @@ class DemoRobot(
         Log.d(TAG, "🚀 PayPal checkout with login completed successfully")
     }
 
-    fun completeOrder() = apply {
+    fun completeOrder(intent: String? = null) = apply {
+        val completeButtonText = when (intent) {
+            "AUTHORIZE" -> "AUTHORIZE ORDER"
+            "CAPTURE" -> "CAPTURE ORDER"
+            else -> "COMPLETE ORDER"
+        }
         // Wait for Step 3 to appear
-        composeTestRule.waitUntilExactlyOneExists(hasText("Complete Order"))
+        composeTestRule.waitUntilExactlyOneExists(hasText("Complete Order"), TIMEOUT_LONG_MS)
 
         // Click on "COMPLETE ORDER" button
-        composeTestRule.waitUntilExactlyOneExists(hasText("COMPLETE ORDER"))
-        composeTestRule.onNodeWithText("COMPLETE ORDER").performClick()
+        composeTestRule.waitUntilExactlyOneExists(hasText(completeButtonText))
+        composeTestRule.onNodeWithText(completeButtonText).performClick()
+
+        val expectedFinalStatus = when (intent) {
+            "AUTHORIZE" -> "ORDER AUTHORIZED"
+            "CAPTURE" -> "ORDER CAPTURED"
+            else -> "ORDER COMPLETED"
+        }
 
         // Wait for order completion and verify success
-        composeTestRule.waitUntilExactlyOneExists(hasText("ORDER COMPLETED"), TIMEOUT_LONG_MS)
+        composeTestRule.waitUntilExactlyOneExists(hasText(expectedFinalStatus), TIMEOUT_LONG_MS)
 
-        Log.d(TAG, "🎉 Order completed successfully - Full PayPal checkout flow finished!")
+        Log.d(TAG, "🎉 Order completed successfully with status: $expectedFinalStatus")
     }
 
     fun navigateToPayPalVault() = apply {
@@ -201,9 +227,6 @@ class DemoRobot(
             hasText("SETUP TOKEN CREATED"),
             TIMEOUT_LONG_MS
         )
-        composeTestRule.waitUntilExactlyOneExists(
-            hasText("Vault PayPal")
-        )
     }
 
     fun startVaultWithLogin(email: String, password: String) = apply {
@@ -238,5 +261,119 @@ class DemoRobot(
             TIMEOUT_LONG_MS
         )
         Log.d(TAG, "🎉 Payment token created successfully!")
+    }
+
+    fun navigateToCardVault() = apply {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("Vault")
+        )
+        composeTestRule.onNodeWithText("Vault").performClick()
+        composeTestRule.onNodeWithText("Vault Card").isDisplayed()
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("Create Setup Token")
+        )
+    }
+
+    fun createSetupToken(
+        returnToAppStrategy: ReturnToAppStrategyOption,
+        sca: com.paypal.android.cardpayments.threedsecure.SCA
+    ) = apply {
+        setSCA(sca)
+        setReturnToAppStrategyOption(returnToAppStrategy)
+        clickCreateSetupToken()
+        verifySetupTokenCreated()
+
+        Log.d(
+            TAG,
+            "✅ Setup token created successfully with SCA: $sca, " +
+                    "returnToAppStrategy: $returnToAppStrategy"
+        )
+    }
+
+    fun setSCA(sca: com.paypal.android.cardpayments.threedsecure.SCA) = apply {
+        composeTestRule.waitUntilExactlyOneExists(hasText("SCA"), TIMEOUT_LONG_MS)
+        val scaText = when (sca) {
+            com.paypal.android.cardpayments.threedsecure.SCA.SCA_ALWAYS -> "SCA_ALWAYS"
+            com.paypal.android.cardpayments.threedsecure.SCA.SCA_WHEN_REQUIRED -> "SCA_WHEN_REQUIRED"
+        }
+        composeTestRule.onNodeWithText(scaText).performClick()
+    }
+
+    fun pickTestCard(cardName: String) = apply {
+        composeTestRule.onNodeWithText("Use a Test Card", true).isDisplayed()
+        composeTestRule.onNodeWithText("Use a Test Card", true).performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText(cardName),
+            TIMEOUT_LONG_MS
+        )
+        composeTestRule.onNodeWithText(cardName).performClick()
+
+        Log.d(TAG, "✅ Selected test card: $cardName")
+    }
+
+    fun vaultCard() = apply {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("VAULT CARD"),
+            TIMEOUT_LONG_MS
+        )
+        composeTestRule.onNodeWithText("VAULT CARD").performClick()
+    }
+
+    fun verify3DSChallenge(otpCode: String = "1234") = apply {
+        val chromeOpened = chromeRobot.waitForChromeAppToAppear()
+        if (!chromeOpened) {
+            Log.d(TAG, "Chrome did not open for 3DS challenge")
+        } else {
+            Log.d(TAG, "Chrome opened for 3DS challenge, proceeding with OTP verification")
+            otpPageRobot.verifyOtpPage(otpCode)
+        }
+        waitForAppToReturn()
+    }
+
+    fun verifyCardVaulted() = apply {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("CARD VAULTED"),
+            TIMEOUT_LONG_MS
+        )
+        composeTestRule.onNodeWithText("Setup Token ID").isDisplayed()
+
+        Log.d(TAG, "🎉 Card vaulted successfully!")
+    }
+
+    fun createOrder(
+        intent: String,
+        returnToAppStrategy: ReturnToAppStrategyOption,
+    ) = apply {
+        setIntent(intent)
+        setReturnToAppStrategyOption(returnToAppStrategy)
+        clickCreateOrder()
+        verifyOrderCreated()
+
+        // Verify the "ID" label exists, which indicates OrderView is displayed
+        composeTestRule.waitUntilExactlyOneExists(hasText("ID"), TIMEOUT_LONG_MS)
+        Log.d(
+            TAG,
+            "✅ Order created successfully with intent: $intent, returnToAppStrategy: $returnToAppStrategy"
+        )
+    }
+
+    fun clickApproveOrder() = apply {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("APPROVE ORDER"),
+            TIMEOUT_LONG_MS
+        )
+        composeTestRule.onNodeWithText("APPROVE ORDER").performClick()
+    }
+
+    fun navigateToApproveOrder() = apply {
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("Approve Order")
+        )
+        composeTestRule.onNodeWithText("Approve Order").performClick()
+        composeTestRule.waitUntilExactlyOneExists(
+            hasText("Card Approve Order"),
+            TIMEOUT_LONG_MS
+        )
     }
 }

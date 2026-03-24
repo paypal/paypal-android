@@ -6,7 +6,7 @@ object ReturnUrlFactory {
 
     fun createGenericReturnUrl(strategy: ReturnToAppStrategy, path: String? = null) =
         when (strategy) {
-            is ReturnToAppStrategy.AppLink -> strategy.appLinkUrl + path?.let { "/$it" }
+            is ReturnToAppStrategy.AppLink -> strategy.appLinkUrl + path?.let { "/$it" }.orEmpty()
             is ReturnToAppStrategy.CustomUrlScheme -> "${strategy.urlScheme}://" + path.orEmpty()
     }
 

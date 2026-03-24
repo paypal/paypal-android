@@ -5,8 +5,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import com.paypal.android.executeShellCommandWithOutput
-import com.paypal.android.test.TestConstants
+import com.paypal.android.utils.TestConstants
+import com.paypal.android.utils.TestConstants.TIMEOUT_LONG_MS
+import com.paypal.android.utils.TestConstants.TIMEOUT_SHORT_MS
+import com.paypal.android.utils.executeShellCommandWithOutput
 
 /**
  * Provides API for Chrome browser-related operations
@@ -92,6 +94,38 @@ class ChromeRobot {
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error clearing Chrome cache: ${e.message}")
             false
+        }
+    }
+
+    fun waitForChromeAppToAppear(): Boolean {
+        Log.d(TAG, "⏳ Waiting for Chrome Custom Tab to appear...")
+        val chromeAppeared = device.wait(
+            Until.hasObject(By.pkg("com.android.chrome")),
+            TIMEOUT_LONG_MS
+        )
+        if (chromeAppeared) {
+            Log.d(TAG, "✅ Chrome Custom Tab appeared, waiting for idle...")
+            device.waitForIdle()
+            Log.d(TAG, "✅ Chrome Custom Tab loaded and ready for interaction")
+            return true
+        } else {
+            Log.w(TAG, "⚠️ Timeout waiting for Chrome Custom Tab to appear")
+            return false
+        }
+    }
+
+    fun chromeAPPClosed(): Boolean {
+        Log.d(TAG, "🔍 Checking if Chrome Custom Tab is closed...")
+        val chromeClosed = device.wait(
+            Until.gone(By.pkg("com.android.chrome")),
+            TIMEOUT_SHORT_MS
+        )
+        if (chromeClosed) {
+            Log.d(TAG, "✅ Chrome Custom Tab is closed")
+            return true
+        } else {
+            Log.w(TAG, "⚠️ Timeout waiting for Chrome Custom Tab to close")
+            return false
         }
     }
 }

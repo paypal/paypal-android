@@ -1,7 +1,8 @@
-package com.paypal.android
+package com.paypal.android.utils
 
 import android.app.Instrumentation
 import java.io.BufferedReader
+import java.io.FileInputStream
 import java.io.InputStreamReader
 
 fun executeShellCommandWithOutput(
@@ -11,7 +12,7 @@ fun executeShellCommandWithOutput(
     val output = StringBuilder()
     try {
         val parcelFileDescriptor = instrumentation.uiAutomation.executeShellCommand(command)
-        val inputStream = java.io.FileInputStream(parcelFileDescriptor.fileDescriptor)
+        val inputStream = FileInputStream(parcelFileDescriptor.fileDescriptor)
         BufferedReader(InputStreamReader(inputStream)).use { reader ->
             var line: String?
             while (reader.readLine().also { line = it } != null) {
