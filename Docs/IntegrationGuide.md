@@ -262,35 +262,57 @@ class MainActivity : ComponentActivity() {
 
 Use this flow when a customer pays with a credit or debit card. The flow has three steps: your server creates an order, the SDK approves the order with the card, and your server captures or authorizes the order.
 
+**Without 3D Secure:**
+
 ```mermaid
 sequenceDiagram
     participant App as Your App
     participant Server as Your Server
-    participant SDK as CardClient
+    participant SDK as PayPal SDK
+    participant PayPal as PayPal
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API (create)
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: approveOrder(cardRequest)
+    SDK->>PayPal: Confirm payment source (REST API)
+    PayPal-->>SDK: Success
+    SDK-->>App: CardApproveOrderResult.Success
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API (capture)
+    PayPal-->>Server: Confirmation
+    Server-->>App: Order captured
+```
+
+**With 3D Secure:**
+
+```mermaid
+sequenceDiagram
+    participant App as Your App
+    participant Server as Your Server
+    participant SDK as PayPal SDK
     participant PayPal as PayPal
     participant Browser as Chrome Custom Tab
 
     App->>Server: Create order
-    Server->>PayPal: Orders v2 API
+    Server->>PayPal: Orders v2 API (create)
     PayPal-->>Server: orderId
     Server-->>App: orderId
     App->>SDK: approveOrder(cardRequest)
-    SDK->>PayPal: Submit card data
-    alt No 3D Secure required
-        PayPal-->>SDK: Success
-        SDK-->>App: CardApproveOrderResult.Success
-    else 3D Secure required
-        PayPal-->>SDK: AuthorizationRequired
-        SDK-->>App: CardApproveOrderResult.AuthorizationRequired
-        App->>Browser: presentAuthChallenge()
-        Browser->>PayPal: Customer completes 3DS
-        PayPal-->>Browser: Redirect (deep link)
-        Browser-->>App: Return intent
-        App->>SDK: finishApproveOrder(intent)
-        SDK-->>App: CardFinishApproveOrderResult
-    end
+    SDK->>PayPal: Confirm payment source (REST API)
+    PayPal-->>SDK: AuthorizationRequired
+    SDK-->>App: CardApproveOrderResult.AuthorizationRequired
+    App->>Browser: presentAuthChallenge()
+    Note over Browser,PayPal: Customer completes 3D Secure
+    PayPal-->>Browser: Redirect (deep link)
+    Browser-->>App: Return intent
+    App->>SDK: finishApproveOrder(intent)
+    SDK-->>App: CardFinishApproveOrderResult
     App->>Server: Capture/authorize order
-    Server->>PayPal: Orders v2 API
+    Server->>PayPal: Orders v2 API (capture)
+    PayPal-->>Server: Confirmation
+    Server-->>App: Order captured
 ```
 
 ### What you'll do
@@ -534,7 +556,7 @@ Use this flow when a customer pays with their PayPal account. The SDK opens a Ch
 sequenceDiagram
     participant App as Your App
     participant Server as Your Server
-    participant SDK as PayPalWebCheckoutClient
+    participant SDK as PayPal SDK
     participant Browser as Chrome Custom Tab / PayPal App
     participant PayPal as PayPal
 
