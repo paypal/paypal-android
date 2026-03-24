@@ -157,7 +157,7 @@ val payPalDataCollector = PayPalDataCollector(coreConfig)
 
 ---
 
-## Process death recovery
+## Process kill recovery
 
 Android may stop your app process while the customer is in the external browser completing authentication. When the customer returns, Android launches a fresh process and delivers the deep link intent. If your SDK client objects were destroyed during the process stop, they have no auth state and cannot process the return.
 
