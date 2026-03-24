@@ -4,7 +4,55 @@
 
 This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, process one-time payments, and vault payment methods for future use. Before you begin, review the Prerequisites section to make sure your environment is ready.
 
-<PlaceholderImage description="End-to-end flow diagram showing the three actors: your Android app (SDK), your server, and PayPal APIs. Arrows show: app collects payment details → app calls SDK → SDK contacts PayPal → PayPal returns result to SDK → SDK returns result to app → app calls your server to capture/authorize." />
+**PayPal checkout flow:**
+
+```mermaid
+sequenceDiagram
+    participant App as Your Android App
+    participant SDK as PayPal SDK
+    participant Browser as Chrome Custom Tab / PayPal App
+    participant Server as Your Server
+    participant PayPal as PayPal APIs
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API (create)
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: start(checkoutRequest)
+    SDK->>Browser: Launch checkout URL
+    Note over Browser,PayPal: Customer logs in & approves payment
+    PayPal-->>Browser: Redirect (deep link)
+    Browser-->>App: Return intent
+    App->>SDK: finishStart(intent)
+    SDK-->>App: orderId, payerId
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API (capture)
+    PayPal-->>Server: Confirmation
+    Server-->>App: Order captured
+```
+
+**Card payment flow:**
+
+```mermaid
+sequenceDiagram
+    participant App as Your Android App
+    participant SDK as PayPal SDK
+    participant Server as Your Server
+    participant PayPal as PayPal APIs
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API (create)
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: approveOrder(cardRequest)
+    SDK->>PayPal: Confirm payment source (REST API)
+    PayPal-->>SDK: Approval result
+    SDK-->>App: Success or AuthorizationRequired
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API (capture)
+    PayPal-->>Server: Confirmation
+    Server-->>App: Order captured
+```
 
 ---
 
@@ -23,7 +71,8 @@ Before you integrate the SDK, make sure you have the following:
 - A server-side integration that can create PayPal orders and capture or authorize them (see [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/))
 - For card vaulting or PayPal vaulting: a server that can create setup tokens and payment tokens (see [PayPal vaulting documentation](https://developer.paypal.com/docs/))
 - Android Studio with a project targeting Android SDK 23 or higher
-- Kotlin or Java project (the SDK supports both languages)
+- Kotlin or Java project (the SDK is written in Kotlin but is fully callable from Java)
+- If you haven't set up your server integration yet, see the [server-side setup guide](https://developer.paypal.com/docs/checkout/advanced/integrate/) before continuing
 
 ---
 
@@ -55,7 +104,7 @@ All modules are published to Maven Central under the `com.paypal.android` group.
 
 **Snapshot builds**
 
-If you'd like to test upcoming features before they ship, use snapshot builds. First, add the snapshot repository to your top-level `build.gradle`:
+To test upcoming features before they ship, use snapshot builds. First, add the snapshot repository to your top-level `build.gradle`:
 
 ```groovy
 repositories {
@@ -96,7 +145,7 @@ Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs 
     <!-- Custom URL scheme for returning to app -->
     <intent-filter>
         <action android:name="android.intent.action.VIEW"/>
-        <data android:scheme="com.example.your-app-domain"/>
+        <data android:scheme="com.example.myapp"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
     </intent-filter>
@@ -139,7 +188,7 @@ val coreConfig = CoreConfig(
 )
 
 // Create the card payments client
-val cardClient = CardClient(applicationContext, coreConfig)
+val cardClient = CardClient(context, coreConfig)
 
 // Create the PayPal web checkout / vault client
 val paypalClient = PayPalWebCheckoutClient(context, coreConfig)
@@ -188,7 +237,7 @@ The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClie
 
 ## Demo app architecture
 
-The [Demo app](Demo/) included in this repository uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which contains a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active screen.
+The merchant-facing [Demo app](Demo/) included in the repository uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which contains a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active screen.
 
 This single-entry-point pattern avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the deep link intent-filters.
 
@@ -213,7 +262,36 @@ class MainActivity : ComponentActivity() {
 
 Use this flow when a customer pays with a credit or debit card. The flow has three steps: your server creates an order, the SDK approves the order with the card, and your server captures or authorizes the order.
 
-<PlaceholderImage description="Sequence diagram for card payment: 1) App calls server to create order → server calls Orders v2 API and returns orderId. 2) App calls CardClient.approveOrder() → SDK contacts PayPal → if 3D Secure required, SDK opens Chrome Custom Tab → customer completes 3D Secure → deep link returns to app → app calls finishApproveOrder(). 3) App calls server to capture/authorize → server calls Orders v2 API." />
+```mermaid
+sequenceDiagram
+    participant App as Your App
+    participant Server as Your Server
+    participant SDK as CardClient
+    participant PayPal as PayPal
+    participant Browser as Chrome Custom Tab
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: approveOrder(cardRequest)
+    SDK->>PayPal: Submit card data
+    alt No 3D Secure required
+        PayPal-->>SDK: Success
+        SDK-->>App: CardApproveOrderResult.Success
+    else 3D Secure required
+        PayPal-->>SDK: AuthorizationRequired
+        SDK-->>App: CardApproveOrderResult.AuthorizationRequired
+        App->>Browser: presentAuthChallenge()
+        Browser->>PayPal: Customer completes 3DS
+        PayPal-->>Browser: Redirect (deep link)
+        Browser-->>App: Return intent
+        App->>SDK: finishApproveOrder(intent)
+        SDK-->>App: CardFinishApproveOrderResult
+    end
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API
+```
 
 ### What you'll do
 
@@ -343,6 +421,8 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+> **Understanding `NoResult`:** `NoResult` means the SDK does not have enough information to determine the outcome — for example, if the customer returned to the app without completing authentication, or if the deep link intent was not associated with the current auth session. The payment may or may not have succeeded server-side. When you receive `NoResult`, query the [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/) from your server to check the current order status before showing an error or retrying.
+
 ### What's next
 
 After capturing or authorizing the order on your server, show a confirmation to the customer. The card payment flow is complete.
@@ -450,7 +530,28 @@ After creating the payment token on your server, store the token ID. Use it for 
 
 Use this flow when a customer pays with their PayPal account. The SDK opens a Chrome Custom Tab or the PayPal app (if installed and the customer opts in) for the customer to log in and approve the payment.
 
-<PlaceholderImage description="Sequence diagram for PayPal web checkout: 1) App calls server to create order → server returns orderId. 2) App calls PayPalWebCheckoutClient.start() → SDK opens Chrome Custom Tab or PayPal app → customer logs in and approves. 3) PayPal deep-links back to app → app calls finishStart() → SDK returns orderId and payerId. 4) App calls server to capture/authorize." />
+```mermaid
+sequenceDiagram
+    participant App as Your App
+    participant Server as Your Server
+    participant SDK as PayPalWebCheckoutClient
+    participant Browser as Chrome Custom Tab / PayPal App
+    participant PayPal as PayPal
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API (create)
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: start(checkoutRequest)
+    SDK->>Browser: Launch checkout URL
+    Note over Browser,PayPal: Customer logs in & approves payment
+    PayPal-->>Browser: Redirect (deep link)
+    Browser-->>App: Return intent
+    App->>SDK: finishStart(intent)
+    SDK-->>App: orderId, payerId
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API (capture)
+```
 
 ### What you'll do
 
@@ -624,6 +725,17 @@ The [Demo app](Demo/) connects to a hosted sample server for testing purposes. Y
 **Test sandbox accounts**
 
 Create sandbox test accounts in the [PayPal Developer Dashboard](https://developer.paypal.com) under your sandbox environment. Use these accounts when logging in during PayPal web checkout tests.
+
+**Sandbox test card numbers**
+
+| Card Number | Scenario |
+|---|---|
+| `4111111111111111` | Successful payment (Visa) |
+| `5555555555554444` | Successful payment (Mastercard) |
+| `4000000000003220` | 3D Secure authentication required |
+| `4000000000000002` | Declined |
+
+For the full list of sandbox test values, see the [PayPal sandbox testing guide](https://developer.paypal.com/tools/sandbox/card-testing/).
 
 **Test scenarios to verify**
 
