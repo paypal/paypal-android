@@ -188,7 +188,7 @@ The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClie
 
 ## Demo app architecture
 
-The [Demo app](Demo/) included in this repository uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which hosts a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active screen.
+The [Demo app](Demo/) included in this repository uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which contains a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active screen.
 
 This single-entry-point pattern avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the deep link intent-filters.
 
