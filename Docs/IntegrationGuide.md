@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, process one-time payments, and vault payment methods for future use. Before you begin, review the Prerequisites section to make sure your environment is ready.
+This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, process one-time payments, and vault payment methods for future use. Before you begin, review the [Prerequisites](#prerequisites) section to make sure your environment is ready.
 
 **PayPal checkout flow:**
 
@@ -122,11 +122,47 @@ implementation 'com.paypal.android:card-payments:2.3.0-SNAPSHOT'
 
 ### Configure deep links
 
-The SDK opens a Chrome Custom Tab or the PayPal app for certain flows (PayPal web checkout, PayPal vaulting, 3D Secure card authentication). When the customer finishes, PayPal redirects them back to your app using a deep link. Configure your app to receive this redirect.
+The SDK opens a Chrome Custom Tab or the PayPal app for certain flows (PayPal web checkout, PayPal vaulting, 3D Secure card authentication). When the customer finishes, PayPal redirects them back to your app using a deep link. You'll need to configure your app to receive this redirect.
 
-The SDK supports two return URL strategies. Choose one or configure both as a fallback:
+The SDK uses `ReturnToAppStrategy` to determine how the customer returns to your app. Choose one of the two strategies:
 
-**Option 1: Custom URL Scheme**
+**Option 1: Android App Links (HTTPS) — Recommended**
+
+App Links use HTTPS URLs with domain verification (`android:autoVerify="true"`). This requires you to host a `/.well-known/assetlinks.json` file on your domain.
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:launchMode="singleTop">
+
+    <!-- Standard launcher intent-filter -->
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+            android:host="your-app-domain.example.com"
+            android:pathPrefix="/"
+            android:scheme="https" />
+    </intent-filter>
+</activity>
+```
+
+Use this strategy in SDK requests:
+
+```kotlin
+val returnToAppStrategy = ReturnToAppStrategy.AppLink(
+    appLinkUrl = "https://your-app-domain.example.com"
+)
+```
+
+**Option 2: Custom URL Scheme**
 
 Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs to use `android:launchMode="singleTop"` so that the OS delivers the return intent to the existing activity instance rather than creating a new one.
 
@@ -152,25 +188,13 @@ Register a custom URL scheme in your `AndroidManifest.xml`. Your activity needs 
 </activity>
 ```
 
-Use this scheme as your `fallbackUrlScheme` in SDK requests: `"com.example.myapp"`.
+Use this strategy in SDK requests:
 
-**Option 2: Android App Links (HTTPS)**
-
-App Links use HTTPS URLs with domain verification (`android:autoVerify="true"`). This requires you to host a `/.well-known/assetlinks.json` file on your domain.
-
-```xml
-<intent-filter android:autoVerify="true">
-    <action android:name="android.intent.action.VIEW" />
-    <category android:name="android.intent.category.DEFAULT" />
-    <category android:name="android.intent.category.BROWSABLE" />
-    <data
-        android:host="your-app-domain.example.com"
-        android:pathPrefix="/"
-        android:scheme="https" />
-</intent-filter>
+```kotlin
+val returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(
+    urlScheme = "com.example.myapp"
+)
 ```
-
-Use your HTTPS URL as the `appLinkUrl` in SDK requests: `"https://your-app-domain.example.com"`.
 
 > **Architecture warning:** Only the activity that declares these intent-filters can receive deep links back into the host application. If your app has multiple activities, route all SDK flows through the activity that declares the deep link intent-filters.
 
@@ -178,7 +202,7 @@ Use your HTTPS URL as the `appLinkUrl` in SDK requests: `"https://your-app-domai
 
 ## Initialize the SDK
 
-Create a `CoreConfig` object with your client ID and environment. Then create a client for each payment method you need.
+Create a `CoreConfig` object with your client ID and environment. Then create a client for each payment method you need. The Demo app creates clients inside ViewModel constructors so they are scoped to the screen lifecycle.
 
 ```kotlin
 // Create configuration (use Environment.LIVE for production)
@@ -239,7 +263,7 @@ The same `instanceState` / `restore()` pattern applies to `PayPalWebCheckoutClie
 
 The merchant-facing [Demo app](Demo/) included in the repository uses Jetpack Compose Navigation with a single entry-point activity. All SDK flows live within `MainActivity`, which contains a `NavHost`. Individual payment screens are composable destinations. Deep link returns arrive at `MainActivity` and are dispatched to the active screen.
 
-This single-entry-point pattern avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the deep link intent-filters.
+This single-entry-point pattern is recommended because it avoids routing ambiguity: the OS delivers deep link intents to `MainActivity`, which is the only activity that declares the intent-filters for deep linking.
 
 > **Note:** Your app's architecture may differ from the Demo app. The key requirement is that deep link intent-filters are declared on the activity that handles SDK return flows. The patterns shown in this guide are not prescriptive — adapt them to fit your app's architecture.
 
@@ -337,8 +361,9 @@ val card = Card(
 )
 
 // Build the request
-// returnUrl must match a URL scheme registered in your AndroidManifest.xml
-val returnUrl = "com.example.myapp://"    // or your HTTPS app link URL
+// returnUrl must match a deep link registered in your AndroidManifest.xml
+// Use your App Link URL or custom URL scheme (e.g., "com.example.myapp://")
+val returnUrl = "https://your-app-domain.example.com"
 val cardRequest = CardRequest(
     orderId = orderId,                    // order ID from your server
     card = card,
@@ -443,6 +468,54 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+**Jetpack Compose alternative**
+
+If your app uses Jetpack Compose, you can handle deep link returns with composable effects instead of Activity overrides. Place these two effects in the composable that manages your payment flow. Both are needed to cover the two ways Android can deliver the return intent.
+
+```kotlin
+@Composable
+fun CardPaymentScreen(cardClient: CardClient) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Handle return when the activity resumes (e.g., returning from Chrome Custom Tab)
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+    LaunchedEffect(lifecycleState) {
+        if (lifecycleState == Lifecycle.State.RESUMED) {
+            val activity = context as? ComponentActivity ?: return@LaunchedEffect
+            activity.intent?.let { intent -> handleFinishApproveOrder(cardClient, intent) }
+        }
+    }
+
+    // Handle return when a new intent is delivered to a singleTop activity
+    DisposableEffect(Unit) {
+        val activity = context as? ComponentActivity ?: return@DisposableEffect onDispose {}
+        val listener = Consumer<Intent> { newIntent ->
+            handleFinishApproveOrder(cardClient, newIntent)
+        }
+        activity.addOnNewIntentListener(listener)
+        onDispose { activity.removeOnNewIntentListener(listener) }
+    }
+
+    // ... your payment UI
+}
+
+private fun handleFinishApproveOrder(cardClient: CardClient, intent: Intent) {
+    cardClient.finishApproveOrder(intent)?.let { result ->
+        when (result) {
+            is CardFinishApproveOrderResult.Success ->
+                captureOrderOnServer(result.orderId)
+            is CardFinishApproveOrderResult.Failure ->
+                showError(result.error.errorDescription)
+            CardFinishApproveOrderResult.Canceled ->
+                resetToIdleState()
+            CardFinishApproveOrderResult.NoResult ->
+                resetToIdleState()
+        }
+    }
+}
+```
+
 > **Understanding `NoResult`:** `NoResult` means the SDK does not have enough information to determine the outcome — for example, if the customer returned to the app without completing authentication, or if the deep link intent was not associated with the current auth session. The payment may or may not have succeeded server-side. When you receive `NoResult`, query the [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/) from your server to check the current order status before showing an error or retrying.
 
 ### What's next
@@ -475,8 +548,8 @@ val card = Card(
     securityCode = "123"
 )
 
-// returnUrl must match a URL scheme registered in your AndroidManifest.xml
-val returnUrl = "com.example.myapp://"
+// returnUrl must match a deep link registered in your AndroidManifest.xml
+val returnUrl = "https://your-app-domain.example.com"
 val cardVaultRequest = CardVaultRequest(
     setupTokenId = setupTokenId,   // from your server
     card = card,
@@ -519,7 +592,7 @@ fun createPaymentToken(setupTokenId: String) {
 
 ### Deep link return
 
-Handle the deep link return using the same `onResume()` / `onNewIntent()` pattern used in the card payment flow. Call `finishVault()` instead of `finishApproveOrder()`.
+Handle the deep link return using the same `onResume()` / `onNewIntent()` pattern used in the card payment flow (or the Jetpack Compose alternative). Call `finishVault()` instead of `finishApproveOrder()`.
 
 ```kotlin
 private fun handleVaultReturnIntent(intent: Intent) {
@@ -590,8 +663,7 @@ val checkoutRequest = PayPalWebCheckoutRequest(
     orderId = orderId,                                           // from your server
     fundingSource = PayPalWebCheckoutFundingSource.PAYPAL,       // PAYPAL, PAYPAL_CREDIT, or PAY_LATER
     appSwitchWhenEligible = true,                                // switch to PayPal app if installed
-    appLinkUrl = "https://your-app-domain.example.com",          // HTTPS return URL (or null)
-    fallbackUrlScheme = "com.example.myapp"                      // custom scheme fallback (or null)
+    returnToAppStrategy = returnToAppStrategy                    // from Configure deep links section
 )
 
 paypalClient.start(activity, checkoutRequest) { startResult ->
@@ -632,7 +704,7 @@ fun capturePayPalOrder(orderId: String?) {
 
 ### Deep link return
 
-Override `onResume()` and `onNewIntent()` in your activity to handle the return. Call `finishStart()` to complete the PayPal checkout flow.
+Override `onResume()` and `onNewIntent()` in your activity to handle the return (or use the Jetpack Compose alternative shown in the card payment section). Call `finishStart()` to complete the PayPal checkout flow.
 
 ```kotlin
 private fun handlePayPalReturnIntent(intent: Intent) {
@@ -684,8 +756,7 @@ Your server creates a PayPal setup token and returns the setup token ID.
 val vaultRequest = PayPalWebVaultRequest(
     setupTokenId = setupTokenId,                                 // from your server
     appSwitchWhenEligible = true,                                // switch to PayPal app if installed
-    appLinkUrl = "https://your-app-domain.example.com",          // HTTPS return URL (or null)
-    fallbackUrlScheme = "com.example.myapp"                      // custom scheme fallback (or null)
+    returnToAppStrategy = returnToAppStrategy                    // from Configure deep links section
 )
 
 paypalClient.vault(activity, vaultRequest) { result ->
