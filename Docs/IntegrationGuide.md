@@ -55,7 +55,7 @@ All modules are published to Maven Central under the `com.paypal.android` group.
 
 **Snapshot builds**
 
-To test upcoming features before they ship, use snapshot builds. First, add the snapshot repository to your top-level `build.gradle`:
+If you'd like to test upcoming features before they ship, use snapshot builds. First, add the snapshot repository to your top-level `build.gradle`:
 
 ```groovy
 repositories {
