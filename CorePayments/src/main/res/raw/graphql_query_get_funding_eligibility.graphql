@@ -1,0 +1,14 @@
+query GetFundingEligibility(
+  $merchantID: [String],
+  $enableFunding: [SupportedPaymentMethodsType]
+) {
+    fundingEligibility(
+        merchantId: $merchantID,
+        enableFunding: $enableFunding
+    ) {
+        venmo {
+            eligible
+            reasons
+        }
+    }
+}

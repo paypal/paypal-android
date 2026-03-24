@@ -41,6 +41,8 @@ private val payPalWebFeatures = listOf(
     Feature.PAYPAL_WEB_VAULT
 )
 
+private val venmoFeatures = listOf(Feature.PAY_WITH_VENMO)
+
 @ExperimentalFoundationApi
 @Composable
 fun FeaturesView(
@@ -63,6 +65,12 @@ fun FeaturesView(
         }
         item {
             FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
+        }
+        stickyHeader {
+            FeatureGroupHeader("Venmo")
+        }
+        item {
+            FeatureOptions(venmoFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
     }
 }
