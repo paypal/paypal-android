@@ -139,7 +139,7 @@ val coreConfig = CoreConfig(
 )
 
 // Create the card payments client
-val cardClient = CardClient(context, coreConfig)
+val cardClient = CardClient(applicationContext, coreConfig)
 
 // Create the PayPal web checkout / vault client
 val paypalClient = PayPalWebCheckoutClient(context, coreConfig)
