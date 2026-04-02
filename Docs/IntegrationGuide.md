@@ -4,13 +4,13 @@
 
 This guide shows you how to accept card payments and PayPal payments in your Android app using the PayPal Android SDK. You learn how to set up the SDK, process one-time payments, and vault payment methods for future use. Before you begin, review the [Prerequisites](#prerequisites) section to make sure your environment is ready.
 
-**PayPal checkout flow:**
+**PayPal checkout flow (Chrome Custom Tab):**
 
 ```mermaid
 sequenceDiagram
     participant App as Your Android App
     participant SDK as PayPal SDK
-    participant Browser as Chrome Custom Tab / PayPal App
+    participant Browser as Chrome Custom Tab
     participant Server as Your Server
     participant PayPal as PayPal APIs
 
@@ -23,6 +23,34 @@ sequenceDiagram
     Note over Browser,PayPal: Customer logs in & approves payment
     PayPal-->>Browser: Redirect (deep link)
     Browser-->>App: Return intent
+    App->>SDK: finishStart(intent)
+    SDK-->>App: orderId, payerId
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API (capture)
+    PayPal-->>Server: Confirmation
+    Server-->>App: Order captured
+```
+
+**PayPal checkout flow (app switch):**
+
+```mermaid
+sequenceDiagram
+    participant App as Your Android App
+    participant SDK as PayPal SDK
+    participant PayPalApp as PayPal App
+    participant Server as Your Server
+    participant PayPal as PayPal APIs
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API (create)
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: start(checkoutRequest)
+    SDK->>PayPal: Check app switch eligibility
+    PayPal-->>SDK: Eligible + launch URL
+    SDK->>PayPalApp: Launch PayPal app
+    Note over PayPalApp: Customer approves payment
+    PayPalApp-->>App: Return intent (deep link)
     App->>SDK: finishStart(intent)
     SDK-->>App: orderId, payerId
     App->>Server: Capture/authorize order
@@ -58,7 +86,18 @@ sequenceDiagram
 
 ## How the PayPal Android SDK works
 
-The SDK handles the client-side portion of your payment integration. For card payments, the SDK submits card data directly to PayPal using encrypted channels and returns a result your server uses to capture or authorize the order. For PayPal payments, the SDK opens a Chrome Custom Tab (or the PayPal app if installed) so the customer can log in and approve the payment. When the customer finishes, PayPal redirects them back to your app using a deep link. Your server then captures or authorizes the approved order using the Orders v2 API.
+The SDK handles the client-side portion of your payment integration. For card payments, the SDK submits card data directly to PayPal using encrypted channels and returns a result your server uses to capture or authorize the order. For PayPal payments, the SDK launches a checkout experience where the customer logs in and approves the payment. When the customer finishes, PayPal redirects them back to your app using a deep link. Your server then captures or authorizes the approved order using the Orders v2 API.
+
+### App switch vs. Chrome Custom Tab
+
+The SDK supports two ways to present PayPal checkout:
+
+- **App switch** — If the customer has the PayPal app installed and the merchant opts in with `appSwitchWhenEligible = true`, the SDK checks eligibility with PayPal's backend. If eligible, the SDK launches the PayPal app directly. This provides a native experience where the customer may already be logged in, reducing friction.
+- **Chrome Custom Tab** — The default experience. The SDK opens a Chrome Custom Tab where the customer logs in to PayPal in a browser window.
+
+When app switch is enabled, the SDK handles eligibility automatically. If the PayPal app is not installed, the eligibility check fails, or the backend determines the customer is not eligible, the SDK silently falls back to Chrome Custom Tab. No additional error handling is needed — the fallback is invisible to both the merchant and the customer.
+
+The deep link return flow is identical regardless of which path the SDK takes. Your app calls the same `finishStart()` or `finishVault()` method and receives the same result types whether the customer returns from the PayPal app or from a Chrome Custom Tab.
 
 ---
 
@@ -279,6 +318,38 @@ class MainActivity : ComponentActivity() {
     }
 }
 ```
+
+---
+
+## App switch eligibility
+
+When you set `appSwitchWhenEligible = true` on a `PayPalWebCheckoutRequest` or `PayPalWebVaultRequest`, the SDK runs an eligibility check before launching checkout. This section explains how that check works and what happens at each step.
+
+### How eligibility is determined
+
+```mermaid
+flowchart TD
+    A["appSwitchWhenEligible = true?"] -->|No| B["Launch Chrome Custom Tab"]
+    A -->|Yes| C["PayPal app installed?"]
+    C -->|No| B
+    C -->|Yes| D["Call eligibility API"]
+    D -->|Eligible + launch URL| E["Launch PayPal app"]
+    D -->|Not eligible| B
+    D -->|API error| B
+```
+
+1. **Merchant opt-in** — The SDK checks whether the request has `appSwitchWhenEligible = true`. If `false` (the default), the SDK skips app switch entirely and uses Chrome Custom Tab.
+2. **App installed check** — The SDK checks whether the PayPal app is installed on the device. If not, it falls back to Chrome Custom Tab without making a network call.
+3. **Backend eligibility call** — The SDK sends a request to PayPal's backend with the order or setup token, the merchant's opt-in status, and device information. The backend evaluates eligibility based on factors such as merchant configuration, customer risk profile, and feature availability.
+4. **Result** — If the backend returns `appSwitchEligible = true` with a launch URL, the SDK opens the PayPal app. If the backend returns `appSwitchEligible = false` (with an `ineligibleReason`), or if the API call fails, the SDK falls back to Chrome Custom Tab.
+
+### Fallback guarantee
+
+Every failure in the eligibility check results in a silent fallback to Chrome Custom Tab. The merchant does not need to handle these cases — the SDK manages them automatically. The customer sees a working checkout flow regardless of whether app switch is available.
+
+### What the merchant controls
+
+The only merchant-side control is the `appSwitchWhenEligible` flag. Setting it to `true` tells the SDK to attempt app switch when possible. The backend has final authority over eligibility. There is no way to force app switch — the flag is a request, not a guarantee.
 
 ---
 
@@ -623,14 +694,16 @@ After creating the payment token on your server, store the token ID. Use it for 
 
 ## Accept a PayPal payment
 
-Use this flow when a customer pays with their PayPal account. The SDK opens a Chrome Custom Tab or the PayPal app (if installed and the customer opts in) for the customer to log in and approve the payment.
+Use this flow when a customer pays with their PayPal account. The SDK launches either the PayPal app (via app switch) or a Chrome Custom Tab for the customer to log in and approve the payment. See [App switch eligibility](#app-switch-eligibility) for how the SDK chooses between them.
+
+**Chrome Custom Tab flow:**
 
 ```mermaid
 sequenceDiagram
     participant App as Your App
     participant Server as Your Server
     participant SDK as PayPal SDK
-    participant Browser as Chrome Custom Tab / PayPal App
+    participant Browser as Chrome Custom Tab
     participant PayPal as PayPal
 
     App->>Server: Create order
@@ -647,6 +720,34 @@ sequenceDiagram
     App->>Server: Capture/authorize order
     Server->>PayPal: Orders v2 API (capture)
 ```
+
+**App switch flow:**
+
+```mermaid
+sequenceDiagram
+    participant App as Your App
+    participant Server as Your Server
+    participant SDK as PayPal SDK
+    participant PayPalApp as PayPal App
+    participant PayPal as PayPal
+
+    App->>Server: Create order
+    Server->>PayPal: Orders v2 API (create)
+    PayPal-->>Server: orderId
+    Server-->>App: orderId
+    App->>SDK: start(checkoutRequest)
+    SDK->>PayPal: Check app switch eligibility
+    PayPal-->>SDK: Eligible + launch URL
+    SDK->>PayPalApp: Launch PayPal app
+    Note over PayPalApp: Customer approves payment
+    PayPalApp-->>App: Return intent (deep link)
+    App->>SDK: finishStart(intent)
+    SDK-->>App: orderId, payerId
+    App->>Server: Capture/authorize order
+    Server->>PayPal: Orders v2 API (capture)
+```
+
+> **Note:** If app switch eligibility fails at any step, the SDK automatically falls back to the Chrome Custom Tab flow. Your code does not need to handle this — the same `start()` call covers both paths.
 
 ### What you'll do
 
@@ -679,6 +780,15 @@ paypalClient.start(activity, checkoutRequest) { startResult ->
 }
 ```
 
+`PayPalWebCheckoutRequest` parameters:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `orderId` | String | Yes | The order ID returned by your server after creating a PayPal order. |
+| `fundingSource` | PayPalWebCheckoutFundingSource | No | The funding source for the checkout. Default: `PAYPAL`. |
+| `appSwitchWhenEligible` | Boolean | No | Set to `true` to request app switch to the PayPal app when eligible. Default: `false`. This is a request, not a guarantee — the SDK checks eligibility and falls back to Chrome Custom Tab if app switch is not available. See [App switch eligibility](#app-switch-eligibility). |
+| `returnToAppStrategy` | ReturnToAppStrategy | Yes | Determines how the customer returns to your app after checkout. See [Configure deep links](#configure-deep-links). |
+
 `PayPalWebCheckoutFundingSource` options:
 
 | Value | Description |
@@ -705,6 +815,8 @@ fun capturePayPalOrder(orderId: String?) {
 ### Deep link return
 
 Override `onResume()` and `onNewIntent()` in your activity to handle the return (or use the Jetpack Compose alternative shown in the card payment section). Call `finishStart()` to complete the PayPal checkout flow.
+
+> **App switch note:** The deep link return is handled identically whether the customer returns from the PayPal app or a Chrome Custom Tab. The same `finishStart()` call works for both paths, and you receive the same result types. No conditional logic is needed.
 
 ```kotlin
 private fun handlePayPalReturnIntent(intent: Intent) {
@@ -742,6 +854,8 @@ After capturing the order, show a payment confirmation to the customer. The PayP
 
 Vaulting a PayPal account stores it as a reusable payment method. Use this flow to save a customer's PayPal account for future payments.
 
+App switch works the same way for vaulting as it does for checkout. Set `appSwitchWhenEligible = true` on the `PayPalWebVaultRequest` to enable it. The same eligibility check, silent fallback, and identical return flow apply. See [App switch eligibility](#app-switch-eligibility) for details.
+
 ### What you'll do
 
 Call `paypalClient.vault()` with a setup token, then handle the deep link return.
@@ -771,6 +885,14 @@ paypalClient.vault(activity, vaultRequest) { result ->
 }
 ```
 
+`PayPalWebVaultRequest` parameters:
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `setupTokenId` | String | Yes | The setup token ID returned by your server. |
+| `appSwitchWhenEligible` | Boolean | No | Set to `true` to request app switch to the PayPal app when eligible. Default: `false`. Behavior is identical to checkout — see [App switch eligibility](#app-switch-eligibility). |
+| `returnToAppStrategy` | ReturnToAppStrategy | Yes | Determines how the customer returns to your app after vaulting. See [Configure deep links](#configure-deep-links). |
+
 ### Handle the result
 
 After vaulting succeeds, create a payment token on your server.
@@ -782,6 +904,8 @@ fun createPayPalPaymentToken(approvalSessionId: String) {
 ```
 
 ### Deep link return
+
+As with checkout, the return flow is the same whether the customer comes back from the PayPal app or a Chrome Custom Tab. Call `finishVault()` and handle the same result types.
 
 ```kotlin
 private fun handlePayPalVaultReturnIntent(intent: Intent) {
@@ -835,16 +959,27 @@ For the full list of sandbox test values, see the [PayPal sandbox testing guide]
 - Card payment succeeds without 3D Secure
 - Card payment triggers 3D Secure challenge — customer completes authentication
 - Card payment triggers 3D Secure challenge — customer cancels
-- PayPal checkout completes
+- PayPal checkout completes via Chrome Custom Tab
 - PayPal checkout — customer cancels in Chrome Custom Tab
-- PayPal checkout — app switch to PayPal app (if testing `appSwitchWhenEligible = true`)
 - Process death recovery — stop the app while authentication is in progress, return to it, and verify the flow completes correctly
+
+**Test app switch scenarios**
+
+App switch requires a physical device with the PayPal app installed. Test the following:
+
+- PayPal checkout with `appSwitchWhenEligible = true` and PayPal app installed — verify the PayPal app opens and the customer can approve the payment
+- PayPal checkout with `appSwitchWhenEligible = true` and PayPal app **not** installed — verify the SDK falls back to Chrome Custom Tab without errors
+- PayPal vault with `appSwitchWhenEligible = true` — verify the vault flow works through the PayPal app
+- App switch return — verify that `finishStart()` / `finishVault()` returns the correct result when the customer returns from the PayPal app
+- Eligibility fallback — if the backend determines the customer is not eligible for app switch, verify the SDK silently falls back to Chrome Custom Tab
+
+> **Note:** App switch eligibility is determined by PayPal's backend and may not always be available in sandbox. If the PayPal app is installed but checkout still opens in a Chrome Custom Tab, the backend may have returned an ineligible result. This is expected behavior — the SDK is falling back correctly.
 
 **Test process death recovery**
 
-1. Start a checkout flow that opens a Chrome Custom Tab (PayPal web checkout or card 3D Secure).
-2. After the Chrome Custom Tab opens, use Android Studio's "Stop app" button to stop the process.
-3. Return to the app by selecting the notification or using the back button from the browser.
+1. Start a checkout flow that opens a Chrome Custom Tab or the PayPal app (PayPal web checkout or card 3D Secure).
+2. After the Chrome Custom Tab or PayPal app opens, use Android Studio's "Stop app" button to stop the process.
+3. Return to the app by selecting the notification or using the back button from the browser or PayPal app.
 4. Verify that your `restore()` call rebuilds the SDK client state and that `finishStart()` or `finishApproveOrder()` returns the correct result.
 
 ---
@@ -860,6 +995,9 @@ Before going live, complete the following:
 - [ ] Test process death recovery on a physical device running a live-like build
 - [ ] Confirm that all result variants (`Success`, `Failure`, `Canceled`, `NoResult`) are handled in every callback
 - [ ] Confirm that nullable return values (`status`, `orderId`, `payerId`) are null-checked before use
+- [ ] If using app switch (`appSwitchWhenEligible = true`): test on a physical device with the PayPal app installed and verify the checkout completes through the PayPal app
+- [ ] If using app switch: verify that checkout still works when the PayPal app is not installed (fallback to Chrome Custom Tab)
+- [ ] If using app switch: verify the deep link return works correctly from the PayPal app in a release build
 - [ ] Review Google Play policies regarding location data consent if you call `PayPalDataCollector` with `hasUserLocationConsent = true`
 
 ---
