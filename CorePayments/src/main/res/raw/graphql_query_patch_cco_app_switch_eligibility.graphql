@@ -8,6 +8,7 @@ mutation PatchCcoWithAppSwitchEligibility(
   $tokenType: externalTokenType!
   $integrationArtifact: externalIntegrationArtifactType!
   $userExperienceFlow: externalUserExperienceFlowType!
+  $buyerEmailAddressMerchantPassed: String
 ) {
   external {
     patchCcoWithAppSwitchEligibility(
@@ -19,6 +20,7 @@ mutation PatchCcoWithAppSwitchEligibility(
         osType: $osType
         token: $token
         tokenType: $tokenType
+        buyerEmailAddressMerchantPassed: $buyerEmailAddressMerchantPassed
       }
       patchCcoInput: {
         token: $token

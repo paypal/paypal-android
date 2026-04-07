@@ -20,7 +20,8 @@ data class PatchCcoWithAppSwitchEligibilityVariables(
     val experimentationContext: ExperimentationContext,
     val integrationArtifact: String,
     val userExperienceFlow: String,
-    val osType: String
+    val osType: String,
+    val buyerEmailAddress: String? = null
 )
 
 /**

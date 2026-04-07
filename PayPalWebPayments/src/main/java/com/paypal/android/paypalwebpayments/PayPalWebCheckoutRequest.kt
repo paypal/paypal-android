@@ -9,10 +9,12 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
  * @param fundingSource specify funding (credit, paylater or default)
  * @param appSwitchWhenEligible whether to switch to the PayPal app when eligible
  * @param returnToAppStrategy Strategy for returning to the app after checkout flow
+ * @param buyerEmailAddress Optional buyer email address
  */
 data class PayPalWebCheckoutRequest @JvmOverloads constructor(
     val orderId: String,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val appSwitchWhenEligible: Boolean = false,
-    val returnToAppStrategy: ReturnToAppStrategy? = null
+    val returnToAppStrategy: ReturnToAppStrategy? = null,
+    val buyerEmailAddress: String? = null
 )

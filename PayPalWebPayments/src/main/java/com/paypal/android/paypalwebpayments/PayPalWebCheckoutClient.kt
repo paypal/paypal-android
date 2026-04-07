@@ -196,6 +196,7 @@ class PayPalWebCheckoutClient internal constructor(
                     token = request.orderId,
                     tokenType = TokenType.ORDER_ID,
                     appSwitchWhenEligible = request.appSwitchWhenEligible,
+                    buyerEmailAddress = request.buyerEmailAddress,
                     fallbackUri = buildPayPalCheckoutUri(
                         orderId = request.orderId,
                         funding = request.fundingSource,
@@ -337,7 +338,8 @@ class PayPalWebCheckoutClient internal constructor(
                 token = request.setupTokenId,
                 tokenType = TokenType.VAULT_ID,
                 appSwitchWhenEligible = request.appSwitchWhenEligible,
-                fallbackUri = buildPayPalVaultUri(request.setupTokenId)
+                fallbackUri = buildPayPalVaultUri(request.setupTokenId),
+                buyerEmailAddress = request.buyerEmailAddress
             )
         }
 
@@ -544,7 +546,8 @@ class PayPalWebCheckoutClient internal constructor(
         token: String,
         tokenType: TokenType,
         appSwitchWhenEligible: Boolean,
-        fallbackUri: Uri
+        fallbackUri: Uri,
+        buyerEmailAddress: String? = null
     ): Uri {
         return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
@@ -552,7 +555,8 @@ class PayPalWebCheckoutClient internal constructor(
                 orderId = token,
                 tokenType = tokenType,
                 merchantOptInForAppSwitch = true,
-                paypalNativeAppInstalled = true
+                paypalNativeAppInstalled = true,
+                buyerEmailAddress = buyerEmailAddress
             )
             when (patchCcoResult) {
                 is APIResult.Success -> {

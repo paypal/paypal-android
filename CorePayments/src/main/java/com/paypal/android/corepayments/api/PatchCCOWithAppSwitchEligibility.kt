@@ -39,14 +39,16 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         orderId: String,
         tokenType: TokenType,
         merchantOptInForAppSwitch: Boolean,
-        paypalNativeAppInstalled: Boolean
+        paypalNativeAppInstalled: Boolean,
+        buyerEmailAddress: String? = null
     ): APIResult<AppSwitchEligibility> {
         val graphQLRequest = createGraphQLRequest(
             context = context,
             tokenType = tokenType,
             orderId = orderId,
             merchantOptInForAppSwitch = merchantOptInForAppSwitch,
-            paypalNativeAppInstalled = paypalNativeAppInstalled
+            paypalNativeAppInstalled = paypalNativeAppInstalled,
+            buyerEmailAddress = buyerEmailAddress
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
     }
@@ -56,7 +58,8 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
         tokenType: TokenType,
         orderId: String,
         merchantOptInForAppSwitch: Boolean,
-        paypalNativeAppInstalled: Boolean
+        paypalNativeAppInstalled: Boolean,
+        buyerEmailAddress: String? = null
     ): GraphQLRequest<PatchCcoWithAppSwitchEligibilityVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             context,
@@ -79,7 +82,8 @@ class PatchCCOWithAppSwitchEligibility internal constructor(
             integrationArtifact = UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT,
             userExperienceFlow = UpdateClientConfigAPI.Defaults.USER_EXPERIENCE_FLOW,
             osType = OS_TYPE,
-            paypalNativeAppInstalled = paypalNativeAppInstalled
+            paypalNativeAppInstalled = paypalNativeAppInstalled,
+            buyerEmailAddress = buyerEmailAddress
         )
 
         return GraphQLRequest(
