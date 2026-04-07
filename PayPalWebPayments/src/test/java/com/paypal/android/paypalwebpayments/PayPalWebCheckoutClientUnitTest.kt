@@ -2403,4 +2403,104 @@ class PayPalWebCheckoutClientUnitTest {
             )
         }
     }
+
+    @Test
+    fun `startAsync() passes buyerEmailAddress to patchCCOWithAppSwitchEligibility`() = runTest {
+        // Given
+        val buyerEmail = "buyer@example.com"
+        coEvery {
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any(),
+                buyerEmailAddress = buyerEmail
+            )
+        } returns APIResult.Success(
+            AppSwitchEligibility(
+                appSwitchEligible = true,
+                launchUrl = fakeAppSwitchUrl,
+                ineligibleReason = null
+            )
+        )
+
+        every { deviceInspector.isPayPalInstalled } returns true
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+        val request = PayPalWebCheckoutRequest(
+            "fake-order-id",
+            appSwitchWhenEligible = true,
+            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(urlScheme),
+            buyerEmailAddress = buyerEmail
+        )
+
+        // When
+        sut.startAsync(activity, request)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        coVerify {
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                merchantOptInForAppSwitch = true,
+                paypalNativeAppInstalled = true,
+                buyerEmailAddress = buyerEmail
+            )
+        }
+    }
+
+    @Test
+    fun `vaultAsync() passes buyerEmailAddress to patchCCOWithAppSwitchEligibility`() = runTest {
+        // Given
+        val buyerEmail = "buyer@example.com"
+        coEvery {
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = any(),
+                tokenType = any(),
+                merchantOptInForAppSwitch = any(),
+                paypalNativeAppInstalled = any(),
+                buyerEmailAddress = buyerEmail
+            )
+        } returns APIResult.Success(
+            AppSwitchEligibility(
+                appSwitchEligible = true,
+                launchUrl = fakeAppSwitchUrl,
+                ineligibleReason = null
+            )
+        )
+
+        every { deviceInspector.isPayPalInstalled } returns true
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+        val request = PayPalWebVaultRequest(
+            "fake-setup-token-id",
+            appSwitchWhenEligible = true,
+            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(urlScheme),
+            buyerEmailAddress = buyerEmail
+        )
+
+        // When
+        sut.vaultAsync(activity, request)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        coVerify {
+            patchCCOWithAppSwitchEligibility(
+                context = any(),
+                orderId = "fake-setup-token-id",
+                tokenType = TokenType.VAULT_ID,
+                merchantOptInForAppSwitch = true,
+                paypalNativeAppInstalled = true,
+                buyerEmailAddress = buyerEmail
+            )
+        }
+    }
 }
