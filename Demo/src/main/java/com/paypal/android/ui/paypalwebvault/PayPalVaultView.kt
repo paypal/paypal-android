@@ -7,13 +7,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
@@ -86,6 +94,32 @@ private fun Step1_CreateSetupToken(
             onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
             modifier = Modifier.fillMaxWidth()
         )
+        if (uiState.appSwitchWhenEligible) {
+            if (uiState.buyerEmailAddress != null) {
+                TextButton(
+                    onClick = { viewModel.buyerEmailAddress = null },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Clear Buyer Email Address (${uiState.buyerEmailAddress})")
+                }
+            } else {
+                TextButton(
+                    onClick = { viewModel.showBuyerEmailDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Enter Buyer Email Address")
+                }
+            }
+        }
+        if (uiState.showBuyerEmailDialog) {
+            BuyerEmailDialog(
+                onConfirm = { email ->
+                    viewModel.buyerEmailAddress = email
+                    viewModel.showBuyerEmailDialog = false
+                },
+                onDismiss = { viewModel.showBuyerEmailDialog = false }
+            )
+        }
         EnumOptionList(
             title = stringResource(id = R.string.return_to_app_strategy_title),
             stringArrayResId = R.array.deep_link_strategy_options,
@@ -165,4 +199,56 @@ fun PayPalWebVaultResultView(result: PayPalWebCheckoutFinishVaultResult.Success)
     ) {
         PropertyView(name = "Approval Session ID", value = result.approvalSessionId)
     }
+}
+
+@Composable
+private fun BuyerEmailDialog(
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val emailInput = remember { mutableStateOf("") }
+    val emailError = remember { mutableStateOf<String?>(null) }
+
+    fun isValidEmail(email: String): Boolean =
+        android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Buyer Email Address") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = emailInput.value,
+                    onValueChange = {
+                        emailInput.value = it
+                        emailError.value = null
+                    },
+                    label = { Text("Email Address") },
+                    isError = emailError.value != null,
+                    supportingText = emailError.value?.let { { Text(it) } },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                when {
+                    emailInput.value.isBlank() -> emailError.value = "Email address is required"
+                    !isValidEmail(emailInput.value) -> emailError.value =
+                        "Enter a valid email address"
+
+                    else -> onConfirm(emailInput.value.trim())
+                }
+            }) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

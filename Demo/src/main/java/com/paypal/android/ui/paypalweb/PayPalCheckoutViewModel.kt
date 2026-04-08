@@ -58,7 +58,12 @@ class PayPalCheckoutViewModel @Inject constructor(
     var appSwitchWhenEligible: Boolean
         get() = _uiState.value.appSwitchWhenEligible
         set(value) {
-            _uiState.update { it.copy(appSwitchWhenEligible = value) }
+            _uiState.update {
+                it.copy(
+                    appSwitchWhenEligible = value,
+                    buyerEmailAddress = if (value) it.buyerEmailAddress else null
+                )
+            }
         }
 
     var returnToAppStrategyOption: ReturnToAppStrategyOption
@@ -94,6 +99,18 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(fundingSource = value) }
         }
 
+    var buyerEmailAddress: String?
+        get() = _uiState.value.buyerEmailAddress
+        set(value) {
+            _uiState.update { it.copy(buyerEmailAddress = value) }
+        }
+
+    var showBuyerEmailDialog: Boolean
+        get() = _uiState.value.showBuyerEmailDialog
+        set(value) {
+            _uiState.update { it.copy(showBuyerEmailDialog = value) }
+        }
+
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
@@ -125,7 +142,8 @@ class PayPalCheckoutViewModel @Inject constructor(
             orderId,
             fundingSource,
             appSwitchWhenEligible,
-            returnToAppStrategyOption.toReturnToAppStrategy()
+            returnToAppStrategyOption.toReturnToAppStrategy(),
+            buyerEmailAddress = if (appSwitchWhenEligible) buyerEmailAddress else null
         )
 
         paypalClient.start(activity, checkoutRequest) { startResult ->

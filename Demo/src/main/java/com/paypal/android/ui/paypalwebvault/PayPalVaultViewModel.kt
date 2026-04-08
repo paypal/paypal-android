@@ -57,13 +57,30 @@ class PayPalVaultViewModel @Inject constructor(
     var appSwitchWhenEligible: Boolean
         get() = _uiState.value.appSwitchWhenEligible
         set(value) {
-            _uiState.update { it.copy(appSwitchWhenEligible = value) }
+            _uiState.update {
+                it.copy(
+                    appSwitchWhenEligible = value,
+                    buyerEmailAddress = if (value) it.buyerEmailAddress else null
+                )
+            }
         }
 
     var returnToAppStrategy: ReturnToAppStrategyOption
         get() = _uiState.value.returnToAppStrategy
         set(value) {
             _uiState.update { it.copy(returnToAppStrategy = value) }
+        }
+
+    var buyerEmailAddress: String?
+        get() = _uiState.value.buyerEmailAddress
+        set(value) {
+            _uiState.update { it.copy(buyerEmailAddress = value) }
+        }
+
+    var showBuyerEmailDialog: Boolean
+        get() = _uiState.value.showBuyerEmailDialog
+        set(value) {
+            _uiState.update { it.copy(showBuyerEmailDialog = value) }
         }
 
     fun createSetupToken() {
@@ -89,7 +106,8 @@ class PayPalVaultViewModel @Inject constructor(
                 val request = PayPalWebVaultRequest(
                     setupTokenId,
                     appSwitchWhenEligible,
-                    returnToAppStrategy.toReturnToAppStrategy()
+                    returnToAppStrategy.toReturnToAppStrategy(),
+                    buyerEmailAddress = if (appSwitchWhenEligible) buyerEmailAddress else null
                 )
                 vaultSetupTokenWithRequest(activity, request)
             }

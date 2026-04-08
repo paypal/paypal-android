@@ -15,6 +15,8 @@ data class PayPalUiState(
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val appSwitchWhenEligible: Boolean = false,
     val returnToAppStrategyOption: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS,
+    val buyerEmailAddress: String? = null,
+    val showBuyerEmailDialog: Boolean = false,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
