@@ -1,6 +1,7 @@
 package com.paypal.android.api.model.serialization
 
 import com.paypal.android.api.model.OrderIntent
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -44,7 +45,8 @@ data class Vault(
 
 @Serializable
 data class PayPalPaymentSource(
-    val experienceContext: PayPalOrderExperienceContext
+    val experienceContext: PayPalOrderExperienceContext,
+    @SerialName("email_address") val emailAddress: String? = null
 )
 
 @Serializable

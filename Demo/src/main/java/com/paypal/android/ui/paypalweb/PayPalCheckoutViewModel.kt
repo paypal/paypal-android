@@ -119,7 +119,8 @@ class PayPalCheckoutViewModel @Inject constructor(
                     intent = intentOption,
                     shouldVaultOnSuccess = false,
                     appSwitchWhenEligible = appSwitchWhenEligible,
-                    returnToAppStrategy = returnToAppStrategyOption
+                    returnToAppStrategy = returnToAppStrategyOption,
+                    buyerEmailAddress = buyerEmailAddress
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()

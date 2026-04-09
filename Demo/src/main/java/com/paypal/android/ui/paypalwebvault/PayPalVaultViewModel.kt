@@ -88,7 +88,8 @@ class PayPalVaultViewModel @Inject constructor(
             createSetupTokenState = ActionState.Loading
             createSetupTokenState = createPayPalSetupTokenUseCase(
                 appSwitchWhenEligible,
-                returnToAppStrategy.toReturnToAppStrategy()
+                returnToAppStrategy.toReturnToAppStrategy(),
+                buyerEmailAddress = buyerEmailAddress
             ).mapToActionState()
         }
     }

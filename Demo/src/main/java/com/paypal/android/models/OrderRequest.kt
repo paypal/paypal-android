@@ -10,5 +10,6 @@ data class OrderRequest(
     val intent: OrderIntent,
     val shouldVaultOnSuccess: Boolean,
     val appSwitchWhenEligible: Boolean,
-    @Transient val returnToAppStrategy: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS
+    @Transient val returnToAppStrategy: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS,
+    @Transient val buyerEmailAddress: String? = null
 )

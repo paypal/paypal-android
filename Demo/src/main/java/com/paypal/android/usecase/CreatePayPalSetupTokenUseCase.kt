@@ -20,7 +20,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 
     suspend operator fun invoke(
         appSwitchEnabled: Boolean,
-        returnToAppStrategy: ReturnToAppStrategy
+        returnToAppStrategy: ReturnToAppStrategy,
+        buyerEmailAddress: String? = null
     ): SDKSampleServerResult<PayPalSetupToken, Exception> =
         withContext(Dispatchers.IO) {
             val appUrl = ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy)
@@ -35,7 +36,8 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
                 paymentSource = PayPalSource(
                     paypal = PayPalDetails(
                         usageType = "MERCHANT",
-                        experienceContext = experienceContext
+                        experienceContext = experienceContext,
+                        emailAddress = buyerEmailAddress
                     )
                 )
             )

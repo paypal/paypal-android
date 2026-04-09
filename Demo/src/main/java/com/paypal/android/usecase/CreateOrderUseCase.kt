@@ -36,7 +36,8 @@ class CreateOrderUseCase @Inject constructor(
                             ),
                             cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(returnToAppStrategy),
                             nativeApp = NativeApp(appUrl = appUrl)
-                        )
+                        ),
+                        emailAddress = request.buyerEmailAddress
                     )
                 )
             }

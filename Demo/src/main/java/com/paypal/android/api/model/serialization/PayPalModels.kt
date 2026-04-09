@@ -1,5 +1,6 @@
 package com.paypal.android.api.model.serialization
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 // PayPal Setup Request
@@ -16,7 +17,8 @@ data class PayPalSource(
 @Serializable
 data class PayPalDetails(
     val usageType: String,
-    val experienceContext: PayPalExperienceContext
+    val experienceContext: PayPalExperienceContext,
+    @SerialName("email_address") val emailAddress: String? = null
 )
 
 @Serializable
