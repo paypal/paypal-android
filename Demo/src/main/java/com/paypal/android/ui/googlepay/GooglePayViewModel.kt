@@ -87,5 +87,7 @@ class GooglePayViewModel @Inject constructor(
         }
     }
 
-    suspend fun launchGooglePay() = googlePayClient.start()
+    fun launchGooglePay() {
+        googlePayClient.start()
+    }
 }
