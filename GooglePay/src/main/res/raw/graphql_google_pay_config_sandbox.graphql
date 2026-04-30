@@ -1,0 +1,41 @@
+query getGooglePayConfig(
+    $clientId: String!
+    $merchantId: [String]!
+    $merchantOrigin: String!
+    $buyerCountry: CountryCodes
+) {
+    googlePayConfig(
+        clientId: $clientId
+        merchantId: $merchantId
+        merchantOrigin: $merchantOrigin
+        buyerCountry: $buyerCountry
+    ) {
+        isEligible
+        apiVersion
+        apiVersionMinor
+        countryCode
+        allowedPaymentMethods {
+            type
+            parameters {
+                allowedAuthMethods
+                allowedCardNetworks
+                billingAddressRequired
+                assuranceDetailsRequired
+                billingAddressParameters {
+                    format
+                }
+            }
+            tokenizationSpecification {
+                type
+                parameters {
+                    gateway
+                    gatewayMerchantId
+                }
+            }
+        }
+        merchantInfo {
+            merchantOrigin
+            merchantId
+        }
+    }
+}
