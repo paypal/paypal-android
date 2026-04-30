@@ -62,7 +62,7 @@ fun GooglePayView(
                 uiState = uiState,
                 onLaunchGooglePay = {
                     coroutineScope.launch {
-                        val result = viewModel.launchGooglePay()
+                        val result = viewModel.requestGooglePayLaunch()
                         when (result) {
                             is SDKResult.Success -> {
                                 val launchRequest = result.value

@@ -26,4 +26,15 @@ class GooglePayLaunchContract(
         val success = googlePayResult.status.statusCode == CommonStatusCodes.SUCCESS
         return GooglePayLaunchResult(success)
     }
+
+    override fun getSynchronousResult(
+        context: Context,
+        input: GooglePayLaunchRequest?
+    ): SynchronousResult<GooglePayLaunchResult?>? {
+        val result = input?.task?.let { googlePayContract.getSynchronousResult(context, it) }
+        return result?.value?.let { value ->
+            val success = value.status.statusCode == CommonStatusCodes.SUCCESS
+            return SynchronousResult(GooglePayLaunchResult(success))
+        }
+    }
 }
