@@ -41,11 +41,11 @@ internal class GooglePayAPI(
         val variables = GetGooglePayConfigVariables(
             clientId = coreConfig.clientId,
             // TODO: allow this to be provided as a param
-            merchantId = "",
+            merchantId = listOf("V9YP27HFNG2LW"),
             // TODO: see if we need this
             merchantOrigin = "com.paypal.android.sdk",
-            // TODO: allow this to be provided as a param
-            buyerCountry = "US"
+//            // TODO: allow this to be provided as a param
+//            buyerCountry = "US"
         )
 
         val graphQLRequest = GraphQLRequest(

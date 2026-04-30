@@ -2,6 +2,7 @@ package com.paypal.android.googlepay
 
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @InternalSerializationApi
 @Serializable
@@ -16,8 +17,8 @@ data class GooglePayConfig(
     val apiVersion: Int?,
     val apiVersionMinor: Int?,
     val isEligible: Boolean,
-    val merchantInfo: GooglePayMerchantInfo?,
-    val allowedPaymentMethods: List<GooglePayPaymentMethod>?
+    val merchantInfo: JsonElement?,
+    val allowedPaymentMethods: JsonElement?
 )
 
 @InternalSerializationApi

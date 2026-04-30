@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 @OptIn(InternalSerializationApi::class)
 data class GetGooglePayConfigVariables(
     val clientId: String,
-    val merchantId: String,
+    val merchantId: List<String>,
     val merchantOrigin: String,
-    val buyerCountry: String
 )

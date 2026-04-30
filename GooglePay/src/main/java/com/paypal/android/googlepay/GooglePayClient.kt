@@ -70,14 +70,16 @@ class GooglePayClient internal constructor(
             .put("totalPrice", "1.00")
             .put("totalPriceLabel", "Total")
 
-        val allowedPaymentMethods = JSONObject(googlePayConfig.allowedPaymentMethods.toString())
-        val merchantInfo = JSONObject(googlePayConfig.merchantInfo.toString())
+        // TODO: migrate to kotlinx serialization so we don't have to make this conversion
+        val allowedPaymentMethods =
+            googlePayConfig.allowedPaymentMethods?.let { JSONArray(it.toString()) }
+        val merchantInfo = googlePayConfig.merchantInfo?.let { JSONObject(it.toString()) }
 
         val request = JSONObject()
             .put("apiVersion", 2)
             .put("apiVersionMinor", 0)
-            .put("allowedPaymentMethods", allowedPaymentMethods)
             .put("merchantInfo", merchantInfo)
+            .put("allowedPaymentMethods", allowedPaymentMethods)
             .put("callbackIntents", JSONArray(listOf("PAYMENT_AUTHORIZATION")))
             .put("transactionInfo", transactionInfo)
         return request
