@@ -1,5 +1,6 @@
 package com.paypal.android.ui.googlepay
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,10 +14,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.googlepay.GooglePayLaunchContract
+import com.paypal.android.googlepay.SDKResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
@@ -25,6 +29,7 @@ import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
+import kotlinx.coroutines.launch
 
 @Composable
 fun GooglePayView(
@@ -37,8 +42,13 @@ fun GooglePayView(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
+    val googlePayLauncher = rememberLauncherForActivityResult(GooglePayLaunchContract()) { result ->
+        print(result.success)
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contentPadding = UIConstants.paddingMedium
+    val coroutineScope = rememberCoroutineScope()
     Column(
         verticalArrangement = UIConstants.spacingLarge,
         modifier = Modifier
@@ -50,7 +60,19 @@ fun GooglePayView(
         if (uiState.isCreateOrderSuccessful) {
             Step2_LaunchGooglePay(
                 uiState = uiState,
-                onLaunchGooglePay = { viewModel.launchGooglePay() }
+                onLaunchGooglePay = {
+                    coroutineScope.launch {
+                        val result = viewModel.launchGooglePay()
+                        when (result) {
+                            is SDKResult.Success -> {
+                                val launchRequest = result.value
+                                googlePayLauncher.launch(launchRequest)
+                            }
+
+                            is SDKResult.Failure -> TODO("handle error case")
+                        }
+                    }
+                }
             )
         }
         if (uiState.isGooglePaySuccessful) {
