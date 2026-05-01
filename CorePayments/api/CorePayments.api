@@ -31,31 +31,6 @@ public final class com/paypal/android/corepayments/Address$Creator : android/os/
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract class com/paypal/android/corepayments/ApproveGooglePayPaymentResult {
-}
-
-public final class com/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure : com/paypal/android/corepayments/ApproveGooglePayPaymentResult {
-	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
-	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure;
-	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Failure;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success : com/paypal/android/corepayments/ApproveGooglePayPaymentResult {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success;
-	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/corepayments/ApproveGooglePayPaymentResult$Success;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getStatus ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/paypal/android/corepayments/BrowserSwitchRequestCodes {
 	public static final field CARD_APPROVE_ORDER I
 	public static final field CARD_VAULT I
