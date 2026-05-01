@@ -45,12 +45,12 @@ android {
 
 dependencies {
     api project(':CorePayments')
-    api libs.google.playServicesWallet
 
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
     implementation libs.kotlinx.serializationJson
     implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.google.playServicesWallet
 
     testImplementation libs.junit
 
