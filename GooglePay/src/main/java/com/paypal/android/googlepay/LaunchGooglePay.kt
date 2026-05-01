@@ -6,10 +6,14 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.contract.TaskResultContracts
 
-// Wrapper for Google Pay launch
-class LaunchGooglePay(
-    private val googlePayContract: TaskResultContracts.GetPaymentDataResult = TaskResultContracts.GetPaymentDataResult()
+// Wrapper for Google Pay GetPaymentDataResult ActivityResultAPI contract
+class LaunchGooglePay internal constructor(
+    private val googlePayContract: TaskResultContracts.GetPaymentDataResult
 ) : ActivityResultContract<GooglePayAuthChallenge, GooglePayLaunchResult>() {
+
+    // NOTE: this constructor is necessary to avoid having to mark play-services as
+    // `api` in the :GooglePay build.gradle
+    constructor(): this(TaskResultContracts.GetPaymentDataResult())
 
     override fun createIntent(
         context: Context,

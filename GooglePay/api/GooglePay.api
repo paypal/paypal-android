@@ -65,8 +65,6 @@ public final class com/paypal/android/googlepay/GooglePayStartResult$Success : c
 
 public final class com/paypal/android/googlepay/LaunchGooglePay : androidx/activity/result/contract/ActivityResultContract {
 	public fun <init> ()V
-	public fun <init> (Lcom/google/android/gms/wallet/contract/TaskResultContracts$GetPaymentDataResult;)V
-	public synthetic fun <init> (Lcom/google/android/gms/wallet/contract/TaskResultContracts$GetPaymentDataResult;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun createIntent (Landroid/content/Context;Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)Landroid/content/Intent;
 	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
 	public fun getSynchronousResult (Landroid/content/Context;Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)Landroidx/activity/result/contract/ActivityResultContract$SynchronousResult;
