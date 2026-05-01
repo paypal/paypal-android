@@ -7,7 +7,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.contract.TaskResultContracts
 
 // Wrapper for Google Pay launch
-class GooglePayLaunchContract(
+class LaunchGooglePay(
     private val googlePayContract: TaskResultContracts.GetPaymentDataResult = TaskResultContracts.GetPaymentDataResult()
 ) : ActivityResultContract<GooglePayAuthChallenge, GooglePayLaunchResult>() {
 

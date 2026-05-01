@@ -39,18 +39,6 @@ public final class com/paypal/android/googlepay/GooglePayExtKt {
 	public static final fun awaitTask (Lcom/google/android/gms/tasks/Task;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class com/paypal/android/googlepay/GooglePayLaunchContract : androidx/activity/result/contract/ActivityResultContract {
-	public fun <init> ()V
-	public fun <init> (Lcom/google/android/gms/wallet/contract/TaskResultContracts$GetPaymentDataResult;)V
-	public synthetic fun <init> (Lcom/google/android/gms/wallet/contract/TaskResultContracts$GetPaymentDataResult;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun createIntent (Landroid/content/Context;Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)Landroid/content/Intent;
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun getSynchronousResult (Landroid/content/Context;Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)Landroidx/activity/result/contract/ActivityResultContract$SynchronousResult;
-	public synthetic fun getSynchronousResult (Landroid/content/Context;Ljava/lang/Object;)Landroidx/activity/result/contract/ActivityResultContract$SynchronousResult;
-	public fun parseResult (ILandroid/content/Intent;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-}
-
 public final class com/paypal/android/googlepay/GooglePayLaunchResult {
 	public fun <init> (Z)V
 	public final fun component1 ()Z
@@ -73,6 +61,18 @@ public final class com/paypal/android/googlepay/GooglePayStartResult$Failure : c
 public final class com/paypal/android/googlepay/GooglePayStartResult$Success : com/paypal/android/googlepay/GooglePayStartResult {
 	public fun <init> (Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)V
 	public final fun getAuthChallenge ()Lcom/paypal/android/googlepay/GooglePayAuthChallenge;
+}
+
+public final class com/paypal/android/googlepay/LaunchGooglePay : androidx/activity/result/contract/ActivityResultContract {
+	public fun <init> ()V
+	public fun <init> (Lcom/google/android/gms/wallet/contract/TaskResultContracts$GetPaymentDataResult;)V
+	public synthetic fun <init> (Lcom/google/android/gms/wallet/contract/TaskResultContracts$GetPaymentDataResult;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun createIntent (Landroid/content/Context;Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)Landroid/content/Intent;
+	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
+	public fun getSynchronousResult (Landroid/content/Context;Lcom/paypal/android/googlepay/GooglePayAuthChallenge;)Landroidx/activity/result/contract/ActivityResultContract$SynchronousResult;
+	public synthetic fun getSynchronousResult (Landroid/content/Context;Ljava/lang/Object;)Landroidx/activity/result/contract/ActivityResultContract$SynchronousResult;
+	public fun parseResult (ILandroid/content/Intent;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
+	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
 }
 
 public abstract class com/paypal/android/googlepay/SDKResult {
