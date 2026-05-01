@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.googlepay.GooglePayLaunchContract
-import com.paypal.android.googlepay.SDKResult
+import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.ErrorView
@@ -64,12 +64,10 @@ fun GooglePayView(
                     coroutineScope.launch {
                         val result = viewModel.requestGooglePayLaunch()
                         when (result) {
-                            is SDKResult.Success -> {
-                                val launchRequest = result.value
-                                googlePayLauncher.launch(launchRequest)
-                            }
+                            is GooglePayStartResult.Success ->
+                                googlePayLauncher.launch(result.authChallenge)
 
-                            is SDKResult.Failure -> TODO("handle error case")
+                            is GooglePayStartResult.Failure -> TODO("handle error case")
                         }
                     }
                 }

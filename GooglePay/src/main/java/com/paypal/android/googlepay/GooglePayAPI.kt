@@ -26,10 +26,12 @@ internal class GooglePayAPI(
     )
 
     @OptIn(InternalSerializationApi::class)
-    suspend fun getGooglePayConfig(): SDKResult<GooglePayConfig> {
+    suspend fun getGooglePayConfig(merchantId: String): SDKResult<GooglePayConfig> {
         @RawRes val resId = R.raw.graphql_google_pay_config_sandbox
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
-            is LoadRawResourceResult.Success -> sendGraphQLGooglePayConfigRequest(result.value)
+            is LoadRawResourceResult.Success ->
+                sendGraphQLGooglePayConfigRequest(result.value, merchantId)
+
             is LoadRawResourceResult.Failure -> TODO("signal error")
         }
     }
@@ -37,15 +39,13 @@ internal class GooglePayAPI(
     @OptIn(InternalSerializationApi::class)
     private suspend fun sendGraphQLGooglePayConfigRequest(
         query: String,
+        merchantId: String
     ): SDKResult<GooglePayConfig> {
         val variables = GetGooglePayConfigVariables(
             clientId = coreConfig.clientId,
-            // TODO: allow this to be provided as a param
-            merchantId = listOf("V9YP27HFNG2LW"),
+            merchantId = listOf(merchantId),
             // TODO: see if we need this
             merchantOrigin = "com.paypal.android.sdk",
-//            // TODO: allow this to be provided as a param
-//            buyerCountry = "US"
         )
 
         val graphQLRequest = GraphQLRequest(
