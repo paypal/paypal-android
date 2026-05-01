@@ -7,30 +7,16 @@ import kotlinx.serialization.json.JsonElement
 @InternalSerializationApi
 @Serializable
 @OptIn(InternalSerializationApi::class)
-data class GetGooglePayConfigResponse(
+internal data class GetGooglePayConfigResponse(
     val googlePayConfig: GooglePayConfig?
 )
 
 @InternalSerializationApi
 @Serializable
-data class GooglePayConfig(
+internal data class GooglePayConfig(
     val apiVersion: Int?,
     val apiVersionMinor: Int?,
     val isEligible: Boolean,
     val merchantInfo: JsonElement?,
     val allowedPaymentMethods: JsonElement?
 )
-
-@InternalSerializationApi
-@Serializable
-data class GooglePayMerchantInfo(
-    val merchantName: String?,
-    val merchantId: String,
-    val merchantOrigin: String,
-    val authJwt: String
-)
-
-@InternalSerializationApi
-@Serializable
-data class GooglePayPaymentMethod(val type: String)
-

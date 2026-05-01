@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonElement
 @InternalSerializationApi
 @Serializable
 @OptIn(InternalSerializationApi::class)
-data class ApproveGooglePayPaymentRequestVariables(
+internal data class ApproveGooglePayPaymentRequestVariables(
     val paymentMethodData: JsonElement,
     val clientID: String,
     val orderID: String,
