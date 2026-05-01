@@ -22,17 +22,19 @@ class GooglePayClient internal constructor(
         paymentsClient = createPaymentsClient(context)
     )
 
+
     @OptIn(InternalSerializationApi::class)
-    suspend fun start(): SDKResult<GooglePayLaunchRequest> {
-        return when (val result = googlePayAPI.getGooglePayConfig()) {
+    suspend fun start(request: GooglePayCheckoutRequest): GooglePayStartResult {
+        val merchantId = request.merchantId
+        return when (val result = googlePayAPI.getGooglePayConfig(merchantId)) {
             is SDKResult.Success -> {
                 val config = result.value
                 val loadPaymentDataTask = loadPaymentData(config)
-                SDKResult.Success(GooglePayLaunchRequest(loadPaymentDataTask))
+                val launchRequest = GooglePayAuthChallenge(loadPaymentDataTask)
+                GooglePayStartResult.Success(launchRequest)
             }
 
-            // forward result
-            is SDKResult.Failure -> result
+            is SDKResult.Failure -> GooglePayStartResult.Failure(result.error)
         }
     }
 

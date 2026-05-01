@@ -9,11 +9,11 @@ import com.google.android.gms.wallet.contract.TaskResultContracts
 // Wrapper for Google Pay launch
 class GooglePayLaunchContract(
     private val googlePayContract: TaskResultContracts.GetPaymentDataResult = TaskResultContracts.GetPaymentDataResult()
-) : ActivityResultContract<GooglePayLaunchRequest, GooglePayLaunchResult>() {
+) : ActivityResultContract<GooglePayAuthChallenge, GooglePayLaunchResult>() {
 
     override fun createIntent(
         context: Context,
-        input: GooglePayLaunchRequest
+        input: GooglePayAuthChallenge
     ): Intent {
         return googlePayContract.createIntent(context, input.task)
     }
@@ -29,7 +29,7 @@ class GooglePayLaunchContract(
 
     override fun getSynchronousResult(
         context: Context,
-        input: GooglePayLaunchRequest?
+        input: GooglePayAuthChallenge?
     ): SynchronousResult<GooglePayLaunchResult?>? {
         val result = input?.task?.let { googlePayContract.getSynchronousResult(context, it) }
         return result?.value?.let { value ->
