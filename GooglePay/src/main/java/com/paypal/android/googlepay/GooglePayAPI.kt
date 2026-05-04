@@ -102,7 +102,6 @@ internal class GooglePayAPI(
             paymentMethodData = Json.parseToJsonElement(paymentMethodData.toString()),
             clientID = coreConfig.clientId,
             orderID = orderId,
-            productFlow = "CUSTOM_DIGITAL_WALLET"
         )
         val graphQLRequest = GraphQLRequest(
             query = query,

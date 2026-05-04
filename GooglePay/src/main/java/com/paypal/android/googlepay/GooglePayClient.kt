@@ -87,6 +87,19 @@ class GooglePayClient internal constructor(
         return request
     }
 
+    suspend fun finishStart(result: GooglePayLaunchResult, orderId: String) {
+        if (result.success)  {
+            val paymentMethodData = result.paymentMethodData
+            if (paymentMethodData != null) {
+                val result = googlePayAPI.confirmOrder(orderId, JSONObject(paymentMethodData))
+                when (result) {
+                    is SDKResult.Success -> print(result.value)
+                    is SDKResult.Failure -> print(result.error)
+                }
+            }
+        }
+    }
+
     companion object {
         fun createPaymentsClient(context: Context): PaymentsClient {
             val walletOptions = Wallet.WalletOptions.Builder()

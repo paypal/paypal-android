@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.contract.TaskResultContracts
+import org.json.JSONObject
 
 // Wrapper for Google Pay GetPaymentDataResult ActivityResultAPI contract
 class LaunchGooglePay internal constructor(
@@ -28,17 +29,22 @@ class LaunchGooglePay internal constructor(
     ): GooglePayLaunchResult? {
         val googlePayResult = googlePayContract.parseResult(resultCode, intent)
         val success = googlePayResult.status.statusCode == CommonStatusCodes.SUCCESS
-        return GooglePayLaunchResult(success)
+        val paymentMethodData = googlePayResult.result?.toJson()?.let { jsonString ->
+            val json = JSONObject(jsonString)
+            json.getJSONObject("paymentMethodData").toString()
+        }
+        return GooglePayLaunchResult(success, paymentMethodData)
     }
 
     override fun getSynchronousResult(
         context: Context,
         input: GooglePayAuthChallenge?
     ): SynchronousResult<GooglePayLaunchResult?>? {
-        val result = input?.task?.let { googlePayContract.getSynchronousResult(context, it) }
-        return result?.value?.let { value ->
-            val success = value.status.statusCode == CommonStatusCodes.SUCCESS
-            return SynchronousResult(GooglePayLaunchResult(success))
+        val syncResult = input?.task?.let { googlePayContract.getSynchronousResult(context, it) }
+        return syncResult?.value?.let { googlePayResult ->
+            val success = googlePayResult.status.statusCode == CommonStatusCodes.SUCCESS
+            val paymentMethodData = googlePayResult.result?.toJson()
+            return SynchronousResult(GooglePayLaunchResult(success, paymentMethodData))
         }
     }
 }
