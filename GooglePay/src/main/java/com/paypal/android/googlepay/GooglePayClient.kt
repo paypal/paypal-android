@@ -8,9 +8,11 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
 import kotlinx.serialization.InternalSerializationApi
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.String
 
 class GooglePayClient internal constructor(
     private val googlePayAPI: GooglePayAPI,
@@ -87,16 +89,36 @@ class GooglePayClient internal constructor(
         return request
     }
 
-    suspend fun finishStart(result: GooglePayLaunchResult, orderId: String) {
-        if (result.success)  {
+    @OptIn(InternalSerializationApi::class)
+    suspend fun finishStart(
+        result: GooglePayLaunchResult,
+        orderId: String
+    ): GooglePayFinishStartResult {
+        return if (result.success) {
             val paymentMethodData = result.paymentMethodData
-            if (paymentMethodData != null) {
+            if (paymentMethodData == null) {
+                val error = PayPalSDKError(123, "GooglePay finish start missing payment data.")
+                GooglePayFinishStartResult.Failure(error)
+            } else {
                 val result = googlePayAPI.confirmOrder(orderId, JSONObject(paymentMethodData))
                 when (result) {
-                    is SDKResult.Success -> print(result.value)
-                    is SDKResult.Failure -> print(result.error)
+                    is SDKResult.Success -> {
+                        val status = result.value.status
+                        val googlePayCard = result.value.paymentSource.googlePay.card
+                        GooglePayFinishStartResult.Success(
+                            status = status,
+                            cardLastDigits = googlePayCard.lastDigits,
+                            cardType = googlePayCard.type,
+                            cardBrand = googlePayCard.brand
+                        )
+                    }
+
+                    is SDKResult.Failure -> GooglePayFinishStartResult.Failure(result.error)
                 }
             }
+        } else {
+            val error = PayPalSDKError(123, "GooglePay finish start failed.")
+            GooglePayFinishStartResult.Failure(error)
         }
     }
 

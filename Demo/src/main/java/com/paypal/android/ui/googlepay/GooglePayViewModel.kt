@@ -10,6 +10,7 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.googlepay.GooglePayCheckoutRequest
 import com.paypal.android.googlepay.GooglePayClient
+import com.paypal.android.googlepay.GooglePayFinishStartResult
 import com.paypal.android.googlepay.GooglePayLaunchResult
 import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.models.OrderRequest
@@ -49,10 +50,10 @@ class GooglePayViewModel @Inject constructor(
             _uiState.update { it.copy(createOrderState = value) }
         }
 
-    private var googlePayState
-        get() = _uiState.value.googlePayState
+    private var googlePayFinishStartState
+        get() = _uiState.value.googlePayFinishStartState
         set(value) {
-            _uiState.update { it.copy(googlePayState = value) }
+            _uiState.update { it.copy(googlePayFinishStartState = value) }
         }
 
     private val createdOrder: Order?
@@ -92,6 +93,7 @@ class GooglePayViewModel @Inject constructor(
     }
 
     suspend fun requestGooglePayLaunch(): GooglePayStartResult {
+        googlePayFinishStartState = ActionState.Loading
         val request = GooglePayCheckoutRequest(merchantId = MerchantIntegration.DEFAULT.merchantId)
         return googlePayClient.start(request)
     }
@@ -100,7 +102,14 @@ class GooglePayViewModel @Inject constructor(
         val orderId = createdOrder?.id
         if (orderId != null) {
             viewModelScope.launch {
-                googlePayClient.finishStart(result, orderId)
+                val finishStartResult = googlePayClient.finishStart(result, orderId)
+                when (finishStartResult) {
+                    is GooglePayFinishStartResult.Success ->
+                        googlePayFinishStartState = ActionState.Success(finishStartResult)
+
+                    is GooglePayFinishStartResult.Failure ->
+                        googlePayFinishStartState = ActionState.Failure(finishStartResult.error)
+                }
             }
         }
     }
