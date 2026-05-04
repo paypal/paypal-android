@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paypal.android.googlepay.GooglePayFinishStartResult
 import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.googlepay.LaunchGooglePay
 import com.paypal.android.uishared.components.ActionButtonColumn
@@ -73,7 +74,7 @@ fun GooglePayView(
                 }
             )
         }
-        if (uiState.isGooglePaySuccessful) {
+        if (uiState.isGooglePayFinished) {
             Step3_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
@@ -115,14 +116,14 @@ private fun Step2_LaunchGooglePay(uiState: GooglePayUiState, onLaunchGooglePay: 
         ActionButtonColumn(
             defaultTitle = "LAUNCH GOOGLE PAY",
             successTitle = "GOOGLE PAY SUCCESS",
-            state = uiState.googlePayState,
+            state = uiState.googlePayFinishStartState,
             onClick = onLaunchGooglePay,
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> GooglePayTaskResultView(result = state.value)
+                is CompletedActionState.Success -> GooglePayFinishStartSuccessView(result = state.value)
             }
         }
     }
@@ -151,12 +152,15 @@ private fun Step3_CompleteOrder(uiState: GooglePayUiState, viewModel: GooglePayV
 }
 
 @Composable
-fun GooglePayTaskResultView(result: String) {
+fun GooglePayFinishStartSuccessView(result: GooglePayFinishStartResult.Success) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)
     ) {
-        PropertyView(name = "Status", value = result)
+        PropertyView(name = "Status", value = result.status)
+        PropertyView(name = "Card Type", value = result.cardType)
+        PropertyView(name = "Card Brand", value = result.cardBrand)
+        PropertyView(name = "Card Last Digits", value = result.cardLastDigits)
     }
 }
 

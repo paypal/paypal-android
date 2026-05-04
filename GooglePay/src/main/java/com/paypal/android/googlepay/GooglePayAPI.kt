@@ -79,10 +79,11 @@ internal class GooglePayAPI(
         }
     }
 
+    @OptIn(InternalSerializationApi::class)
     suspend fun confirmOrder(
         orderId: String,
         paymentMethodData: JSONObject
-    ): SDKResult<String> {
+    ): SDKResult<ApproveGooglePayPayment> {
         @RawRes val resId = R.raw.graphql_approve_google_pay_payment
         return when (val result = resourceLoader.loadRawResource(applicationContext, resId)) {
             is LoadRawResourceResult.Success ->
@@ -97,7 +98,7 @@ internal class GooglePayAPI(
         query: String,
         orderId: String,
         paymentMethodData: JSONObject
-    ): SDKResult<String> {
+    ): SDKResult<ApproveGooglePayPayment> {
         val variables = ApproveGooglePayPaymentRequestVariables(
             paymentMethodData = Json.parseToJsonElement(paymentMethodData.toString()),
             clientID = coreConfig.clientId,
@@ -121,7 +122,7 @@ internal class GooglePayAPI(
                 if (responseData == null) {
                     TODO("handle null response error")
                 } else {
-                    SDKResult.Success(value = responseData.approveGooglePayPayment.status)
+                    SDKResult.Success(value = responseData.approveGooglePayPayment)
                 }
             }
 
