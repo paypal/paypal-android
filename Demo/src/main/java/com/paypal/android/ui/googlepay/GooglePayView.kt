@@ -43,7 +43,7 @@ fun GooglePayView(
     }
 
     val googlePayLauncher = rememberLauncherForActivityResult(LaunchGooglePay()) { result ->
-        print(result.success)
+        viewModel.finishStart(result)
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

@@ -11,5 +11,4 @@ internal data class ApproveGooglePayPaymentRequestVariables(
     val paymentMethodData: JsonElement,
     val clientID: String,
     val orderID: String,
-    val productFlow: String
 )

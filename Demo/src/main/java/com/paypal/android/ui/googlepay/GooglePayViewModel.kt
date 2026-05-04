@@ -10,6 +10,7 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.googlepay.GooglePayCheckoutRequest
 import com.paypal.android.googlepay.GooglePayClient
+import com.paypal.android.googlepay.GooglePayLaunchResult
 import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.uishared.state.ActionState
@@ -93,5 +94,14 @@ class GooglePayViewModel @Inject constructor(
     suspend fun requestGooglePayLaunch(): GooglePayStartResult {
         val request = GooglePayCheckoutRequest(merchantId = MerchantIntegration.DEFAULT.merchantId)
         return googlePayClient.start(request)
+    }
+
+    fun finishStart(result: GooglePayLaunchResult) {
+        val orderId = createdOrder?.id
+        if (orderId != null) {
+            viewModelScope.launch {
+                googlePayClient.finishStart(result, orderId)
+            }
+        }
     }
 }
