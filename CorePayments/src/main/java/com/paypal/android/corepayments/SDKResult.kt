@@ -1,8 +1,8 @@
-package com.paypal.android.googlepay
+package com.paypal.android.corepayments
 
-import com.paypal.android.corepayments.PayPalSDKError
+import androidx.annotation.RestrictTo
 
-// TODO: move to core module
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class SDKResult<out T> {
     data class Success<T>(val value: T) : SDKResult<T>()
     data class Failure(val error: PayPalSDKError) : SDKResult<Nothing>()
