@@ -28,6 +28,7 @@ public final class com/paypal/android/googlepay/GooglePayCheckoutRequest {
 public final class com/paypal/android/googlepay/GooglePayClient {
 	public static final field Companion Lcom/paypal/android/googlepay/GooglePayClient$Companion;
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
+	public final fun finishStart (Lcom/paypal/android/googlepay/GooglePayLaunchResult;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun start (Lcom/paypal/android/googlepay/GooglePayCheckoutRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -39,11 +40,27 @@ public final class com/paypal/android/googlepay/GooglePayExtKt {
 	public static final fun awaitTask (Lcom/google/android/gms/tasks/Task;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract class com/paypal/android/googlepay/GooglePayFinishStartResult {
+}
+
+public final class com/paypal/android/googlepay/GooglePayFinishStartResult$Failure : com/paypal/android/googlepay/GooglePayFinishStartResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+}
+
+public final class com/paypal/android/googlepay/GooglePayFinishStartResult$Success : com/paypal/android/googlepay/GooglePayFinishStartResult {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getCardBrand ()Ljava/lang/String;
+	public final fun getCardLastDigits ()Ljava/lang/String;
+	public final fun getCardType ()Ljava/lang/String;
+	public final fun getStatus ()Ljava/lang/String;
+}
+
 public final class com/paypal/android/googlepay/GooglePayLaunchResult {
-	public fun <init> (Z)V
+	public fun <init> (ZLjava/lang/String;)V
 	public final fun component1 ()Z
-	public final fun copy (Z)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
-	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/GooglePayLaunchResult;ZILjava/lang/Object;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
+	public final fun copy (ZLjava/lang/String;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
+	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/GooglePayLaunchResult;ZLjava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getSuccess ()Z
 	public fun hashCode ()I
@@ -71,30 +88,5 @@ public final class com/paypal/android/googlepay/LaunchGooglePay : androidx/activ
 	public synthetic fun getSynchronousResult (Landroid/content/Context;Ljava/lang/Object;)Landroidx/activity/result/contract/ActivityResultContract$SynchronousResult;
 	public fun parseResult (ILandroid/content/Intent;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
 	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-}
-
-public abstract class com/paypal/android/googlepay/SDKResult {
-}
-
-public final class com/paypal/android/googlepay/SDKResult$Failure : com/paypal/android/googlepay/SDKResult {
-	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
-	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/googlepay/SDKResult$Failure;
-	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/SDKResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/googlepay/SDKResult$Failure;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/googlepay/SDKResult$Success : com/paypal/android/googlepay/SDKResult {
-	public fun <init> (Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;)Lcom/paypal/android/googlepay/SDKResult$Success;
-	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/SDKResult$Success;Ljava/lang/Object;ILjava/lang/Object;)Lcom/paypal/android/googlepay/SDKResult$Success;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
