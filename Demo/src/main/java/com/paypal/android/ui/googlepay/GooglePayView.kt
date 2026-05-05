@@ -194,7 +194,6 @@ fun GooglePayFinishStartSuccessView(result: GooglePayFinishStartResult.Success) 
     }
 }
 
-
 @Preview
 @Composable
 fun GooglePayViewPreview() {
