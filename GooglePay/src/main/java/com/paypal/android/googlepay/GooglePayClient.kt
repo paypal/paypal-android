@@ -10,6 +10,8 @@ import com.google.android.gms.wallet.WalletConstants
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.String
@@ -44,7 +46,8 @@ class GooglePayClient internal constructor(
     private suspend fun loadPaymentData(googlePayConfig: GooglePayConfig): Task<PaymentData> {
         if (googlePayConfig.isEligible) {
             val paymentDataRequestJSON = createPaymentDataRequest(googlePayConfig)
-            val paymentDataRequest = PaymentDataRequest.fromJson(paymentDataRequestJSON.toString())
+            val paymentDataRequest =
+                PaymentDataRequest.fromJson(Json.encodeToString(paymentDataRequestJSON))
             return paymentsClient.loadPaymentData(paymentDataRequest).awaitTask()
         } else {
             TODO("Handle GooglePay ineligibility")
@@ -52,41 +55,29 @@ class GooglePayClient internal constructor(
     }
 
     @OptIn(InternalSerializationApi::class)
-    private fun createPaymentDataRequest(googlePayConfig: GooglePayConfig): JSONObject {
-        val displayItems = JSONArray(
-            listOf(
-                JSONObject()
-                    .put("label", "Subtotal")
-                    .put("type", "SUBTOTAL")
-                    .put("price", "1.00"),
-                JSONObject()
-                    .put("label", "Tax")
-                    .put("type", "TAX")
-                    .put("price", "0.00"),
-            )
+    private fun createPaymentDataRequest(googlePayConfig: GooglePayConfig): GooglePayPaymentDataRequest {
+        val displayItems = listOf(
+            GooglePayTransactionDisplayItem(label = "Subtotal", type = "SUBTOTAL", price = "1.00"),
+            GooglePayTransactionDisplayItem(label = "Tax", type = "TAX", price = "0.00")
         )
 
-        val transactionInfo = JSONObject()
-            .put("displayItems", displayItems)
-            .put("countryCode", "US")
-            .put("currencyCode", "USD")
-            .put("totalPriceStatus", "FINAL")
-            .put("totalPrice", "1.00")
-            .put("totalPriceLabel", "Total")
+        val transactionInfo = GooglePayTransactionInfo(
+            countryCode = "US",
+            currencyCode = "USD",
+            totalPriceStatus = "FINAL",
+            totalPrice = "1.00",
+            totalPriceLabel = "Total",
+            displayItems = displayItems
+        )
 
-        // TODO: migrate to kotlinx serialization so we don't have to make this conversion
-        val allowedPaymentMethods =
-            googlePayConfig.allowedPaymentMethods?.let { JSONArray(it.toString()) }
-        val merchantInfo = googlePayConfig.merchantInfo?.let { JSONObject(it.toString()) }
-
-        val request = JSONObject()
-            .put("apiVersion", 2)
-            .put("apiVersionMinor", 0)
-            .put("merchantInfo", merchantInfo)
-            .put("allowedPaymentMethods", allowedPaymentMethods)
-            .put("callbackIntents", JSONArray(listOf("PAYMENT_AUTHORIZATION")))
-            .put("transactionInfo", transactionInfo)
-        return request
+        return GooglePayPaymentDataRequest(
+            apiVersion = 2,
+            apiVersionMinor = 0,
+            merchantInfo = googlePayConfig.merchantInfo,
+            allowedPaymentMethods = googlePayConfig.allowedPaymentMethods,
+            callbackIntents = listOf("PAYMENT_AUTHORIZATION"),
+            transactionInfo = transactionInfo
+        )
     }
 
     @OptIn(InternalSerializationApi::class)
