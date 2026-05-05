@@ -2,6 +2,7 @@ package com.paypal.android.ui.googlepay
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.googlepay.GooglePayAuthChallenge
 import com.paypal.android.googlepay.GooglePayFinishStartResult
 import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.uishared.state.ActionState
@@ -9,12 +10,22 @@ import com.paypal.android.uishared.state.ActionState
 data class GooglePayUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
+    val googlePayStartState: ActionState<GooglePayStartResult.Success, Exception> = ActionState.Idle,
     val googlePayFinishStartState: ActionState<GooglePayFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
 
-    val isGooglePayFinished: Boolean
+    val isGooglePayStartSuccessful: Boolean
+        get() = googlePayStartState is ActionState.Success
+
+    val isGooglePayFinishSuccessful: Boolean
         get() = googlePayFinishStartState is ActionState.Success
+
+    val authChallenge: GooglePayAuthChallenge?
+        get() = when (googlePayStartState) {
+            is ActionState.Success -> googlePayStartState.value.authChallenge
+            else -> null
+        }
 }

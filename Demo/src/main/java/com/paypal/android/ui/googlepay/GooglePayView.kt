@@ -11,16 +11,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.googlepay.GooglePayFinishStartResult
-import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.googlepay.LaunchGooglePay
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
@@ -30,12 +29,15 @@ import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.UIConstants
-import kotlinx.coroutines.launch
 
 @Composable
 fun GooglePayView(
     viewModel: GooglePayViewModel = hiltViewModel()
 ) {
+
+    val googlePayLauncher = rememberLauncherForActivityResult(LaunchGooglePay()) { result ->
+        viewModel.finishStart(result)
+    }
 
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {
@@ -43,13 +45,8 @@ fun GooglePayView(
         scrollState.animateScrollTo(scrollState.maxValue)
     }
 
-    val googlePayLauncher = rememberLauncherForActivityResult(LaunchGooglePay()) { result ->
-        viewModel.finishStart(result)
-    }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val contentPadding = UIConstants.paddingMedium
-    val coroutineScope = rememberCoroutineScope()
     Column(
         verticalArrangement = UIConstants.spacingLarge,
         modifier = Modifier
@@ -59,23 +56,21 @@ fun GooglePayView(
     ) {
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
-            Step2_LaunchGooglePay(
+            Step2_RequestGooglePayLaunch(
                 uiState = uiState,
-                onLaunchGooglePay = {
-                    coroutineScope.launch {
-                        val result = viewModel.requestGooglePayLaunch()
-                        when (result) {
-                            is GooglePayStartResult.Success ->
-                                googlePayLauncher.launch(result.authChallenge)
-
-                            is GooglePayStartResult.Failure -> TODO("handle error case")
-                        }
-                    }
-                }
+                onRequestGooglePayLaunch = { viewModel.requestGooglePayLaunch() }
             )
         }
-        if (uiState.isGooglePayFinished) {
-            Step3_CompleteOrder(uiState, viewModel)
+
+        val authChallenge = uiState.authChallenge
+        if (authChallenge != null) {
+            Step3_LaunchGooglePay(
+                uiState = uiState,
+                onLaunchGooglePay = { googlePayLauncher.launch(authChallenge) }
+            )
+        }
+        if (uiState.isGooglePayFinishSuccessful) {
+            Step4_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
@@ -108,11 +103,36 @@ private fun Step1_CreateOrder(uiState: GooglePayUiState, viewModel: GooglePayVie
 }
 
 @Composable
-private fun Step2_LaunchGooglePay(uiState: GooglePayUiState, onLaunchGooglePay: () -> Unit) {
+private fun Step2_RequestGooglePayLaunch(
+    uiState: GooglePayUiState,
+    onRequestGooglePayLaunch: () -> Unit
+) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 2, title = "Launch Google Pay")
+        StepHeader(stepNumber = 2, title = "Request Google Pay")
+        ActionButtonColumn(
+            defaultTitle = "REQUEST GOOGLE PAY",
+            successTitle = "REQUEST GOOGLE PAY SUCCESS",
+            state = uiState.googlePayStartState,
+            onClick = onRequestGooglePayLaunch,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> GooglePayStartSuccessView()
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step3_LaunchGooglePay(uiState: GooglePayUiState, onLaunchGooglePay: () -> Unit) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Launch Google Pay")
         ActionButtonColumn(
             defaultTitle = "LAUNCH GOOGLE PAY",
             successTitle = "GOOGLE PAY SUCCESS",
@@ -130,11 +150,11 @@ private fun Step2_LaunchGooglePay(uiState: GooglePayUiState, onLaunchGooglePay: 
 }
 
 @Composable
-private fun Step3_CompleteOrder(uiState: GooglePayUiState, viewModel: GooglePayViewModel) {
+private fun Step4_CompleteOrder(uiState: GooglePayUiState, viewModel: GooglePayViewModel) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Complete Order")
+        StepHeader(stepNumber = 4, title = "Complete Order")
         ActionButtonColumn(
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",
@@ -152,6 +172,16 @@ private fun Step3_CompleteOrder(uiState: GooglePayUiState, viewModel: GooglePayV
 }
 
 @Composable
+fun GooglePayStartSuccessView() {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
+    ) {
+        Text("Continue to Launch Google Pay")
+    }
+}
+
+@Composable
 fun GooglePayFinishStartSuccessView(result: GooglePayFinishStartResult.Success) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
@@ -163,6 +193,7 @@ fun GooglePayFinishStartSuccessView(result: GooglePayFinishStartResult.Success) 
         PropertyView(name = "Card Last Digits", value = result.cardLastDigits)
     }
 }
+
 
 @Preview
 @Composable
