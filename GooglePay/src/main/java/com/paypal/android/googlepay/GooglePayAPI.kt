@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.RawRes
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.LoadRawResourceResult
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
@@ -32,7 +33,11 @@ internal class GooglePayAPI(
             is LoadRawResourceResult.Success ->
                 sendGraphQLGooglePayConfigRequest(result.value, merchantId)
 
-            is LoadRawResourceResult.Failure -> TODO("signal error")
+            is LoadRawResourceResult.Failure -> {
+                val error =
+                    PayPalSDKError(123, "Unable to launch google pay: config query missing.")
+                SDKResult.Failure(error)
+            }
         }
     }
 
@@ -59,22 +64,19 @@ internal class GooglePayAPI(
             )
         return when (graphQLResponse) {
             is GraphQLResult.Success -> {
-                val responseData = graphQLResponse.response.data
-                if (responseData == null) {
-                    TODO("handle null response error")
+                val googlePayConfig = graphQLResponse.response.data?.googlePayConfig
+                if (googlePayConfig == null) {
+                    val error = PayPalSDKError(123, "Unable to launch google pay: config missing.")
+                    SDKResult.Failure(error)
                 } else {
-                    val googlePayConfig = responseData.googlePayConfig
-                    if (googlePayConfig == null) {
-                        TODO("handle error")
-                    } else {
-                        SDKResult.Success(googlePayConfig)
-                    }
+                    SDKResult.Success(googlePayConfig)
                 }
             }
 
             is GraphQLResult.Failure -> {
-                print(graphQLResponse)
-                TODO("handle graphql failure error")
+                val error =
+                    PayPalSDKError(123, "Unable to launch google pay: unable to fetch config.")
+                SDKResult.Failure(error)
             }
         }
     }
@@ -89,7 +91,10 @@ internal class GooglePayAPI(
             is LoadRawResourceResult.Success ->
                 sendGraphQLApproveGooglePayPaymentRequest(result.value, orderId, paymentMethodData)
 
-            is LoadRawResourceResult.Failure -> TODO("signal error")
+            is LoadRawResourceResult.Failure -> {
+                val error = PayPalSDKError(123, "Unable to confirm order: query missing.")
+                SDKResult.Failure(error)
+            }
         }
     }
 
@@ -118,16 +123,20 @@ internal class GooglePayAPI(
 
         return when (graphQLResponse) {
             is GraphQLResult.Success -> {
-                val responseData = graphQLResponse.response.data
-                if (responseData == null) {
-                    TODO("handle null response error")
+                val approveGooglePayPayment = graphQLResponse.response.data?.approveGooglePayPayment
+                if (approveGooglePayPayment == null) {
+                    val error =
+                        PayPalSDKError(123, "Unable to confirm order: response data missing.")
+                    SDKResult.Failure(error)
                 } else {
-                    SDKResult.Success(value = responseData.approveGooglePayPayment)
+                    SDKResult.Success(value = approveGooglePayPayment)
                 }
             }
 
             is GraphQLResult.Failure -> {
-                TODO("handle graphql failure error")
+                val error =
+                    PayPalSDKError(123, "Unable to confirm order: request fialed.")
+                SDKResult.Failure(error)
             }
         }
     }
