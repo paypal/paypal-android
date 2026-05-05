@@ -130,6 +130,28 @@ public final class com/paypal/android/corepayments/ReturnToAppStrategy$CustomUrl
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/paypal/android/corepayments/SDKResult$Failure : com/paypal/android/corepayments/SDKResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/corepayments/SDKResult$Failure;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/SDKResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/corepayments/SDKResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/corepayments/SDKResult$Success : com/paypal/android/corepayments/SDKResult {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lcom/paypal/android/corepayments/SDKResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/corepayments/SDKResult$Success;Ljava/lang/Object;ILjava/lang/Object;)Lcom/paypal/android/corepayments/SDKResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/paypal/android/corepayments/UpdateClientConfigAPI$Defaults {
 	public static final field INSTANCE Lcom/paypal/android/corepayments/UpdateClientConfigAPI$Defaults;
 	public static final field INTEGRATION_ARTIFACT Ljava/lang/String;

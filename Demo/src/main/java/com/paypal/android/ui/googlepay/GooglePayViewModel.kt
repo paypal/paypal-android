@@ -5,9 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.MerchantIntegration
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.googlepay.GooglePayCheckoutRequest
 import com.paypal.android.googlepay.GooglePayClient
+import com.paypal.android.googlepay.GooglePayFinishStartResult
+import com.paypal.android.googlepay.GooglePayLaunchResult
+import com.paypal.android.googlepay.GooglePayStartResult
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
@@ -45,10 +50,16 @@ class GooglePayViewModel @Inject constructor(
             _uiState.update { it.copy(createOrderState = value) }
         }
 
-    private var googlePayState
-        get() = _uiState.value.googlePayState
+    private var googlePayStartState
+        get() = _uiState.value.googlePayStartState
         set(value) {
-            _uiState.update { it.copy(googlePayState = value) }
+            _uiState.update { it.copy(googlePayStartState = value) }
+        }
+
+    private var googlePayFinishStartState
+        get() = _uiState.value.googlePayFinishStartState
+        set(value) {
+            _uiState.update { it.copy(googlePayFinishStartState = value) }
         }
 
     private val createdOrder: Order?
@@ -74,6 +85,20 @@ class GooglePayViewModel @Inject constructor(
         }
     }
 
+    fun finishStart(result: GooglePayLaunchResult) {
+        googlePayFinishStartState = ActionState.Loading
+        val orderId = createdOrder?.id
+        if (orderId != null) {
+            viewModelScope.launch {
+                val finishStartResult = googlePayClient.finishStart(result, orderId)
+                googlePayFinishStartState = when (finishStartResult) {
+                    is GooglePayFinishStartResult.Success -> ActionState.Success(finishStartResult)
+                    is GooglePayFinishStartResult.Failure -> ActionState.Failure(finishStartResult.error)
+                }
+            }
+        }
+    }
+
     fun completeOrder() {
         val orderId = createdOrder?.id
         if (orderId == null) {
@@ -87,7 +112,16 @@ class GooglePayViewModel @Inject constructor(
         }
     }
 
-    fun launchGooglePay() {
-        googlePayClient.start()
+    fun requestGooglePayLaunch() {
+        googlePayStartState = ActionState.Loading
+        viewModelScope.launch {
+            val request =
+                GooglePayCheckoutRequest(merchantId = MerchantIntegration.DEFAULT.merchantId)
+            val result = googlePayClient.start(request)
+            googlePayStartState = when (result) {
+                is GooglePayStartResult.Success -> ActionState.Success(result)
+                is GooglePayStartResult.Failure -> ActionState.Failure(result.error)
+            }
+        }
     }
 }
