@@ -360,6 +360,19 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
+    fun `deliverBrowserSwitchResult() parses vault cancellation when deep link url indicates failure`() {
+        val browserSwitchResult = createVaultCancellationBrowserSwitchResult(
+            setupTokenId = "fake-setup-token-id",
+            approvalSessionId = "fake-approval-session-id",
+        )
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val status = sut.deliverBrowserSwitchResult(activity)
+        assertTrue(status is PayPalWebStatus.VaultCanceled)
+    }
+
+    @Test
     fun `deliverBrowserSwitchResult() parses vault cancelations`() {
         val browserSwitchResult = createVaultCanceledBrowserSwitchResult("fake-setup-token-id")
         every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
@@ -408,6 +421,16 @@ class PayPalWebLauncherUnitTest {
         metadata: JSONObject? = setupTokenId?.let { createVaultMetadata(it) },
         deepLinkUrl: Uri? = approvalSessionId?.let { createVaultDeepLinkUrl(it) }
     ) = createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, metadata, deepLinkUrl)
+
+    private fun createVaultCancellationBrowserSwitchResult(
+        setupTokenId: String,
+        approvalSessionId: String
+    ): BrowserSwitchResult {
+        val metadata = createVaultMetadata(setupTokenId)
+        val deepLinkUrl =
+            "http://testurl.com/checkout/cancel?approval_session_id=$approvalSessionId".toUri()
+        return createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, metadata, deepLinkUrl)
+    }
 
     private fun createVaultCanceledBrowserSwitchResult(setupTokenId: String) =
         createBrowserSwitchResult(
