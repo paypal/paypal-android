@@ -25,10 +25,11 @@ internal class PayPalWebLauncher(
     companion object {
         private const val METADATA_KEY_REQUEST_TYPE = "request_type"
         private const val METADATA_KEY_ORDER_ID = "order_id"
+        private const val METADATA_KEY_OP_TYPE = "opType"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
 
-        private const val REQUEST_TYPE_CHECKOUT = "checkout"
-        private const val REQUEST_TYPE_VAULT = "vault"
+        private const val REQUEST_TYPE_CHECKOUT = "paypal_checkout"
+        private const val REQUEST_TYPE_VAULT = "paypal_vault"
 
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
@@ -143,7 +144,10 @@ internal class PayPalWebLauncher(
         } else {
             val payerId = deepLinkUrl.getQueryParameter("PayerID")
             val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
-            if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
+            val opType = deepLinkUrl.getQueryParameter(METADATA_KEY_OP_TYPE)
+            if (opType == "cancel") {
+                PayPalWebStatus.CheckoutCanceled(orderId)
+            } else if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
                 PayPalWebStatus.CheckoutError(PayPalWebCheckoutError.malformedResultError, orderId)
             } else {
                 PayPalWebStatus.CheckoutSuccess(PayPalWebCheckoutResult(orderId, payerId))
@@ -165,8 +169,11 @@ internal class PayPalWebLauncher(
         return if (deepLinkUrl == null || requestMetadata == null) {
             PayPalWebStatus.VaultError(PayPalWebCheckoutError.unknownError)
         } else {
+            val isCancelUrl = deepLinkUrl.path?.contains("cancel") ?: false
             val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-            if (approvalSessionId.isNullOrEmpty()) {
+            if (isCancelUrl) {
+                PayPalWebStatus.VaultCanceled
+            } else if (approvalSessionId.isNullOrEmpty()) {
                 PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
             } else {
                 val result = PayPalWebVaultResult(approvalSessionId)
