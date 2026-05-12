@@ -1,6 +1,7 @@
 package com.paypal.android.paypalwebpayments
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.braintreepayments.api.BrowserSwitchClient
 import com.braintreepayments.api.BrowserSwitchException
@@ -290,6 +291,20 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
+    fun `deliverBrowserSwitchResult() parses checkout cancellation when deep link url indicates failure`() {
+        val browserSwitchResult =
+            createCheckoutCancellationBrowserSwitchResult(orderId = "fake-order-id")
+        every { browserSwitchClient.deliverResult(activity) } returns browserSwitchResult
+
+        sut = PayPalWebLauncher("custom_url_scheme", liveConfig, browserSwitchClient)
+        val status = sut.deliverBrowserSwitchResult(activity)
+        assertTrue(status is PayPalWebStatus.CheckoutCanceled)
+
+        val actualOrderId = (status as? PayPalWebStatus.CheckoutCanceled)?.orderId
+        assertEquals("fake-order-id", actualOrderId)
+    }
+
+    @Test
     fun `deliverBrowserSwitchResult() parses checkout cancelations`() {
         val browserSwitchResult = createCheckoutCanceledBrowserSwitchResult("fake-order-id")
         createBrowserSwitchResult(BrowserSwitchStatus.CANCELED)
@@ -367,6 +382,12 @@ class PayPalWebLauncherUnitTest {
         metadata: JSONObject? = orderId?.let { createCheckoutMetadata(it) },
         deepLinkUrl: Uri? = payerId?.let { createCheckoutDeepLinkUrl(it) }
     ) = createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, metadata, deepLinkUrl)
+
+    private fun createCheckoutCancellationBrowserSwitchResult(orderId: String): BrowserSwitchResult {
+        val deepLinkUrl = "http://testurl.com/checkout?opType=cancel".toUri()
+        val metadata = createCheckoutMetadata(orderId)
+        return createBrowserSwitchResult(BrowserSwitchStatus.SUCCESS, metadata, deepLinkUrl)
+    }
 
     private fun createCheckoutCanceledBrowserSwitchResult(orderId: String) =
         createBrowserSwitchResult(
