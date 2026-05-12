@@ -15,8 +15,8 @@ internal class CardAuthLauncher(
 
     companion object {
         private const val METADATA_KEY_REQUEST_TYPE = "request_type"
-        private const val REQUEST_TYPE_APPROVE_ORDER = "approve_order"
-        private const val REQUEST_TYPE_VAULT = "vault"
+        private const val REQUEST_TYPE_APPROVE_ORDER = "card_approve_order"
+        private const val REQUEST_TYPE_VAULT = "card_vault"
 
         private const val METADATA_KEY_ORDER_ID = "order_id"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"

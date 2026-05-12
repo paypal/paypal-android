@@ -27,8 +27,8 @@ internal class PayPalWebLauncher(
         private const val METADATA_KEY_ORDER_ID = "order_id"
         private const val METADATA_KEY_SETUP_TOKEN_ID = "setup_token_id"
 
-        private const val REQUEST_TYPE_CHECKOUT = "checkout"
-        private const val REQUEST_TYPE_VAULT = "vault"
+        private const val REQUEST_TYPE_CHECKOUT = "paypal_checkout"
+        private const val REQUEST_TYPE_VAULT = "paypal_vault"
 
         private const val URL_PARAM_APPROVAL_SESSION_ID = "approval_session_id"
     }
