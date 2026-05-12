@@ -7,6 +7,9 @@
   * Explicitly declare Java 17 version as the target JVM toolchain
 * CardPayments
   * Skip deep link URL parsing in `CardClient` for `approveOrder()` and `vault()` 3DS authentication flows
+* PayPalWebPayments
+  * Fix issue with `PayPalWebCheckoutClient.start()` that caused explicit user cancelation to return a `Failure` event, instead of `Canceled`
+  * Fix issue with `PayPalWebCheckoutClient.vault()` that caused explicit user cancelation ro return a `Success` event, instead of `Canceled`
 
 ## 1.7.1 (2024-10-29)
 * Gradle
