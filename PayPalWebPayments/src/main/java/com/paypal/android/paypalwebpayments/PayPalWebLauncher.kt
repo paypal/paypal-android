@@ -169,8 +169,11 @@ internal class PayPalWebLauncher(
         return if (deepLinkUrl == null || requestMetadata == null) {
             PayPalWebStatus.VaultError(PayPalWebCheckoutError.unknownError)
         } else {
+            val isCancelUrl = deepLinkUrl.path?.contains("cancel") ?: false
             val approvalSessionId = deepLinkUrl.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
-            if (approvalSessionId.isNullOrEmpty()) {
+            if (isCancelUrl) {
+                PayPalWebStatus.VaultCanceled
+            } else if (approvalSessionId.isNullOrEmpty()) {
                 PayPalWebStatus.VaultError(PayPalWebCheckoutError.malformedResultError)
             } else {
                 val result = PayPalWebVaultResult(approvalSessionId)
