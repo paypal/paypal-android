@@ -62,7 +62,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { metadata?.get("request_type") }.isEqualTo("checkout")
+            get { metadata?.get("request_type") }.isEqualTo("paypal_checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -88,7 +88,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { metadata?.get("request_type") }.isEqualTo("checkout")
+            get { metadata?.get("request_type") }.isEqualTo("paypal_checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -114,7 +114,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { metadata?.get("request_type") }.isEqualTo("checkout")
+            get { metadata?.get("request_type") }.isEqualTo("paypal_checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -140,7 +140,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("order_id") }.isEqualTo("fake-order-id")
-            get { metadata?.get("request_type") }.isEqualTo("checkout")
+            get { metadata?.get("request_type") }.isEqualTo("paypal_checkout")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -176,7 +176,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
-            get { metadata?.get("request_type") }.isEqualTo("vault")
+            get { metadata?.get("request_type") }.isEqualTo("paypal_vault")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -198,7 +198,7 @@ class PayPalWebLauncherUnitTest {
         val browserSwitchOptions = slot.captured
         expectThat(browserSwitchOptions) {
             get { metadata?.get("setup_token_id") }.isEqualTo("fake-setup-token")
-            get { metadata?.get("request_type") }.isEqualTo("vault")
+            get { metadata?.get("request_type") }.isEqualTo("paypal_vault")
             get { returnUrlScheme }.isEqualTo("custom_url_scheme")
             get { url }.isEqualTo(Uri.parse(expectedUrl))
         }
@@ -376,7 +376,7 @@ class PayPalWebLauncherUnitTest {
 
     private fun createVaultMetadata(setupTokenId: String) = JSONObject()
         .put("setup_token_id", setupTokenId)
-        .put("request_type", "vault")
+        .put("request_type", "paypal_vault")
 
     private fun createVaultDeepLinkUrl(approvalSessionId: String) =
         Uri.parse("http://testurl.com/checkout?approval_session_id=$approvalSessionId")
