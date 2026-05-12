@@ -1,6 +1,7 @@
 # PayPal Android SDK Release Notes
 
 ## unreleased
+
 * Gradle
   * Update Kotlin version to `1.9.24`
   * Update Android Gradle Plugin (AGP) to version `8.7.1`
