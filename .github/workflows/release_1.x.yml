@@ -178,7 +178,6 @@ jobs:
         env:
           VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         run: |
-          echo "${VALIDATED_VERSION}"
           ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
       - name: Publish All Modules
         uses: ./.github/actions/publish_all_modules
