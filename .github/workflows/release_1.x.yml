@@ -167,9 +167,10 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Update Version
+      - name: Log Version
         run: |
-          ./gradlew -PversionParam="${VALIDATED_VERSION_NAME}" changeReleaseVersion
+          # Use extracted version from build.gradle
+          echo "Using version from build.gradle: ${VALIDATED_VERSION_NAME}"
       - name: Publish All Modules
         uses: ./.github/actions/publish_all_modules
         with:
