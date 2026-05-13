@@ -178,6 +178,7 @@ jobs:
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Update Version
         run: |
+          echo "${VALIDATED_VERSION}"
           ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
       - name: Publish All Modules
         uses: ./.github/actions/publish_all_modules
