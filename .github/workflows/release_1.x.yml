@@ -48,7 +48,7 @@ jobs:
 
           # append validated version input to action runner environment
           # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#example-of-writing-an-environment-variable-to-github_env
-          echo "VALIDATED_VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "VALIDATED_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Set up Java
