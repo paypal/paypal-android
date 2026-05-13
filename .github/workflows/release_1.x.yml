@@ -160,8 +160,6 @@ jobs:
     needs: [ unit_test_finished, build_aar ]
     name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
-    env:
-      VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
     if: ${{ github.ref == 'refs/heads/1.x' }}
     steps:
       - name: Checkout Repository
@@ -177,6 +175,8 @@ jobs:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Update Version
+        env:
+          VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         run: |
           echo "${VALIDATED_VERSION}"
           ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
@@ -194,8 +194,6 @@ jobs:
     needs: [ publish_all_modules, build_aar ]
     name: Bump Version
     runs-on: ubuntu-latest
-    env:
-      VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
     permissions:
       contents: write
     steps:
@@ -209,6 +207,8 @@ jobs:
       - name: Set github user
         uses: ./.github/actions/set_github_user
       - name: Update Version
+        env:
+          VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         run: |
           ./gradlew -PversionParam="${VALIDATED_VERSION}" updateCHANGELOGVersion
           ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
@@ -228,6 +228,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         with:
           tag_name: ${{ env.VALIDATED_VERSION }}
           release_name: ${{ env.VALIDATED_VERSION }}
