@@ -1,9 +1,9 @@
-name: Release
+name: Release 1.x
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release'
+        description: '1.x version to release'
         required: true
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
