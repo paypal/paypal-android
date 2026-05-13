@@ -3,7 +3,7 @@ name: Release 1.x
 on:
   workflow_dispatch:
     inputs:
-      versionName:
+      version:
         description: '1.x version to release (e.g., 1.1.0)'
         required: true
         type: string
@@ -19,29 +19,30 @@ jobs:
     steps:
       - name: Validate Version Name
         env:
-          VERSION_NAME: ${{ github.event.inputs.versionName }}
+          VERSION: ${{ github.event.inputs.version }}
         run: |
           # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string                                                                                    
-          SEMVER_REGEX='^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+          # NOTE: semver must start with a 1
+          SEMVER_REGEX='^1\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
 
           # Ref: https://stackoverflow.com/a/17368090
           MAX_VERSION_INPUT_SIZE=255
           echo "Validating length of version name is less than ${MAX_VERSION_INPUT_SIZE} characters..."                                                                                                     
-          if [ ${#VERSION_NAME} -gt $MAX_VERSION_INPUT_SIZE ]; then
-            echo "Version name "${VERSION_NAME}" too long."
+          if [ ${#VERSION} -gt $MAX_VERSION_INPUT_SIZE ]; then
+            echo "Version name "${VERSION}" too long."
             exit 1
           fi
 
           # Ref: https://github.com/orgs/community/discussions/48373#discussioncomment-7543209                                                                                                 
           echo "Validating version name to make sure it adheres to semantic versioning..."                                                                                                     
-          if ! echo "$VERSION_NAME" | grep -P "${SEMVER_REGEX}"; then
-            echo "Version name "${VERSION_NAME}" invalid."
+          if ! echo "$VERSION" | grep -P "${SEMVER_REGEX}"; then
+            echo "Version name "${VERSION}" invalid. It must match the 1.x.x format."
             exit 2
           fi
 
           # append validated version input to action runner environment
           # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#example-of-writing-an-environment-variable-to-github_env
-          echo "VALIDATED_VERSION_NAME=${VERSION_NAME}" >> "$GITHUB_ENV"
+          echo "VALIDATED_VERSION=${VERSION}" >> "$GITHUB_ENV"
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Set up Java
@@ -167,10 +168,9 @@ jobs:
         with:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
-      - name: Log Version
+      - name: Update Version
         run: |
-          # Use extracted version from build.gradle
-          echo "Using version from build.gradle: ${VALIDATED_VERSION_NAME}"
+          ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
       - name: Publish All Modules
         uses: ./.github/actions/publish_all_modules
         with:
@@ -197,18 +197,17 @@ jobs:
         uses: ./.github/actions/set_github_user
       - name: Update Version
         run: |
-
-          ./gradlew -PversionParam="${VALIDATED_VERSION_NAME}" updateCHANGELOGVersion
-          ./gradlew -PversionParam="${VALIDATED_VERSION_NAME}" changeReleaseVersion
+          ./gradlew -PversionParam="${VALIDATED_VERSION}" updateCHANGELOGVersion
+          ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
 
           git add .
-          git commit -m "Bump version to ${VALIDATED_VERSION_NAME}"
-          git tag "${VALIDATED_VERSION_NAME}" -a -m "Release ${VALIDATED_VERSION_NAME}, by ${{ github.actor }}"
+          git commit -m "Bump version to ${VALIDATED_VERSION}"
+          git tag "${VALIDATED_VERSION}" -a -m "Release ${VALIDATED_VERSION}, by ${{ github.actor }}"
 
           ./gradlew incrementSnapshotVersion
           git add .
           git commit -m 'Next version ready'
-          git push origin HEAD "${VALIDATED_VERSION_NAME}"
+          git push origin HEAD "${VALIDATED_VERSION}"
       - name: Save changelog entries to a file
         run: sed -e '1,/##/d' -e '/##/,$d' CHANGELOG.md > changelog_entries.md
       - name: Create GitHub release
@@ -217,8 +216,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VALIDATED_VERSION_NAME }}
-          release_name: ${{ env.VALIDATED_VERSION_NAME }}
+          tag_name: ${{ env.VALIDATED_VERSION }}
+          release_name: ${{ env.VALIDATED_VERSION }}
           body_path: changelog_entries.md
           draft: false
           prerelease: false
