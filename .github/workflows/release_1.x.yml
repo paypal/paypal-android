@@ -1,0 +1,228 @@
+name: Release 1.x
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '1.x version to release (e.g., 1.1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
+jobs:
+  #First we build
+  build_aar:
+    name: Build
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/1.x' }}
+    steps:
+      - name: Validate Version Name
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          # Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string                                                                                    
+          # NOTE: semver must start with a 1
+          SEMVER_REGEX='^1\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+
+          # Ref: https://stackoverflow.com/a/17368090
+          MAX_VERSION_INPUT_SIZE=255
+          echo "Validating length of version name is less than ${MAX_VERSION_INPUT_SIZE} characters..."                                                                                                     
+          if [ ${#VERSION} -gt $MAX_VERSION_INPUT_SIZE ]; then
+            echo "Version name "${VERSION}" too long."
+            exit 1
+          fi
+
+          # Ref: https://github.com/orgs/community/discussions/48373#discussioncomment-7543209                                                                                                 
+          echo "Validating version name to make sure it adheres to semantic versioning..."                                                                                                     
+          if ! echo "$VERSION" | grep -P "${SEMVER_REGEX}"; then
+            echo "Version name "${VERSION}" invalid. It must match the 1.x.x format."
+            exit 2
+          fi
+
+          # append validated version input to action runner environment
+          # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#example-of-writing-an-environment-variable-to-github_env
+          echo "VALIDATED_VERSION=${VERSION}" >> "$GITHUB_ENV"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+          #After decoding the secret key, place the file in ~ /. Gradle/ secring.gpg
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Assemble
+        run: ./gradlew --stacktrace assemble -x :Demo:assemble # we exclude Demo from assemble
+        env:
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_FILE: ${{ env.SIGNING_KEY_FILE_PATH }}
+
+  #Once building is finished, we unit test every module in parallel
+  unit_test_core:
+    name: CorePayments Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: CorePayments
+
+  unit_test_card:
+    name: CardPayments Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: CardPayments
+  unit_test_paypal_web:
+    name: PayPal Web Payments Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: PayPalWebPayments
+  unit_test_paypal_native:
+    name: PayPal Native Payments Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: PayPalNativePayments
+  unit_test_fraud_protection:
+    name: Fraud Protection Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Run Unit Tests
+        uses: ./.github/actions/unit_test_module
+        with:
+          module: FraudProtection
+
+  unit_test_finished:
+    needs: [unit_test_card, unit_test_core, unit_test_paypal_web, unit_test_paypal_native, unit_test_fraud_protection]
+    name: All Unit Test finished
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Unit test finished"
+
+  # after build and unit tests are finished, publish all modules at once
+  # to help reduce the probability of failure when interacting with sonatype servers
+  publish_all_modules:
+    needs: [ unit_test_finished, build_aar ]
+    name: Publish All Modules To Sonatype
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/1.x' }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Decode Signing Key
+        uses: ./.github/actions/decode_signing_key_action
+        with:
+          signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
+          signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
+      - name: Update Version
+        run: |
+          ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
+      - name: Publish All Modules
+        uses: ./.github/actions/publish_all_modules
+        with:
+          sonatype_usr: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          sonatype_pwd: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_key_pwd: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          signing_key_file: ${{ env.SIGNING_KEY_FILE_PATH }}
+
+  # Once all releases are done, we bump version, tag it and prepare next
+  bump_version:
+    needs: [ publish_all_modules ]
+    name: Bump Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+      - name: Set github user
+        uses: ./.github/actions/set_github_user
+      - name: Update Version
+        run: |
+          ./gradlew -PversionParam="${VALIDATED_VERSION}" updateCHANGELOGVersion
+          ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
+
+          git add .
+          git commit -m "Bump version to ${VALIDATED_VERSION}"
+          git tag "${VALIDATED_VERSION}" -a -m "Release ${VALIDATED_VERSION}, by ${{ github.actor }}"
+
+          ./gradlew incrementSnapshotVersion
+          git add .
+          git commit -m 'Next version ready'
+          git push origin HEAD "${VALIDATED_VERSION}"
+      - name: Save changelog entries to a file
+        run: sed -e '1,/##/d' -e '/##/,$d' CHANGELOG.md > changelog_entries.md
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VALIDATED_VERSION }}
+          release_name: ${{ env.VALIDATED_VERSION }}
+          body_path: changelog_entries.md
+          draft: false
+          prerelease: false
