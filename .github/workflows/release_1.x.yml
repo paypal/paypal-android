@@ -8,6 +8,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 env:
   SIGNING_KEY_FILE_PATH: /home/runner/secretKey.gpg
 jobs:
@@ -185,6 +188,8 @@ jobs:
     needs: [ publish_all_modules ]
     name: Bump Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
