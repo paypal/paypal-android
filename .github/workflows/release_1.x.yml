@@ -19,8 +19,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/1.x' }}
+    outputs:
+      validated-version: ${{ steps.validate-version.outputs.VALIDATED_VERSION }}
     steps:
-      - name: Validate Version Name
+      - name: Validate Version
+        id: validate-version
         env:
           VERSION: ${{ github.event.inputs.version }}
         run: |
@@ -157,6 +160,8 @@ jobs:
     needs: [ unit_test_finished, build_aar ]
     name: Publish All Modules To Sonatype
     runs-on: ubuntu-latest
+    env:
+      VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
     if: ${{ github.ref == 'refs/heads/1.x' }}
     steps:
       - name: Checkout Repository
@@ -185,9 +190,11 @@ jobs:
 
   # Once all releases are done, we bump version, tag it and prepare next
   bump_version:
-    needs: [ publish_all_modules ]
+    needs: [ publish_all_modules, build_aar ]
     name: Bump Version
     runs-on: ubuntu-latest
+    env:
+      VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
     permissions:
       contents: write
     steps:
