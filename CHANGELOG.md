@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## unreleased
+## 1.8.0 (2026-05-13)
 
 * Gradle
   * Update Kotlin version to `1.9.24`
