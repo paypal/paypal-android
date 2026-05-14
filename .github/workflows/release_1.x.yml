@@ -19,8 +19,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/1.x' }}
+    outputs:
+      validated-version: ${{ steps.validate-version.outputs.VALIDATED_VERSION }}
     steps:
-      - name: Validate Version Name
+      - name: Validate Version
+        id: validate-version
         env:
           VERSION: ${{ github.event.inputs.version }}
         run: |
@@ -45,7 +48,7 @@ jobs:
 
           # append validated version input to action runner environment
           # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#example-of-writing-an-environment-variable-to-github_env
-          echo "VALIDATED_VERSION=${VERSION}" >> "$GITHUB_ENV"
+          echo "VALIDATED_VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Set up Java
@@ -172,6 +175,8 @@ jobs:
           signing_key_file: ${{ secrets.SIGNING_KEY_FILE }}
           signing_file_path: ${{ env.SIGNING_KEY_FILE_PATH }}
       - name: Update Version
+        env:
+          VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         run: |
           ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
       - name: Publish All Modules
@@ -185,7 +190,7 @@ jobs:
 
   # Once all releases are done, we bump version, tag it and prepare next
   bump_version:
-    needs: [ publish_all_modules ]
+    needs: [ publish_all_modules, build_aar ]
     name: Bump Version
     runs-on: ubuntu-latest
     permissions:
@@ -201,6 +206,8 @@ jobs:
       - name: Set github user
         uses: ./.github/actions/set_github_user
       - name: Update Version
+        env:
+          VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         run: |
           ./gradlew -PversionParam="${VALIDATED_VERSION}" updateCHANGELOGVersion
           ./gradlew -PversionParam="${VALIDATED_VERSION}" changeReleaseVersion
@@ -220,6 +227,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         with:
           tag_name: ${{ env.VALIDATED_VERSION }}
           release_name: ${{ env.VALIDATED_VERSION }}
