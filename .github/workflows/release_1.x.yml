@@ -207,6 +207,7 @@ jobs:
         uses: ./.github/actions/set_github_user
       - name: Update Version
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATED_VERSION: ${{ needs.build_aar.outputs.validated-version }}
         run: |
           ./gradlew -PversionParam="${VALIDATED_VERSION}" updateCHANGELOGVersion
