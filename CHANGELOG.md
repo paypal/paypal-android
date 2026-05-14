@@ -179,6 +179,17 @@
     * Update Android Gradle Plugin (AGP) to version `8.7.1`
     * Explicitly declare Java 17 version as the target JVM toolchain
 
+## 1.8.0 (2026-05-13)
+* Gradle
+  * Update Kotlin version to `1.9.24`
+  * Update Android Gradle Plugin (AGP) to version `8.7.1`
+  * Explicitly declare Java 17 version as the target JVM toolchain
+* CardPayments
+  * Skip deep link URL parsing in `CardClient` for `approveOrder()` and `vault()` 3DS authentication flows
+* PayPalWebPayments
+  * Fix issue with `PayPalWebCheckoutClient.start()` that caused explicit user cancelation to return a `Failure` event, instead of `Canceled`
+  * Fix issue with `PayPalWebCheckoutClient.vault()` that caused explicit user cancelation ro return a `Success` event, instead of `Canceled`
+
 ## 1.7.1 (2024-10-29)
 * Gradle
   * Update Android Gradle Plugin (AGP) to version `8.5.2`
