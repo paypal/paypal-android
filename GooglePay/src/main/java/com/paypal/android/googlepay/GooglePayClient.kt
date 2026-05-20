@@ -8,6 +8,7 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.SDKResult
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
@@ -21,7 +22,7 @@ class GooglePayClient internal constructor(
 
     constructor(context: Context, config: CoreConfig) : this(
         googlePayAPI = GooglePayAPI(context, config),
-        paymentsClient = createPaymentsClient(context)
+        paymentsClient = createPaymentsClient(context, config)
     )
 
     @OptIn(InternalSerializationApi::class)
@@ -111,9 +112,14 @@ class GooglePayClient internal constructor(
     }
 
     companion object {
-        fun createPaymentsClient(context: Context): PaymentsClient {
+        fun createPaymentsClient(context: Context, config: CoreConfig): PaymentsClient {
+            val walletEnvironment = when (config.environment) {
+                Environment.LIVE -> WalletConstants.ENVIRONMENT_PRODUCTION
+                Environment.SANDBOX -> WalletConstants.ENVIRONMENT_TEST
+            }
+
             val walletOptions = Wallet.WalletOptions.Builder()
-                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
+                .setEnvironment(walletEnvironment)
                 .build()
             return Wallet.getPaymentsClient(context, walletOptions)
         }
