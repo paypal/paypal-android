@@ -26,13 +26,9 @@ public final class com/paypal/android/googlepay/GooglePayCheckoutRequest {
 }
 
 public final class com/paypal/android/googlepay/GooglePayClient {
-	public static final field Companion Lcom/paypal/android/googlepay/GooglePayClient$Companion;
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
 	public final fun finishStart (Lcom/paypal/android/googlepay/GooglePayLaunchResult;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun start (Lcom/paypal/android/googlepay/GooglePayCheckoutRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/paypal/android/googlepay/GooglePayClient$Companion {
 }
 
 public final class com/paypal/android/googlepay/GooglePayExtKt {
