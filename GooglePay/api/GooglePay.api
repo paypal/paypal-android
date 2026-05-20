@@ -33,7 +33,6 @@ public final class com/paypal/android/googlepay/GooglePayClient {
 }
 
 public final class com/paypal/android/googlepay/GooglePayClient$Companion {
-	public final fun createPaymentsClient (Landroid/content/Context;)Lcom/google/android/gms/wallet/PaymentsClient;
 }
 
 public final class com/paypal/android/googlepay/GooglePayExtKt {
@@ -56,13 +55,39 @@ public final class com/paypal/android/googlepay/GooglePayFinishStartResult$Succe
 	public final fun getStatus ()Ljava/lang/String;
 }
 
-public final class com/paypal/android/googlepay/GooglePayLaunchResult {
-	public fun <init> (ZLjava/lang/String;)V
-	public final fun component1 ()Z
-	public final fun copy (ZLjava/lang/String;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
-	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/GooglePayLaunchResult;ZLjava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/googlepay/GooglePayLaunchResult;
+public final class com/paypal/android/googlepay/GooglePayFinishStartResult$UserCanceled : com/paypal/android/googlepay/GooglePayFinishStartResult {
+	public static final field INSTANCE Lcom/paypal/android/googlepay/GooglePayFinishStartResult$UserCanceled;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getSuccess ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/paypal/android/googlepay/GooglePayLaunchResult {
+}
+
+public final class com/paypal/android/googlepay/GooglePayLaunchResult$Failure : com/paypal/android/googlepay/GooglePayLaunchResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun component1 ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun copy (Lcom/paypal/android/corepayments/PayPalSDKError;)Lcom/paypal/android/googlepay/GooglePayLaunchResult$Failure;
+	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/GooglePayLaunchResult$Failure;Lcom/paypal/android/corepayments/PayPalSDKError;ILjava/lang/Object;)Lcom/paypal/android/googlepay/GooglePayLaunchResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/googlepay/GooglePayLaunchResult$Success : com/paypal/android/googlepay/GooglePayLaunchResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;)Lcom/paypal/android/googlepay/GooglePayLaunchResult$Success;
+	public static synthetic fun copy$default (Lcom/paypal/android/googlepay/GooglePayLaunchResult$Success;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/googlepay/GooglePayLaunchResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/googlepay/GooglePayLaunchResult$UserCanceled : com/paypal/android/googlepay/GooglePayLaunchResult {
+	public static final field INSTANCE Lcom/paypal/android/googlepay/GooglePayLaunchResult$UserCanceled;
+	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

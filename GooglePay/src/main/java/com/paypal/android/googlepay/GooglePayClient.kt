@@ -112,7 +112,7 @@ class GooglePayClient internal constructor(
     }
 
     companion object {
-        fun createPaymentsClient(context: Context, config: CoreConfig): PaymentsClient {
+        private fun createPaymentsClient(context: Context, config: CoreConfig): PaymentsClient {
             val walletEnvironment = when (config.environment) {
                 Environment.LIVE -> WalletConstants.ENVIRONMENT_PRODUCTION
                 Environment.SANDBOX -> WalletConstants.ENVIRONMENT_TEST
