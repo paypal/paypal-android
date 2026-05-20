@@ -1,3 +1,9 @@
 package com.paypal.android.googlepay
 
-data class GooglePayLaunchResult(val success: Boolean, internal val paymentMethodData: String?)
+import com.paypal.android.corepayments.PayPalSDKError
+
+sealed class GooglePayLaunchResult {
+    data class Success(internal val paymentMethodData: String) : GooglePayLaunchResult()
+    data class Failure(val error: PayPalSDKError) : GooglePayLaunchResult()
+    data object UserCanceled : GooglePayLaunchResult()
+}

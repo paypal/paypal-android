@@ -8,14 +8,11 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.SDKResult
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.String
 
 class GooglePayClient internal constructor(
     private val googlePayAPI: GooglePayAPI,
@@ -26,7 +23,6 @@ class GooglePayClient internal constructor(
         googlePayAPI = GooglePayAPI(context, config),
         paymentsClient = createPaymentsClient(context)
     )
-
 
     @OptIn(InternalSerializationApi::class)
     suspend fun start(request: GooglePayCheckoutRequest): GooglePayStartResult {
@@ -86,17 +82,15 @@ class GooglePayClient internal constructor(
         result: GooglePayLaunchResult,
         orderId: String
     ): GooglePayFinishStartResult {
-        return if (result.success) {
-            val paymentMethodData = result.paymentMethodData
-            if (paymentMethodData == null) {
-                val error = PayPalSDKError(123, "GooglePay finish start missing payment data.")
-                GooglePayFinishStartResult.Failure(error)
-            } else {
-                val result = googlePayAPI.confirmOrder(orderId, JSONObject(paymentMethodData))
-                when (result) {
+        return when (result) {
+            is GooglePayLaunchResult.Success -> {
+                val paymentMethodDataJSON = JSONObject(result.paymentMethodData)
+                val confirmOrderResult =
+                    googlePayAPI.confirmOrder(orderId, paymentMethodDataJSON)
+                when (confirmOrderResult) {
                     is SDKResult.Success -> {
-                        val status = result.value.status
-                        val googlePayCard = result.value.paymentSource.googlePay.card
+                        val status = confirmOrderResult.value.status
+                        val googlePayCard = confirmOrderResult.value.paymentSource.googlePay.card
                         GooglePayFinishStartResult.Success(
                             status = status,
                             cardLastDigits = googlePayCard.lastDigits,
@@ -105,12 +99,14 @@ class GooglePayClient internal constructor(
                         )
                     }
 
-                    is SDKResult.Failure -> GooglePayFinishStartResult.Failure(result.error)
+                    is SDKResult.Failure ->
+                        GooglePayFinishStartResult.Failure(confirmOrderResult.error)
                 }
             }
-        } else {
-            val error = PayPalSDKError(123, "GooglePay finish start failed.")
-            GooglePayFinishStartResult.Failure(error)
+
+            // map non-success types to expected return type
+            is GooglePayLaunchResult.Failure -> GooglePayFinishStartResult.Failure(result.error)
+            GooglePayLaunchResult.UserCanceled -> GooglePayFinishStartResult.UserCanceled
         }
     }
 
@@ -119,7 +115,6 @@ class GooglePayClient internal constructor(
             val walletOptions = Wallet.WalletOptions.Builder()
                 .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
                 .build()
-
             return Wallet.getPaymentsClient(context, walletOptions)
         }
     }

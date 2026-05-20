@@ -90,6 +90,8 @@ class GooglePayViewModel @Inject constructor(
                 googlePayFinishStartState = when (finishStartResult) {
                     is GooglePayFinishStartResult.Success -> ActionState.Success(finishStartResult)
                     is GooglePayFinishStartResult.Failure -> ActionState.Failure(finishStartResult.error)
+
+                    GooglePayFinishStartResult.UserCanceled -> ActionState.Failure(Exception("User Canceled"))
                 }
             }
         }

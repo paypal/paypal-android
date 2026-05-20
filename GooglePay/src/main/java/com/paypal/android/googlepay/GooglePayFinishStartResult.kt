@@ -11,4 +11,5 @@ sealed class GooglePayFinishStartResult {
     ) : GooglePayFinishStartResult()
 
     class Failure(val error: PayPalSDKError) : GooglePayFinishStartResult()
+    data object UserCanceled : GooglePayFinishStartResult()
 }
