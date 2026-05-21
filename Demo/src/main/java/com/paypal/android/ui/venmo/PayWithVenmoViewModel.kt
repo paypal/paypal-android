@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.ReturnToAppStrategy
+import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.models.OrderRequest
-import com.paypal.android.uishared.enums.DeepLinkStrategy
+import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.utils.ReturnUrlFactory
@@ -58,7 +61,7 @@ class PayWithVenmoViewModel @Inject constructor(
                     intent = OrderIntent.CAPTURE,
                     shouldVaultOnSuccess = false,
                     appSwitchWhenEligible = false,
-                    deepLinkStrategy = DeepLinkStrategy.CUSTOM_URL_SCHEME
+                    returnToAppStrategy = ReturnToAppStrategyOption.CUSTOM_URL_SCHEME
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -70,9 +73,10 @@ class PayWithVenmoViewModel @Inject constructor(
         if (orderId == null) {
             payWithVenmoState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            val deepLinkStrategy = DeepLinkStrategy.CUSTOM_URL_SCHEME
-            val returnUrl = ReturnUrlFactory.createGenericReturnUrl(deepLinkStrategy)
-            venmoClient.startVenmo(activity, orderId, returnUrl)
+            // TODO: add demo app UI option to tweak this parameter
+            val returnToAppStrategy =
+                ReturnToAppStrategy.CustomUrlScheme(DemoConstants.APP_CUSTOM_URL_SCHEME)
+            venmoClient.startVenmo(activity, orderId, returnToAppStrategy.returnUrl)
         }
     }
 }
