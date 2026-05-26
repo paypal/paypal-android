@@ -54,12 +54,6 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
-    var appSwitchWhenEligible: Boolean
-        get() = _uiState.value.appSwitchWhenEligible
-        set(value) {
-            _uiState.update { it.copy(appSwitchWhenEligible = value) }
-        }
-
     var returnToAppStrategy: ReturnToAppStrategyOption
         get() = _uiState.value.returnToAppStrategy
         set(value) {
@@ -70,7 +64,6 @@ class PayPalVaultViewModel @Inject constructor(
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
             createSetupTokenState = createPayPalSetupTokenUseCase(
-                appSwitchWhenEligible,
                 returnToAppStrategy.toReturnToAppStrategy()
             ).mapToActionState()
         }
@@ -88,7 +81,6 @@ class PayPalVaultViewModel @Inject constructor(
             viewModelScope.launch {
                 val request = PayPalWebVaultRequest(
                     setupTokenId,
-                    appSwitchWhenEligible,
                     returnToAppStrategy.toReturnToAppStrategy()
                 )
                 vaultSetupTokenWithRequest(activity, request)

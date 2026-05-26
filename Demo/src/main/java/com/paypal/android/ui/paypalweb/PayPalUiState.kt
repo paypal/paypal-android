@@ -13,7 +13,6 @@ data class PayPalUiState(
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
-    val appSwitchWhenEligible: Boolean = false,
     val returnToAppStrategyOption: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS,
 ) {
     val isCreateOrderSuccessful: Boolean

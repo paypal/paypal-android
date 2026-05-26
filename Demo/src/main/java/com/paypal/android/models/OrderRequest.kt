@@ -9,6 +9,5 @@ import kotlinx.serialization.Transient
 data class OrderRequest(
     val intent: OrderIntent,
     val shouldVaultOnSuccess: Boolean,
-    val appSwitchWhenEligible: Boolean,
     @Transient val returnToAppStrategy: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS
 )

@@ -48,6 +48,9 @@ class PayPalWebCheckoutClient internal constructor(
 
 ) {
 
+    // Enable app switch by switching this flag to true
+    private val appSwitchWhenEligible: Boolean = false
+
     // for analytics tracking
     private var checkoutOrderId: String? = null
     private var vaultSetupTokenId: String? = null
@@ -176,7 +179,6 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
 
         checkoutOrderId = request.orderId
-        appSwitchEnabled = request.appSwitchWhenEligible
         analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
@@ -195,7 +197,6 @@ class PayPalWebCheckoutClient internal constructor(
                     context = activity.applicationContext,
                     token = request.orderId,
                     tokenType = TokenType.ORDER_ID,
-                    appSwitchWhenEligible = request.appSwitchWhenEligible,
                     fallbackUri = buildPayPalCheckoutUri(
                         orderId = request.orderId,
                         funding = request.fundingSource,
@@ -274,7 +275,6 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = request.setupTokenId
-        appSwitchEnabled = request.appSwitchWhenEligible
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
@@ -325,7 +325,6 @@ class PayPalWebCheckoutClient internal constructor(
         request: PayPalWebVaultRequest
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = request.setupTokenId
-        appSwitchEnabled = request.appSwitchWhenEligible
         analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
 
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
@@ -336,7 +335,6 @@ class PayPalWebCheckoutClient internal constructor(
                 context = activity.applicationContext,
                 token = request.setupTokenId,
                 tokenType = TokenType.VAULT_ID,
-                appSwitchWhenEligible = request.appSwitchWhenEligible,
                 fallbackUri = buildPayPalVaultUri(request.setupTokenId)
             )
         }
@@ -543,7 +541,6 @@ class PayPalWebCheckoutClient internal constructor(
         context: Context,
         token: String,
         tokenType: TokenType,
-        appSwitchWhenEligible: Boolean,
         fallbackUri: Uri
     ): Uri {
         return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
