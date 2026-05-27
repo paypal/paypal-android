@@ -21,7 +21,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
-import com.paypal.android.uishared.components.BooleanOptionList
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
@@ -79,12 +78,6 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create an Order")
-        BooleanOptionList(
-            title = stringResource(id = R.string.app_switch_when_available),
-            selectedOption = uiState.appSwitchWhenEligible,
-            onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
-            modifier = Modifier.fillMaxWidth()
-        )
         CreateOrderForm(
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },

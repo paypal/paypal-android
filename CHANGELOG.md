@@ -2,9 +2,6 @@
 
 ## Unreleased
 
-* Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch
-  behavior
-* Adds new property `appSwitchWhenEligible`in `PayPalWebVaultRequest` to control app switch behavior
 * Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
   used to re-open app after approving order
 * Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be

@@ -19,7 +19,6 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        appSwitchEnabled: Boolean,
         returnToAppStrategy: ReturnToAppStrategy
     ): SDKSampleServerResult<PayPalSetupToken, Exception> =
         withContext(Dispatchers.IO) {

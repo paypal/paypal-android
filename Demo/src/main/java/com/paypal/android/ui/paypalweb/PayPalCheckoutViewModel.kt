@@ -55,12 +55,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    var appSwitchWhenEligible: Boolean
-        get() = _uiState.value.appSwitchWhenEligible
-        set(value) {
-            _uiState.update { it.copy(appSwitchWhenEligible = value) }
-        }
-
     var returnToAppStrategyOption: ReturnToAppStrategyOption
         get() = _uiState.value.returnToAppStrategyOption
         set(value) {
@@ -101,7 +95,6 @@ class PayPalCheckoutViewModel @Inject constructor(
                 OrderRequest(
                     intent = intentOption,
                     shouldVaultOnSuccess = false,
-                    appSwitchWhenEligible = appSwitchWhenEligible,
                     returnToAppStrategy = returnToAppStrategyOption
                 )
             }
@@ -124,7 +117,6 @@ class PayPalCheckoutViewModel @Inject constructor(
         val checkoutRequest = PayPalWebCheckoutRequest(
             orderId,
             fundingSource,
-            appSwitchWhenEligible,
             returnToAppStrategyOption.toReturnToAppStrategy()
         )
 

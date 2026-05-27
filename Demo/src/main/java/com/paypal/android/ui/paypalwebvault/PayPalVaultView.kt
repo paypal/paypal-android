@@ -3,7 +3,6 @@ package com.paypal.android.ui.paypalwebvault
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -19,7 +18,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
-import com.paypal.android.uishared.components.BooleanOptionList
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
@@ -80,12 +78,6 @@ private fun Step1_CreateSetupToken(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create Setup Token")
-        BooleanOptionList(
-            title = stringResource(id = R.string.app_switch_when_available),
-            selectedOption = uiState.appSwitchWhenEligible,
-            onSelectedOptionChange = { value -> viewModel.appSwitchWhenEligible = value },
-            modifier = Modifier.fillMaxWidth()
-        )
         EnumOptionList(
             title = stringResource(id = R.string.return_to_app_strategy_title),
             stringArrayResId = R.array.deep_link_strategy_options,

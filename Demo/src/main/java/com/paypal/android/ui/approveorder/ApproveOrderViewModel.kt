@@ -54,7 +54,7 @@ class ApproveOrderViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault, false)
+                OrderRequest(intentOption, shouldVault, returnToAppStrategyOption)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }

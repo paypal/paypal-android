@@ -10,7 +10,6 @@ data class PayPalVaultUiState(
     val createSetupTokenState: ActionState<PayPalSetupToken, Exception> = ActionState.Idle,
     val vaultPayPalState: ActionState<PayPalWebCheckoutFinishVaultResult.Success, Exception> = ActionState.Idle,
     val createPaymentTokenState: ActionState<PayPalPaymentToken, Exception> = ActionState.Idle,
-    val appSwitchWhenEligible: Boolean = false,
     val returnToAppStrategy: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS
 ) {
     val isCreateSetupTokenSuccessful: Boolean
