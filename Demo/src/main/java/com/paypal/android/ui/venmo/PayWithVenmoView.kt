@@ -1,5 +1,6 @@
 package com.paypal.android.ui.venmo
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,8 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
+import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
 
@@ -28,6 +31,16 @@ import com.paypal.android.utils.getActivityOrNull
 fun PayWithVenmoView(
     viewModel: PayWithVenmoViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        val intent = context.getActivityOrNull()?.intent
+        Log.d("PayWithVenmoView", intent?.toString() ?: "")
+    }
+
+    OnNewIntentEffect { newIntent ->
+        Log.d("PayWithVenmoView", newIntent.toString())
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {

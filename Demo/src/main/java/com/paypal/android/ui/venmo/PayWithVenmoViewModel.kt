@@ -75,7 +75,7 @@ class PayWithVenmoViewModel @Inject constructor(
         } else {
             // TODO: add demo app UI option to tweak this parameter
             val returnToAppStrategy =
-                ReturnToAppStrategy.CustomUrlScheme(DemoConstants.APP_CUSTOM_URL_SCHEME)
+                ReturnToAppStrategy.AppLink(DemoConstants.APP_URL)
             venmoClient.startVenmo(activity, orderId, returnToAppStrategy.returnUrl)
         }
     }

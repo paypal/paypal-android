@@ -13,6 +13,7 @@ import com.paypal.android.corepayments.model.APIResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class VenmoClient(
     private val coreConfig: CoreConfig,
@@ -73,18 +74,26 @@ class VenmoClient(
             }
 
             // FROM: VenmoAppSwitch
+//            val localVenmoBaseUrl = "https://www.venmo.com/smart/checkout/venmo"
             val localVenmoBaseUrl = "https://www.paypal.com/smart/checkout/venmo"
             val sandboxVenmoBaseUrl = "https://www.sandbox.paypal.com/smart/checkout/venmo"
             val appSwitchUri = localVenmoBaseUrl.toUri()
                 .buildUpon()
+                .appendQueryParameter("buttonSessionID", UUID.randomUUID().toString())
                 .appendQueryParameter("buyerCountry", "US")
                 .appendQueryParameter("channel", "mobile-web")
+                .appendQueryParameter("commit", "true")
+                .appendQueryParameter("domain", "sdk.paypal.com")
                 .appendQueryParameter("enableFunding", "venmo")
-                .appendQueryParameter("env", "sandbox")
+                .appendQueryParameter("env", "qa")
                 .appendQueryParameter("facilitatorAccessToken", "")
                 .appendQueryParameter("fundingSource", "venmo")
                 .appendQueryParameter("orderID", orderId)
                 .appendQueryParameter("pageUrl", returnUrl)
+                .appendQueryParameter("sessionUID", UUID.randomUUID().toString())
+                .appendQueryParameter("sdkMeta", "")
+//                .appendQueryParameter("clientID", coreConfig.clientId)
+//                .appendQueryParameter("merchantId", "V9YP27HFNG2LW")
                 .build()
             activity.startActivity(Intent(Intent.ACTION_VIEW, appSwitchUri))
 
