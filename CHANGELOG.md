@@ -1,5 +1,28 @@
 # PayPal Android SDK Release Notes
 
+## unreleased
+
+* CorePayments
+  * Add `AnalyticsServiceRegistry` — a singleton initialized once in `Application.onCreate()`
+    that provides a shared `AnalyticsService` instance across the SDK. Eliminates per-client
+    `AnalyticsService` creation and ensures all analytics events use a single, correctly
+    credentialed instance.
+  * Add `AnalyticsServiceProvider` interface allowing UI components to receive an
+    `AnalyticsService` from a checkout client without requiring a module dependency.
+* PaymentButtons
+  * Fix `payment-button:initialized` and `payment-button:tapped` events being sent to live
+    FPTI with `clientId = "N/A"`. Buttons now source their `AnalyticsService` automatically
+    from `AnalyticsServiceRegistry` when attached to the window — no merchant wiring required.
+  * Add `PaymentButtonEvent` enum with typed `INITIALIZED` and `TAPPED` constants.
+  * Add `PaymentButtonAnalytics` wrapper class, consistent with `CardAnalytics` and
+    `PayPalWebAnalytics` in other modules.
+* CardPayments
+  * `CardClient` now uses the shared `AnalyticsService` from `AnalyticsServiceRegistry`
+    instead of creating its own instance.
+* PayPalWebPayments
+  * `PayPalWebCheckoutClient` now uses the shared `AnalyticsService` from
+    `AnalyticsServiceRegistry` instead of creating its own instance.
+
 ## 2.3.0 (2025-11-03)
 
 * PayPalWebPayments
