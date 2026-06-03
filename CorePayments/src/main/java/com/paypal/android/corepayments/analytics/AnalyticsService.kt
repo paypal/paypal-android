@@ -23,6 +23,9 @@ class AnalyticsService internal constructor(
     private val trackingEventsAPI: TrackingEventsAPI,
     private val scope: CoroutineScope
 ) {
+    companion object {
+        private const val TAG = "[PayPal SDK]"
+    }
 
     constructor(context: Context, coreConfig: CoreConfig) :
             this(context, coreConfig, Dispatchers.IO)
@@ -56,15 +59,11 @@ class AnalyticsService internal constructor(
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->
-                    Log.d(TAG, "Failed to send analytics: $errorMessage")
+                    Log.w(TAG, "Failed to send analytics: $errorMessage")
                 }
             } catch (e: PayPalSDKError) {
-                Log.d(TAG, "Failed to send analytics due to missing clientId: ${e.message}")
+                Log.e(TAG, "Failed to send analytics due to missing clientId: ${e.message}")
             }
         }
-    }
-
-    companion object {
-        private const val TAG = "[PayPal SDK]"
     }
 }
