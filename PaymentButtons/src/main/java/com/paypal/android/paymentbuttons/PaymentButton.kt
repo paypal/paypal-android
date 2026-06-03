@@ -208,8 +208,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         super.onAttachedToWindow()
         if (analytics == null) {
             analytics = PaymentButtonAnalytics(AnalyticsServiceRegistry.service)
+            analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
         }
-        analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
         renderButton()
     }
 
