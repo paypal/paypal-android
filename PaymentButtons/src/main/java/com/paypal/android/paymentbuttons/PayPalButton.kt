@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
+import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
@@ -70,11 +71,7 @@ open class PayPalButton @JvmOverloads constructor(
             updateLabelFrom(typedArray)
         }
         contentDescription = context.getString(R.string.paypal_payment_button_description)
-        analyticsService.sendAnalyticsEvent(
-            "payment-button:initialized",
-            orderId = null,
-            buttonType = PaymentButtonFundingType.PAYPAL.buttonType
-        )
+        analytics?.notify(PaymentButtonEvent.INITIALIZED, PaymentButtonFundingType.PAYPAL.buttonType)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {

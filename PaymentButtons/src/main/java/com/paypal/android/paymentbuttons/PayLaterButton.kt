@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
+import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.ui.R
 
 
@@ -68,11 +69,7 @@ class PayLaterButton @JvmOverloads constructor(
             updateColorFrom(typedArray)
         }
         updateLabel(PayPalButtonLabel.PAY_LATER)
-        analyticsService.sendAnalyticsEvent(
-            "payment-button:initialized",
-            orderId = null,
-            buttonType = PaymentButtonFundingType.PAY_LATER.buttonType
-        )
+        analytics?.notify(PaymentButtonEvent.INITIALIZED, PaymentButtonFundingType.PAY_LATER.buttonType)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {
