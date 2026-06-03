@@ -17,6 +17,7 @@ import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.paypal.android.corepayments.analytics.AnalyticsServiceRegistry
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonAnalytics
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.ui.R
@@ -205,6 +206,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        if (analytics == null) {
+            analytics = PaymentButtonAnalytics(AnalyticsServiceRegistry.service)
+        }
+        analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
         renderButton()
     }
 

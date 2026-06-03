@@ -71,7 +71,6 @@ open class PayPalButton @JvmOverloads constructor(
             updateLabelFrom(typedArray)
         }
         contentDescription = context.getString(R.string.paypal_payment_button_description)
-        analytics?.notify(PaymentButtonEvent.INITIALIZED, PaymentButtonFundingType.PAYPAL.buttonType)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {
