@@ -43,6 +43,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private val analytics: PaymentButtonAnalytics? =
         coreConfig?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
 
+    private var hasNotifiedInitialized = false
+
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
             field = value
@@ -208,7 +210,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
+        if (!hasNotifiedInitialized) {
+            hasNotifiedInitialized = true
+            analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
+        }
         renderButton()
     }
 

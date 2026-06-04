@@ -1,5 +1,6 @@
 package com.paypal.android.paymentbuttons.analytics
 
+import com.paypal.android.corepayments.analytics.AnalyticsParams
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.mockk
 import io.mockk.verify
@@ -11,25 +12,25 @@ class PaymentButtonAnalyticsTest {
     private val sut = PaymentButtonAnalytics(analyticsService)
 
     @Test
-    fun `notify sends INITIALIZED event with correct button type`() {
+    fun `notify sends INITIALIZED event with correct button type param`() {
         sut.notify(PaymentButtonEvent.INITIALIZED, "PayPal")
 
         verify(exactly = 1) {
             analyticsService.sendAnalyticsEvent(
                 "payment-button:initialized",
-                buttonType = "PayPal"
+                params = mapOf(AnalyticsParams.BUTTON_TYPE to "PayPal")
             )
         }
     }
 
     @Test
-    fun `notify sends TAPPED event with correct button type`() {
+    fun `notify sends TAPPED event with correct button type param`() {
         sut.notify(PaymentButtonEvent.TAPPED, "Pay Later")
 
         verify(exactly = 1) {
             analyticsService.sendAnalyticsEvent(
                 "payment-button:tapped",
-                buttonType = "Pay Later"
+                params = mapOf(AnalyticsParams.BUTTON_TYPE to "Pay Later")
             )
         }
     }

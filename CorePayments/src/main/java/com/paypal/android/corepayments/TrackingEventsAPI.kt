@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments
 
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
+import com.paypal.android.corepayments.analytics.AnalyticsParams
 import com.paypal.android.corepayments.analytics.DeviceData
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.encodeToString
@@ -43,8 +44,8 @@ internal class TrackingEventsAPI constructor(
             platform = PLATFORM_ANDROID,
             timestamp = event.timestamp.toString(),
             tenantName = TENANT_NAME_PAYPAL,
-            orderId = event.orderId,
-            buttonType = event.buttonType
+            orderId = event.params[AnalyticsParams.ORDER_ID],
+            buttonType = event.params[AnalyticsParams.BUTTON_TYPE]
         )
 
         val events = TrackingEvents(eventParams = eventParams)
@@ -62,5 +63,6 @@ internal class TrackingEventsAPI constructor(
         const val EVENT_SOURCE_MOBILE_NATIVE = "mobile-native"
         const val PLATFORM_ANDROID = "Android"
         const val TENANT_NAME_PAYPAL = "PayPal"
+
     }
 }

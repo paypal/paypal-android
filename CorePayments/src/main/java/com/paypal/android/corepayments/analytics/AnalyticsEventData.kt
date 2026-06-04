@@ -5,6 +5,5 @@ internal data class AnalyticsEventData(
     val environment: String,
     val eventName: String,
     val timestamp: Long,
-    val orderId: String?,
-    val buttonType: String? = null
+    val params: Map<String, String> = emptyMap()
 )
