@@ -3,25 +3,20 @@
 ## unreleased
 
 * CorePayments
-  * Add `AnalyticsServiceRegistry` — a singleton initialized once in `Application.onCreate()`
-    that provides a shared `AnalyticsService` instance across the SDK. Eliminates per-client
-    `AnalyticsService` creation and ensures all analytics events use a single, correctly
-    credentialed instance.
-  * Add `AnalyticsServiceProvider` interface allowing UI components to receive an
-    `AnalyticsService` from a checkout client without requiring a module dependency.
+  * `AnalyticsService.sendAnalyticsEvent` now accepts a generic `params: Map<String, String>`
+    instead of typed `orderId` and `buttonType` parameters. Each analytics component
+    defines its own param keys using the new `AnalyticsParams` constants object.
+  * Add `AnalyticsParams` with `ORDER_ID` and `BUTTON_TYPE` constants, accessible
+    across all SDK modules.
 * PaymentButtons
   * Fix `payment-button:initialized` and `payment-button:tapped` events being sent to live
-    FPTI with `clientId = "N/A"`. Buttons now source their `AnalyticsService` automatically
-    from `AnalyticsServiceRegistry` when attached to the window — no merchant wiring required.
-  * Add `PaymentButtonEvent` enum with typed `INITIALIZED` and `TAPPED` constants.
+    FPTI with `clientId = "N/A"`. `PaymentButton` now accepts an optional `CoreConfig`
+    constructor parameter — analytics fires with real credentials if provided, and is
+    silently suppressed if not (e.g. XML inflation).
+  * Add `PaymentButtonEvent` enum with typed `INITIALIZED` and `TAPPED` constants,
+    consistent with `CheckoutEvent`/`VaultEvent` in other modules.
   * Add `PaymentButtonAnalytics` wrapper class, consistent with `CardAnalytics` and
     `PayPalWebAnalytics` in other modules.
-* CardPayments
-  * `CardClient` now uses the shared `AnalyticsService` from `AnalyticsServiceRegistry`
-    instead of creating its own instance.
-* PayPalWebPayments
-  * `PayPalWebCheckoutClient` now uses the shared `AnalyticsService` from
-    `AnalyticsServiceRegistry` instead of creating its own instance.
 
 ## 2.3.0 (2025-11-03)
 
