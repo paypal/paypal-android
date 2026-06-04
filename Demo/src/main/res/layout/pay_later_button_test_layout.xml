@@ -23,31 +23,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_color="white" />
+            app:paypal_color="white"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_color="black" />
+            app:paypal_color="black"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_color="blue" />
+            app:paypal_color="blue"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_color="gold" />
+            app:paypal_color="gold"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_color="silver" />
+            app:paypal_color="silver"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <TextView
             android:layout_width="match_parent"
@@ -59,31 +69,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paylater_color="white" />
+            app:paylater_color="white"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paylater_color="gold" />
+            app:paylater_color="gold"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paylater_color="blue" />
+            app:paylater_color="blue"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paylater_color="silver" />
+            app:paylater_color="silver"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paylater_color="black" />
+            app:paylater_color="black"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <TextView
             android:layout_width="match_parent"
@@ -95,13 +115,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_credit_color="black" />
+            app:paypal_credit_color="black"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
         <com.paypal.android.paymentbuttons.PayPalCreditButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_credit_color="dark_blue" />
+            app:paypal_credit_color="dark_blue"
+            app:paypal_client_id="@string/paypal_demo_client_id"
+            app:paypal_environment="sandbox" />
 
     </LinearLayout>
 </ScrollView>

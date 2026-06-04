@@ -18,6 +18,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonAnalytics
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
@@ -37,11 +38,25 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var shapeHasChanged = false
 
     /**
-     * Analytics for button events. Populated if a [CoreConfig] was provided at construction.
-     * If null, no button events are sent. Internal so subclasses can fire INITIALIZED in their
-     * own init blocks after their fundingType property is available.
+     * Optionally set a [CoreConfig] to enable button analytics. Can be set after XML inflation:
+     * ```
+     * val button = findViewById<PayPalButton>(R.id.payPalButton)
+     * button.coreConfig = CoreConfig(clientId, Environment.SANDBOX)
+     * ```
+     * Setting this rebuilds the internal [PaymentButtonAnalytics] instance.
      */
-    internal val analytics: PaymentButtonAnalytics? =
+    var coreConfig: CoreConfig? = coreConfig
+        set(value) {
+            field = value
+            analytics = value?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
+        }
+
+    /**
+     * Analytics for button events. Populated when [coreConfig] is set, either via constructor,
+     * XML attributes, or by setting [coreConfig] after inflation.
+     * Internal so subclasses can fire INITIALIZED in their own init blocks.
+     */
+    internal var analytics: PaymentButtonAnalytics? =
         coreConfig?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
@@ -203,6 +218,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
         orientation = HORIZONTAL
         gravity = Gravity.CENTER
+        isClickable = true
 
         initAttributes(attributeSet, defStyleAttr)
     }
@@ -232,6 +248,19 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
+            updateCoreConfigFrom(typedArray)
+        }
+    }
+
+    private fun updateCoreConfigFrom(typedArray: TypedArray) {
+        val clientId = typedArray.getString(R.styleable.PaymentButton_paypal_client_id)
+        if (!clientId.isNullOrBlank()) {
+            val environmentValue = typedArray.getInt(
+                R.styleable.PaymentButton_paypal_environment,
+                0 // default: sandbox
+            )
+            val environment = if (environmentValue == 0) Environment.SANDBOX else Environment.LIVE
+            coreConfig = CoreConfig(clientId, environment)
         }
     }
 
