@@ -10,7 +10,7 @@ import com.paypal.android.cardpayments.analytics.VaultEvent
 import com.paypal.android.cardpayments.api.CheckoutOrdersAPI
 import com.paypal.android.cardpayments.api.ConfirmPaymentSourceResult
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.analytics.AnalyticsServiceRegistry
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +42,7 @@ class CardClient internal constructor(
     constructor(context: Context, configuration: CoreConfig) : this(
         CheckoutOrdersAPI(configuration),
         DataVaultPaymentMethodTokensAPI(context.applicationContext, configuration),
-        CardAnalytics(AnalyticsServiceRegistry.service),
+        CardAnalytics(AnalyticsService(context.applicationContext, configuration)),
         CardAuthLauncher(),
         Dispatchers.Main
     )

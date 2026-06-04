@@ -17,7 +17,8 @@ import com.google.android.material.shape.CutCornerTreatment
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.paypal.android.corepayments.analytics.AnalyticsServiceRegistry
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonAnalytics
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.ui.R
@@ -26,7 +27,8 @@ import com.paypal.android.ui.R
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    coreConfig: CoreConfig? = null
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
 
     /**
@@ -35,11 +37,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var shapeHasChanged = false
 
     /**
-     * Analytics service for button events. Null by default — no events are sent until a real
-     * [com.paypal.android.corepayments.CoreConfig] is available. Set internally by the SDK
-     * when a checkout client binds to this button.
+     * Analytics for button events. Populated if a [CoreConfig] was provided at construction.
+     * If null, no button events are sent.
      */
-    internal var analytics: PaymentButtonAnalytics? = null
+    private val analytics: PaymentButtonAnalytics? =
+        coreConfig?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
@@ -206,10 +208,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (analytics == null) {
-            analytics = PaymentButtonAnalytics(AnalyticsServiceRegistry.service)
-            analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
-        }
+        analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
         renderButton()
     }
 

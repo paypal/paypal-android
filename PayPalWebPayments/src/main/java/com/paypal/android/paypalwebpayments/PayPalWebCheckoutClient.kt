@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.corepayments.analytics.AnalyticsServiceRegistry
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
@@ -44,7 +44,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlScheme the custom URl scheme used to return to your app from a browser switch flow
      */
     constructor(context: Context, configuration: CoreConfig, urlScheme: String) : this(
-        analytics = PayPalWebAnalytics(AnalyticsServiceRegistry.service),
+        analytics = PayPalWebAnalytics(AnalyticsService(context.applicationContext, configuration)),
         payPalWebLauncher = PayPalWebLauncher(urlScheme, configuration),
         sessionStore = PayPalWebCheckoutSessionStore(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
