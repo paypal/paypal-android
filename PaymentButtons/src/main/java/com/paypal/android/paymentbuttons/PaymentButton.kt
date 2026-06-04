@@ -38,12 +38,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     /**
      * Analytics for button events. Populated if a [CoreConfig] was provided at construction.
-     * If null, no button events are sent.
+     * If null, no button events are sent. Internal so subclasses can fire INITIALIZED in their
+     * own init blocks after their fundingType property is available.
      */
-    private val analytics: PaymentButtonAnalytics? =
+    internal val analytics: PaymentButtonAnalytics? =
         coreConfig?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
-
-    private var hasNotifiedInitialized = false
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
@@ -210,10 +209,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (!hasNotifiedInitialized) {
-            hasNotifiedInitialized = true
-            analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
-        }
         renderButton()
     }
 
