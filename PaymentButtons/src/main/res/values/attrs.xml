@@ -13,14 +13,6 @@
             <enum name="rectangle" value="2" />
         </attr>
 
-        <!-- Optional: provide a PayPal client ID to enable button analytics from XML. -->
-        <attr name="paypal_client_id" format="string" />
-
-        <!-- Optional: environment for analytics. Defaults to sandbox if omitted. -->
-        <attr name="paypal_environment" format="enum">
-            <enum name="sandbox" value="0" />
-            <enum name="live" value="1" />
-        </attr>
     </declare-styleable>
 
     <declare-styleable name="PayPalButton">

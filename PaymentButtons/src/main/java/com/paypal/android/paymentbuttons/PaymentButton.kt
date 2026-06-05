@@ -18,7 +18,6 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonAnalytics
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
@@ -38,12 +37,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private var shapeHasChanged = false
 
     /**
-     * Optionally set a [CoreConfig] to enable button analytics. Can be set after XML inflation:
-     * ```
-     * val button = findViewById<PayPalButton>(R.id.payPalButton)
-     * button.coreConfig = CoreConfig(clientId, Environment.SANDBOX)
-     * ```
-     * Setting this rebuilds the internal [PaymentButtonAnalytics] instance.
+     * Optionally set a [CoreConfig] to enable button analytics. Can be provided at construction
+     * or set after creation. Setting this rebuilds the internal [PaymentButtonAnalytics] instance.
      */
     var coreConfig: CoreConfig? = coreConfig
         set(value) {
@@ -248,19 +243,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
-            updateCoreConfigFrom(typedArray)
-        }
-    }
-
-    private fun updateCoreConfigFrom(typedArray: TypedArray) {
-        val clientId = typedArray.getString(R.styleable.PaymentButton_paypal_client_id)
-        if (!clientId.isNullOrBlank()) {
-            val environmentValue = typedArray.getInt(
-                R.styleable.PaymentButton_paypal_environment,
-                0 // default: sandbox
-            )
-            val environment = if (environmentValue == 0) Environment.SANDBOX else Environment.LIVE
-            coreConfig = CoreConfig(clientId, environment)
         }
     }
 
