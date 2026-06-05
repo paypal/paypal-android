@@ -9,5 +9,6 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object AnalyticsParams {
     const val ORDER_ID = "order_id"
+    const val SETUP_TOKEN_ID = "setup_token_id"
     const val BUTTON_TYPE = "button_type"
 }

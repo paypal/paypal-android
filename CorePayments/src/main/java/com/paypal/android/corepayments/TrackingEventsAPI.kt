@@ -45,6 +45,7 @@ internal class TrackingEventsAPI constructor(
             timestamp = event.timestamp.toString(),
             tenantName = TENANT_NAME_PAYPAL,
             orderId = event.params[AnalyticsParams.ORDER_ID],
+            setupTokenId = event.params[AnalyticsParams.SETUP_TOKEN_ID],
             buttonType = event.params[AnalyticsParams.BUTTON_TYPE]
         )
 

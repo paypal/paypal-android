@@ -18,7 +18,7 @@ internal class CardAnalytics(
     fun notify(event: VaultEvent, setupTokenId: String?) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
-            params = buildParams(setupTokenId)
+            params = setupTokenId?.let { mapOf(AnalyticsParams.SETUP_TOKEN_ID to it) } ?: emptyMap()
         )
     }
 
