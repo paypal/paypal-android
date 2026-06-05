@@ -7,7 +7,25 @@ import kotlinx.serialization.Serializable
 data class OrderRequestBody(
     val intent: OrderIntent,
     val purchaseUnits: List<PurchaseUnit>,
-    val paymentSource: OrderPaymentSource? = null
+    val paymentSource: OrderPaymentSource? = null,
+    val applicationContext: ApplicationContext? = null,
+    val appSwitchContext: VenmoAppSwitchContext? = null
+)
+
+@Serializable
+data class ApplicationContext(
+    val returnFlow: String? = null,
+    val venmoApplicationContext: VenmoApplicationContext? = null
+)
+
+@Serializable
+data class VenmoApplicationContext(
+    val returnFlow: String
+)
+
+@Serializable
+data class VenmoAppSwitchContext(
+    val source: String
 )
 
 @Serializable
@@ -24,7 +42,8 @@ data class Amount(
 @Serializable
 data class OrderPaymentSource(
     val card: Card? = null,
-    val paypal: PayPalPaymentSource? = null
+    val paypal: PayPalPaymentSource? = null,
+    val venmo: VenmoPaymentSource? = null
 )
 
 @Serializable
@@ -57,4 +76,16 @@ data class PayPalOrderExperienceContext(
 @Serializable
 data class NativeApp(
     val appUrl: String
+)
+
+@Serializable
+data class VenmoPaymentSource(
+    val experienceContext: VenmoExperienceContext
+)
+
+@Serializable
+data class VenmoExperienceContext(
+    val returnUrl: String,
+    val cancelUrl: String,
+    val appSwitchContext: VenmoAppSwitchContext? = null
 )

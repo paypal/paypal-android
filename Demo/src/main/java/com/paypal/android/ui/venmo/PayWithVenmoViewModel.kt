@@ -2,6 +2,7 @@ package com.paypal.android.ui.venmo
 
 import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paypal.android.DemoConstants
@@ -15,6 +16,7 @@ import com.paypal.android.models.OrderRequest
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.usecase.CreateVenmoOrderUseCase
 import com.paypal.android.utils.ReturnUrlFactory
 import com.paypal.android.venmo.VenmoClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PayWithVenmoViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
-    val createOrderUseCase: CreateOrderUseCase,
+    val createOrderUseCase: CreateVenmoOrderUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PayWithVenmoUiState())
@@ -60,8 +62,8 @@ class PayWithVenmoViewModel @Inject constructor(
                 OrderRequest(
                     intent = OrderIntent.CAPTURE,
                     shouldVaultOnSuccess = false,
-                    appSwitchWhenEligible = false,
-                    returnToAppStrategy = ReturnToAppStrategyOption.CUSTOM_URL_SCHEME
+                    appSwitchWhenEligible = true,
+                    returnToAppStrategy = ReturnToAppStrategyOption.APP_LINKS
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -76,7 +78,11 @@ class PayWithVenmoViewModel @Inject constructor(
             // TODO: add demo app UI option to tweak this parameter
             val returnToAppStrategy =
                 ReturnToAppStrategy.AppLink(DemoConstants.APP_URL)
-            venmoClient.startVenmo(activity, orderId, returnToAppStrategy.returnUrl)
+            val returnUrl = returnToAppStrategy.returnUrl.toUri()
+                .buildUpon()
+                .fragment("return")
+                .toString()
+            venmoClient.startVenmo(activity, orderId, returnUrl)
         }
     }
 }

@@ -2,15 +2,14 @@ package com.paypal.android.usecase
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
-import com.paypal.android.api.model.serialization.Card
-import com.paypal.android.api.model.serialization.CardAttributes
-import com.paypal.android.api.model.serialization.NativeApp
+import com.paypal.android.api.model.serialization.ApplicationContext
 import com.paypal.android.api.model.serialization.OrderPaymentSource
 import com.paypal.android.api.model.serialization.OrderRequestBody
-import com.paypal.android.api.model.serialization.PayPalOrderExperienceContext
-import com.paypal.android.api.model.serialization.PayPalPaymentSource
 import com.paypal.android.api.model.serialization.PurchaseUnit
-import com.paypal.android.api.model.serialization.Vault
+import com.paypal.android.api.model.serialization.VenmoAppSwitchContext
+import com.paypal.android.api.model.serialization.VenmoApplicationContext
+import com.paypal.android.api.model.serialization.VenmoExperienceContext
+import com.paypal.android.api.model.serialization.VenmoPaymentSource
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.models.OrderRequest
@@ -19,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class CreateOrderUseCase @Inject constructor(
+class CreateVenmoOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
 
@@ -27,23 +26,16 @@ class CreateOrderUseCase @Inject constructor(
         val paymentSource = when {
             request.appSwitchWhenEligible -> {
                 val returnToAppStrategy = request.returnToAppStrategy.toReturnToAppStrategy()
-                val appUrl = ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy)
                 OrderPaymentSource(
-                    paypal = PayPalPaymentSource(
-                        experienceContext = PayPalOrderExperienceContext(
+                    venmo = VenmoPaymentSource(
+                        experienceContext = VenmoExperienceContext(
                             returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(
                                 returnToAppStrategy
                             ),
                             cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(returnToAppStrategy),
-                            nativeApp = NativeApp(appUrl = appUrl)
+                            appSwitchContext = VenmoAppSwitchContext(source = "NATIVE_APP")
                         )
                     )
-                )
-            }
-
-            request.shouldVaultOnSuccess -> {
-                OrderPaymentSource(
-                    card = Card(attributes = CardAttributes(vault = Vault(storeInVault = "ON_SUCCESS")))
                 )
             }
 
@@ -62,7 +54,7 @@ class CreateOrderUseCase @Inject constructor(
             val orderRequestBody = OrderRequestBody(
                 intent = request.intent,
                 purchaseUnits = listOf(purchaseUnit),
-                paymentSource = paymentSource,
+                paymentSource = paymentSource
             )
 
             sdkSampleServerAPI.createOrder(orderRequestBody)

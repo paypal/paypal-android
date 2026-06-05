@@ -34,11 +34,11 @@ fun PayWithVenmoView(
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
-        Log.d("PayWithVenmoView", intent?.toString() ?: "")
+        Log.d("PayWithVenmoView", intent?.data?.toString() ?: "")
     }
 
     OnNewIntentEffect { newIntent ->
-        Log.d("PayWithVenmoView", newIntent.toString())
+        Log.d("PayWithVenmoView", newIntent.data?.toString() ?: "")
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
