@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDKError
+import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.api.GetFundingEligibility
@@ -28,7 +30,7 @@ class VenmoClient(
         GetFundingEligibility(config)
     )
 
-    fun startVenmo(
+    fun start(
         activity: ComponentActivity,
         orderId: String,
         returnUrl: String,
@@ -63,11 +65,13 @@ class VenmoClient(
             }
 
             // Venmo is eligible, proceed with CCO update
-            val ccoUpdateResult = ccoAPI.updateClientConfig(tokenId = orderId, fundingSource = "venmo")
+            val ccoUpdateResult =
+                ccoAPI.updateClientConfig(tokenId = orderId, fundingSource = "venmo")
             when (ccoUpdateResult) {
                 UpdateClientConfigResult.Success -> {
                     Log.d("venmo", "CCO Update Success")
                 }
+
                 is UpdateClientConfigResult.Failure -> {
                     Log.d("venmo", "CCO Update Failure")
                 }
@@ -108,4 +112,18 @@ class VenmoClient(
 
         }
     }
+
+    fun finishStart(intent: Intent): VenmoFinishStartResult? =
+        intent.data?.let { uri ->
+            // Ref: https://ppcp-mobile-demo-sandbox-87bbd7f0a27f.herokuapp.com/success?token=3AA109843N208505T&PayerID=DZJ6MD58L5YY6&approved=true
+            val token = uri.getQueryParameter("token")
+            val payerId = uri.getQueryParameter("PayerID")
+            val approved = uri.getQueryParameter("approved")
+            if (token != null && payerId != null && approved != null) {
+                VenmoFinishStartResult.Success(token, payerId, approved.toBoolean())
+            } else {
+                val error = PayPalSDKError(123, "Unable to parse deep link.")
+                VenmoFinishStartResult.Failure(error)
+            }
+        }
 }

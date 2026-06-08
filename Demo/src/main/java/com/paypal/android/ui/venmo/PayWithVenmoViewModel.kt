@@ -1,6 +1,7 @@
 package com.paypal.android.ui.venmo
 
 import android.content.Context
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,7 @@ import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.CreateVenmoOrderUseCase
 import com.paypal.android.utils.ReturnUrlFactory
 import com.paypal.android.venmo.VenmoClient
+import com.paypal.android.venmo.VenmoFinishStartResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,7 +84,16 @@ class PayWithVenmoViewModel @Inject constructor(
                 .buildUpon()
                 .fragment("return")
                 .toString()
-            venmoClient.startVenmo(activity, orderId, returnUrl)
+            venmoClient.start(activity, orderId, returnUrl)
+        }
+    }
+
+    fun finishVenmo(intent: Intent) {
+        venmoClient.finishStart(intent)?.let { result ->
+            payWithVenmoState = when (result) {
+                is VenmoFinishStartResult.Success -> ActionState.Success(result)
+                is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
+            }
         }
     }
 }

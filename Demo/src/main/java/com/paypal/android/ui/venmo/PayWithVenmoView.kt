@@ -20,12 +20,14 @@ import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import com.paypal.android.venmo.VenmoFinishStartResult
 
 @Composable
 fun PayWithVenmoView(
@@ -34,11 +36,11 @@ fun PayWithVenmoView(
     val context = LocalContext.current
     OnLifecycleOwnerResumeEffect {
         val intent = context.getActivityOrNull()?.intent
-        Log.d("PayWithVenmoView", intent?.data?.toString() ?: "")
+        intent?.let { viewModel.finishVenmo(it) }
     }
 
     OnNewIntentEffect { newIntent ->
-        Log.d("PayWithVenmoView", newIntent.data?.toString() ?: "")
+        viewModel.finishVenmo(newIntent)
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -105,11 +107,20 @@ private fun Step2_StartPayWithVenmo(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> state.value.run {
-                    Text("We did iiiit!")
-//                    PayPalWebCheckoutResultView(orderId, payerId)
-                }
+                is CompletedActionState.Success -> VenmoFinishStartSuccessView(result = state.value)
             }
         }
+    }
+}
+
+@Composable
+fun VenmoFinishStartSuccessView(result: VenmoFinishStartResult.Success) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
+    ) {
+        PropertyView(name = "Token", value = result.token)
+        PropertyView(name = "Payer ID", value = result.payerId)
+        PropertyView(name = "Approved", value = result.approved.toString())
     }
 }
