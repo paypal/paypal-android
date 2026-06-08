@@ -17,6 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
+import com.paypal.android.ui.paypalweb.PayPalCheckoutViewModel
+import com.paypal.android.ui.paypalweb.PayPalUiState
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
@@ -61,6 +63,9 @@ fun PayWithVenmoView(
         Step1_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
             Step2_StartPayWithVenmo(uiState, viewModel)
+        }
+        if (uiState.isVenmoSuccessful) {
+            Step3_CompleteOrder(uiState, viewModel)
         }
     }
 }
@@ -108,6 +113,29 @@ private fun Step2_StartPayWithVenmo(
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
                 is CompletedActionState.Success -> VenmoFinishStartSuccessView(result = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step3_CompleteOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Complete Order")
+        ActionButtonColumn(
+            defaultTitle = "COMPLETE ORDER",
+            successTitle = "ORDER COMPLETED",
+            state = uiState.completeOrderState,
+            onClick = { viewModel.completeOrder(context) },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
             }
         }
     }

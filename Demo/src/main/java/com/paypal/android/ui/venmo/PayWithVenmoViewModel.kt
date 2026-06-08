@@ -13,9 +13,12 @@ import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.returnUrl
+import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import com.paypal.android.usecase.CreateVenmoOrderUseCase
 import com.paypal.android.utils.ReturnUrlFactory
@@ -34,12 +37,14 @@ import javax.inject.Inject
 class PayWithVenmoViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val createOrderUseCase: CreateVenmoOrderUseCase,
+    val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PayWithVenmoUiState())
     val uiState = _uiState.asStateFlow()
 
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val venmoClient = VenmoClient(applicationContext, coreConfig)
 
     private var createOrderState
@@ -52,6 +57,12 @@ class PayWithVenmoViewModel @Inject constructor(
         get() = _uiState.value.payWithVenmoState
         set(value) {
             _uiState.update { it.copy(payWithVenmoState = value) }
+        }
+
+    private var completeOrderState
+        get() = _uiState.value.completeOrderState
+        set(value) {
+            _uiState.update { it.copy(completeOrderState = value) }
         }
 
     private val createdOrder: Order?
@@ -93,6 +104,23 @@ class PayWithVenmoViewModel @Inject constructor(
             payWithVenmoState = when (result) {
                 is VenmoFinishStartResult.Success -> ActionState.Success(result)
                 is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
+            }
+        }
+    }
+
+    fun completeOrder(context: Context) {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+        } else {
+            viewModelScope.launch {
+                completeOrderState = ActionState.Loading
+                val dataCollectorRequest =
+                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
+                // TODO: allow order intent to be configurable
+                completeOrderState =
+                    completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid).mapToActionState()
             }
         }
     }
