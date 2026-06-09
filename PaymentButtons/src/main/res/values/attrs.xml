@@ -12,7 +12,6 @@
             <enum name="pill" value="1" />
             <enum name="rectangle" value="2" />
         </attr>
-
     </declare-styleable>
 
     <declare-styleable name="PayPalButton">
