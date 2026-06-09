@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments
 
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
+import com.paypal.android.corepayments.analytics.AnalyticsEventParams
 import com.paypal.android.corepayments.analytics.DeviceData
 import io.mockk.CapturingSlot
 import io.mockk.coEvery
@@ -55,9 +56,10 @@ class TrackingEventsAPIUnitTest {
             environment = "fake-environment",
             eventName = "fake-event",
             timestamp = 123L,
-            orderId = "fake-order-id",
-            buttonType = "paypal",
-            appSwitchEnabled = false
+            params = AnalyticsEventParams(
+                orderId = "fake-order-id",
+                buttonType = "paypal"
+            )
         )
         sut.sendEvent(event, deviceData)
 

@@ -43,9 +43,10 @@ internal class TrackingEventsAPI constructor(
             platform = PLATFORM_ANDROID,
             timestamp = event.timestamp.toString(),
             tenantName = TENANT_NAME_PAYPAL,
-            orderId = event.orderId,
-            buttonType = event.buttonType,
-            appSwitchEnabled = event.appSwitchEnabled
+            orderId = event.params.orderId,
+            setupTokenId = event.params.setupTokenId,
+            buttonType = event.params.buttonType,
+            appSwitchEnabled = event.params.appSwitchEnabled
         )
 
         val events = TrackingEvents(eventParams = eventParams)

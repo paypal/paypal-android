@@ -23,6 +23,9 @@ class AnalyticsService internal constructor(
     private val trackingEventsAPI: TrackingEventsAPI,
     private val scope: CoroutineScope
 ) {
+    companion object {
+        private const val TAG = "[PayPal SDK]"
+    }
 
     constructor(context: Context, coreConfig: CoreConfig) :
             this(context, coreConfig, Dispatchers.IO)
@@ -40,12 +43,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-    fun sendAnalyticsEvent(
-        name: String,
-        orderId: String? = null,
-        buttonType: String? = null,
-        appSwitchEnabled: Boolean = false
-    ) {
+    fun sendAnalyticsEvent(name: String, params: AnalyticsEventParams = AnalyticsEventParams()) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
@@ -53,22 +51,17 @@ class AnalyticsService internal constructor(
             try {
                 val deviceData = deviceInspector.inspect()
                 val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
-                    name,
-                    timestamp,
-                    orderId = orderId,
-                    buttonType = buttonType,
-                    appSwitchEnabled = appSwitchEnabled
+                    environment = environment.name.lowercase(),
+                    eventName = name,
+                    timestamp = timestamp,
+                    params = params
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->
-                    Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
+                    Log.w(TAG, "Failed to send analytics: $errorMessage")
                 }
             } catch (e: PayPalSDKError) {
-                Log.d(
-                    "[PayPal SDK]",
-                    "Failed to send analytics due to missing clientId: ${e.message}"
-                )
+                Log.e(TAG, "Failed to send analytics due to missing clientId: ${e.message}")
             }
         }
     }
