@@ -15,10 +15,10 @@ internal class CardAnalytics(
         )
     }
 
-    fun notify(event: VaultEvent, setupTokenId: String?) {
+    fun notify(event: VaultEvent, vaultSetupToken: String?) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
-            params = AnalyticsEventParams(vaultSetupToken = setupTokenId)
+            params = AnalyticsEventParams(vaultSetupToken = vaultSetupToken)
         )
     }
 }
