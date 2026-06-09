@@ -2,9 +2,11 @@ package com.paypal.android.ui.venmo
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -67,6 +69,7 @@ fun PayWithVenmoView(
         if (uiState.isVenmoSuccessful) {
             Step3_CompleteOrder(uiState, viewModel)
         }
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
