@@ -18,15 +18,17 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.paymentbuttons.analytics.PaymentButtonAnalytics
+import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.ui.R
 
 @Suppress("TooManyFunctions")
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    coreConfig: CoreConfig? = null
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
 
     /**
@@ -34,8 +36,13 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      */
     private var shapeHasChanged = false
 
-    internal val analyticsService: AnalyticsService =
-        AnalyticsService(context, CoreConfig(clientId = "N/A", environment = Environment.LIVE))
+    /**
+     * Analytics for button events. Populated if a [CoreConfig] was provided at construction.
+     * If null, no button events are sent.
+     * Internal so subclasses can fire INITIALIZED in their own init blocks.
+     */
+    internal var analytics: PaymentButtonAnalytics? =
+        coreConfig?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
@@ -196,6 +203,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
         orientation = HORIZONTAL
         gravity = Gravity.CENTER
+        isClickable = true
 
         initAttributes(attributeSet, defStyleAttr)
     }
@@ -231,11 +239,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     override fun setOnClickListener(listener: OnClickListener?) {
         super.setOnClickListener { view ->
             listener?.onClick(view)
-            analyticsService.sendAnalyticsEvent(
-                "payment-button:tapped",
-                orderId = null,
-                buttonType = fundingType.buttonType
-            )
+            analytics?.notify(PaymentButtonEvent.TAPPED, fundingType.buttonType)
         }
     }
 

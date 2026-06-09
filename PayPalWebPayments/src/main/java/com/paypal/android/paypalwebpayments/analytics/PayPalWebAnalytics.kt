@@ -15,10 +15,10 @@ internal class PayPalWebAnalytics(
         )
     }
 
-    fun notify(event: VaultEvent, setupTokenId: String?, appSwitchEnabled: Boolean) {
+    fun notify(event: VaultEvent, vaultSetupToken: String?, appSwitchEnabled: Boolean) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
-            params = AnalyticsEventParams(setupTokenId = setupTokenId, appSwitchEnabled = appSwitchEnabled)
+            params = AnalyticsEventParams(vaultSetupToken = vaultSetupToken, appSwitchEnabled = appSwitchEnabled)
         )
     }
 }

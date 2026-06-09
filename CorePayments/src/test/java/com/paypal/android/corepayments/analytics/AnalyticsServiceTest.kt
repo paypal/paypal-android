@@ -1,6 +1,7 @@
 package com.paypal.android.corepayments.analytics
 
 import com.paypal.android.corepayments.*
+import com.paypal.android.corepayments.analytics.AnalyticsEventParams
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -57,13 +58,14 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
+        sut.sendAnalyticsEvent("sample.event.name", AnalyticsEventParams(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("sample.event.name", analyticsEventData.eventName)
     }
 
+    @Test
     fun `sendAnalyticsEvent sends proper timestamp`() = runTest {
         val analyticsEventDataSlot = slot<AnalyticsEventData>()
         coEvery {
@@ -72,12 +74,12 @@ class AnalyticsServiceTest {
 
         val timeBeforeEventSent = System.currentTimeMillis()
         sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
+        sut.sendAnalyticsEvent("sample.event.name", AnalyticsEventParams(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
-        assert(actualTimestamp > timeBeforeEventSent)
-        assert(actualTimestamp < System.currentTimeMillis())
+        assert(actualTimestamp >= timeBeforeEventSent)
+        assert(actualTimestamp <= System.currentTimeMillis())
     }
 
     @Test
@@ -88,7 +90,7 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("fake-event", "fake-order-id")
+        sut.sendAnalyticsEvent("fake-event", AnalyticsEventParams(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
@@ -103,7 +105,7 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         sut = createAnalyticsService(Environment.LIVE, testScheduler)
-        sut.sendAnalyticsEvent("fake-event", "fake-order-id")
+        sut.sendAnalyticsEvent("fake-event", AnalyticsEventParams(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured

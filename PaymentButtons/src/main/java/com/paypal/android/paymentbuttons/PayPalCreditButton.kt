@@ -4,9 +4,10 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import androidx.core.content.res.use
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
-import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.DARK_BLUE
 
 /**
@@ -28,8 +29,9 @@ import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.DARK_BLUE
 class PayPalCreditButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : PaymentButton<PayPalCreditButtonColor>(context, attributeSet, defStyleAttr) {
+    defStyleAttr: Int = 0,
+    coreConfig: CoreConfig? = null
+) : PaymentButton<PayPalCreditButtonColor>(context, attributeSet, defStyleAttr, coreConfig) {
 
     /**
      * Updates the color of the Payment Button with the provided [PayPalCreditButtonColor].
@@ -53,11 +55,7 @@ class PayPalCreditButton @JvmOverloads constructor(
                 updateColorFrom(typedArray)
             }
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
-        analyticsService.sendAnalyticsEvent(
-            "payment-button:initialized",
-            orderId = null,
-            buttonType = PaymentButtonFundingType.PAYPAL_CREDIT.buttonType
-        )
+        analytics?.notify(PaymentButtonEvent.INITIALIZED, fundingType.buttonType)
     }
 
     private fun updateColorFrom(typedArray: TypedArray) {

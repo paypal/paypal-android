@@ -57,6 +57,8 @@ internal data class TrackingEventParams(
     val tenantName: String,
     @SerialName("order_id")
     val orderId: String? = null,
+    @SerialName("vault_setup_token")
+    val vaultSetupToken: String? = null,
     @SerialName("button_type")
     val buttonType: String? = null,
     @SerialName("app_switch_enabled")
