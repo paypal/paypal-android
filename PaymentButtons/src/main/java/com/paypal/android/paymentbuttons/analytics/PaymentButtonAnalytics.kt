@@ -2,11 +2,8 @@ package com.paypal.android.paymentbuttons.analytics
 
 import com.paypal.android.corepayments.analytics.AnalyticsEventParams
 import com.paypal.android.corepayments.analytics.AnalyticsService
-import com.paypal.android.corepayments.analytics.AnalyticsServiceWrapper
 
-internal class PaymentButtonAnalytics(
-    override val analyticsService: AnalyticsService
-) : AnalyticsServiceWrapper {
+internal class PaymentButtonAnalytics(private val analyticsService: AnalyticsService) {
 
     fun notify(event: PaymentButtonEvent, buttonType: String) {
         analyticsService.sendAnalyticsEvent(
