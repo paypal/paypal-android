@@ -48,8 +48,10 @@ android {
 dependencies {
     implementation libs.androidx.coreKtx
     implementation libs.android.material
+    implementation libs.kotlinx.coroutinesAndroid
 
     implementation project(':CorePayments')
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
 }
 
 project.ext.name = "payment-buttons"

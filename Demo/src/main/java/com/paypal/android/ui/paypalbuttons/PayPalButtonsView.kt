@@ -1,6 +1,7 @@
 package com.paypal.android.ui.paypalbuttons
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -36,6 +38,8 @@ import com.paypal.android.paymentbuttons.PaymentButton
 import com.paypal.android.paymentbuttons.PaymentButtonColor
 import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.utils.UIConstants
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 const val CORNER_RADIUS_SLIDER_MAX = 100
 
@@ -152,6 +156,7 @@ fun CustomCornerRadiusSlider(cornerRadius: Int?, onCornerRadiusChange: (Int) -> 
 
 @Composable
 fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
+    val scope = rememberCoroutineScope()
     when (uiState.fundingType) {
         ButtonFundingType.PAYPAL -> {
             AndroidView(
@@ -159,6 +164,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                     PayPalButton(context).apply {
                         setOnClickListener {
                             showToast(context, "PayPalButton clicked!")
+                            scope.launch { createOrder() }
                         }
                     }
                 },
@@ -175,6 +181,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                     PayLaterButton(context).apply {
                         setOnClickListener {
                             showToast(context, "PayLaterButton clicked!")
+                            scope.launch { createOrder() }
                         }
                     }
                 },
@@ -191,6 +198,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
                     PayPalCreditButton(context).apply {
                         setOnClickListener {
                             showToast(context, "PayPalCreditButton clicked!")
+                            scope.launch { createOrder() }
                         }
                     }
                 },
@@ -253,6 +261,15 @@ fun PayPalButtonColorOptionListFactory(
 
 private fun showToast(context: Context, message: String) {
     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+}
+
+private suspend fun createOrder(): String {
+    // simulate network call
+    kotlinx.coroutines.delay(1000.milliseconds)
+    val timestamp =
+        java.text.SimpleDateFormat("HH:mm:ss.SSS", java.util.Locale.US).format(java.util.Date())
+    Log.d("PayPalSDK", "[$timestamp] Order created successfully.")
+    return "ORDER_ID_123"
 }
 
 @ExperimentalMaterial3Api

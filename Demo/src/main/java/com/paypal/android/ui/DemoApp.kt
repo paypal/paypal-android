@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.PayPalSDK
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
@@ -46,6 +50,8 @@ import com.paypal.android.utils.UIConstants
 @ExperimentalFoundationApi
 @Composable
 fun DemoApp() {
+    LaunchedEffect(Unit) { PayPalSDK.init(CoreConfig(SDKSampleServerAPI.clientId)) }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     var shouldDisplayBackButton by remember { mutableStateOf(false) }

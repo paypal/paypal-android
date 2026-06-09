@@ -20,7 +20,13 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.shopperSession.CreateShopperSessionId
 import com.paypal.android.ui.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 @Suppress("TooManyFunctions")
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
@@ -33,6 +39,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      * Signals that the backing shape has changed and may require a full redraw.
      */
     private var shapeHasChanged = false
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val createShopperSessionId: CreateShopperSessionId = CreateShopperSessionId()
 
     internal val analyticsService: AnalyticsService =
         AnalyticsService(context, CoreConfig(clientId = "N/A", environment = Environment.LIVE))
@@ -236,7 +246,15 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
                 orderId = null,
                 buttonType = fundingType.buttonType
             )
+            scope.launch {
+                createShopperSessionId()
+            }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        scope.cancel()
     }
 
     private fun updateSizeFrom(typedArray: TypedArray) {
