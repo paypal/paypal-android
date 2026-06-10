@@ -241,9 +241,10 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     private fun initAnalyticsFromXML(typedArray: TypedArray) {
         val clientId = typedArray.getString(R.styleable.PaymentButton_paypal_client_id)
         if (!clientId.isNullOrBlank()) {
+            val sandboxEnvironmentAttr = 0
             val environmentValue = typedArray.getInt(
                 R.styleable.PaymentButton_paypal_environment,
-                0 // default to sandbox
+                sandboxEnvironmentAttr
             )
             val environment = if (environmentValue == 1) Environment.LIVE else Environment.SANDBOX
             analytics = PaymentButtonAnalytics(

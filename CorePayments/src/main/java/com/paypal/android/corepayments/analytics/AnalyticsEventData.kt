@@ -5,5 +5,5 @@ internal data class AnalyticsEventData(
     val environment: String,
     val eventName: String,
     val timestamp: Long,
-    val params: AnalyticsEventParams = AnalyticsEventParams()
+    val params: AnalyticsEventParams? = null
 )
