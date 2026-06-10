@@ -18,6 +18,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonAnalytics
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
@@ -233,14 +234,27 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
+            initAnalyticsFromXML(typedArray)
         }
     }
 
-    override fun setOnClickListener(listener: OnClickListener?) {
-        super.setOnClickListener { view ->
-            listener?.onClick(view)
-            analytics?.notify(PaymentButtonEvent.TAPPED, fundingType.buttonType)
+    private fun initAnalyticsFromXML(typedArray: TypedArray) {
+        val clientId = typedArray.getString(R.styleable.PaymentButton_paypal_client_id)
+        if (!clientId.isNullOrBlank()) {
+            val environmentValue = typedArray.getInt(
+                R.styleable.PaymentButton_paypal_environment,
+                0 // default to sandbox
+            )
+            val environment = if (environmentValue == 1) Environment.LIVE else Environment.SANDBOX
+            analytics = PaymentButtonAnalytics(
+                AnalyticsService(context, CoreConfig(clientId, environment))
+            )
         }
+    }
+
+    override fun performClick(): Boolean {
+        analytics?.notify(PaymentButtonEvent.TAPPED, fundingType.buttonType)
+        return super.performClick()
     }
 
     private fun updateSizeFrom(typedArray: TypedArray) {

@@ -12,6 +12,13 @@
             <enum name="pill" value="1" />
             <enum name="rectangle" value="2" />
         </attr>
+
+        <attr name="paypal_client_id" format="string" />
+
+        <attr name="paypal_environment" format="enum">
+            <enum name="sandbox" value="0" />
+            <enum name="live" value="1" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="PayPalButton">
