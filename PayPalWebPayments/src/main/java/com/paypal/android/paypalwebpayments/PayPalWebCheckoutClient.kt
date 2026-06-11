@@ -4,11 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -22,11 +24,13 @@ import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
@@ -45,7 +49,6 @@ class PayPalWebCheckoutClient internal constructor(
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val urlScheme: String? = null,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
-
 ) {
 
     // Enable app switch by switching this flag to true
@@ -259,6 +262,37 @@ class PayPalWebCheckoutClient internal constructor(
                 callback.onPayPalWebStartResult(result)
             }
         }
+    }
+
+    fun startV2(
+        activity: ComponentActivity,
+        request: PayPalWebCheckoutRequest,
+        createOrder: ((Result<String>) -> Unit) -> Unit,
+        callback: PayPalWebStartCallback
+    ) {
+        val shopperSessionIdResult : Deferred<String> = applicationScope.async {
+            Log.d("PayPalWebCheckoutClient", "startV2: Starting shopper session call...")
+            delay(1000)
+            Log.d("PayPalWebCheckoutClient", "startV2: Shopper session call complete")
+            "fake-shopper-session-id"
+        }
+        val onCreateOrderComplete: (Result<String>) -> Unit = { result ->
+            result.onSuccess { orderId ->
+                applicationScope.launch {
+                    val shopperSessionId = shopperSessionIdResult.await()
+                    Log.d("PayPalWebCheckoutClient", "startV2: Shopper Session ID $shopperSessionId")
+                    Log.d("PayPalWebCheckoutClient", "startV2: Order ID $orderId")
+                    callback.onPayPalWebStartResult(PayPalPresentAuthChallengeResult.Success("fake-auth-state"))
+                }
+            }
+            result.onFailure { failureReason ->
+                val errorDescription = "startV2: Create Order Failed"
+                val error = PayPalSDKError(123, errorDescription, reason = failureReason)
+                callback.onPayPalWebStartResult(PayPalPresentAuthChallengeResult.Failure(error))
+            }
+        }
+        Log.d("PayPalWebCheckoutClient", "startV2: Starting order creation call...")
+        createOrder(onCreateOrderComplete)
     }
 
     /**
@@ -516,7 +550,10 @@ class PayPalWebCheckoutClient internal constructor(
             .appendQueryParameter("redirect_uri", returnUrl)
             .appendQueryParameter("native_xo", "1")
             .appendQueryParameter("fundingSource", funding.value)
-            .appendQueryParameter("integration_artifact", UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT)
+            .appendQueryParameter(
+                "integration_artifact",
+                UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT
+            )
             .build()
     }
 
@@ -535,7 +572,7 @@ class PayPalWebCheckoutClient internal constructor(
         get() = when (coreConfig.environment) {
             Environment.LIVE -> "https://paypal.com/"
             Environment.SANDBOX -> "https://sandbox.paypal.com/"
-    }
+        }
 
     private suspend fun getLaunchUri(
         context: Context,
@@ -567,6 +604,7 @@ class PayPalWebCheckoutClient internal constructor(
             fallbackUri
         }
     }
+
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
      * (@see [PayPalWebCheckoutClient.vault]), call this method to see if a user has

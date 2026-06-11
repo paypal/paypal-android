@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
@@ -120,7 +121,29 @@ class PayPalCheckoutViewModel @Inject constructor(
             returnToAppStrategyOption.toReturnToAppStrategy()
         )
 
-        paypalClient.start(activity, checkoutRequest) { startResult ->
+        paypalClient.startV2(activity, checkoutRequest, createOrder = { callback ->
+            viewModelScope.launch {
+                val orderRequest = _uiState.value.run {
+                    OrderRequest(
+                        intent = intentOption,
+                        shouldVaultOnSuccess = false,
+                        returnToAppStrategy = returnToAppStrategyOption
+                    )
+                }
+                val createOrderResult = createOrderUseCase(orderRequest)
+                when (createOrderResult) {
+                    is SDKSampleServerResult.Success -> {
+                        val orderId = createOrderResult.value.id!!
+                        callback(Result.success(orderId))
+                    }
+
+                    is SDKSampleServerResult.Failure -> {
+                        val error = createOrderResult.value
+                        callback(Result.failure(error))
+                    }
+                }
+            }
+        }) { startResult ->
             when (startResult) {
                 is PayPalPresentAuthChallengeResult.Success -> {
                     // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
