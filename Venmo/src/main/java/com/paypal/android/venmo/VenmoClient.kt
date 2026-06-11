@@ -78,7 +78,8 @@ class VenmoClient(
             }
 
             // FROM: VenmoAppSwitch
-            val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
+            val localVenmoBaseUrl = "https://account.venmo.com/go/web/paypal"
+//            val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
 //            val localVenmoBaseUrl = "https://venmo.com/smart/checkout/venmo"
 //            val localVenmoBaseUrl = "https://www.paypal.com/smart/checkout/venmo"
             val sandboxVenmoBaseUrl = "https://www.sandbox.paypal.com/smart/checkout/venmo"
