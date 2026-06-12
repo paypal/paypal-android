@@ -42,6 +42,8 @@ android {
         jvmTarget = modules.kotlinJvmTarget
     }
 
+    testOptions.unitTests.includeAndroidResources true
+
     namespace 'com.paypal.android.ui'
 }
 
@@ -50,6 +52,12 @@ dependencies {
     implementation libs.android.material
 
     implementation project(':CorePayments')
+
+    testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.junit
+    testImplementation libs.androidx.test.espresso
 }
 
 project.ext.name = "payment-buttons"

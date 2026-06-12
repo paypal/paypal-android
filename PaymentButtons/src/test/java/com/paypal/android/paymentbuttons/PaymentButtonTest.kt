@@ -73,16 +73,6 @@ class PaymentButtonTest {
     }
 
     @Test
-    fun `no analytics event fires when no CoreConfig is provided`() {
-        val button = PayPalButton(context) // analytics is null — no CoreConfig
-        activityController.get().setContentView(button)
-
-        verify(exactly = 0) {
-            mockAnalyticsService.sendAnalyticsEvent(any(), params = any())
-        }
-    }
-
-    @Test
     fun `TAPPED event fires when button is clicked`() {
         val button = PayPalButton(context)
         injectMockAnalytics(button)

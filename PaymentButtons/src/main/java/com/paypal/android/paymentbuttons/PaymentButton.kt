@@ -36,7 +36,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      */
     private var shapeHasChanged = false
 
-    internal val analytics: PaymentButtonAnalytics = newPaymentButtonAnalytics()
+    internal var analytics: PaymentButtonAnalytics = newPaymentButtonAnalytics()
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
