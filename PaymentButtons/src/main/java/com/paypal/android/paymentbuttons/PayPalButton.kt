@@ -5,7 +5,6 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
-import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.paymentbuttons.analytics.PaymentButtonEvent
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
@@ -29,9 +28,8 @@ import com.paypal.android.ui.R
 open class PayPalButton @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-    coreConfig: CoreConfig? = null
-) : PaymentButton<PayPalButtonColor>(context, attributeSet, defStyleAttr, coreConfig) {
+    defStyleAttr: Int = 0
+) : PaymentButton<PayPalButtonColor>(context, attributeSet, defStyleAttr) {
 
     /**
      * Updates the color of the Payment Button with the provided [PayPalButtonColor].

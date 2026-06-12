@@ -27,8 +27,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.paypal.android.R
-import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.paymentbuttons.PayLaterButton
 import com.paypal.android.paymentbuttons.PayPalButton
 import com.paypal.android.paymentbuttons.PayPalButtonColor
@@ -40,8 +38,6 @@ import com.paypal.android.uishared.components.IntSlider
 import com.paypal.android.utils.UIConstants
 
 const val CORNER_RADIUS_SLIDER_MAX = 100
-
-private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
 
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
@@ -160,7 +156,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAYPAL -> {
             AndroidView(
                 factory = { context ->
-                    PayPalButton(context, coreConfig = coreConfig).apply {
+                    PayPalButton(context).apply {
                         setOnClickListener {
                             showToast(context, "PayPalButton clicked!")
                         }
@@ -176,7 +172,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAY_LATER -> {
             AndroidView(
                 factory = { context ->
-                    PayLaterButton(context, coreConfig = coreConfig).apply {
+                    PayLaterButton(context).apply {
                         setOnClickListener {
                             showToast(context, "PayLaterButton clicked!")
                         }
@@ -192,7 +188,7 @@ fun PayPalButtonFactory(uiState: PayPalButtonsUiState) {
         ButtonFundingType.PAYPAL_CREDIT -> {
             AndroidView(
                 factory = { context ->
-                    PayPalCreditButton(context, coreConfig = coreConfig).apply {
+                    PayPalCreditButton(context).apply {
                         setOnClickListener {
                             showToast(context, "PayPalCreditButton clicked!")
                         }

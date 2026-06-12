@@ -23,35 +23,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_color="white" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_color="black" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_color="blue" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_color="gold" />
 
         <com.paypal.android.paymentbuttons.PayPalButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_color="silver" />
 
         <TextView
@@ -64,35 +59,30 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paylater_color="white" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paylater_color="gold" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paylater_color="blue" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paylater_color="silver" />
 
         <com.paypal.android.paymentbuttons.PayLaterButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paylater_color="black" />
 
         <TextView
@@ -105,14 +95,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_credit_color="black" />
 
         <com.paypal.android.paymentbuttons.PayPalCreditButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:paypal_client_id="@string/paypal_demo_client_id"
             app:paypal_credit_color="dark_blue" />
 
     </LinearLayout>

@@ -28,8 +28,7 @@ import com.paypal.android.ui.R
 abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
     context: Context,
     attributeSet: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-    coreConfig: CoreConfig? = null
+    defStyleAttr: Int = 0
 ) : LinearLayout(context, attributeSet, defStyleAttr) {
 
     /**
@@ -37,13 +36,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
      */
     private var shapeHasChanged = false
 
-    /**
-     * Analytics for button events. Populated if a [CoreConfig] was provided at construction.
-     * If null, no button events are sent.
-     * Internal so subclasses can fire INITIALIZED in their own init blocks.
-     */
-    internal var analytics: PaymentButtonAnalytics? =
-        coreConfig?.let { PaymentButtonAnalytics(AnalyticsService(context, it)) }
+    internal val analytics: PaymentButtonAnalytics = newPaymentButtonAnalytics()
 
     private var shapeAppearanceModel: ShapeAppearanceModel = ShapeAppearanceModel()
         set(value) {
@@ -204,7 +197,6 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
 
         orientation = HORIZONTAL
         gravity = Gravity.CENTER
-        isClickable = true
 
         initAttributes(attributeSet, defStyleAttr)
     }
@@ -234,28 +226,14 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         context.obtainStyledAttributes(attributeSet, R.styleable.PaymentButton).use { typedArray ->
             updateSizeFrom(typedArray)
             updateShapeFrom(typedArray, attributeSet, defStyleAttr)
-            initAnalyticsFromXML(typedArray)
         }
     }
 
-    private fun initAnalyticsFromXML(typedArray: TypedArray) {
-        val clientId = typedArray.getString(R.styleable.PaymentButton_paypal_client_id)
-        if (!clientId.isNullOrBlank()) {
-            val sandboxEnvironmentAttr = 0
-            val environmentValue = typedArray.getInt(
-                R.styleable.PaymentButton_paypal_environment,
-                sandboxEnvironmentAttr
-            )
-            val environment = if (environmentValue == 1) Environment.LIVE else Environment.SANDBOX
-            analytics = PaymentButtonAnalytics(
-                AnalyticsService(context, CoreConfig(clientId, environment))
-            )
+    override fun setOnClickListener(listener: OnClickListener?) {
+        super.setOnClickListener { view ->
+            listener?.onClick(view)
+            analytics.notify(PaymentButtonEvent.TAPPED, fundingType.buttonType)
         }
-    }
-
-    override fun performClick(): Boolean {
-        analytics?.notify(PaymentButtonEvent.TAPPED, fundingType.buttonType)
-        return super.performClick()
     }
 
     private fun updateSizeFrom(typedArray: TypedArray) {
@@ -330,6 +308,11 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
         }
         prefixTextView.setTextColor(textColor)
         suffixTextView.setTextColor(textColor)
+    }
+
+    private fun newPaymentButtonAnalytics(): PaymentButtonAnalytics {
+        val coreConfig = CoreConfig(clientId = "N/A", environment = Environment.LIVE)
+        return PaymentButtonAnalytics(AnalyticsService(context, coreConfig))
     }
 }
 
