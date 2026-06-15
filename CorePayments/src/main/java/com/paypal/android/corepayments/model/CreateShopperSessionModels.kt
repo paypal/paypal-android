@@ -19,6 +19,7 @@ data class CreateShopperSessionVariables(
     val flowType: String,
     val paymentType: String,
     val contextId: String,
+    val tokenType: String?,
     val buyerEmailAddressMerchantPassed: String?,
     val paypalNativeAppInstalled: Boolean,
     val returnAppUrl: String,
@@ -66,6 +67,7 @@ data class ShopperSessionConfigData(
  *   `integrationChannel = PPCP_NATIVE_SDK`.
  * @property ineligibleReason Reason code when not eligible. Logged for analytics.
  * @property shopperSessionId The created shopper session ID (SSID), appended to checkout URLs.
+ * @property expiresAt The date / time the Shopper Session data is no longer valid.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ShopperSessionWithAppSwitchEligibility(
@@ -74,4 +76,5 @@ data class ShopperSessionWithAppSwitchEligibility(
     val checkoutFallbackUrl: String?,
     val ineligibleReason: String?,
     val shopperSessionId: String?,
+    val expiresAt: String?
 )

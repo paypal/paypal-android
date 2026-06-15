@@ -8,6 +8,7 @@ mutation CreateShopperSessionWithAppSwitchEligibility(
   $flowType: String!
   $paymentType: String!
   $contextId: String!
+  $tokenType: String
   $buyerEmailAddressMerchantPassed: String
   $paypalNativeAppInstalled: Boolean!
   $returnAppUrl: String!
@@ -25,6 +26,7 @@ mutation CreateShopperSessionWithAppSwitchEligibility(
       flowType: $flowType
       paymentType: $paymentType
       contextId: $contextId
+      tokenType: $tokenType
       buyerEmailAddressMerchantPassed: $buyerEmailAddressMerchantPassed
       paypalNativeAppInstalled: $paypalNativeAppInstalled
       returnAppUrl: $returnAppUrl

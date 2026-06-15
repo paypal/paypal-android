@@ -46,6 +46,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         bnCode: String?,
         flowType: String,
         paymentType: String,
+        tokenType: String?,
         buyerEmail: String?,
         paypalNativeAppInstalled: Boolean,
         returnAppUrl: String,
@@ -72,6 +73,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
             flowType = flowType,
             paymentType = paymentType,
             contextId = UUID.randomUUID().toString(),
+            tokenType = tokenType,
             buyerEmailAddressMerchantPassed = buyerEmail,
             paypalNativeAppInstalled = paypalNativeAppInstalled,
             returnAppUrl = returnAppUrl,
@@ -128,6 +130,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                 checkoutFallbackUrl = data.checkoutFallbackUrl,
                 ineligibleReason = data.ineligibleReason,
                 shopperSessionId = data.shopperSessionConfig?.id,
+                expiresAt = data.shopperSessionConfig?.expiresAt
             )
         )
     }
@@ -139,5 +142,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
 
         // TODO: replace with BuildConfig.VERSION_NAME once a version constant is wired up
         const val SDK_VERSION = "1.0.0"
+
+        const val TOKEN_TYPE_ORDER_ID = "ORDER_ID"
+        const val TOKEN_TYPE_VAULT_ID = "VAULT_ID"
     }
 }
