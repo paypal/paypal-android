@@ -20,6 +20,7 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.analytics.AnalyticsService
+import com.paypal.android.corepayments.analytics.ButtonSessionStore
 import com.paypal.android.ui.R
 
 @Suppress("TooManyFunctions")
@@ -234,7 +235,8 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             analyticsService.sendAnalyticsEvent(
                 "payment-button:tapped",
                 orderId = null,
-                buttonType = fundingType.buttonType
+                buttonType = fundingType.buttonType,
+                buttonSessionId = ButtonSessionStore.buttonSessionId
             )
         }
     }

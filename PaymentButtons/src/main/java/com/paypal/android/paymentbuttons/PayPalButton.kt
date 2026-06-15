@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.res.use
+import com.paypal.android.corepayments.analytics.ButtonSessionStore
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 
@@ -73,7 +74,8 @@ open class PayPalButton @JvmOverloads constructor(
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
             orderId = null,
-            buttonType = PaymentButtonFundingType.PAYPAL.buttonType
+            buttonType = PaymentButtonFundingType.PAYPAL.buttonType,
+            buttonSessionId = ButtonSessionStore.buttonSessionId
         )
     }
 

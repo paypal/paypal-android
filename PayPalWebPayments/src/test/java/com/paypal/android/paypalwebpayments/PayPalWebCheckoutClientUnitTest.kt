@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
+import com.paypal.android.corepayments.analytics.ButtonSessionStore
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
@@ -22,6 +23,8 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
@@ -92,6 +95,8 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `startAsync() launches PayPal web checkout`() = runTest {
+        mockkObject(ButtonSessionStore)
+        every { ButtonSessionStore.buttonSessionId } returns "fake-session-id"
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
         every {
             payPalWebLauncher.launchWithUrl(
@@ -119,6 +124,15 @@ class PayPalWebCheckoutClientUnitTest {
                 returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
             )
         }
+        verify {
+            analytics.notify(
+                CheckoutEvent.STARTED,
+                "fake-order-id",
+                any(),
+                "fake-session-id"
+            )
+        }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
@@ -200,6 +214,8 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `finishStart() with merchant provided auth state forwards success result from auth launcher`() {
+        mockkObject(ButtonSessionStore)
+        every { ButtonSessionStore.buttonSessionId } returns "fake-session-id"
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
         every {
@@ -208,10 +224,14 @@ class PayPalWebCheckoutClientUnitTest {
 
         val result = sut.finishStart(intent, "auth state")
         assertSame(successResult, result)
+        verify { analytics.notify(CheckoutEvent.SUCCEEDED, any(), any(), "fake-session-id") }
+        verify { ButtonSessionStore.resetSession() }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
     fun `finishStart() with merchant provided auth state forwards error result from auth launcher`() {
+        mockkObject(ButtonSessionStore)
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
         every {
@@ -220,10 +240,13 @@ class PayPalWebCheckoutClientUnitTest {
 
         val result = sut.finishStart(intent, "auth state")
         assertSame(failureResult, result)
+        verify { ButtonSessionStore.resetSession() }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
     fun `finishStart() with merchant provided auth state forwards cancellation result from auth launcher`() {
+        mockkObject(ButtonSessionStore)
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
@@ -231,6 +254,8 @@ class PayPalWebCheckoutClientUnitTest {
 
         val result = sut.finishStart(intent, "auth state")
         assertSame(canceledResult, result)
+        verify { ButtonSessionStore.resetSession() }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
@@ -241,6 +266,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state forwards success result from auth launcher`() =
         runTest {
+        mockkObject(ButtonSessionStore)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
                 payPalWebLauncher.launchWithUrl(
@@ -265,6 +291,8 @@ class PayPalWebCheckoutClientUnitTest {
             sut.startAsync(activity, request)
         val result = sut.finishStart(intent)
         assertSame(successResult, result)
+        verify { ButtonSessionStore.resetSession() }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
@@ -308,6 +336,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state forwards error result from auth launcher`() =
         runTest {
+        mockkObject(ButtonSessionStore)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
                 payPalWebLauncher.launchWithUrl(
@@ -332,6 +361,8 @@ class PayPalWebCheckoutClientUnitTest {
             sut.startAsync(activity, request)
         val result = sut.finishStart(intent)
         assertSame(failureResult, result)
+        verify { ButtonSessionStore.resetSession() }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
@@ -366,6 +397,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `finishStart() with session auth state forwards cancellation result from auth launcher`() =
         runTest {
+        mockkObject(ButtonSessionStore)
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
             every {
                 payPalWebLauncher.launchWithUrl(
@@ -389,6 +421,8 @@ class PayPalWebCheckoutClientUnitTest {
             sut.startAsync(activity, request)
         val result = sut.finishStart(intent)
         assertSame(canceledResult, result)
+        verify { ButtonSessionStore.resetSession() }
+        unmockkObject(ButtonSessionStore)
     }
 
     @Test
@@ -1403,7 +1437,7 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(launchResult, result)
 
         // Verify analytics was called with CheckoutEvent
-        verify { analytics.notify(any<CheckoutEvent>(), "fake-order-id", any()) }
+        verify { analytics.notify(any<CheckoutEvent>(), "fake-order-id", any(), any()) }
 
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
@@ -1464,7 +1498,7 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(launchResult, result)
 
         // Verify analytics was called with VaultEvent
-        verify { analytics.notify(any<VaultEvent>(), any(), any()) }
+        verify { analytics.notify(any<VaultEvent>(), any(), any(), any()) }
 
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
@@ -1813,12 +1847,13 @@ class PayPalWebCheckoutClientUnitTest {
             sut.startAsync(activity, request)
 
             // Then
-            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
+            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false, any()) }
             verify {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                     "fake-order-id",
-                    false
+                    false,
+                    any()
                 )
             }
         }
@@ -1847,7 +1882,7 @@ class PayPalWebCheckoutClientUnitTest {
         sut.finishStart(intent)
 
         // Then
-        verify { analytics.notify(CheckoutEvent.CANCELED, "fake-order-id", false) }
+        verify { analytics.notify(CheckoutEvent.CANCELED, "fake-order-id", false, any()) }
     }
 
     @Test
@@ -1875,7 +1910,7 @@ class PayPalWebCheckoutClientUnitTest {
         sut.finishStart(intent)
 
         // Then
-        verify { analytics.notify(CheckoutEvent.FAILED, "fake-order-id", false) }
+        verify { analytics.notify(CheckoutEvent.FAILED, "fake-order-id", false, any()) }
     }
 
     @Test
@@ -1897,12 +1932,13 @@ class PayPalWebCheckoutClientUnitTest {
             sut.vaultAsync(activity, request)
 
             // Then
-            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
+            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false, any()) }
             verify {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                     "fake-setup-token-id",
-                    false
+                    false,
+                    any()
                 )
             }
         }
@@ -1924,12 +1960,13 @@ class PayPalWebCheckoutClientUnitTest {
         sut.start(activity, request)
 
         // Then
-        verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
+        verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false, any()) }
         verify {
             analytics.notify(
                 CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                 "fake-order-id",
-                false
+                false,
+                any()
             )
         }
     }
@@ -1951,12 +1988,13 @@ class PayPalWebCheckoutClientUnitTest {
         sut.vault(activity, request)
 
         // Then
-        verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
+        verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false, any()) }
         verify {
             analytics.notify(
                 VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
                 "fake-setup-token-id",
-                false
+                false,
+                any()
             )
         }
     }
