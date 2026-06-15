@@ -43,11 +43,12 @@ class PayPalVaultViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var createSetupTokenState
-        get() = _uiState.value.createSetupTokenState
-        set(value) {
-            _uiState.update { it.copy(createSetupTokenState = value) }
-        }
+    // Internal tracking only — not exposed in UiState since token creation is
+    // an implementation detail of vaultSetupToken().
+    private var createSetupTokenState: ActionState<PayPalSetupToken, Exception> = ActionState.Idle
+
+    private val createdSetupToken: PayPalSetupToken?
+        get() = (createSetupTokenState as? ActionState.Success)?.value
 
     private var vaultPayPalState
         get() = _uiState.value.vaultPayPalState
@@ -66,18 +67,6 @@ class PayPalVaultViewModel @Inject constructor(
         set(value) {
             _uiState.update { it.copy(returnToAppStrategy = value) }
         }
-
-    fun createSetupToken() {
-        viewModelScope.launch {
-            createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createPayPalSetupTokenUseCase(
-                returnToAppStrategy.toReturnToAppStrategy()
-            ).mapToActionState()
-        }
-    }
-
-    private val createdSetupToken: PayPalSetupToken?
-        get() = (createSetupTokenState as? ActionState.Success)?.value
 
     fun vaultSetupToken(activity: ComponentActivity) {
         vaultPayPalState = ActionState.Loading
@@ -118,7 +107,7 @@ class PayPalVaultViewModel @Inject constructor(
         val setupToken = createdSetupToken
         if (setupToken == null) {
             createPaymentTokenState =
-                ActionState.Failure(Exception("Create a setup token to continue."))
+                ActionState.Failure(Exception("Start vault to continue."))
         } else {
             createPaymentTokenState = ActionState.Loading
             viewModelScope.launch {
@@ -135,7 +124,6 @@ class PayPalVaultViewModel @Inject constructor(
                 is PayPalWebCheckoutFinishVaultResult.Failure -> ActionState.Failure(result.error)
                 PayPalWebCheckoutFinishVaultResult.Canceled ->
                     ActionState.Failure(Exception("USER CANCELED"))
-
                 PayPalWebCheckoutFinishVaultResult.NoResult -> {
                     // no result; re-enable PayPal button so user can retry
                     ActionState.Idle

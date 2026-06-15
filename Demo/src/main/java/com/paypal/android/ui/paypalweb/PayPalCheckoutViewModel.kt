@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
@@ -68,15 +67,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(returnToAppStrategyOption = value) }
         }
 
-    private var createOrderState
-        get() = _uiState.value.createOrderState
-        set(value) {
-            _uiState.update { it.copy(createOrderState = value) }
-        }
-
-    private val createdOrder: Order?
-        get() = (createOrderState as? ActionState.Success)?.value
-
     private var payPalWebCheckoutState
         get() = _uiState.value.payPalWebCheckoutState
         set(value) {
@@ -94,20 +84,6 @@ class PayPalCheckoutViewModel @Inject constructor(
         set(value) {
             _uiState.update { it.copy(fundingSource = value) }
         }
-
-    fun createOrder() {
-        viewModelScope.launch {
-            createOrderState = ActionState.Loading
-            val orderRequest = _uiState.value.run {
-                OrderRequest(
-                    intent = intentOption,
-                    shouldVaultOnSuccess = false,
-                    returnToAppStrategy = returnToAppStrategyOption
-                )
-            }
-            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
-        }
-    }
 
     fun startCheckout(activity: ComponentActivity) {
         payPalWebCheckoutState = ActionState.Loading
@@ -130,7 +106,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             viewModelScope.launch {
                 when (val result = createOrderUseCase(orderRequest)) {
                     is SDKSampleServerResult.Success -> {
-                        createOrderState = ActionState.Success(result.value)
                         val orderId = result.value.id
                         if (orderId == null) {
                             callback(CreateOrderResponse.Failure(Exception("Order ID is null")))
@@ -154,9 +129,9 @@ class PayPalCheckoutViewModel @Inject constructor(
     }
 
     fun completeOrder(context: Context) {
-        val orderId = createdOrder?.id
+        val orderId = (payPalWebCheckoutState as? ActionState.Success)?.value?.orderId
         if (orderId == null) {
-            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+            completeOrderState = ActionState.Failure(Exception("Start checkout to continue."))
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
