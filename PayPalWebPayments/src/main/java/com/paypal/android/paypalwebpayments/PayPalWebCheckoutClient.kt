@@ -277,6 +277,7 @@ class PayPalWebCheckoutClient internal constructor(
             "fake-shopper-session-id"
         }
         val onCreateOrderComplete: (Result<String>) -> Unit = { result ->
+            Log.d("PayPalWebCheckoutClient", "startV2: Order creation call complete")
             result.onSuccess { orderId ->
                 applicationScope.launch {
                     val shopperSessionId = shopperSessionIdResult.await()
