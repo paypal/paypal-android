@@ -27,4 +27,16 @@ internal object PayPalWebCheckoutError {
         code = PayPalWebCheckoutErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
         errorDescription = "ReturnToAppStrategy or urlScheme is required. "
     )
+
+    // 4. Merchant's createOrder callback returned a failure
+    fun orderCreationFailed(cause: Exception) = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.ORDER_CREATION_FAILED.ordinal,
+        errorDescription = cause.message ?: "Order creation failed"
+    )
+
+    // 5. Merchant's createSetupToken callback returned a failure
+    fun setupTokenCreationFailed(cause: Exception) = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.SETUP_TOKEN_CREATION_FAILED.ordinal,
+        errorDescription = cause.message ?: "Setup token creation failed"
+    )
 }

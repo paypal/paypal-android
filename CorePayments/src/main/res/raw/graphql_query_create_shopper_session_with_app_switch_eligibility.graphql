@@ -1,0 +1,45 @@
+mutation CreateShopperSessionWithAppSwitchEligibility(
+  $bnCode: String
+  $sdkVersion: String!
+  $osVersion: String!
+  $osType: String!
+  $integrationChannel: String!
+  $paymentMethodSelected: String!
+  $flowType: String!
+  $paymentType: String!
+  $contextId: String!
+  $buyerEmailAddressMerchantPassed: String
+  $paypalNativeAppInstalled: Boolean!
+  $returnAppUrl: String!
+  $cancelAppUrl: String!
+  $fallbackSchemeUrl: String!
+) {
+  createShopperSessionWithAppSwitchEligibility(
+    input: {
+      bnCode: $bnCode
+      sdkVersion: $sdkVersion
+      osVersion: $osVersion
+      osType: $osType
+      integrationChannel: $integrationChannel
+      paymentMethodSelected: $paymentMethodSelected
+      flowType: $flowType
+      paymentType: $paymentType
+      contextId: $contextId
+      buyerEmailAddressMerchantPassed: $buyerEmailAddressMerchantPassed
+      paypalNativeAppInstalled: $paypalNativeAppInstalled
+      returnAppUrl: $returnAppUrl
+      cancelAppUrl: $cancelAppUrl
+      fallbackSchemeUrl: $fallbackSchemeUrl
+    }
+  ) {
+    appSwitchEligible
+    redirectURL
+    checkoutFallbackUrl
+    ineligibleReason
+    matchedAuthenticationMethods
+    shopperSessionConfig {
+      id
+      expiresAt
+    }
+  }
+}

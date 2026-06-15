@@ -5,17 +5,24 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.paypalwebpayments.CreateSetupTokenHandler
+import com.paypal.android.paypalwebpayments.CreateSetupTokenResponse
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
+import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.paypalwebpayments.PayPalWebVaultRequest
+import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
+import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +37,7 @@ class PayPalVaultViewModel @Inject constructor(
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
 ) : ViewModel() {
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
     private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
 
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
@@ -73,33 +80,34 @@ class PayPalVaultViewModel @Inject constructor(
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
     fun vaultSetupToken(activity: ComponentActivity) {
-        val setupTokenId = createdSetupToken?.id
-
-        if (setupTokenId == null) {
-            vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
-        } else {
-            viewModelScope.launch {
-                val request = PayPalWebVaultRequest(
-                    setupTokenId,
-                    returnToAppStrategy.toReturnToAppStrategy()
-                )
-                vaultSetupTokenWithRequest(activity, request)
-            }
-        }
-    }
-
-    private fun vaultSetupTokenWithRequest(
-        activity: ComponentActivity,
-        request: PayPalWebVaultRequest
-    ) {
         vaultPayPalState = ActionState.Loading
 
-        paypalClient.vault(activity, request) { result ->
+        val strategy = returnToAppStrategy.toReturnToAppStrategy()
+        val request = PayPalWebVaultRequest(
+            userIdentity = PayPalUserIdentity.Unknown,
+            returnToAppUrlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = ReturnUrlFactory.createVaultSuccessUrl(strategy),
+                cancelAppUrl = ReturnUrlFactory.createVaultCancelUrl(strategy),
+                fallbackSchemeUrl = "${DemoConstants.APP_CUSTOM_URL_SCHEME}://paypal-sdk/paypal-vault",
+            )
+        )
+
+        paypalClient.vault(activity, request, CreateSetupTokenHandler { callback ->
+            viewModelScope.launch {
+                when (val result = createPayPalSetupTokenUseCase(strategy)) {
+                    is SDKSampleServerResult.Success -> {
+                        createSetupTokenState = ActionState.Success(result.value)
+                        callback(CreateSetupTokenResponse.Success(result.value.id))
+                    }
+                    is SDKSampleServerResult.Failure ->
+                        callback(CreateSetupTokenResponse.Failure(result.value))
+                }
+            }
+        }) { result ->
             when (result) {
                 is PayPalPresentAuthChallengeResult.Success -> {
-                    // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
+                    // Browser switch launched; wait for user to complete PayPal vault
                 }
-
                 is PayPalPresentAuthChallengeResult.Failure ->
                     vaultPayPalState = ActionState.Failure(result.error)
             }

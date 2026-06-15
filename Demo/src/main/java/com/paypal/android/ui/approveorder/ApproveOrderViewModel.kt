@@ -42,7 +42,7 @@ class ApproveOrderViewModel @Inject constructor(
     private val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val cardClient = CardClient(applicationContext, coreConfig)
 

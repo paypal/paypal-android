@@ -41,6 +41,9 @@ class SDKSampleServerAPI {
 
         val clientId: String
             get() = SELECTED_MERCHANT_INTEGRATION.clientId
+
+        val merchantId: String
+            get() = SELECTED_MERCHANT_INTEGRATION.merchantId
     }
 
     @JvmSuppressWildcards

@@ -23,8 +23,8 @@ import java.util.UUID
 
 class PayPalDataCollectorUnitTest {
 
-    private val sandboxConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
-    private val liveConfig = CoreConfig("fake-client-id", Environment.LIVE)
+    private val sandboxConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
+    private val liveConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.LIVE)
 
     private lateinit var context: Context
 
