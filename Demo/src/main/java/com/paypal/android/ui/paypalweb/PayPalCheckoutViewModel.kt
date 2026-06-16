@@ -14,6 +14,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.paypalwebpayments.PayPalCheckoutWarmupResult
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
@@ -25,6 +26,8 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -103,6 +106,17 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
     }
 
+    suspend fun createOrderV2(): SDKSampleServerResult<Order, Exception> {
+        val orderRequest = _uiState.value.run {
+            OrderRequest(
+                intent = intentOption,
+                shouldVaultOnSuccess = false,
+                returnToAppStrategy = returnToAppStrategyOption
+            )
+        }
+        return createOrderUseCase(orderRequest)
+    }
+
     fun startCheckout(activity: ComponentActivity) {
         val orderId = createdOrder?.id
         if (orderId == null) {
@@ -121,7 +135,33 @@ class PayPalCheckoutViewModel @Inject constructor(
             returnToAppStrategyOption.toReturnToAppStrategy()
         )
 
+        viewModelScope.launch {
+            // execute in parallel
+            val warmupRequest = async { paypalClient.warmupCheckout() }
+            val createOrderRequest = async { createOrderV2() }
+
+            // wait for both order creation and shopper session id to be created
+            val createOrderResult = createOrderRequest.await()
+            val warmupResult = warmupRequest.await()
+
+            if (createOrderResult is SDKSampleServerResult.Success && warmupResult is PayPalCheckoutWarmupResult.Success) {
+                // start activity with warmup token that is an opaque, merchant facing type with
+                // an invisible, internal property that contains the session ID
+                val warmupToken = warmupResult.token
+                val startResult = paypalClient.startV3(activity, checkoutRequest, warmupToken)
+                when (startResult) {
+                    is PayPalPresentAuthChallengeResult.Success -> TODO("handle start checkout success")
+                    is PayPalPresentAuthChallengeResult.Failure -> TODO("handle start checkout failure")
+                }
+            } else if (createOrderResult is SDKSampleServerResult.Failure) {
+                TODO("handle create order failure")
+            } else if (warmupResult is PayPalCheckoutWarmupResult.Failure) {
+                TODO("handle warmup failure")
+            }
+        }
+
         paypalClient.startV2(activity, checkoutRequest, createOrder = { callback ->
+
             viewModelScope.launch {
                 val orderRequest = _uiState.value.run {
                     OrderRequest(

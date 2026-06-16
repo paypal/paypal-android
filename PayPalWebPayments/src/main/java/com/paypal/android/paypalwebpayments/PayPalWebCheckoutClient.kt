@@ -32,6 +32,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.*
 
+data class PayPalCheckoutWarmupToken(internal val shopperSessionId: String)
+
+sealed class PayPalCheckoutWarmupResult {
+    data class Success(val token: PayPalCheckoutWarmupToken): PayPalCheckoutWarmupResult()
+    data class Failure(val error: PayPalSDKError): PayPalCheckoutWarmupResult()
+}
+
 // NEXT MAJOR VERSION: consider renaming this module to PayPalWebClient since
 // it now offers both checkout and vaulting
 
@@ -270,7 +277,7 @@ class PayPalWebCheckoutClient internal constructor(
         createOrder: ((Result<String>) -> Unit) -> Unit,
         callback: PayPalWebStartCallback
     ) {
-        val shopperSessionIdResult : Deferred<String> = applicationScope.async {
+        val shopperSessionIdResult: Deferred<String> = applicationScope.async {
             Log.d("PayPalWebCheckoutClient", "startV2: Starting shopper session call...")
             delay(1000)
             Log.d("PayPalWebCheckoutClient", "startV2: Shopper session call complete")
@@ -281,7 +288,10 @@ class PayPalWebCheckoutClient internal constructor(
             result.onSuccess { orderId ->
                 applicationScope.launch {
                     val shopperSessionId = shopperSessionIdResult.await()
-                    Log.d("PayPalWebCheckoutClient", "startV2: Shopper Session ID $shopperSessionId")
+                    Log.d(
+                        "PayPalWebCheckoutClient",
+                        "startV2: Shopper Session ID $shopperSessionId"
+                    )
                     Log.d("PayPalWebCheckoutClient", "startV2: Order ID $orderId")
                     callback.onPayPalWebStartResult(PayPalPresentAuthChallengeResult.Success("fake-auth-state"))
                 }
@@ -294,6 +304,20 @@ class PayPalWebCheckoutClient internal constructor(
         }
         Log.d("PayPalWebCheckoutClient", "startV2: Starting order creation call...")
         createOrder(onCreateOrderComplete)
+    }
+
+    suspend fun warmupCheckout(): PayPalCheckoutWarmupResult {
+        delay(1000L)
+        val token = PayPalCheckoutWarmupToken("shopper-session-id")
+        return PayPalCheckoutWarmupResult.Success(token = token)
+    }
+
+    suspend fun startV3(
+        activity: ComponentActivity,
+        request: PayPalWebCheckoutRequest,
+        warmupToken: PayPalCheckoutWarmupToken,
+    ): PayPalPresentAuthChallengeResult {
+        return PayPalPresentAuthChallengeResult.Success("fake-auth-state")
     }
 
     /**
