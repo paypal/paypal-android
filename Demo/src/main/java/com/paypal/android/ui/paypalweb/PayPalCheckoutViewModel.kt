@@ -99,7 +99,11 @@ class PayPalCheckoutViewModel @Inject constructor(
         )
 
         val orderRequest = _uiState.value.run {
-            OrderRequest(intent = intentOption, shouldVaultOnSuccess = false, returnToAppStrategy = returnToAppStrategyOption)
+            OrderRequest(
+                intent = intentOption,
+                shouldVaultOnSuccess = false,
+                returnToAppStrategy = returnToAppStrategyOption
+            )
         }
 
         paypalClient.start(activity, checkoutRequest, CreateOrderHandler { callback ->

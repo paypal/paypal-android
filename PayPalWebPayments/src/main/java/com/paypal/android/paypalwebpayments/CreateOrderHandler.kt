@@ -46,4 +46,3 @@ sealed class CreateOrderResponse {
      */
     data class Failure(val error: Exception) : CreateOrderResponse()
 }
-

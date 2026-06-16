@@ -25,6 +25,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
     private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
+    private val useFakeResponse: Boolean = true // // TODO: remove once real GraphQL implementation is ready
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
@@ -41,6 +42,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      * route checkout/vault via app switch or browser. On failure, the caller should silently
      * fall back to the patchCCO path.
      */
+    @Suppress("LongParameterList", "ReturnCount") // TODO: remove "ReturnCount" once fake response block is removed;
     suspend operator fun invoke(
         context: Context,
         bnCode: String?,
@@ -51,18 +53,19 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         paypalNativeAppInstalled: Boolean,
         returnAppUrl: String,
         cancelAppUrl: String,
-        fallbackSchemeUrl: String,
-        useFakeResponse: Boolean = true, // TODO: remove once real GraphQL implementation is ready
+        fallbackSchemeUrl: String
     ): APIResult<ShopperSessionWithAppSwitchEligibility> {
         if (useFakeResponse) {
-            // redirectURL?token={orderID}&shoppersSessionId={ssid}&source={source}&switch_initiated_time={timestamp}&merchant={merchantID}
+            // TODO: remove — fake SSID response until real GraphQL implementation is ready
             return APIResult.Success(
                 ShopperSessionWithAppSwitchEligibility(
                     appSwitchEligible = true,
-                    redirectURL = "https://www.sandbox.paypal.com/app-switch-checkout?token=63C65802K52763744&shoppersSessionId=HARDCODED_SSID_1234567890",
-                    checkoutFallbackUrl = "https://www.sandbox.paypal.com/checkoutnow?token=63C65802K52763744&shoppersSessionId=HARDCODED_SSID_1234567890",
+                    redirectURL = "https://www.sandbox.paypal.com/app-switch-checkout" +
+                        "?token=63C65802K52763744&shoppersSessionId=1234567890",
+                    checkoutFallbackUrl = "https://www.sandbox.paypal.com/checkoutnow" +
+                        "?token=63C65802K52763744&shoppersSessionId=1234567890",
                     ineligibleReason = null,
-                    shopperSessionId = "HARDCODED_SSID_1234567890",
+                    shopperSessionId = "1234567890",
                     expiresAt = null,
                 )
             )

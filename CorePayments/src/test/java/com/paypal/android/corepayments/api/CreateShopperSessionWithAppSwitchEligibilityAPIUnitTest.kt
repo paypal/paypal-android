@@ -43,6 +43,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             graphQLClient = graphQLClient,
             resourceLoader = resourceLoader,
             authenticationSecureTokenServiceAPI = authenticationSecureTokenServiceAPI,
+            useFakeResponse = true
         )
         // Default happy path — individual tests override as needed
         coEvery { resourceLoader.loadRawResource(any(), any()) } returns
@@ -230,8 +231,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         paypalNativeAppInstalled = false,
         returnAppUrl = "https://example.com/return",
         cancelAppUrl = "https://example.com/cancel",
-        fallbackSchemeUrl = "com.example://paypal-sdk/paypal-checkout",
-        useFakeResponse = false,
+        fallbackSchemeUrl = "com.example://paypal-sdk/paypal-checkout"
     )
 
     @OptIn(InternalSerializationApi::class)

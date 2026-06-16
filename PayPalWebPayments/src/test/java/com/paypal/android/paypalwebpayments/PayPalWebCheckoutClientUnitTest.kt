@@ -113,6 +113,12 @@ class PayPalWebCheckoutClientUnitTest {
 
     private val successLaunchResult = PayPalPresentAuthChallengeResult.Success("fake-auth-state")
 
+    private fun stubSsidApi(result: APIResult<ShopperSessionWithAppSwitchEligibility>) {
+        coEvery {
+            createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+        } returns result
+    }
+
     private fun fakeSession(
         appSwitchEligible: Boolean = false,
         redirectURL: String? = null,
@@ -132,7 +138,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() launches browser via checkoutFallbackUrl when SSID succeeds`() = runTest {
         val session = fakeSession(checkoutFallbackUrl = "https://sandbox.paypal.com/checkoutnow")
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         var capturedResult: PayPalPresentAuthChallengeResult? = null
@@ -147,9 +153,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() falls back to patchCCO when SSID call fails`() = runTest {
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Failure(
-            PayPalSDKError(0, "network error")
-        )
+        stubSsidApi(APIResult.Failure(PayPalSDKError(0, "network error")))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         var capturedResult: PayPalPresentAuthChallengeResult? = null
@@ -176,7 +180,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() stores auth state in session store so finishStart can retrieve it`() = runTest {
         val session = fakeSession()
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         val finishResult = PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
@@ -195,7 +199,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() launches browser via checkoutFallbackUrl when SSID succeeds`() = runTest {
         val session = fakeSession(checkoutFallbackUrl = "https://sandbox.paypal.com/agreements/approve")
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         var capturedResult: PayPalPresentAuthChallengeResult? = null
@@ -210,9 +214,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `vault() falls back to direct vault URL when SSID call fails`() = runTest {
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Failure(
-            PayPalSDKError(0, "network error")
-        )
+        stubSsidApi(APIResult.Failure(PayPalSDKError(0, "network error")))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         var capturedResult: PayPalPresentAuthChallengeResult? = null
@@ -239,7 +241,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() stores auth state in session store so finishVault can retrieve it`() = runTest {
         val session = fakeSession()
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         val vaultSuccess = PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
@@ -262,7 +264,7 @@ class PayPalWebCheckoutClientUnitTest {
             redirectURL = "https://paypal.com/app-switch",
             checkoutFallbackUrl = "https://sandbox.paypal.com/checkoutnow"
         )
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { deviceInspector.isPayPalInstalled } returns true
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
@@ -290,9 +292,11 @@ class PayPalWebCheckoutClientUnitTest {
             checkoutFallbackUrl = "https://sandbox.paypal.com/checkoutnow",
             ssid = "test-ssid-123"
         )
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         val uriSlot = slot<Uri>()
-        every { payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any()) } returns successLaunchResult
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns successLaunchResult
 
         sut.start(activity, fakeCheckoutRequest, CreateOrderHandler { cb ->
             cb(CreateOrderResponse.Success("fake-order-id"))
@@ -305,7 +309,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() falls back to patchCCO when SSID session has no checkout URLs`() = runTest {
         val session = fakeSession(redirectURL = null, checkoutFallbackUrl = null)
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         var capturedResult: PayPalPresentAuthChallengeResult? = null
@@ -324,7 +328,7 @@ class PayPalWebCheckoutClientUnitTest {
             redirectURL = "https://paypal.com/app-switch-vault",
             checkoutFallbackUrl = "https://sandbox.paypal.com/agreements/approve"
         )
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { deviceInspector.isPayPalInstalled } returns true
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
@@ -352,9 +356,11 @@ class PayPalWebCheckoutClientUnitTest {
             checkoutFallbackUrl = "https://sandbox.paypal.com/agreements/approve",
             ssid = "vault-ssid-456"
         )
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         val uriSlot = slot<Uri>()
-        every { payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any()) } returns successLaunchResult
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns successLaunchResult
 
         sut.vault(activity, fakeVaultRequest, CreateSetupTokenHandler { cb ->
             cb(CreateSetupTokenResponse.Success("fake-setup-token-id"))
@@ -367,7 +373,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() falls back to direct vault URL when SSID session has no URLs`() = runTest {
         val session = fakeSession(redirectURL = null, checkoutFallbackUrl = null)
-        coEvery { createShopperSessionAPI(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns APIResult.Success(session)
+        stubSsidApi(APIResult.Success(session))
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns successLaunchResult
 
         var capturedResult: PayPalPresentAuthChallengeResult? = null

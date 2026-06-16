@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
-import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -28,9 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
 
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
@@ -129,7 +126,9 @@ class PayPalWebCheckoutClient internal constructor(
                     applicationScope.launch {
                         val launchResult = when (val sessionResult = sessionDeferred.await()) {
                             is APIResult.Success ->
-                                routeCheckoutWithSsid(activity, sessionResult.data, orderResult.orderId, returnToAppStrategy)
+                                routeCheckoutWithSsid(
+                                    activity, sessionResult.data, orderResult.orderId, returnToAppStrategy
+                                )
                             is APIResult.Failure ->
                                 // Silent fallback — merchant is not notified of SSID failure
                                 fallbackCheckoutWithPatchCco(activity, orderResult.orderId, returnToAppStrategy)
@@ -201,7 +200,9 @@ class PayPalWebCheckoutClient internal constructor(
                         val sessionResult = sessionDeferred.await()
                         val launchResult = when (sessionResult) {
                             is APIResult.Success ->
-                                routeVaultWithSsid(activity, sessionResult.data, tokenResult.setupTokenId, returnToAppStrategy)
+                                routeVaultWithSsid(
+                                    activity, sessionResult.data, tokenResult.setupTokenId, returnToAppStrategy
+                                )
                             is APIResult.Failure ->
                                 // Silent fallback — use standard vault URL
                                 fallbackVault(activity, tokenResult.setupTokenId, returnToAppStrategy)
