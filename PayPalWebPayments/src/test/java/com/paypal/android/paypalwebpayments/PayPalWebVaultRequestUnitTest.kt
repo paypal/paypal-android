@@ -3,7 +3,7 @@ package com.paypal.android.paypalwebpayments
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
-class PayPalWebCheckoutRequestUnitTest {
+class PayPalWebVaultRequestUnitTest {
 
     private val fakeReturnToAppUrlConfig = ReturnToAppUrlConfig(
         returnAppUrl = "https://example.com/return",
@@ -13,7 +13,7 @@ class PayPalWebCheckoutRequestUnitTest {
 
     @Test
     fun `userIdentity is stored correctly`() {
-        val request = PayPalWebCheckoutRequest(
+        val request = PayPalWebVaultRequest(
             userIdentity = PayPalUserIdentity.Unknown,
             returnToAppUrlConfig = fakeReturnToAppUrlConfig
         )
@@ -22,7 +22,7 @@ class PayPalWebCheckoutRequestUnitTest {
 
     @Test
     fun `returnToAppUrlConfig is stored correctly`() {
-        val request = PayPalWebCheckoutRequest(
+        val request = PayPalWebVaultRequest(
             userIdentity = PayPalUserIdentity.Unknown,
             returnToAppUrlConfig = fakeReturnToAppUrlConfig
         )
@@ -31,7 +31,7 @@ class PayPalWebCheckoutRequestUnitTest {
 
     @Test
     fun `userAction defaults to CONTINUE`() {
-        val request = PayPalWebCheckoutRequest(
+        val request = PayPalWebVaultRequest(
             userIdentity = PayPalUserIdentity.Unknown,
             returnToAppUrlConfig = fakeReturnToAppUrlConfig
         )
@@ -39,18 +39,18 @@ class PayPalWebCheckoutRequestUnitTest {
     }
 
     @Test
-    fun `userAction can be overridden to PAY_NOW`() {
-        val request = PayPalWebCheckoutRequest(
+    fun `userAction can be overridden to SETUP_NOW`() {
+        val request = PayPalWebVaultRequest(
             userIdentity = PayPalUserIdentity.Unknown,
             returnToAppUrlConfig = fakeReturnToAppUrlConfig,
-            userAction = PayPalUserAction.PAY_NOW
+            userAction = PayPalUserAction.SETUP_NOW
         )
-        assertEquals(PayPalUserAction.PAY_NOW, request.userAction)
+        assertEquals(PayPalUserAction.SETUP_NOW, request.userAction)
     }
 
     @Test
     fun `Email userIdentity stores email address`() {
-        val request = PayPalWebCheckoutRequest(
+        val request = PayPalWebVaultRequest(
             userIdentity = PayPalUserIdentity.Email("buyer@example.com"),
             returnToAppUrlConfig = fakeReturnToAppUrlConfig
         )

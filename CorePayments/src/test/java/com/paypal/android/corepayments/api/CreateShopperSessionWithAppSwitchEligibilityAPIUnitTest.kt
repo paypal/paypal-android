@@ -1,7 +1,6 @@
 package com.paypal.android.corepayments.api
 
 import android.content.Context
-import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
