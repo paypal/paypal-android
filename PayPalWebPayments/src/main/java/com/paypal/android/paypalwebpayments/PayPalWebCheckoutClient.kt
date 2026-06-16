@@ -226,17 +226,6 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
-    @VisibleForTesting
-    internal suspend fun vaultAsync(
-        activity: ComponentActivity,
-        request: PayPalWebVaultRequest,
-        createSetupTokenHandler: CreateSetupTokenHandler,
-    ): PayPalPresentAuthChallengeResult = suspendCancellableCoroutine { continuation ->
-        vault(activity, request, createSetupTokenHandler) { result ->
-            continuation.resume(result)
-        }
-    }
-
     // ── finishStart / finishVault ─────────────────────────────────────────────
 
     /**

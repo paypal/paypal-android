@@ -52,7 +52,22 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         returnAppUrl: String,
         cancelAppUrl: String,
         fallbackSchemeUrl: String,
+        useFakeResponse: Boolean = true, // TODO: remove once real GraphQL implementation is ready
     ): APIResult<ShopperSessionWithAppSwitchEligibility> {
+        if (useFakeResponse) {
+            // redirectURL?token={orderID}&shoppersSessionId={ssid}&source={source}&switch_initiated_time={timestamp}&merchant={merchantID}
+            return APIResult.Success(
+                ShopperSessionWithAppSwitchEligibility(
+                    appSwitchEligible = true,
+                    redirectURL = "https://www.sandbox.paypal.com/app-switch-checkout?token=63C65802K52763744&shoppersSessionId=HARDCODED_SSID_1234567890",
+                    checkoutFallbackUrl = "https://www.sandbox.paypal.com/checkoutnow?token=63C65802K52763744&shoppersSessionId=HARDCODED_SSID_1234567890",
+                    ineligibleReason = null,
+                    shopperSessionId = "HARDCODED_SSID_1234567890",
+                    expiresAt = null,
+                )
+            )
+        }
+
         val resourceResult = resourceLoader.loadRawResource(
             context,
             R.raw.graphql_query_create_shopper_session_with_app_switch_eligibility

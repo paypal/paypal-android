@@ -71,10 +71,10 @@ data class ShopperSessionConfigData(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ShopperSessionWithAppSwitchEligibility(
-    val appSwitchEligible: Boolean,
-    val redirectURL: String?,
-    val checkoutFallbackUrl: String?,
-    val ineligibleReason: String?,
-    val shopperSessionId: String?,
-    val expiresAt: String?
+    val appSwitchEligible: Boolean = false,
+    val redirectURL: String? = null,
+    val checkoutFallbackUrl: String? = null,
+    val ineligibleReason: String? = null,
+    val shopperSessionId: String? = null,
+    val expiresAt: String? = null
 )
