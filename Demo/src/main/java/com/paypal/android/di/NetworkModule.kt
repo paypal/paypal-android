@@ -1,15 +1,11 @@
 package com.paypal.android.di
 
-import com.paypal.android.api.services.SDKSampleServerAPI
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+// SDKSampleServerAPI and CustomEnvironmentRepository both use @Inject constructors and
+// @Singleton, so Hilt provides them automatically — no manual @Provides needed here.
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
-
-    @Provides
-    fun provideSDKSampleServerAPI(): SDKSampleServerAPI = SDKSampleServerAPI()
-}
+object NetworkModule

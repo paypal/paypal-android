@@ -49,7 +49,7 @@ class PayPalWebCheckoutClient internal constructor(
 ) {
 
     // Enable app switch by switching this flag to true
-    private val appSwitchWhenEligible: Boolean = false
+    private val appSwitchWhenEligible: Boolean = true
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -535,7 +535,10 @@ class PayPalWebCheckoutClient internal constructor(
         get() = when (coreConfig.environment) {
             Environment.LIVE -> "https://paypal.com/"
             Environment.SANDBOX -> "https://sandbox.paypal.com/"
-    }
+            // For custom environments, derive the web checkout base from the SDK's graphQL endpoint.
+            // e.g. "https://www.braintree.stage.paypal.com" -> "https://www.braintree.stage.paypal.com/"
+            is Environment.Custom -> coreConfig.environment.graphQLEndpoint.trimEnd('/') + "/"
+        }
 
     private suspend fun getLaunchUri(
         context: Context,

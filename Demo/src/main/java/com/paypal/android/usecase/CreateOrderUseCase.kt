@@ -45,7 +45,8 @@ class CreateOrderUseCase @Inject constructor(
                 paymentSource = paymentSource
             )
 
-            sdkSampleServerAPI.createOrder(orderRequestBody)
+            val response = sdkSampleServerAPI.createOrder(orderRequestBody)
+            response
         }
     }
 }

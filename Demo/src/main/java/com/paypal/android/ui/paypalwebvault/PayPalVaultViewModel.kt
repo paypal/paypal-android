@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
@@ -29,9 +30,16 @@ class PayPalVaultViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
-    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
+
+    private fun buildCoreConfig(): CoreConfig =
+        customEnvironmentRepository.getConfig().toCoreConfig(
+            fallbackConfig = CoreConfig(SDKSampleServerAPI.clientId)
+        )
+
+    // Held as a field so completeAuthChallenge uses the same instance that started the vault flow.
+    private var paypalClient: PayPalWebCheckoutClient? = null
 
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
@@ -94,6 +102,8 @@ class PayPalVaultViewModel @Inject constructor(
     ) {
         vaultPayPalState = ActionState.Loading
 
+        val paypalClient = PayPalWebCheckoutClient(applicationContext, buildCoreConfig())
+            .also { this.paypalClient = it }
         paypalClient.vault(activity, request) { result ->
             when (result) {
                 is PayPalPresentAuthChallengeResult.Success -> {
@@ -121,6 +131,8 @@ class PayPalVaultViewModel @Inject constructor(
     }
 
     fun completeAuthChallenge(intent: Intent) {
+        val paypalClient = this.paypalClient
+            ?: PayPalWebCheckoutClient(applicationContext, buildCoreConfig())
         paypalClient.finishVault(intent)?.let { result ->
             vaultPayPalState = when (result) {
                 is PayPalWebCheckoutFinishVaultResult.Success -> ActionState.Success(result)

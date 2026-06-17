@@ -3,6 +3,7 @@ package com.paypal.android.uishared.components
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,7 +19,8 @@ import androidx.compose.ui.Modifier
 fun DemoAppTopBar(
     title: String,
     shouldDisplayBackButton: Boolean,
-    onBackButtonClick: () -> Unit
+    onBackButtonClick: () -> Unit,
+    onSettingsClick: (() -> Unit)? = null
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -35,6 +37,16 @@ fun DemoAppTopBar(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back"
+                    )
+                }
+            }
+        },
+        actions = {
+            onSettingsClick?.let {
+                IconButton(onClick = it) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Environment Settings"
                     )
                 }
             }
