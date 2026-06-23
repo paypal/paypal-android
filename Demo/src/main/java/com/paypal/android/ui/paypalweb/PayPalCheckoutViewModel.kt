@@ -6,14 +6,17 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
+import com.paypal.android.paypalwebpayments.CreateOrderHandler
+import com.paypal.android.paypalwebpayments.CreateOrderResponse
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
+import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
@@ -28,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,8 +47,7 @@ class PayPalCheckoutViewModel @Inject constructor(
 
     private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
-    private val paypalClient =
-        PayPalWebCheckoutClient(applicationContext, coreConfig)
+    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
 
     private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()
@@ -61,15 +64,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(returnToAppStrategyOption = value) }
         }
 
-    private var createOrderState
-        get() = _uiState.value.createOrderState
-        set(value) {
-            _uiState.update { it.copy(createOrderState = value) }
-        }
-
-    private val createdOrder: Order?
-        get() = (createOrderState as? ActionState.Success)?.value
-
     private var payPalWebCheckoutState
         get() = _uiState.value.payPalWebCheckoutState
         set(value) {
@@ -82,48 +76,45 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(completeOrderState = value) }
         }
 
+    // Kept for the "Complete Order" step which requires the order ID after checkout finishes.
+    private var lastOrderId: String? = null
+
     var fundingSource: PayPalWebCheckoutFundingSource
         get() = _uiState.value.fundingSource
         set(value) {
             _uiState.update { it.copy(fundingSource = value) }
         }
 
-    fun createOrder() {
-        viewModelScope.launch {
-            createOrderState = ActionState.Loading
-            val orderRequest = _uiState.value.run {
-                OrderRequest(
-                    intent = intentOption,
-                    shouldVaultOnSuccess = false,
-                    returnToAppStrategy = returnToAppStrategyOption
-                )
-            }
-            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
-        }
-    }
-
     fun startCheckout(activity: ComponentActivity) {
-        val orderId = createdOrder?.id
-        if (orderId == null) {
-            payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
-        } else {
-            startCheckoutWithOrderId(activity, orderId)
-        }
-    }
-
-    private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
         val checkoutRequest = PayPalWebCheckoutRequest(
-            orderId,
-            fundingSource,
-            returnToAppStrategyOption.toReturnToAppStrategy()
+            userIdentity = PayPalUserIdentity.Unknown,
+            returnToAppUrlConfig = returnToAppStrategyOption.toReturnToAppUrlConfig()
         )
 
-        paypalClient.start(activity, checkoutRequest) { startResult ->
+        // createOrder is invoked by the SDK on a background thread; runBlocking is safe here.
+        val createOrderHandler = CreateOrderHandler {
+            val orderRequest = OrderRequest(
+                intent = intentOption,
+                shouldVaultOnSuccess = false,
+                returnToAppStrategy = returnToAppStrategyOption
+            )
+            when (val result = runBlocking { createOrderUseCase(orderRequest) }) {
+                is SDKSampleServerResult.Success -> {
+                    lastOrderId = result.value.id
+                    CreateOrderResponse.Success(result.value.id ?: "")
+                }
+
+                is SDKSampleServerResult.Failure ->
+                    CreateOrderResponse.Failure(result.value)
+            }
+        }
+
+        paypalClient.start(activity, checkoutRequest, createOrderHandler) { startResult ->
             when (startResult) {
                 is PayPalPresentAuthChallengeResult.Success -> {
-                    // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
+                    // Wait for the buyer to authenticate in Chrome Custom Tab.
                 }
 
                 is PayPalPresentAuthChallengeResult.Failure ->
@@ -133,9 +124,9 @@ class PayPalCheckoutViewModel @Inject constructor(
     }
 
     fun completeOrder(context: Context) {
-        val orderId = createdOrder?.id
+        val orderId = lastOrderId
         if (orderId == null) {
-            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
+            completeOrderState = ActionState.Failure(Exception("Start checkout to continue."))
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
@@ -166,7 +157,7 @@ class PayPalCheckoutViewModel @Inject constructor(
                 }
 
                 PayPalWebCheckoutFinishStartResult.NoResult -> {
-                    // no result; re-enable PayPal button so user can retry
+                    // No result; re-enable button so user can retry.
                     payPalWebCheckoutState = ActionState.Idle
                 }
             }

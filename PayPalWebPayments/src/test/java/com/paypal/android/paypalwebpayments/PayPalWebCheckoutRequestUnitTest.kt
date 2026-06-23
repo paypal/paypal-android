@@ -6,9 +6,30 @@ import org.junit.Test
 class PayPalWebCheckoutRequestUnitTest {
 
     @Test
-    fun `given an order id, PayPalRequest should return the same orderId`() {
-        val orderId = "fake_order_id"
-        val payPalRequest = PayPalWebCheckoutRequest(orderId)
-        assertEquals(orderId, payPalRequest.orderId)
+    fun `given a ReturnToAppUrlConfig, PayPalWebCheckoutRequest should return the same config`() {
+        val returnToAppUrlConfig = ReturnToAppUrlConfig(
+            returnAppUrl = "https://example.com/return",
+            cancelAppUrl = "https://example.com/cancel",
+            fallbackSchemeUrl = "com.example.app"
+        )
+        val request = PayPalWebCheckoutRequest(
+            userIdentity = PayPalUserIdentity.Unknown,
+            returnToAppUrlConfig = returnToAppUrlConfig
+        )
+        assertEquals(returnToAppUrlConfig, request.returnToAppUrlConfig)
+    }
+
+    @Test
+    fun `given no userAction, PayPalWebCheckoutRequest defaults to CONTINUE`() {
+        val returnToAppUrlConfig = ReturnToAppUrlConfig(
+            returnAppUrl = "https://example.com/return",
+            cancelAppUrl = "https://example.com/cancel",
+            fallbackSchemeUrl = "com.example.app"
+        )
+        val request = PayPalWebCheckoutRequest(
+            userIdentity = PayPalUserIdentity.Unknown,
+            returnToAppUrlConfig = returnToAppUrlConfig
+        )
+        assertEquals(PayPalUserAction.CONTINUE, request.userAction)
     }
 }

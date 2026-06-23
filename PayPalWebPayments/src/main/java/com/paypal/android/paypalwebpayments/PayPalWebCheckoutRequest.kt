@@ -1,16 +1,14 @@
 package com.paypal.android.paypalwebpayments
 
-import com.paypal.android.corepayments.ReturnToAppStrategy
-
 /**
- * Creates an instance of a PayPalRequest.
+ * Request to start a PayPal web checkout flow with [PayPalWebCheckoutClient.start].
  *
- * @param orderId The ID of the order to be approved.
- * @param fundingSource specify funding (credit, paylater or default)
- * @param returnToAppStrategy Strategy for returning to the app after checkout flow
+ * @property userIdentity Buyer identity information. Use [PayPalUserIdentity.Unknown] to opt out.
+ * @property returnToAppUrlConfig URLs used to return the buyer to the merchant app after checkout.
+ * @property userAction Controls the call-to-action label on the PayPal checkout page.
  */
-data class PayPalWebCheckoutRequest @JvmOverloads constructor(
-    val orderId: String,
-    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
-    val returnToAppStrategy: ReturnToAppStrategy? = null
+data class PayPalWebCheckoutRequest(
+    val userIdentity: PayPalUserIdentity,
+    val returnToAppUrlConfig: ReturnToAppUrlConfig,
+    val userAction: PayPalUserAction = PayPalUserAction.CONTINUE
 )

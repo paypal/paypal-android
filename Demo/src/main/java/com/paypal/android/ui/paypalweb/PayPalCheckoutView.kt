@@ -61,23 +61,21 @@ fun PayPalCheckoutView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_CreateOrder(uiState, viewModel)
-        if (uiState.isCreateOrderSuccessful) {
-            Step2_StartPayPalCheckout(uiState, viewModel)
-        }
+        Step1_StartPayPalCheckout(uiState, viewModel)
         if (uiState.isPayPalWebCheckoutSuccessful) {
-            Step3_CompleteOrder(uiState, viewModel)
+            Step2_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+private fun Step1_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create an Order")
+        StepHeader(stepNumber = 1, title = stringResource(R.string.launch_paypal))
         CreateOrderForm(
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
@@ -88,29 +86,6 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             onSelectedOptionChange = { value -> viewModel.returnToAppStrategyOption = value },
             selectedOption = uiState.returnToAppStrategyOption
         )
-        ActionButtonColumn(
-            defaultTitle = "CREATE ORDER",
-            successTitle = "ORDER CREATED",
-            state = uiState.createOrderState,
-            onClick = { viewModel.createOrder() },
-            modifier = Modifier
-                .fillMaxWidth()
-        ) { state ->
-            when (state) {
-                is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> OrderView(order = state.value)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
-    val context = LocalContext.current
-    Column(
-        verticalArrangement = UIConstants.spacingMedium,
-    ) {
-        StepHeader(stepNumber = 2, title = stringResource(R.string.launch_paypal))
         StartPayPalWebCheckoutForm(
             fundingSource = uiState.fundingSource,
             onFundingSourceChange = { value -> viewModel.fundingSource = value },
@@ -134,12 +109,12 @@ private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalC
 }
 
 @Composable
-private fun Step3_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+private fun Step2_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Complete Order")
+        StepHeader(stepNumber = 2, title = "Complete Order")
         ActionButtonColumn(
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",

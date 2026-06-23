@@ -1,29 +1,14 @@
 package com.paypal.android.paypalwebpayments
 
-import com.paypal.android.corepayments.ReturnToAppStrategy
-
 /**
  * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
  *
- * @property [setupTokenId] ID for the setup token associated with the vault approval
- * @property [returnToAppStrategy] Strategy for returning to the app after checkout flow
- * @property [approveVaultHref] URL for the approval web page
+ * @property userIdentity Buyer identity information. Use [PayPalUserIdentity.Unknown] to opt out.
+ * @property returnToAppUrlConfig URLs used to return the buyer to the merchant app after vaulting.
+ * @property userAction Controls the call-to-action label on the PayPal vault page.
  */
-data class PayPalWebVaultRequest @Deprecated("Use PayPalWebVaultRequest(setupTokenId) instead.")
-constructor(
-    val setupTokenId: String,
-    val returnToAppStrategy: ReturnToAppStrategy? = null,
-    @Deprecated("The approveVaultHref property is no longer required and will be ignored.")
-    val approveVaultHref: String? = null // NEXT_MAJOR_VERSION: - Remove this property
-) {
-
-    /**
-     * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
-     *
-     * @property [setupTokenId] ID for the setup token associated with the vault approval
-     */
-    constructor(
-        setupTokenId: String,
-        returnToAppStrategy: ReturnToAppStrategy? = null
-    ) : this(setupTokenId, returnToAppStrategy, null)
-}
+data class PayPalWebVaultRequest(
+    val userIdentity: PayPalUserIdentity,
+    val returnToAppUrlConfig: ReturnToAppUrlConfig,
+    val userAction: PayPalUserAction = PayPalUserAction.CONTINUE
+)
