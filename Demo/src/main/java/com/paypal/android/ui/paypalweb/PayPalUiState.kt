@@ -9,15 +9,11 @@ import com.paypal.android.uishared.state.ActionState
 
 data class PayPalUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val returnToAppStrategyOption: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS,
 ) {
-    val isCreateOrderSuccessful: Boolean
-        get() = createOrderState is ActionState.Success
-
     val isPayPalWebCheckoutSuccessful: Boolean
         get() = payPalWebCheckoutState is ActionState.Success
 }

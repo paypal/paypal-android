@@ -22,19 +22,13 @@ internal object PayPalWebCheckoutError {
         errorDescription = cause.message ?: "Unable to Browser Switch"
     )
 
-    // 3. ReturnToAppStrategy or urlScheme is required
-    val noReturnToAppStrategyError = PayPalSDKError(
-        code = PayPalWebCheckoutErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
-        errorDescription = "ReturnToAppStrategy or urlScheme is required. "
-    )
-
-    // 4. createOrder callback returned a failure
+    // 3. createOrder callback returned a failure
     fun createOrderFailed(cause: Exception) = PayPalSDKError(
         code = PayPalWebCheckoutErrorCode.CREATE_ORDER_FAILED.ordinal,
         errorDescription = cause.message ?: "createOrder callback returned a failure."
     )
 
-    // 5. createSetupToken callback returned a failure
+    // 4. createSetupToken callback returned a failure
     fun createSetupTokenFailed(cause: Exception) = PayPalSDKError(
         code = PayPalWebCheckoutErrorCode.CREATE_SETUP_TOKEN_FAILED.ordinal,
         errorDescription = cause.message ?: "createSetupToken callback returned a failure."

@@ -38,9 +38,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
-    private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
-    private val urlScheme: String? = null,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
 
@@ -73,9 +71,7 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
-        urlScheme = urlScheme,
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
-        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
     constructor(
@@ -87,9 +83,7 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
-        urlScheme = null,
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
-        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
     /**
@@ -127,7 +121,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebStartCallback
     ) {
         applicationScope.launch {
-            // TODO: DTPPMOBILE-XXX — execute createOrder and Shopper Session creation in parallel
+            // TODO: execute createOrder and Shopper Session creation in parallel
             val createOrderResult = withContext(Dispatchers.IO) {
                 createOrderHandler.createOrder()
             }
@@ -177,7 +171,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebVaultCallback
     ) {
         applicationScope.launch {
-            // TODO: DTPPMOBILE-XXX — execute createSetupToken and Shopper Session creation in parallel
+            // TODO: execute createSetupToken and Shopper Session creation in parallel
             val createSetupTokenResult = withContext(Dispatchers.IO) {
                 createSetupTokenHandler.createSetupToken()
             }
