@@ -2,6 +2,7 @@ package com.paypal.android.ui.paypalweb
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
@@ -13,6 +14,7 @@ data class PayPalUiState(
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
     val returnToAppStrategyOption: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS,
+    val userIdentity: PayPalUserIdentity = PayPalUserIdentity.Unknown,
 ) {
     val isPayPalWebCheckoutSuccessful: Boolean
         get() = payPalWebCheckoutState is ActionState.Success

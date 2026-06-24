@@ -85,11 +85,17 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(fundingSource = value) }
         }
 
+    var userIdentity: PayPalUserIdentity
+        get() = _uiState.value.userIdentity
+        set(value) {
+            _uiState.update { it.copy(userIdentity = value) }
+        }
+
     fun startCheckout(activity: ComponentActivity) {
         payPalWebCheckoutState = ActionState.Loading
 
         val checkoutRequest = PayPalWebCheckoutRequest(
-            userIdentity = PayPalUserIdentity.Unknown,
+            userIdentity = userIdentity,
             returnToAppUrlConfig = returnToAppStrategyOption.toReturnToAppUrlConfig()
         )
 

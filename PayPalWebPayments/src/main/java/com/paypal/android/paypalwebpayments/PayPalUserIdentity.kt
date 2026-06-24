@@ -11,6 +11,10 @@ package com.paypal.android.paypalwebpayments
  * Use [Unknown] to opt out of providing identity information.
  */
 sealed class PayPalUserIdentity {
+    /**
+     * Buyer identifier
+     */
+    abstract val identifier: String?
 
     /**
      * Buyer identity via a server-side shopper session ID.
@@ -18,25 +22,33 @@ sealed class PayPalUserIdentity {
      * @property serverSideShopperSessionId Session ID created by the merchant's server.
      */
     data class ServerSideShopperSession(
-        val serverSideShopperSessionId: String
-    ) : PayPalUserIdentity()
+        val serverSideShopperSessionId: String,
+    ) : PayPalUserIdentity() {
+        override val identifier: String = serverSideShopperSessionId
+    }
 
     /**
      * Buyer identity via email address.
      *
      * @property email The buyer's email address.
      */
-    data class Email(val email: String) : PayPalUserIdentity()
+    data class Email(val email: String) : PayPalUserIdentity() {
+        override val identifier: String = email
+    }
 
     /**
      * Buyer identity via phone number.
      *
      * @property phone The buyer's phone number.
      */
-    data class Phone(val phone: String) : PayPalUserIdentity()
+    data class Phone(val phone: String) : PayPalUserIdentity() {
+        override val identifier: String? = null
+    }
 
     /**
      * No buyer identity provided.
      */
-    data object Unknown : PayPalUserIdentity()
+    data object Unknown : PayPalUserIdentity() {
+        override val identifier: String? = null
+    }
 }

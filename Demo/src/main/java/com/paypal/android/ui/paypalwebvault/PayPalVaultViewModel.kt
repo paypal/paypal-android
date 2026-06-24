@@ -59,6 +59,12 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(returnToAppStrategy = value) }
         }
 
+    var userIdentity: PayPalUserIdentity
+        get() = _uiState.value.userIdentity
+        set(value) {
+            _uiState.update { it.copy(userIdentity = value) }
+        }
+
     // Used for the "Create Payment Token" step
     private var lastSetupToken: PayPalSetupToken? = null
 
@@ -66,7 +72,7 @@ class PayPalVaultViewModel @Inject constructor(
         vaultPayPalState = ActionState.Loading
 
         val vaultRequest = PayPalWebVaultRequest(
-            userIdentity = PayPalUserIdentity.Unknown,
+            userIdentity = userIdentity,
             returnToAppUrlConfig = returnToAppStrategy.toReturnToAppUrlConfig()
         )
 

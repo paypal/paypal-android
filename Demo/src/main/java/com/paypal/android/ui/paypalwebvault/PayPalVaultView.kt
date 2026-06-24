@@ -21,6 +21,7 @@ import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
+import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
@@ -80,6 +81,10 @@ private fun Step1_VaultPayPal(
             stringArrayResId = R.array.deep_link_strategy_options,
             onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
             selectedOption = uiState.returnToAppStrategy
+        )
+        PayPalUserIdentityForm(
+            userIdentity = uiState.userIdentity,
+            onUserIdentityChange = { value -> viewModel.userIdentity = value }
         )
         ActionButtonColumn(
             defaultTitle = "VAULT PAYPAL",
