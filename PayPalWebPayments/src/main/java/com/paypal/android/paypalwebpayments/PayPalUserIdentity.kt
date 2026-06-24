@@ -1,7 +1,7 @@
 package com.paypal.android.paypalwebpayments
 
 /**
- * Represents buyer identity information passed to the PPCP Native SDK.
+ * Represents buyer identity information passed to the SDK.
  *
  * Use [ServerSideShopperSession] when the merchant has already created a shopper session
  * server-side and wants to pass the session ID directly.

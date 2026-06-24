@@ -76,7 +76,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(completeOrderState = value) }
         }
 
-    // Kept for the "Complete Order" step which requires the order ID after checkout finishes.
+    // Used for the "Create Order" step
     private var lastOrderId: String? = null
 
     var fundingSource: PayPalWebCheckoutFundingSource
@@ -93,7 +93,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             returnToAppUrlConfig = returnToAppStrategyOption.toReturnToAppUrlConfig()
         )
 
-        // createOrder is invoked by the SDK on a background thread; runBlocking is safe here.
         val createOrderHandler = CreateOrderHandler {
             val orderRequest = OrderRequest(
                 intent = intentOption,
@@ -114,7 +113,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         paypalClient.start(activity, checkoutRequest, createOrderHandler) { startResult ->
             when (startResult) {
                 is PayPalPresentAuthChallengeResult.Success -> {
-                    // Wait for the buyer to authenticate in Chrome Custom Tab.
+                    // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
                 }
 
                 is PayPalPresentAuthChallengeResult.Failure ->
@@ -157,7 +156,7 @@ class PayPalCheckoutViewModel @Inject constructor(
                 }
 
                 PayPalWebCheckoutFinishStartResult.NoResult -> {
-                    // No result; re-enable button so user can retry.
+                    // no result; re-enable PayPal button so user can retry
                     payPalWebCheckoutState = ActionState.Idle
                 }
             }

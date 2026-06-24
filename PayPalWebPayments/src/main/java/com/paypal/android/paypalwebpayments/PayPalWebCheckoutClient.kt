@@ -23,6 +23,7 @@ import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -38,11 +39,12 @@ class PayPalWebCheckoutClient internal constructor(
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
+    private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
 
-    // Enable app switch by switching this flag to true
+    // Disable app switch by switching this flag to true
     private val appSwitchWhenEligible: Boolean = true
 
     // for analytics tracking
@@ -71,6 +73,7 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
     )
 
@@ -83,6 +86,7 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
     )
 
@@ -208,40 +212,6 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
-     * @param [authState] A continuation state received from [PayPalPresentAuthChallengeResult.Success]
-     * when calling [PayPalWebCheckoutClient.start]. This is needed to properly verify that an
-     * authorization completed successfully.
-     */
-    @Deprecated(
-        message = "Auth state is now captured internally by the SDK. Please migrate to finishStart(intent).",
-        replaceWith = ReplaceWith("finishStart(intent)")
-    )
-    fun finishStart(intent: Intent, authState: String): PayPalWebCheckoutFinishStartResult {
-        val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
-        when (result) {
-            is PayPalWebCheckoutFinishStartResult.Success ->
-                analytics.notify(CheckoutEvent.SUCCEEDED, checkoutOrderId, appSwitchEnabled)
-
-            is PayPalWebCheckoutFinishStartResult.Canceled ->
-                analytics.notify(CheckoutEvent.CANCELED, checkoutOrderId, appSwitchEnabled)
-
-            is PayPalWebCheckoutFinishStartResult.Failure ->
-                analytics.notify(CheckoutEvent.FAILED, checkoutOrderId, appSwitchEnabled)
-
-            PayPalWebCheckoutFinishStartResult.NoResult -> {
-                // no analytics tracking required at the moment
-            }
-        }
-        return result
-    }
-
-    /**
-     * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalWebCheckoutClient.start]), call this method to see if a user has
-     * successfully authorized a PayPal account as a payment source.
-     *
-     * @param [intent] An Android intent that holds the deep link put the merchant app
-     * back into the foreground after an auth challenge.
      */
     fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
         sessionStore.authState?.let { authState ->
@@ -337,8 +307,6 @@ class PayPalWebCheckoutClient internal constructor(
             return result
         }
 
-    // region — Internal launch helpers
-
     @VisibleForTesting
     internal suspend fun startWithOrderId(
         activity: Activity,
@@ -352,16 +320,27 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig.returnAppUrl)
 
         val launchUri = withContext(Dispatchers.IO) {
-            getLaunchUri(
-                context = activity.applicationContext,
-                token = orderId,
-                tokenType = TokenType.ORDER_ID,
-                fallbackUri = buildPayPalCheckoutUri(
-                    orderId = orderId,
-                    funding = PayPalWebCheckoutFundingSource.PAYPAL,
-                    returnUrl = returnToAppStrategy.returnUrl
+            // Run updateClientConfig and getLaunchUri in parallel
+            val updateConfigDeferred = async {
+                updateClientConfigAPI.updateClientConfig(
+                    orderId,
+                    PayPalWebCheckoutFundingSource.PAYPAL.value
                 )
-            )
+            }
+            val launchUriDeferred = async {
+                getLaunchUri(
+                    context = activity.applicationContext,
+                    token = orderId,
+                    tokenType = TokenType.ORDER_ID,
+                    fallbackUri = buildPayPalCheckoutUri(
+                        orderId = orderId,
+                        funding = PayPalWebCheckoutFundingSource.PAYPAL,
+                        returnUrl = returnToAppStrategy.returnUrl
+                    )
+                )
+            }
+            updateConfigDeferred.await()
+            launchUriDeferred.await()
         }
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -445,10 +424,6 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    // endregion
-
-    // region — Private URL builders
-
     private fun buildPayPalCheckoutUri(
         orderId: String?,
         funding: PayPalWebCheckoutFundingSource,
@@ -513,6 +488,4 @@ class PayPalWebCheckoutClient internal constructor(
             fallbackUri
         }
     }
-
-    // endregion
 }

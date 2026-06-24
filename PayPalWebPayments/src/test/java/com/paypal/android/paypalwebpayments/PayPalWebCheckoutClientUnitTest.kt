@@ -233,7 +233,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns successResult
 
-        val result = sut.finishStart(intent, "auth state")
+        val result = sut.finishStart(intent)
         assertSame(successResult, result)
     }
 
@@ -245,7 +245,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns failureResult
 
-        val result = sut.finishStart(intent, "auth state")
+        val result = sut.finishStart(intent)
         assertSame(failureResult, result)
     }
 
@@ -256,7 +256,7 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns canceledResult
 
-        val result = sut.finishStart(intent, "auth state")
+        val result = sut.finishStart(intent)
         assertSame(canceledResult, result)
     }
 
@@ -321,7 +321,6 @@ class PayPalWebCheckoutClientUnitTest {
             updateClientConfigAPI = updateClientConfigAPI,
                 deviceInspector = deviceInspector,
                 coreConfig = coreConfig,
-                urlScheme = urlScheme,
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
         )
         val request = PayPalWebCheckoutRequest(PayPalUserIdentity.Unknown, returnToAppUrlConfig)
@@ -448,7 +447,6 @@ class PayPalWebCheckoutClientUnitTest {
             updateClientConfigAPI = updateClientConfigAPI,
                 deviceInspector = deviceInspector,
                 coreConfig = coreConfig,
-                urlScheme = urlScheme,
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility
         )
         val request = PayPalWebCheckoutRequest(PayPalUserIdentity.Unknown, returnToAppUrlConfig)

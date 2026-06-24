@@ -15,7 +15,7 @@ sealed class CreateSetupTokenResponse {
     /**
      * Setup token creation failed.
      *
-     * @property error The exception describing the failure.
+     * @property error Description of the failure.
      */
     data class Failure(val error: Exception) : CreateSetupTokenResponse()
 }

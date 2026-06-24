@@ -3,8 +3,7 @@ package com.paypal.android.paypalwebpayments
 /**
  * Callback interface for creating a PayPal setup token (vault flow).
  *
- * The SDK invokes [createSetupToken] on a background thread. Implementations should perform
- * their own network call to the merchant server and return the resulting setup token ID.
+ * The SDK invokes [createSetupToken] on a background thread.
  */
 fun interface CreateSetupTokenHandler {
 
