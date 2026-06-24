@@ -45,7 +45,7 @@ class PayPalWebCheckoutClient internal constructor(
 ) {
 
     // Disable app switch by switching this flag to true
-    private val appSwitchWhenEligible: Boolean = true
+    private val appSwitchWhenEligible: Boolean = false
 
     // for analytics tracking
     private var checkoutOrderId: String? = null

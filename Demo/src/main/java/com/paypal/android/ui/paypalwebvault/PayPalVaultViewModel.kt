@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -41,6 +42,17 @@ class PayPalVaultViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var createSetupTokenState
+        get() = _uiState.value.createSetupTokenState
+        set(value) {
+            _uiState.update { it.copy(createSetupTokenState = value) }
+        }
+
+    private val createSetupToken: PayPalSetupToken?
+        get() = (createSetupTokenState as? ActionState.Success)?.value
+
+    private var lastCrateSetupToken: SDKSampleServerResult<PayPalSetupToken, Exception>? = null
+
     private var vaultPayPalState
         get() = _uiState.value.vaultPayPalState
         set(value) {
@@ -65,10 +77,8 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(userIdentity = value) }
         }
 
-    // Used for the "Create Payment Token" step
-    private var lastSetupToken: PayPalSetupToken? = null
-
     fun vaultSetupToken(activity: ComponentActivity) {
+        createSetupTokenState = ActionState.Loading
         vaultPayPalState = ActionState.Loading
 
         val vaultRequest = PayPalWebVaultRequest(
@@ -77,13 +87,12 @@ class PayPalVaultViewModel @Inject constructor(
         )
 
         val createSetupTokenHandler = CreateSetupTokenHandler {
-            when (val result = runBlocking {
-                createPayPalSetupTokenUseCase(returnToAppStrategy.toReturnToAppStrategy())
-            }) {
-                is SDKSampleServerResult.Success -> {
-                    lastSetupToken = result.value
-                    CreateSetupTokenResponse.Success(result.value.id ?: "")
-                }
+            val returnToAppStrategy = returnToAppStrategy.toReturnToAppStrategy()
+            val result = runBlocking { createPayPalSetupTokenUseCase(returnToAppStrategy) }
+            lastCrateSetupToken = result
+            when (result) {
+                is SDKSampleServerResult.Success ->
+                    CreateSetupTokenResponse.Success(result.value.id)
 
                 is SDKSampleServerResult.Failure ->
                     CreateSetupTokenResponse.Failure(result.value)
@@ -91,6 +100,7 @@ class PayPalVaultViewModel @Inject constructor(
         }
 
         paypalClient.vault(activity, vaultRequest, createSetupTokenHandler) { result ->
+            createSetupTokenState = lastCrateSetupToken?.mapToActionState() ?: ActionState.Idle
             when (result) {
                 is PayPalPresentAuthChallengeResult.Success -> {
                     // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
@@ -103,7 +113,7 @@ class PayPalVaultViewModel @Inject constructor(
     }
 
     fun createPaymentToken() {
-        val setupToken = lastSetupToken
+        val setupToken = createSetupToken
         if (setupToken == null) {
             createPaymentTokenState =
                 ActionState.Failure(Exception("Vault a setup token to continue."))
