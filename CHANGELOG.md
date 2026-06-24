@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+* CardPayments
+  * Removed deprecated `CardClient.finishApproveOrder(intent, authState)` — use `CardClient.finishApproveOrder(intent)` instead
+  * Removed deprecated `CardClient.finishVault(intent, authState)` — use `CardClient.finishVault(intent)` instead
+  * Removed `authState` from public API of `CardPresentAuthChallengeResult.Success`
+* PayPalWebPayments
+  * Removed deprecated `PayPalWebCheckoutClient(context, configuration, urlScheme)` constructor — use `PayPalWebCheckoutClient(context, configuration)` and set `returnToAppStrategy` on requests instead
+  * Removed deprecated `PayPalWebCheckoutClient.start(activity, request)` — use `PayPalWebCheckoutClient.start(activity, request, callback)` or `startAsync()` instead
+  * Removed deprecated `PayPalWebCheckoutClient.vault(activity, request)` — use `PayPalWebCheckoutClient.vault(activity, request, callback)` or `vaultAsync()` instead
+  * Removed deprecated `PayPalWebCheckoutClient.finishStart(intent, authState)` — use `PayPalWebCheckoutClient.finishStart(intent)` instead
+  * Removed deprecated `PayPalWebCheckoutClient.finishVault(intent, authState)` — use `PayPalWebCheckoutClient.finishVault(intent)` instead
+  * Removed deprecated `approveVaultHref` from `PayPalWebVaultRequest`
+  * Removed `authState` from public API of `PayPalPresentAuthChallengeResult.Success`
+* FraudProtection
+  * Removed deprecated `PayPalDataCollector.collectDeviceData(context, clientMetadataId)` and `collectDeviceData(context, clientMetadataId, additionalData)` overloads — use `collectDeviceData(context, PayPalDataCollectorRequest)` instead
+
 * Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
   used to re-open app after approving order
 * Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be
