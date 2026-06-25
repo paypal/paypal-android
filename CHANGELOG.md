@@ -16,6 +16,7 @@
   * Removed `authState` from public API of `PayPalPresentAuthChallengeResult.Success`
 * FraudProtection
   * Removed deprecated `PayPalDataCollector.collectDeviceData(context, clientMetadataId)` and `collectDeviceData(context, clientMetadataId, additionalData)` overloads — use `collectDeviceData(context, PayPalDataCollectorRequest)` instead
+  * Removed deprecated `PayPalDataCollector.setLogging(Boolean)`
 
 * Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
   used to re-open app after approving order

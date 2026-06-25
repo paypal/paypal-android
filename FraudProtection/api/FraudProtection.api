@@ -8,7 +8,6 @@ public final class com/paypal/android/fraudprotection/BuildConfig {
 public final class com/paypal/android/fraudprotection/PayPalDataCollector {
 	public fun <init> (Lcom/paypal/android/corepayments/CoreConfig;)V
 	public final fun collectDeviceData (Landroid/content/Context;Lcom/paypal/android/fraudprotection/PayPalDataCollectorRequest;)Ljava/lang/String;
-	public final fun setLogging (Z)V
 }
 
 public final class com/paypal/android/fraudprotection/PayPalDataCollectorRequest {
