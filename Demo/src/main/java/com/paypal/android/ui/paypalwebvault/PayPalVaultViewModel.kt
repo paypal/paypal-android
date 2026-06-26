@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
@@ -83,7 +82,7 @@ class PayPalVaultViewModel @Inject constructor(
 
         val vaultRequest = PayPalWebVaultRequest(
             userIdentity = userIdentity,
-            returnToAppUrlConfig = returnToAppStrategy.toReturnToAppUrlConfig()
+            payPalURLConfig = returnToAppStrategy.toReturnToAppUrlConfig()
         )
 
         val createSetupTokenHandler = CreateSetupTokenHandler {

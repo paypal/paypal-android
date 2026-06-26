@@ -44,8 +44,8 @@ class PayPalWebCheckoutClient internal constructor(
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
 
-    // Disable app switch by switching this flag to true
-    private val appSwitchWhenEligible: Boolean = false
+    // Disable app switch by switching this flag to false
+    private val appSwitchWhenEligible: Boolean = true
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -139,10 +139,11 @@ class PayPalWebCheckoutClient internal constructor(
                 is CreateOrderResponse.Success -> {
                     val orderId = createOrderResult.orderId
                     val shopperSessionId = shopperSessionDeferred.await()
-                    val result = startWithOrderId(
+                    val result = launchCheckout(
                         activity = activity,
                         orderId = orderId,
-                        returnToAppUrlConfig = request.returnToAppUrlConfig
+                        shopperSessionId = shopperSessionId,
+                        payPalWebCheckoutRequest = request
                     )
                     withContext(Dispatchers.Main) {
                         callback.onPayPalWebStartResult(result)
@@ -189,10 +190,10 @@ class PayPalWebCheckoutClient internal constructor(
             when (createSetupTokenResult) {
                 is CreateSetupTokenResponse.Success -> {
                     val setupTokenId = createSetupTokenResult.setupTokenId
-                    val result = vaultWithSetupTokenId(
+                    val result = launchVault(
                         activity = activity,
                         setupTokenId = setupTokenId,
-                        returnToAppUrlConfig = request.returnToAppUrlConfig
+                        payPalURLConfig = request.payPalURLConfig
                     )
                     withContext(Dispatchers.Main) {
                         callback.onPayPalWebVaultResult(result)
@@ -315,23 +316,24 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
     @VisibleForTesting
-    internal suspend fun startWithOrderId(
+    internal suspend fun launchCheckout(
         activity: Activity,
         orderId: String,
-        returnToAppUrlConfig: ReturnToAppUrlConfig
+        shopperSessionId: String?,
+        payPalWebCheckoutRequest: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
         checkoutOrderId = orderId
         appSwitchEnabled = false
         analytics.notify(CheckoutEvent.STARTED, orderId, appSwitchEnabled)
 
-        val returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig.returnAppUrl)
+        val returnToAppStrategy = ReturnToAppStrategy.AppLink(payPalWebCheckoutRequest.payPalURLConfig.returnAppUrl)
 
         val launchUri = withContext(Dispatchers.IO) {
             // Run updateClientConfig and getLaunchUri in parallel
             val updateConfigDeferred = async {
                 updateClientConfigAPI.updateClientConfig(
                     orderId,
-                    PayPalWebCheckoutFundingSource.PAYPAL.value
+                    payPalWebCheckoutRequest.fundingSource.value
                 )
             }
             val launchUriDeferred = async {
@@ -381,16 +383,16 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun vaultWithSetupTokenId(
+    internal suspend fun launchVault(
         activity: Activity,
         setupTokenId: String,
-        returnToAppUrlConfig: ReturnToAppUrlConfig
+        payPalURLConfig: PayPalURLConfig
     ): PayPalPresentAuthChallengeResult {
         vaultSetupTokenId = setupTokenId
         appSwitchEnabled = false
         analytics.notify(VaultEvent.STARTED, setupTokenId, appSwitchEnabled)
 
-        val returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig.returnAppUrl)
+        val returnToAppStrategy = ReturnToAppStrategy.AppLink(payPalURLConfig.returnAppUrl)
 
         val launchUri = withContext(Dispatchers.IO) {
             getLaunchUri(

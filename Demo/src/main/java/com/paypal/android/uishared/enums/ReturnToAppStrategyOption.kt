@@ -2,7 +2,7 @@ package com.paypal.android.uishared.enums
 
 import com.paypal.android.DemoConstants
 import com.paypal.android.corepayments.ReturnToAppStrategy
-import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
+import com.paypal.android.paypalwebpayments.PayPalURLConfig
 
 enum class ReturnToAppStrategyOption {
     APP_LINKS,
@@ -13,7 +13,7 @@ enum class ReturnToAppStrategyOption {
         CUSTOM_URL_SCHEME -> ReturnToAppStrategy.CustomUrlScheme(DemoConstants.APP_CUSTOM_URL_SCHEME)
     }
 
-    fun toReturnToAppUrlConfig(): ReturnToAppUrlConfig = ReturnToAppUrlConfig(
+    fun toReturnToAppUrlConfig(): PayPalURLConfig = PayPalURLConfig(
         returnAppUrl = DemoConstants.APP_URL,
         cancelAppUrl = DemoConstants.APP_URL,
         fallbackSchemeUrl = DemoConstants.APP_CUSTOM_URL_SCHEME

@@ -76,7 +76,6 @@ class PayPalCheckoutViewModel @Inject constructor(
 
     private var lastOrderResult: SDKSampleServerResult<Order, Exception>? = null
 
-
     private var payPalWebCheckoutState
         get() = _uiState.value.payPalWebCheckoutState
         set(value) {
@@ -124,7 +123,7 @@ class PayPalCheckoutViewModel @Inject constructor(
 
         val checkoutRequest = PayPalWebCheckoutRequest(
             userIdentity = userIdentity,
-            returnToAppUrlConfig = returnToAppStrategyOption.toReturnToAppUrlConfig()
+            payPalURLConfig = returnToAppStrategyOption.toReturnToAppUrlConfig()
         )
 
         paypalClient.start(activity, checkoutRequest, createOrderHandler) { startResult ->

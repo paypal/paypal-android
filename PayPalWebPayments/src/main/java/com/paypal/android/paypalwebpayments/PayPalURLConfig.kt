@@ -8,7 +8,7 @@ package com.paypal.android.paypalwebpayments
  * @property fallbackSchemeUrl Custom URL scheme deep link used as a fallback if the App Link
  * return fails.
  */
-data class ReturnToAppUrlConfig(
+data class PayPalURLConfig(
     val returnAppUrl: String,
     val cancelAppUrl: String,
     val fallbackSchemeUrl: String

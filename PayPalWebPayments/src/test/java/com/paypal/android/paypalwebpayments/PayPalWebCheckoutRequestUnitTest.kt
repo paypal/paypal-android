@@ -7,28 +7,28 @@ class PayPalWebCheckoutRequestUnitTest {
 
     @Test
     fun `given a ReturnToAppUrlConfig, PayPalWebCheckoutRequest should return the same config`() {
-        val returnToAppUrlConfig = ReturnToAppUrlConfig(
+        val payPalURLConfig = PayPalURLConfig(
             returnAppUrl = "https://example.com/return",
             cancelAppUrl = "https://example.com/cancel",
             fallbackSchemeUrl = "com.example.app"
         )
         val request = PayPalWebCheckoutRequest(
             userIdentity = PayPalUserIdentity.Unknown,
-            returnToAppUrlConfig = returnToAppUrlConfig
+            payPalURLConfig = payPalURLConfig
         )
-        assertEquals(returnToAppUrlConfig, request.returnToAppUrlConfig)
+        assertEquals(payPalURLConfig, request.payPalURLConfig)
     }
 
     @Test
     fun `given no userAction, PayPalWebCheckoutRequest defaults to CONTINUE`() {
-        val returnToAppUrlConfig = ReturnToAppUrlConfig(
+        val payPalURLConfig = PayPalURLConfig(
             returnAppUrl = "https://example.com/return",
             cancelAppUrl = "https://example.com/cancel",
             fallbackSchemeUrl = "com.example.app"
         )
         val request = PayPalWebCheckoutRequest(
             userIdentity = PayPalUserIdentity.Unknown,
-            returnToAppUrlConfig = returnToAppUrlConfig
+            payPalURLConfig = payPalURLConfig
         )
         assertEquals(PayPalUserAction.CONTINUE, request.userAction)
     }
