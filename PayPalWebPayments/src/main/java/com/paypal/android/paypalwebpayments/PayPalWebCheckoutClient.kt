@@ -108,29 +108,19 @@ class PayPalWebCheckoutClient internal constructor(
             val createOrderResult = withContext(Dispatchers.IO) {
                 createOrderHandler.createOrder()
             }
-            when (createOrderResult) {
-                is CreateOrderResponse.Success -> {
-                    val orderId = createOrderResult.orderId
-                    val shopperSessionId = shopperSessionDeferred.await()
-                    val result = launchCheckout(
-                        activity = activity,
-                        orderId = orderId,
-                        shopperSessionId = shopperSessionId,
-                        payPalWebCheckoutRequest = request
-                    )
-                    withContext(Dispatchers.Main) {
-                        callback.onPayPalWebStartResult(result)
-                    }
-                }
-
-                is CreateOrderResponse.Failure -> {
-                    val sdkError = PayPalWebCheckoutError.createOrderFailed(createOrderResult.error)
-                    withContext(Dispatchers.Main) {
-                        callback.onPayPalWebStartResult(
-                            PayPalPresentAuthChallengeResult.Failure(sdkError)
-                        )
-                    }
-                }
+            val result = when (createOrderResult) {
+                is CreateOrderResponse.Success -> launchCheckout(
+                    activity = activity,
+                    orderId = createOrderResult.orderId,
+                    shopperSessionId = shopperSessionDeferred.await(),
+                    payPalWebCheckoutRequest = request
+                )
+                is CreateOrderResponse.Failure -> PayPalPresentAuthChallengeResult.Failure(
+                    PayPalWebCheckoutError.createOrderFailed(createOrderResult.error)
+                )
+            }
+            withContext(Dispatchers.Main) {
+                callback.onPayPalWebStartResult(result)
             }
         }
     }
@@ -157,28 +147,18 @@ class PayPalWebCheckoutClient internal constructor(
             val createSetupTokenResult = withContext(Dispatchers.IO) {
                 createSetupTokenHandler.createSetupToken()
             }
-            when (createSetupTokenResult) {
-                is CreateSetupTokenResponse.Success -> {
-                    val setupTokenId = createSetupTokenResult.setupTokenId
-                    val result = launchVault(
-                        activity = activity,
-                        setupTokenId = setupTokenId,
-                        payPalURLConfig = request.payPalURLConfig
-                    )
-                    withContext(Dispatchers.Main) {
-                        callback.onPayPalWebVaultResult(result)
-                    }
-                }
-
-                is CreateSetupTokenResponse.Failure -> {
-                    val sdkError =
-                        PayPalWebCheckoutError.createSetupTokenFailed(createSetupTokenResult.error)
-                    withContext(Dispatchers.Main) {
-                        callback.onPayPalWebVaultResult(
-                            PayPalPresentAuthChallengeResult.Failure(sdkError)
-                        )
-                    }
-                }
+            val result = when (createSetupTokenResult) {
+                is CreateSetupTokenResponse.Success -> launchVault(
+                    activity = activity,
+                    setupTokenId = createSetupTokenResult.setupTokenId,
+                    payPalURLConfig = request.payPalURLConfig
+                )
+                is CreateSetupTokenResponse.Failure -> PayPalPresentAuthChallengeResult.Failure(
+                    PayPalWebCheckoutError.createSetupTokenFailed(createSetupTokenResult.error)
+                )
+            }
+            withContext(Dispatchers.Main) {
+                callback.onPayPalWebVaultResult(result)
             }
         }
     }
