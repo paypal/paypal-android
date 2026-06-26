@@ -111,7 +111,6 @@ class PayPalCheckoutViewModel @Inject constructor(
                 shouldVaultOnSuccess = false,
                 returnToAppStrategy = returnToAppStrategyOption
             )
-
             val result = runBlocking { createOrderUseCase(orderRequest) }
             lastOrderResult = result
             when (result) {
@@ -127,6 +126,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             userIdentity = userIdentity,
             returnToAppUrlConfig = returnToAppStrategyOption.toReturnToAppUrlConfig()
         )
+
         paypalClient.start(activity, checkoutRequest, createOrderHandler) { startResult ->
             createOrderState = lastOrderResult?.mapToActionState() ?: ActionState.Idle
             when (startResult) {

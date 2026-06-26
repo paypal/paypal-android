@@ -73,8 +73,8 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
-        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
     constructor(
@@ -86,8 +86,8 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
-        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
+        updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
     /**
@@ -107,11 +107,12 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Confirm PayPal payment source for an order.
      *
-     * The SDK invokes [createOrderHandler] on a background thread to retrieve the order ID,
-     * then launches the PayPal checkout web flow.
+     * The SDK immediately kicks off Shopper Session ID (SSID) creation in the background, then
+     * invokes [createOrderHandler] on a background thread to retrieve the order ID. Once both
+     * are available, the PayPal checkout web flow is launched.
      *
-     * Note: the [activity] parameter will be removed once the Shopper Session ID (SSID)
-     * launch path is implemented in a follow-up story.
+     * Note: the [activity] parameter will be removed once the SSID launch path is implemented
+     * in a follow-up story.
      *
      * @param activity The activity to launch the PayPal web checkout from.
      * @param request [PayPalWebCheckoutRequest] containing buyer identity and URL config.
@@ -124,14 +125,20 @@ class PayPalWebCheckoutClient internal constructor(
         createOrderHandler: CreateOrderHandler,
         callback: PayPalWebStartCallback
     ) {
+        // Kick off SSID creation in parallel so it's ready by the time the order ID arrives.
+        // TODO: replace with real SSID fetch when implementing shopper session logic.
+        val shopperSessionDeferred = applicationScope.async(Dispatchers.IO) {
+            null as String?
+        }
+
         applicationScope.launch {
-            // TODO: execute createOrder and Shopper Session creation in parallel
             val createOrderResult = withContext(Dispatchers.IO) {
                 createOrderHandler.createOrder()
             }
             when (createOrderResult) {
                 is CreateOrderResponse.Success -> {
                     val orderId = createOrderResult.orderId
+                    val shopperSessionId = shopperSessionDeferred.await()
                     val result = startWithOrderId(
                         activity = activity,
                         orderId = orderId,

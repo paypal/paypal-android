@@ -12,7 +12,9 @@ package com.paypal.android.paypalwebpayments
  */
 sealed class PayPalUserIdentity {
     /**
-     * Buyer identifier
+     * The identifier value represented by this identity.
+     *
+     * Returns `null` if this identity type has no identifier value.
      */
     abstract val identifier: String?
 
@@ -42,7 +44,7 @@ sealed class PayPalUserIdentity {
      * @property phone The buyer's phone number.
      */
     data class Phone(val phone: String) : PayPalUserIdentity() {
-        override val identifier: String? = null
+        override val identifier: String = phone
     }
 
     /**
