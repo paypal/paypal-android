@@ -84,12 +84,8 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Confirm PayPal payment source for an order.
      *
-     * The SDK immediately kicks off Shopper Session ID (SSID) creation in the background, then
-     * invokes [createOrderHandler] on a background thread to retrieve the order ID. Once both
-     * are available, the PayPal checkout web flow is launched.
-     *
-     * Note: the [activity] parameter will be removed once the SSID launch path is implemented
-     * in a follow-up story.
+     * The SDK invokes [createOrderHandler] on a background thread to retrieve the order ID,
+     * then launches the PayPal checkout web flow.
      *
      * @param activity The activity to launch the PayPal web checkout from.
      * @param request [PayPalWebCheckoutRequest] containing buyer identity and URL config.
@@ -144,9 +140,6 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * The SDK invokes [createSetupTokenHandler] on a background thread to retrieve the setup
      * token ID, then launches the PayPal vault web flow.
-     *
-     * Note: the [activity] parameter will be removed once the Shopper Session ID (SSID)
-     * launch path is implemented in a follow-up story.
      *
      * @param activity The activity to launch the PayPal vault flow from.
      * @param request [PayPalWebVaultRequest] containing buyer identity and URL config.
@@ -479,6 +472,27 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param activity The activity to launch the PayPal web checkout from.
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval.
+     */
+    @Deprecated(
+        message = "Use start(activity, request, createOrderHandler, callback) instead.",
+        replaceWith = ReplaceWith("start(activity, request, createOrderHandler, callback)")
+    )
+    fun start(
+        activity: Activity,
+        request: PayPalWebCheckoutRequest
+    ): PayPalPresentAuthChallengeResult {
+        return PayPalPresentAuthChallengeResult.Failure(
+            PayPalWebCheckoutError.createOrderFailed(
+                Exception("Deprecated. Migrate to start(activity, request, createOrderHandler, callback).")
+            )
+        )
+    }
+
+    /**
+     * Confirm PayPal payment source for an order.
+     *
+     * @param activity The activity to launch the PayPal web checkout from.
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval.
      * @param callback [PayPalWebStartCallback] to receive the result.
      */
     @Deprecated(
@@ -501,6 +515,27 @@ class PayPalWebCheckoutClient internal constructor(
                 )
             }
         }
+    }
+
+    /**
+     * Vault PayPal as a payment method.
+     *
+     * @param activity The activity to launch the PayPal vault flow from.
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method.
+     */
+    @Deprecated(
+        message = "Use vault(activity, request, createSetupTokenHandler, callback) instead.",
+        replaceWith = ReplaceWith("vault(activity, request, createSetupTokenHandler, callback)")
+    )
+    fun vault(
+        activity: Activity,
+        request: PayPalWebVaultRequest
+    ): PayPalPresentAuthChallengeResult {
+        return PayPalPresentAuthChallengeResult.Failure(
+            PayPalWebCheckoutError.createSetupTokenFailed(
+                Exception("Deprecated. Migrate to vault(activity, request, createSetupTokenHandler, callback).")
+            )
+        )
     }
 
     /**
