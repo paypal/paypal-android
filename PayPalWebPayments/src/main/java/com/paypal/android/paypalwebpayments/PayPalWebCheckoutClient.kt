@@ -207,7 +207,6 @@ class PayPalWebCheckoutClient internal constructor(
         createOrderHandler: CreateOrderHandler,
         payPalWebCheckoutRequest: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
-        // Why are we on applicationScope.async but withContext on the other call.
         val shopperSessionDeferred = applicationScope.async(ioDispatcher) {
             null as String?
         }

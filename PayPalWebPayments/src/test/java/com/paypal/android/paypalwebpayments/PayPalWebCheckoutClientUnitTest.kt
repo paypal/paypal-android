@@ -228,7 +228,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Suppress("DEPRECATION")
     @Test
-    fun `finishStart() with merchant provided auth state forwards success result from auth launcher`() {
+    fun `deprecated finishStart() with merchant provided auth state forwards success result from auth launcher`() {
         val successResult =
             PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
         every {
@@ -241,7 +241,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Suppress("DEPRECATION")
     @Test
-    fun `finishStart() with merchant provided auth state forwards error result from auth launcher`() {
+    fun `deprecated finishStart() with merchant provided auth state forwards error result from auth launcher`() {
         val error = PayPalSDKError(123, "fake-error-description")
         val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
         every {
@@ -254,7 +254,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Suppress("DEPRECATION")
     @Test
-    fun `finishStart() with merchant provided auth state forwards cancellation result from auth launcher`() {
+    fun `deprecated finishStart() with merchant provided auth state forwards cancellation result from auth launcher`() {
         val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
         every {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
@@ -262,6 +262,76 @@ class PayPalWebCheckoutClientUnitTest {
 
         val result = sut.finishStart(intent, "auth state")
         assertSame(canceledResult, result)
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `deprecated start(activity, request) returns failure`() {
+        val request = PayPalWebCheckoutRequest(PayPalUserIdentity.Unknown, payPalURLConfig)
+
+        val result = sut.start(activity, request)
+
+        assertTrue(result is PayPalPresentAuthChallengeResult.Failure)
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `deprecated start(activity, request, callback) delivers failure to callback`() = runTest(testDispatcher) {
+        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+        val request = PayPalWebCheckoutRequest(PayPalUserIdentity.Unknown, payPalURLConfig)
+
+        val sutWithTestScope = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = payPalWebLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            applicationScope = CoroutineScope(testDispatcher)
+        )
+
+        sutWithTestScope.start(activity, request, callback)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            callback.onPayPalWebStartResult(match { it is PayPalPresentAuthChallengeResult.Failure })
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `deprecated vault(activity, request) returns failure`() {
+        val request = PayPalWebVaultRequest(PayPalUserIdentity.Unknown, payPalURLConfig)
+
+        val result = sut.vault(activity, request)
+
+        assertTrue(result is PayPalPresentAuthChallengeResult.Failure)
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `deprecated vault(activity, request, callback) delivers failure to callback`() = runTest(testDispatcher) {
+        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+        val request = PayPalWebVaultRequest(PayPalUserIdentity.Unknown, payPalURLConfig)
+
+        val sutWithTestScope = PayPalWebCheckoutClient(
+            analytics = analytics,
+            payPalWebLauncher = payPalWebLauncher,
+            sessionStore = PayPalWebCheckoutSessionStore(),
+            updateClientConfigAPI = updateClientConfigAPI,
+            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
+            deviceInspector = deviceInspector,
+            coreConfig = coreConfig,
+            applicationScope = CoroutineScope(testDispatcher)
+        )
+
+        sutWithTestScope.vault(activity, request, callback)
+        advanceUntilIdle()
+
+        verify(exactly = 1) {
+            callback.onPayPalWebVaultResult(match { it is PayPalPresentAuthChallengeResult.Failure })
+        }
     }
 
     @Test
@@ -539,8 +609,9 @@ class PayPalWebCheckoutClientUnitTest {
         assertNull(sut.finishStart(intent))
     }
 
+    @Suppress("DEPRECATION")
     @Test
-    fun `finishVault() with merchant provided auth forwards vault success from PayPal web launcher`() {
+    fun `deprecated finishVault() with merchant provided auth state forwards success result from auth launcher`() {
         val successResult =
             PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
         every {
@@ -552,8 +623,9 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame("fake-approval-session-id", result.approvalSessionId)
     }
 
+    @Suppress("DEPRECATION")
     @Test
-    fun `finishVault() with merchant provided auth notifies merchant of vault failure`() {
+    fun `deprecated finishVault() with merchant provided auth state forwards error result from auth launcher`() {
         val error = PayPalSDKError(123, "fake-error-description")
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
@@ -564,8 +636,9 @@ class PayPalWebCheckoutClientUnitTest {
         assertSame(error, result.error)
     }
 
+    @Suppress("DEPRECATION")
     @Test
-    fun `finishVault with merchant provided auth forwards vault cancellation`() {
+    fun `deprecated finishVault() with merchant provided auth state forwards cancellation result from auth launcher`() {
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
@@ -574,8 +647,9 @@ class PayPalWebCheckoutClientUnitTest {
         assertTrue(result is PayPalWebCheckoutFinishVaultResult.Canceled)
     }
 
+    @Suppress("DEPRECATION")
     @Test
-    fun `finishVault with merchant provided auth forwards no result`() {
+    fun `deprecated finishVault() with merchant provided auth state forwards no result from auth launcher`() {
         every {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.NoResult
