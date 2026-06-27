@@ -2,12 +2,23 @@
 
 ## Unreleased
 
-* Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
-  used to re-open app after approving order
-* Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be
-  used to re-open app after vaulting
-* Deprecates `urlScheme` property in `PayPalWebCheckoutClient` instead use `fallbackUrlScheme` in
-  `PayPalWebCheckoutRequest` and `PayPalWebVaultRequest`
+* PayPalWebPayments
+  * **Breaking:** Redesign `PayPalWebCheckoutClient.start()` signature to accept a `CreateOrderHandler`
+    and `PayPalWebStartCallback` — the SDK now invokes `createOrder()` on a background thread
+  * **Breaking:** Redesign `PayPalWebCheckoutClient.vault()` signature to accept a `CreateSetupTokenHandler`
+    and `PayPalWebVaultCallback` — the SDK now invokes `createSetupToken()` on a background thread
+  * **Breaking:** Redesign `PayPalWebCheckoutRequest` — replace `orderId` and `returnToAppStrategy`
+    with `userIdentity: PayPalUserIdentity` and `payPalURLConfig: PayPalURLConfig`
+  * **Breaking:** Redesign `PayPalWebVaultRequest` — replace `setupTokenId` and `returnToAppStrategy`
+    with `userIdentity: PayPalUserIdentity` and `payPalURLConfig: PayPalURLConfig`
+  * Add `CreateOrderHandler` — `fun interface` invoked by the SDK to create a PayPal order
+  * Add `CreateOrderResponse` — sealed result type returned by `CreateOrderHandler` (`Success`, `Failure`)
+  * Add `CreateSetupTokenHandler` — `fun interface` invoked by the SDK to create a setup token
+  * Add `CreateSetupTokenResponse` — sealed result type returned by `CreateSetupTokenHandler` (`Success`, `Failure`)
+  * Add `PayPalUserIdentity` — represents buyer identity passed to the SDK (e.g. `ServerSideShopperSession`, `Unknown`)
+  * Add `PayPalURLConfig` — consolidates return-to-app URL configuration for checkout and vault flows
+  * Add `PayPalUserAction` — controls the call-to-action label shown on the PayPal checkout/vault page
+  * Enable app-switch eligibility (`appSwitchWhenEligible = true`) in `PayPalWebCheckoutClient`
 
 ## 2.3.0 (2025-11-03)
 * PayPalWebPayments
