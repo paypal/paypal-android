@@ -20,6 +20,7 @@ import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,12 +43,13 @@ class PayPalWebCheckoutClient internal constructor(
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
 
     // Disable app switch by switching this flag to false
     private val appSwitchWhenEligible: Boolean = true
 
-    // for analytics tracking
+    // For analytics tracking
     private var checkoutOrderId: String? = null
     private var vaultSetupTokenId: String? = null
     private var appSwitchEnabled: Boolean = false
@@ -98,27 +100,8 @@ class PayPalWebCheckoutClient internal constructor(
         createOrderHandler: CreateOrderHandler,
         callback: PayPalWebStartCallback
     ) {
-        // Kick off SSID creation in parallel so it's ready by the time the order ID arrives.
-        // TODO: replace with real SSID fetch when implementing shopper session logic.
-        val shopperSessionDeferred = applicationScope.async(Dispatchers.IO) {
-            null as String?
-        }
-
         applicationScope.launch {
-            val createOrderResult = withContext(Dispatchers.IO) {
-                createOrderHandler.createOrder()
-            }
-            val result = when (createOrderResult) {
-                is CreateOrderResponse.Success -> launchCheckout(
-                    activity = activity,
-                    orderId = createOrderResult.orderId,
-                    shopperSessionId = shopperSessionDeferred.await(),
-                    payPalWebCheckoutRequest = request
-                )
-                is CreateOrderResponse.Failure -> PayPalPresentAuthChallengeResult.Failure(
-                    PayPalWebCheckoutError.createOrderFailed(createOrderResult.error)
-                )
-            }
+            val result = startAsync(activity, createOrderHandler, request)
             withContext(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(result)
             }
@@ -143,20 +126,7 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebVaultCallback
     ) {
         applicationScope.launch {
-            // TODO: execute createSetupToken and Shopper Session creation in parallel
-            val createSetupTokenResult = withContext(Dispatchers.IO) {
-                createSetupTokenHandler.createSetupToken()
-            }
-            val result = when (createSetupTokenResult) {
-                is CreateSetupTokenResponse.Success -> launchVault(
-                    activity = activity,
-                    setupTokenId = createSetupTokenResult.setupTokenId,
-                    payPalURLConfig = request.payPalURLConfig
-                )
-                is CreateSetupTokenResponse.Failure -> PayPalPresentAuthChallengeResult.Failure(
-                    PayPalWebCheckoutError.createSetupTokenFailed(createSetupTokenResult.error)
-                )
-            }
+            val result = vaultAsync(activity, createSetupTokenHandler, request.payPalURLConfig)
             withContext(Dispatchers.Main) {
                 callback.onPayPalWebVaultResult(result)
             }
@@ -232,19 +202,45 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
     @VisibleForTesting
-    internal suspend fun launchCheckout(
+    internal suspend fun startAsync(
+        activity: Activity,
+        createOrderHandler: CreateOrderHandler,
+        payPalWebCheckoutRequest: PayPalWebCheckoutRequest
+    ): PayPalPresentAuthChallengeResult {
+        // Why are we on applicationScope.async but withContext on the other call.
+        val shopperSessionDeferred = applicationScope.async(ioDispatcher) {
+            null as String?
+        }
+        val createOrderResult = withContext(ioDispatcher) {
+            createOrderHandler.createOrder()
+        }
+
+        return when (createOrderResult) {
+            is CreateOrderResponse.Success -> {
+                val orderId = createOrderResult.orderId
+                val shopperSessionId = shopperSessionDeferred.await()
+                launchCheckout(activity, orderId, shopperSessionId, payPalWebCheckoutRequest)
+            }
+            is CreateOrderResponse.Failure -> PayPalPresentAuthChallengeResult.Failure(
+                PayPalWebCheckoutError.createOrderFailed(createOrderResult.error)
+            )
+        }
+    }
+
+    private suspend fun launchCheckout(
         activity: Activity,
         orderId: String,
         shopperSessionId: String?,
         payPalWebCheckoutRequest: PayPalWebCheckoutRequest
     ): PayPalPresentAuthChallengeResult {
+        // TODO: Use the shopperSessionId
         checkoutOrderId = orderId
         appSwitchEnabled = false
         analytics.notify(CheckoutEvent.STARTED, orderId, appSwitchEnabled)
 
         val returnToAppStrategy = ReturnToAppStrategy.AppLink(payPalWebCheckoutRequest.payPalURLConfig.returnAppUrl)
 
-        val launchUri = withContext(Dispatchers.IO) {
+        val launchUri = withContext(ioDispatcher) {
             // Run updateClientConfig and getLaunchUri in parallel
             val updateConfigDeferred = async {
                 updateClientConfigAPI.updateClientConfig(
@@ -299,18 +295,45 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun launchVault(
+    internal suspend fun vaultAsync(
         activity: Activity,
-        setupTokenId: String,
+        createSetupTokenHandler: CreateSetupTokenHandler,
         payPalURLConfig: PayPalURLConfig
     ): PayPalPresentAuthChallengeResult {
+        // TODO: execute createSetupToken and Shopper Session creation in parallel
+        val shopperSessionDeferred = applicationScope.async(ioDispatcher) {
+            null as String?
+        }
+
+        val createSetupTokenResult = withContext(ioDispatcher) {
+            createSetupTokenHandler.createSetupToken()
+        }
+        return when (createSetupTokenResult) {
+            is CreateSetupTokenResponse.Success -> {
+                val setupTokenId = createSetupTokenResult.setupTokenId
+                val shopperSessionId = shopperSessionDeferred.await()
+                launchVault(activity, setupTokenId, shopperSessionId, payPalURLConfig)
+            }
+            is CreateSetupTokenResponse.Failure -> PayPalPresentAuthChallengeResult.Failure(
+                PayPalWebCheckoutError.createSetupTokenFailed(createSetupTokenResult.error)
+            )
+        }
+    }
+
+    private suspend fun launchVault(
+        activity: Activity,
+        setupTokenId: String,
+        shopperSessionId: String?,
+        payPalURLConfig: PayPalURLConfig
+    ): PayPalPresentAuthChallengeResult {
+        // TODO: Use the shopperSessionId
         vaultSetupTokenId = setupTokenId
         appSwitchEnabled = false
         analytics.notify(VaultEvent.STARTED, setupTokenId, appSwitchEnabled)
 
         val returnToAppStrategy = ReturnToAppStrategy.AppLink(payPalURLConfig.returnAppUrl)
 
-        val launchUri = withContext(Dispatchers.IO) {
+        val launchUri = withContext(ioDispatcher) {
             getLaunchUri(
                 context = activity.applicationContext,
                 token = setupTokenId,
