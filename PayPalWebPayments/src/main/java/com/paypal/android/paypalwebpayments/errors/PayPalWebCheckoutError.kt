@@ -27,4 +27,10 @@ internal object PayPalWebCheckoutError {
         code = PayPalWebCheckoutErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
         errorDescription = "ReturnToAppStrategy or urlScheme is required. "
     )
+
+    // 4. startPayPalSession() was not called before start() or vault()
+    val sessionNotStartedError = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.SESSION_NOT_STARTED.ordinal,
+        errorDescription = "startPayPalSession() must be called before start() or vault()."
+    )
 }

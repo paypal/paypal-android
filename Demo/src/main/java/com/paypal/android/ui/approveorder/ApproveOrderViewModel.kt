@@ -21,12 +21,11 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
-import com.paypal.android.utils.ReturnUrlFactory
+import com.paypal.android.utils.ReturnUrlProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +53,7 @@ class ApproveOrderViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault, returnToAppStrategyOption)
+                OrderRequest(intentOption, shouldVault)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -83,11 +82,7 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            val returnUrl =
-                ReturnUrlFactory.createGenericReturnUrl(
-                    returnToAppStrategyOption.toReturnToAppStrategy(),
-                    "return-path"
-                )
+            val returnUrl = ReturnUrlProvider.returnToAppUrlConfig.returnAppUrl
             CardRequest(orderId, card, returnUrl, scaOption)
         }
         cardClient.approveOrder(cardRequest) { result ->
@@ -193,12 +188,6 @@ class ApproveOrderViewModel @Inject constructor(
         get() = _uiState.value.shouldVaultOption
         set(value) {
             _uiState.update { it.copy(shouldVaultOption = value) }
-        }
-
-    var returnToAppStrategy: ReturnToAppStrategyOption
-        get() = _uiState.value.returnToAppStrategyOption
-        set(value) {
-            _uiState.update { it.copy(returnToAppStrategyOption = value) }
         }
 
     fun prefillCard(testCard: TestCard) {

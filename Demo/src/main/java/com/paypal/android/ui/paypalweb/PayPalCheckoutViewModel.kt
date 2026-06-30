@@ -14,14 +14,16 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
+import com.paypal.android.paypalwebpayments.PayPalUserAction
+import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutRequest
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
+import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
+import com.paypal.android.utils.ReturnUrlProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,12 +57,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(intentOption = value) }
         }
 
-    var returnToAppStrategyOption: ReturnToAppStrategyOption
-        get() = _uiState.value.returnToAppStrategyOption
-        set(value) {
-            _uiState.update { it.copy(returnToAppStrategyOption = value) }
-        }
-
     private var createOrderState
         get() = _uiState.value.createOrderState
         set(value) {
@@ -88,16 +84,41 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(fundingSource = value) }
         }
 
+    var userIdentity: PayPalUserIdentity
+        get() = _uiState.value.userIdentity
+        set(value) {
+            _uiState.update { it.copy(userIdentity = value) }
+        }
+
+    var userAction: PayPalUserAction
+        get() = _uiState.value.userAction
+        set(value) {
+            _uiState.update { it.copy(userAction = value) }
+        }
+
+    private var startPayPalSessionState
+        get() = _uiState.value.startPayPalSessionState
+        set(value) {
+            _uiState.update { it.copy(startPayPalSessionState = value) }
+        }
+
+    fun startPayPalSession() {
+        paypalClient.startPayPalSession(
+            userIdentity = _uiState.value.userIdentity,
+            urlConfig = ReturnUrlProvider.returnToAppUrlConfig,
+            userAction = _uiState.value.userAction
+        )
+        // startPayPalSession() is fire-and-forget; record that it was triggered
+        startPayPalSessionState = ActionState.Success(Unit)
+    }
+
     fun createOrder() {
         viewModelScope.launch {
             createOrderState = ActionState.Loading
-            val orderRequest = _uiState.value.run {
-                OrderRequest(
-                    intent = intentOption,
-                    shouldVaultOnSuccess = false,
-                    returnToAppStrategy = returnToAppStrategyOption
-                )
-            }
+            val orderRequest = OrderRequest(
+                intent = _uiState.value.intentOption,
+                shouldVaultOnSuccess = false
+            )
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
@@ -114,13 +135,7 @@ class PayPalCheckoutViewModel @Inject constructor(
     private fun startCheckoutWithOrderId(activity: ComponentActivity, orderId: String) {
         payPalWebCheckoutState = ActionState.Loading
 
-        val checkoutRequest = PayPalWebCheckoutRequest(
-            orderId,
-            fundingSource,
-            returnToAppStrategyOption.toReturnToAppStrategy()
-        )
-
-        paypalClient.start(activity, checkoutRequest) { startResult ->
+        paypalClient.start(activity, orderId) { startResult ->
             when (startResult) {
                 is PayPalPresentAuthChallengeResult.Success -> {
                     // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab

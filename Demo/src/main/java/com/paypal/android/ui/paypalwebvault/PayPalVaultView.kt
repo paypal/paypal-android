@@ -3,6 +3,7 @@ package com.paypal.android.ui.paypalwebvault
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
+import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
@@ -58,32 +60,63 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_CreateSetupToken(uiState, viewModel)
+        Step1_StartPayPalSession(uiState, viewModel)
+        Step2_CreateSetupToken(uiState, viewModel)
         if (uiState.isCreateSetupTokenSuccessful) {
-            Step2_VaultPayPal(uiState, viewModel)
+            Step3_VaultPayPal(uiState, viewModel)
         }
         if (uiState.isVaultPayPalSuccessful) {
-            Step3_CreatePaymentToken(uiState, viewModel)
+            Step4_CreatePaymentToken(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateSetupToken(
+private fun Step1_StartPayPalSession(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create Setup Token")
-        EnumOptionList(
-            title = stringResource(id = R.string.return_to_app_strategy_title),
-            stringArrayResId = R.array.deep_link_strategy_options,
-            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
-            selectedOption = uiState.returnToAppStrategy
+        StepHeader(stepNumber = 1, title = "Start PayPal Session")
+        PayPalUserIdentityForm(
+            userIdentity = uiState.userIdentity,
+            onUserIdentityChange = { value -> viewModel.userIdentity = value },
+            modifier = Modifier.fillMaxWidth()
         )
+        EnumOptionList(
+            title = stringResource(R.string.user_action_title),
+            stringArrayResId = R.array.user_action_options,
+            onSelectedOptionChange = { value -> viewModel.userAction = value },
+            selectedOption = uiState.userAction,
+            modifier = Modifier.fillMaxWidth()
+        )
+        ActionButtonColumn(
+            defaultTitle = "START PAYPAL SESSION",
+            successTitle = "SESSION STARTED",
+            state = uiState.startPayPalSessionState,
+            onClick = { viewModel.startPayPalSession() },
+            modifier = Modifier.fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> { /* fire-and-forget; no result to display */ }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step2_CreateSetupToken(
+    uiState: PayPalVaultUiState,
+    viewModel: PayPalVaultViewModel
+) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 2, title = "Create Setup Token")
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",
             successTitle = "SETUP TOKEN CREATED",
@@ -99,7 +132,7 @@ private fun Step1_CreateSetupToken(
 }
 
 @Composable
-private fun Step2_VaultPayPal(
+private fun Step3_VaultPayPal(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
@@ -107,7 +140,7 @@ private fun Step2_VaultPayPal(
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 2, title = "Vault PayPal")
+        StepHeader(stepNumber = 3, title = "Vault PayPal")
         ActionButtonColumn(
             defaultTitle = "VAULT PAYPAL",
             successTitle = "PAYPAL VAULTED",
@@ -127,14 +160,14 @@ private fun Step2_VaultPayPal(
 }
 
 @Composable
-private fun Step3_CreatePaymentToken(
+private fun Step4_CreatePaymentToken(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Create Payment Token")
+        StepHeader(stepNumber = 4, title = "Create Payment Token")
         ActionButtonColumn(
             defaultTitle = "CREATE PAYMENT TOKEN",
             successTitle = "PAYMENT TOKEN CREATED",

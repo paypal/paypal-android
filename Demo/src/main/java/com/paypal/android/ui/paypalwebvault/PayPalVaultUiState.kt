@@ -2,15 +2,18 @@ package com.paypal.android.ui.paypalwebvault
 
 import com.paypal.android.api.model.PayPalPaymentToken
 import com.paypal.android.api.model.PayPalSetupToken
+import com.paypal.android.paypalwebpayments.PayPalUserAction
+import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 
 data class PayPalVaultUiState(
     val createSetupTokenState: ActionState<PayPalSetupToken, Exception> = ActionState.Idle,
+    val userIdentity: PayPalUserIdentity = PayPalUserIdentity.None,
+    val userAction: PayPalUserAction = PayPalUserAction.SETUP_NOW,
+    val startPayPalSessionState: ActionState<Unit, Exception> = ActionState.Idle,
     val vaultPayPalState: ActionState<PayPalWebCheckoutFinishVaultResult.Success, Exception> = ActionState.Idle,
     val createPaymentTokenState: ActionState<PayPalPaymentToken, Exception> = ActionState.Idle,
-    val returnToAppStrategy: ReturnToAppStrategyOption = ReturnToAppStrategyOption.APP_LINKS
 ) {
     val isCreateSetupTokenSuccessful: Boolean
         get() = createSetupTokenState is ActionState.Success
