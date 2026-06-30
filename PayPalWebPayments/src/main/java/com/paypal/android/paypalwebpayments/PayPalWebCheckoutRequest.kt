@@ -3,7 +3,7 @@ package com.paypal.android.paypalwebpayments
 import com.paypal.android.corepayments.ReturnToAppStrategy
 
 /**
- * Request to initiate a PayPal checkout.
+ * Creates an instance of a PayPalRequest.
  *
  * @deprecated Use [PayPalWebCheckoutClient.startPayPalSession] followed by
  * [PayPalWebCheckoutClient.start] with only the order ID instead.

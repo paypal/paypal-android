@@ -452,7 +452,6 @@ class PayPalWebCheckoutClient internal constructor(
         )
     }
 
-
     // Used by deprecated start() methods
     @VisibleForTesting
     internal suspend fun startAsync(

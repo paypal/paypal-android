@@ -19,6 +19,12 @@ constructor(
     @Deprecated("The approveVaultHref property is no longer required and will be ignored.")
     val approveVaultHref: String? = null // NEXT_MAJOR_VERSION: - Remove this property
 ) {
+
+    /**
+     * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
+     *
+     * @property [setupTokenId] ID for the setup token associated with the vault approval
+     */
     constructor(
         setupTokenId: String,
         returnToAppStrategy: ReturnToAppStrategy? = null
