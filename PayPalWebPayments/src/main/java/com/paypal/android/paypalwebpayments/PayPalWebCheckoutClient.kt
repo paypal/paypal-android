@@ -21,6 +21,7 @@ import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val urlScheme: String? = null,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
     // Enable app switch by switching this flag to true
@@ -333,7 +335,7 @@ class PayPalWebCheckoutClient internal constructor(
                 PayPalWebCheckoutError.noReturnToAppStrategyError
             )
 
-        val launchUri = withContext(Dispatchers.IO) {
+        val launchUri = withContext(ioDispatcher) {
             getLaunchUri(
                 context = activity.applicationContext,
                 token = orderId,
@@ -391,7 +393,7 @@ class PayPalWebCheckoutClient internal constructor(
                 PayPalWebCheckoutError.noReturnToAppStrategyError
             )
 
-        val launchUri = withContext(Dispatchers.IO) {
+        val launchUri = withContext(ioDispatcher) {
             getLaunchUri(
                 context = activity.applicationContext,
                 token = setupTokenId,
@@ -464,7 +466,7 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
-        val launchUri = withContext(Dispatchers.IO) {
+        val launchUri = withContext(ioDispatcher) {
             // perform updateCCO and getLaunchUri in parallel
             val updateConfigDeferred = async {
                 updateClientConfigAPI.updateClientConfig(
@@ -533,7 +535,7 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
-        val launchUri = withContext(Dispatchers.IO) {
+        val launchUri = withContext(ioDispatcher) {
             getLaunchUri(
                 context = activity.applicationContext,
                 token = request.setupTokenId,
