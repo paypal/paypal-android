@@ -78,30 +78,33 @@ class VenmoClient(
             }
 
             // FROM: VenmoAppSwitch
-            val localVenmoBaseUrl = "https://account.venmo.com/go/web/paypal"
-//            val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
+            // Sample Sandbox URL: https://account.ext.live.venmo.com/go/web/paypal?token=4YJ65706E9342972A&return_flow=AUTO&env=sandbox
+//            val localVenmoBaseUrl = "https://account.ext.live.venmo.com/go/web/paypal"
+            val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
+//            val localVenmoBaseUrl = "https://account.venmo.com/go/web/paypal"
 //            val localVenmoBaseUrl = "https://venmo.com/smart/checkout/venmo"
 //            val localVenmoBaseUrl = "https://www.paypal.com/smart/checkout/venmo"
             val sandboxVenmoBaseUrl = "https://www.sandbox.paypal.com/smart/checkout/venmo"
             val appSwitchUri = localVenmoBaseUrl.toUri()
                 .buildUpon()
-                .appendQueryParameter("buttonSessionID", UUID.randomUUID().toString())
-                .appendQueryParameter("buyerCountry", "US")
+//                .appendQueryParameter("buttonSessionID", UUID.randomUUID().toString())
+//                .appendQueryParameter("buyerCountry", "US")
 //                .appendQueryParameter("channel", "in-app")
-                .appendQueryParameter("channel", "in-app")
+//                .appendQueryParameter("channel", "in-app")
 //                .appendQueryParameter("channel", "mobile-web")
-                .appendQueryParameter("commit", "true")
-                .appendQueryParameter("domain", "sdk.paypal.com")
-                .appendQueryParameter("enableFunding", "venmo")
+//                .appendQueryParameter("commit", "true")
+//                .appendQueryParameter("domain", "sdk.paypal.com")
+//                .appendQueryParameter("enableFunding", "venmo")
+//                .appendQueryParameter("env", "qa")
                 .appendQueryParameter("env", "qa")
-                .appendQueryParameter("facilitatorAccessToken", "")
-                .appendQueryParameter("fundingSource", "venmo")
-                .appendQueryParameter("return_flow", "auto")
+//                .appendQueryParameter("facilitatorAccessToken", "")
+//                .appendQueryParameter("fundingSource", "venmo")
+                .appendQueryParameter("return_flow", "AUTO")
 //                .appendQueryParameter("orderID", orderId)
                 .appendQueryParameter("token", orderId)
-                .appendQueryParameter("pageUrl", returnUrl)
-                .appendQueryParameter("sessionUID", UUID.randomUUID().toString())
-                .appendQueryParameter("sdkMeta", "")
+//                .appendQueryParameter("pageUrl", returnUrl)
+//                .appendQueryParameter("sessionUID", UUID.randomUUID().toString())
+//                .appendQueryParameter("sdkMeta", "")
 //                .appendQueryParameter("clientID", coreConfig.clientId)
 //                .appendQueryParameter("merchantId", "V9YP27HFNG2LW")
                 .build()

@@ -1,5 +1,6 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
 import com.paypal.android.api.model.serialization.Card
@@ -9,6 +10,7 @@ import com.paypal.android.api.model.serialization.OrderPaymentSource
 import com.paypal.android.api.model.serialization.OrderRequestBody
 import com.paypal.android.api.model.serialization.PayPalOrderExperienceContext
 import com.paypal.android.api.model.serialization.PayPalPaymentSource
+import com.paypal.android.api.model.serialization.Payee
 import com.paypal.android.api.model.serialization.PurchaseUnit
 import com.paypal.android.api.model.serialization.Vault
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -56,7 +58,8 @@ class CreateOrderUseCase @Inject constructor(
             )
 
             val purchaseUnit = PurchaseUnit(
-                amount = amount
+                amount = amount,
+                payee = Payee(merchantId = DemoConstants.MERCHANT_ID)
             )
 
             val orderRequestBody = OrderRequestBody(

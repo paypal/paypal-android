@@ -30,13 +30,19 @@ data class VenmoAppSwitchContext(
 
 @Serializable
 data class PurchaseUnit(
-    val amount: Amount
+    val amount: Amount,
+    val payee: Payee? = null
 )
 
 @Serializable
 data class Amount(
     val currencyCode: String,
     val value: String
+)
+
+@Serializable
+data class Payee(
+    val merchantId: String
 )
 
 @Serializable
