@@ -149,12 +149,12 @@ class PayPalWebCheckoutClient internal constructor(
         checkoutOrderId = orderId
         applicationScope.launch {
             try {
-                val sessionId = deferred.await()
+                val shopperSession = deferred.await()
                 shopperSessionDeferred = null
                 analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
                 val result = launchCheckoutWithShopperSession(
                     activity = activity,
-                    shopperSession = sessionId,
+                    shopperSession = shopperSession,
                     orderId = orderId,
                 )
                 withContext(Dispatchers.Main) {
