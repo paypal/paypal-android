@@ -38,7 +38,11 @@ import kotlinx.coroutines.withContext
 /**
  * Use this client to approve an order with a [PayPalWebCheckoutRequest].
  */
-@Suppress("TooManyFunctions") // Necessary due to multiple method variations for backward compatibility
+@Suppress(
+    "TooManyFunctions", // Necessary due to multiple method variations for backward compatibility
+    "LargeClass", // Necessary due to v3 + v2 + v1 method variants
+    "TooGenericExceptionCaught", // Coroutine error handling requires catching broad exception types
+)
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
     private val payPalWebLauncher: PayPalWebLauncher,
@@ -381,6 +385,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param shopperSession The shopper session returned by [createShopperSessionWithAppSwitchEligibility].
      * @param setupTokenId The setup token ID to approve.
      */
+    @Suppress("UnusedPrivateMember") // TODO: shopperSession will be used once GraphQL call is implemented
     private suspend fun launchVaultWithSession(
         activity: Activity,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
@@ -432,6 +437,7 @@ class PayPalWebCheckoutClient internal constructor(
      * TODO: DTPPMOBILE-530 — implement the actual GraphQL call.
      */
     @VisibleForTesting
+    @Suppress("UnusedPrivateMember") // TODO: params will be used once GraphQL call is implemented
     internal suspend fun createShopperSessionWithAppSwitchEligibility(
         urlConfig: ReturnToAppUrlConfig,
         userIdentity: PayPalUserIdentity,

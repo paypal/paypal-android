@@ -42,6 +42,7 @@ private fun PayPalUserIdentity.toIdentityOption(): IdentityOption = when (this) 
     is PayPalUserIdentity.ServerSideShopperSession -> SERVER_SIDE_SHOPPER_SESSION
 }
 
+@Suppress("LongMethod")
 @Composable
 fun PayPalUserIdentityForm(
     userIdentity: PayPalUserIdentity,
