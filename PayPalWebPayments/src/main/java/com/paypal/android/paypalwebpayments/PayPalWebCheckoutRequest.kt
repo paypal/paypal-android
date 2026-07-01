@@ -5,11 +5,11 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
 /**
  * Creates an instance of a PayPalRequest.
  *
- * @deprecated Use [PayPalWebCheckoutClient.startPayPalSession] followed by
+ * @deprecated Use [PayPalWebCheckoutClient.createPayPalSession] followed by
  * [PayPalWebCheckoutClient.start] with only the order ID instead.
  */
 @Deprecated(
-    message = "Use startPayPalSession() followed by start(activity, orderId, callback) instead.",
+    message = "Use createPayPalSession() followed by start(activity, orderId, callback) instead.",
     level = DeprecationLevel.WARNING
 )
 data class PayPalWebCheckoutRequest @JvmOverloads constructor(

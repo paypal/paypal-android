@@ -60,7 +60,7 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_StartPayPalSession(uiState, viewModel)
+        Step1_CreatePayPalSession(uiState, viewModel)
         Step2_CreateSetupToken(uiState, viewModel)
         if (uiState.isCreateSetupTokenSuccessful) {
             Step3_VaultPayPal(uiState, viewModel)
@@ -73,14 +73,14 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun Step1_StartPayPalSession(
+private fun Step1_CreatePayPalSession(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Start PayPal Session")
+        StepHeader(stepNumber = 1, title = "Create PayPal Session")
         PayPalUserIdentityForm(
             userIdentity = uiState.userIdentity,
             onUserIdentityChange = { value -> viewModel.userIdentity = value },
@@ -94,10 +94,10 @@ private fun Step1_StartPayPalSession(
             modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
-            defaultTitle = "START PAYPAL SESSION",
-            successTitle = "SESSION START INITIATED ",
-            state = uiState.startPayPalSessionState,
-            onClick = { viewModel.startPayPalSession() },
+            defaultTitle = "CREATE PAYPAL SESSION",
+            successTitle = "SESSION CREATION INITIATED",
+            state = uiState.createPayPalSessionState,
+            onClick = { viewModel.createPayPalSession() },
             modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {

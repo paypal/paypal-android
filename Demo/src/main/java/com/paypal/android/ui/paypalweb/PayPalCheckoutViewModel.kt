@@ -95,19 +95,19 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(userAction = value) }
         }
 
-    private var startPayPalSessionState
-        get() = _uiState.value.startPayPalSessionState
+    private var createPayPalSessionState
+        get() = _uiState.value.createPayPalSessionState
         set(value) {
-            _uiState.update { it.copy(startPayPalSessionState = value) }
+            _uiState.update { it.copy(createPayPalSessionState = value) }
         }
 
-    fun startPayPalSession() {
-        paypalClient.startPayPalSession(
+    fun createPayPalSession() {
+        paypalClient.createPayPalSession(
             userIdentity = _uiState.value.userIdentity,
             urlConfig = ReturnUrlProvider.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )
-        startPayPalSessionState = ActionState.Success(Unit)
+        createPayPalSessionState = ActionState.Success(Unit)
     }
 
     fun createOrder() {

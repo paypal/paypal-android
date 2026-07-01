@@ -63,7 +63,7 @@ class PayPalWebCheckoutClient internal constructor(
     private var vaultSetupTokenId: String? = null
     private var appSwitchEnabled: Boolean = false
 
-    // Shopper Session ID (v3) — set by startPayPalSession(), awaited by start() / vault()
+    // Shopper Session ID (v3) — set by createPayPalSession(), awaited by start() / vault()
     private var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
 
@@ -111,7 +111,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
      * @param userAction Controls the call-to-action label on the PayPal checkout page.
      */
-    fun startPayPalSession(
+    fun createPayPalSession(
         userIdentity: PayPalUserIdentity,
         urlConfig: ReturnToAppUrlConfig,
         userAction: PayPalUserAction = PayPalUserAction.CONTINUE,
@@ -123,10 +123,10 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Initiates PayPal checkout using the Shopper Session ID pre-warmed by [startPayPalSession].
+     * Initiates PayPal checkout using the Shopper Session ID pre-warmed by [createPayPalSession].
      *
      * If the session fetch is still in progress this method awaits its completion before
-     * launching checkout. If [startPayPalSession] was never called the callback receives a
+     * launching checkout. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure] with error code `SESSION_NOT_STARTED`.
      *
      * @param activity The activity to launch the PayPal checkout from.
@@ -180,10 +180,10 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Initiates PayPal vault using the Shopper Session ID pre-warmed by [startPayPalSession].
+     * Initiates PayPal vault using the Shopper Session ID pre-warmed by [createPayPalSession].
      *
      * If the session fetch is still in progress this method awaits its completion before
-     * launching the vault flow. If [startPayPalSession] was never called the callback receives a
+     * launching the vault flow. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure] with error code `SESSION_NOT_STARTED`.
      *
      * @param activity The activity to launch the PayPal vault flow from.
@@ -434,7 +434,7 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Creates a shopper session by calling the PayPal GraphQL `createShopperSession` mutation.
      *
-     * Returns the session ID string on success. This is called internally by [startPayPalSession]
+     * Returns the session ID string on success. This is called internally by [createPayPalSession]
      * and runs on a background coroutine.
      *
      * TODO: DTPPMOBILE-530 — implement the actual GraphQL call.
@@ -749,10 +749,10 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Confirm PayPal payment source for an order with callback.
      *
-     * @deprecated Use [startPayPalSession] followed by [start] with only the order ID instead.
+     * @deprecated Use [createPayPalSession] followed by [start] with only the order ID instead.
      */
     @Deprecated(
-        message = "Use startPayPalSession() followed by start(activity, orderId, callback) instead.",
+        message = "Use createPayPalSession() followed by start(activity, orderId, callback) instead.",
         replaceWith = ReplaceWith("start(activity, request.orderId, callback)")
     )
     fun start(
@@ -824,10 +824,10 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Vault PayPal as a payment method with callback.
      *
-     * @deprecated Use [startPayPalSession] followed by [vault] with only the setup token ID instead.
+     * @deprecated Use [createPayPalSession] followed by [vault] with only the setup token ID instead.
      */
     @Deprecated(
-        message = "Use startPayPalSession() followed by vault(activity, setupTokenId, callback) instead.",
+        message = "Use createPayPalSession() followed by vault(activity, setupTokenId, callback) instead.",
         replaceWith = ReplaceWith("vault(activity, request.setupTokenId, callback)")
     )
     fun vault(

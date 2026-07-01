@@ -3,7 +3,7 @@ package com.paypal.android.paypalwebpayments
 /**
  * Represents the identity of the shopper initiating a PayPal session.
  *
- * Pass one of the subclasses to [PayPalWebCheckoutClient.startPayPalSession] to pre-warm
+ * Pass one of the subclasses to [PayPalWebCheckoutClient.createPayPalSession] to pre-warm
  * the shopper session with the appropriate identity signal.
  */
 sealed class PayPalUserIdentity {

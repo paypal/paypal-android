@@ -65,7 +65,7 @@ fun PayPalCheckoutView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_StartPayPalSession(uiState, viewModel)
+        Step1_CreatePayPalSession(uiState, viewModel)
         Step2_CreateOrder(uiState, viewModel)
         if (uiState.isCreateOrderSuccessful) {
             Step3_StartPayPalCheckout(uiState, viewModel)
@@ -78,11 +78,11 @@ fun PayPalCheckoutView(
 }
 
 @Composable
-private fun Step1_StartPayPalSession(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+private fun Step1_CreatePayPalSession(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Start PayPal Session")
+        StepHeader(stepNumber = 1, title = "Create PayPal Session")
         PayPalUserIdentityForm(
             userIdentity = uiState.userIdentity,
             onUserIdentityChange = { value -> viewModel.userIdentity = value },
@@ -96,10 +96,10 @@ private fun Step1_StartPayPalSession(uiState: PayPalUiState, viewModel: PayPalCh
             modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
-            defaultTitle = "START PAYPAL SESSION",
-            successTitle = "SESSION START INITIATED ",
-            state = uiState.startPayPalSessionState,
-            onClick = { viewModel.startPayPalSession() },
+            defaultTitle = "CREATE PAYPAL SESSION",
+            successTitle = "SESSION CREATION INITIATED",
+            state = uiState.createPayPalSessionState,
+            onClick = { viewModel.createPayPalSession() },
             modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {

@@ -11,7 +11,7 @@ data class PayPalVaultUiState(
     val createSetupTokenState: ActionState<PayPalSetupToken, Exception> = ActionState.Idle,
     val userIdentity: PayPalUserIdentity = PayPalUserIdentity.None,
     val userAction: PayPalUserAction = PayPalUserAction.SETUP_NOW,
-    val startPayPalSessionState: ActionState<Unit, Exception> = ActionState.Idle,
+    val createPayPalSessionState: ActionState<Unit, Exception> = ActionState.Idle,
     val vaultPayPalState: ActionState<PayPalWebCheckoutFinishVaultResult.Success, Exception> = ActionState.Idle,
     val createPaymentTokenState: ActionState<PayPalPaymentToken, Exception> = ActionState.Idle,
 ) {
