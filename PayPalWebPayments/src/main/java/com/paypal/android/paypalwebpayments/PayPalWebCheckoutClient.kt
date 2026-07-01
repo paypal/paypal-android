@@ -41,7 +41,6 @@ import kotlinx.coroutines.withContext
 @Suppress(
     "TooManyFunctions", // Necessary due to multiple method variations for backward compatibility
     "LargeClass", // Necessary due to v3 + v2 + v1 method variants
-    "TooGenericExceptionCaught", // Coroutine error handling requires catching broad exception types
 )
 class PayPalWebCheckoutClient internal constructor(
     private val analytics: PayPalWebAnalytics,
@@ -134,6 +133,8 @@ class PayPalWebCheckoutClient internal constructor(
      * @param orderId The ID of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
+    // TODO: Narrow exception type once createShopperSessionWithAppSwitchEligibility is implemented
+    @Suppress("TooGenericExceptionCaught")
     fun start(
         activity: Activity,
         orderId: String,
@@ -189,6 +190,8 @@ class PayPalWebCheckoutClient internal constructor(
      * @param setupTokenId The setup token ID associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
+    // TODO: Narrow exception type once createShopperSessionWithAppSwitchEligibility is implemented
+    @Suppress("TooGenericExceptionCaught")
     fun vault(
         activity: ComponentActivity,
         setupTokenId: String,
