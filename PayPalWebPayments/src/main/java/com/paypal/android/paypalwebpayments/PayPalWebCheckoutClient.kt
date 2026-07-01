@@ -64,7 +64,6 @@ class PayPalWebCheckoutClient internal constructor(
     private var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
 
-
     constructor(
         context: Context,
         configuration: CoreConfig
