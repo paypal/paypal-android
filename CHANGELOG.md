@@ -3,14 +3,11 @@
 ## Unreleased
 
 * PayPalWebPayments
-  * Add `PayPalWebCheckoutClient.createPayPalSession(userIdentity, urlConfig, userAction)` method to pre-warm a Shopper Session ID (SSID) before initiating checkout or vault
-  * Add `PayPalWebCheckoutClient.start(activity, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
-  * Add `PayPalWebCheckoutClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
-  * Add `ReturnToAppUrlConfig` type for specifying return, cancel, and fallback URLs in v3 flows
-  * Add `PayPalUserIdentity` sealed class for providing shopper identity to `createPayPalSession()`
-  * Add `PayPalUserAction` enum (`CONTINUE`, `PAY_NOW`, `SETUP_NOW`) for controlling the checkout call-to-action
-  * Deprecate `PayPalWebCheckoutClient.start(activity, request, callback)` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
-  * Deprecate `PayPalWebCheckoutClient.vault(activity, request, callback)` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
+  * Add `PayPalWebCheckoutClient.createPayPalSession(userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`
+  * Add `PayPalWebCheckoutClient.start(context, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
+  * Add `PayPalWebCheckoutClient.vault(context, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
+  * Deprecate `PayPalWebCheckoutClient.start(activity, request, callback)` — use `createPayPalSession()` followed by `start(context, orderId, callback)` instead
+  * Deprecate `PayPalWebCheckoutClient.vault(activity, request, callback)` — use `createPayPalSession()` followed by `vault(context, setupTokenId, callback)` instead
 
 * Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
   used to re-open app after approving order

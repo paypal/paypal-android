@@ -8,7 +8,7 @@ data class CreateShopperSessionWithAppSwitchEligibilityResponse(
     val appSwitchEligible: Boolean,
     val redirectUrl: String,
     val checkoutFallbackUrl: String,
-    val inEligibleReason: String, // TODO: Replace With AppSwitchInEligibleReason,
+    val inEligibleReason: String?, // TODO: Replace With AppSwitchInEligibleReason,
     val matchedAuthenticationMethods: List<String>,
     val shopperSessionConfig: ShopperSessionConfig
 )

@@ -145,7 +145,7 @@ class PayPalWebCheckoutClient internal constructor(
             applicationScope.launch(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(
                     PayPalPresentAuthChallengeResult.Failure(
-                        PayPalWebCheckoutError.sessionNotStartedError
+                        PayPalWebCheckoutError.sessionNotCreatedError
                     )
                 )
             }
@@ -202,7 +202,7 @@ class PayPalWebCheckoutClient internal constructor(
             applicationScope.launch(Dispatchers.Main) {
                 callback.onPayPalWebVaultResult(
                     PayPalPresentAuthChallengeResult.Failure(
-                        PayPalWebCheckoutError.sessionNotStartedError
+                        PayPalWebCheckoutError.sessionNotCreatedError
                     )
                 )
             }

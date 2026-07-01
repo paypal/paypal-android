@@ -1766,7 +1766,7 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 callback.onPayPalWebStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalWebCheckoutError.sessionNotStartedError.code
+                        it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1839,7 +1839,7 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 callback2.onPayPalWebStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalWebCheckoutError.sessionNotStartedError.code
+                        it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1857,7 +1857,7 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 callback.onPayPalWebVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalWebCheckoutError.sessionNotStartedError.code
+                        it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1929,7 +1929,7 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 callback2.onPayPalWebVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalWebCheckoutError.sessionNotStartedError.code
+                        it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
                 })
             }
         }
