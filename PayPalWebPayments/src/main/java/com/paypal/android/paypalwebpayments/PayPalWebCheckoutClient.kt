@@ -533,9 +533,9 @@ class PayPalWebCheckoutClient internal constructor(
 
     private val baseUrl: String
         get() = when (coreConfig.environment) {
-            Environment.LIVE -> "https://paypal.com/"
-            Environment.SANDBOX -> "https://sandbox.paypal.com/"
-    }
+            Environment.LIVE -> "https://www.paypal.com/"
+            else -> "https://www.sandbox.paypal.com/"
+        }
 
     private suspend fun getLaunchUri(
         context: Context,

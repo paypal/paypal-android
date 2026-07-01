@@ -3,6 +3,7 @@ package com.paypal.android.corepayments.graphql
 import androidx.annotation.RestrictTo
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /**
  * @suppress
@@ -12,5 +13,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GraphQLError(
     val message: String,
-    val extensions: List<GraphQLExtension>? = null
+    // extensions can be an object OR an array depending on the server — JsonElement accepts both
+    val extensions: JsonElement? = null
 )

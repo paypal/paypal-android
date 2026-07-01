@@ -6,5 +6,5 @@ import lib.android.paypal.com.magnessdk.Environment
 internal val CoreConfig.magnesEnvironment: Environment
     get() = when (environment) {
         com.paypal.android.corepayments.Environment.LIVE -> Environment.LIVE
-        com.paypal.android.corepayments.Environment.SANDBOX -> Environment.SANDBOX
+        else -> Environment.SANDBOX
     }
