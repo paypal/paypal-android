@@ -97,7 +97,7 @@ private fun Step1_StartPayPalSession(uiState: PayPalUiState, viewModel: PayPalCh
         )
         ActionButtonColumn(
             defaultTitle = "START PAYPAL SESSION",
-            successTitle = "SESSION STARTED",
+            successTitle = "SESSION START INITIATED ",
             state = uiState.startPayPalSessionState,
             onClick = { viewModel.startPayPalSession() },
             modifier = Modifier.fillMaxWidth()
