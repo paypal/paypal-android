@@ -1720,9 +1720,8 @@ class PayPalWebCheckoutClientUnitTest {
 
     // Helper to build a spy-backed sut with urlScheme so launchCheckoutWithSession /
     // launchVaultWithSession can resolve a ReturnToAppStrategy via the fallback path.
-    // Inject test-controlled applicationScope and ioDispatcher so all coroutines (including
-    // those inside withContext(ioDispatcher)) run on the test scheduler and are advanced by
-    // testDispatcher.scheduler.advanceUntilIdle() — no Thread.sleep() needed.
+    // Inject test-controlled applicationScope so coroutines launched by v3 methods
+    // run on the test scheduler and are drained by testDispatcher.scheduler.advanceUntilIdle().
     private fun makeSutWithUrlScheme(): PayPalWebCheckoutClient = spyk(
         PayPalWebCheckoutClient(
             analytics = analytics,
@@ -1734,7 +1733,6 @@ class PayPalWebCheckoutClientUnitTest {
             coreConfig = coreConfig,
             urlScheme = urlScheme,
             applicationScope = CoroutineScope(SupervisorJob() + testDispatcher),
-            ioDispatcher = testDispatcher,
         )
     )
 

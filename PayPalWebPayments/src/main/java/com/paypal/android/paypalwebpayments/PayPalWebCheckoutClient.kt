@@ -23,7 +23,6 @@ import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +51,6 @@ class PayPalWebCheckoutClient internal constructor(
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val urlScheme: String? = null,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
     // Enable app switch by switching this flag to true
@@ -331,23 +329,21 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
-        val launchUri = withContext(ioDispatcher) {
-            getLaunchUri(
-                context = activity.applicationContext,
-                token = orderId,
-                tokenType = TokenType.ORDER_ID,
-                fallbackUri = buildPayPalCheckoutUri(
-                    orderId = orderId,
-                    funding = PayPalWebCheckoutFundingSource.PAYPAL,
-                    returnUrl = returnToAppUrlConfig?.returnAppUrl,
-                ).buildUpon()
-                    .appendQueryParameter(
-                        "shopper_session_id",
-                        shopperSession.shopperSessionConfig.id
-                    )
-                    .build()
-            )
-        }
+        val launchUri = getLaunchUri(
+            context = activity.applicationContext,
+            token = orderId,
+            tokenType = TokenType.ORDER_ID,
+            fallbackUri = buildPayPalCheckoutUri(
+                orderId = orderId,
+                funding = PayPalWebCheckoutFundingSource.PAYPAL,
+                returnUrl = returnToAppUrlConfig?.returnAppUrl,
+            ).buildUpon()
+                .appendQueryParameter(
+                    "shopper_session_id",
+                    shopperSession.shopperSessionConfig.id
+                )
+                .build()
+        )
 
         // TODO: Remove ReturnToAppStrategy all together.
         val result = payPalWebLauncher.launchWithUrl(
@@ -394,14 +390,12 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
-        val launchUri = withContext(ioDispatcher) {
-            getLaunchUri(
-                context = activity.applicationContext,
-                token = setupTokenId,
-                tokenType = TokenType.VAULT_ID,
-                fallbackUri = buildPayPalVaultUri(setupTokenId)
-            )
-        }
+        val launchUri = getLaunchUri(
+            context = activity.applicationContext,
+            token = setupTokenId,
+            tokenType = TokenType.VAULT_ID,
+            fallbackUri = buildPayPalVaultUri(setupTokenId)
+        )
 
         val result = payPalWebLauncher.launchWithUrl(
             activity = activity,
@@ -470,7 +464,7 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
-        val launchUri = withContext(ioDispatcher) {
+        val launchUri = withContext(Dispatchers.IO) {
             // perform updateCCO and getLaunchUri in parallel
             val updateConfigDeferred = async {
                 updateClientConfigAPI.updateClientConfig(
@@ -539,7 +533,7 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = resolveReturnToAppStrategy(request.returnToAppStrategy)
             ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
 
-        val launchUri = withContext(ioDispatcher) {
+        val launchUri = withContext(Dispatchers.IO) {
             getLaunchUri(
                 context = activity.applicationContext,
                 token = request.setupTokenId,
