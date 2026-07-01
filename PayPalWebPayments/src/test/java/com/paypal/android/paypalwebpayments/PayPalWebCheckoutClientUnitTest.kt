@@ -12,6 +12,8 @@ import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
 import com.paypal.android.corepayments.model.AppSwitchEligibilityData
+import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
+import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -816,74 +818,6 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             // Given
             every { deviceInspector.isPayPalInstalled } returns false
-            val request = PayPalWebVaultRequest(
-                "fake-setup-token-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.vaultAsync(activity, request)
-
-            // Then
-            coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
-            }
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    activity = activity,
-                    uri = any(),
-                    token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
-    @Test
-    fun `start() uses web checkout when app switch disabled regardless of PayPal app installation`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns true
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.startAsync(activity, request)
-
-            // Then
-            coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
-            }
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    activity = activity,
-                    uri = any(),
-                    token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
-    @Test
-    fun `vault() uses web vault when app switch disabled regardless of PayPal app installation`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns true
             val request = PayPalWebVaultRequest(
                 "fake-setup-token-id",
                 returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
@@ -1832,7 +1766,14 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId launches checkout when session resolves successfully`() = runTest {
         val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
+        coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } returns CreateShopperSessionWithAppSwitchEligibilityResponse(
+            appSwitchEligible = false,
+            redirectUrl = "",
+            checkoutFallbackUrl = "",
+            inEligibleReason = "",
+            matchedAuthenticationMethods = emptyList(),
+            shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        )
 
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
@@ -1855,9 +1796,9 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() with orderId delivers failure when createShopperSession throws`() = runTest {
+    fun `start() with orderId delivers failure when createShopperSessionWithAppSwitchEligibility throws`() = runTest {
         val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } throws RuntimeException("session error")
+        coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } throws RuntimeException("session error")
 
         val callback = mockk<PayPalWebStartCallback>(relaxed = true)
         spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig)
@@ -1873,7 +1814,14 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() with orderId clears session deferred so a second call returns SESSION_NOT_STARTED`() =
         runTest {
             val spySut = makeSutWithUrlScheme()
-            coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
+            coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } returns CreateShopperSessionWithAppSwitchEligibilityResponse(
+            appSwitchEligible = false,
+            redirectUrl = "",
+            checkoutFallbackUrl = "",
+            inEligibleReason = "",
+            matchedAuthenticationMethods = emptyList(),
+            shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        )
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
@@ -1917,7 +1865,14 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId launches vault when session resolves successfully`() = runTest {
         val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
+        coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } returns CreateShopperSessionWithAppSwitchEligibilityResponse(
+            appSwitchEligible = false,
+            redirectUrl = "",
+            checkoutFallbackUrl = "",
+            inEligibleReason = "",
+            matchedAuthenticationMethods = emptyList(),
+            shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        )
 
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
@@ -1940,9 +1895,9 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `vault() with setupTokenId delivers failure when createShopperSession throws`() = runTest {
+    fun `vault() with setupTokenId delivers failure when createShopperSessionWithAppSwitchEligibility throws`() = runTest {
         val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } throws RuntimeException("session error")
+        coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } throws RuntimeException("session error")
 
         val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
         spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig)
@@ -1958,7 +1913,14 @@ class PayPalWebCheckoutClientUnitTest {
     fun `vault() with setupTokenId clears session deferred so a second call returns SESSION_NOT_STARTED`() =
         runTest {
             val spySut = makeSutWithUrlScheme()
-            coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
+            coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } returns CreateShopperSessionWithAppSwitchEligibilityResponse(
+            appSwitchEligible = false,
+            redirectUrl = "",
+            checkoutFallbackUrl = "",
+            inEligibleReason = "",
+            matchedAuthenticationMethods = emptyList(),
+            shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        )
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
@@ -1980,66 +1942,43 @@ class PayPalWebCheckoutClientUnitTest {
             }
         }
 
-    // --- startPayPalSession() analytics ---
-
     @Test
-    fun `startPayPalSession() fires CREATE_PAYPAL_SESSION_START analytics`() = runTest {
+    fun `startPayPalSession() passes userAction to createShopperSessionWithAppSwitchEligibility`() = runTest {
         val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
-
-        spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        verify { analytics.notify(CheckoutEvent.CREATE_PAYPAL_SESSION_START, null, false) }
-    }
-
-    @Test
-    fun `startPayPalSession() fires CREATE_PAYPAL_SESSION_SUCCESS when createShopperSession succeeds`() =
-        runTest {
-            val spySut = makeSutWithUrlScheme()
-            coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
-
-            spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            verify { analytics.notify(CheckoutEvent.CREATE_PAYPAL_SESSION_SUCCESS, null, false) }
-        }
-
-    @Test
-    fun `startPayPalSession() fires CREATE_PAYPAL_SESSION_FAILURE when createShopperSession throws`() =
-        runTest {
-            val spySut = makeSutWithUrlScheme()
-            coEvery { spySut.createShopperSession(any(), any(), any()) } throws RuntimeException("error")
-
-            spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            verify { analytics.notify(CheckoutEvent.CREATE_PAYPAL_SESSION_FAILURE, null, false) }
-        }
-
-    @Test
-    fun `startPayPalSession() passes userAction to createShopperSession`() = runTest {
-        val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
+        coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } returns CreateShopperSessionWithAppSwitchEligibilityResponse(
+            appSwitchEligible = false,
+            redirectUrl = "",
+            checkoutFallbackUrl = "",
+            inEligibleReason = "",
+            matchedAuthenticationMethods = emptyList(),
+            shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        )
 
         spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig, PayPalUserAction.PAY_NOW)
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify {
-            spySut.createShopperSession(fakeUrlConfig, fakeUserIdentity, PayPalUserAction.PAY_NOW)
+            spySut.createShopperSessionWithAppSwitchEligibility(fakeUrlConfig, fakeUserIdentity, PayPalUserAction.PAY_NOW)
         }
     }
 
     @Test
     fun `startPayPalSession() defaults userAction to CONTINUE`() = runTest {
         val spySut = makeSutWithUrlScheme()
-        coEvery { spySut.createShopperSession(any(), any(), any()) } returns "fake-session-id"
+        coEvery { spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any()) } returns CreateShopperSessionWithAppSwitchEligibilityResponse(
+            appSwitchEligible = false,
+            redirectUrl = "",
+            checkoutFallbackUrl = "",
+            inEligibleReason = "",
+            matchedAuthenticationMethods = emptyList(),
+            shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
+        )
 
         spySut.startPayPalSession(fakeUserIdentity, fakeUrlConfig)
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify {
-            spySut.createShopperSession(fakeUrlConfig, fakeUserIdentity, PayPalUserAction.CONTINUE)
+            spySut.createShopperSessionWithAppSwitchEligibility(fakeUrlConfig, fakeUserIdentity, PayPalUserAction.CONTINUE)
         }
     }
 

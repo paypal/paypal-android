@@ -116,15 +116,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         returnToAppUrlConfig = urlConfig
         shopperSessionDeferred = applicationScope.async {
-            analytics.notify(CheckoutEvent.CREATE_PAYPAL_SESSION_START, null, false)
-            try {
-                val sessionId = createShopperSessionWithAppSwitchEligibility(urlConfig, userIdentity, userAction)
-                analytics.notify(CheckoutEvent.CREATE_PAYPAL_SESSION_SUCCESS, null, false)
-                sessionId
-            } catch (e: Exception) {
-                analytics.notify(CheckoutEvent.CREATE_PAYPAL_SESSION_FAILURE, null, false)
-                throw e
-            }
+            createShopperSessionWithAppSwitchEligibility(urlConfig, userIdentity, userAction)
         }
     }
 

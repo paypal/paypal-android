@@ -107,7 +107,6 @@ class PayPalCheckoutViewModel @Inject constructor(
             urlConfig = ReturnUrlProvider.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )
-        // startPayPalSession() is fire-and-forget; record that it was triggered
         startPayPalSessionState = ActionState.Success(Unit)
     }
 
