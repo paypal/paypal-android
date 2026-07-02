@@ -102,9 +102,6 @@ class PayPalWebCheckoutClient internal constructor(
      * Fire and forget — returns immediately. The GraphQL `createShopperSession` call runs
      * asynchronously and the result is stored internally as a [Deferred].
      *
-     * Analytics events fired: `create-paypal-session:start`, `create-paypal-session:success`,
-     * or `create-paypal-session:failure`.
-     *
      * @param userIdentity Shopper identity used to pre-identify the payer.
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
      * @param userAction Controls the call-to-action label on the PayPal checkout page.
