@@ -3,6 +3,7 @@ package com.paypal.android.corepayments.graphql
 import androidx.annotation.RestrictTo
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
+
 /**
  * @suppress
  */
