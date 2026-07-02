@@ -34,7 +34,7 @@ class PayPalDataCollectorUnitTest {
     }
 
     @Test
-    fun `when environment is SANDBOX, magnes settings environment is SANDBOX`() {
+    fun `when environment is SANDBOX, magnes settings environment is STAGE`() {
         val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
         val mockUUIDHelper = mockk<UUIDHelper>(relaxed = true)
