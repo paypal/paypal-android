@@ -49,7 +49,7 @@ class PayPalWebCheckoutClient internal constructor(
 ) {
 
     // Enable app switch by switching this flag to true
-    private val appSwitchWhenEligible: Boolean = false
+    private val appSwitchWhenEligible: Boolean = true
 
     // for analytics tracking
     private var checkoutOrderId: String? = null
@@ -532,10 +532,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     private val baseUrl: String
-        get() = when (coreConfig.environment) {
-            Environment.LIVE -> "https://www.paypal.com/"
-            else -> "https://www.sandbox.paypal.com/"
-        }
+        get() = coreConfig.environment.graphQLEndpoint.trimEnd('/') + "/"
 
     private suspend fun getLaunchUri(
         context: Context,

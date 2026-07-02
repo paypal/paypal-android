@@ -37,6 +37,7 @@ fun SettingsView(
         config = config,
         onSdkRestUrlChange = viewModel::updateSdkRestUrl,
         onSdkGraphQLUrlChange = viewModel::updateSdkGraphQLUrl,
+        onClientIdChange = viewModel::updateClientId,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
@@ -47,6 +48,7 @@ private fun SettingsContent(
     config: CustomEnvironmentConfig,
     onSdkRestUrlChange: (String) -> Unit,
     onSdkGraphQLUrlChange: (String) -> Unit,
+    onClientIdChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -81,7 +83,14 @@ private fun SettingsContent(
             label = "SDK GraphQL Base URL",
             placeholder = "Enter SDK GraphQL base URL",
             value = config.sdkGraphQLUrl,
-            onValueChange = onSdkGraphQLUrlChange,
+            onValueChange = onSdkGraphQLUrlChange
+        )
+
+        UrlField(
+            label = "Client ID",
+            placeholder = "Enter PayPal client ID (optional)",
+            value = config.clientId,
+            onValueChange = onClientIdChange,
             imeAction = ImeAction.Done
         )
 
@@ -157,9 +166,11 @@ private fun SettingsViewPreview() {
                 config = CustomEnvironmentConfig(
                     sdkRestUrl = "sdk-rest-url-entered-at-runtime",
                     sdkGraphQLUrl = "sdk-graphql-url-entered-at-runtime",
+                    clientId = "client-id-entered-at-runtime",
                 ),
                 onSdkRestUrlChange = {},
                 onSdkGraphQLUrlChange = {},
+                onClientIdChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

@@ -23,6 +23,10 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(sdkGraphQLUrl = value) }
     }
 
+    fun updateClientId(value: String) {
+        _uiState.update { it.copy(clientId = value) }
+    }
+
     /** Persists the current UI state to SharedPreferences. */
     fun saveConfig() {
         customEnvironmentRepository.saveConfig(_uiState.value)
