@@ -20,9 +20,11 @@ import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
+import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -102,8 +104,9 @@ class PayPalWebCheckoutClient internal constructor(
      * Fire and forget — returns immediately. The GraphQL `createShopperSession` call runs
      * asynchronously and the result is stored internally as a [Deferred].
      *
-     * Analytics events fired: `create-paypal-session:start`, `create-paypal-session:success`,
-     * or `create-paypal-session:failure`.
+     * Analytics events fired: [CreatePayPalSessionEvent.STARTED] synchronously when this method
+     * is called, then [CreatePayPalSessionEvent.SUCCEEDED] or [CreatePayPalSessionEvent.FAILED]
+     * once the GraphQL call resolves.
      *
      * @param userIdentity Shopper identity used to pre-identify the payer.
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
@@ -115,17 +118,33 @@ class PayPalWebCheckoutClient internal constructor(
         userAction: PayPalUserAction = PayPalUserAction.CONTINUE,
     ) {
         returnToAppUrlConfig = urlConfig
+        analytics.notify(CreatePayPalSessionEvent.STARTED)
         shopperSessionDeferred = applicationScope.async {
-            createShopperSessionWithAppSwitchEligibility(urlConfig, userIdentity, userAction)
+            try {
+                val response = createShopperSessionWithAppSwitchEligibility(
+                    urlConfig,
+                    userIdentity,
+                    userAction
+                )
+                analytics.notify(CreatePayPalSessionEvent.SUCCEEDED)
+                response
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                analytics.notify(CreatePayPalSessionEvent.FAILED)
+                throw e
+            }
         }
     }
 
     /**
      * Initiates PayPal checkout using the Shopper Session ID pre-warmed by [createPayPalSession].
      *
-     * If the session fetch is still in progress this method awaits its completion before
-     * launching checkout. If [createPayPalSession] was never called the callback receives a
-     * [PayPalPresentAuthChallengeResult.Failure] with error code `SESSION_NOT_STARTED`.
+     * [CheckoutEvent.STARTED] fires synchronously as soon as this method is called. If the
+     * session fetch is still in progress this method awaits its completion before launching
+     * checkout. If [createPayPalSession] was never called, [CheckoutEvent.SESSION_NOT_STARTED]
+     * fires and the callback receives a [PayPalPresentAuthChallengeResult.Failure] with error
+     * code `SESSION_NOT_CREATED`.
      *
      * @param activity The activity to launch the PayPal checkout from.
      * @param orderId The ID of the order to be approved.
@@ -138,8 +157,12 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String,
         callback: PayPalWebStartCallback,
     ) {
+        checkoutOrderId = orderId
+        analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
+
         val deferred = shopperSessionDeferred
         if (deferred == null) {
+            analytics.notify(CheckoutEvent.SESSION_NOT_STARTED, checkoutOrderId, appSwitchEnabled)
             applicationScope.launch(Dispatchers.Main) {
                 callback.onPayPalWebStartResult(
                     PayPalPresentAuthChallengeResult.Failure(
@@ -149,12 +172,10 @@ class PayPalWebCheckoutClient internal constructor(
             }
             return
         }
-        checkoutOrderId = orderId
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
                 val result = launchCheckoutWithShopperSession(
                     activity = activity,
                     shopperSession = shopperSession,
@@ -180,9 +201,11 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Initiates PayPal vault using the Shopper Session ID pre-warmed by [createPayPalSession].
      *
-     * If the session fetch is still in progress this method awaits its completion before
-     * launching the vault flow. If [createPayPalSession] was never called the callback receives a
-     * [PayPalPresentAuthChallengeResult.Failure] with error code `SESSION_NOT_STARTED`.
+     * [VaultEvent.STARTED] fires synchronously as soon as this method is called. If the session
+     * fetch is still in progress this method awaits its completion before launching the vault
+     * flow. If [createPayPalSession] was never called, [VaultEvent.SESSION_NOT_STARTED] fires and
+     * the callback receives a [PayPalPresentAuthChallengeResult.Failure] with error code
+     * `SESSION_NOT_CREATED`.
      *
      * @param activity The activity to launch the PayPal vault flow from.
      * @param setupTokenId The setup token ID associated with the vault approval.
@@ -195,8 +218,12 @@ class PayPalWebCheckoutClient internal constructor(
         setupTokenId: String,
         callback: PayPalWebVaultCallback,
     ) {
+        vaultSetupTokenId = setupTokenId
+        analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
+
         val deferred = shopperSessionDeferred
         if (deferred == null) {
+            analytics.notify(VaultEvent.SESSION_NOT_STARTED, vaultSetupTokenId, appSwitchEnabled)
             applicationScope.launch(Dispatchers.Main) {
                 callback.onPayPalWebVaultResult(
                     PayPalPresentAuthChallengeResult.Failure(
@@ -206,12 +233,10 @@ class PayPalWebCheckoutClient internal constructor(
             }
             return
         }
-        vaultSetupTokenId = setupTokenId
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
                 val result = launchVaultWithSession(
                     activity = activity,
                     shopperSession = shopperSession,

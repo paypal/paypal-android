@@ -11,5 +11,7 @@ internal enum class VaultEvent(val value: String) {
 
     AUTH_CHALLENGE_PRESENTATION_SUCCEEDED("paypal-web-payments:vault-wo-purchase:auth-challenge-presentation:succeeded"),
     AUTH_CHALLENGE_PRESENTATION_FAILED(   "paypal-web-payments:vault-wo-purchase:auth-challenge-presentation:failed"),
+
+    SESSION_NOT_STARTED("paypal-web-payments:vault-wo-purchase:session-not-started"),
     // @formatter:on
 }

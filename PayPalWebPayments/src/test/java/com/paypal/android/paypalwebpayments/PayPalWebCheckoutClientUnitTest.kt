@@ -17,6 +17,7 @@ import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
+import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import io.mockk.MockKAnnotations
@@ -1965,6 +1966,133 @@ class PayPalWebCheckoutClientUnitTest {
             )
         }
     }
+
+    // --- Analytics: createPayPalSession() / SESSION_NOT_STARTED ---
+
+    @Test
+    fun `createPayPalSession() fires CreatePayPalSessionEvent STARTED synchronously`() {
+        sut.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+
+        verify { analytics.notify(CreatePayPalSessionEvent.STARTED) }
+    }
+
+    @Test
+    fun `createPayPalSession() fires CreatePayPalSessionEvent SUCCEEDED when session resolves`() =
+        runTest {
+            val spySut = makeSutWithUrlScheme()
+            coEvery {
+                spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any())
+            } returns fakeSessionResponse
+
+            spySut.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify { analytics.notify(CreatePayPalSessionEvent.SUCCEEDED) }
+            verify(exactly = 0) { analytics.notify(CreatePayPalSessionEvent.FAILED) }
+        }
+
+    @Test
+    fun `createPayPalSession() fires CreatePayPalSessionEvent FAILED when session creation throws`() =
+        runTest {
+            val spySut = makeSutWithUrlScheme()
+            coEvery {
+                spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any())
+            } throws RuntimeException("session error")
+
+            spySut.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify { analytics.notify(CreatePayPalSessionEvent.FAILED) }
+            verify(exactly = 0) { analytics.notify(CreatePayPalSessionEvent.SUCCEEDED) }
+        }
+
+    @Test
+    fun `start() fires CheckoutEvent STARTED and SESSION_NOT_STARTED when createPayPalSession not called`() =
+        runTest {
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+
+            sut.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
+            verify { analytics.notify(CheckoutEvent.SESSION_NOT_STARTED, "fake-order-id", false) }
+        }
+
+    @Test
+    fun `start() fires CheckoutEvent STARTED synchronously before awaiting the shopper session`() =
+        runTest {
+            val spySut = makeSutWithUrlScheme()
+            coEvery {
+                spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any())
+            } returns fakeSessionResponse
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            spySut.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+
+            spySut.start(activity, "fake-order-id", callback)
+
+            // STARTED must fire immediately — before the coroutine that awaits the
+            // pre-warmed session has had a chance to run.
+            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
+            verify(exactly = 0) {
+                analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED, any(), any())
+            }
+
+            testDispatcher.scheduler.advanceUntilIdle()
+            verify {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    "fake-order-id",
+                    false
+                )
+            }
+        }
+
+    @Test
+    fun `vault() fires VaultEvent STARTED and SESSION_NOT_STARTED when createPayPalSession not called`() =
+        runTest {
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+
+            sut.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
+            verify { analytics.notify(VaultEvent.SESSION_NOT_STARTED, "fake-setup-token-id", false) }
+        }
+
+    @Test
+    fun `vault() fires VaultEvent STARTED synchronously before awaiting the shopper session`() =
+        runTest {
+            val spySut = makeSutWithUrlScheme()
+            coEvery {
+                spySut.createShopperSessionWithAppSwitchEligibility(any(), any(), any())
+            } returns fakeSessionResponse
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            spySut.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+
+            spySut.vault(activity, "fake-setup-token-id", callback)
+
+            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
+            verify(exactly = 0) {
+                analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED, any(), any())
+            }
+
+            testDispatcher.scheduler.advanceUntilIdle()
+            verify {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    "fake-setup-token-id",
+                    false
+                )
+            }
+        }
 
     fun createAppSwithEligibility(launchUrl: String?) = AppSwitchEligibilityData(
         appSwitchEligible = !launchUrl.isNullOrEmpty(),

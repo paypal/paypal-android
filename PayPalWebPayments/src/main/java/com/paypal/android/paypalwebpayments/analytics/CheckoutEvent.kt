@@ -11,5 +11,7 @@ internal enum class CheckoutEvent(val value: String) {
 
     AUTH_CHALLENGE_PRESENTATION_SUCCEEDED("paypal-web-payments:checkout:auth-challenge-presentation:succeeded"),
     AUTH_CHALLENGE_PRESENTATION_FAILED(   "paypal-web-payments:checkout:auth-challenge-presentation:failed"),
+
+    SESSION_NOT_STARTED("paypal-web-payments:checkout:session-not-started"),
     // @formatter:on
 }

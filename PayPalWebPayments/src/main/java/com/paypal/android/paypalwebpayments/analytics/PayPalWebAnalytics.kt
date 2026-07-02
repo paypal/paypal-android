@@ -19,4 +19,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
             appSwitchEnabled = appSwitchEnabled
         )
     }
+    fun notify(event: CreatePayPalSessionEvent) {
+        analyticsService.sendAnalyticsEvent(name = event.value)
+    }
 }
