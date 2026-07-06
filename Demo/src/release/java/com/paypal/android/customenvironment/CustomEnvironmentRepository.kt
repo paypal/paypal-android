@@ -5,7 +5,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * No-op stub for release builds. Custom environment configuration is a debug-only feature;
+ * Custom environment configuration is a debug-only feature;
  * this stub always falls back to the default [CoreConfig].
  */
 @Singleton

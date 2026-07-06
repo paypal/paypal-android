@@ -61,8 +61,6 @@ fun DemoApp() {
             topBar = {
                 val route = navBackStackEntry?.destination?.route
                 val titleText = DemoAppDestinations.titleForDestination(route)
-                // Show the settings gear on every screen except the settings screen itself.
-                // The gear is only present in debug builds.
                 val showSettingsIcon = BuildConfig.DEBUG && route != DemoAppDestinations.SETTINGS
                 DemoAppTopBar(
                     title = titleText,
