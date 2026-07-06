@@ -53,9 +53,6 @@ class PayPalWebCheckoutClient internal constructor(
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
 
-    // Enable app switch by switching this flag to true
-    private val appSwitchWhenEligible: Boolean = true
-
     // for analytics tracking
     private var checkoutOrderId: String? = null
     private var vaultSetupTokenId: String? = null
@@ -99,8 +96,7 @@ class PayPalWebCheckoutClient internal constructor(
      * Pre-warms the Shopper Session in the background. Must be called before [start] or [vault]
      * in SDK v3 flows.
      *
-     * Fire and forget — returns immediately. The GraphQL `createShopperSession` call runs
-     * asynchronously and the result is stored internally as a [Deferred].
+     * Fire and forget — returns immediately.
      *
      * @param userIdentity Shopper identity used to pre-identify the payer.
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
@@ -613,7 +609,7 @@ class PayPalWebCheckoutClient internal constructor(
         tokenType: TokenType,
         fallbackUri: Uri
     ): Uri {
-        return if (appSwitchWhenEligible && deviceInspector.isPayPalInstalled) {
+        return if (deviceInspector.isPayPalInstalled) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = context,
                 orderId = token,
