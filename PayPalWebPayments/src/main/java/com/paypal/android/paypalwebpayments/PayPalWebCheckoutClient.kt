@@ -93,8 +93,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Pre-warms the Shopper Session in the background. Must be called before [start] or [vault]
-     * in SDK v3 flows.
+     * Pre-warms the shopper session in the background. Must be called before [start] or [vault].
      *
      * Fire and forget — returns immediately.
      *
@@ -114,17 +113,17 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Initiates PayPal checkout using the Shopper Session ID pre-warmed by [createPayPalSession].
+     * Initiates PayPal checkout using the session pre-warmed by [createPayPalSession].
      *
      * If the session fetch is still in progress this method awaits its completion before
      * launching checkout. If [createPayPalSession] was never called the callback receives a
-     * [PayPalPresentAuthChallengeResult.Failure] with error code `SESSION_NOT_STARTED`.
+     * [PayPalPresentAuthChallengeResult.Failure].
      *
      * @param activity The activity to launch the PayPal checkout from.
      * @param orderId The ID of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
-    // TODO: Narrow exception type once createShopperSessionWithAppSwitchEligibility is implemented
+    // TODO: Narrow exception type once the shopper session network call is finalized
     @Suppress("TooGenericExceptionCaught")
     fun start(
         activity: Activity,
@@ -171,17 +170,17 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Initiates PayPal vault using the Shopper Session ID pre-warmed by [createPayPalSession].
+     * Initiates PayPal vault using the session pre-warmed by [createPayPalSession].
      *
      * If the session fetch is still in progress this method awaits its completion before
      * launching the vault flow. If [createPayPalSession] was never called the callback receives a
-     * [PayPalPresentAuthChallengeResult.Failure] with error code `SESSION_NOT_STARTED`.
+     * [PayPalPresentAuthChallengeResult.Failure].
      *
      * @param activity The activity to launch the PayPal vault flow from.
      * @param setupTokenId The setup token ID associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
-    // TODO: Narrow exception type once createShopperSessionWithAppSwitchEligibility is implemented
+    // TODO: Narrow exception type once the shopper session network call is finalized
     @Suppress("TooGenericExceptionCaught")
     fun vault(
         activity: ComponentActivity,
@@ -424,7 +423,7 @@ class PayPalWebCheckoutClient internal constructor(
      * Returns the session ID string on success. This is called internally by [createPayPalSession]
      * and runs on a background coroutine.
      *
-     * TODO: DTPPMOBILE-530 — implement the actual GraphQL call.
+     * TODO: implement the actual GraphQL call.
      */
     @VisibleForTesting
     @Suppress("UnusedPrivateMember") // TODO: params will be used once GraphQL call is implemented
