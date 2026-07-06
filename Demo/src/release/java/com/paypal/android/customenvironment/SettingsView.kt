@@ -7,4 +7,4 @@ import androidx.compose.runtime.Composable
  * in release (the gear icon is hidden via BuildConfig.DEBUG).
  */
 @Composable
-fun SettingsView() {}
+fun SettingsView() = Unit

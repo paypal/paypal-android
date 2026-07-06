@@ -60,32 +60,19 @@ private fun SettingsContent(
             .padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "Custom Environment",
-            style = MaterialTheme.typography.titleLarge
-        )
-        Text(
-            text = "Point the SDK at a custom backend.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
+        SettingsHeader()
         UrlField(
             label = "SDK REST Base URL",
             placeholder = "Enter SDK REST base URL",
             value = config.sdkRestUrl,
             onValueChange = onSdkRestUrlChange
         )
-
         UrlField(
             label = "SDK GraphQL Base URL",
             placeholder = "Enter SDK GraphQL base URL",
             value = config.sdkGraphQLUrl,
             onValueChange = onSdkGraphQLUrlChange
         )
-
         UrlField(
             label = "Client ID",
             placeholder = "Enter PayPal client ID (optional)",
@@ -93,9 +80,7 @@ private fun SettingsContent(
             onValueChange = onClientIdChange,
             imeAction = ImeAction.Done
         )
-
         Spacer(modifier = Modifier.height(4.dp))
-
         if (config.isConfigured) {
             Text(
                 text = "✓ Custom environment is active",
@@ -109,28 +94,45 @@ private fun SettingsContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
         Spacer(modifier = Modifier.height(8.dp))
+        SettingsActionButtons(onSaveClick = onSaveClick, onClearClick = onClearClick)
+    }
+}
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+@Composable
+private fun SettingsHeader() {
+    Text(
+        text = "Custom Environment",
+        style = MaterialTheme.typography.titleLarge
+    )
+    Text(
+        text = "Point the SDK at a custom backend.",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Composable
+private fun SettingsActionButtons(onSaveClick: () -> Unit, onClearClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Button(
+            onClick = onSaveClick,
+            modifier = Modifier.weight(1f)
         ) {
-            Button(
-                onClick = onSaveClick,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Save")
-            }
-            OutlinedButton(
-                onClick = onClearClick,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Clear")
-            }
+            Text("Save")
+        }
+        OutlinedButton(
+            onClick = onClearClick,
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Text("Clear")
         }
     }
 }
@@ -157,6 +159,7 @@ private fun UrlField(
     )
 }
 
+@Suppress("UnusedPrivateMember")
 @Preview(showBackground = true)
 @Composable
 private fun SettingsViewPreview() {
