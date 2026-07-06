@@ -80,14 +80,16 @@ class PayPalVaultViewModel @Inject constructor(
 
     fun vaultSetupToken(activity: ComponentActivity) {
         val setupTokenId = createdSetupToken?.id
+
         if (setupTokenId == null) {
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             viewModelScope.launch {
-                vaultSetupTokenWithRequest(
-                    activity,
-                    PayPalWebVaultRequest(setupTokenId, returnToAppStrategy.toReturnToAppStrategy())
+                val request = PayPalWebVaultRequest(
+                    setupTokenId,
+                    returnToAppStrategy.toReturnToAppStrategy()
                 )
+                vaultSetupTokenWithRequest(activity, request)
             }
         }
     }
@@ -98,14 +100,13 @@ class PayPalVaultViewModel @Inject constructor(
     ) {
         vaultPayPalState = ActionState.Loading
 
-        // Rebuild from the active environment config so any Settings change is picked up.
-        val client = PayPalWebCheckoutClient(applicationContext, buildCoreConfig())
-            .also { paypalClient = it }
+        val paypalClient = PayPalWebCheckoutClient(applicationContext, buildCoreConfig())
+            .also { this.paypalClient = it }
 
-        client.vault(activity, request) { result ->
+        paypalClient.vault(activity, request) { result ->
             when (result) {
                 is PayPalPresentAuthChallengeResult.Success -> {
-                    // do nothing; wait for user to authenticate in Chrome Custom Tab
+                    // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
                 }
 
                 is PayPalPresentAuthChallengeResult.Failure ->
@@ -136,7 +137,11 @@ class PayPalVaultViewModel @Inject constructor(
                 is PayPalWebCheckoutFinishVaultResult.Failure -> ActionState.Failure(result.error)
                 PayPalWebCheckoutFinishVaultResult.Canceled ->
                     ActionState.Failure(Exception("USER CANCELED"))
-                PayPalWebCheckoutFinishVaultResult.NoResult -> ActionState.Idle
+
+                PayPalWebCheckoutFinishVaultResult.NoResult -> {
+                    // no result; re-enable PayPal button so user can retry
+                    ActionState.Idle
+                }
             }
         }
     }
