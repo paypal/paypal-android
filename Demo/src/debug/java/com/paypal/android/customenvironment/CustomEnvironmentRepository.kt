@@ -2,10 +2,11 @@ package com.paypal.android.customenvironment
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
+import com.paypal.android.corepayments.CoreConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.content.edit
 
 /**
  * Persists and retrieves [CustomEnvironmentConfig] via SharedPreferences.
@@ -40,6 +41,14 @@ class CustomEnvironmentRepository @Inject constructor(
     fun clearConfig() {
         prefs.edit { clear() }
     }
+
+    /**
+     * Returns a [CoreConfig] for the active environment.
+     * Uses [Environment.CUSTOM] when the user has configured custom URLs in Settings;
+     * falls back to [fallbackConfig] otherwise.
+     */
+    fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig =
+        getConfig().toCoreConfig(fallbackConfig)
 
     companion object {
         private const val PREFS_NAME = "custom_environment"

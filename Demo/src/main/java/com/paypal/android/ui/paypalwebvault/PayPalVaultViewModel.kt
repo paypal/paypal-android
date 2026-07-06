@@ -34,9 +34,7 @@ class PayPalVaultViewModel @Inject constructor(
 ) : ViewModel() {
 
     private fun buildCoreConfig(): CoreConfig =
-        customEnvironmentRepository.getConfig().toCoreConfig(
-            fallbackConfig = CoreConfig(SDKSampleServerAPI.clientId)
-        )
+        customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId))
 
     // Held as a field so completeAuthChallenge uses the same instance that started the vault flow.
     private var paypalClient: PayPalWebCheckoutClient? = null

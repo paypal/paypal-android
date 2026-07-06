@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.paypal.android.BuildConfig
 import com.paypal.android.customenvironment.SettingsView
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
@@ -61,7 +62,8 @@ fun DemoApp() {
                 val route = navBackStackEntry?.destination?.route
                 val titleText = DemoAppDestinations.titleForDestination(route)
                 // Show the settings gear on every screen except the settings screen itself.
-                val showSettingsIcon = route != DemoAppDestinations.SETTINGS
+                // The gear is only present in debug builds.
+                val showSettingsIcon = BuildConfig.DEBUG && route != DemoAppDestinations.SETTINGS
                 DemoAppTopBar(
                     title = titleText,
                     shouldDisplayBackButton = shouldDisplayBackButton,
@@ -133,8 +135,10 @@ fun DemoApp() {
                         navController.popBackStack()
                     })
                 }
-                composable(DemoAppDestinations.SETTINGS) {
-                    SettingsView()
+                if (BuildConfig.DEBUG) {
+                    composable(DemoAppDestinations.SETTINGS) {
+                        SettingsView()
+                    }
                 }
             }
         }
