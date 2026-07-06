@@ -2,6 +2,7 @@ package com.paypal.android.venmo
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
@@ -46,23 +47,23 @@ class VenmoClient(
                 currency = currency
             )
 
-            when (eligibilityResult) {
-                is APIResult.Success -> {
-                    val fundingEligibility = eligibilityResult.data
-                    if (!fundingEligibility.venmoEligible) {
-                        Log.d("venmo", "Venmo is not eligible for this transaction")
-                        return@launch
-                    }
-                }
-
-                is APIResult.Failure -> {
-                    Log.d(
-                        "venmo",
-                        "Failed to check funding eligibility: ${eligibilityResult.error}"
-                    )
-                    return@launch
-                }
-            }
+//            when (eligibilityResult) {
+//                is APIResult.Success -> {
+//                    val fundingEligibility = eligibilityResult.data
+//                    if (!fundingEligibility.venmoEligible) {
+//                        Log.d("venmo", "Venmo is not eligible for this transaction")
+//                        return@launch
+//                    }
+//                }
+//
+//                is APIResult.Failure -> {
+//                    Log.d(
+//                        "venmo",
+//                        "Failed to check funding eligibility: ${eligibilityResult.error}"
+//                    )
+//                    return@launch
+//                }
+//            }
 
             // Venmo is eligible, proceed with CCO update
             val ccoUpdateResult =
@@ -77,44 +78,54 @@ class VenmoClient(
                 }
             }
 
-            // FROM: VenmoAppSwitch
-            // Sample Sandbox URL: https://account.ext.live.venmo.com/go/web/paypal?token=4YJ65706E9342972A&return_flow=AUTO&env=sandbox
-//            val localVenmoBaseUrl = "https://account.ext.live.venmo.com/go/web/paypal"
-            val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
-//            val localVenmoBaseUrl = "https://account.venmo.com/go/web/paypal"
+//            val appSwitchUri = buildAppSwitchUriV1(orderId)
+            val appSwitchUri = buildAppSwitchUriV2(orderId, returnUrl)
+            activity.startActivity(Intent(Intent.ACTION_VIEW, appSwitchUri))
+        }
+    }
+
+    fun buildAppSwitchUriV1(orderId: String): Uri {
+        // FROM: VenmoAppSwitch
+        // Sample Sandbox URL: https://account.ext.live.venmo.com/go/web/paypal?token=4YJ65706E9342972A&return_flow=AUTO&env=sandbox
+        val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
+        return localVenmoBaseUrl.toUri()
+            .buildUpon()
+            .appendQueryParameter("env", "qa")
+            .appendQueryParameter("return_flow", "AUTO")
+            .appendQueryParameter("token", orderId)
+            .build()
+    }
+
+    fun buildAppSwitchUriV2(orderId: String, returnUrl: String): Uri {
+        // FROM: VenmoWebProductFlow.ts (Sandbox)
+        // FROM: VenmoAppSwitchProductFlow.ts (Sandbox)
+
+        val localVenmoBaseUrl = "https://account.qa.venmo.com/go/web/paypal"
 //            val localVenmoBaseUrl = "https://venmo.com/smart/checkout/venmo"
 //            val localVenmoBaseUrl = "https://www.paypal.com/smart/checkout/venmo"
-            val sandboxVenmoBaseUrl = "https://www.sandbox.paypal.com/smart/checkout/venmo"
-            val appSwitchUri = localVenmoBaseUrl.toUri()
-                .buildUpon()
-//                .appendQueryParameter("buttonSessionID", UUID.randomUUID().toString())
-//                .appendQueryParameter("buyerCountry", "US")
+        val sandboxVenmoBaseUrl = "https://www.sandbox.paypal.com/smart/checkout/venmo"
+        return localVenmoBaseUrl.toUri()
+            .buildUpon()
+            .appendQueryParameter("buttonSessionID", UUID.randomUUID().toString())
+            .appendQueryParameter("buyerCountry", "US")
 //                .appendQueryParameter("channel", "in-app")
-//                .appendQueryParameter("channel", "in-app")
+            .appendQueryParameter("channel", "in-app")
 //                .appendQueryParameter("channel", "mobile-web")
-//                .appendQueryParameter("commit", "true")
-//                .appendQueryParameter("domain", "sdk.paypal.com")
-//                .appendQueryParameter("enableFunding", "venmo")
-//                .appendQueryParameter("env", "qa")
-                .appendQueryParameter("env", "qa")
-//                .appendQueryParameter("facilitatorAccessToken", "")
-//                .appendQueryParameter("fundingSource", "venmo")
-                .appendQueryParameter("return_flow", "AUTO")
+            .appendQueryParameter("commit", "true")
+            .appendQueryParameter("domain", "sdk.paypal.com")
+            .appendQueryParameter("enableFunding", "venmo")
+            .appendQueryParameter("env", "qa")
+            .appendQueryParameter("facilitatorAccessToken", "")
+            .appendQueryParameter("fundingSource", "venmo")
+            .appendQueryParameter("return_flow", "auto")
 //                .appendQueryParameter("orderID", orderId)
-                .appendQueryParameter("token", orderId)
-//                .appendQueryParameter("pageUrl", returnUrl)
-//                .appendQueryParameter("sessionUID", UUID.randomUUID().toString())
-//                .appendQueryParameter("sdkMeta", "")
+            .appendQueryParameter("token", orderId)
+            .appendQueryParameter("pageUrl", returnUrl)
+            .appendQueryParameter("sessionUID", UUID.randomUUID().toString())
+            .appendQueryParameter("sdkMeta", "")
 //                .appendQueryParameter("clientID", coreConfig.clientId)
 //                .appendQueryParameter("merchantId", "V9YP27HFNG2LW")
-                .build()
-            activity.startActivity(Intent(Intent.ACTION_VIEW, appSwitchUri))
-
-            // FROM: VenmoWebProductFlow.ts (Sandbox)
-
-            // FROM: VenmoAppSwitchProductFlow.ts (Sandbox)
-
-        }
+            .build()
     }
 
     fun finishStart(intent: Intent): VenmoFinishStartResult? =
