@@ -1677,7 +1677,7 @@ class PayPalWebCheckoutClientUnitTest {
     // --- start(activity, orderId, callback) ---
 
     @Test
-    fun `start() with orderId delivers SESSION_NOT_STARTED when createPayPalSession not called`() =
+    fun `start() with orderId delivers SESSION_NOT_CREATED when createPayPalSession not called`() =
         runTest {
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
 
@@ -1737,7 +1737,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `start() with orderId clears session deferred so a second call returns SESSION_NOT_STARTED`() =
+    fun `start() with orderId clears session deferred so a second call returns SESSION_NOT_CREATED`() =
         runTest {
             val spySut = makeSutWithUrlScheme()
             coEvery {
@@ -1768,7 +1768,7 @@ class PayPalWebCheckoutClientUnitTest {
     // --- vault(activity, setupTokenId, callback) ---
 
     @Test
-    fun `vault() with setupTokenId delivers SESSION_NOT_STARTED when createPayPalSession not called`() =
+    fun `vault() with setupTokenId delivers SESSION_NOT_CREATED when createPayPalSession not called`() =
         runTest {
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
 
@@ -1828,7 +1828,7 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
-    fun `vault() with setupTokenId clears session deferred so a second call returns SESSION_NOT_STARTED`() =
+    fun `vault() with setupTokenId clears session deferred so a second call returns SESSION_NOT_CREATED`() =
         runTest {
             val spySut = makeSutWithUrlScheme()
             coEvery {
