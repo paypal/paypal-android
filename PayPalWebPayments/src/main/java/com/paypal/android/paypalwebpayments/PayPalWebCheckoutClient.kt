@@ -405,6 +405,7 @@ class PayPalWebCheckoutClient internal constructor(
      * TODO: Replace with actual implementation.
      */
     @VisibleForTesting
+    @Suppress("UnusedPrivateMember") // TODO: params will be used once implementation is complete
     internal suspend fun createShopperSessionWithAppSwitchEligibility(
         urlConfig: ReturnToAppUrlConfig,
         userIdentity: PayPalUserIdentity,
@@ -547,7 +548,7 @@ class PayPalWebCheckoutClient internal constructor(
     // endregion
 
     // region Private Helpers
-    private fun  CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
         val launchUri = if (appSwitchEligible) {
             redirectUrl.toUri()
         } else {
