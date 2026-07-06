@@ -530,8 +530,7 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private val baseUrl: String
-        get() = coreConfig.environment.graphQLEndpoint.trimEnd('/') + "/"
+    private val baseUrl: String = coreConfig.environment.graphQLEndpoint
 
     private suspend fun getLaunchUri(
         context: Context,
