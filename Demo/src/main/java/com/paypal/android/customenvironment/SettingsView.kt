@@ -97,7 +97,7 @@ private fun SettingsContent(
             )
             UrlField(
                 label = "Merchant Server Base URL",
-                placeholder = "Enter merchant server base URL (optional)",
+                placeholder = "Enter merchant server base URL",
                 value = uiState.settings.customMerchantBaseUrl,
                 onValueChange = onCustomMerchantBaseUrlChange,
                 imeAction = ImeAction.Done,
@@ -164,7 +164,7 @@ private fun SettingsStatus(settings: DemoEnvironmentSettings) {
             .replaceFirstChar { it.uppercase() }
         "✓ $envName environment selected" to MaterialTheme.colorScheme.primary
     } else {
-        "Fill in both URL fields to use the Custom environment." to
+        "Fill in all URL fields to use the Custom environment." to
             MaterialTheme.colorScheme.onSurfaceVariant
     }
     Text(

@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.net.MalformedURLException
-import java.net.URL
+import java.net.URI
+import java.net.URISyntaxException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -79,7 +79,7 @@ class SettingsViewModel @Inject constructor(
         }
         val restError = validateUrl(settings.customSdkRestUrl)
         val graphQLError = validateUrl(settings.customSdkGraphQLUrl)
-        val merchantError = validateUrl(settings.customMerchantBaseUrl, optional = true)
+        val merchantError = validateUrl(settings.customMerchantBaseUrl)
         if (restError != null || graphQLError != null || merchantError != null) {
             _uiState.update {
                 it.copy(
@@ -123,23 +123,18 @@ class SettingsViewModel @Inject constructor(
      * When [optional] is true, a blank value is considered valid (field is not required).
      * When [optional] is false, the field is required.
      */
-    private fun validateUrl(url: String, optional: Boolean = false): String? {
-        if (url.isBlank()) return if (optional) null else "URL is required"
-        return when {
-            url != url.trim() -> "URL must not contain leading or trailing spaces"
-            url.contains(' ') -> "URL must not contain spaces"
-            else -> try {
-                val parsed = URL(url)
-                when {
-                    parsed.protocol !in listOf("http", "https") ->
-                        "URL must start with http:// or https://"
-                    parsed.host.isNullOrBlank() ->
-                        "Enter a valid URL (e.g. https://api.example.com)"
-                    else -> null
-                }
-            } catch (e: MalformedURLException) {
-                "Enter a valid URL (e.g. https://api.example.com)"
+    private fun validateUrl(url: String, optional: Boolean = false): String? = when {
+        url.isBlank() -> if (optional) null else "URL is required"
+        url != url.trim() || url.contains(' ') -> "URL must not contain spaces"
+        else -> try {
+            val uri = URI(url)
+            when {
+                uri.scheme !in listOf("http", "https") -> "URL must start with http:// or https://"
+                uri.host.isNullOrBlank() -> "Enter a valid URL (e.g. https://api.example.com)"
+                else -> null
             }
+        } catch (_: URISyntaxException) {
+            "Enter a valid URL (e.g. https://api.example.com)"
         }
     }
 }

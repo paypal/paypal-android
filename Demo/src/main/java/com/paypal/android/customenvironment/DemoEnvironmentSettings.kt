@@ -19,8 +19,7 @@ data class DemoEnvironmentSettings(
     val customClientId: String = "",
 
     /**
-     * Optional merchant server base URL override. When blank, falls back to the default
-     * merchant server URL.
+     * Merchant server base URL override. Required when [selectedEnvironment] is CUSTOM.
      */
     val customMerchantBaseUrl: String = "",
 ) {
@@ -29,6 +28,10 @@ data class DemoEnvironmentSettings(
      * and either URL field is blank.
      */
     val isValidEnvironment: Boolean
-        get() = selectedEnvironment != SelectedEnvironment.CUSTOM ||
-                (customSdkRestUrl.isNotBlank() && customSdkGraphQLUrl.isNotBlank())
+        get() = selectedEnvironment != SelectedEnvironment.CUSTOM || isValidCustomEnvironment
+
+    private val isValidCustomEnvironment: Boolean
+        get() = customSdkRestUrl.isNotBlank() &&
+                customSdkGraphQLUrl.isNotBlank() &&
+                customMerchantBaseUrl.isNotBlank()
 }
