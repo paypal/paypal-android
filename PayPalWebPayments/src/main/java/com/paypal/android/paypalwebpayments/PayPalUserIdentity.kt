@@ -9,9 +9,9 @@ package com.paypal.android.paypalwebpayments
 sealed class PayPalUserIdentity {
 
     /**
-     * Identifies the shopper via a server-side shopper session ID.
+     * Identifies the shopper via a server-side shopper session id.
      *
-     * @param serverSideShopperSessionId The session ID obtained from the merchant's server.
+     * @param serverSideShopperSessionId The session id obtained from the merchant's server.
      */
     data class ServerSideShopperSession(
         val serverSideShopperSessionId: String

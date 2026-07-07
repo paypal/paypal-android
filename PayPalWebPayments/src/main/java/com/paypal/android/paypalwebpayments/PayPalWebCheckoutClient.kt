@@ -58,7 +58,7 @@ class PayPalWebCheckoutClient internal constructor(
     private var vaultSetupTokenId: String? = null
     private var appSwitchEnabled: Boolean = false
 
-    // Shopper Session ID (v3) — set by createPayPalSession(), awaited by start() / vault()
+    // Shopper Session id (v3) — set by createPayPalSession(), awaited by start() / vault()
     private var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
 
@@ -120,7 +120,7 @@ class PayPalWebCheckoutClient internal constructor(
      * [PayPalPresentAuthChallengeResult.Failure].
      *
      * @param activity The activity to launch the PayPal checkout from.
-     * @param orderId The ID of the order to be approved.
+     * @param orderId The id of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
     // TODO: Narrow exception type once the shopper session network call is finalized
@@ -177,7 +177,7 @@ class PayPalWebCheckoutClient internal constructor(
      * [PayPalPresentAuthChallengeResult.Failure].
      *
      * @param activity The activity to launch the PayPal vault flow from.
-     * @param setupTokenId The setup token ID associated with the vault approval.
+     * @param setupTokenId The setup token id associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
     // TODO: Narrow exception type once the shopper session network call is finalized
@@ -314,7 +314,7 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param activity The activity context needed to launch the checkout UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
-     * @param orderId The order ID to approve.
+     * @param orderId The order id to approve.
      */
     private fun launchCheckoutWithShopperSession(
         activity: Activity,
@@ -361,7 +361,7 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * @param activity The activity context needed to launch the vault UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
-     * @param setupTokenId The setup token ID to approve.
+     * @param setupTokenId The setup token id to approve.
      */
     private fun launchVaultWithSession(
         activity: Activity,
@@ -724,7 +724,7 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Confirm PayPal payment source for an order with callback.
      *
-     * @deprecated Use [createPayPalSession] followed by [start] with only the order ID instead.
+     * @deprecated Use [createPayPalSession] followed by [start] with only the order id instead.
      */
     @Deprecated(
         message = "Use createPayPalSession() followed by start(activity, orderId, callback) instead.",
@@ -799,7 +799,7 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Vault PayPal as a payment method with callback.
      *
-     * @deprecated Use [createPayPalSession] followed by [vault] with only the setup token ID instead.
+     * @deprecated Use [createPayPalSession] followed by [vault] with only the setup token id instead.
      */
     @Deprecated(
         message = "Use createPayPalSession() followed by vault(activity, setupTokenId, callback) instead.",

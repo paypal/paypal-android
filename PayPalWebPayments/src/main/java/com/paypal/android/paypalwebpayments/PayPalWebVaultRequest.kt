@@ -6,7 +6,7 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
  * Request to vault a PayPal payment method.
  *
  * @deprecated Use [PayPalWebCheckoutClient.createPayPalSession] followed by
- * [PayPalWebCheckoutClient.vault] with only the setup token ID instead.
+ * [PayPalWebCheckoutClient.vault] with only the setup token id instead.
  */
 @Deprecated(
     message = "Use createPayPalSession() followed by vault(activity, setupTokenId, callback) instead.",
@@ -23,7 +23,7 @@ constructor(
     /**
      * Request to vault a PayPal payment method using [PayPalWebCheckoutClient.vault].
      *
-     * @property [setupTokenId] ID for the setup token associated with the vault approval
+     * @property [setupTokenId] id for the setup token associated with the vault approval
      */
     constructor(
         setupTokenId: String,
