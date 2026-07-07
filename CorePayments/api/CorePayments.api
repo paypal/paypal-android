@@ -66,7 +66,6 @@ public final class com/paypal/android/corepayments/Environment : java/lang/Enum 
 	public static final field LIVE Lcom/paypal/android/corepayments/Environment;
 	public static final field SANDBOX Lcom/paypal/android/corepayments/Environment;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getGraphQLEndpoint ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/paypal/android/corepayments/Environment;
 	public static fun values ()[Lcom/paypal/android/corepayments/Environment;
 }

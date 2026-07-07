@@ -1,8 +1,5 @@
 package com.paypal.android.customenvironment
 
-import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
-
 /**
  * Holds the SDK URLs for a custom environment.
  *
@@ -21,18 +18,4 @@ data class CustomEnvironmentConfig(
     /** True only when both URL fields are non-blank. */
     val isConfigured: Boolean
         get() = sdkRestUrl.isNotBlank() && sdkGraphQLUrl.isNotBlank()
-
-    /**
-     * Builds a [CoreConfig] backed by [Environment.CUSTOM], or returns [fallbackConfig]
-     * when the custom environment is not fully configured.
-     */
-    fun toCoreConfig(fallbackConfig: CoreConfig): CoreConfig =
-        if (isConfigured) {
-            Environment.customRestUrl = sdkRestUrl.trim().trimEnd('/')
-            Environment.customGraphQLUrl = sdkGraphQLUrl.trim().trimEnd('/')
-            val resolvedClientId = clientId.trim().ifBlank { fallbackConfig.clientId }
-            CoreConfig(clientId = resolvedClientId, environment = Environment.CUSTOM)
-        } else {
-            fallbackConfig
-        }
 }

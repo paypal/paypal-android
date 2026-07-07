@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,8 +48,17 @@ class CustomEnvironmentRepository @Inject constructor(
      * Uses [Environment.CUSTOM] when the user has configured custom URLs in Settings;
      * falls back to [fallbackConfig] otherwise.
      */
-    fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig =
-        getConfig().toCoreConfig(fallbackConfig)
+    fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig {
+        val config = getConfig()
+        return if (config.isConfigured) {
+            Environment.customRestUrl = config.sdkRestUrl.trim().trimEnd('/')
+            Environment.customGraphQLUrl = config.sdkGraphQLUrl.trim().trimEnd('/')
+            val resolvedClientId = config.clientId.trim().ifBlank { fallbackConfig.clientId }
+            CoreConfig(clientId = resolvedClientId, environment = Environment.CUSTOM)
+        } else {
+            fallbackConfig
+        }
+    }
 
     companion object {
         private const val PREFS_NAME = "custom_environment"
