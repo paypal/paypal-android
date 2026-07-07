@@ -13,9 +13,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,12 +36,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun SettingsView(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val config by viewModel.uiState.collectAsState()
+    val settings by viewModel.uiState.collectAsState()
     SettingsContent(
-        config = config,
-        onSdkRestUrlChange = viewModel::updateSdkRestUrl,
-        onSdkGraphQLUrlChange = viewModel::updateSdkGraphQLUrl,
-        onClientIdChange = viewModel::updateClientId,
+        settings = settings,
+        onEnvironmentChange = viewModel::updateSelectedEnvironment,
+        onCustomSdkRestUrlChange = viewModel::updateCustomSdkRestUrl,
+        onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
+        onCustomClientIdChange = viewModel::updateCustomClientId,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
@@ -45,10 +50,11 @@ fun SettingsView(
 
 @Composable
 private fun SettingsContent(
-    config: CustomEnvironmentConfig,
-    onSdkRestUrlChange: (String) -> Unit,
-    onSdkGraphQLUrlChange: (String) -> Unit,
-    onClientIdChange: (String) -> Unit,
+    settings: DemoEnvironmentSettings,
+    onEnvironmentChange: (SelectedEnvironment) -> Unit,
+    onCustomSdkRestUrlChange: (String) -> Unit,
+    onCustomSdkGraphQLUrlChange: (String) -> Unit,
+    onCustomClientIdChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -61,39 +67,30 @@ private fun SettingsContent(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SettingsHeader()
-        UrlField(
-            label = "SDK REST Base URL",
-            placeholder = "Enter SDK REST base URL",
-            value = config.sdkRestUrl,
-            onValueChange = onSdkRestUrlChange
-        )
-        UrlField(
-            label = "SDK GraphQL Base URL",
-            placeholder = "Enter SDK GraphQL base URL",
-            value = config.sdkGraphQLUrl,
-            onValueChange = onSdkGraphQLUrlChange
-        )
-        UrlField(
-            label = "Client ID",
-            placeholder = "Enter PayPal client ID (optional)",
-            value = config.clientId,
-            onValueChange = onClientIdChange,
-            imeAction = ImeAction.Done
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        if (config.isConfigured) {
-            Text(
-                text = "✓ Custom environment is active",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
+        EnvironmentSelector(selected = settings.selectedEnvironment, onSelect = onEnvironmentChange)
+        if (settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
+            UrlField(
+                label = "SDK REST Base URL",
+                placeholder = "Enter SDK REST base URL",
+                value = settings.customSdkRestUrl,
+                onValueChange = onCustomSdkRestUrlChange
             )
-        } else {
-            Text(
-                text = "Fill in both fields to activate. Leave blank to use Sandbox.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            UrlField(
+                label = "SDK GraphQL Base URL",
+                placeholder = "Enter SDK GraphQL base URL",
+                value = settings.customSdkGraphQLUrl,
+                onValueChange = onCustomSdkGraphQLUrlChange
+            )
+            UrlField(
+                label = "Client ID",
+                placeholder = "Enter PayPal client ID (optional)",
+                value = settings.customClientId,
+                onValueChange = onCustomClientIdChange,
+                imeAction = ImeAction.Done
             )
         }
+        Spacer(modifier = Modifier.height(4.dp))
+        SettingsStatus(settings = settings)
         Spacer(modifier = Modifier.height(8.dp))
         SettingsActionButtons(onSaveClick = onSaveClick, onClearClick = onClearClick)
     }
@@ -106,11 +103,51 @@ private fun SettingsHeader() {
         style = MaterialTheme.typography.titleLarge
     )
     Text(
-        text = "Point the SDK at a custom backend.",
+        text = "Select an environment and point the SDK at the right backend.",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EnvironmentSelector(
+    selected: SelectedEnvironment,
+    onSelect: (SelectedEnvironment) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
+        SelectedEnvironment.entries.forEachIndexed { index, env ->
+            SegmentedButton(
+                selected = selected == env,
+                onClick = { onSelect(env) },
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = SelectedEnvironment.entries.size
+                ),
+                label = { Text(env.name.lowercase().replaceFirstChar { it.uppercase() }) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsStatus(settings: DemoEnvironmentSettings) {
+    val (text, color) = if (settings.isConfigured) {
+        val envName = settings.selectedEnvironment.name
+            .lowercase()
+            .replaceFirstChar { it.uppercase() }
+        "✓ $envName environment selected" to MaterialTheme.colorScheme.primary
+    } else {
+        "Fill in both URL fields to use the Custom environment." to
+            MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = color
+    )
 }
 
 @Composable
@@ -166,14 +203,16 @@ private fun SettingsViewPreview() {
     MaterialTheme {
         Surface {
             SettingsContent(
-                config = CustomEnvironmentConfig(
-                    sdkRestUrl = "sdk-rest-url-entered-at-runtime",
-                    sdkGraphQLUrl = "sdk-graphql-url-entered-at-runtime",
-                    clientId = "client-id-entered-at-runtime",
+                settings = DemoEnvironmentSettings(
+                    selectedEnvironment = SelectedEnvironment.CUSTOM,
+                    customSdkRestUrl = "sdk-rest-url-entered-at-runtime",
+                    customSdkGraphQLUrl = "sdk-graphql-url-entered-at-runtime",
+                    customClientId = "client-id-entered-at-runtime",
                 ),
-                onSdkRestUrlChange = {},
-                onSdkGraphQLUrlChange = {},
-                onClientIdChange = {},
+                onEnvironmentChange = {},
+                onCustomSdkRestUrlChange = {},
+                onCustomSdkGraphQLUrlChange = {},
+                onCustomClientIdChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

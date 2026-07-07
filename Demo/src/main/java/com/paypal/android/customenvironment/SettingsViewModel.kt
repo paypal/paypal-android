@@ -15,16 +15,20 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(customEnvironmentRepository.getConfig())
     val uiState = _uiState.asStateFlow()
 
-    fun updateSdkRestUrl(value: String) {
-        _uiState.update { it.copy(sdkRestUrl = value) }
+    fun updateSelectedEnvironment(value: SelectedEnvironment) {
+        _uiState.update { it.copy(selectedEnvironment = value) }
     }
 
-    fun updateSdkGraphQLUrl(value: String) {
-        _uiState.update { it.copy(sdkGraphQLUrl = value) }
+    fun updateCustomSdkRestUrl(value: String) {
+        _uiState.update { it.copy(customSdkRestUrl = value) }
     }
 
-    fun updateClientId(value: String) {
-        _uiState.update { it.copy(clientId = value) }
+    fun updateCustomSdkGraphQLUrl(value: String) {
+        _uiState.update { it.copy(customSdkGraphQLUrl = value) }
+    }
+
+    fun updateCustomClientId(value: String) {
+        _uiState.update { it.copy(customClientId = value) }
     }
 
     /** Persists the current UI state to SharedPreferences. */
@@ -32,9 +36,9 @@ class SettingsViewModel @Inject constructor(
         customEnvironmentRepository.saveConfig(_uiState.value)
     }
 
-    /** Clears the saved config and resets all fields to blank. */
+    /** Clears the saved config and resets all fields to their defaults. */
     fun clearConfig() {
         customEnvironmentRepository.clearConfig()
-        _uiState.value = CustomEnvironmentConfig()
+        _uiState.value = DemoEnvironmentSettings()
     }
 }

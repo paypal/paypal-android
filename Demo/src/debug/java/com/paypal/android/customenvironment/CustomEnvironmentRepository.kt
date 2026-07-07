@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Persists and retrieves [CustomEnvironmentConfig] via SharedPreferences.
+ * Persists and retrieves [DemoEnvironmentSettings] via SharedPreferences.
  *
  * Injected as a singleton so all ViewModels share the same source of truth.
  */
@@ -22,19 +22,21 @@ class CustomEnvironmentRepository @Inject constructor(
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    /** Returns the currently saved config (all fields blank if nothing has been saved). */
-    fun getConfig(): CustomEnvironmentConfig = CustomEnvironmentConfig(
-        sdkRestUrl = (prefs.getString(KEY_SDK_REST_URL, "") ?: "").trim().trimEnd('/'),
-        sdkGraphQLUrl = (prefs.getString(KEY_SDK_GRAPHQL_URL, "") ?: "").trim().trimEnd('/'),
-        clientId = (prefs.getString(KEY_CLIENT_ID, "") ?: "").trim(),
+    /** Returns the currently saved settings (defaults to SANDBOX with all fields blank if nothing saved). */
+    fun getConfig(): DemoEnvironmentSettings = DemoEnvironmentSettings(
+        selectedEnvironment = getSelectedEnvironment(),
+        customSdkRestUrl = (prefs.getString(KEY_SDK_REST_URL, "") ?: ""),
+        customSdkGraphQLUrl = (prefs.getString(KEY_SDK_GRAPHQL_URL, "") ?: ""),
+        customClientId = (prefs.getString(KEY_CLIENT_ID, "") ?: ""),
     )
 
-    /** Persists [config] to SharedPreferences. */
-    fun saveConfig(config: CustomEnvironmentConfig) {
+    /** Persists [settings] to SharedPreferences. */
+    fun saveConfig(settings: DemoEnvironmentSettings) {
         prefs.edit {
-            putString(KEY_SDK_REST_URL, config.sdkRestUrl)
-                .putString(KEY_SDK_GRAPHQL_URL, config.sdkGraphQLUrl)
-            .putString(KEY_CLIENT_ID, config.clientId)
+            putString(KEY_SELECTED_ENV, settings.selectedEnvironment.name)
+            putString(KEY_SDK_REST_URL, settings.customSdkRestUrl)
+            putString(KEY_SDK_GRAPHQL_URL, settings.customSdkGraphQLUrl)
+            putString(KEY_CLIENT_ID, settings.customClientId)
         }
     }
 
@@ -45,23 +47,38 @@ class CustomEnvironmentRepository @Inject constructor(
 
     /**
      * Returns a [CoreConfig] for the active environment.
-     * Uses [Environment.CUSTOM] when the user has configured custom URLs in Settings;
-     * falls back to [fallbackConfig] otherwise.
+     * - [SelectedEnvironment.LIVE] / [SelectedEnvironment.SANDBOX] → the corresponding [Environment].
+     * - [SelectedEnvironment.CUSTOM] with URLs configured → [Environment.CUSTOM] with those URLs.
+     * - [SelectedEnvironment.CUSTOM] without URLs → falls back to [fallbackConfig].
      */
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig {
-        val config = getConfig()
-        return if (config.isConfigured) {
-            Environment.customRestUrl = config.sdkRestUrl.trim().trimEnd('/')
-            Environment.customGraphQLUrl = config.sdkGraphQLUrl.trim().trimEnd('/')
-            val resolvedClientId = config.clientId.trim().ifBlank { fallbackConfig.clientId }
-            CoreConfig(clientId = resolvedClientId, environment = Environment.CUSTOM)
-        } else {
-            fallbackConfig
+        val settings = getConfig()
+        return when (settings.selectedEnvironment) {
+            SelectedEnvironment.LIVE ->
+                CoreConfig(clientId = fallbackConfig.clientId, environment = Environment.LIVE)
+            SelectedEnvironment.SANDBOX ->
+                CoreConfig(clientId = fallbackConfig.clientId, environment = Environment.SANDBOX)
+            SelectedEnvironment.CUSTOM -> if (settings.isConfigured) {
+                Environment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
+                Environment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
+                val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
+                CoreConfig(clientId = resolvedClientId, environment = Environment.CUSTOM)
+            } else {
+                fallbackConfig
+            }
         }
     }
 
+    private fun getSelectedEnvironment(): SelectedEnvironment {
+        return prefs.getString(KEY_SELECTED_ENV, null)
+            ?.let { runCatching { SelectedEnvironment.valueOf(it) }.getOrNull() }
+            ?: SelectedEnvironment.SANDBOX
+    }
+
+
     companion object {
         private const val PREFS_NAME = "custom_environment"
+        private const val KEY_SELECTED_ENV = "selected_env"
         private const val KEY_SDK_REST_URL = "sdk_rest_url"
         private const val KEY_SDK_GRAPHQL_URL = "sdk_graphql_url"
         private const val KEY_CLIENT_ID = "client_id"

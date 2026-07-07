@@ -9,8 +9,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class CustomEnvironmentRepository @Inject constructor() {
-    fun getConfig(): CustomEnvironmentConfig = CustomEnvironmentConfig()
-    fun saveConfig(config: CustomEnvironmentConfig) = Unit
+    fun getConfig(): DemoEnvironmentSettings = DemoEnvironmentSettings()
+    fun saveConfig(settings: DemoEnvironmentSettings) = Unit
     fun clearConfig() = Unit
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig = fallbackConfig
 }
