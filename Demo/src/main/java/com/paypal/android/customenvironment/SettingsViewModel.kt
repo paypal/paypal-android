@@ -1,10 +1,14 @@
 package com.paypal.android.customenvironment
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.net.MalformedURLException
 import java.net.URL
 import javax.inject.Inject
@@ -19,21 +23,23 @@ class SettingsViewModel @Inject constructor(
     )
     val uiState = _uiState.asStateFlow()
 
+    private var saveSuccessJob: Job? = null
+
     fun updateSelectedEnvironment(value: SelectedEnvironment) {
         val savedSettings = customEnvironmentRepository.getConfig()
         _uiState.value = SettingsUiState(settings = savedSettings.copy(selectedEnvironment = value))
     }
 
     fun updateCustomSdkRestUrl(value: String) {
-        _uiState.update { it.copy(settings = it.settings.copy(customSdkRestUrl = value), restUrlError = null) }
+        _uiState.update { it.copy(settings = it.settings.copy(customSdkRestUrl = value), restUrlError = null, showSaveSuccess = false) }
     }
 
     fun updateCustomSdkGraphQLUrl(value: String) {
-        _uiState.update { it.copy(settings = it.settings.copy(customSdkGraphQLUrl = value), graphQLUrlError = null) }
+        _uiState.update { it.copy(settings = it.settings.copy(customSdkGraphQLUrl = value), graphQLUrlError = null, showSaveSuccess = false) }
     }
 
     fun updateCustomClientId(value: String) {
-        _uiState.update { it.copy(settings = it.settings.copy(customClientId = value)) }
+        _uiState.update { it.copy(settings = it.settings.copy(customClientId = value), showSaveSuccess = false) }
     }
 
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
@@ -58,12 +64,22 @@ class SettingsViewModel @Inject constructor(
             return
         }
         customEnvironmentRepository.saveConfig(settings)
+        showSaveSuccessBriefly()
     }
 
     /** Clears the saved config and resets all fields to their defaults. */
     fun clearConfig() {
         customEnvironmentRepository.clearConfig()
         _uiState.value = SettingsUiState()
+    }
+
+    private fun showSaveSuccessBriefly() {
+        saveSuccessJob?.cancel()
+        _uiState.update { it.copy(showSaveSuccess = true) }
+        saveSuccessJob = viewModelScope.launch {
+            delay(2_000)
+            _uiState.update { it.copy(showSaveSuccess = false) }
+        }
     }
 
     private fun validateUrl(url: String): String? {

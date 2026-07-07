@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -95,6 +97,15 @@ private fun SettingsContent(
         SettingsStatus(settings = uiState.settings)
         Spacer(modifier = Modifier.height(8.dp))
         SettingsActionButtons(onSaveClick = onSaveClick, onClearClick = onClearClick)
+        if (uiState.showSaveSuccess) {
+            Text(
+                text = "Custom URLs saved successfully.",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xff007f5f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
