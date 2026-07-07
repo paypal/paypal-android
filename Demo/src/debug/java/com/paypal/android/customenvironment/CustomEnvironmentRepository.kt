@@ -58,7 +58,7 @@ class CustomEnvironmentRepository @Inject constructor(
                 CoreConfig(clientId = fallbackConfig.clientId, environment = Environment.LIVE)
             SelectedEnvironment.SANDBOX ->
                 CoreConfig(clientId = fallbackConfig.clientId, environment = Environment.SANDBOX)
-            SelectedEnvironment.CUSTOM -> if (settings.isConfigured) {
+            SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
                 Environment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
                 Environment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
                 val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
@@ -74,7 +74,6 @@ class CustomEnvironmentRepository @Inject constructor(
             ?.let { runCatching { SelectedEnvironment.valueOf(it) }.getOrNull() }
             ?: SelectedEnvironment.SANDBOX
     }
-
 
     companion object {
         private const val PREFS_NAME = "custom_environment"

@@ -134,13 +134,14 @@ private fun EnvironmentSelector(
 
 @Composable
 private fun SettingsStatus(settings: DemoEnvironmentSettings) {
-    val (text, color) = if (settings.isConfigured) {
+    val (text, color) = if (settings.isValidEnvironment) {
         val envName = settings.selectedEnvironment.name
             .lowercase()
             .replaceFirstChar { it.uppercase() }
         "✓ $envName environment selected" to MaterialTheme.colorScheme.primary
     } else {
-        "Fill in both URL fields to use the Custom environment." to
+        "Fill in both URL fields to use the Custom environment. " +
+                "Otherwise, Environment is Sandbox by default." to
             MaterialTheme.colorScheme.onSurfaceVariant
     }
     Text(

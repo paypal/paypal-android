@@ -10,6 +10,8 @@ import javax.inject.Singleton
 @Singleton
 class CustomEnvironmentRepository @Inject constructor() {
     fun getConfig(): DemoEnvironmentSettings = DemoEnvironmentSettings()
+
+    @Suppress("UnusedPrivateMember")
     fun saveConfig(settings: DemoEnvironmentSettings) = Unit
     fun clearConfig() = Unit
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig = fallbackConfig

@@ -19,13 +19,10 @@ data class DemoEnvironmentSettings(
     val customClientId: String = "",
 ) {
     /**
-     * True when the config is ready to use:
-     * - Always true for LIVE and SANDBOX.
-     * - True for CUSTOM only when both URL fields are non-blank.
+     * True when the config is ready to use. Only false when [selectedEnvironment] is CUSTOM
+     * and either URL field is blank.
      */
-    val isConfigured: Boolean
-        get() = when (selectedEnvironment) {
-            SelectedEnvironment.LIVE, SelectedEnvironment.SANDBOX -> true
-            SelectedEnvironment.CUSTOM -> customSdkRestUrl.isNotBlank() && customSdkGraphQLUrl.isNotBlank()
-        }
+    val isValidEnvironment: Boolean
+        get() = selectedEnvironment != SelectedEnvironment.CUSTOM ||
+                (customSdkRestUrl.isNotBlank() && customSdkGraphQLUrl.isNotBlank())
 }
