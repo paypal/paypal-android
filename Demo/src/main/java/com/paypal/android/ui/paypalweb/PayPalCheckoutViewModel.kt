@@ -97,7 +97,7 @@ class PayPalCheckoutViewModel @Inject constructor(
 
     fun createPayPalSession() {
         paypalClient.createPayPalSession(
-            userIdentity = _uiState.value.userIdentity ?: PayPalUserIdentity.Email(),
+            userIdentity = _uiState.value.userIdentity ?: PayPalUserIdentity(),
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )

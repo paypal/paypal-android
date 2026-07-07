@@ -1662,7 +1662,7 @@ class PayPalWebCheckoutClientUnitTest {
         cancelAppUrl = "https://example.com/paypal-cancel",
         fallbackSchemeUrl = "com.example.app://paypal",
     )
-    private val fakeUserIdentity = PayPalUserIdentity.Email()
+    private val fakeUserIdentity = PayPalUserIdentity()
     private val fakeSessionResponse = CreateShopperSessionWithAppSwitchEligibilityResponse(
         appSwitchEligible = false,
         redirectUrl = "",
