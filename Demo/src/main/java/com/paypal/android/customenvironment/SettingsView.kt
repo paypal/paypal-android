@@ -158,14 +158,13 @@ private fun EnvironmentSelector(
 
 @Composable
 private fun SettingsStatus(settings: DemoEnvironmentSettings) {
-    if (!settings.isValidEnvironment)  {
+    if (!settings.isValidEnvironment) {
         Text(
             text = "Fill in all URL fields to use the Custom environment. Will default to Sandbox.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-
 }
 
 @Composable
