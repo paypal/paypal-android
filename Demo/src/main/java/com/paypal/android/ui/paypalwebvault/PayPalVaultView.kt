@@ -26,6 +26,7 @@ import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
@@ -96,15 +97,10 @@ private fun Step1_CreatePayPalSession(
         ActionButtonColumn(
             defaultTitle = "CREATE PAYPAL SESSION",
             successTitle = "SESSION CREATION INITIATED",
-            state = uiState.createPayPalSessionState,
+            state = if (uiState.isPayPalSessionCreated) ActionState.Success(Unit) else ActionState.Idle,
             onClick = { viewModel.createPayPalSession() },
             modifier = Modifier.fillMaxWidth()
-        ) { state ->
-            when (state) {
-                is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> { /* fire-and-forget; no result to display */ }
-            }
-        }
+        )
     }
 }
 

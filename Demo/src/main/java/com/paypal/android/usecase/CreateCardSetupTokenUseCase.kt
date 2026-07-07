@@ -1,4 +1,5 @@
 package com.paypal.android.usecase
+import com.paypal.android.DemoConstants
 
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.model.serialization.CardDetails
@@ -8,7 +9,6 @@ import com.paypal.android.api.model.serialization.ExperienceContext
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
 import com.paypal.android.cardpayments.threedsecure.SCA
-import com.paypal.android.utils.ReturnUrlProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -26,8 +26,8 @@ class CreateCardSetupTokenUseCase @Inject constructor(
                     card = CardDetails(
                         verificationMethod = sca.name,
                         experienceContext = ExperienceContext(
-                            returnUrl = ReturnUrlProvider.returnToAppUrlConfig.returnAppUrl,
-                            cancelUrl = ReturnUrlProvider.returnToAppUrlConfig.cancelAppUrl
+                            returnUrl = DemoConstants.returnToAppUrlConfig.returnAppUrl,
+                            cancelUrl = DemoConstants.returnToAppUrlConfig.cancelAppUrl
                         )
                     )
                 )

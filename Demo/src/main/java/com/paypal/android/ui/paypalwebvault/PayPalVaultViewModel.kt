@@ -1,4 +1,5 @@
 package com.paypal.android.ui.paypalwebvault
+import com.paypal.android.DemoConstants
 
 import android.content.Context
 import android.content.Intent
@@ -16,7 +17,6 @@ import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishVaultResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
-import com.paypal.android.utils.ReturnUrlProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,19 +67,13 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(userAction = value) }
         }
 
-    private var createPayPalSessionState
-        get() = _uiState.value.createPayPalSessionState
-        set(value) {
-            _uiState.update { it.copy(createPayPalSessionState = value) }
-        }
-
     fun createPayPalSession() {
         paypalClient.createPayPalSession(
             userIdentity = _uiState.value.userIdentity,
-            urlConfig = ReturnUrlProvider.returnToAppUrlConfig,
+            urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )
-        createPayPalSessionState = ActionState.Success(Unit)
+        _uiState.update { it.copy(isPayPalSessionCreated = true) }
     }
 
     fun createSetupToken() {

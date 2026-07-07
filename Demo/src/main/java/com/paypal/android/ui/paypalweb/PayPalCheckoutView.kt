@@ -98,15 +98,10 @@ private fun Step1_CreatePayPalSession(uiState: PayPalUiState, viewModel: PayPalC
         ActionButtonColumn(
             defaultTitle = "CREATE PAYPAL SESSION",
             successTitle = "SESSION CREATION INITIATED",
-            state = uiState.createPayPalSessionState,
+            state = if (uiState.isPayPalSessionCreated) ActionState.Success(Unit) else ActionState.Idle,
             onClick = { viewModel.createPayPalSession() },
             modifier = Modifier.fillMaxWidth()
-        ) { state ->
-            when (state) {
-                is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> { /* fire-and-forget; no result to display */ }
-            }
-        }
+        )
     }
 }
 

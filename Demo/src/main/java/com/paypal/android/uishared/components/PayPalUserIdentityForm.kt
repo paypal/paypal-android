@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.uishared.components.IdentityOption.EMAIL
 import com.paypal.android.uishared.components.IdentityOption.NONE
@@ -42,7 +43,6 @@ private fun PayPalUserIdentity.toIdentityOption(): IdentityOption = when (this) 
     is PayPalUserIdentity.ServerSideShopperSession -> SERVER_SIDE_SHOPPER_SESSION
 }
 
-@Suppress("LongMethod")
 @Composable
 fun PayPalUserIdentityForm(
     userIdentity: PayPalUserIdentity,
@@ -131,9 +131,10 @@ fun PayPalUserIdentityForm(
                         when (option) {
                             NONE -> { /* no input fields */ }
                             EMAIL -> {
-                                OutlinedTextField(
+                                IdentityTextField(
                                     value = emailValue,
-                                    label = { Text("Email") },
+                                    label = "Email",
+                                    bottomPadding = UIConstants.paddingSmall,
                                     onValueChange = { input ->
                                         emailValue = input
                                         onUserIdentityChange(
@@ -142,18 +143,11 @@ fun PayPalUserIdentityForm(
                                                 phone = phoneValue.ifBlank { null }
                                             )
                                         )
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = UIConstants.paddingMedium,
-                                            end = UIConstants.paddingMedium,
-                                            bottom = UIConstants.paddingSmall
-                                        )
+                                    }
                                 )
-                                OutlinedTextField(
+                                IdentityTextField(
                                     value = phoneValue,
-                                    label = { Text("Phone") },
+                                    label = "Phone",
                                     onValueChange = { input ->
                                         phoneValue = input
                                         onUserIdentityChange(
@@ -162,20 +156,13 @@ fun PayPalUserIdentityForm(
                                                 phone = input.ifBlank { null }
                                             )
                                         )
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = UIConstants.paddingMedium,
-                                            end = UIConstants.paddingMedium,
-                                            bottom = UIConstants.paddingMedium
-                                        )
+                                    }
                                 )
                             }
                             SERVER_SIDE_SHOPPER_SESSION -> {
-                                OutlinedTextField(
+                                IdentityTextField(
                                     value = sessionIdValue,
-                                    label = { Text("Server-Side Shopper Session ID") },
+                                    label = "Server-Side Shopper Session ID",
                                     onValueChange = { input ->
                                         sessionIdValue = input
                                         onUserIdentityChange(
@@ -183,14 +170,7 @@ fun PayPalUserIdentityForm(
                                                 serverSideShopperSessionId = input
                                             )
                                         )
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = UIConstants.paddingMedium,
-                                            end = UIConstants.paddingMedium,
-                                            bottom = UIConstants.paddingMedium
-                                        )
+                                    }
                                 )
                             }
                         }
@@ -203,6 +183,28 @@ fun PayPalUserIdentityForm(
             }
         }
     }
+}
+
+
+@Composable
+private fun IdentityTextField(
+    value: String,
+    label: String,
+    onValueChange: (String) -> Unit,
+    bottomPadding: Dp = UIConstants.paddingMedium,
+) {
+    OutlinedTextField(
+        value = value,
+        label = { Text(label) },
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = UIConstants.paddingMedium,
+                end = UIConstants.paddingMedium,
+                bottom = bottomPadding
+            )
+    )
 }
 
 @Preview
