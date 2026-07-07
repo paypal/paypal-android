@@ -34,6 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
+private val successGreen = Color(color = 0xff007f5f)
+
 @Composable
 fun SettingsView(
     viewModel: SettingsViewModel = hiltViewModel()
@@ -101,7 +103,7 @@ private fun SettingsContent(
             Text(
                 text = "Custom URLs saved successfully.",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xff007f5f),
+                color = successGreen,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -212,6 +214,7 @@ private fun UrlField(
     )
 }
 
+@Suppress("UnusedPrivateMember")
 @Preview(showBackground = true)
 @Composable
 private fun SettingsViewPreview() {

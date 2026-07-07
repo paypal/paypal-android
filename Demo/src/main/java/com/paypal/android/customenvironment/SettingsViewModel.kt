@@ -3,7 +3,6 @@ package com.paypal.android.customenvironment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,12 +17,14 @@ class SettingsViewModel @Inject constructor(
     private val customEnvironmentRepository: CustomEnvironmentRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val SUCCESS_MESSAGE_DISPLAY_TIME: Long = 2_000
+    }
+
     private val _uiState = MutableStateFlow(
         SettingsUiState(settings = customEnvironmentRepository.getConfig())
     )
     val uiState = _uiState.asStateFlow()
-
-    private var saveSuccessJob: Job? = null
 
     fun updateSelectedEnvironment(value: SelectedEnvironment) {
         val savedSettings = customEnvironmentRepository.getConfig()
@@ -31,15 +32,32 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateCustomSdkRestUrl(value: String) {
-        _uiState.update { it.copy(settings = it.settings.copy(customSdkRestUrl = value), restUrlError = null, showSaveSuccess = false) }
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customSdkRestUrl = value),
+                restUrlError = null,
+                showSaveSuccess = false
+            )
+        }
     }
 
     fun updateCustomSdkGraphQLUrl(value: String) {
-        _uiState.update { it.copy(settings = it.settings.copy(customSdkGraphQLUrl = value), graphQLUrlError = null, showSaveSuccess = false) }
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customSdkGraphQLUrl = value),
+                graphQLUrlError = null,
+                showSaveSuccess = false
+            )
+        }
     }
 
     fun updateCustomClientId(value: String) {
-        _uiState.update { it.copy(settings = it.settings.copy(customClientId = value), showSaveSuccess = false) }
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customClientId = value),
+                showSaveSuccess = false
+            )
+        }
     }
 
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
@@ -74,27 +92,33 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun showSaveSuccessBriefly() {
-        saveSuccessJob?.cancel()
         _uiState.update { it.copy(showSaveSuccess = true) }
-        saveSuccessJob = viewModelScope.launch {
-            delay(2_000)
+        viewModelScope.launch {
+            delay(SUCCESS_MESSAGE_DISPLAY_TIME)
             _uiState.update { it.copy(showSaveSuccess = false) }
         }
     }
 
     private fun validateUrl(url: String): String? {
-        if (url.isBlank()) return "URL is required"
-        if (url != url.trim()) return "URL must not contain leading or trailing spaces"
-        if (url.contains(' ')) return "URL must not contain spaces"
-        return try {
-            val parsed = URL(url)
-            when {
-                parsed.protocol != "https" -> "URL must start with https://"
-                parsed.host.isNullOrBlank() -> "Enter a valid URL (e.g. https://api.example.com)"
-                else -> null
+        val errorMessage = if (url.isBlank()) {
+            "URL is required"
+        } else if (url != url.trim()) {
+            "URL must not contain leading or trailing spaces"
+        } else if (url.contains(' ')) {
+            "URL must not contain spaces"
+        } else {
+            try {
+                val parsed = URL(url)
+                when {
+                    parsed.protocol != "https" -> "URL must start with https://"
+                    parsed.host.isNullOrBlank() -> "Enter a valid URL (e.g. https://api.example.com)"
+                    else -> null
+                }
+            } catch (e: MalformedURLException) {
+                "Enter a valid URL (e.g. https://api.example.com)"
             }
-        } catch (e: MalformedURLException) {
-            "Enter a valid URL (e.g. https://api.example.com)"
         }
+
+        return errorMessage
     }
 }
