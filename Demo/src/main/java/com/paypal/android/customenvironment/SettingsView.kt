@@ -36,9 +36,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun SettingsView(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val settings by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     SettingsContent(
-        settings = settings,
+        uiState = uiState,
         onEnvironmentChange = viewModel::updateSelectedEnvironment,
         onCustomSdkRestUrlChange = viewModel::updateCustomSdkRestUrl,
         onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
@@ -50,7 +50,7 @@ fun SettingsView(
 
 @Composable
 private fun SettingsContent(
-    settings: DemoEnvironmentSettings,
+    uiState: SettingsUiState,
     onEnvironmentChange: (SelectedEnvironment) -> Unit,
     onCustomSdkRestUrlChange: (String) -> Unit,
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
@@ -67,30 +67,32 @@ private fun SettingsContent(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SettingsHeader()
-        EnvironmentSelector(selected = settings.selectedEnvironment, onSelect = onEnvironmentChange)
-        if (settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
+        EnvironmentSelector(selected = uiState.settings.selectedEnvironment, onSelect = onEnvironmentChange)
+        if (uiState.settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
             UrlField(
                 label = "SDK REST Base URL",
                 placeholder = "Enter SDK REST base URL",
-                value = settings.customSdkRestUrl,
-                onValueChange = onCustomSdkRestUrlChange
+                value = uiState.settings.customSdkRestUrl,
+                onValueChange = onCustomSdkRestUrlChange,
+                error = uiState.restUrlError
             )
             UrlField(
                 label = "SDK GraphQL Base URL",
                 placeholder = "Enter SDK GraphQL base URL",
-                value = settings.customSdkGraphQLUrl,
-                onValueChange = onCustomSdkGraphQLUrlChange
+                value = uiState.settings.customSdkGraphQLUrl,
+                onValueChange = onCustomSdkGraphQLUrlChange,
+                error = uiState.graphQLUrlError
             )
             UrlField(
                 label = "Client ID",
                 placeholder = "Enter PayPal client ID (optional)",
-                value = settings.customClientId,
+                value = uiState.settings.customClientId,
                 onValueChange = onCustomClientIdChange,
                 imeAction = ImeAction.Done
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-        SettingsStatus(settings = settings)
+        SettingsStatus(settings = uiState.settings)
         Spacer(modifier = Modifier.height(8.dp))
         SettingsActionButtons(onSaveClick = onSaveClick, onClearClick = onClearClick)
     }
@@ -140,8 +142,7 @@ private fun SettingsStatus(settings: DemoEnvironmentSettings) {
             .replaceFirstChar { it.uppercase() }
         "✓ $envName environment selected" to MaterialTheme.colorScheme.primary
     } else {
-        "Fill in both URL fields to use the Custom environment. " +
-                "Otherwise, Environment is Sandbox by default." to
+        "Fill in both URL fields to use the Custom environment." to
             MaterialTheme.colorScheme.onSurfaceVariant
     }
     Text(
@@ -182,6 +183,7 @@ private fun UrlField(
     value: String,
     onValueChange: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
+    error: String? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -190,6 +192,8 @@ private fun UrlField(
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodySmall) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { msg -> { Text(msg) } },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Uri,
             imeAction = imeAction
@@ -197,18 +201,21 @@ private fun UrlField(
     )
 }
 
-@Suppress("UnusedPrivateMember")
 @Preview(showBackground = true)
 @Composable
 private fun SettingsViewPreview() {
     MaterialTheme {
         Surface {
             SettingsContent(
-                settings = DemoEnvironmentSettings(
-                    selectedEnvironment = SelectedEnvironment.CUSTOM,
-                    customSdkRestUrl = "sdk-rest-url-entered-at-runtime",
-                    customSdkGraphQLUrl = "sdk-graphql-url-entered-at-runtime",
-                    customClientId = "client-id-entered-at-runtime",
+                uiState = SettingsUiState(
+                    settings = DemoEnvironmentSettings(
+                        selectedEnvironment = SelectedEnvironment.CUSTOM,
+                        customSdkRestUrl = "not-a-valid-url",
+                        customSdkGraphQLUrl = "",
+                        customClientId = "client-id-entered-at-runtime",
+                    ),
+                    restUrlError = "URL must start with https://",
+                    graphQLUrlError = "URL is required"
                 ),
                 onEnvironmentChange = {},
                 onCustomSdkRestUrlChange = {},
