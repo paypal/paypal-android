@@ -125,19 +125,21 @@ class SettingsViewModel @Inject constructor(
      */
     private fun validateUrl(url: String, optional: Boolean = false): String? {
         if (url.isBlank()) return if (optional) null else "URL is required"
-        if (url != url.trim()) return "URL must not contain leading or trailing spaces"
-        if (url.contains(' ')) return "URL must not contain spaces"
-        return try {
-            val parsed = URL(url)
-            when {
-                parsed.protocol !in listOf("http", "https") ->
-                    "URL must start with http:// or https://"
-                parsed.host.isNullOrBlank() ->
-                    "Enter a valid URL (e.g. https://api.example.com)"
-                else -> null
+        return when {
+            url != url.trim() -> "URL must not contain leading or trailing spaces"
+            url.contains(' ') -> "URL must not contain spaces"
+            else -> try {
+                val parsed = URL(url)
+                when {
+                    parsed.protocol !in listOf("http", "https") ->
+                        "URL must start with http:// or https://"
+                    parsed.host.isNullOrBlank() ->
+                        "Enter a valid URL (e.g. https://api.example.com)"
+                    else -> null
+                }
+            } catch (e: MalformedURLException) {
+                "Enter a valid URL (e.g. https://api.example.com)"
             }
-        } catch (e: MalformedURLException) {
-            "Enter a valid URL (e.g. https://api.example.com)"
         }
     }
 }
