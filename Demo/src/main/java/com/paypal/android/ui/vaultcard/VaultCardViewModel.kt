@@ -38,7 +38,7 @@ class VaultCardViewModel @Inject constructor(
     val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
 ) : ViewModel() {
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.clientId)
     private val cardClient = CardClient(applicationContext, coreConfig)
 
     private val _uiState = MutableStateFlow(VaultCardUiState())

@@ -42,7 +42,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         private val TAG = PayPalCheckoutViewModel::class.qualifiedName
     }
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val paypalClient =
         PayPalWebCheckoutClient(applicationContext, coreConfig)

@@ -61,7 +61,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @MockK
     private val deviceInspector: DeviceInspector = mockk(relaxed = true)
-    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
     private val urlScheme = "com.example.app"
 
     @MockK
