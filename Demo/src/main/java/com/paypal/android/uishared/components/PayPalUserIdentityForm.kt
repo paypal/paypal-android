@@ -44,6 +44,40 @@ private fun PayPalUserIdentity?.toIdentityOption(): IdentityOption = when (this)
 }
 
 @Composable
+fun PayPalUserIdentityForm(
+    userIdentity: PayPalUserIdentity?,
+    onUserIdentityChange: (PayPalUserIdentity?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val selectedOption = userIdentity.toIdentityOption()
+    Card(modifier = modifier) {
+        IdentityFormHeader()
+        Column(modifier = Modifier.selectableGroup()) {
+            IdentityOption.entries.forEachIndexed { index, option ->
+                IdentityOptionItem(
+                    option = option,
+                    isSelected = option == selectedOption,
+                    onSelect = {
+                        onUserIdentityChange(
+                            when (option) {
+                                NONE -> null
+                                EMAIL -> PayPalUserIdentity.Email()
+                                SERVER_SIDE_SHOPPER_SESSION ->
+                                    PayPalUserIdentity.ServerSideShopperSession("")
+                            }
+                        )
+                    },
+                    onUserIdentityChange = onUserIdentityChange,
+                )
+                if (index != IdentityOption.entries.lastIndex) {
+                    Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun IdentityTextField(
     value: String,
     label: String,
@@ -65,142 +99,114 @@ private fun IdentityTextField(
 }
 
 @Composable
-fun PayPalUserIdentityForm(
-    userIdentity: PayPalUserIdentity?,
-    onUserIdentityChange: (PayPalUserIdentity?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val selectedOption = userIdentity.toIdentityOption()
-
-    // Email option tracks two independent fields
-    var emailValue by remember(selectedOption) {
-        mutableStateOf((userIdentity as? PayPalUserIdentity.Email)?.email ?: "")
-    }
-    var phoneValue by remember(selectedOption) {
-        mutableStateOf((userIdentity as? PayPalUserIdentity.Email)?.phone ?: "")
-    }
-
-    // ServerSideShopperSession option tracks one field
-    var sessionIdValue by remember(selectedOption) {
-        mutableStateOf(
-            (userIdentity as? PayPalUserIdentity.ServerSideShopperSession)
-                ?.serverSideShopperSessionId ?: ""
+private fun IdentityFormHeader() {
+    Row(modifier = Modifier.background(MaterialTheme.colorScheme.inverseSurface)) {
+        Text(
+            text = "USER IDENTITY",
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .padding(UIConstants.paddingMedium)
+                .fillMaxWidth()
         )
     }
+}
 
-    Card(modifier = modifier) {
-        Row(
-            modifier = Modifier.background(MaterialTheme.colorScheme.inverseSurface)
-        ) {
-            Text(
-                text = "USER IDENTITY",
-                color = MaterialTheme.colorScheme.inverseOnSurface,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(UIConstants.paddingMedium)
-                    .fillMaxWidth()
+@Composable
+private fun IdentityOptionRow(
+    option: IdentityOption,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
+            .selectable(selected = isSelected, onClick = onClick, role = Role.RadioButton)
+    ) {
+        Text(
+            text = option.name,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .padding(UIConstants.paddingMedium)
+                .weight(1.0f)
+                .align(Alignment.CenterVertically)
+        )
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(horizontal = UIConstants.paddingMedium)
+        )
+    }
+}
+
+@Composable
+private fun EmailIdentityFields(onUserIdentityChange: (PayPalUserIdentity?) -> Unit) {
+    var emailValue by remember { mutableStateOf("") }
+    var phoneValue by remember { mutableStateOf("") }
+    IdentityTextField(
+        value = emailValue,
+        label = "Email",
+        bottomPadding = UIConstants.paddingSmall,
+        onValueChange = { input ->
+            emailValue = input
+            onUserIdentityChange(
+                PayPalUserIdentity.Email(
+                    email = input.ifBlank { null },
+                    phone = phoneValue.ifBlank { null }
+                )
             )
         }
-        Column(modifier = Modifier.selectableGroup()) {
-            IdentityOption.entries.forEachIndexed { index, option ->
-                val isSelected = option == selectedOption
-                val isLast = index == IdentityOption.entries.lastIndex
+    )
+    IdentityTextField(
+        value = phoneValue,
+        label = "Phone",
+        onValueChange = { input ->
+            phoneValue = input
+            onUserIdentityChange(
+                PayPalUserIdentity.Email(
+                    email = emailValue.ifBlank { null },
+                    phone = input.ifBlank { null }
+                )
+            )
+        }
+    )
+}
 
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = UIConstants.minimumTouchSize)
-                            .selectable(
-                                selected = isSelected,
-                                onClick = {
-                                    onUserIdentityChange(
-                                        when (option) {
-                                            NONE -> null
-                                            EMAIL -> PayPalUserIdentity.Email(
-                                                email = emailValue.ifBlank { null },
-                                                phone = phoneValue.ifBlank { null }
-                                            )
-                                            SERVER_SIDE_SHOPPER_SESSION ->
-                                                PayPalUserIdentity.ServerSideShopperSession(
-                                                    serverSideShopperSessionId = sessionIdValue
-                                                )
-                                        }
-                                    )
-                                },
-                                role = Role.RadioButton
-                            )
-                    ) {
-                        Text(
-                            text = option.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .padding(UIConstants.paddingMedium)
-                                .weight(1.0f)
-                                .align(Alignment.CenterVertically)
-                        )
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = null,
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(horizontal = UIConstants.paddingMedium)
-                        )
-                    }
+@Composable
+private fun ServerSideShopperSessionIdentityFields(
+    onUserIdentityChange: (PayPalUserIdentity?) -> Unit,
+) {
+    var sessionIdValue by remember { mutableStateOf("") }
+    IdentityTextField(
+        value = sessionIdValue,
+        label = "Server-Side Shopper Session ID",
+        onValueChange = { input ->
+            sessionIdValue = input
+            onUserIdentityChange(
+                PayPalUserIdentity.ServerSideShopperSession(serverSideShopperSessionId = input)
+            )
+        }
+    )
+}
 
-                    if (isSelected) {
-                        when (option) {
-                            NONE -> { /* no fields */ }
-                            EMAIL -> {
-                                IdentityTextField(
-                                    value = emailValue,
-                                    label = "Email",
-                                    bottomPadding = UIConstants.paddingSmall,
-                                    onValueChange = { input ->
-                                        emailValue = input
-                                        onUserIdentityChange(
-                                            PayPalUserIdentity.Email(
-                                                email = input.ifBlank { null },
-                                                phone = phoneValue.ifBlank { null }
-                                            )
-                                        )
-                                    }
-                                )
-                                IdentityTextField(
-                                    value = phoneValue,
-                                    label = "Phone",
-                                    onValueChange = { input ->
-                                        phoneValue = input
-                                        onUserIdentityChange(
-                                            PayPalUserIdentity.Email(
-                                                email = emailValue.ifBlank { null },
-                                                phone = input.ifBlank { null }
-                                            )
-                                        )
-                                    }
-                                )
-                            }
-                            SERVER_SIDE_SHOPPER_SESSION -> {
-                                IdentityTextField(
-                                    value = sessionIdValue,
-                                    label = "Server-Side Shopper Session ID",
-                                    onValueChange = { input ->
-                                        sessionIdValue = input
-                                        onUserIdentityChange(
-                                            PayPalUserIdentity.ServerSideShopperSession(
-                                                serverSideShopperSessionId = input
-                                            )
-                                        )
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                if (!isLast) {
-                    Divider(modifier = Modifier.padding(start = UIConstants.paddingMedium))
-                }
+@Composable
+private fun IdentityOptionItem(
+    option: IdentityOption,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
+    onUserIdentityChange: (PayPalUserIdentity?) -> Unit,
+) {
+    Column {
+        IdentityOptionRow(option = option, isSelected = isSelected, onClick = onSelect)
+        if (isSelected) {
+            when (option) {
+                NONE -> {}
+                EMAIL -> EmailIdentityFields(onUserIdentityChange = onUserIdentityChange)
+                SERVER_SIDE_SHOPPER_SESSION ->
+                    ServerSideShopperSessionIdentityFields(onUserIdentityChange)
             }
         }
     }

@@ -48,8 +48,6 @@ public final class com/paypal/android/corepayments/BuildConfig {
 }
 
 public final class com/paypal/android/corepayments/CoreConfig {
-	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/corepayments/Environment;Ljava/lang/String;)V
