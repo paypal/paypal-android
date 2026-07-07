@@ -11,10 +11,10 @@ sealed class PayPalUserIdentity {
     /**
      * Identifies the shopper via a server-side shopper session id.
      *
-     * @param serverSideShopperSessionId The session id obtained from the merchant's server.
+     * @param existingPayPalSessionId The session id obtained from the merchant's server.
      */
-    data class ServerSideShopperSession(
-        val serverSideShopperSessionId: String
+    data class ExistingPayPalSession(
+        val existingPayPalSessionId: String
     ) : PayPalUserIdentity()
 
     /**

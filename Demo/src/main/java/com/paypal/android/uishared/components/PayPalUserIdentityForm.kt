@@ -28,18 +28,18 @@ import androidx.compose.ui.unit.Dp
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.uishared.components.IdentityOption.EMAIL
 import com.paypal.android.uishared.components.IdentityOption.NONE
-import com.paypal.android.uishared.components.IdentityOption.SERVER_SIDE_SHOPPER_SESSION
+import com.paypal.android.uishared.components.IdentityOption.EXISTING_PAYPAL_SESSION
 import com.paypal.android.utils.UIConstants
 
 private enum class IdentityOption {
     NONE,
     EMAIL,
-    SERVER_SIDE_SHOPPER_SESSION;
+    EXISTING_PAYPAL_SESSION;
 }
 
 private fun PayPalUserIdentity?.toIdentityOption(): IdentityOption = when (this) {
     is PayPalUserIdentity.Email -> EMAIL
-    is PayPalUserIdentity.ServerSideShopperSession -> SERVER_SIDE_SHOPPER_SESSION
+    is PayPalUserIdentity.ExistingPayPalSession -> EXISTING_PAYPAL_SESSION
     null -> NONE
 }
 
@@ -62,8 +62,8 @@ fun PayPalUserIdentityForm(
                             when (option) {
                                 NONE -> null
                                 EMAIL -> PayPalUserIdentity.Email()
-                                SERVER_SIDE_SHOPPER_SESSION ->
-                                    PayPalUserIdentity.ServerSideShopperSession("")
+                                EXISTING_PAYPAL_SESSION ->
+                                    PayPalUserIdentity.ExistingPayPalSession("")
                             }
                         )
                     },
@@ -176,17 +176,17 @@ private fun EmailIdentityFields(onUserIdentityChange: (PayPalUserIdentity?) -> U
 }
 
 @Composable
-private fun ServerSideShopperSessionIdentityFields(
+private fun ExistingPayPalSessionIdentityFields(
     onUserIdentityChange: (PayPalUserIdentity?) -> Unit,
 ) {
     var sessionIdValue by remember { mutableStateOf("") }
     IdentityTextField(
         value = sessionIdValue,
-        label = "Server-Side Shopper Session ID",
+        label = "Existing PayPal Session ID",
         onValueChange = { input ->
             sessionIdValue = input
             onUserIdentityChange(
-                PayPalUserIdentity.ServerSideShopperSession(serverSideShopperSessionId = input)
+                PayPalUserIdentity.ExistingPayPalSession(existingPayPalSessionId = input)
             )
         }
     )
@@ -205,8 +205,8 @@ private fun IdentityOptionItem(
             when (option) {
                 NONE -> {}
                 EMAIL -> EmailIdentityFields(onUserIdentityChange = onUserIdentityChange)
-                SERVER_SIDE_SHOPPER_SESSION ->
-                    ServerSideShopperSessionIdentityFields(onUserIdentityChange)
+                EXISTING_PAYPAL_SESSION ->
+                    ExistingPayPalSessionIdentityFields(onUserIdentityChange)
             }
         }
     }
