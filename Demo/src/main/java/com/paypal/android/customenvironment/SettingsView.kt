@@ -90,18 +90,18 @@ private fun SettingsContent(
                 error = uiState.graphQLUrlError
             )
             UrlField(
-                label = "Client ID",
-                placeholder = "Enter PayPal client ID (optional)",
-                value = uiState.settings.customClientId,
-                onValueChange = onCustomClientIdChange,
-            )
-            UrlField(
                 label = "Merchant Server Base URL",
                 placeholder = "Enter merchant server base URL",
                 value = uiState.settings.customMerchantBaseUrl,
                 onValueChange = onCustomMerchantBaseUrlChange,
                 imeAction = ImeAction.Done,
                 error = uiState.merchantBaseUrlError
+            )
+            UrlField(
+                label = "Client ID",
+                placeholder = "Enter PayPal client ID (optional)",
+                value = uiState.settings.customClientId,
+                onValueChange = onCustomClientIdChange,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
