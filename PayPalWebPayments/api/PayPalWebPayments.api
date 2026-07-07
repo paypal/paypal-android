@@ -57,7 +57,6 @@ public final class com/paypal/android/paypalwebpayments/PayPalUserIdentity$Email
 	public fun toString ()Ljava/lang/String;
 }
 
-
 public final class com/paypal/android/paypalwebpayments/PayPalUserIdentity$ServerSideShopperSession : com/paypal/android/paypalwebpayments/PayPalUserIdentity {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;

@@ -59,7 +59,8 @@ class PayPalWebCheckoutClient internal constructor(
     private var appSwitchEnabled: Boolean = false
 
     // Shopper Session id (v3) — set by createPayPalSession(), awaited by start() / vault()
-    private var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse>? = null
+    @VisibleForTesting
+    internal var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
 
     constructor(
