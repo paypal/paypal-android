@@ -17,6 +17,12 @@ data class DemoEnvironmentSettings(
 
     /** Optional client ID override. When blank, falls back to the default integration client ID. */
     val customClientId: String = "",
+
+    /**
+     * Optional merchant server base URL override. When blank, falls back to the default
+     * merchant server URL.
+     */
+    val customMerchantBaseUrl: String = "",
 ) {
     /**
      * True when the config is ready to use. Only false when [selectedEnvironment] is CUSTOM

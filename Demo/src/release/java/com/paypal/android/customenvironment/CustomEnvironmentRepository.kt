@@ -1,5 +1,6 @@
 package com.paypal.android.customenvironment
 
+import com.paypal.android.api.services.MerchantIntegration
 import com.paypal.android.corepayments.CoreConfig
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,4 +16,5 @@ class CustomEnvironmentRepository @Inject constructor() {
     fun saveConfig(settings: DemoEnvironmentSettings) = Unit
     fun clearConfig() = Unit
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig = fallbackConfig
+    fun getMerchantBaseUrl(): String = MerchantIntegration.DEFAULT.baseUrl
 }

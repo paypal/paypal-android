@@ -47,6 +47,7 @@ fun SettingsView(
         onCustomSdkRestUrlChange = viewModel::updateCustomSdkRestUrl,
         onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
         onCustomClientIdChange = viewModel::updateCustomClientId,
+        onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
@@ -59,6 +60,7 @@ private fun SettingsContent(
     onCustomSdkRestUrlChange: (String) -> Unit,
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
+    onCustomMerchantBaseUrlChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -92,7 +94,14 @@ private fun SettingsContent(
                 placeholder = "Enter PayPal client ID (optional)",
                 value = uiState.settings.customClientId,
                 onValueChange = onCustomClientIdChange,
-                imeAction = ImeAction.Done
+            )
+            UrlField(
+                label = "Merchant Server Base URL",
+                placeholder = "Enter merchant server base URL (optional)",
+                value = uiState.settings.customMerchantBaseUrl,
+                onValueChange = onCustomMerchantBaseUrlChange,
+                imeAction = ImeAction.Done,
+                error = uiState.merchantBaseUrlError
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -227,14 +236,17 @@ private fun SettingsViewPreview() {
                         customSdkRestUrl = "not-a-valid-url",
                         customSdkGraphQLUrl = "",
                         customClientId = "client-id-entered-at-runtime",
+                        customMerchantBaseUrl = "bad merchant url",
                     ),
                     restUrlError = "URL must start with https://",
-                    graphQLUrlError = "URL is required"
+                    graphQLUrlError = "URL is required",
+                    merchantBaseUrlError = "URL must not contain spaces"
                 ),
                 onEnvironmentChange = {},
                 onCustomSdkRestUrlChange = {},
                 onCustomSdkGraphQLUrlChange = {},
                 onCustomClientIdChange = {},
+                onCustomMerchantBaseUrlChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

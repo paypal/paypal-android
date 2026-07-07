@@ -3,6 +3,7 @@ package com.paypal.android.customenvironment
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.paypal.android.api.services.MerchantIntegration
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,7 @@ class CustomEnvironmentRepository @Inject constructor(
         customSdkRestUrl = (prefs.getString(KEY_SDK_REST_URL, "") ?: ""),
         customSdkGraphQLUrl = (prefs.getString(KEY_SDK_GRAPHQL_URL, "") ?: ""),
         customClientId = (prefs.getString(KEY_CLIENT_ID, "") ?: ""),
+        customMerchantBaseUrl = (prefs.getString(KEY_MERCHANT_BASE_URL, "") ?: ""),
     )
 
     /** Persists [settings] to SharedPreferences. */
@@ -37,12 +39,28 @@ class CustomEnvironmentRepository @Inject constructor(
             putString(KEY_SDK_REST_URL, settings.customSdkRestUrl)
             putString(KEY_SDK_GRAPHQL_URL, settings.customSdkGraphQLUrl)
             putString(KEY_CLIENT_ID, settings.customClientId)
+            putString(KEY_MERCHANT_BASE_URL, settings.customMerchantBaseUrl)
         }
     }
 
     /** Clears all saved values, reverting to the default sandbox environment. */
     fun clearConfig() {
         prefs.edit { clear() }
+    }
+
+    /**
+     * Returns the merchant server base URL to use. When [SelectedEnvironment.CUSTOM] is active
+     * and a custom merchant URL has been saved, that URL is returned. Otherwise falls back to the
+     * default merchant server URL.
+     */
+    fun getMerchantBaseUrl(): String {
+        val settings = getConfig()
+        val customUrl = settings.customMerchantBaseUrl.trim().trimEnd('/')
+        return if (settings.selectedEnvironment == SelectedEnvironment.CUSTOM && customUrl.isNotBlank()) {
+            customUrl
+        } else {
+            MerchantIntegration.DEFAULT.baseUrl
+        }
     }
 
     /**
@@ -81,5 +99,6 @@ class CustomEnvironmentRepository @Inject constructor(
         private const val KEY_SDK_REST_URL = "sdk_rest_url"
         private const val KEY_SDK_GRAPHQL_URL = "sdk_graphql_url"
         private const val KEY_CLIENT_ID = "client_id"
+        private const val KEY_MERCHANT_BASE_URL = "merchant_base_url"
     }
 }

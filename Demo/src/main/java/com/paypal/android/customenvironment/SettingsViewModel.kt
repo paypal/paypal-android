@@ -60,6 +60,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomMerchantBaseUrl(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customMerchantBaseUrl = value),
+                merchantBaseUrlError = null,
+                showSaveSuccess = false
+            )
+        }
+    }
+
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
     fun saveConfig() {
         val settings = _uiState.value.settings
@@ -69,14 +79,22 @@ class SettingsViewModel @Inject constructor(
         }
         val restError = validateUrl(settings.customSdkRestUrl)
         val graphQLError = validateUrl(settings.customSdkGraphQLUrl)
-        if (restError != null || graphQLError != null) {
-            _uiState.update { it.copy(restUrlError = restError, graphQLUrlError = graphQLError) }
+        val merchantError = validateUrl(settings.customMerchantBaseUrl, optional = true)
+        if (restError != null || graphQLError != null || merchantError != null) {
+            _uiState.update {
+                it.copy(
+                    restUrlError = restError,
+                    graphQLUrlError = graphQLError,
+                    merchantBaseUrlError = merchantError
+                )
+            }
             // Persist whichever fields are valid so they survive an environment switch.
             // Invalid fields are saved as empty to avoid persisting bad data.
             customEnvironmentRepository.saveConfig(
                 settings.copy(
                     customSdkRestUrl = if (restError == null) settings.customSdkRestUrl else "",
                     customSdkGraphQLUrl = if (graphQLError == null) settings.customSdkGraphQLUrl else "",
+                    customMerchantBaseUrl = if (merchantError == null) settings.customMerchantBaseUrl else "",
                 )
             )
             return
@@ -99,26 +117,27 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun validateUrl(url: String): String? {
-        val errorMessage = if (url.isBlank()) {
-            "URL is required"
-        } else if (url != url.trim()) {
-            "URL must not contain leading or trailing spaces"
-        } else if (url.contains(' ')) {
-            "URL must not contain spaces"
-        } else {
-            try {
-                val parsed = URL(url)
-                when {
-                    parsed.protocol != "https" -> "URL must start with https://"
-                    parsed.host.isNullOrBlank() -> "Enter a valid URL (e.g. https://api.example.com)"
-                    else -> null
-                }
-            } catch (e: MalformedURLException) {
-                "Enter a valid URL (e.g. https://api.example.com)"
+    /**
+     * Validates a URL field. Both http:// and https:// are accepted.
+     *
+     * When [optional] is true, a blank value is considered valid (field is not required).
+     * When [optional] is false, the field is required.
+     */
+    private fun validateUrl(url: String, optional: Boolean = false): String? {
+        if (url.isBlank()) return if (optional) null else "URL is required"
+        if (url != url.trim()) return "URL must not contain leading or trailing spaces"
+        if (url.contains(' ')) return "URL must not contain spaces"
+        return try {
+            val parsed = URL(url)
+            when {
+                parsed.protocol !in listOf("http", "https") ->
+                    "URL must start with http:// or https://"
+                parsed.host.isNullOrBlank() ->
+                    "Enter a valid URL (e.g. https://api.example.com)"
+                else -> null
             }
+        } catch (e: MalformedURLException) {
+            "Enter a valid URL (e.g. https://api.example.com)"
         }
-
-        return errorMessage
     }
 }
