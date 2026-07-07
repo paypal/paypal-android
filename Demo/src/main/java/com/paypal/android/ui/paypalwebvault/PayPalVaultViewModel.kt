@@ -55,7 +55,7 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(createPaymentTokenState = value) }
         }
 
-    var userIdentity: PayPalUserIdentity
+    var userIdentity: PayPalUserIdentity?
         get() = _uiState.value.userIdentity
         set(value) {
             _uiState.update { it.copy(userIdentity = value) }
@@ -69,7 +69,7 @@ class PayPalVaultViewModel @Inject constructor(
 
     fun createPayPalSession() {
         paypalClient.createPayPalSession(
-            userIdentity = _uiState.value.userIdentity,
+            userIdentity = _uiState.value.userIdentity ?: PayPalUserIdentity.Email(),
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )

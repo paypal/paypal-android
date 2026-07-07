@@ -9,7 +9,7 @@ import com.paypal.android.uishared.state.ActionState
 
 data class PayPalVaultUiState(
     val createSetupTokenState: ActionState<PayPalSetupToken, Exception> = ActionState.Idle,
-    val userIdentity: PayPalUserIdentity = PayPalUserIdentity.None,
+    val userIdentity: PayPalUserIdentity? = null,
     val userAction: PayPalUserAction = PayPalUserAction.SETUP_NOW,
     val isPayPalSessionCreated: Boolean = false,
     val vaultPayPalState: ActionState<PayPalWebCheckoutFinishVaultResult.Success, Exception> = ActionState.Idle,

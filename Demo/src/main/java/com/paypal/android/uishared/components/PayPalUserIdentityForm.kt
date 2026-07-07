@@ -37,16 +37,37 @@ private enum class IdentityOption {
     SERVER_SIDE_SHOPPER_SESSION;
 }
 
-private fun PayPalUserIdentity.toIdentityOption(): IdentityOption = when (this) {
-    is PayPalUserIdentity.None -> NONE
+private fun PayPalUserIdentity?.toIdentityOption(): IdentityOption = when (this) {
     is PayPalUserIdentity.Email -> EMAIL
     is PayPalUserIdentity.ServerSideShopperSession -> SERVER_SIDE_SHOPPER_SESSION
+    null -> NONE
+}
+
+@Composable
+private fun IdentityTextField(
+    value: String,
+    label: String,
+    onValueChange: (String) -> Unit,
+    bottomPadding: Dp = UIConstants.paddingMedium,
+) {
+    OutlinedTextField(
+        value = value,
+        label = { Text(label) },
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = UIConstants.paddingMedium,
+                end = UIConstants.paddingMedium,
+                bottom = bottomPadding
+            )
+    )
 }
 
 @Composable
 fun PayPalUserIdentityForm(
-    userIdentity: PayPalUserIdentity,
-    onUserIdentityChange: (PayPalUserIdentity) -> Unit,
+    userIdentity: PayPalUserIdentity?,
+    onUserIdentityChange: (PayPalUserIdentity?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val selectedOption = userIdentity.toIdentityOption()
@@ -94,7 +115,7 @@ fun PayPalUserIdentityForm(
                                 onClick = {
                                     onUserIdentityChange(
                                         when (option) {
-                                            NONE -> PayPalUserIdentity.None
+                                            NONE -> null
                                             EMAIL -> PayPalUserIdentity.Email(
                                                 email = emailValue.ifBlank { null },
                                                 phone = phoneValue.ifBlank { null }
@@ -129,7 +150,7 @@ fun PayPalUserIdentityForm(
 
                     if (isSelected) {
                         when (option) {
-                            NONE -> { /* no input fields */ }
+                            NONE -> { /* no fields */ }
                             EMAIL -> {
                                 IdentityTextField(
                                     value = emailValue,
@@ -183,28 +204,6 @@ fun PayPalUserIdentityForm(
             }
         }
     }
-}
-
-
-@Composable
-private fun IdentityTextField(
-    value: String,
-    label: String,
-    onValueChange: (String) -> Unit,
-    bottomPadding: Dp = UIConstants.paddingMedium,
-) {
-    OutlinedTextField(
-        value = value,
-        label = { Text(label) },
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = UIConstants.paddingMedium,
-                end = UIConstants.paddingMedium,
-                bottom = bottomPadding
-            )
-    )
 }
 
 @Preview

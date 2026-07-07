@@ -11,7 +11,7 @@ import com.paypal.android.uishared.state.ActionState
 data class PayPalUiState(
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
-    val userIdentity: PayPalUserIdentity = PayPalUserIdentity.None,
+    val userIdentity: PayPalUserIdentity? = null,
     val userAction: PayPalUserAction = PayPalUserAction.PAY_NOW,
     val isPayPalSessionCreated: Boolean = false,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,

@@ -27,9 +27,4 @@ sealed class PayPalUserIdentity {
         val email: String? = null,
         val phone: String? = null
     ) : PayPalUserIdentity()
-
-    /**
-     * No identity signal is provided. The shopper session is created without pre-identification.
-     */
-    data object None : PayPalUserIdentity()
 }
