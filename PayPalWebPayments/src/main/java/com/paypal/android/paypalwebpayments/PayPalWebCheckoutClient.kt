@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -530,7 +531,13 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private val baseUrl: String = coreConfig.environment.graphQLEndpoint
+    // With V3, we won't need base url, it'll be returned as part of shopper session.
+    // Leaving for deprecated method support.
+    private val baseUrl: String
+        get() = when (coreConfig.environment) {
+            Environment.LIVE -> "https://paypal.com/"
+            else -> "https://sandbox.paypal.com/"
+        }
 
     private suspend fun getLaunchUri(
         context: Context,
