@@ -63,7 +63,7 @@ public final class com/paypal/android/corepayments/CoreConfig {
 	public final fun getBnCode ()Ljava/lang/String;
 	public final fun getClientId ()Ljava/lang/String;
 	public final fun getEnvironment ()Lcom/paypal/android/corepayments/Environment;
-	public final fun getMerchantID ()Ljava/lang/String;
+	public final fun getMerchantId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
