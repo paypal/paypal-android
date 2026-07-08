@@ -21,6 +21,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.paypal.android.BuildConfig
+import com.paypal.android.customenvironment.SettingsView
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
@@ -60,12 +62,18 @@ fun DemoApp() {
             topBar = {
                 val route = navBackStackEntry?.destination?.route
                 val titleText = DemoAppDestinations.titleForDestination(route)
+                val showSettingsIcon = BuildConfig.DEBUG && route != DemoAppDestinations.SETTINGS
                 DemoAppTopBar(
                     title = titleText,
                     shouldDisplayBackButton = shouldDisplayBackButton,
                     onBackButtonClick = {
                         val destinationId = navController.graph.startDestinationId
                         navController.popBackStack(destinationId, false)
+                    },
+                    onSettingsClick = if (showSettingsIcon) {
+                        { navController.navigate(DemoAppDestinations.SETTINGS) }
+                    } else {
+                        null
                     }
                 )
             },
@@ -128,6 +136,11 @@ fun DemoApp() {
                 }
                 composable(DemoAppDestinations.PAY_WITH_VENMO) {
                     PayWithVenmoView()
+                }
+                if (BuildConfig.DEBUG) {
+                    composable(DemoAppDestinations.SETTINGS) {
+                        SettingsView()
+                    }
                 }
             }
         }
