@@ -55,7 +55,7 @@ class CustomEnvironmentRepository @Inject constructor(
      */
     fun getMerchantBaseUrl(): String {
         val settings = getConfig()
-        val customUrl = settings.customMerchantBaseUrl.trim().trimEnd('/')
+        val customUrl = settings.customMerchantBaseUrl.trim()
         return if (settings.selectedEnvironment == SelectedEnvironment.CUSTOM && customUrl.isNotBlank()) {
             customUrl
         } else {

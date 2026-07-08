@@ -33,6 +33,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
     private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
+    private val merchantId: String
 ) {
 
     constructor(coreConfig: CoreConfig, applicationContext: Context) : this(
@@ -40,6 +41,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         graphQLClient = GraphQLClient(coreConfig),
         resourceLoader = ResourceLoader(),
         authenticationSecureTokenServiceAPI = AuthenticationSecureTokenServiceAPI(coreConfig),
+        merchantId = coreConfig.merchantId
     )
 
     /**
@@ -100,7 +102,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                 experimentationContext = CreateShopperSessionExperimentationContext(
                     appSwitchSupported = paypalNativeAppInstalled,
                     buyerGUID = null,
-                    merchantAccountId = null,
+                    merchantAccountId = merchantId,
                     merchantCountry = null,
                     integrationChannel = INTEGRATION_CHANNEL,
                     isWebLLSEligible = false,
