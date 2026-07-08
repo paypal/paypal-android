@@ -1697,7 +1697,7 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
         val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-        sutV3.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+        sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
         sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
         sutV3.start(activity, "fake-order-id", callback)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -1718,7 +1718,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() with orderId delivers failure when createShopperSession throws`() = runTest {
         val sutV3 = makeSutWithUrlScheme()
         val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-        sutV3.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+        sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
         sutV3.shopperSessionDeferred = CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse>()
             .also { it.completeExceptionally(RuntimeException("session error")) }
         sutV3.start(activity, "fake-order-id", callback)
@@ -1736,7 +1736,7 @@ class PayPalWebCheckoutClientUnitTest {
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            sutV3.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
             val callback1 = mockk<PayPalWebStartCallback>(relaxed = true)
             val callback2 = mockk<PayPalWebStartCallback>(relaxed = true)
@@ -1781,7 +1781,7 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
         val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-        sutV3.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+        sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
         sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
         sutV3.vault(activity, "fake-setup-token-id", callback)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -1802,7 +1802,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `vault() with setupTokenId delivers failure when createShopperSession throws`() = runTest {
         val sutV3 = makeSutWithUrlScheme()
         val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-        sutV3.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+        sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
         sutV3.shopperSessionDeferred = CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse>()
             .also { it.completeExceptionally(RuntimeException("session error")) }
         sutV3.vault(activity, "fake-setup-token-id", callback)
@@ -1820,7 +1820,7 @@ class PayPalWebCheckoutClientUnitTest {
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            sutV3.createPayPalSession(fakeUserIdentity, fakeUrlConfig)
+            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
             val callback1 = mockk<PayPalWebVaultCallback>(relaxed = true)
             val callback2 = mockk<PayPalWebVaultCallback>(relaxed = true)

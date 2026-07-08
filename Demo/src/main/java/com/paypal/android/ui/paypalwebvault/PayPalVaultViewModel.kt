@@ -10,6 +10,7 @@ import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.customenvironment.CustomEnvironmentRepository
+import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalUserAction
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
@@ -76,6 +77,7 @@ class PayPalVaultViewModel @Inject constructor(
 
     fun createPayPalSession() {
         paypalClient.createPayPalSession(
+            tokenType = TokenType.VAULT_ID,
             userIdentity = _uiState.value.userIdentity,
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction

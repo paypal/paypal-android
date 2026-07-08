@@ -16,6 +16,7 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
+import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.PayPalUserAction
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
@@ -101,8 +102,8 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
 
     fun createPayPalSession() {
-
         paypalClient.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
             userIdentity = _uiState.value.userIdentity,
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
