@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -103,7 +104,7 @@ class PayPalWebCheckoutClient internal constructor(
      * @param userAction Controls the call-to-action label on the PayPal checkout page.
      */
     fun createPayPalSession(
-        userIdentity: PayPalUserIdentity,
+        userIdentity: PayPalUserIdentity?,
         urlConfig: ReturnToAppUrlConfig,
         userAction: PayPalUserAction = PayPalUserAction.CONTINUE,
     ) {
@@ -127,7 +128,7 @@ class PayPalWebCheckoutClient internal constructor(
     // TODO: Narrow exception type once the shopper session network call is finalized
     @Suppress("TooGenericExceptionCaught")
     fun start(
-        activity: Activity,
+        context: Context,
         orderId: String,
         callback: PayPalWebStartCallback,
     ) {
@@ -149,7 +150,7 @@ class PayPalWebCheckoutClient internal constructor(
                 shopperSessionDeferred = null
                 analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled)
                 val result = launchCheckoutWithShopperSession(
-                    activity = activity,
+                    context = context,
                     shopperSession = shopperSession,
                     orderId = orderId,
                 )
@@ -184,7 +185,7 @@ class PayPalWebCheckoutClient internal constructor(
     // TODO: Narrow exception type once the shopper session network call is finalized
     @Suppress("TooGenericExceptionCaught")
     fun vault(
-        activity: ComponentActivity,
+        context: Context,
         setupTokenId: String,
         callback: PayPalWebVaultCallback,
     ) {
@@ -206,7 +207,7 @@ class PayPalWebCheckoutClient internal constructor(
                 shopperSessionDeferred = null
                 analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
                 val result = launchVaultWithSession(
-                    activity = activity,
+                    context = context,
                     shopperSession = shopperSession,
                     setupTokenId = setupTokenId,
                 )
@@ -317,41 +318,43 @@ class PayPalWebCheckoutClient internal constructor(
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param orderId The order id to approve.
      */
+    @Suppress("UnusedPrivateMember") // TODO: params will be used once implementation is complete
     private fun launchCheckoutWithShopperSession(
-        activity: Activity,
+        context: Context,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
-        appSwitchEnabled = shopperSession.appSwitchEligible
+        appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
         val launchUri = shopperSession.getLaunchUri(orderId)
 
         // TODO: Remove ReturnToAppStrategy all together.
-        val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
-            uri = launchUri,
-            token = orderId,
-            tokenType = TokenType.ORDER_ID,
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
-        )
-
-        when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    checkoutOrderId,
-                    appSwitchEnabled,
-                )
-                sessionStore.authState = result.authState
-            }
-            is PayPalPresentAuthChallengeResult.Failure -> {
-                analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    checkoutOrderId,
-                    appSwitchEnabled,
-                )
-            }
-        }
-        return result
+//        val result = payPalWebLauncher.launchWithUrl(
+//            activity = activity,
+//            uri = launchUri,
+//            token = orderId,
+//            tokenType = TokenType.ORDER_ID,
+//            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+//        )
+//
+//        when (result) {
+//            is PayPalPresentAuthChallengeResult.Success -> {
+//                analytics.notify(
+//                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+//                    checkoutOrderId,
+//                    appSwitchEnabled,
+//                )
+//                sessionStore.authState = result.authState
+//            }
+//            is PayPalPresentAuthChallengeResult.Failure -> {
+//                analytics.notify(
+//                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+//                    checkoutOrderId,
+//                    appSwitchEnabled,
+//                )
+//            }
+//        }
+//        return result
+        return PayPalPresentAuthChallengeResult.Failure(PayPalSDKError(0, ""))
     }
 
     /**
@@ -364,40 +367,42 @@ class PayPalWebCheckoutClient internal constructor(
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param setupTokenId The setup token id to approve.
      */
+    @Suppress("UnusedPrivateMember") // TODO: params will be used once implementation is complete
     private fun launchVaultWithSession(
-        activity: Activity,
+        context: Context,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
 
-        val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
-            uri = launchUri,
-            token = setupTokenId,
-            tokenType = TokenType.VAULT_ID,
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
-        )
-
-        when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    vaultSetupTokenId,
-                    appSwitchEnabled,
-                )
-                sessionStore.authState = result.authState
-            }
-            is PayPalPresentAuthChallengeResult.Failure -> {
-                analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    vaultSetupTokenId,
-                    appSwitchEnabled,
-                )
-            }
-        }
-        return result
+//        val result = payPalWebLauncher.launchWithUrl(
+//            activity = activity,
+//            uri = launchUri,
+//            token = setupTokenId,
+//            tokenType = TokenType.VAULT_ID,
+//            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+//        )
+//
+//        when (result) {
+//            is PayPalPresentAuthChallengeResult.Success -> {
+//                analytics.notify(
+//                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+//                    vaultSetupTokenId,
+//                    appSwitchEnabled,
+//                )
+//                sessionStore.authState = result.authState
+//            }
+//            is PayPalPresentAuthChallengeResult.Failure -> {
+//                analytics.notify(
+//                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+//                    vaultSetupTokenId,
+//                    appSwitchEnabled,
+//                )
+//            }
+//        }
+//        return result
+        return PayPalPresentAuthChallengeResult.Failure(PayPalSDKError(0, ""))
     }
 
     /**
@@ -409,7 +414,7 @@ class PayPalWebCheckoutClient internal constructor(
     @Suppress("UnusedPrivateMember") // TODO: params will be used once implementation is complete
     internal suspend fun createShopperSessionWithAppSwitchEligibility(
         urlConfig: ReturnToAppUrlConfig,
-        userIdentity: PayPalUserIdentity,
+        userIdentity: PayPalUserIdentity?,
         userAction: PayPalUserAction,
     ): CreateShopperSessionWithAppSwitchEligibilityResponse {
         // TODO: Replace with real implementation.

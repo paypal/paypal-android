@@ -5,10 +5,10 @@ package com.paypal.android.paypalwebpayments
  *
  * @param returnAppUrl The deep link URL to open when checkout completes successfully.
  * @param cancelAppUrl The deep link URL to open when the shopper cancels checkout.
- * @param fallbackSchemeUrl A fallback URL scheme used when the primary deep link cannot be resolved.
+ * @param fallbackSchemeUrl Optional. A fallback URL scheme used when the primary deep link cannot be resolved.
  */
 data class ReturnToAppUrlConfig(
     val returnAppUrl: String,
     val cancelAppUrl: String,
-    val fallbackSchemeUrl: String,
+    val fallbackSchemeUrl: String?,
 )

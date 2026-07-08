@@ -69,7 +69,7 @@ class PayPalVaultViewModel @Inject constructor(
 
     fun createPayPalSession() {
         paypalClient.createPayPalSession(
-            userIdentity = _uiState.value.userIdentity ?: PayPalUserIdentity(),
+            userIdentity = _uiState.value.userIdentity,
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )
