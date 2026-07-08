@@ -17,6 +17,7 @@ import com.paypal.android.cardpayments.CardPresentAuthChallengeResult
 import com.paypal.android.cardpayments.CardRequest
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
@@ -40,11 +41,14 @@ class ApproveOrderViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     private val createOrderUseCase: CreateOrderUseCase,
     private val completeOrderUseCase: CompleteOrderUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
-    private val payPalDataCollector = PayPalDataCollector(coreConfig)
-    private val cardClient = CardClient(applicationContext, coreConfig)
+    private fun buildCoreConfig(): CoreConfig =
+        customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId))
+
+    // Held as a field so completeAuthChallenge uses the same instance that started the auth flow.
+    private var cardClient: CardClient? = null
 
     private val _uiState = MutableStateFlow(ApproveOrderUiState())
     val uiState = _uiState.asStateFlow()
@@ -74,6 +78,8 @@ class ApproveOrderViewModel @Inject constructor(
     private fun approveOrderWithId(activity: ComponentActivity, orderId: String) {
         approveOrderState = ActionState.Loading
 
+        val cardClient = CardClient(applicationContext, buildCoreConfig()).also { this.cardClient = it }
+
         val cardRequest = uiState.value.run {
             // expiration date in UI State needs to be formatted because it uses a visual transformation
             val dateString = DateString(cardExpirationDate)
@@ -100,7 +106,7 @@ class ApproveOrderViewModel @Inject constructor(
                 }
 
                 is CardApproveOrderResult.AuthorizationRequired ->
-                    presentAuthChallenge(activity, result.authChallenge)
+                    presentAuthChallenge(activity, result.authChallenge, cardClient)
 
                 is CardApproveOrderResult.Failure ->
                     approveOrderState = ActionState.Failure(result.error)
@@ -110,7 +116,8 @@ class ApproveOrderViewModel @Inject constructor(
 
     private fun presentAuthChallenge(
         activity: ComponentActivity,
-        authChallenge: CardAuthChallenge
+        authChallenge: CardAuthChallenge,
+        cardClient: CardClient,
     ) {
         when (val presentAuthResult = cardClient.presentAuthChallenge(activity, authChallenge)) {
             is CardPresentAuthChallengeResult.Success -> {
@@ -129,6 +136,7 @@ class ApproveOrderViewModel @Inject constructor(
         } else {
             viewModelScope.launch {
                 completeOrderState = ActionState.Loading
+                val payPalDataCollector = PayPalDataCollector(buildCoreConfig())
                 val dataCollectorRequest =
                     PayPalDataCollectorRequest(hasUserLocationConsent = false)
                 val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
@@ -213,7 +221,8 @@ class ApproveOrderViewModel @Inject constructor(
     }
 
     fun completeAuthChallenge(intent: Intent) {
-        cardClient.finishApproveOrder(intent)?.let { approveOrderResult ->
+        val client = cardClient ?: CardClient(applicationContext, buildCoreConfig())
+        client.finishApproveOrder(intent)?.let { approveOrderResult ->
             when (approveOrderResult) {
                 is CardFinishApproveOrderResult.Success -> {
                     val orderInfo = approveOrderResult.run {

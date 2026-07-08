@@ -1,6 +1,7 @@
 package com.paypal.android.di
 
 import com.paypal.android.api.services.SDKSampleServerAPI
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,5 +12,9 @@ import dagger.hilt.components.SingletonComponent
 object NetworkModule {
 
     @Provides
-    fun provideSDKSampleServerAPI(): SDKSampleServerAPI = SDKSampleServerAPI()
+    fun provideSDKSampleServerAPI(
+        customEnvironmentRepository: CustomEnvironmentRepository
+    ): SDKSampleServerAPI = SDKSampleServerAPI(
+        customMerchantBaseUrl = customEnvironmentRepository.getMerchantBaseUrl()
+    )
 }
