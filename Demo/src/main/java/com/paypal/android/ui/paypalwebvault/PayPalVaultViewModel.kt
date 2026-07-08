@@ -1,6 +1,6 @@
 package com.paypal.android.ui.paypalwebvault
-import com.paypal.android.DemoConstants
 
+import com.paypal.android.DemoConstants
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalwebpayments.PayPalUserAction
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
@@ -30,9 +31,15 @@ class PayPalVaultViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val createPayPalSetupTokenUseCase: CreatePayPalSetupTokenUseCase,
     val createPayPalPaymentTokenUseCase: CreatePayPalPaymentTokenUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
-    private val paypalClient = PayPalWebCheckoutClient(applicationContext, coreConfig)
+
+    private fun getCorConfig(): CoreConfig =
+        customEnvironmentRepository.getCoreConfig(
+            CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
+        )
+
+    private val paypalClient: PayPalWebCheckoutClient = PayPalWebCheckoutClient(applicationContext, getCorConfig())
 
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()
@@ -93,6 +100,7 @@ class PayPalVaultViewModel @Inject constructor(
             vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
         } else {
             vaultPayPalState = ActionState.Loading
+
             paypalClient.vault(activity, setupTokenId) { result ->
                 when (result) {
                     is PayPalPresentAuthChallengeResult.Success -> {

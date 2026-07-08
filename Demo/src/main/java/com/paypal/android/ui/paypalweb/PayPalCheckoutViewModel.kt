@@ -1,6 +1,6 @@
 package com.paypal.android.ui.paypalweb
-import com.paypal.android.DemoConstants
 
+import com.paypal.android.DemoConstants
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -11,6 +11,7 @@ import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
@@ -35,17 +36,21 @@ import javax.inject.Inject
 class PayPalCheckoutViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val createOrderUseCase: CreateOrderUseCase,
-    val completeOrderUseCase: CompleteOrderUseCase
+    val completeOrderUseCase: CompleteOrderUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
 
     companion object {
         private val TAG = PayPalCheckoutViewModel::class.qualifiedName
     }
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
-    private val payPalDataCollector = PayPalDataCollector(coreConfig)
-    private val paypalClient =
-        PayPalWebCheckoutClient(applicationContext, coreConfig)
+    private fun getCorConfig(): CoreConfig =
+        customEnvironmentRepository.getCoreConfig(
+            CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
+        )
+
+    private val payPalDataCollector = PayPalDataCollector(getCorConfig())
+    private val paypalClient: PayPalWebCheckoutClient = PayPalWebCheckoutClient(applicationContext, getCorConfig())
 
     private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()
@@ -96,6 +101,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
 
     fun createPayPalSession() {
+
         paypalClient.createPayPalSession(
             userIdentity = _uiState.value.userIdentity,
             urlConfig = DemoConstants.returnToAppUrlConfig,
