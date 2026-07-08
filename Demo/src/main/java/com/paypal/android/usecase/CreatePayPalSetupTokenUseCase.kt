@@ -23,7 +23,7 @@ class CreatePayPalSetupTokenUseCase @Inject constructor(
                 vaultInstruction = "ON_PAYER_APPROVAL",
                 returnUrl = returnToAppUrlConfig.returnAppUrl,
                 cancelUrl = returnToAppUrlConfig.cancelAppUrl,
-                nativeApp = PayPalNativeApp(appUrl = returnToAppUrlConfig.fallbackSchemeUrl)
+                nativeApp = PayPalNativeApp(appUrl = DemoConstants.APP_URL)
             )
 
             val payPalSetupRequest = PayPalSetupRequestBody(

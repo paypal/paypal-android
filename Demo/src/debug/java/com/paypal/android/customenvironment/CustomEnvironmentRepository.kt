@@ -73,14 +73,15 @@ class CustomEnvironmentRepository @Inject constructor(
         val settings = getConfig()
         return when (settings.selectedEnvironment) {
             SelectedEnvironment.LIVE ->
-                CoreConfig(clientId = fallbackConfig.clientId, environment = Environment.LIVE)
+                CoreConfig(clientId = fallbackConfig.clientId, fallbackConfig.merchantId, environment = Environment.LIVE)
             SelectedEnvironment.SANDBOX ->
-                CoreConfig(clientId = fallbackConfig.clientId, environment = Environment.SANDBOX)
+                CoreConfig(clientId = fallbackConfig.clientId, fallbackConfig.merchantId, environment = Environment.SANDBOX)
             SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
                 Environment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
                 Environment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
                 val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
-                CoreConfig(clientId = resolvedClientId, environment = Environment.CUSTOM)
+                val resolvedMerchantId = ""// TODO - Implement.
+                CoreConfig(clientId = resolvedClientId, resolvedMerchantId, environment = Environment.CUSTOM)
             } else {
                 fallbackConfig
             }
