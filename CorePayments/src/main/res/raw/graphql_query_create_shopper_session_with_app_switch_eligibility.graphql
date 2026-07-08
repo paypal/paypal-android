@@ -1,59 +1,21 @@
 mutation CreateShopperSessionWithAppSwitchEligibility(
-  $osType: String!,
-  $osVersion: String!,
-  $token: String!,
-  $tokenType: String!,
-  $contextId: String!,
-  $buyerEmailAddressMerchantPassed: String,
-  $paypalNativeAppInstalled: Boolean!,
-  $bnCode: String,
-  $integrationChannel: String,
-  $paymentMethodSelected: String,
-  $productCode: String,
-  $paymentType: String,
-  $returnAppUrl: String!,
-  $cancelAppUrl: String!,
-  $fallbackUrlScheme: String,
-  $sdkVersion: String
+  $appSwitchEligibilityInput: externalAppSwitchEligibilityInput,
+  $shopperSessionInput: externalShopperSessionInput
 ) {
-  createShopperSessionWithAppSwitchEligibility(
-    input: {
-      deviceInfo: {
-        osType: $osType,
-        osVersion: $osVersion
-      },
-      tokenInfo: {
-        token: $token,
-        tokenType: $tokenType,
-        contextId: $contextId
-      },
-      buyerInfo: {
-        buyerEmailAddressMerchantPassed: $buyerEmailAddressMerchantPassed
-      },
-      appSwitchInfo: {
-        paypalNativeAppInstalled: $paypalNativeAppInstalled,
-        returnAppUrl: $returnAppUrl,
-        cancelAppUrl: $cancelAppUrl,
-        fallbackUrlScheme: $fallbackUrlScheme
-      },
-      productInfo: {
-        bnCode: $bnCode,
-        integrationChannel: $integrationChannel,
-        paymentMethodSelected: $paymentMethodSelected,
-        productCode: $productCode,
-        paymentType: $paymentType,
-        sdkVersion: $sdkVersion
+  external {
+    createShopperSessionWithAppSwitchEligibility(
+      appSwitchEligibilityInput: $appSwitchEligibilityInput
+      shopperSessionInput: $shopperSessionInput
+    ) {
+      appSwitchEligibilityResponse {
+        appSwitchEligible
+        ineligibleReason
+        redirectURL
       }
-    }
-  ) {
-    appSwitchEligibilityResponse {
-      appSwitchEligible,
-      ineligibleReason,
-      redirectURL
-    },
-    shopperSessionResponse {
-      sessionId,
-      expiresAt
+      shopperSessionResponse {
+        sessionId
+        expiresAt
+      }
     }
   }
 }

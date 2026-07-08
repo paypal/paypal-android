@@ -425,11 +425,10 @@ class PayPalWebCheckoutClient internal constructor(
         val result = api(
             token = token,
             tokenType = tokenType,
-            email = userIdentity?.email,
             returnAppUrl = urlConfig.returnAppUrl,
             cancelAppUrl = urlConfig.cancelAppUrl,
             fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
-            paymentType = userAction.name,
+            paymentType = userAction.toExternalPaymentType(),
             paypalNativeAppInstalled = deviceInspector.isPayPalInstalled,
             fallbackUrl = baseUrl,
         )
@@ -914,4 +913,10 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     // endregion
+}
+
+private fun PayPalUserAction.toExternalPaymentType(): String = when (this) {
+    PayPalUserAction.CONTINUE -> "CONTINUE"
+    PayPalUserAction.PAY_NOW -> "PAY"
+    PayPalUserAction.SETUP_NOW -> "COMMIT"
 }

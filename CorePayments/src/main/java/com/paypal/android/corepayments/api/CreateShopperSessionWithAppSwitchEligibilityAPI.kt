@@ -1,7 +1,6 @@
 package com.paypal.android.corepayments.api
 
 import android.content.Context
-import android.os.Build
 import androidx.annotation.RestrictTo
 import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.BuildConfig
@@ -15,9 +14,12 @@ import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.CreateShopperSessionAppSwitchData
+import com.paypal.android.corepayments.model.CreateShopperSessionAppSwitchEligibilityInput
 import com.paypal.android.corepayments.model.CreateShopperSessionData
+import com.paypal.android.corepayments.model.CreateShopperSessionExperimentationContext
 import com.paypal.android.corepayments.model.CreateShopperSessionGraphQLResponse
 import com.paypal.android.corepayments.model.CreateShopperSessionSessionData
+import com.paypal.android.corepayments.model.CreateShopperSessionShopperSessionInput
 import com.paypal.android.corepayments.model.CreateShopperSessionVariables
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.ShopperSessionConfig
@@ -43,9 +45,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     /**
      * Calls the `createShopperSessionWithAppSwitchEligibility` GraphQL mutation.
      *
-     * @param token The order or setup token.
+     * @param token The order or setup token (used as contextId).
      * @param tokenType The type of token (ORDER_ID, VAULT_ID, etc.).
-     * @param email Buyer email address provided by the merchant, if available.
      * @param returnAppUrl Deep-link URL to return to the app on success.
      * @param cancelAppUrl Deep-link URL to return to the app on cancellation.
      * @param fallbackSchemeUrl Custom URL scheme used as fallback.
@@ -56,7 +57,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     suspend operator fun invoke(
         token: String,
         tokenType: TokenType,
-        email: String?,
         returnAppUrl: String,
         cancelAppUrl: String,
         fallbackSchemeUrl: String?,
@@ -67,7 +67,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         val graphQLRequest = createGraphQLRequest(
             token = token,
             tokenType = tokenType,
-            email = email,
             returnAppUrl = returnAppUrl,
             cancelAppUrl = cancelAppUrl,
             fallbackSchemeUrl = fallbackSchemeUrl,
@@ -80,7 +79,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     private suspend fun createGraphQLRequest(
         token: String,
         tokenType: TokenType,
-        email: String?,
         returnAppUrl: String,
         cancelAppUrl: String,
         fallbackSchemeUrl: String?,
@@ -97,28 +95,35 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         }
 
         val variables = CreateShopperSessionVariables(
-            osType = OS_TYPE,
-            osVersion = Build.VERSION.RELEASE,
-            token = token,
-            tokenType = tokenType.toGraphQLTokenType(),
-            contextId = token,
-            buyerEmailAddressMerchantPassed = email,
-            paypalNativeAppInstalled = paypalNativeAppInstalled,
-            bnCode = null,
-            integrationChannel = INTEGRATION_CHANNEL,
-            paymentMethodSelected = PAYMENT_METHOD_SELECTED,
-            productCode = tokenType.toProductCode(),
-            paymentType = paymentType,
-            returnAppUrl = returnAppUrl,
-            cancelAppUrl = cancelAppUrl,
-            fallbackUrlScheme = fallbackSchemeUrl,
-            sdkVersion = BuildConfig.CLIENT_SDK_VERSION,
+            appSwitchEligibilityInput = CreateShopperSessionAppSwitchEligibilityInput(
+                contextId = token,
+                experimentationContext = CreateShopperSessionExperimentationContext(
+                    appSwitchSupported = paypalNativeAppInstalled,
+                    buyerGUID = null,
+                    merchantAccountId = null,
+                    merchantCountry = null,
+                    integrationChannel = INTEGRATION_CHANNEL,
+                    isWebLLSEligible = false,
+                    isWebView = false,
+                    paymentType = paymentType,
+                ),
+                merchantOptInForAppSwitch = true,
+                osType = OS_TYPE,
+                paypalNativeAppInstalled = paypalNativeAppInstalled,
+                tokenType = tokenType.toGraphQLTokenType(),
+            ),
+            shopperSessionInput = CreateShopperSessionShopperSessionInput(
+                returnAppUrl = returnAppUrl,
+                cancelAppUrl = cancelAppUrl,
+                fallbackUrlScheme = fallbackSchemeUrl,
+                sdkVersion = BuildConfig.CLIENT_SDK_VERSION,
+            ),
         )
 
         return GraphQLRequest(
             query = query,
             variables = variables,
-            operationName = "CreateShopperSessionWithAppSwitchEligibility"
+            operationName = "createShopperSessionWithAppSwitchEligibility"
         )
     }
 
@@ -140,6 +145,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         return when (graphQLResult) {
             is GraphQLResult.Success -> {
                 val data = graphQLResult.response.data
+                    ?.external
                     ?.createShopperSessionWithAppSwitchEligibility
                     ?: return APIResult.Failure(
                         APIClientError.noResponseData(graphQLResult.correlationId)
@@ -153,7 +159,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     companion object {
         private const val OS_TYPE = "ANDROID"
         private const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
-        private const val PAYMENT_METHOD_SELECTED = "PAYPAL"
     }
 }
 
@@ -161,12 +166,6 @@ private fun TokenType.toGraphQLTokenType(): String = when (this) {
     TokenType.ORDER_ID -> "CHECKOUT_TOKEN"
     TokenType.VAULT_ID -> "BILLING_TOKEN"
     TokenType.BILLING_TOKEN -> "BILLING_TOKEN"
-}
-
-private fun TokenType.toProductCode(): String = when (this) {
-    TokenType.ORDER_ID -> "EC_ONE_TIME_CHECKOUT"
-    TokenType.VAULT_ID -> "BILLING_AGREEMENT"
-    TokenType.BILLING_TOKEN -> "BILLING_AGREEMENT"
 }
 
 private fun CreateShopperSessionData.toResponse(
