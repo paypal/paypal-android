@@ -2,12 +2,10 @@ package com.paypal.android.usecase
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
-import com.paypal.android.api.model.serialization.ApplicationContext
 import com.paypal.android.api.model.serialization.OrderPaymentSource
 import com.paypal.android.api.model.serialization.OrderRequestBody
 import com.paypal.android.api.model.serialization.PurchaseUnit
 import com.paypal.android.api.model.serialization.VenmoAppSwitchContext
-import com.paypal.android.api.model.serialization.VenmoApplicationContext
 import com.paypal.android.api.model.serialization.VenmoExperienceContext
 import com.paypal.android.api.model.serialization.VenmoPaymentSource
 import com.paypal.android.api.services.SDKSampleServerAPI

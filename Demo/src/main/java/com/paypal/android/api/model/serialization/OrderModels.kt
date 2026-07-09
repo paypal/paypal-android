@@ -24,7 +24,8 @@ data class Amount(
 @Serializable
 data class OrderPaymentSource(
     val card: Card? = null,
-    val paypal: PayPalPaymentSource? = null
+    val paypal: PayPalPaymentSource? = null,
+    val venmo: VenmoPaymentSource? = null
 )
 
 @Serializable
@@ -57,4 +58,27 @@ data class PayPalOrderExperienceContext(
 @Serializable
 data class NativeApp(
     val appUrl: String
+)
+
+@Serializable
+data class VenmoPaymentSource(
+    val experienceContext: VenmoExperienceContext
+)
+
+@Serializable
+data class VenmoExperienceContext(
+    val returnUrl: String,
+    val cancelUrl: String,
+    val appSwitchContext: VenmoAppSwitchContext? = null
+)
+
+@Serializable
+data class VenmoAppSwitchContext(
+    val source: String
+)
+
+@Serializable
+data class VenmoApplicationContext(
+    val returnUrl: String? = null,
+    val cancelUrl: String? = null
 )
