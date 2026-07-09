@@ -66,6 +66,7 @@ class GetFundingEligibility internal constructor(
 
         val variables = GetFundingEligibilityVariables(
             merchantID = listOf(merchantId),
+            buyerCountry = "US",
             enableFunding = listOf(fundingSource),
         )
 

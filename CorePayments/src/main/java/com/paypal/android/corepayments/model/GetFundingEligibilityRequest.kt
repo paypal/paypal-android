@@ -13,7 +13,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GetFundingEligibilityVariables(
     val merchantID: List<String>,
-    val enableFunding: List<String>
+    val enableFunding: List<String>,
+    val buyerCountry: String,
 )
 
 /**
