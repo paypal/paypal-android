@@ -12,11 +12,7 @@ data class PayWithVenmoUiState(
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle
 ) {
     val isEligibilityCheckSuccessful: Boolean
-        get() {
-            val isSuccess = checkEligibilityState is ActionState.Success
-            val isEligible = (checkEligibilityState as? ActionState.Success)?.value is VenmoEligibilityResult.Eligible
-            return isSuccess && isEligible
-        }
+        get() = checkEligibilityState is ActionState.Success
 
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
