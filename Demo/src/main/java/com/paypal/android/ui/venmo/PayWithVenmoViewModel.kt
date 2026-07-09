@@ -41,7 +41,7 @@ class PayWithVenmoViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayWithVenmoUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
+    private val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX, "49PMUL5PVD5SY")
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val venmoClient = VenmoClient(applicationContext, coreConfig)
 
@@ -117,11 +117,10 @@ class PayWithVenmoViewModel @Inject constructor(
     }
 
     fun finishVenmo(intent: Intent) {
-        venmoClient.finishStart(intent)?.let { result ->
-            payWithVenmoState = when (result) {
-                is VenmoFinishStartResult.Success -> ActionState.Success(result)
-                is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
-            }
+        val result = venmoClient.finishStart(intent)
+        payWithVenmoState = when (result) {
+            is VenmoFinishStartResult.Success -> ActionState.Success(result)
+            is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
         }
     }
 

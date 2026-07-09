@@ -209,11 +209,7 @@ class UpdateClientConfigAPIUnitTest {
         // Assert
         assertTrue("Result should be Failure", result is UpdateClientConfigResult.Failure)
         val failure = result as UpdateClientConfigResult.Failure
-        assertEquals("Error code should be 0", 0, failure.error.code)
-        assertTrue(
-            "Error description should mention GraphQL query resource",
-            failure.error.errorDescription.contains("Failed to load GraphQL query resource")
-        )
+        assertEquals("Error should be the resource loading error", resourceError, failure.error)
 
         // Verify GraphQL client was not called when resource loading fails
         coVerify(exactly = 0) {

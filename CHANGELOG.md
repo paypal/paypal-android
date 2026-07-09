@@ -3,7 +3,7 @@
 ## Unreleased
 
 * Venmo
-  * Add `VenmoClient.isEligible(context: Context, currency: String = "USD"): VenmoEligibilityResult` 
+  * Add `VenmoClient.isEligible(context: Context): VenmoEligibilityResult` 
     suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`, 
     `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
 * Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch

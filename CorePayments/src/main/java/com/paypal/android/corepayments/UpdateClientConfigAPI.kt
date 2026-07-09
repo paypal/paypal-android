@@ -64,9 +64,7 @@ class UpdateClientConfigAPI(
             }
 
             is LoadRawResourceResult.Failure -> {
-                UpdateClientConfigResult.Failure(
-                    PayPalSDKError(0, "Failed to load GraphQL query resource")
-                )
+                UpdateClientConfigResult.Failure(result.error)
             }
         }
     }

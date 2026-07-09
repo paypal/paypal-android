@@ -21,28 +21,38 @@ import kotlinx.serialization.InternalSerializationApi
 class GetFundingEligibility internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
+    private val coreConfig: CoreConfig,
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
         graphQLClient = GraphQLClient(coreConfig),
         resourceLoader = ResourceLoader(),
+        coreConfig = coreConfig
     )
 
     suspend operator fun invoke(
         context: Context,
         clientId: String,
-        merchantId: List<String>? = null,
+        fundingSource: String,
         buyerCountry: String? = null,
         currency: String? = null
     ): APIResult<FundingEligibility> {
+        require(clientId.isNotBlank()) { "Client ID cannot be blank" }
+        require(fundingSource.isNotBlank()) { "Funding source cannot be blank" }
+        require(coreConfig.merchantId.isNotBlank()) { "Merchant ID cannot be blank" }
+
         val graphQLRequest = createGraphQLRequest(
-            context = context
+            context = context,
+            fundingSource = fundingSource,
+            merchantId = coreConfig.merchantId
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequest(graphQLRequest)
     }
 
     private suspend fun createGraphQLRequest(
-        context: Context
+        context: Context,
+        fundingSource: String,
+        merchantId: String
     ): GraphQLRequest<GetFundingEligibilityVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             context,
@@ -55,8 +65,8 @@ class GetFundingEligibility internal constructor(
         }
 
         val variables = GetFundingEligibilityVariables(
-            merchantID = listOf("V9YP27HFNG2LW"),
-            enableFunding = listOf("VENMO"),
+            merchantID = listOf(merchantId),
+            enableFunding = listOf(fundingSource),
         )
 
         return GraphQLRequest(
@@ -66,14 +76,10 @@ class GetFundingEligibility internal constructor(
         )
     }
 
-    private fun parseResponse(response: GetFundingEligibilityResponse): FundingEligibility? {
-        val fundingEligibilityData = response.fundingEligibility
-
-        return fundingEligibilityData?.let {
-            FundingEligibility(
-                venmoEligible = it.venmo?.eligible ?: false
-            )
-        }
+    private fun parseResponse(response: GetFundingEligibilityResponse): FundingEligibility {
+        return FundingEligibility(
+            venmoEligible = response.fundingEligibility?.venmo?.eligible ?: false
+        )
     }
 
     private suspend fun sendGraphQLRequest(
@@ -86,18 +92,22 @@ class GetFundingEligibility internal constructor(
         )
         return when (graphQLResult) {
             is GraphQLResult.Success -> {
-                graphQLResult.response.data?.let { responseData ->
-                    parseResponse(responseData)?.let { fundingEligibility ->
-                        APIResult.Success(data = fundingEligibility)
-                    } ?: APIResult.Failure(
-                        APIClientError.dataParsingError(graphQLResult.correlationId)
-                    )
-                } ?: APIResult.Failure(
-                    APIClientError.noResponseData(graphQLResult.correlationId)
-                )
+                handleSuccessResponse(graphQLResult)
             }
 
             is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
         }
+    }
+
+    private fun handleSuccessResponse(
+        graphQLResult: GraphQLResult.Success<GetFundingEligibilityResponse>
+    ): APIResult<FundingEligibility> {
+        val responseData = graphQLResult.response.data
+            ?: return APIResult.Failure(
+                APIClientError.noResponseData(graphQLResult.correlationId)
+            )
+
+        val fundingEligibility = parseResponse(responseData)
+        return APIResult.Success(data = fundingEligibility)
     }
 }
