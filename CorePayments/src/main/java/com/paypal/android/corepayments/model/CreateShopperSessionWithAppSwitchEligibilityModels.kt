@@ -71,7 +71,14 @@ internal data class CreateShopperSessionData(
 internal data class CreateShopperSessionAppSwitchData(
     val appSwitchEligible: Boolean = false,
     val ineligibleReason: String? = null,
+    val checkoutUrls: CreateShopperSessionCheckoutUrls? = null,
+)
+
+@OptIn(InternalSerializationApi::class)
+@Serializable
+internal data class CreateShopperSessionCheckoutUrls(
     val redirectURL: String? = null,
+    val checkoutFallbackUrl: String? = null,
 )
 
 @OptIn(InternalSerializationApi::class)

@@ -103,7 +103,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     appSwitchSupported = paypalNativeAppInstalled,
                     buyerGUID = null,
                     merchantAccountId = merchantId,
-                    merchantCountry = null,
+                    merchantCountry = "US",
                     integrationChannel = INTEGRATION_CHANNEL,
                     isWebLLSEligible = false,
                     isWebView = false,
@@ -177,8 +177,8 @@ private fun CreateShopperSessionData.toResponse(
     val session = shopperSessionResponse
     return CreateShopperSessionWithAppSwitchEligibilityResponse(
         appSwitchEligible = appSwitch?.appSwitchEligible ?: false,
-        redirectUrl = appSwitch?.redirectURL ?: fallbackUrl,
-        checkoutFallbackUrl = fallbackUrl,
+        redirectUrl = appSwitch?.checkoutUrls?.redirectURL ?: fallbackUrl,
+        checkoutFallbackUrl = appSwitch?.checkoutUrls?.checkoutFallbackUrl ?: fallbackUrl,
         inEligibleReason = appSwitch?.ineligibleReason,
         matchedAuthenticationMethods = emptyList(),
         shopperSessionConfig = ShopperSessionConfig(

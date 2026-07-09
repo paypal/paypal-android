@@ -10,7 +10,10 @@ mutation CreateShopperSessionWithAppSwitchEligibility(
       appSwitchEligibilityResponse {
         appSwitchEligible
         ineligibleReason
-        redirectURL
+        checkoutUrls {
+          redirectURL
+          checkoutFallbackUrl
+        }
       }
       shopperSessionResponse {
         sessionId
