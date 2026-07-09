@@ -22,6 +22,7 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
@@ -79,10 +80,30 @@ private fun Step1_CheckEligibility(uiState: PayWithVenmoUiState, viewModel: PayW
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Check Eligibility")
+
+        // Map eligibility result to failure state if not eligible
+        val displayState = when (val checkState = uiState.checkEligibilityState) {
+            is ActionState.Success -> {
+                val result = checkState.value
+                if (result is VenmoEligibilityResult.Eligible) {
+                    checkState
+                } else {
+                    // Show Ineligible or Error as failure
+                    val errorMessage = when (result) {
+                        is VenmoEligibilityResult.Ineligible -> result.reason
+                        is VenmoEligibilityResult.Error -> result.error.errorDescription
+                        else -> "Venmo is not eligible"
+                    }
+                    ActionState.Failure(Exception(errorMessage))
+                }
+            }
+            else -> checkState
+        }
+
         ActionButtonColumn(
             defaultTitle = "CHECK ELIGIBILITY",
             successTitle = "ELIGIBILITY CHECKED",
-            state = uiState.checkEligibilityState,
+            state = displayState,
             onClick = { viewModel.checkEligibility() },
             modifier = Modifier
                 .fillMaxWidth()
