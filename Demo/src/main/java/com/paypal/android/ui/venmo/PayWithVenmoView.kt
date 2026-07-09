@@ -137,7 +137,7 @@ private fun Step3_StartPayWithVenmo(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> VenmoFinishStartSuccessView(result = state.value)
+                is CompletedActionState.Success -> VenmoResultView(result = state.value)
             }
         }
     }
@@ -197,5 +197,32 @@ fun VenmoFinishStartSuccessView(result: VenmoFinishStartResult.Success) {
         PropertyView(name = "Token", value = result.token)
         PropertyView(name = "Payer ID", value = result.payerId)
         PropertyView(name = "Approved", value = result.approved.toString())
+    }
+}
+
+@Composable
+fun VenmoResultView(result: VenmoFinishStartResult) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
+    ) {
+        when (result) {
+            is VenmoFinishStartResult.Success -> {
+                PropertyView(name = "Token", value = result.token)
+                PropertyView(name = "Payer ID", value = result.payerId)
+                PropertyView(name = "Approved", value = result.approved.toString())
+            }
+            is VenmoFinishStartResult.Canceled -> {
+                PropertyView(name = "Status", value = "Canceled by user")
+                result.orderId?.let { PropertyView(name = "Order ID", value = it) }
+            }
+            is VenmoFinishStartResult.NoResult -> {
+                PropertyView(name = "Status", value = "No Venmo result received")
+            }
+            is VenmoFinishStartResult.Failure -> {
+                PropertyView(name = "Status", value = "Error")
+                PropertyView(name = "Error", value = result.error.errorDescription)
+            }
+        }
     }
 }

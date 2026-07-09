@@ -54,7 +54,7 @@ class UpdateClientConfigAPIUnitTest {
     fun `updateClientConfig() returns Success when resource loading and GraphQL call succeed with valid data`() =
         runTest {
             // Arrange
-            val mockResponse = UpdateClientConfigResponse("success")
+            val mockResponse = UpdateClientConfigResponse(UpdateClientConfigData("success"))
             val mockGraphQLResponse = GraphQLResponse(data = mockResponse)
             val mockGraphQLResult = GraphQLResult.Success(mockGraphQLResponse, testCorrelationId)
 
@@ -121,7 +121,7 @@ class UpdateClientConfigAPIUnitTest {
     @Test
     fun `updateClientConfig() returns Success when GraphQL response has valid data`() = runTest {
         // Arrange
-        val mockResponse = UpdateClientConfigResponse("updated")
+        val mockResponse = UpdateClientConfigResponse(UpdateClientConfigData("updated"))
         val mockGraphQLResponse = GraphQLResponse(data = mockResponse)
         val mockGraphQLResult = GraphQLResult.Success(mockGraphQLResponse, testCorrelationId)
 

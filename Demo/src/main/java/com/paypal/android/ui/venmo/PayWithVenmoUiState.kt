@@ -8,7 +8,7 @@ import com.paypal.android.venmo.VenmoFinishStartResult
 data class PayWithVenmoUiState(
     val checkEligibilityState: ActionState<VenmoEligibilityResult, Exception> = ActionState.Idle,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
-    val payWithVenmoState: ActionState<VenmoFinishStartResult.Success, Exception> = ActionState.Idle,
+    val payWithVenmoState: ActionState<VenmoFinishStartResult, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle
 ) {
     val isEligibilityCheckSuccessful: Boolean

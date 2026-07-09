@@ -6,6 +6,11 @@
   * Add `VenmoClient.isEligible(context: Context): VenmoEligibilityResult` 
     suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`, 
     `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
+  * Enhance `VenmoClient.finishStart(intent: Intent): VenmoFinishStartResult` to return:
+    * `VenmoFinishStartResult.Success` for successful payments
+    * `VenmoFinishStartResult.Canceled` when user cancels payment
+    * `VenmoFinishStartResult.NoResult` when intent is unrelated to Venmo flow
+    * `VenmoFinishStartResult.Failure` for errors
 * Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch
   behavior
 * Adds new property `appSwitchWhenEligible`in `PayPalWebVaultRequest` to control app switch behavior

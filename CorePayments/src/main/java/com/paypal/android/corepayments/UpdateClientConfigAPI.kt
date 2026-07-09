@@ -49,12 +49,13 @@ class UpdateClientConfigAPI(
                     )
                 when (graphQLResponse) {
                     is GraphQLResult.Success -> {
-                        val correlationId = graphQLResponse.correlationId
-                        graphQLResponse.response.data?.let {
+                        if (graphQLResponse.response.data != null) {
                             UpdateClientConfigResult.Success
-                        } ?: UpdateClientConfigResult.Failure(
-                            APIClientError.noResponseData(correlationId)
-                        )
+                        } else {
+                            UpdateClientConfigResult.Failure(
+                                APIClientError.noResponseData(graphQLResponse.correlationId)
+                            )
+                        }
                     }
 
                     is GraphQLResult.Failure -> {
@@ -108,6 +109,13 @@ data class UpdateClientConfigVariables(
 @OptIn(InternalSerializationApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class UpdateClientConfigResponse(
+    val data: UpdateClientConfigData? = null
+)
+
+@Serializable
+@OptIn(InternalSerializationApi::class)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class UpdateClientConfigData(
     val updateClientConfig: String
 )
 

@@ -35,8 +35,7 @@ class VenmoClient(
             val eligibilityResult = getFundingEligibility(
                 context = context,
                 clientId = coreConfig.clientId,
-                fundingSource = "VENMO",
-                currency = "USD"
+                fundingSource = "VENMO"
             )
 
             when (eligibilityResult) {
@@ -83,13 +82,14 @@ class VenmoClient(
         val env = when (coreConfig.environment) {
             Environment.SANDBOX -> "sandbox"
             Environment.LIVE -> "live"
-            else -> "sandbox"  // Default to sandbox for unknown environments
+            else -> "sandbox" // Default to sandbox for other environments
         }
 
+        val sessionId = UUID.randomUUID().toString()
         val venmoBaseUrl = "https://account.venmo.com/go/web/paypal"
         val appSwitchUri = venmoBaseUrl.toUri()
             .buildUpon()
-            .appendQueryParameter("buttonSessionID", UUID.randomUUID().toString())
+            .appendQueryParameter("buttonSessionID", sessionId)
             .appendQueryParameter("buyerCountry", "US")
             .appendQueryParameter("channel", "in-app")
             .appendQueryParameter("commit", "true")
@@ -100,7 +100,7 @@ class VenmoClient(
             .appendQueryParameter("return_flow", "auto")
             .appendQueryParameter("token", orderId)
             .appendQueryParameter("pageUrl", returnUrl)
-            .appendQueryParameter("sessionUID", UUID.randomUUID().toString())
+            .appendQueryParameter("sessionUID", sessionId)
             .build()
 
         activity.startActivity(Intent(Intent.ACTION_VIEW, appSwitchUri))
@@ -108,17 +108,25 @@ class VenmoClient(
 
     fun finishStart(intent: Intent): VenmoFinishStartResult {
         val uri = intent.data
-            ?: return VenmoFinishStartResult.Failure(
-                PayPalSDKError(
-                    code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
-                    errorDescription = "No deep link data in intent"
-                )
-            )
+            ?: return VenmoFinishStartResult.NoResult
 
+        // Check if this is a Venmo-related deep link by looking for Venmo-specific parameters
         val token = uri.getQueryParameter("token")
         val payerId = uri.getQueryParameter("PayerID")
         val approved = uri.getQueryParameter("approved")
+        val cancelUrl = uri.getQueryParameter("cancel")
 
+        // If none of the expected parameters are present, this is an unrelated intent
+        if (token == null && payerId == null && approved == null && cancelUrl == null) {
+            return VenmoFinishStartResult.NoResult
+        }
+
+        // Check if this is a cancellation (user pressed cancel, approved=false, etc.)
+        if (cancelUrl != null || approved == "false") {
+            return VenmoFinishStartResult.Canceled(token)
+        }
+
+        // Validate success case parameters
         if (token == null || payerId == null || approved == null) {
             return VenmoFinishStartResult.Failure(
                 PayPalSDKError(

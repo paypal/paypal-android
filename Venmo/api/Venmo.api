@@ -5,3 +5,51 @@ public final class com/paypal/android/venmo/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/paypal/android/venmo/VenmoClient {
+	public constructor <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
+	public suspend fun isEligible (Landroid/content/Context;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public suspend fun start (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun finishStart (Landroid/content/Intent;)Lcom/paypal/android/venmo/VenmoFinishStartResult;
+}
+
+public abstract sealed class com/paypal/android/venmo/VenmoEligibilityResult {
+}
+
+public final class com/paypal/android/venmo/VenmoEligibilityResult$Eligible : com/paypal/android/venmo/VenmoEligibilityResult {
+	public static final field INSTANCE Lcom/paypal/android/venmo/VenmoEligibilityResult$Eligible;
+}
+
+public final class com/paypal/android/venmo/VenmoEligibilityResult$Error : com/paypal/android/venmo/VenmoEligibilityResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+}
+
+public final class com/paypal/android/venmo/VenmoEligibilityResult$Ineligible : com/paypal/android/venmo/VenmoEligibilityResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getReason ()Ljava/lang/String;
+}
+
+public abstract sealed class com/paypal/android/venmo/VenmoFinishStartResult {
+}
+
+public final class com/paypal/android/venmo/VenmoFinishStartResult$Canceled : com/paypal/android/venmo/VenmoFinishStartResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getOrderId ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/venmo/VenmoFinishStartResult$Failure : com/paypal/android/venmo/VenmoFinishStartResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+}
+
+public final class com/paypal/android/venmo/VenmoFinishStartResult$NoResult : com/paypal/android/venmo/VenmoFinishStartResult {
+	public static final field INSTANCE Lcom/paypal/android/venmo/VenmoFinishStartResult$NoResult;
+}
+
+public final class com/paypal/android/venmo/VenmoFinishStartResult$Success : com/paypal/android/venmo/VenmoFinishStartResult {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun getApproved ()Z
+	public final fun getPayerId ()Ljava/lang/String;
+	public final fun getToken ()Ljava/lang/String;
+}
+

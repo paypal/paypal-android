@@ -119,7 +119,9 @@ class PayWithVenmoViewModel @Inject constructor(
     fun finishVenmo(intent: Intent) {
         val result = venmoClient.finishStart(intent)
         payWithVenmoState = when (result) {
-            is VenmoFinishStartResult.Success -> ActionState.Success(result)
+            is VenmoFinishStartResult.Success,
+            is VenmoFinishStartResult.Canceled,
+            is VenmoFinishStartResult.NoResult -> ActionState.Success(result)
             is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
         }
     }
