@@ -2,13 +2,22 @@ package com.paypal.android.ui.venmo
 
 import com.paypal.android.api.model.Order
 import com.paypal.android.uishared.state.ActionState
+import com.paypal.android.venmo.VenmoEligibilityResult
 import com.paypal.android.venmo.VenmoFinishStartResult
 
 data class PayWithVenmoUiState(
+    val checkEligibilityState: ActionState<VenmoEligibilityResult, Exception> = ActionState.Idle,
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val payWithVenmoState: ActionState<VenmoFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle
 ) {
+    val isEligibilityCheckSuccessful: Boolean
+        get() {
+            val isSuccess = checkEligibilityState is ActionState.Success
+            val isEligible = (checkEligibilityState as? ActionState.Success)?.value is VenmoEligibilityResult.Eligible
+            return isSuccess && isEligible
+        }
+
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success
 

@@ -27,6 +27,7 @@ import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import com.paypal.android.venmo.VenmoEligibilityResult
 import com.paypal.android.venmo.VenmoFinishStartResult
 
 @Composable
@@ -58,23 +59,48 @@ fun PayWithVenmoView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_CreateOrder(uiState, viewModel)
+        Step1_CheckEligibility(uiState, viewModel)
+        if (uiState.isEligibilityCheckSuccessful) {
+            Step2_CreateOrder(uiState, viewModel)
+        }
         if (uiState.isCreateOrderSuccessful) {
-            Step2_StartPayWithVenmo(uiState, viewModel)
+            Step3_StartPayWithVenmo(uiState, viewModel)
         }
         if (uiState.isVenmoSuccessful) {
-            Step3_CompleteOrder(uiState, viewModel)
+            Step4_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
+private fun Step1_CheckEligibility(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create an Order")
+        StepHeader(stepNumber = 1, title = "Check Eligibility")
+        ActionButtonColumn(
+            defaultTitle = "CHECK ELIGIBILITY",
+            successTitle = "ELIGIBILITY CHECKED",
+            state = uiState.checkEligibilityState,
+            onClick = { viewModel.checkEligibility() },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> EligibilityResultView(result = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Step2_CreateOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 2, title = "Create an Order")
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
             successTitle = "ORDER CREATED",
@@ -92,7 +118,7 @@ private fun Step1_CreateOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVe
 }
 
 @Composable
-private fun Step2_StartPayWithVenmo(
+private fun Step3_StartPayWithVenmo(
     uiState: PayWithVenmoUiState,
     viewModel: PayWithVenmoViewModel
 ) {
@@ -100,7 +126,7 @@ private fun Step2_StartPayWithVenmo(
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 2, title = stringResource(R.string.launch_venmo))
+        StepHeader(stepNumber = 3, title = stringResource(R.string.launch_venmo))
         ActionButtonColumn(
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
@@ -118,12 +144,12 @@ private fun Step2_StartPayWithVenmo(
 }
 
 @Composable
-private fun Step3_CompleteOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
+private fun Step4_CompleteOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Complete Order")
+        StepHeader(stepNumber = 4, title = "Complete Order")
         ActionButtonColumn(
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",
@@ -135,6 +161,28 @@ private fun Step3_CompleteOrder(uiState: PayWithVenmoUiState, viewModel: PayWith
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
                 is CompletedActionState.Success -> OrderView(order = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+fun EligibilityResultView(result: VenmoEligibilityResult) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
+    ) {
+        when (result) {
+            VenmoEligibilityResult.Eligible -> {
+                PropertyView(name = "Status", value = "Venmo is eligible")
+            }
+            is VenmoEligibilityResult.Ineligible -> {
+                PropertyView(name = "Status", value = "Not Eligible")
+                PropertyView(name = "Reason", value = result.reason)
+            }
+            is VenmoEligibilityResult.Error -> {
+                PropertyView(name = "Status", value = "Error")
+                PropertyView(name = "Error", value = result.error.errorDescription)
             }
         }
     }

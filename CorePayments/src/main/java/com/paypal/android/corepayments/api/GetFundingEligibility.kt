@@ -7,7 +7,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
@@ -22,13 +21,11 @@ import kotlinx.serialization.InternalSerializationApi
 class GetFundingEligibility internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
-    private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
         graphQLClient = GraphQLClient(coreConfig),
         resourceLoader = ResourceLoader(),
-        authenticationSecureTokenServiceAPI = AuthenticationSecureTokenServiceAPI(coreConfig),
     )
 
     suspend operator fun invoke(
@@ -41,7 +38,7 @@ class GetFundingEligibility internal constructor(
         val graphQLRequest = createGraphQLRequest(
             context = context
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
-        return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
+        return sendGraphQLRequest(graphQLRequest)
     }
 
     private suspend fun createGraphQLRequest(
@@ -79,19 +76,13 @@ class GetFundingEligibility internal constructor(
         }
     }
 
-    private suspend fun sendGraphQLRequestWithLSATAuthentication(
+    private suspend fun sendGraphQLRequest(
         graphQLRequest: GraphQLRequest<GetFundingEligibilityVariables>
     ): APIResult<FundingEligibility> {
-        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
-        if (tokenResult is APIResult.Failure) {
-            return APIResult.Failure(tokenResult.error)
-        }
-        val token = (tokenResult as APIResult.Success).data
         val graphQLResult = graphQLClient.send<
                 GetFundingEligibilityResponse,
                 GetFundingEligibilityVariables>(
-            graphQLRequest,
-            additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $token")
+            graphQLRequest
         )
         return when (graphQLResult) {
             is GraphQLResult.Success -> {

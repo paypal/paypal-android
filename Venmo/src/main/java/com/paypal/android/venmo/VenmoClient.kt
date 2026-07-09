@@ -24,6 +24,37 @@ class VenmoClient(
         GetFundingEligibility(config)
     )
 
+    suspend fun isEligible(
+        context: Context,
+        currency: String = "USD"
+    ): VenmoEligibilityResult {
+        return try {
+            val eligibilityResult = getFundingEligibility(
+                context = context,
+                clientId = coreConfig.clientId,
+                currency = currency
+            )
+
+            when (eligibilityResult) {
+                is APIResult.Success -> {
+                    if (eligibilityResult.data.venmoEligible) {
+                        VenmoEligibilityResult.Eligible
+                    } else {
+                        VenmoEligibilityResult.Ineligible("Venmo is not eligible for this transaction")
+                    }
+                }
+
+                is APIResult.Failure -> {
+                    VenmoEligibilityResult.Error(eligibilityResult.error)
+                }
+            }
+        } catch (e: Exception) {
+            VenmoEligibilityResult.Error(
+                PayPalSDKError(0, e.message ?: "Unknown error checking Venmo eligibility")
+            )
+        }
+    }
+
     suspend fun start(
         activity: ComponentActivity,
         orderId: String,
