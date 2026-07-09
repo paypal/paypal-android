@@ -4,6 +4,6 @@ enum class MerchantIntegration(val baseUrl: String, val clientId: String, val me
     DEFAULT(
         baseUrl = "https://ppcp-mobile-demo-sandbox-87bbd7f0a27f.herokuapp.com/",
         clientId = "AQTfw2irFfemo-eWG4H5UY-b9auKihUpXQ2Engl4G1EsHJe2mkpfUv_SN3Mba0v3CfrL6Fk_ecwv9EOo",
-        merchantId = "" // TODO: populate with the sandbox merchant account ID
+        merchantId = "" // TODO: Set with sandbox merchant account ID - currently only set by custom env settings
     ),
 }

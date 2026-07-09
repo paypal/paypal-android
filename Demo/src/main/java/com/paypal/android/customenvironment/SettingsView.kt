@@ -48,6 +48,7 @@ fun SettingsView(
         onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
         onCustomClientIdChange = viewModel::updateCustomClientId,
         onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
+        onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
@@ -61,6 +62,7 @@ private fun SettingsContent(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
+    onCustomMerchantIdChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -94,7 +96,6 @@ private fun SettingsContent(
                 placeholder = "Enter merchant server base URL",
                 value = uiState.settings.customMerchantBaseUrl,
                 onValueChange = onCustomMerchantBaseUrlChange,
-                imeAction = ImeAction.Done,
                 error = uiState.merchantBaseUrlError
             )
             UrlField(
@@ -102,6 +103,13 @@ private fun SettingsContent(
                 placeholder = "Enter PayPal client ID (optional)",
                 value = uiState.settings.customClientId,
                 onValueChange = onCustomClientIdChange,
+            )
+            UrlField(
+                label = "Merchant ID",
+                placeholder = "Enter PayPal merchant ID (optional)",
+                value = uiState.settings.customMerchantId,
+                onValueChange = onCustomMerchantIdChange,
+                imeAction = ImeAction.Done,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -230,6 +238,7 @@ private fun SettingsViewPreview() {
                         customSdkGraphQLUrl = "",
                         customClientId = "client-id-entered-at-runtime",
                         customMerchantBaseUrl = "bad merchant url",
+                        customMerchantId = "merchant-id-entered-at-runtime",
                     ),
                     restUrlError = "URL must start with https://",
                     graphQLUrlError = "URL is required",
@@ -240,6 +249,7 @@ private fun SettingsViewPreview() {
                 onCustomSdkGraphQLUrlChange = {},
                 onCustomClientIdChange = {},
                 onCustomMerchantBaseUrlChange = {},
+                onCustomMerchantIdChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

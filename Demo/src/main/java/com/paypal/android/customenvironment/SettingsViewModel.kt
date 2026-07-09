@@ -70,6 +70,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomMerchantId(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customMerchantId = value),
+                showSaveSuccess = false
+            )
+        }
+    }
+
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
     fun saveConfig() {
         val settings = _uiState.value.settings
