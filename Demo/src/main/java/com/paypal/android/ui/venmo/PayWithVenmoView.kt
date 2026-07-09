@@ -62,12 +62,12 @@ fun PayWithVenmoView(
         Step1_CheckEligibility(uiState, viewModel)
         if (uiState.isEligibilityCheckSuccessful) {
             Step2_CreateOrder(uiState, viewModel)
-        }
-        if (uiState.isCreateOrderSuccessful) {
-            Step3_StartPayWithVenmo(uiState, viewModel)
-        }
-        if (uiState.isVenmoSuccessful) {
-            Step4_CompleteOrder(uiState, viewModel)
+            if (uiState.isCreateOrderSuccessful) {
+                Step3_StartPayWithVenmo(uiState, viewModel)
+                if (uiState.isVenmoSuccessful) {
+                    Step4_CompleteOrder(uiState, viewModel)
+                }
+            }
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
