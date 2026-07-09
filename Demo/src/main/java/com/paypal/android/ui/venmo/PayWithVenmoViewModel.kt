@@ -1,22 +1,28 @@
 package com.paypal.android.ui.venmo
 
 import android.content.Context
+import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.BuildConfig
 import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
-import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.returnUrl
+import com.paypal.android.fraudprotection.PayPalDataCollector
+import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
-import com.paypal.android.usecase.CreateOrderUseCase
-import com.paypal.android.utils.ReturnUrlFactory
+import com.paypal.android.usecase.CompleteOrderUseCase
+import com.paypal.android.usecase.CreateVenmoOrderUseCase
 import com.paypal.android.venmo.VenmoClient
+import com.paypal.android.venmo.VenmoFinishStartResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +35,15 @@ import javax.inject.Inject
 @HiltViewModel
 class PayWithVenmoViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
-    val createOrderUseCase: CreateOrderUseCase,
+    val createOrderUseCase: CreateVenmoOrderUseCase,
+    val completeOrderUseCase: CompleteOrderUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PayWithVenmoUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
+    private val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.CUSTOM)
+    private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val venmoClient = VenmoClient(applicationContext, coreConfig)
 
     private var createOrderState
@@ -50,6 +58,12 @@ class PayWithVenmoViewModel @Inject constructor(
             _uiState.update { it.copy(payWithVenmoState = value) }
         }
 
+    private var completeOrderState
+        get() = _uiState.value.completeOrderState
+        set(value) {
+            _uiState.update { it.copy(completeOrderState = value) }
+        }
+
     private val createdOrder: Order?
         get() = (createOrderState as? ActionState.Success)?.value
 
@@ -60,8 +74,8 @@ class PayWithVenmoViewModel @Inject constructor(
                 OrderRequest(
                     intent = OrderIntent.CAPTURE,
                     shouldVaultOnSuccess = false,
-                    appSwitchWhenEligible = false,
-                    returnToAppStrategy = ReturnToAppStrategyOption.CUSTOM_URL_SCHEME
+                    appSwitchWhenEligible = true,
+                    returnToAppStrategy = ReturnToAppStrategyOption.APP_LINKS
                 )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
@@ -72,11 +86,46 @@ class PayWithVenmoViewModel @Inject constructor(
         val orderId = createdOrder?.id
         if (orderId == null) {
             payWithVenmoState = ActionState.Failure(Exception("Create an order to continue."))
+            return
+        }
+        viewModelScope.launch {
+            payWithVenmoState = ActionState.Loading
+            val returnToAppStrategy = ReturnToAppStrategy.AppLink(DemoConstants.APP_URL)
+            val returnUrl = returnToAppStrategy.returnUrl.toUri()
+                .buildUpon()
+                .fragment("return")
+                .toString()
+            try {
+                venmoClient.start(activity, orderId, returnUrl)
+            } catch (e: Exception) {
+                payWithVenmoState = ActionState.Failure(e)
+            }
+        }
+    }
+
+    fun finishVenmo(intent: Intent) {
+        venmoClient.finishStart(intent)?.let { result ->
+            payWithVenmoState = when (result) {
+                is VenmoFinishStartResult.Success -> ActionState.Success(result)
+                is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
+            }
+        }
+    }
+
+    fun completeOrder(context: Context) {
+        val orderId = createdOrder?.id
+        if (orderId == null) {
+            completeOrderState = ActionState.Failure(Exception("Create an order to continue."))
         } else {
-            // TODO: add demo app UI option to tweak this parameter
-            val returnToAppStrategy =
-                ReturnToAppStrategy.CustomUrlScheme(DemoConstants.APP_CUSTOM_URL_SCHEME)
-            venmoClient.startVenmo(activity, orderId, returnToAppStrategy.returnUrl)
+            viewModelScope.launch {
+                completeOrderState = ActionState.Loading
+                val dataCollectorRequest =
+                    PayPalDataCollectorRequest(hasUserLocationConsent = false)
+                val cmid = payPalDataCollector.collectDeviceData(context, dataCollectorRequest)
+                // TODO: allow order intent to be configurable
+                completeOrderState =
+                    completeOrderUseCase(orderId, OrderIntent.CAPTURE, cmid).mapToActionState()
+            }
         }
     }
 }

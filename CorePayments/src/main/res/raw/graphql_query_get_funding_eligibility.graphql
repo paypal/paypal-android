@@ -1,10 +1,12 @@
 query GetFundingEligibility(
   $merchantID: [String],
-  $enableFunding: [SupportedPaymentMethodsType]
+  $enableFunding: [SupportedPaymentMethodsType],
+  $buyerCountry: CountryCodes
 ) {
     fundingEligibility(
         merchantId: $merchantID,
-        enableFunding: $enableFunding
+        enableFunding: $enableFunding,
+        buyerCountry: $buyerCountry
     ) {
         venmo {
             eligible

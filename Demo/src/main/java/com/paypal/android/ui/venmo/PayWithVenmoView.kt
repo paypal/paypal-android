@@ -1,9 +1,12 @@
 package com.paypal.android.ui.venmo
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -16,18 +19,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
+import com.paypal.android.ui.paypalweb.PayPalCheckoutViewModel
+import com.paypal.android.ui.paypalweb.PayPalUiState
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
 import com.paypal.android.uishared.state.CompletedActionState
+import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
+import com.paypal.android.utils.OnNewIntentEffect
 import com.paypal.android.utils.UIConstants
 import com.paypal.android.utils.getActivityOrNull
+import com.paypal.android.venmo.VenmoFinishStartResult
 
 @Composable
 fun PayWithVenmoView(
     viewModel: PayWithVenmoViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    OnLifecycleOwnerResumeEffect {
+        val intent = context.getActivityOrNull()?.intent
+        intent?.let { viewModel.finishVenmo(it) }
+    }
+
+    OnNewIntentEffect { newIntent ->
+        viewModel.finishVenmo(newIntent)
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {
@@ -47,6 +66,10 @@ fun PayWithVenmoView(
         if (uiState.isCreateOrderSuccessful) {
             Step2_StartPayWithVenmo(uiState, viewModel)
         }
+        if (uiState.isVenmoSuccessful) {
+            Step3_CompleteOrder(uiState, viewModel)
+        }
+        Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
@@ -92,11 +115,43 @@ private fun Step2_StartPayWithVenmo(
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> state.value.run {
-                    Text("We did iiiit!")
-//                    PayPalWebCheckoutResultView(orderId, payerId)
-                }
+                is CompletedActionState.Success -> VenmoFinishStartSuccessView(result = state.value)
             }
         }
+    }
+}
+
+@Composable
+private fun Step3_CompleteOrder(uiState: PayWithVenmoUiState, viewModel: PayWithVenmoViewModel) {
+    val context = LocalContext.current
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+    ) {
+        StepHeader(stepNumber = 3, title = "Complete Order")
+        ActionButtonColumn(
+            defaultTitle = "COMPLETE ORDER",
+            successTitle = "ORDER COMPLETED",
+            state = uiState.completeOrderState,
+            onClick = { viewModel.completeOrder(context) },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) { state ->
+            when (state) {
+                is CompletedActionState.Failure -> ErrorView(error = state.value)
+                is CompletedActionState.Success -> OrderView(order = state.value)
+            }
+        }
+    }
+}
+
+@Composable
+fun VenmoFinishStartSuccessView(result: VenmoFinishStartResult.Success) {
+    Column(
+        verticalArrangement = UIConstants.spacingMedium,
+        modifier = Modifier.padding(UIConstants.paddingMedium)
+    ) {
+        PropertyView(name = "Token", value = result.token)
+        PropertyView(name = "Payer ID", value = result.payerId)
+        PropertyView(name = "Approved", value = result.approved.toString())
     }
 }
