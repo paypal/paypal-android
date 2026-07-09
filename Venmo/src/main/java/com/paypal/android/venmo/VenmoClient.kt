@@ -79,12 +79,6 @@ class VenmoClient(
             throw ccoUpdateResult.error
         }
 
-        val env = when (coreConfig.environment) {
-            Environment.SANDBOX -> "sandbox"
-            Environment.LIVE -> "live"
-            else -> "sandbox" // Default to sandbox for other environments
-        }
-
         val sessionId = UUID.randomUUID().toString()
         val venmoBaseUrl = "https://account.venmo.com/go/web/paypal"
         val appSwitchUri = venmoBaseUrl.toUri()
@@ -95,7 +89,7 @@ class VenmoClient(
             .appendQueryParameter("commit", "true")
             .appendQueryParameter("domain", "sdk.paypal.com")
             .appendQueryParameter("enableFunding", "venmo")
-            .appendQueryParameter("env", env)
+            .appendQueryParameter("env", coreConfig.environment.venmoEnvironment)
             .appendQueryParameter("fundingSource", "venmo")
             .appendQueryParameter("return_flow", "auto")
             .appendQueryParameter("token", orderId)

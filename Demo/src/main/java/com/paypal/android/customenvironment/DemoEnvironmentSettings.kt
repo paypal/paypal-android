@@ -22,6 +22,9 @@ data class DemoEnvironmentSettings(
      * Merchant server base URL override. Required when [selectedEnvironment] is CUSTOM.
      */
     val customMerchantBaseUrl: String = "",
+
+    /** Venmo environment override (e.g., "sandbox", "live"). Optional, only used when testing Venmo. */
+    val customVenmoEnvironment: String = "",
 ) {
     /**
      * True when the config is ready to use. Only false when [selectedEnvironment] is CUSTOM

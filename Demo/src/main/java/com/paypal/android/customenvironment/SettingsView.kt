@@ -48,6 +48,7 @@ fun SettingsView(
         onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
         onCustomClientIdChange = viewModel::updateCustomClientId,
         onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
+        onCustomVenmoEnvironmentChange = viewModel::updateCustomVenmoEnvironment,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
@@ -61,6 +62,7 @@ private fun SettingsContent(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
+    onCustomVenmoEnvironmentChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -78,33 +80,13 @@ private fun SettingsContent(
             onSelect = onEnvironmentChange
         )
         if (uiState.settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
-            UrlField(
-                label = "SDK REST Base URL",
-                placeholder = "Enter SDK REST base URL",
-                value = uiState.settings.customSdkRestUrl,
-                onValueChange = onCustomSdkRestUrlChange,
-                error = uiState.restUrlError
-            )
-            UrlField(
-                label = "SDK GraphQL Base URL",
-                placeholder = "Enter SDK GraphQL base URL",
-                value = uiState.settings.customSdkGraphQLUrl,
-                onValueChange = onCustomSdkGraphQLUrlChange,
-                error = uiState.graphQLUrlError
-            )
-            UrlField(
-                label = "Merchant Server Base URL",
-                placeholder = "Enter merchant server base URL",
-                value = uiState.settings.customMerchantBaseUrl,
-                onValueChange = onCustomMerchantBaseUrlChange,
-                imeAction = ImeAction.Done,
-                error = uiState.merchantBaseUrlError
-            )
-            UrlField(
-                label = "Client ID",
-                placeholder = "Enter PayPal client ID (optional)",
-                value = uiState.settings.customClientId,
-                onValueChange = onCustomClientIdChange,
+            CustomEnvironmentFields(
+                uiState = uiState,
+                onCustomSdkRestUrlChange = onCustomSdkRestUrlChange,
+                onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
+                onCustomClientIdChange = onCustomClientIdChange,
+                onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
+                onCustomVenmoEnvironmentChange = onCustomVenmoEnvironmentChange
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -121,6 +103,54 @@ private fun SettingsContent(
             )
         }
     }
+}
+
+@Composable
+private fun CustomEnvironmentFields(
+    uiState: SettingsUiState,
+    onCustomSdkRestUrlChange: (String) -> Unit,
+    onCustomSdkGraphQLUrlChange: (String) -> Unit,
+    onCustomClientIdChange: (String) -> Unit,
+    onCustomMerchantBaseUrlChange: (String) -> Unit,
+    onCustomVenmoEnvironmentChange: (String) -> Unit
+) {
+    val settings = uiState.settings
+    UrlField(
+        label = "SDK REST Base URL",
+        placeholder = "Enter SDK REST base URL",
+        value = settings.customSdkRestUrl,
+        onValueChange = onCustomSdkRestUrlChange,
+        error = uiState.restUrlError
+    )
+    UrlField(
+        label = "SDK GraphQL Base URL",
+        placeholder = "Enter SDK GraphQL base URL",
+        value = settings.customSdkGraphQLUrl,
+        onValueChange = onCustomSdkGraphQLUrlChange,
+        error = uiState.graphQLUrlError
+    )
+    UrlField(
+        label = "Merchant Server Base URL",
+        placeholder = "Enter merchant server base URL",
+        value = settings.customMerchantBaseUrl,
+        onValueChange = onCustomMerchantBaseUrlChange,
+        imeAction = ImeAction.Done,
+        error = uiState.merchantBaseUrlError
+    )
+    UrlField(
+        label = "Client ID",
+        placeholder = "Enter PayPal client ID (optional)",
+        value = settings.customClientId,
+        onValueChange = onCustomClientIdChange,
+    )
+    UrlField(
+        label = "Venmo Environment (Optional)",
+        placeholder = "sandbox, live, or qa",
+        value = settings.customVenmoEnvironment,
+        onValueChange = onCustomVenmoEnvironmentChange,
+        imeAction = ImeAction.Done,
+        error = uiState.venmoEnvironmentError
+    )
 }
 
 @Composable
@@ -243,6 +273,7 @@ private fun SettingsViewPreview() {
                 onCustomSdkGraphQLUrlChange = {},
                 onCustomClientIdChange = {},
                 onCustomMerchantBaseUrlChange = {},
+                onCustomVenmoEnvironmentChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

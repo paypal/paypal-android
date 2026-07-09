@@ -70,6 +70,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomVenmoEnvironment(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customVenmoEnvironment = value),
+                showSaveSuccess = false
+            )
+        }
+    }
+
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
     fun saveConfig() {
         val settings = _uiState.value.settings
@@ -80,12 +89,20 @@ class SettingsViewModel @Inject constructor(
         val restError = validateUrl(settings.customSdkRestUrl)
         val graphQLError = validateUrl(settings.customSdkGraphQLUrl)
         val merchantError = validateUrl(settings.customMerchantBaseUrl)
-        if (restError != null || graphQLError != null || merchantError != null) {
+        val venmoEnvError = if (settings.customVenmoEnvironment.isNotBlank()) {
+            validateVenmoEnvironment(settings.customVenmoEnvironment)
+        } else {
+            null
+        }
+
+        val hasErrors = restError != null || graphQLError != null || merchantError != null || venmoEnvError != null
+        if (hasErrors) {
             _uiState.update {
                 it.copy(
                     restUrlError = restError,
                     graphQLUrlError = graphQLError,
-                    merchantBaseUrlError = merchantError
+                    merchantBaseUrlError = merchantError,
+                    venmoEnvironmentError = venmoEnvError
                 )
             }
             // Persist whichever fields are valid so they survive an environment switch.
@@ -95,6 +112,7 @@ class SettingsViewModel @Inject constructor(
                     customSdkRestUrl = if (restError == null) settings.customSdkRestUrl else "",
                     customSdkGraphQLUrl = if (graphQLError == null) settings.customSdkGraphQLUrl else "",
                     customMerchantBaseUrl = if (merchantError == null) settings.customMerchantBaseUrl else "",
+                    customVenmoEnvironment = if (venmoEnvError == null) settings.customVenmoEnvironment else "",
                 )
             )
             return
@@ -136,5 +154,11 @@ class SettingsViewModel @Inject constructor(
         } catch (_: URISyntaxException) {
             "Enter a valid URL (e.g. https://api.example.com)"
         }
+    }
+
+    private fun validateVenmoEnvironment(value: String): String? = when {
+        value != value.trim() || value.contains(' ') -> "Venmo environment must not contain spaces"
+        value !in listOf("sandbox", "live", "qa") -> "Venmo environment must be 'sandbox', 'live', or 'qa'"
+        else -> null
     }
 }

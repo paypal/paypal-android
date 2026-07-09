@@ -30,6 +30,7 @@ class CustomEnvironmentRepository @Inject constructor(
         customSdkGraphQLUrl = (prefs.getString(KEY_SDK_GRAPHQL_URL, "") ?: ""),
         customClientId = (prefs.getString(KEY_CLIENT_ID, "") ?: ""),
         customMerchantBaseUrl = (prefs.getString(KEY_MERCHANT_BASE_URL, "") ?: ""),
+        customVenmoEnvironment = (prefs.getString(KEY_VENMO_ENVIRONMENT, "") ?: ""),
     )
 
     /** Persists [settings] to SharedPreferences. */
@@ -40,6 +41,7 @@ class CustomEnvironmentRepository @Inject constructor(
             putString(KEY_SDK_GRAPHQL_URL, settings.customSdkGraphQLUrl)
             putString(KEY_CLIENT_ID, settings.customClientId)
             putString(KEY_MERCHANT_BASE_URL, settings.customMerchantBaseUrl)
+            putString(KEY_VENMO_ENVIRONMENT, settings.customVenmoEnvironment)
         }
     }
 
@@ -94,6 +96,9 @@ class CustomEnvironmentRepository @Inject constructor(
             SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
                 Environment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
                 Environment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
+                if (settings.customVenmoEnvironment.isNotBlank()) {
+                    Environment.customVenmoEnvironment = settings.customVenmoEnvironment.trim()
+                }
                 val resolvedClientId =
                     settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
                 CoreConfig(
@@ -120,5 +125,6 @@ class CustomEnvironmentRepository @Inject constructor(
         private const val KEY_SDK_GRAPHQL_URL = "sdk_graphql_url"
         private const val KEY_CLIENT_ID = "client_id"
         private const val KEY_MERCHANT_BASE_URL = "merchant_base_url"
+        private const val KEY_VENMO_ENVIRONMENT = "venmo_environment"
     }
 }

@@ -6,14 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.BuildConfig
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.returnUrl
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
@@ -36,14 +36,18 @@ class PayWithVenmoViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val createOrderUseCase: CreateVenmoOrderUseCase,
     val completeOrderUseCase: CompleteOrderUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PayWithVenmoUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX, "49PMUL5PVD5SY")
-    private val payPalDataCollector = PayPalDataCollector(coreConfig)
-    private val venmoClient = VenmoClient(applicationContext, coreConfig)
+    private fun buildCoreConfig(): CoreConfig =
+        customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId, merchantId = "49PMUL5PVD5SY"))
+
+    private val coreConfig by lazy { buildCoreConfig() }
+    private val payPalDataCollector by lazy { PayPalDataCollector(coreConfig) }
+    private val venmoClient by lazy { VenmoClient(applicationContext, coreConfig) }
 
     private var checkEligibilityState
         get() = _uiState.value.checkEligibilityState
