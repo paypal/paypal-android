@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class PayWithVenmoViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
@@ -42,7 +41,7 @@ class PayWithVenmoViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PayWithVenmoUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.CUSTOM)
+    private val coreConfig = CoreConfig(BuildConfig.CLIENT_ID, Environment.SANDBOX)
     private val payPalDataCollector = PayPalDataCollector(coreConfig)
     private val venmoClient = VenmoClient(applicationContext, coreConfig)
 
@@ -97,7 +96,7 @@ class PayWithVenmoViewModel @Inject constructor(
                 .toString()
             try {
                 venmoClient.start(activity, orderId, returnUrl)
-            } catch (e: Exception) {
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 payWithVenmoState = ActionState.Failure(e)
             }
         }

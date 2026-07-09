@@ -15,4 +15,3 @@ data class PayWithVenmoUiState(
     val isVenmoSuccessful: Boolean
         get() = payWithVenmoState is ActionState.Success
 }
-
