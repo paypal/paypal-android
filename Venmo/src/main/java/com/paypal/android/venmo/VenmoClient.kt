@@ -108,16 +108,21 @@ class VenmoClient(
         val token = uri.getQueryParameter("token")
         val payerId = uri.getQueryParameter("PayerID")
         val approved = uri.getQueryParameter("approved")
-        val cancelUrl = uri.getQueryParameter("cancel")
+        val canceled = uri.getQueryParameter("canceled")
 
         // If none of the expected parameters are present, this is an unrelated intent
-        if (token == null && payerId == null && approved == null && cancelUrl == null) {
+        if (token == null && payerId == null && approved == null && canceled == null) {
             return VenmoFinishStartResult.NoResult
         }
 
-        // Check if this is a cancellation (user pressed cancel, approved=false, etc.)
-        if (cancelUrl != null || approved == "false") {
-            return VenmoFinishStartResult.Canceled(token)
+        // Check if this is a cancellation (user pressed cancel or canceled=true)
+        if (canceled == "true" || approved == "false") {
+            return VenmoFinishStartResult.Failure(
+                PayPalSDKError(
+                    code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
+                    errorDescription = "User cancelled Venmo payment"
+                )
+            )
         }
 
         // Validate success case parameters
@@ -130,7 +135,7 @@ class VenmoClient(
             )
         }
 
-        if (approved != "true" && approved != "false") {
+        if (approved != "true") {
             return VenmoFinishStartResult.Failure(
                 PayPalSDKError(
                     code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
