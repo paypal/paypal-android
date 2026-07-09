@@ -4,19 +4,21 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 
 internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService) {
 
-    fun notify(event: CheckoutEvent, orderId: String?, appSwitchEnabled: Boolean) {
+    fun notify(event: CheckoutEvent, orderId: String?, appSwitchEnabled: Boolean, buttonSessionId: String?) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             orderId = orderId,
-            appSwitchEnabled = appSwitchEnabled
+            appSwitchEnabled = appSwitchEnabled,
+            buttonSessionId = buttonSessionId
         )
     }
 
-    fun notify(event: VaultEvent, setupTokenId: String?, appSwitchEnabled: Boolean) {
+    fun notify(event: VaultEvent, setupTokenId: String?, appSwitchEnabled: Boolean, buttonSessionId: String?) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             orderId = setupTokenId,
-            appSwitchEnabled = appSwitchEnabled
+            appSwitchEnabled = appSwitchEnabled,
+            buttonSessionId = buttonSessionId
         )
     }
 }
