@@ -118,11 +118,19 @@ class PayWithVenmoViewModel @Inject constructor(
 
     fun finishVenmo(intent: Intent) {
         val result = venmoClient.finishStart(intent)
-        payWithVenmoState = when (result) {
+        // Only update state if this is an actual Venmo result (Success/Canceled)
+        // Ignore NoResult as it means the intent is unrelated to Venmo flow
+        when (result) {
             is VenmoFinishStartResult.Success,
-            is VenmoFinishStartResult.Canceled,
-            is VenmoFinishStartResult.NoResult -> ActionState.Success(result)
-            is VenmoFinishStartResult.Failure -> ActionState.Failure(result.error)
+            is VenmoFinishStartResult.Canceled -> {
+                payWithVenmoState = ActionState.Success(result)
+            }
+            is VenmoFinishStartResult.Failure -> {
+                payWithVenmoState = ActionState.Failure(result.error)
+            }
+            is VenmoFinishStartResult.NoResult -> {
+                // Do nothing - this is the initial app launch or unrelated intent
+            }
         }
     }
 
