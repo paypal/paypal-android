@@ -1,5 +1,6 @@
 package com.paypal.android.ui.venmo
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -152,7 +153,9 @@ private fun Step3_StartPayWithVenmo(
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payWithVenmoState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startVenmo(it) } },
+            onClick = {
+                context.getActivityOrNull()?.let { viewModel.startVenmo(it as ComponentActivity) }
+            },
             modifier = Modifier
                 .fillMaxWidth()
         ) { state ->

@@ -3,16 +3,12 @@ package com.paypal.android.ui.venmo
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.paypal.android.api.services.SDKSampleServerAPI
-import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.ReturnToAppStrategy
-import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
@@ -79,7 +75,7 @@ class PayWithVenmoViewModel @Inject constructor(
     fun checkEligibility() {
         viewModelScope.launch {
             checkEligibilityState = ActionState.Loading
-            val result = venmoClient.isEligible(applicationContext)
+            val result = venmoClient.isEligible()
             checkEligibilityState = ActionState.Success(result)
         }
     }
@@ -107,13 +103,8 @@ class PayWithVenmoViewModel @Inject constructor(
         }
         viewModelScope.launch {
             payWithVenmoState = ActionState.Loading
-            val returnToAppStrategy = ReturnToAppStrategy.AppLink(DemoConstants.APP_URL)
-            val returnUrl = returnToAppStrategy.returnUrl.toUri()
-                .buildUpon()
-                .fragment("return")
-                .toString()
             try {
-                venmoClient.start(activity, orderId, returnUrl)
+                venmoClient.start(activity, orderId)
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 payWithVenmoState = ActionState.Failure(e)
             }
@@ -134,6 +125,9 @@ class PayWithVenmoViewModel @Inject constructor(
             is VenmoFinishStartResult.Canceled,
             is VenmoFinishStartResult.NoResult -> {
                 // Do nothing - canceled or unrelated intent
+            }
+            null -> {
+                // Do nothing - no active Venmo flow
             }
         }
     }

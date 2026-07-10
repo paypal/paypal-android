@@ -23,4 +23,11 @@ enum class Environment {
             LIVE -> "live"
             SANDBOX -> "sandbox"
         }
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val venmoBaseUrl: String
+        get() = when (this) {
+            LIVE -> "https://account.venmo.com/go/web/paypal"
+            SANDBOX -> "https://sandbox-account.venmo.com/go/web/paypal"
+        }
 }
