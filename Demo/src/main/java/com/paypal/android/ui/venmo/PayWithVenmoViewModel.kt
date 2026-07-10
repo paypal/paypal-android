@@ -75,7 +75,7 @@ class PayWithVenmoViewModel @Inject constructor(
     fun checkEligibility() {
         viewModelScope.launch {
             checkEligibilityState = ActionState.Loading
-            val result = venmoClient.isEligible()
+            val result = venmoClient.isEligible(buyerCountry = "US")
             checkEligibilityState = ActionState.Success(result)
         }
     }

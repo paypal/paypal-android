@@ -52,14 +52,16 @@ class VenmoClient internal constructor(
         chromeCustomTabsClient = ChromeCustomTabsClient()
     )
 
-    suspend fun isEligible(): VenmoEligibilityResult {
+    suspend fun isEligible(buyerCountry: String): VenmoEligibilityResult {
         require(coreConfig.clientId.isNotBlank()) { "Client ID cannot be blank" }
+        require(buyerCountry.isNotBlank()) { "Buyer country cannot be blank" }
 
         return try {
             val eligibilityResult = getFundingEligibility(
                 context = this.context,
                 clientId = coreConfig.clientId,
-                fundingSource = VENMO
+                fundingSource = VENMO,
+                buyerCountry = buyerCountry
             )
 
             when (eligibilityResult) {

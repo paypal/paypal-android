@@ -34,17 +34,18 @@ class GetFundingEligibility internal constructor(
         context: Context,
         clientId: String,
         fundingSource: String,
-        buyerCountry: String? = null,
-        currency: String? = null
+        buyerCountry: String
     ): APIResult<FundingEligibility> {
         require(clientId.isNotBlank()) { "Client ID cannot be blank" }
         require(fundingSource.isNotBlank()) { "Funding source cannot be blank" }
+        require(buyerCountry.isNotBlank()) { "Buyer country cannot be blank" }
         require(coreConfig.merchantId.isNotBlank()) { "Merchant ID cannot be blank" }
 
         val graphQLRequest = createGraphQLRequest(
             context = context,
             fundingSource = fundingSource,
-            merchantId = coreConfig.merchantId
+            merchantId = coreConfig.merchantId,
+            buyerCountry = buyerCountry
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequest(graphQLRequest)
     }
@@ -52,7 +53,8 @@ class GetFundingEligibility internal constructor(
     private suspend fun createGraphQLRequest(
         context: Context,
         fundingSource: String,
-        merchantId: String
+        merchantId: String,
+        buyerCountry: String
     ): GraphQLRequest<GetFundingEligibilityVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             context,
@@ -66,7 +68,7 @@ class GetFundingEligibility internal constructor(
 
         val variables = GetFundingEligibilityVariables(
             merchantID = listOf(merchantId),
-            buyerCountry = "US",
+            buyerCountry = buyerCountry,
             enableFunding = listOf(fundingSource),
         )
 

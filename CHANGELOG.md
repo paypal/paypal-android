@@ -3,7 +3,7 @@
 ## Unreleased
 
 * Venmo
-  * Add `VenmoClient.isEligible(context: Context): VenmoEligibilityResult` 
+  * Add `VenmoClient.isEligible(buyerCountry: String): VenmoEligibilityResult` 
     suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`, 
     `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
   * Enhance `VenmoClient.finishStart(intent: Intent): VenmoFinishStartResult` to return:
