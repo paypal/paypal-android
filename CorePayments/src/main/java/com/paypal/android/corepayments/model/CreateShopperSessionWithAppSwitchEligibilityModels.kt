@@ -85,5 +85,5 @@ internal data class CreateShopperSessionCheckoutUrls(
 @Serializable
 internal data class CreateShopperSessionSessionData(
     val sessionId: String = "",
-    val expiresAt: String = "",
+    val expiresAt: String? = null,
 )

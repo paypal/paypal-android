@@ -332,33 +332,32 @@ class PayPalWebCheckoutClient internal constructor(
         val launchUri = shopperSession.getLaunchUri(orderId)
 
         // TODO: Remove ReturnToAppStrategy all together.
-//        val result = payPalWebLauncher.launchWithUrl(
-//            activity = activity,
-//            uri = launchUri,
-//            token = orderId,
-//            tokenType = TokenType.ORDER_ID,
-//            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
-//        )
-//
-//        when (result) {
-//            is PayPalPresentAuthChallengeResult.Success -> {
-//                analytics.notify(
-//                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-//                    checkoutOrderId,
-//                    appSwitchEnabled,
-//                )
-//                sessionStore.authState = result.authState
-//            }
-//            is PayPalPresentAuthChallengeResult.Failure -> {
-//                analytics.notify(
-//                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-//                    checkoutOrderId,
-//                    appSwitchEnabled,
-//                )
-//            }
-//        }
-//        return result
-        return PayPalPresentAuthChallengeResult.Failure(PayPalSDKError(0, ""))
+        val result = payPalWebLauncher.launchWithUrl(
+            context = context,
+            uri = launchUri,
+            token = orderId,
+            tokenType = TokenType.ORDER_ID,
+            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+        )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    checkoutOrderId,
+                    appSwitchEnabled,
+                )
+                sessionStore.authState = result.authState
+            }
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    checkoutOrderId,
+                    appSwitchEnabled,
+                )
+            }
+        }
+        return result
     }
 
     /**
@@ -380,33 +379,33 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
 
-//        val result = payPalWebLauncher.launchWithUrl(
-//            activity = activity,
-//            uri = launchUri,
-//            token = setupTokenId,
-//            tokenType = TokenType.VAULT_ID,
-//            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
-//        )
-//
-//        when (result) {
-//            is PayPalPresentAuthChallengeResult.Success -> {
-//                analytics.notify(
-//                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-//                    vaultSetupTokenId,
-//                    appSwitchEnabled,
-//                )
-//                sessionStore.authState = result.authState
-//            }
-//            is PayPalPresentAuthChallengeResult.Failure -> {
-//                analytics.notify(
-//                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-//                    vaultSetupTokenId,
-//                    appSwitchEnabled,
-//                )
-//            }
-//        }
-//        return result
-        return PayPalPresentAuthChallengeResult.Failure(PayPalSDKError(0, ""))
+        val result = payPalWebLauncher.launchWithUrl(
+            context = context,
+            uri = launchUri,
+            token = setupTokenId,
+            tokenType = TokenType.VAULT_ID,
+            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+        )
+
+        when (result) {
+            is PayPalPresentAuthChallengeResult.Success -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
+                    vaultSetupTokenId,
+                    appSwitchEnabled,
+                )
+                sessionStore.authState = result.authState
+            }
+            is PayPalPresentAuthChallengeResult.Failure -> {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    vaultSetupTokenId,
+                    appSwitchEnabled,
+                )
+            }
+        }
+        return result
+//        return PayPalPresentAuthChallengeResult.Failure(PayPalSDKError(0, ""))
     }
 
     /**
@@ -489,7 +488,7 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
         val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
+            context = activity,
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
@@ -542,7 +541,7 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
         val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
+            context = activity,
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
@@ -582,7 +581,19 @@ class PayPalWebCheckoutClient internal constructor(
             checkoutFallbackUrl.toUri()
         }
 
-        return launchUri.buildUpon().appendQueryParameter("token", token).build()
+        // Guard against a trailing '&' in the source URL's query string. Uri.Builder's
+        // appendQueryParameter() naively appends "&key=value" to the existing encoded query,
+        // so a trailing '&' here would otherwise produce a double "&&" between parameters.
+        val sanitizedLaunchUri = if (launchUri.toString().endsWith("&")) {
+            launchUri.toString().dropLast(1).toUri()
+        } else {
+            launchUri
+        }
+
+        return sanitizedLaunchUri.buildUpon()
+            .appendQueryParameter("token", token)
+            .appendQueryParameter("shopperSessionId", this.shopperSessionConfig.id)
+            .build()
     }
 
     private fun buildPayPalCheckoutUri(
@@ -719,7 +730,7 @@ class PayPalWebCheckoutClient internal constructor(
         )
 
         val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
+            context = activity,
             uri = launchUri,
             token = request.orderId,
             tokenType = TokenType.ORDER_ID,
@@ -793,7 +804,7 @@ class PayPalWebCheckoutClient internal constructor(
         val launchUri = buildPayPalVaultUri(request.setupTokenId)
 
         val result = payPalWebLauncher.launchWithUrl(
-            activity = activity,
+            context = activity,
             uri = launchUri,
             token = request.setupTokenId,
             tokenType = TokenType.VAULT_ID,
