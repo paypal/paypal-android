@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.LoadRawResourceResult
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.model.APIResult
@@ -16,6 +17,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -187,4 +189,31 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             val requestBody = requestSlot.captured.body.orEmpty()
             assertFalse(requestBody.contains(""""phone""""))
         }
+
+    @Test
+    fun `invoke returns an APIResult Failure when LSAT creation fails`() = runTest {
+        // Given: the LSAT (auth token) request itself fails, before the GraphQL call is
+        // ever attempted.
+        val lsatError = PayPalSDKError(401, "Unauthorized")
+        coEvery {
+            tokenServiceAPI.createLowScopedAccessToken()
+        } returns APIResult.Failure(lsatError)
+
+        // When
+        val result = sut(
+            token = "fake-order-id",
+            tokenType = TokenType.ORDER_ID,
+            returnAppUrl = "https://example.com/return",
+            cancelAppUrl = "https://example.com/cancel",
+            fallbackSchemeUrl = null,
+            paymentType = "CONTINUE",
+            paypalNativeAppInstalled = true,
+            fallbackUrl = "https://sandbox.paypal.com/"
+        )
+
+        // Then: the original error is passed through unchanged as an APIResult.Failure — the
+        // GraphQL call is never attempted.
+        assertTrue(result is APIResult.Failure)
+        assertSame(lsatError, (result as APIResult.Failure).error)
+    }
 }
