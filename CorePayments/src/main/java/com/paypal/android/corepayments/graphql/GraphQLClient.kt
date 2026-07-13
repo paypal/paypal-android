@@ -17,7 +17,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
-import java.util.UUID
 
 /**
  * @suppress
@@ -42,7 +41,6 @@ class GraphQLClient internal constructor(
         "Content-Type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",
-        "X-App-Guid" to UUID.randomUUID().toString(),
         "Origin" to coreConfig.environment.graphQLEndpoint
     )
 

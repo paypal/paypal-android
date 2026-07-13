@@ -8,7 +8,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.api.GetFundingEligibility
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
@@ -28,12 +27,10 @@ class VenmoClient internal constructor(
         private const val CHANNEL_PARAM = "channel"
         private const val CHANNEL_VALUE = "in-app"
         private const val TOKEN_PARAM = "token"
-        private const val PAGE_URL_PARAM = "pageUrl"
         private const val ENV_PARAM = "env"
 
         private const val INELIGIBLE_MESSAGE = "Venmo is not eligible for this transaction"
         private const val UNKNOWN_ERROR_MESSAGE = "Unknown error checking Venmo eligibility"
-        private const val CANCELLATION_MESSAGE = "User cancelled Venmo payment"
         private const val MISSING_PARAMS_MESSAGE = "Missing required parameters in deep link"
         private const val INVALID_APPROVAL_MESSAGE = "Invalid approval value"
 
@@ -41,7 +38,6 @@ class VenmoClient internal constructor(
         private const val APPROVED_PARAM = "approved"
         private const val CANCELED_PARAM = "canceled"
 
-        private const val METADATA_KEY_ORDER_ID = "order_id"
     }
 
     constructor(context: Context, config: CoreConfig) : this(
@@ -60,7 +56,8 @@ class VenmoClient internal constructor(
             val eligibilityResult = getFundingEligibility(
                 context = this.context,
                 clientId = coreConfig.clientId,
-                fundingSource = VENMO,
+                fundingSources = listOf(VENMO),
+                merchantIds = listOf(coreConfig.merchantId),
                 buyerCountry = buyerCountry
             )
 
@@ -94,18 +91,11 @@ class VenmoClient internal constructor(
     ): VenmoStartResult {
         require(orderId.isNotBlank()) { "Order ID cannot be blank" }
 
-        val ccoUpdateResult = ccoAPI.updateClientConfig(
+        // Update client config; ignore result as transaction should proceed regardless
+        ccoAPI.updateClientConfig(
             tokenId = orderId,
-            fundingSource = "venmo"
+            fundingSource = VENMO
         )
-
-        if (ccoUpdateResult is UpdateClientConfigResult.Failure) {
-            val error = PayPalSDKError(
-                code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
-                errorDescription = ccoUpdateResult.error.message ?: "Client config update failed"
-            )
-            return VenmoStartResult.Failure(error)
-        }
 
         val appSwitchUri = coreConfig.environment.venmoBaseUrl.toUri()
             .buildUpon()
@@ -135,27 +125,19 @@ class VenmoClient internal constructor(
         }
     }
 
-    fun finishStart(intent: Intent): VenmoFinishStartResult? {
+    fun finishStart(intent: Intent): VenmoFinishStartResult {
         // Get deep link URI from intent
-        val deepLinkUri = intent.data ?: return null
-
-        // Parse Venmo result from deep link parameters
-        // App link verification is handled by Android's autoVerify mechanism
-        val orderId = deepLinkUri.getQueryParameter(PAGE_URL_PARAM).orEmpty()
-        val canceled = deepLinkUri.getQueryParameter(CANCELED_PARAM)
-        val approved = deepLinkUri.getQueryParameter(APPROVED_PARAM)
+        val deepLinkUri = intent.data ?: return VenmoFinishStartResult.NoResult
+        val orderId = deepLinkUri.getQueryParameter(TOKEN_PARAM).orEmpty()
+        val canceled = deepLinkUri.getQueryParameter(CANCELED_PARAM).toBoolean()
+        val approved = deepLinkUri.getQueryParameter(APPROVED_PARAM).toBoolean()
 
         return when {
-            canceled.toBoolean() || !approved.toBoolean() -> {
-                VenmoFinishStartResult.Failure(
-                    PayPalSDKError(
-                        code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
-                        errorDescription = CANCELLATION_MESSAGE
-                    )
-                )
+            canceled -> {
+                VenmoFinishStartResult.Canceled(orderId.takeIf { it.isNotEmpty() })
             }
 
-            approved.toBoolean() -> {
+            approved -> {
                 val payerId = deepLinkUri.getQueryParameter(PAYER_ID_PARAM)
                 if (payerId.isNullOrEmpty()) {
                     VenmoFinishStartResult.Failure(

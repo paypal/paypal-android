@@ -33,18 +33,21 @@ class GetFundingEligibility internal constructor(
     suspend operator fun invoke(
         context: Context,
         clientId: String,
-        fundingSource: String,
+        fundingSources: List<String>,
+        merchantIds: List<String>,
         buyerCountry: String
     ): APIResult<FundingEligibility> {
         require(clientId.isNotBlank()) { "Client ID cannot be blank" }
-        require(fundingSource.isNotBlank()) { "Funding source cannot be blank" }
+        require(fundingSources.isNotEmpty()) { "Funding sources cannot be empty" }
+        require(fundingSources.all { it.isNotBlank() }) { "Funding source values cannot be blank" }
+        require(merchantIds.isNotEmpty()) { "Merchant IDs cannot be empty" }
+        require(merchantIds.all { it.isNotBlank() }) { "Merchant ID values cannot be blank" }
         require(buyerCountry.isNotBlank()) { "Buyer country cannot be blank" }
-        require(coreConfig.merchantId.isNotBlank()) { "Merchant ID cannot be blank" }
 
         val graphQLRequest = createGraphQLRequest(
             context = context,
-            fundingSource = fundingSource,
-            merchantId = coreConfig.merchantId,
+            fundingSources = fundingSources,
+            merchantIds = merchantIds,
             buyerCountry = buyerCountry
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequest(graphQLRequest)
@@ -52,8 +55,8 @@ class GetFundingEligibility internal constructor(
 
     private suspend fun createGraphQLRequest(
         context: Context,
-        fundingSource: String,
-        merchantId: String,
+        fundingSources: List<String>,
+        merchantIds: List<String>,
         buyerCountry: String
     ): GraphQLRequest<GetFundingEligibilityVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
@@ -67,9 +70,9 @@ class GetFundingEligibility internal constructor(
         }
 
         val variables = GetFundingEligibilityVariables(
-            merchantID = listOf(merchantId),
+            merchantID = merchantIds,
             buyerCountry = buyerCountry,
-            enableFunding = listOf(fundingSource),
+            enableFunding = fundingSources,
         )
 
         return GraphQLRequest(

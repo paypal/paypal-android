@@ -122,12 +122,11 @@ class PayWithVenmoViewModel @Inject constructor(
             is VenmoFinishStartResult.Failure -> {
                 payWithVenmoState = ActionState.Failure(result.error)
             }
-            is VenmoFinishStartResult.Canceled,
+            is VenmoFinishStartResult.Canceled -> {
+                payWithVenmoState = ActionState.Failure(Exception("User canceled Venmo payment."))
+            }
             is VenmoFinishStartResult.NoResult -> {
                 // Do nothing - canceled or unrelated intent
-            }
-            null -> {
-                // Do nothing - no active Venmo flow
             }
         }
     }
