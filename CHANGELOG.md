@@ -11,6 +11,7 @@
     * `VenmoFinishStartResult.Canceled` when user cancels payment
     * `VenmoFinishStartResult.NoResult` when intent is unrelated to Venmo flow
     * `VenmoFinishStartResult.Failure` for errors
+  * Add comprehensive analytics tracking to checkout flow with events for start, launch success/failure, and completion (success/canceled/failed)
 * Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch
   behavior
 * Adds new property `appSwitchWhenEligible`in `PayPalWebVaultRequest` to control app switch behavior
