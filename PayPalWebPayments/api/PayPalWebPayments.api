@@ -5,6 +5,19 @@ public final class com/paypal/android/paypalwebpayments/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/paypal/android/paypalwebpayments/PayPalPhoneNumber {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;
+	public static synthetic fun copy$default (Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCountryCode ()Ljava/lang/String;
+	public final fun getNationalNumber ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class com/paypal/android/paypalwebpayments/PayPalPresentAuthChallengeResult {
 }
 
@@ -41,17 +54,17 @@ public final class com/paypal/android/paypalwebpayments/PayPalUserAction : java/
 
 public final class com/paypal/android/paypalwebpayments/PayPalUserIdentity {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;
-	public static synthetic fun copy$default (Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;
+	public final fun component3 ()Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;)Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;
+	public static synthetic fun copy$default (Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;Ljava/lang/String;Ljava/lang/String;Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;ILjava/lang/Object;)Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEmail ()Ljava/lang/String;
 	public final fun getExistingPayPalSessionId ()Ljava/lang/String;
-	public final fun getPhone ()Ljava/lang/String;
+	public final fun getPhone ()Lcom/paypal/android/paypalwebpayments/PayPalPhoneNumber;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

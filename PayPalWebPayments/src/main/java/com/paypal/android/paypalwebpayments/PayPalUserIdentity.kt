@@ -13,5 +13,5 @@ package com.paypal.android.paypalwebpayments
 data class PayPalUserIdentity(
     val existingPayPalSessionId: String? = null,
     val email: String? = null,
-    val phone: String? = null,
+    val phone: PayPalPhoneNumber? = null,
 )

@@ -43,6 +43,14 @@ internal data class CreateShopperSessionShopperSessionInput(
     val cancelAppUrl: String,
     val fallbackUrlScheme: String?,
     val sdkVersion: String?,
+    val phone: CreateShopperSessionPhone? = null,
+)
+
+@OptIn(InternalSerializationApi::class)
+@Serializable
+internal data class CreateShopperSessionPhone(
+    val countryCode: String,
+    val nationalNumber: String,
 )
 
 // ── Response ─────────────────────────────────────────────────────────────────

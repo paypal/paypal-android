@@ -4,6 +4,7 @@ import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
+import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.ResourceLoader
@@ -12,6 +13,7 @@ import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.TokenType
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.slot
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
@@ -133,4 +135,56 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         assertEquals("", data.shopperSessionConfig.expiresAt)
         assertFalse(data.inEligibleReason != null)
     }
+
+    @Test
+    fun `invoke includes a phone object in the request when countryCode and nationalNumber are provided`() =
+        runTest {
+            val requestSlot = slot<HttpRequest>()
+            coEvery { mockHttp.send(capture(requestSlot)) } returns HttpResponse(
+                status = 200,
+                body = """{ "data" : { "external" : { "createShopperSessionWithAppSwitchEligibility" : null } } }""",
+                headers = emptyMap()
+            )
+
+            sut(
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
+                fallbackUrl = "https://sandbox.paypal.com/",
+                countryCode = "1",
+                nationalNumber = "4155551234"
+            )
+
+            val requestBody = requestSlot.captured.body.orEmpty()
+            assertTrue(requestBody.contains(""""phone":{"countryCode":"1","nationalNumber":"4155551234"}"""))
+        }
+
+    @Test
+    fun `invoke omits the phone object from the request when countryCode or nationalNumber are missing`() =
+        runTest {
+            val requestSlot = slot<HttpRequest>()
+            coEvery { mockHttp.send(capture(requestSlot)) } returns HttpResponse(
+                status = 200,
+                body = """{ "data" : { "external" : { "createShopperSessionWithAppSwitchEligibility" : null } } }""",
+                headers = emptyMap()
+            )
+
+            sut(
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
+                fallbackUrl = "https://sandbox.paypal.com/"
+            )
+
+            val requestBody = requestSlot.captured.body.orEmpty()
+            assertFalse(requestBody.contains(""""phone""""))
+        }
 }

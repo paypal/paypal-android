@@ -18,6 +18,7 @@ import com.paypal.android.corepayments.model.CreateShopperSessionAppSwitchEligib
 import com.paypal.android.corepayments.model.CreateShopperSessionData
 import com.paypal.android.corepayments.model.CreateShopperSessionExperimentationContext
 import com.paypal.android.corepayments.model.CreateShopperSessionGraphQLResponse
+import com.paypal.android.corepayments.model.CreateShopperSessionPhone
 import com.paypal.android.corepayments.model.CreateShopperSessionSessionData
 import com.paypal.android.corepayments.model.CreateShopperSessionShopperSessionInput
 import com.paypal.android.corepayments.model.CreateShopperSessionVariables
@@ -55,6 +56,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      * @param paymentType GraphQL paymentType value (e.g. "CONTINUE", "PAY_NOW").
      * @param paypalNativeAppInstalled Whether the PayPal native app is installed.
      * @param fallbackUrl Base URL used to construct [CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl].
+     * @param countryCode Country calling code for the shopper's phone number (e.g. "1").
+     * @param nationalNumber National (subscriber) number for the shopper's phone number.
      */
     suspend operator fun invoke(
         token: String,
@@ -65,6 +68,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         paymentType: String,
         paypalNativeAppInstalled: Boolean,
         fallbackUrl: String,
+        countryCode: String? = null,
+        nationalNumber: String? = null,
     ): APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse> {
         val graphQLRequest = createGraphQLRequest(
             token = token,
@@ -74,6 +79,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
             fallbackSchemeUrl = fallbackSchemeUrl,
             paymentType = paymentType,
             paypalNativeAppInstalled = paypalNativeAppInstalled,
+            countryCode = countryCode,
+            nationalNumber = nationalNumber,
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequestWithLSATAuthentication(graphQLRequest, fallbackUrl)
     }
@@ -86,6 +93,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         fallbackSchemeUrl: String?,
         paymentType: String,
         paypalNativeAppInstalled: Boolean,
+        countryCode: String? = null,
+        nationalNumber: String? = null,
     ): GraphQLRequest<CreateShopperSessionVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             applicationContext,
@@ -119,6 +128,14 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                 cancelAppUrl = cancelAppUrl,
                 fallbackUrlScheme = fallbackSchemeUrl,
                 sdkVersion = BuildConfig.CLIENT_SDK_VERSION,
+                phone = if (countryCode != null && nationalNumber != null) {
+                    CreateShopperSessionPhone(
+                        countryCode = countryCode,
+                        nationalNumber = nationalNumber,
+                    )
+                } else {
+                    null
+                },
             ),
         )
 

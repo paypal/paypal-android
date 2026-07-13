@@ -430,6 +430,8 @@ class PayPalWebCheckoutClient internal constructor(
             paymentType = userAction.toExternalPaymentType(),
             paypalNativeAppInstalled = deviceInspector.isPayPalInstalled,
             fallbackUrl = baseUrl,
+            countryCode = userIdentity?.phone?.countryCode,
+            nationalNumber = userIdentity?.phone?.nationalNumber,
         )
 
         return when (result) {

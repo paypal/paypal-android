@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import com.paypal.android.paypalwebpayments.PayPalPhoneNumber
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.utils.UIConstants
 
@@ -29,12 +30,19 @@ fun PayPalUserIdentityForm(
 ) {
     var existingPayPalSessionIdValue by remember { mutableStateOf(userIdentity?.existingPayPalSessionId ?: "") }
     var emailValue by remember { mutableStateOf(userIdentity?.email ?: "") }
-    var phoneValue by remember { mutableStateOf(userIdentity?.phone ?: "") }
+    var countryCodeValue by remember { mutableStateOf(userIdentity?.phone?.countryCode ?: "") }
+    var nationalNumberValue by remember { mutableStateOf(userIdentity?.phone?.nationalNumber ?: "") }
 
-    fun notifyChange(existingId: String, email: String, phone: String) {
+    fun notifyChange(existingId: String, email: String, countryCode: String, nationalNumber: String) {
         val newExistingId = existingId.ifBlank { null }
         val newEmail = email.ifBlank { null }
-        val newPhone = phone.ifBlank { null }
+        val newCountryCode = countryCode.ifBlank { null }
+        val newNationalNumber = nationalNumber.ifBlank { null }
+        val newPhone = if (newCountryCode != null && newNationalNumber != null) {
+            PayPalPhoneNumber(countryCode = newCountryCode, nationalNumber = newNationalNumber)
+        } else {
+            null
+        }
         onUserIdentityChange(
             if (newExistingId == null && newEmail == null && newPhone == null) {
                 null
@@ -56,7 +64,7 @@ fun PayPalUserIdentityForm(
                 label = "Existing PayPal Session ID",
                 onValueChange = { input ->
                     existingPayPalSessionIdValue = input
-                    notifyChange(input, emailValue, phoneValue)
+                    notifyChange(input, emailValue, countryCodeValue, nationalNumberValue)
                 }
             )
             IdentityTextField(
@@ -64,15 +72,23 @@ fun PayPalUserIdentityForm(
                 label = "Email",
                 onValueChange = { input ->
                     emailValue = input
-                    notifyChange(existingPayPalSessionIdValue, input, phoneValue)
+                    notifyChange(existingPayPalSessionIdValue, input, countryCodeValue, nationalNumberValue)
                 }
             )
             IdentityTextField(
-                value = phoneValue,
-                label = "Phone",
+                value = countryCodeValue,
+                label = "Phone Country Code",
                 onValueChange = { input ->
-                    phoneValue = input
-                    notifyChange(existingPayPalSessionIdValue, emailValue, input)
+                    countryCodeValue = input
+                    notifyChange(existingPayPalSessionIdValue, emailValue, input, nationalNumberValue)
+                }
+            )
+            IdentityTextField(
+                value = nationalNumberValue,
+                label = "Phone National Number",
+                onValueChange = { input ->
+                    nationalNumberValue = input
+                    notifyChange(existingPayPalSessionIdValue, emailValue, countryCodeValue, input)
                 }
             )
         }
