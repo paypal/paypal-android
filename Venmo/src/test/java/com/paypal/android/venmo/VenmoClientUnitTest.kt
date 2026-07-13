@@ -103,14 +103,13 @@ class VenmoClientUnitTest {
     @Test
     fun isEligible_withException_returnsError() = runTest {
         val buyerCountry = "US"
-        val exceptionMessage = "Network error"
         coEvery { getFundingEligibility(any(), any(), any(), any(), any()) } throws
-                Exception(exceptionMessage)
+                Exception("Network error")
 
         val result = venmoClient.isEligible(buyerCountry)
 
         assertTrue(result is VenmoEligibilityResult.Error)
-        assertEquals(exceptionMessage, (result as VenmoEligibilityResult.Error).error.errorDescription)
+        assertEquals(PayPalSDKErrorCode.UNKNOWN.ordinal, (result as VenmoEligibilityResult.Error).error.code)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -305,7 +304,7 @@ class VenmoClientUnitTest {
         assertTrue(result is VenmoFinishStartResult.Failure)
         val failureResult = result as VenmoFinishStartResult.Failure
         assertEquals(PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal, failureResult.error.code)
-        assertTrue(failureResult.error.errorDescription.contains("payerId"))
+        assertTrue(failureResult.error.errorDescription.contains("Payer ID"))
     }
 
     @Test

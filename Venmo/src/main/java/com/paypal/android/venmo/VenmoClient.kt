@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
+import com.paypal.android.corepayments.APIClientError
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
@@ -29,9 +30,6 @@ class VenmoClient internal constructor(
         private const val TOKEN_PARAM = "token"
 
         private const val INELIGIBLE_MESSAGE = "Venmo is not eligible for this transaction"
-        private const val UNKNOWN_ERROR_MESSAGE = "Unknown error checking Venmo eligibility"
-        private const val MISSING_PARAMS_MESSAGE = "Missing required parameters in deep link"
-        private const val INVALID_APPROVAL_MESSAGE = "Invalid approval value"
 
         private const val PAYER_ID_PARAM = "PayerID"
         private const val APPROVED_PARAM = "approved"
@@ -75,11 +73,7 @@ class VenmoClient internal constructor(
             }
         } catch (e: Exception) {
             VenmoEligibilityResult.Error(
-                PayPalSDKError(
-                    code = PayPalSDKErrorCode.UNKNOWN.ordinal,
-                    errorDescription = e.message ?: UNKNOWN_ERROR_MESSAGE,
-                    reason = e
-                )
+                APIClientError.unknownError(throwable = e)
             )
         }
     }
@@ -141,7 +135,7 @@ class VenmoClient internal constructor(
                     VenmoFinishStartResult.Failure(
                         PayPalSDKError(
                             code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
-                            errorDescription = "$MISSING_PARAMS_MESSAGE: payerId"
+                            errorDescription = "Result did not contain the expected data. Payer ID is null."
                         )
                     )
                 } else {
@@ -153,7 +147,7 @@ class VenmoClient internal constructor(
                 VenmoFinishStartResult.Failure(
                     PayPalSDKError(
                         code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
-                        errorDescription = "$INVALID_APPROVAL_MESSAGE: $approved"
+                        errorDescription = "Result did not contain valid approval or cancellation status."
                     )
                 )
             }
