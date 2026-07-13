@@ -49,11 +49,13 @@ fun SettingsView(
         onCustomClientIdChange = viewModel::updateCustomClientId,
         onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
         onCustomVenmoEnvironmentChange = viewModel::updateCustomVenmoEnvironment,
+        onCustomVenmoCheckoutUrlPrefixChange = viewModel::updateCustomVenmoCheckoutUrlPrefix,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun SettingsContent(
     uiState: SettingsUiState,
@@ -63,6 +65,7 @@ private fun SettingsContent(
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
     onCustomVenmoEnvironmentChange: (String) -> Unit,
+    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -86,7 +89,8 @@ private fun SettingsContent(
                 onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
                 onCustomClientIdChange = onCustomClientIdChange,
                 onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
-                onCustomVenmoEnvironmentChange = onCustomVenmoEnvironmentChange
+                onCustomVenmoEnvironmentChange = onCustomVenmoEnvironmentChange,
+                onCustomVenmoCheckoutUrlPrefixChange = onCustomVenmoCheckoutUrlPrefixChange
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -112,7 +116,8 @@ private fun CustomEnvironmentFields(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
-    onCustomVenmoEnvironmentChange: (String) -> Unit
+    onCustomVenmoEnvironmentChange: (String) -> Unit,
+    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit
 ) {
     val settings = uiState.settings
     UrlField(
@@ -148,8 +153,16 @@ private fun CustomEnvironmentFields(
         placeholder = "sandbox, live, or qa",
         value = settings.customVenmoEnvironment,
         onValueChange = onCustomVenmoEnvironmentChange,
-        imeAction = ImeAction.Done,
+        imeAction = ImeAction.Next,
         error = uiState.venmoEnvironmentError
+    )
+    UrlField(
+        label = "Venmo Checkout URL Prefix (Optional)",
+        placeholder = "e.g., qa, staging (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
+        value = settings.customVenmoCheckoutUrlPrefix,
+        onValueChange = onCustomVenmoCheckoutUrlPrefixChange,
+        imeAction = ImeAction.Done,
+        error = uiState.venmoCheckoutUrlPrefixError
     )
 }
 
@@ -274,6 +287,7 @@ private fun SettingsViewPreview() {
                 onCustomClientIdChange = {},
                 onCustomMerchantBaseUrlChange = {},
                 onCustomVenmoEnvironmentChange = {},
+                onCustomVenmoCheckoutUrlPrefixChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

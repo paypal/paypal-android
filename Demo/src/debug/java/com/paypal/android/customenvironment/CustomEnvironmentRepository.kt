@@ -31,6 +31,7 @@ class CustomEnvironmentRepository @Inject constructor(
         customClientId = (prefs.getString(KEY_CLIENT_ID, "") ?: ""),
         customMerchantBaseUrl = (prefs.getString(KEY_MERCHANT_BASE_URL, "") ?: ""),
         customVenmoEnvironment = (prefs.getString(KEY_VENMO_ENVIRONMENT, "") ?: ""),
+        customVenmoCheckoutUrlPrefix = (prefs.getString(KEY_VENMO_CHECKOUT_URL_PREFIX, "") ?: ""),
     )
 
     /** Persists [settings] to SharedPreferences. */
@@ -42,6 +43,7 @@ class CustomEnvironmentRepository @Inject constructor(
             putString(KEY_CLIENT_ID, settings.customClientId)
             putString(KEY_MERCHANT_BASE_URL, settings.customMerchantBaseUrl)
             putString(KEY_VENMO_ENVIRONMENT, settings.customVenmoEnvironment)
+            putString(KEY_VENMO_CHECKOUT_URL_PREFIX, settings.customVenmoCheckoutUrlPrefix)
         }
     }
 
@@ -99,6 +101,11 @@ class CustomEnvironmentRepository @Inject constructor(
                 if (settings.customVenmoEnvironment.isNotBlank()) {
                     Environment.customVenmoEnvironment = settings.customVenmoEnvironment.trim()
                 }
+                if (settings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
+                    val prefix = settings.customVenmoCheckoutUrlPrefix.trim()
+                    Environment.customVenmoCheckoutBaseUrl =
+                        "https://account.$prefix.venmo.com/go/web/paypal"
+                }
                 val resolvedClientId =
                     settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
                 CoreConfig(
@@ -126,5 +133,6 @@ class CustomEnvironmentRepository @Inject constructor(
         private const val KEY_CLIENT_ID = "client_id"
         private const val KEY_MERCHANT_BASE_URL = "merchant_base_url"
         private const val KEY_VENMO_ENVIRONMENT = "venmo_environment"
+        private const val KEY_VENMO_CHECKOUT_URL_PREFIX = "venmo_checkout_url_prefix"
     }
 }

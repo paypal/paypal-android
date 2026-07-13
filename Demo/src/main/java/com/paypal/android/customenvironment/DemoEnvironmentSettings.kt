@@ -25,6 +25,9 @@ data class DemoEnvironmentSettings(
 
     /** Venmo environment override (e.g., "sandbox", "live"). Optional, only used when testing Venmo. */
     val customVenmoEnvironment: String = "",
+
+    /** Venmo checkout URL prefix (e.g., "qa", "staging"). Formatted as https://account.$prefix.venmo.com/go/web/paypal*/
+    val customVenmoCheckoutUrlPrefix: String = "",
 ) {
     /**
      * True when the config is ready to use. Only false when [selectedEnvironment] is CUSTOM

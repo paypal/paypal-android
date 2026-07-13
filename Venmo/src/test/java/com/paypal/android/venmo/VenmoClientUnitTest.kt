@@ -42,7 +42,7 @@ class VenmoClientUnitTest {
     fun setUp() {
         every { coreConfig.clientId } returns "test-client-id"
         every { coreConfig.merchantId } returns "test-merchant-id"
-        every { coreConfig.environment.venmoBaseUrl } returns "https://venmo.com/checkout"
+        every { coreConfig.environment.venmoCheckoutBaseUrl } returns "https://venmo.com/checkout"
         every { coreConfig.environment.venmoEnvironment } returns "sandbox"
 
         venmoClient = VenmoClient(

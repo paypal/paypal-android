@@ -79,6 +79,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomVenmoCheckoutUrlPrefix(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customVenmoCheckoutUrlPrefix = value),
+                venmoCheckoutUrlPrefixError = null,
+                showSaveSuccess = false
+            )
+        }
+    }
+
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
     fun saveConfig() {
         val settings = _uiState.value.settings
@@ -94,15 +104,22 @@ class SettingsViewModel @Inject constructor(
         } else {
             null
         }
+        val venmoCheckoutPrefixError = if (settings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
+            validateVenmoCheckoutPrefix(settings.customVenmoCheckoutUrlPrefix)
+        } else {
+            null
+        }
 
-        val hasErrors = restError != null || graphQLError != null || merchantError != null || venmoEnvError != null
+        val hasErrors = restError != null || graphQLError != null || merchantError != null ||
+                venmoEnvError != null || venmoCheckoutPrefixError != null
         if (hasErrors) {
             _uiState.update {
                 it.copy(
                     restUrlError = restError,
                     graphQLUrlError = graphQLError,
                     merchantBaseUrlError = merchantError,
-                    venmoEnvironmentError = venmoEnvError
+                    venmoEnvironmentError = venmoEnvError,
+                    venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError
                 )
             }
             // Persist whichever fields are valid so they survive an environment switch.
@@ -113,6 +130,11 @@ class SettingsViewModel @Inject constructor(
                     customSdkGraphQLUrl = if (graphQLError == null) settings.customSdkGraphQLUrl else "",
                     customMerchantBaseUrl = if (merchantError == null) settings.customMerchantBaseUrl else "",
                     customVenmoEnvironment = if (venmoEnvError == null) settings.customVenmoEnvironment else "",
+                    customVenmoCheckoutUrlPrefix = if (venmoCheckoutPrefixError == null) {
+                        settings.customVenmoCheckoutUrlPrefix
+                    } else {
+                        ""
+                    },
                 )
             )
             return
@@ -159,6 +181,12 @@ class SettingsViewModel @Inject constructor(
     private fun validateVenmoEnvironment(value: String): String? = when {
         value != value.trim() || value.contains(' ') -> "Venmo environment must not contain spaces"
         value !in listOf("sandbox", "live", "qa") -> "Venmo environment must be 'sandbox', 'live', or 'qa'"
+        else -> null
+    }
+
+    private fun validateVenmoCheckoutPrefix(value: String): String? = when {
+        value != value.trim() || value.contains(' ') -> "Prefix must not contain spaces"
+        !value.matches(Regex("[a-zA-Z0-9-]+")) -> "Prefix must contain only alphanumeric characters and hyphens"
         else -> null
     }
 }
