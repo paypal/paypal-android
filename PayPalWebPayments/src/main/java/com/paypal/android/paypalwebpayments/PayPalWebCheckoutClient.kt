@@ -531,10 +531,7 @@ class PayPalWebCheckoutClient internal constructor(
         userIdentity: PayPalUserIdentity?,
         userAction: PayPalUserAction,
     ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
-        return null
-        val api = createShopperSessionAPI
-
-        val result = api(
+        val result = createShopperSessionAPI(
             token = token,
             tokenType = tokenType,
             returnAppUrl = urlConfig.returnAppUrl,
