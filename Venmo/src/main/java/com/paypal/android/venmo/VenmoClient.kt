@@ -27,7 +27,6 @@ class VenmoClient internal constructor(
         private const val CHANNEL_PARAM = "channel"
         private const val CHANNEL_VALUE = "in-app"
         private const val TOKEN_PARAM = "token"
-        private const val ENV_PARAM = "env"
 
         private const val INELIGIBLE_MESSAGE = "Venmo is not eligible for this transaction"
         private const val UNKNOWN_ERROR_MESSAGE = "Unknown error checking Venmo eligibility"
@@ -100,7 +99,6 @@ class VenmoClient internal constructor(
         val appSwitchUri = coreConfig.environment.venmoCheckoutBaseUrl.toUri()
             .buildUpon()
             .appendQueryParameter(CHANNEL_PARAM, CHANNEL_VALUE)
-            .appendQueryParameter(ENV_PARAM, coreConfig.environment.venmoEnvironment)
             .appendQueryParameter(TOKEN_PARAM, orderId)
             .build()
 

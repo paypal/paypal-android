@@ -48,7 +48,6 @@ fun SettingsView(
         onCustomSdkGraphQLUrlChange = viewModel::updateCustomSdkGraphQLUrl,
         onCustomClientIdChange = viewModel::updateCustomClientId,
         onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
-        onCustomVenmoEnvironmentChange = viewModel::updateCustomVenmoEnvironment,
         onCustomVenmoCheckoutUrlPrefixChange = viewModel::updateCustomVenmoCheckoutUrlPrefix,
         onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
         onSaveClick = viewModel::saveConfig,
@@ -65,7 +64,6 @@ private fun SettingsContent(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
-    onCustomVenmoEnvironmentChange: (String) -> Unit,
     onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     onCustomMerchantIdChange: (String) -> Unit,
     onSaveClick: () -> Unit,
@@ -91,7 +89,6 @@ private fun SettingsContent(
                 onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
                 onCustomClientIdChange = onCustomClientIdChange,
                 onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
-                onCustomVenmoEnvironmentChange = onCustomVenmoEnvironmentChange,
                 onCustomVenmoCheckoutUrlPrefixChange = onCustomVenmoCheckoutUrlPrefixChange,
                 onCustomMerchantIdChange = onCustomMerchantIdChange
             )
@@ -119,7 +116,6 @@ private fun CustomEnvironmentFields(
     onCustomSdkGraphQLUrlChange: (String) -> Unit,
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
-    onCustomVenmoEnvironmentChange: (String) -> Unit,
     onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
     onCustomMerchantIdChange: (String) -> Unit
 ) {
@@ -151,14 +147,6 @@ private fun CustomEnvironmentFields(
         placeholder = "Enter PayPal client ID (optional)",
         value = settings.customClientId,
         onValueChange = onCustomClientIdChange,
-    )
-    UrlField(
-        label = "Venmo Environment (Optional)",
-        placeholder = "sandbox, live, or qa",
-        value = settings.customVenmoEnvironment,
-        onValueChange = onCustomVenmoEnvironmentChange,
-        imeAction = ImeAction.Next,
-        error = uiState.venmoEnvironmentError
     )
     UrlField(
         label = "Venmo Checkout URL Prefix (Optional)",
@@ -298,7 +286,6 @@ private fun SettingsViewPreview() {
                 onCustomSdkGraphQLUrlChange = {},
                 onCustomClientIdChange = {},
                 onCustomMerchantBaseUrlChange = {},
-                onCustomVenmoEnvironmentChange = {},
                 onCustomVenmoCheckoutUrlPrefixChange = {},
                 onCustomMerchantIdChange = {},
                 onSaveClick = {},

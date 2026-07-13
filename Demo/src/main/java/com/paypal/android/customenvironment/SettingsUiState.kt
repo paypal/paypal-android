@@ -5,7 +5,6 @@ data class SettingsUiState(
     val restUrlError: String? = null,
     val graphQLUrlError: String? = null,
     val merchantBaseUrlError: String? = null,
-    val venmoEnvironmentError: String? = null,
     val venmoCheckoutUrlPrefixError: String? = null,
     val merchantIdError: String? = null,
     val showSaveSuccess: Boolean = false,

@@ -70,15 +70,6 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateCustomVenmoEnvironment(value: String) {
-        _uiState.update {
-            it.copy(
-                settings = it.settings.copy(customVenmoEnvironment = value),
-                showSaveSuccess = false
-            )
-        }
-    }
-
     fun updateCustomVenmoCheckoutUrlPrefix(value: String) {
         _uiState.update {
             it.copy(
@@ -110,11 +101,6 @@ class SettingsViewModel @Inject constructor(
         val restError = validateUrl(settings.customSdkRestUrl)
         val graphQLError = validateUrl(settings.customSdkGraphQLUrl)
         val merchantError = validateUrl(settings.customMerchantBaseUrl)
-        val venmoEnvError = if (settings.customVenmoEnvironment.isNotBlank()) {
-            validateVenmoEnvironment(settings.customVenmoEnvironment)
-        } else {
-            null
-        }
         val venmoCheckoutPrefixError = if (settings.customVenmoCheckoutUrlPrefix.isNotBlank()) {
             validateVenmoCheckoutPrefix(settings.customVenmoCheckoutUrlPrefix)
         } else {
@@ -127,14 +113,13 @@ class SettingsViewModel @Inject constructor(
         }
 
         val hasErrors = restError != null || graphQLError != null || merchantError != null ||
-                venmoEnvError != null || venmoCheckoutPrefixError != null || merchantIdError != null
+                venmoCheckoutPrefixError != null || merchantIdError != null
         if (hasErrors) {
             _uiState.update {
                 it.copy(
                     restUrlError = restError,
                     graphQLUrlError = graphQLError,
                     merchantBaseUrlError = merchantError,
-                    venmoEnvironmentError = venmoEnvError,
                     venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError,
                     merchantIdError = merchantIdError
                 )
@@ -146,7 +131,6 @@ class SettingsViewModel @Inject constructor(
                     customSdkRestUrl = if (restError == null) settings.customSdkRestUrl else "",
                     customSdkGraphQLUrl = if (graphQLError == null) settings.customSdkGraphQLUrl else "",
                     customMerchantBaseUrl = if (merchantError == null) settings.customMerchantBaseUrl else "",
-                    customVenmoEnvironment = if (venmoEnvError == null) settings.customVenmoEnvironment else "",
                     customVenmoCheckoutUrlPrefix = if (venmoCheckoutPrefixError == null) {
                         settings.customVenmoCheckoutUrlPrefix
                     } else {
@@ -194,12 +178,6 @@ class SettingsViewModel @Inject constructor(
         } catch (_: URISyntaxException) {
             "Enter a valid URL (e.g. https://api.example.com)"
         }
-    }
-
-    private fun validateVenmoEnvironment(value: String): String? = when {
-        value != value.trim() || value.contains(' ') -> "Venmo environment must not contain spaces"
-        value !in listOf("sandbox", "live", "qa") -> "Venmo environment must be 'sandbox', 'live', or 'qa'"
-        else -> null
     }
 
     private fun validateVenmoCheckoutPrefix(value: String): String? = when {

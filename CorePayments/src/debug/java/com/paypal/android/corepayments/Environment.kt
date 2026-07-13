@@ -20,14 +20,6 @@ enum class Environment {
         }
 
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val venmoEnvironment: String
-        get() = when (this) {
-            LIVE -> "live"
-            SANDBOX -> "sandbox"
-            CUSTOM -> customVenmoEnvironment
-        }
-
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val venmoCheckoutBaseUrl: String
         get() = when (this) {
             LIVE, SANDBOX -> "https://account.venmo.com/go/web/paypal"
@@ -37,7 +29,6 @@ enum class Environment {
     companion object {
         var customRestUrl: String = ""
         var customGraphQLUrl: String = ""
-        var customVenmoEnvironment: String = ""
         var customVenmoCheckoutBaseUrl: String = ""
     }
 }

@@ -242,7 +242,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * Confirm PayPal payment source for an order with callback.
-     *
+     *ƒ
      * @param activity The activity to launch the PayPal web checkout from
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      * @param callback [PayPalWebStartCallback] to receive the result

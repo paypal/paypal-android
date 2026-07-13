@@ -43,7 +43,6 @@ class VenmoClientUnitTest {
         every { coreConfig.clientId } returns "test-client-id"
         every { coreConfig.merchantId } returns "test-merchant-id"
         every { coreConfig.environment.venmoCheckoutBaseUrl } returns "https://venmo.com/checkout"
-        every { coreConfig.environment.venmoEnvironment } returns "sandbox"
 
         venmoClient = VenmoClient(
             context = context,
@@ -226,7 +225,7 @@ class VenmoClientUnitTest {
         assertEquals("/checkout", uri?.path)
         assertEquals(orderId, uri?.getQueryParameter("token"))
         assertEquals("in-app", uri?.getQueryParameter("channel"))
-        assertEquals("sandbox", uri?.getQueryParameter("env"))
+        assertNull(uri?.getQueryParameter("env"))
     }
 
     // ============ finishStart Tests ============
