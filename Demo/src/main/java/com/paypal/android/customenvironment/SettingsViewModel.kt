@@ -89,7 +89,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomMerchantId(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customMerchantId = value),
+                merchantIdError = null,
+                showSaveSuccess = false
+            )
+        }
+    }
+
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
+    @Suppress("CyclomaticComplexMethod")
     fun saveConfig() {
         val settings = _uiState.value.settings
         if (settings.selectedEnvironment != SelectedEnvironment.CUSTOM) {
@@ -109,9 +120,14 @@ class SettingsViewModel @Inject constructor(
         } else {
             null
         }
+        val merchantIdError = if (settings.customMerchantId.isNotBlank()) {
+            validateMerchantId(settings.customMerchantId)
+        } else {
+            null
+        }
 
         val hasErrors = restError != null || graphQLError != null || merchantError != null ||
-                venmoEnvError != null || venmoCheckoutPrefixError != null
+                venmoEnvError != null || venmoCheckoutPrefixError != null || merchantIdError != null
         if (hasErrors) {
             _uiState.update {
                 it.copy(
@@ -119,7 +135,8 @@ class SettingsViewModel @Inject constructor(
                     graphQLUrlError = graphQLError,
                     merchantBaseUrlError = merchantError,
                     venmoEnvironmentError = venmoEnvError,
-                    venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError
+                    venmoCheckoutUrlPrefixError = venmoCheckoutPrefixError,
+                    merchantIdError = merchantIdError
                 )
             }
             // Persist whichever fields are valid so they survive an environment switch.
@@ -135,6 +152,7 @@ class SettingsViewModel @Inject constructor(
                     } else {
                         ""
                     },
+                    customMerchantId = if (merchantIdError == null) settings.customMerchantId else "",
                 )
             )
             return
@@ -188,5 +206,15 @@ class SettingsViewModel @Inject constructor(
         value != value.trim() || value.contains(' ') -> "Prefix must not contain spaces"
         !value.matches(Regex("[a-zA-Z0-9-]+")) -> "Prefix must contain only alphanumeric characters and hyphens"
         else -> null
+    }
+
+    private fun validateMerchantId(value: String): String? {
+        @Suppress("MagicNumber")
+        val minimumLength = 3
+        return when {
+            value != value.trim() || value.contains(' ') -> "Merchant ID must not contain spaces"
+            value.length < minimumLength -> "Merchant ID must be at least $minimumLength characters"
+            else -> null
+        }
     }
 }

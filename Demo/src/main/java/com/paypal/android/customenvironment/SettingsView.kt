@@ -50,6 +50,7 @@ fun SettingsView(
         onCustomMerchantBaseUrlChange = viewModel::updateCustomMerchantBaseUrl,
         onCustomVenmoEnvironmentChange = viewModel::updateCustomVenmoEnvironment,
         onCustomVenmoCheckoutUrlPrefixChange = viewModel::updateCustomVenmoCheckoutUrlPrefix,
+        onCustomMerchantIdChange = viewModel::updateCustomMerchantId,
         onSaveClick = viewModel::saveConfig,
         onClearClick = viewModel::clearConfig
     )
@@ -66,6 +67,7 @@ private fun SettingsContent(
     onCustomMerchantBaseUrlChange: (String) -> Unit,
     onCustomVenmoEnvironmentChange: (String) -> Unit,
     onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
+    onCustomMerchantIdChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onClearClick: () -> Unit
 ) {
@@ -90,7 +92,8 @@ private fun SettingsContent(
                 onCustomClientIdChange = onCustomClientIdChange,
                 onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
                 onCustomVenmoEnvironmentChange = onCustomVenmoEnvironmentChange,
-                onCustomVenmoCheckoutUrlPrefixChange = onCustomVenmoCheckoutUrlPrefixChange
+                onCustomVenmoCheckoutUrlPrefixChange = onCustomVenmoCheckoutUrlPrefixChange,
+                onCustomMerchantIdChange = onCustomMerchantIdChange
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -117,7 +120,8 @@ private fun CustomEnvironmentFields(
     onCustomClientIdChange: (String) -> Unit,
     onCustomMerchantBaseUrlChange: (String) -> Unit,
     onCustomVenmoEnvironmentChange: (String) -> Unit,
-    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit
+    onCustomVenmoCheckoutUrlPrefixChange: (String) -> Unit,
+    onCustomMerchantIdChange: (String) -> Unit
 ) {
     val settings = uiState.settings
     UrlField(
@@ -161,8 +165,16 @@ private fun CustomEnvironmentFields(
         placeholder = "e.g., qa, staging (formats as https://account.\$prefix.venmo.com/go/web/paypal)",
         value = settings.customVenmoCheckoutUrlPrefix,
         onValueChange = onCustomVenmoCheckoutUrlPrefixChange,
-        imeAction = ImeAction.Done,
+        imeAction = ImeAction.Next,
         error = uiState.venmoCheckoutUrlPrefixError
+    )
+    UrlField(
+        label = "Merchant ID (Optional)",
+        placeholder = "Enter merchant ID",
+        value = settings.customMerchantId,
+        onValueChange = onCustomMerchantIdChange,
+        imeAction = ImeAction.Done,
+        error = uiState.merchantIdError
     )
 }
 
@@ -288,6 +300,7 @@ private fun SettingsViewPreview() {
                 onCustomMerchantBaseUrlChange = {},
                 onCustomVenmoEnvironmentChange = {},
                 onCustomVenmoCheckoutUrlPrefixChange = {},
+                onCustomMerchantIdChange = {},
                 onSaveClick = {},
                 onClearClick = {}
             )

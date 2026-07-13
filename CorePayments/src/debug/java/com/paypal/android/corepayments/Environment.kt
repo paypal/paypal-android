@@ -30,8 +30,7 @@ enum class Environment {
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val venmoCheckoutBaseUrl: String
         get() = when (this) {
-            LIVE -> "https://account.venmo.com/go/web/paypal"
-            SANDBOX -> "https://sandbox.account.venmo.com/go/web/paypal"
+            LIVE, SANDBOX -> "https://account.venmo.com/go/web/paypal"
             CUSTOM -> customVenmoCheckoutBaseUrl
         }
 
@@ -39,6 +38,6 @@ enum class Environment {
         var customRestUrl: String = ""
         var customGraphQLUrl: String = ""
         var customVenmoEnvironment: String = ""
-        var customVenmoCheckoutBaseUrl: String = "https://account.sandbox.venmo.com/go/web/paypal"
+        var customVenmoCheckoutBaseUrl: String = ""
     }
 }

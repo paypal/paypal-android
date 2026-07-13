@@ -39,7 +39,12 @@ class PayWithVenmoViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private fun buildCoreConfig(): CoreConfig =
-        customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId, merchantId = "49PMUL5PVD5SY"))
+        customEnvironmentRepository.getCoreConfig(
+            CoreConfig(
+                SDKSampleServerAPI.clientId,
+                merchantId = SDKSampleServerAPI.merchantId
+            )
+        )
 
     private val coreConfig by lazy { buildCoreConfig() }
     private val payPalDataCollector by lazy { PayPalDataCollector(coreConfig) }

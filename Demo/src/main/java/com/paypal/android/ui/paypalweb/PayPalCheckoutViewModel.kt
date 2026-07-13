@@ -44,7 +44,12 @@ class PayPalCheckoutViewModel @Inject constructor(
     }
 
     private fun buildCoreConfig(): CoreConfig =
-        customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId, merchantId = "V9YP27HFNG2LW"))
+        customEnvironmentRepository.getCoreConfig(
+            CoreConfig(
+                SDKSampleServerAPI.clientId,
+                merchantId = SDKSampleServerAPI.merchantId
+            )
+        )
 
     // Held as a field so completeAuthChallenge uses the same instance that started the auth flow.
     private var paypalClient: PayPalWebCheckoutClient? = null
