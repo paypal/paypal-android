@@ -422,7 +422,6 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * Launches checkout via the legacy patchCCO path after the Shopper Session fetch failed
-     * with a session-creation failure or network timeout. Mirrors
      * [getLaunchUri]'s existing patchCCO-with-further-fallback behavior used by the deprecated
      * v1/v2 flows: if patchCCO also fails (or the PayPal app isn't installed), checkout still
      * proceeds via the plain non-app-switch [baseUrl].
@@ -471,9 +470,8 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Launches vault via the legacy patchCCO path after the Shopper Session fetch failed with a
-     * session-creation failure or network timeout. See
-     * [launchCheckoutViaPatchCCOFallback].
+     * Launches vault via the legacy patchCCO path after the Shopper Session fetch failed.
+     * See [launchCheckoutViaPatchCCOFallback].
      */
     private suspend fun launchVaultViaPatchCCOFallback(
         context: Context,
@@ -518,9 +516,6 @@ class PayPalWebCheckoutClient internal constructor(
         return result
     }
 
-    /**
-     * Creates a shopper session by calling the PayPal GraphQL `createShopperSession` mutation.
-     */
     @VisibleForTesting
     internal suspend fun createShopperSessionWithAppSwitchEligibility(
         token: String,
