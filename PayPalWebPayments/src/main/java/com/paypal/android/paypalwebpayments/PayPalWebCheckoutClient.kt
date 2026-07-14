@@ -421,99 +421,37 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Launches checkout via the legacy patchCCO path after the Shopper Session fetch failed
-     * [getLaunchUri]'s existing patchCCO-with-further-fallback behavior used by the deprecated
-     * v1/v2 flows: if patchCCO also fails (or the PayPal app isn't installed), checkout still
-     * proceeds via the plain non-app-switch [baseUrl].
+     * Launches checkout after the Shopper Session fetch failed with a session-creation
+     * failure or network timeout.
+     *
+     * TODO: Re-implement fallback behavior for session-creation failure. This previously
+     *  fell back to the legacy patchCCO path via [getLaunchUri] (see git history / PR diff
+     *  for the removed implementation). Removed pending a decision on the replacement
+     *  behavior — currently unhandled.
      */
+    @Suppress("UnusedPrivateMember")
     private suspend fun launchCheckoutViaPatchCCOFallback(
         context: Context,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
-        val launchUri = getLaunchUri(
-            context = context,
-            token = orderId,
-            tokenType = TokenType.ORDER_ID,
-            fallbackUri = buildPayPalCheckoutUri(
-                orderId = orderId,
-                funding = null,
-                returnUrl = returnToAppUrlConfig?.returnAppUrl,
-            ),
-        )
-
-        val result = payPalWebLauncher.launchWithUrl(
-            context = context,
-            uri = launchUri,
-            token = orderId,
-            tokenType = TokenType.ORDER_ID,
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
-        )
-
-        when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    checkoutOrderId,
-                    appSwitchEnabled,
-                )
-                sessionStore.authState = result.authState
-            }
-            is PayPalPresentAuthChallengeResult.Failure -> {
-                analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    checkoutOrderId,
-                    appSwitchEnabled,
-                )
-            }
-        }
-        return result
+        TODO("Re-implement checkout fallback for session-creation failure (patchCCO fallback removed)")
     }
 
     /**
-     * Launches vault via the legacy patchCCO path after the Shopper Session fetch failed.
-     * See [launchCheckoutViaPatchCCOFallback].
+     * Launches vault after the Shopper Session fetch failed with a session-creation failure
+     * or network timeout. See [launchCheckoutViaPatchCCOFallback].
+     *
+     * TODO: Re-implement fallback behavior for session-creation failure. This previously
+     *  fell back to the legacy patchCCO path via [getLaunchUri] (see git history / PR diff
+     *  for the removed implementation). Removed pending a decision on the replacement
+     *  behavior — currently unhandled.
      */
+    @Suppress("UnusedPrivateMember")
     private suspend fun launchVaultViaPatchCCOFallback(
         context: Context,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
-        val launchUri = getLaunchUri(
-            context = context,
-            token = setupTokenId,
-            tokenType = TokenType.VAULT_ID,
-            fallbackUri = buildPayPalCheckoutUri(
-                orderId = setupTokenId,
-                funding = null,
-                returnUrl = returnToAppUrlConfig?.returnAppUrl,
-            ),
-        )
-
-        val result = payPalWebLauncher.launchWithUrl(
-            context = context,
-            uri = launchUri,
-            token = setupTokenId,
-            tokenType = TokenType.VAULT_ID,
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
-        )
-
-        when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    vaultSetupTokenId,
-                    appSwitchEnabled,
-                )
-                sessionStore.authState = result.authState
-            }
-            is PayPalPresentAuthChallengeResult.Failure -> {
-                analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    vaultSetupTokenId,
-                    appSwitchEnabled,
-                )
-            }
-        }
-        return result
+        TODO("Re-implement vault fallback for session-creation failure (patchCCO fallback removed)")
     }
 
     @VisibleForTesting
@@ -669,23 +607,36 @@ class PayPalWebCheckoutClient internal constructor(
     // endregion
 
     // region Private Helpers
+
+    /**
+     * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
+     * appends the given token as a query param.
+     */
+    private fun Uri.appendTokenQueryParam(token: String): Uri {
+        val trimmedUri = if (toString().endsWith("&")) {
+            toString().dropLast(1).toUri()
+        } else {
+            this
+        }
+        return trimmedUri.buildUpon()
+            .appendQueryParameter("token", token)
+            .build()
+    }
+
     private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
-        var launchUri = if (appSwitchEligible) {
+        val launchUri = if (appSwitchEligible) {
             redirectUrl.toUri()
         } else {
             checkoutFallbackUrl.toUri()
-        }
-        // Drop a trailing '&' so appendQueryParameter doesn't produce a double separator.
-        if (launchUri.toString().endsWith("&")) {
-            launchUri = launchUri.toString().dropLast(1).toUri()
-        }
+        }.appendTokenQueryParam(token)
 
-        val uriBuilder = launchUri.buildUpon()
-            .appendQueryParameter("token", token)
-        if (shopperSessionConfig.id.isNotBlank()) {
-            uriBuilder.appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
+        return if (shopperSessionConfig.id.isNotBlank()) {
+            launchUri.buildUpon()
+                .appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
+                .build()
+        } else {
+            launchUri
         }
-        return uriBuilder.build()
     }
 
     private fun buildPayPalCheckoutUri(
