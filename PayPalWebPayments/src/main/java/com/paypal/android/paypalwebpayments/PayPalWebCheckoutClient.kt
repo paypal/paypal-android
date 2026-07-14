@@ -116,6 +116,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         returnToAppUrlConfig = urlConfig
         shopperSessionDeferred = applicationScope.async {
+            // TODO - Follow up and set token correctly.
             createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
         }
     }
