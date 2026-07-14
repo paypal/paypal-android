@@ -13,7 +13,6 @@ data class PayPalUiState(
     val createOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val userIdentity: PayPalUserIdentity? = null,
     val userAction: PayPalUserAction = PayPalUserAction.PAY_NOW,
-    val isPayPalSessionCreated: Boolean = false,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,

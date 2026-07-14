@@ -75,17 +75,17 @@ class PayPalVaultViewModel @Inject constructor(
             _uiState.update { it.copy(userAction = value) }
         }
 
-    fun createPayPalSession() {
+    private fun createPayPalSession() {
         paypalClient.createPayPalSession(
             tokenType = TokenType.VAULT_ID,
             userIdentity = _uiState.value.userIdentity,
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )
-        _uiState.update { it.copy(isPayPalSessionCreated = true) }
     }
 
     fun createSetupToken() {
+        createPayPalSession()
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
             createSetupTokenState = createPayPalSetupTokenUseCase().mapToActionState()

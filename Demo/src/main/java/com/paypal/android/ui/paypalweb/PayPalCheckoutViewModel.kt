@@ -101,17 +101,17 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(userAction = value) }
         }
 
-    fun createPayPalSession() {
+    private fun createPayPalSession() {
         paypalClient.createPayPalSession(
             tokenType = TokenType.ORDER_ID,
             userIdentity = _uiState.value.userIdentity,
             urlConfig = DemoConstants.returnToAppUrlConfig,
             userAction = _uiState.value.userAction
         )
-        _uiState.update { it.copy(isPayPalSessionCreated = true) }
     }
 
     fun createOrder() {
+        createPayPalSession()
         viewModelScope.launch {
             createOrderState = ActionState.Loading
             val orderRequest = OrderRequest(
