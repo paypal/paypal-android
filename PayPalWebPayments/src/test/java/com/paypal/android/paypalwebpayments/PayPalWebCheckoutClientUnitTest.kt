@@ -2526,7 +2526,11 @@ class PayPalWebCheckoutClientUnitTest {
 
             val launchedUri = uriSlot.captured
             assertTrue(launchedUri.toString().startsWith("https://example.com/app-switch-vault-redirect"))
-            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("token"))
+            // Vault identifies the session via approval_session_id, not token (see
+            // PayPalWebLauncher.URL_PARAM_APPROVAL_SESSION_ID, which is what's read back out of
+            // the return deep link) — regression coverage for the vault-lands-on-error-page bug.
+            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("approval_session_id"))
+            assertNull(launchedUri.getQueryParameter("token"))
         }
 
     @Test

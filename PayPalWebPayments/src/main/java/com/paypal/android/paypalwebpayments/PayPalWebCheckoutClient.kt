@@ -345,7 +345,7 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
-        val launchUri = shopperSession.getLaunchUri(orderId)
+        val launchUri = shopperSession.getLaunchUri(orderId, TokenType.ORDER_ID)
 
         val result = payPalWebLauncher.launchWithUrl(
             context = context,
@@ -391,7 +391,7 @@ class PayPalWebCheckoutClient internal constructor(
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
-        val launchUri = shopperSession.getLaunchUri(setupTokenId)
+        val launchUri = shopperSession.getLaunchUri(setupTokenId, TokenType.VAULT_ID)
 
         val result = payPalWebLauncher.launchWithUrl(
             context = context,
@@ -615,23 +615,30 @@ class PayPalWebCheckoutClient internal constructor(
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
      * appends the given token as a query param.
      */
-    private fun Uri.appendTokenQueryParam(token: String): Uri {
+    private fun Uri.appendTokenQueryParam(token: String, tokenType: TokenType): Uri {
         val trimmedUri = if (toString().endsWith("&")) {
             toString().dropLast(1).toUri()
         } else {
             this
         }
+        val paramName = when (tokenType) {
+            TokenType.ORDER_ID -> "token"
+            TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "approval_session_id"
+        }
         return trimmedUri.buildUpon()
-            .appendQueryParameter("token", token)
+            .appendQueryParameter(paramName, token)
             .build()
     }
 
-    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String,): Uri {
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(
+        token: String,
+        tokenType: TokenType,
+    ): Uri {
         val launchUri = if (appSwitchEnabled) {
             redirectUrl.toUri()
         } else {
             checkoutFallbackUrl.toUri()
-        }.appendTokenQueryParam(token)
+        }.appendTokenQueryParam(token, tokenType)
 
         return if (shopperSessionConfig.id.isNotBlank()) {
             launchUri.buildUpon()
