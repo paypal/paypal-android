@@ -1692,7 +1692,7 @@ class PayPalWebCheckoutClientUnitTest {
         appSwitchEligible = false,
         redirectUrl = "",
         checkoutFallbackUrl = "",
-        inEligibleReason = "",
+        ineligibleReason = "",
         matchedAuthenticationMethods = emptyList(),
         shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
     )

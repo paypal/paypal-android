@@ -103,6 +103,7 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * Fire and forget — returns immediately.
      *
+     * @param tokenType Whether the session is for an order (checkout) or a setup token (vault).
      * @param userIdentity Shopper identity used to pre-identify the payer.
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
      * @param userAction Controls the call-to-action label on the PayPal checkout page.
@@ -130,7 +131,6 @@ class PayPalWebCheckoutClient internal constructor(
      * @param orderId The id of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
-    // TODO: Narrow exception type once the shopper session network call is finalized
     @Suppress("TooGenericExceptionCaught")
     fun start(
         context: Context,
@@ -195,7 +195,6 @@ class PayPalWebCheckoutClient internal constructor(
      * @param setupTokenId The setup token id associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
-    // TODO: Narrow exception type once the shopper session network call is finalized
     @Suppress("TooGenericExceptionCaught")
     fun vault(
         context: Context,
@@ -335,7 +334,7 @@ class PayPalWebCheckoutClient internal constructor(
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
      * otherwise falls back to Chrome Custom Tabs.
      *
-     * @param activity The activity context needed to launch the checkout UI.
+     * @param context The Context needed to launch the checkout UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param orderId The order id to approve.
      */
@@ -347,7 +346,6 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
         val launchUri = shopperSession.getLaunchUri(orderId)
 
-        // TODO: Remove ReturnToAppStrategy all together.
         val result = payPalWebLauncher.launchWithUrl(
             context = context,
             uri = launchUri,
@@ -382,7 +380,7 @@ class PayPalWebCheckoutClient internal constructor(
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
      * otherwise falls back to Chrome Custom Tabs.
      *
-     * @param activity The activity context needed to launch the vault UI.
+     * @param context The Context needed to launch the vault UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param setupTokenId The setup token id to approve.
      */
@@ -424,7 +422,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * Launches checkout via the legacy patchCCO path after the Shopper Session fetch failed
-     * with a session-creation failure or network timeout (LLD Section 3.8). Mirrors
+     * with a session-creation failure or network timeout. Mirrors
      * [getLaunchUri]'s existing patchCCO-with-further-fallback behavior used by the deprecated
      * v1/v2 flows: if patchCCO also fails (or the PayPal app isn't installed), checkout still
      * proceeds via the plain non-app-switch [baseUrl].
@@ -474,7 +472,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * Launches vault via the legacy patchCCO path after the Shopper Session fetch failed with a
-     * session-creation failure or network timeout (LLD Section 3.8). See
+     * session-creation failure or network timeout. See
      * [launchCheckoutViaPatchCCOFallback].
      */
     private suspend fun launchVaultViaPatchCCOFallback(
@@ -682,7 +680,7 @@ class PayPalWebCheckoutClient internal constructor(
         } else {
             checkoutFallbackUrl.toUri()
         }
-        // Guard against a trailing '&' in the source URL's query string. Uri.Builder's
+        // Drop a trailing '&' so appendQueryParameter doesn't produce a double separator.
         if (launchUri.toString().endsWith("&")) {
             launchUri = launchUri.toString().dropLast(1).toUri()
         }
@@ -866,7 +864,9 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Confirm PayPal payment source for an order with callback.
      *
-     * @deprecated Use [createPayPalSession] followed by [start] with only the order id instead.
+     * @param activity The activity to launch the PayPal web checkout from
+     * @param request [PayPalWebCheckoutRequest] for requesting an order approval
+     * @param callback [PayPalWebStartCallback] to receive the result
      */
     @Deprecated(
         message = "Use createPayPalSession() followed by start(activity, orderId, callback) instead.",
@@ -941,7 +941,9 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Vault PayPal as a payment method with callback.
      *
-     * @deprecated Use [createPayPalSession] followed by [vault] with only the setup token id instead.
+     * @param activity the ComponentActivity to launch the auth challenge from
+     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
+     * @param callback callback to receive the result
      */
     @Deprecated(
         message = "Use createPayPalSession() followed by vault(activity, setupTokenId, callback) instead.",

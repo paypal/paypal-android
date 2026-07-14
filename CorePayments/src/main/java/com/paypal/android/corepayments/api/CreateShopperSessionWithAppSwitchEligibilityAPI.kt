@@ -198,7 +198,7 @@ private fun CreateShopperSessionData.toResponse(
         appSwitchEligible = appSwitch?.appSwitchEligible ?: false,
         redirectUrl = appSwitch?.checkoutUrls?.redirectURL ?: fallbackUrl,
         checkoutFallbackUrl = appSwitch?.checkoutUrls?.checkoutFallbackUrl ?: fallbackUrl,
-        inEligibleReason = appSwitch?.ineligibleReason,
+        ineligibleReason = appSwitch?.ineligibleReason,
         matchedAuthenticationMethods = emptyList(),
         shopperSessionConfig = ShopperSessionConfig(
             id = session?.sessionId ?: "",

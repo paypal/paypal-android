@@ -5,8 +5,9 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
 /**
  * Creates an instance of a PayPalRequest.
  *
- * @deprecated Use [PayPalWebCheckoutClient.createPayPalSession] followed by
- * [PayPalWebCheckoutClient.start] with only the order id instead.
+ * @param orderId The ID of the order to be approved.
+ * @param fundingSource specify funding (credit, paylater or default)
+ * @param returnToAppStrategy Strategy for returning to the app after checkout flow
  */
 @Deprecated(
     message = "Use createPayPalSession() followed by start(activity, orderId, callback) instead.",

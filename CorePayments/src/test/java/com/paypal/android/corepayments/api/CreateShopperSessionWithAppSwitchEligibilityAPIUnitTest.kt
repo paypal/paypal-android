@@ -135,7 +135,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         )
         assertEquals("11F1-7BDF-BCAACEF2-91A9-A556CD2372A8", data.shopperSessionConfig.id)
         assertEquals("", data.shopperSessionConfig.expiresAt)
-        assertFalse(data.inEligibleReason != null)
+        assertFalse(data.ineligibleReason != null)
     }
 
     @Test
