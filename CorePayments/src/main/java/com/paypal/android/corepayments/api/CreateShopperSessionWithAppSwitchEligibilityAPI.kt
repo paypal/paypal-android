@@ -112,7 +112,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     appSwitchSupported = paypalNativeAppInstalled,
                     buyerGUID = null,
                     merchantAccountId = merchantId,
-                    merchantCountry = "US",
+                    merchantCountry = "US", // TODO: Determine
                     integrationChannel = INTEGRATION_CHANNEL,
                     isWebLLSEligible = false,
                     isWebView = false,
@@ -142,7 +142,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         return GraphQLRequest(
             query = query,
             variables = variables,
-            operationName = "createShopperSessionWithAppSwitchEligibility"
+            operationName = OPERATION_NAME
         )
     }
 
@@ -176,6 +176,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     }
 
     companion object {
+        private const val OPERATION_NAME = "createShopperSessionWithAppSwitchEligibility"
         private const val OS_TYPE = "ANDROID"
         private const val INTEGRATION_CHANNEL = "PPCP_NATIVE_SDK"
     }

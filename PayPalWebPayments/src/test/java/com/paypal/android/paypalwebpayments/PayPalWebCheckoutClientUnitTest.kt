@@ -132,7 +132,7 @@ class PayPalWebCheckoutClientUnitTest {
         // Verify launchWithUrl is called with correct parameters
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -185,7 +185,7 @@ class PayPalWebCheckoutClientUnitTest {
         sut.vaultAsync(activity, request)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -595,7 +595,7 @@ class PayPalWebCheckoutClientUnitTest {
             // Then
             verify {
                 payPalWebLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
@@ -631,7 +631,7 @@ class PayPalWebCheckoutClientUnitTest {
             // Then
             verify {
                 payPalWebLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
@@ -668,7 +668,7 @@ class PayPalWebCheckoutClientUnitTest {
             // Then
             verify {
                 payPalWebLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-setup-token-id",
                     tokenType = TokenType.VAULT_ID,
@@ -708,7 +708,7 @@ class PayPalWebCheckoutClientUnitTest {
         // Then
         verify {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -742,7 +742,7 @@ class PayPalWebCheckoutClientUnitTest {
             }
             verify {
                 payPalWebLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
@@ -776,7 +776,7 @@ class PayPalWebCheckoutClientUnitTest {
             }
             verify {
                 payPalWebLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-setup-token-id",
                     tokenType = TokenType.VAULT_ID,
@@ -1110,7 +1110,7 @@ class PayPalWebCheckoutClientUnitTest {
         // Then
         verify {
             mockLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1154,7 +1154,7 @@ class PayPalWebCheckoutClientUnitTest {
         // Then
         verify {
             mockLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -1203,7 +1203,7 @@ class PayPalWebCheckoutClientUnitTest {
             // Then
             verify {
                 mockLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
@@ -1252,7 +1252,7 @@ class PayPalWebCheckoutClientUnitTest {
             // Then
             verify {
                 mockLauncher.launchWithUrl(
-                    activity = activity,
+                    context = activity,
                     uri = any(),
                     token = "fake-setup-token-id",
                     tokenType = TokenType.VAULT_ID,
@@ -1291,7 +1291,7 @@ class PayPalWebCheckoutClientUnitTest {
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1352,7 +1352,7 @@ class PayPalWebCheckoutClientUnitTest {
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -1443,7 +1443,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1480,7 +1480,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1506,7 +1506,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1531,7 +1531,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1556,7 +1556,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -1593,7 +1593,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -1619,7 +1619,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -1722,14 +1722,14 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
         val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-        sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+        sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
         sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
         sutV3.start(activity, "fake-order-id", callback)
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
@@ -1749,7 +1749,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
             sutV3.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -1770,7 +1770,7 @@ class PayPalWebCheckoutClientUnitTest {
                 shopperSessionConfig = ShopperSessionConfig("", "")
             )
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             sutV3.shopperSessionDeferred = CompletableDeferred(blankIdResponse)
             sutV3.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -1785,7 +1785,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             // Any unexpected exception from the pre-warm fetch (as opposed to a "normal"
             // APIResult.Failure) should fail the whole flow rather than fall back to patchCCO.
             sutV3.shopperSessionDeferred = CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
@@ -1824,11 +1824,12 @@ class PayPalWebCheckoutClientUnitTest {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns launchResult
 
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             // null represents a session-creation failure / network timeout (any non-LSAT
             // APIResult.Failure from createShopperSessionWithAppSwitchEligibility).
             sutV3.shopperSessionDeferred =
-                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>(null)
+                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
+                    .also { it.complete(null) }
             sutV3.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -1860,7 +1861,7 @@ class PayPalWebCheckoutClientUnitTest {
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
             val callback1 = mockk<PayPalWebStartCallback>(relaxed = true)
             val callback2 = mockk<PayPalWebStartCallback>(relaxed = true)
@@ -1905,14 +1906,14 @@ class PayPalWebCheckoutClientUnitTest {
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
         val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-        sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+        sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
         sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
         sutV3.vault(activity, "fake-setup-token-id", callback)
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify {
             payPalWebLauncher.launchWithUrl(
-                activity = activity,
+                context = activity,
                 uri = any(),
                 token = "fake-setup-token-id",
                 tokenType = TokenType.VAULT_ID,
@@ -1927,7 +1928,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             // Any unexpected exception from the pre-warm fetch (as opposed to a "normal"
             // APIResult.Failure) should fail the whole flow rather than fall back to patchCCO.
             sutV3.shopperSessionDeferred = CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
@@ -1966,11 +1967,12 @@ class PayPalWebCheckoutClientUnitTest {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns launchResult
 
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             // null represents a session-creation failure / network timeout (any non-LSAT
             // APIResult.Failure from createShopperSessionWithAppSwitchEligibility).
             sutV3.shopperSessionDeferred =
-                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>(null)
+                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
+                    .also { it.complete(null) }
             sutV3.vault(activity, "fake-setup-token-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -2096,7 +2098,7 @@ class PayPalWebCheckoutClientUnitTest {
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            sutV3.createPayPalSession(token = "", tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
+            sutV3.createPayPalSession(tokenType = TokenType.ORDER_ID, userIdentity = fakeUserIdentity, urlConfig = fakeUrlConfig)
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
             val callback1 = mockk<PayPalWebVaultCallback>(relaxed = true)
             val callback2 = mockk<PayPalWebVaultCallback>(relaxed = true)

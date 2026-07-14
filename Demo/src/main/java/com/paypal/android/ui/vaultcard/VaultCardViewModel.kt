@@ -1,11 +1,11 @@
 package com.paypal.android.ui.vaultcard
 
-import com.paypal.android.DemoConstants
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card

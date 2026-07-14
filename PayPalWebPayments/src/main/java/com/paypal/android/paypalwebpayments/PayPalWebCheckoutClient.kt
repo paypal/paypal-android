@@ -336,7 +336,6 @@ class PayPalWebCheckoutClient internal constructor(
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param orderId The order id to approve.
      */
-    @Suppress("UnusedPrivateMember") // TODO: params will be used once implementation is complete
     private fun launchCheckoutWithShopperSession(
         context: Context,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
@@ -384,7 +383,6 @@ class PayPalWebCheckoutClient internal constructor(
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param setupTokenId The setup token id to approve.
      */
-    @Suppress("UnusedPrivateMember") // TODO: params will be used once implementation is complete
     private fun launchVaultWithSession(
         context: Context,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
@@ -419,7 +417,6 @@ class PayPalWebCheckoutClient internal constructor(
             }
         }
         return result
-//        return PayPalPresentAuthChallengeResult.Failure(PayPalSDKError(0, ""))
     }
 
     /**
@@ -687,10 +684,12 @@ class PayPalWebCheckoutClient internal constructor(
             launchUri = launchUri.toString().dropLast(1).toUri()
         }
 
-        return launchUri.buildUpon()
+        val uriBuilder = launchUri.buildUpon()
             .appendQueryParameter("token", token)
-            .appendQueryParameter("shopperSessionId", this.shopperSessionConfig.id)
-            .build()
+        if (shopperSessionConfig.id.isNotBlank()) {
+            uriBuilder.appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
+        }
+        return uriBuilder.build()
     }
 
     private fun buildPayPalCheckoutUri(
@@ -698,15 +697,16 @@ class PayPalWebCheckoutClient internal constructor(
         funding: PayPalWebCheckoutFundingSource?,
         returnUrl: String?
     ): Uri {
-        return baseUrl.toUri()
+        val uriBuilder = baseUrl.toUri()
             .buildUpon()
             .appendPath("checkoutnow")
             .appendQueryParameter("token", orderId)
             .appendQueryParameter("redirect_uri", returnUrl)
             .appendQueryParameter("native_xo", "1")
-            .appendQueryParameter("fundingSource", funding?.value)
             .appendQueryParameter("integration_artifact", UpdateClientConfigAPI.Defaults.INTEGRATION_ARTIFACT)
-            .build()
+
+        funding?.let { uriBuilder.appendQueryParameter("fundingSource", it.value) }
+        return uriBuilder.build()
     }
 
     private fun buildPayPalVaultUri(

@@ -1,22 +1,22 @@
 package com.paypal.android.ui.paypalweb
 
-import com.paypal.android.DemoConstants
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalwebpayments.PayPalPresentAuthChallengeResult
-import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.PayPalUserAction
 import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
@@ -45,13 +45,13 @@ class PayPalCheckoutViewModel @Inject constructor(
         private val TAG = PayPalCheckoutViewModel::class.qualifiedName
     }
 
-    private fun getCorConfig(): CoreConfig =
+    private fun buildCoreConfig(): CoreConfig =
         customEnvironmentRepository.getCoreConfig(
             CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
         )
 
-    private val payPalDataCollector = PayPalDataCollector(getCorConfig())
-    private val paypalClient: PayPalWebCheckoutClient = PayPalWebCheckoutClient(applicationContext, getCorConfig())
+    private val payPalDataCollector = PayPalDataCollector(buildCoreConfig())
+    private val paypalClient: PayPalWebCheckoutClient = PayPalWebCheckoutClient(applicationContext, buildCoreConfig())
 
     private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()
