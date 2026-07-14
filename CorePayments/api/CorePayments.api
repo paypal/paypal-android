@@ -190,6 +190,9 @@ public final class com/paypal/android/corepayments/UpdateClientConfigVariables$C
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/paypal/android/corepayments/api/CreateShopperSessionWithAppSwitchEligibilityAPI$Companion {
+}
+
 public final class com/paypal/android/corepayments/api/PatchCCOWithAppSwitchEligibility$Companion {
 }
 

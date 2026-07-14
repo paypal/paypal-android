@@ -72,8 +72,8 @@ public final class com/paypal/android/paypalwebpayments/PayPalUserIdentity {
 public final class com/paypal/android/paypalwebpayments/PayPalWebCheckoutClient {
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;Ljava/lang/String;)V
-	public final fun createPayPalSession (Ljava/lang/String;Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;Lcom/paypal/android/paypalwebpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalwebpayments/PayPalUserAction;)V
-	public static synthetic fun createPayPalSession$default (Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutClient;Ljava/lang/String;Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;Lcom/paypal/android/paypalwebpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalwebpayments/PayPalUserAction;ILjava/lang/Object;)V
+	public final fun createPayPalSession (Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;Lcom/paypal/android/paypalwebpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalwebpayments/PayPalUserAction;)V
+	public static synthetic fun createPayPalSession$default (Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutClient;Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalwebpayments/PayPalUserIdentity;Lcom/paypal/android/paypalwebpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalwebpayments/PayPalUserAction;ILjava/lang/Object;)V
 	public final fun finishStart (Landroid/content/Intent;)Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFinishStartResult;
 	public final fun finishStart (Landroid/content/Intent;Ljava/lang/String;)Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFinishStartResult;
 	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/paypalwebpayments/PayPalWebCheckoutFinishVaultResult;
