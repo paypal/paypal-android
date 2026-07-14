@@ -191,6 +191,62 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         }
 
     @Test
+    fun `invoke includes buyerEmailAddressMerchantPassed and shoppersSessionId in the request when provided`() =
+        runTest {
+            val requestSlot = slot<HttpRequest>()
+            coEvery { mockHttp.send(capture(requestSlot)) } returns HttpResponse(
+                status = 200,
+                body = """{ "data" : { "external" : { "createShopperSessionWithAppSwitchEligibility" : null } } }""",
+                headers = emptyMap()
+            )
+
+            sut(
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
+                fallbackUrl = "https://sandbox.paypal.com/",
+                buyerEmailAddressMerchantPassed = "shopper@example.com",
+                existingPayPalSessionId = "11F1-7BDF-BCAACEF2-91A9-A556CD2372A8",
+            )
+
+            val requestBody = requestSlot.captured.body.orEmpty()
+            assertTrue(requestBody.contains(""""buyerEmailAddressMerchantPassed":"shopper@example.com""""))
+            assertTrue(
+                requestBody.contains(""""shoppersSessionId":"11F1-7BDF-BCAACEF2-91A9-A556CD2372A8"""")
+            )
+        }
+
+    @Test
+    fun `invoke omits buyerEmailAddressMerchantPassed and shoppersSessionId from the request when not provided`() =
+        runTest {
+            val requestSlot = slot<HttpRequest>()
+            coEvery { mockHttp.send(capture(requestSlot)) } returns HttpResponse(
+                status = 200,
+                body = """{ "data" : { "external" : { "createShopperSessionWithAppSwitchEligibility" : null } } }""",
+                headers = emptyMap()
+            )
+
+            sut(
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
+                fallbackUrl = "https://sandbox.paypal.com/",
+            )
+
+            val requestBody = requestSlot.captured.body.orEmpty()
+            assertFalse(requestBody.contains(""""buyerEmailAddressMerchantPassed""""))
+            assertFalse(requestBody.contains(""""shoppersSessionId""""))
+        }
+
+    @Test
     fun `invoke returns an APIResult Failure when LSAT creation fails`() = runTest {
         // Given: the LSAT (auth token) request itself fails, before the GraphQL call is
         // ever attempted.

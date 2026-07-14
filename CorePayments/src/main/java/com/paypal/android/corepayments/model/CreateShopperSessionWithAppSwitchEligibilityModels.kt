@@ -21,6 +21,8 @@ internal data class CreateShopperSessionAppSwitchEligibilityInput(
     val osType: String,
     val paypalNativeAppInstalled: Boolean,
     val tokenType: String,
+    val buyerEmailAddressMerchantPassed: String? = null,
+    val shoppersSessionId: String? = null,
 )
 
 @OptIn(InternalSerializationApi::class)

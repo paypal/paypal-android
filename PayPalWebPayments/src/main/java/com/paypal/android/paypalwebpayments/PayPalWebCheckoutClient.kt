@@ -390,7 +390,7 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
-        appSwitchEnabled = shopperSession.appSwitchEligible
+        appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -474,6 +474,8 @@ class PayPalWebCheckoutClient internal constructor(
             fallbackUrl = baseUrl,
             countryCode = userIdentity?.phone?.countryCode,
             nationalNumber = userIdentity?.phone?.nationalNumber,
+            buyerEmailAddressMerchantPassed = userIdentity?.email,
+            existingPayPalSessionId = userIdentity?.existingPayPalSessionId,
         )
 
         return when (result) {
@@ -624,8 +626,8 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
-        val launchUri = if (appSwitchEligible) {
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String,): Uri {
+        val launchUri = if (appSwitchEnabled) {
             redirectUrl.toUri()
         } else {
             checkoutFallbackUrl.toUri()
