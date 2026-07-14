@@ -44,7 +44,9 @@ class ApproveOrderViewModel @Inject constructor(
 ) : ViewModel() {
 
     private fun buildCoreConfig(): CoreConfig {
-        return customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId))
+        return customEnvironmentRepository.getCoreConfig(
+            CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
+        )
     }
 
     // Held as a field so completeAuthChallenge uses the same instance that started the auth flow.

@@ -13,13 +13,11 @@ import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
 import com.paypal.android.corepayments.model.APIResult
-import com.paypal.android.corepayments.model.CreateShopperSessionAppSwitchData
 import com.paypal.android.corepayments.model.CreateShopperSessionAppSwitchEligibilityInput
 import com.paypal.android.corepayments.model.CreateShopperSessionData
 import com.paypal.android.corepayments.model.CreateShopperSessionExperimentationContext
 import com.paypal.android.corepayments.model.CreateShopperSessionGraphQLResponse
 import com.paypal.android.corepayments.model.CreateShopperSessionPhone
-import com.paypal.android.corepayments.model.CreateShopperSessionSessionData
 import com.paypal.android.corepayments.model.CreateShopperSessionShopperSessionInput
 import com.paypal.android.corepayments.model.CreateShopperSessionVariables
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
@@ -55,7 +53,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      * @param fallbackSchemeUrl Custom URL scheme used as fallback.
      * @param paymentType GraphQL paymentType value (e.g. "CONTINUE", "PAY_NOW").
      * @param paypalNativeAppInstalled Whether the PayPal native app is installed.
-     * @param fallbackUrl Base URL used to construct [CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl].
+     * @param fallbackUrl Base URL used to construct
+     * [CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl].
      * @param countryCode Country calling code for the shopper's phone number (e.g. "1").
      * @param nationalNumber National (subscriber) number for the shopper's phone number.
      */
@@ -151,27 +150,29 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         fallbackUrl: String,
     ): APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse> {
         val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
-        if (tokenResult is APIResult.Failure) {
-            return APIResult.Failure(tokenResult.error)
-        }
-        val lsat = (tokenResult as APIResult.Success).data
-        val graphQLResult = graphQLClient.send<
-                CreateShopperSessionGraphQLResponse,
-                CreateShopperSessionVariables>(
-            graphQLRequest,
-            additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $lsat")
-        )
-        return when (graphQLResult) {
-            is GraphQLResult.Success -> {
-                val data = graphQLResult.response.data
-                    ?.external
-                    ?.createShopperSessionWithAppSwitchEligibility
-                    ?: return APIResult.Failure(
-                        APIClientError.noResponseData(graphQLResult.correlationId)
-                    )
-                APIResult.Success(data.toResponse(fallbackUrl))
+        return if (tokenResult is APIResult.Failure) {
+            APIResult.Failure(tokenResult.error)
+        } else {
+            val lsat = (tokenResult as APIResult.Success).data
+            val graphQLResult = graphQLClient.send<
+                    CreateShopperSessionGraphQLResponse,
+                    CreateShopperSessionVariables>(
+                graphQLRequest,
+                additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $lsat")
+            )
+            when (graphQLResult) {
+                is GraphQLResult.Success -> {
+                    val data = graphQLResult.response.data
+                        ?.external
+                        ?.createShopperSessionWithAppSwitchEligibility
+                    if (data == null) {
+                        APIResult.Failure(APIClientError.noResponseData(graphQLResult.correlationId))
+                    } else {
+                        APIResult.Success(data.toResponse(fallbackUrl))
+                    }
+                }
+                is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
             }
-            is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
         }
     }
 

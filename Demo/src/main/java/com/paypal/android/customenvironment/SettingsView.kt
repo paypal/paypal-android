@@ -77,39 +77,13 @@ private fun SettingsContent(
         SettingsHeader()
         EnvironmentSelector(selected = uiState.settings.selectedEnvironment, onSelect = onEnvironmentChange)
         if (uiState.settings.selectedEnvironment == SelectedEnvironment.CUSTOM) {
-            UrlField(
-                label = "SDK REST Base URL",
-                placeholder = "Enter SDK REST base URL",
-                value = uiState.settings.customSdkRestUrl,
-                onValueChange = onCustomSdkRestUrlChange,
-                error = uiState.restUrlError
-            )
-            UrlField(
-                label = "SDK GraphQL Base URL",
-                placeholder = "Enter SDK GraphQL base URL",
-                value = uiState.settings.customSdkGraphQLUrl,
-                onValueChange = onCustomSdkGraphQLUrlChange,
-                error = uiState.graphQLUrlError
-            )
-            UrlField(
-                label = "Merchant Server Base URL",
-                placeholder = "Enter merchant server base URL",
-                value = uiState.settings.customMerchantBaseUrl,
-                onValueChange = onCustomMerchantBaseUrlChange,
-                error = uiState.merchantBaseUrlError
-            )
-            UrlField(
-                label = "Client ID",
-                placeholder = "Enter PayPal client ID (optional)",
-                value = uiState.settings.customClientId,
-                onValueChange = onCustomClientIdChange,
-            )
-            UrlField(
-                label = "Merchant ID",
-                placeholder = "Enter PayPal merchant ID (optional)",
-                value = uiState.settings.customMerchantId,
-                onValueChange = onCustomMerchantIdChange,
-                imeAction = ImeAction.Done,
+            CustomEnvironmentFields(
+                uiState = uiState,
+                onCustomSdkRestUrlChange = onCustomSdkRestUrlChange,
+                onCustomSdkGraphQLUrlChange = onCustomSdkGraphQLUrlChange,
+                onCustomMerchantBaseUrlChange = onCustomMerchantBaseUrlChange,
+                onCustomClientIdChange = onCustomClientIdChange,
+                onCustomMerchantIdChange = onCustomMerchantIdChange,
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -126,6 +100,51 @@ private fun SettingsContent(
             )
         }
     }
+}
+
+@Composable
+private fun CustomEnvironmentFields(
+    uiState: SettingsUiState,
+    onCustomSdkRestUrlChange: (String) -> Unit,
+    onCustomSdkGraphQLUrlChange: (String) -> Unit,
+    onCustomMerchantBaseUrlChange: (String) -> Unit,
+    onCustomClientIdChange: (String) -> Unit,
+    onCustomMerchantIdChange: (String) -> Unit,
+) {
+    UrlField(
+        label = "SDK REST Base URL",
+        placeholder = "Enter SDK REST base URL",
+        value = uiState.settings.customSdkRestUrl,
+        onValueChange = onCustomSdkRestUrlChange,
+        error = uiState.restUrlError
+    )
+    UrlField(
+        label = "SDK GraphQL Base URL",
+        placeholder = "Enter SDK GraphQL base URL",
+        value = uiState.settings.customSdkGraphQLUrl,
+        onValueChange = onCustomSdkGraphQLUrlChange,
+        error = uiState.graphQLUrlError
+    )
+    UrlField(
+        label = "Merchant Server Base URL",
+        placeholder = "Enter merchant server base URL",
+        value = uiState.settings.customMerchantBaseUrl,
+        onValueChange = onCustomMerchantBaseUrlChange,
+        error = uiState.merchantBaseUrlError
+    )
+    UrlField(
+        label = "Client ID",
+        placeholder = "Enter PayPal client ID (optional)",
+        value = uiState.settings.customClientId,
+        onValueChange = onCustomClientIdChange,
+    )
+    UrlField(
+        label = "Merchant ID",
+        placeholder = "Enter PayPal merchant ID (optional)",
+        value = uiState.settings.customMerchantId,
+        onValueChange = onCustomMerchantIdChange,
+        imeAction = ImeAction.Done,
+    )
 }
 
 @Composable

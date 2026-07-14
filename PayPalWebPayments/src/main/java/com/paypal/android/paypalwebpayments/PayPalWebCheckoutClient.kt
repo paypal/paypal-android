@@ -75,7 +75,10 @@ class PayPalWebCheckoutClient internal constructor(
         coreConfig = configuration,
         urlScheme = null,
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
-        createShopperSessionAPI = CreateShopperSessionWithAppSwitchEligibilityAPI(configuration, context.applicationContext),
+        createShopperSessionAPI = CreateShopperSessionWithAppSwitchEligibilityAPI(
+            configuration,
+            context.applicationContext,
+        ),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
@@ -796,7 +799,10 @@ class PayPalWebCheckoutClient internal constructor(
         coreConfig = configuration,
         urlScheme = urlScheme,
         patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
-        createShopperSessionAPI = CreateShopperSessionWithAppSwitchEligibilityAPI(configuration, context.applicationContext),
+        createShopperSessionAPI = CreateShopperSessionWithAppSwitchEligibilityAPI(
+            configuration,
+            context.applicationContext,
+        ),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
