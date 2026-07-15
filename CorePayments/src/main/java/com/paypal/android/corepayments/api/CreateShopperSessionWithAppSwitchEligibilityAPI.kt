@@ -117,7 +117,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
             appSwitchEligibilityInput = CreateShopperSessionAppSwitchEligibilityInput(
                 contextId = token,
                 experimentationContext = CreateShopperSessionExperimentationContext(
-                    appSwitchSupported = paypalNativeAppInstalled,
+                    appSwitchSupported = true,
                     buyerGUID = null,
                     merchantAccountId = merchantId,
                     merchantCountry = "US", // TODO: Determine
