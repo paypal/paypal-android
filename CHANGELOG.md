@@ -2,24 +2,27 @@
 
 ## Unreleased
 
+* CorePayments
+  * **Breaking**: `CoreConfig` constructor now requires `merchantId` parameter. Update initialization: `CoreConfig(clientId, environment, merchantId)`
+  * Add `X-App-Guid` header to GraphQL requests for improved tracking and compliance
+  * Simplify `Environment` enum with `when` expressions
 * Venmo
-  * Add `VenmoClient.isEligible(buyerCountry: String): VenmoEligibilityResult` 
-    suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`, 
+  * Add `VenmoClient.isEligible(buyerCountry: String)` suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`, 
     `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
-  * Enhance `VenmoClient.finishStart(intent: Intent): VenmoFinishStartResult` to return:
+  * Add `VenmoClient.isEligible(buyerCountry: String, callback: VenmoEligibilityCallback)` callback-based method for Java compatibility
+  * Add `VenmoClient.start(activity: Activity, orderId: String)` suspend function to initiate Venmo checkout
+  * Add `VenmoClient.start(activity: Activity, orderId: String, callback: VenmoStartCallback)` callback-based method for Java compatibility
+  * Enhance `VenmoClient.finishStart(intent: Intent)` to return type-safe results:
     * `VenmoFinishStartResult.Success` for successful payments
     * `VenmoFinishStartResult.Canceled` when user cancels payment
     * `VenmoFinishStartResult.NoResult` when intent is unrelated to Venmo flow
     * `VenmoFinishStartResult.Failure` for errors
-* Adds new property `appSwitchWhenEligible`in `PayPalWebCheckoutRequest` to control app switch
-  behavior
-* Adds new property `appSwitchWhenEligible`in `PayPalWebVaultRequest` to control app switch behavior
-* Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
-  used to re-open app after approving order
-* Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be
-  used to re-open app after vaulting
-* Deprecates `urlScheme` property in `PayPalWebCheckoutClient` instead use `fallbackUrlScheme` in
-  `PayPalWebCheckoutRequest` and `PayPalWebVaultRequest`
+* PayPalWebPayments
+  * Add `appSwitchWhenEligible` property to `PayPalWebCheckoutRequest` to control app switch behavior
+  * Add `appSwitchWhenEligible` property to `PayPalWebVaultRequest` to control app switch behavior
+  * Add `appLinkUrl` property to `PayPalWebCheckoutRequest` to specify app link URL for return-to-app flow
+  * Add `appLinkUrl` property to `PayPalWebVaultRequest` to specify app link URL for return-to-app flow
+  * Deprecate `urlScheme` property in `PayPalWebCheckoutClient` — use `fallbackUrlScheme` in `PayPalWebCheckoutRequest` and `PayPalWebVaultRequest` instead
 
 ## 2.3.0 (2025-11-03)
 * PayPalWebPayments

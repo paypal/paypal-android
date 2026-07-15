@@ -14,6 +14,11 @@ import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
 import com.paypal.android.corepayments.model.APIResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class VenmoClient internal constructor(
     private val context: Context,
@@ -21,6 +26,7 @@ class VenmoClient internal constructor(
     private val ccoAPI: UpdateClientConfigAPI,
     private val getFundingEligibility: GetFundingEligibility,
     private val chromeCustomTabsClient: ChromeCustomTabsClient,
+    private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob())
 ) {
 
     companion object {
@@ -150,6 +156,44 @@ class VenmoClient internal constructor(
                         errorDescription = "Result did not contain valid approval or cancellation status."
                     )
                 )
+            }
+        }
+    }
+
+    /**
+     * Check Venmo payment eligibility with callback.
+     *
+     * @param buyerCountry the buyer's country for eligibility determination
+     * @param callback callback to receive the eligibility result
+     */
+    fun isEligible(
+        buyerCountry: String,
+        callback: VenmoEligibilityCallback
+    ) {
+        applicationScope.launch {
+            val result = isEligible(buyerCountry)
+            withContext(Dispatchers.Main) {
+                callback.onVenmoEligibilityResult(result)
+            }
+        }
+    }
+
+    /**
+     * Initiate Venmo checkout with callback.
+     *
+     * @param activity the activity to launch Venmo from
+     * @param orderId the order ID for the Venmo payment
+     * @param callback callback to receive the start result
+     */
+    fun start(
+        activity: Activity,
+        orderId: String,
+        callback: VenmoStartCallback
+    ) {
+        applicationScope.launch {
+            val result = start(activity, orderId)
+            withContext(Dispatchers.Main) {
+                callback.onVenmoStartResult(result)
             }
         }
     }
