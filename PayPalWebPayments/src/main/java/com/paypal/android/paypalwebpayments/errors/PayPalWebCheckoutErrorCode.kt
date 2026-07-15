@@ -4,5 +4,6 @@ internal enum class PayPalWebCheckoutErrorCode {
     UNKNOWN,
     MALFORMED_RESULT,
     BROWSER_SWITCH,
-    NO_RETURN_TO_APP_STRATEGY
+    NO_RETURN_TO_APP_STRATEGY,
+    SESSION_NOT_CREATED,
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -22,12 +23,10 @@ import com.paypal.android.fraudprotection.PayPalDataCollector
 import com.paypal.android.fraudprotection.PayPalDataCollectorRequest
 import com.paypal.android.models.OrderRequest
 import com.paypal.android.models.TestCard
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
-import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,8 +43,11 @@ class ApproveOrderViewModel @Inject constructor(
     private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
 
-    private fun buildCoreConfig(): CoreConfig =
-        customEnvironmentRepository.getCoreConfig(CoreConfig(SDKSampleServerAPI.clientId))
+    private fun buildCoreConfig(): CoreConfig {
+        return customEnvironmentRepository.getCoreConfig(
+            CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
+        )
+    }
 
     // Held as a field so completeAuthChallenge uses the same instance that started the auth flow.
     private var cardClient: CardClient? = null
@@ -58,7 +60,7 @@ class ApproveOrderViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault, returnToAppStrategyOption)
+                OrderRequest(intentOption, shouldVault)
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -89,11 +91,7 @@ class ApproveOrderViewModel @Inject constructor(
                 expirationYear = dateString.formattedYear,
                 securityCode = cardSecurityCode
             )
-            val returnUrl =
-                ReturnUrlFactory.createGenericReturnUrl(
-                    returnToAppStrategyOption.toReturnToAppStrategy(),
-                    "return-path"
-                )
+            val returnUrl = DemoConstants.returnToAppUrlConfig.returnAppUrl
             CardRequest(orderId, card, returnUrl, scaOption)
         }
         cardClient.approveOrder(cardRequest) { result ->
@@ -201,12 +199,6 @@ class ApproveOrderViewModel @Inject constructor(
         get() = _uiState.value.shouldVaultOption
         set(value) {
             _uiState.update { it.copy(shouldVaultOption = value) }
-        }
-
-    var returnToAppStrategy: ReturnToAppStrategyOption
-        get() = _uiState.value.returnToAppStrategyOption
-        set(value) {
-            _uiState.update { it.copy(returnToAppStrategyOption = value) }
         }
 
     fun prefillCard(testCard: TestCard) {

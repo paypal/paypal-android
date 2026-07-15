@@ -30,7 +30,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
+        coreConfig = CoreConfig("test-client-id", "fake-merchant-id", Environment.SANDBOX)
         restClient = mockk(relaxed = true)
         sut = AuthenticationSecureTokenServiceAPI(coreConfig, restClient)
     }
@@ -205,7 +205,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
     fun `createLowScopedAccessToken() creates proper Basic Auth header from client ID`() = runTest {
         // Given
         val clientId = "test-client-123"
-        val configWithCustomClientId = CoreConfig(clientId, Environment.LIVE)
+        val configWithCustomClientId = CoreConfig(clientId, "fake-merchant-id", Environment.LIVE)
         val sutWithCustomConfig =
             AuthenticationSecureTokenServiceAPI(configWithCustomClientId, restClient)
 

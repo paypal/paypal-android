@@ -9,6 +9,10 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
  * @param fundingSource specify funding (credit, paylater or default)
  * @param returnToAppStrategy Strategy for returning to the app after checkout flow
  */
+@Deprecated(
+    message = "Use createPayPalSession() followed by start(activity, orderId, callback) instead.",
+    level = DeprecationLevel.WARNING
+)
 data class PayPalWebCheckoutRequest @JvmOverloads constructor(
     val orderId: String,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,

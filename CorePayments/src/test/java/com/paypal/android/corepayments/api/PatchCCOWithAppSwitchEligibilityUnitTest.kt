@@ -44,7 +44,7 @@ class PatchCCOWithAppSwitchEligibilityUnitTest {
     @Before
     fun beforeEach() {
         context = mockk(relaxed = true)
-        coreConfig = CoreConfig("test-client-id", Environment.SANDBOX)
+        coreConfig = CoreConfig("test-client-id", "fake-merchant-id", Environment.SANDBOX)
         graphQLClient = mockk(relaxed = true)
         resourceLoader = mockk(relaxed = true)
         tokenServiceAPI = mockk(relaxed = true)

@@ -27,4 +27,10 @@ internal object PayPalWebCheckoutError {
         code = PayPalWebCheckoutErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
         errorDescription = "ReturnToAppStrategy or urlScheme is required. "
     )
+
+    // 4. PayPal Session was not created
+    val sessionNotCreatedError = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.SESSION_NOT_CREATED.ordinal,
+        errorDescription = "PayPal Session must be created. Call createPayPalSession()"
+    )
 }

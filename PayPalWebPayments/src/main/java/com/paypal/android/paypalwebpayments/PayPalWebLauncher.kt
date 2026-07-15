@@ -1,6 +1,5 @@
 package com.paypal.android.paypalwebpayments
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -32,7 +31,7 @@ internal class PayPalWebLauncher(
     }
 
     fun launchWithUrl(
-        activity: Activity,
+        context: Context,
         uri: Uri,
         token: String,
         tokenType: TokenType,
@@ -46,7 +45,7 @@ internal class PayPalWebLauncher(
             appLinkUrl = (returnToAppStrategy as? ReturnToAppStrategy.AppLink)?.appLinkUrl,
             metadata = metadata
         )
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(context, options)
     }
 
     private fun getRequestCode(tokenType: TokenType): Int {
@@ -69,10 +68,10 @@ internal class PayPalWebLauncher(
     }
 
     private fun launchBrowserSwitch(
-        activity: Activity,
+        context: Context,
         options: BrowserSwitchOptions
     ): PayPalPresentAuthChallengeResult =
-        when (val startResult = browserSwitchClient.start(activity, options)) {
+        when (val startResult = browserSwitchClient.start(context, options)) {
             is BrowserSwitchStartResult.Success -> {
                 val pendingState = BrowserSwitchPendingState(options)
                 PayPalPresentAuthChallengeResult.Success(pendingState.toBase64EncodedJSON())

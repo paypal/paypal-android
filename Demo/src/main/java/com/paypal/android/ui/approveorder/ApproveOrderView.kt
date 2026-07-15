@@ -15,16 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.paypal.android.R
 import com.paypal.android.api.model.OrderIntent
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CardResultView
 import com.paypal.android.uishared.components.CreateOrderWithVaultOptionForm
-import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.StepHeader
@@ -92,12 +89,6 @@ private fun Step1_CreateOrder(uiState: ApproveOrderUiState, viewModel: ApproveOr
             shouldVault = uiState.shouldVaultOption,
             onIntentOptionChanged = { value -> viewModel.intentOption = value },
             onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-        )
-        EnumOptionList(
-            title = stringResource(id = R.string.return_to_app_strategy_title),
-            stringArrayResId = R.array.deep_link_strategy_options,
-            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
-            selectedOption = uiState.returnToAppStrategyOption
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",

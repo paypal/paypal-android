@@ -70,6 +70,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateCustomMerchantId(value: String) {
+        _uiState.update {
+            it.copy(
+                settings = it.settings.copy(customMerchantId = value),
+                showSaveSuccess = false
+            )
+        }
+    }
+
     /** Validates URLs (CUSTOM only) then persists to SharedPreferences. */
     fun saveConfig() {
         val settings = _uiState.value.settings
@@ -77,9 +86,16 @@ class SettingsViewModel @Inject constructor(
             customEnvironmentRepository.saveConfig(settings)
             return
         }
-        val restError = validateUrl(settings.customSdkRestUrl)
-        val graphQLError = validateUrl(settings.customSdkGraphQLUrl)
-        val merchantError = validateUrl(settings.customMerchantBaseUrl)
+        val trimmedSettings = settings.copy(
+            customSdkRestUrl = settings.customSdkRestUrl.trim(),
+            customSdkGraphQLUrl = settings.customSdkGraphQLUrl.trim(),
+            customMerchantBaseUrl = settings.customMerchantBaseUrl.trim(),
+        )
+        _uiState.update { it.copy(settings = trimmedSettings) }
+
+        val restError = validateUrl(trimmedSettings.customSdkRestUrl)
+        val graphQLError = validateUrl(trimmedSettings.customSdkGraphQLUrl)
+        val merchantError = validateUrl(trimmedSettings.customMerchantBaseUrl)
         if (restError != null || graphQLError != null || merchantError != null) {
             _uiState.update {
                 it.copy(
@@ -91,15 +107,15 @@ class SettingsViewModel @Inject constructor(
             // Persist whichever fields are valid so they survive an environment switch.
             // Invalid fields are saved as empty to avoid persisting bad data.
             customEnvironmentRepository.saveConfig(
-                settings.copy(
-                    customSdkRestUrl = if (restError == null) settings.customSdkRestUrl else "",
-                    customSdkGraphQLUrl = if (graphQLError == null) settings.customSdkGraphQLUrl else "",
-                    customMerchantBaseUrl = if (merchantError == null) settings.customMerchantBaseUrl else "",
+                trimmedSettings.copy(
+                    customSdkRestUrl = if (restError == null) trimmedSettings.customSdkRestUrl else "",
+                    customSdkGraphQLUrl = if (graphQLError == null) trimmedSettings.customSdkGraphQLUrl else "",
+                    customMerchantBaseUrl = if (merchantError == null) trimmedSettings.customMerchantBaseUrl else "",
                 )
             )
             return
         }
-        customEnvironmentRepository.saveConfig(settings)
+        customEnvironmentRepository.saveConfig(trimmedSettings)
         showSaveSuccessBriefly()
     }
 

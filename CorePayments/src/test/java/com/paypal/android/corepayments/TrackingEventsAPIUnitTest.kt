@@ -32,7 +32,7 @@ class TrackingEventsAPIUnitTest {
         clientOS = "fake client OS"
     )
 
-    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
 
     private lateinit var restClient: RestClient
     private lateinit var apiRequestSlot: CapturingSlot<APIRequest>

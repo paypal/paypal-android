@@ -22,6 +22,9 @@ data class DemoEnvironmentSettings(
      * Merchant server base URL override. Required when [selectedEnvironment] is CUSTOM.
      */
     val customMerchantBaseUrl: String = "",
+
+    /** Optional merchant ID override. When blank, falls back to the default integration merchant ID. */
+    val customMerchantId: String = "",
 ) {
     /**
      * True when the config is ready to use. Only false when [selectedEnvironment] is CUSTOM

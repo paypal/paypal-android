@@ -3,6 +3,7 @@ package com.paypal.android.ui.paypalwebvault
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -22,8 +23,10 @@ import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
 import com.paypal.android.uishared.components.PayPalSetupTokenView
+import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
@@ -36,8 +39,10 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
 
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {
-        // continuously scroll to bottom of the list when event state is updated
-        scrollState.animateScrollTo(scrollState.maxValue)
+        // Auto-scroll once the user has started the flow; avoids scrolling on initial render
+        if (uiState.createSetupTokenState !is ActionState.Idle) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
     }
 
     val context = LocalContext.current
@@ -78,11 +83,17 @@ private fun Step1_CreateSetupToken(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create Setup Token")
+        PayPalUserIdentityForm(
+            userIdentity = uiState.userIdentity,
+            onUserIdentityChange = { value -> viewModel.userIdentity = value },
+            modifier = Modifier.fillMaxWidth()
+        )
         EnumOptionList(
-            title = stringResource(id = R.string.return_to_app_strategy_title),
-            stringArrayResId = R.array.deep_link_strategy_options,
-            onSelectedOptionChange = { value -> viewModel.returnToAppStrategy = value },
-            selectedOption = uiState.returnToAppStrategy
+            title = stringResource(R.string.user_action_title),
+            stringArrayResId = R.array.user_action_options,
+            onSelectedOptionChange = { value -> viewModel.userAction = value },
+            selectedOption = uiState.userAction,
+            modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
             defaultTitle = "CREATE SETUP TOKEN",

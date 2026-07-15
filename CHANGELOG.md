@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+* PayPalWebPayments
+  * Add `PayPalWebCheckoutClient.createPayPalSession(userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`
+  * Add `PayPalPhoneNumber(countryCode, nationalNumber)` and change `PayPalUserIdentity.phone` from `String?` to `PayPalPhoneNumber?` — the shopper's phone number is now sent to the `createShopperSessionWithAppSwitchEligibility` GraphQL mutation
+  * Add `PayPalWebCheckoutClient.start(context, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
+  * Add `PayPalWebCheckoutClient.vault(context, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
+  * Deprecate `PayPalWebCheckoutClient.start(activity, request, callback)` — use `createPayPalSession()` followed by `start(context, orderId, callback)` instead
+  * Deprecate `PayPalWebCheckoutClient.vault(activity, request, callback)` — use `createPayPalSession()` followed by `vault(context, setupTokenId, callback)` instead
+
 * Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
   used to re-open app after approving order
 * Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be

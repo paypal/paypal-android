@@ -1,4 +1,5 @@
 package com.paypal.android.usecase
+import com.paypal.android.DemoConstants
 
 import com.paypal.android.api.model.PayPalSetupToken
 import com.paypal.android.api.model.serialization.PayPalDetails
@@ -8,8 +9,6 @@ import com.paypal.android.api.model.serialization.PayPalSetupRequestBody
 import com.paypal.android.api.model.serialization.PayPalSource
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.api.services.SDKSampleServerResult
-import com.paypal.android.corepayments.ReturnToAppStrategy
-import com.paypal.android.utils.ReturnUrlFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -17,17 +16,14 @@ import javax.inject.Inject
 class CreatePayPalSetupTokenUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
-
-    suspend operator fun invoke(
-        returnToAppStrategy: ReturnToAppStrategy
-    ): SDKSampleServerResult<PayPalSetupToken, Exception> =
+    suspend operator fun invoke(): SDKSampleServerResult<PayPalSetupToken, Exception> =
         withContext(Dispatchers.IO) {
-            val appUrl = ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy)
+            val returnToAppUrlConfig = DemoConstants.returnToAppUrlConfig
             val experienceContext = PayPalExperienceContext(
                 vaultInstruction = "ON_PAYER_APPROVAL",
-                returnUrl = ReturnUrlFactory.createCheckoutSuccessUrl(returnToAppStrategy),
-                cancelUrl = ReturnUrlFactory.createCheckoutCancelUrl(returnToAppStrategy),
-                nativeApp = PayPalNativeApp(appUrl = appUrl)
+                returnUrl = returnToAppUrlConfig.returnAppUrl,
+                cancelUrl = returnToAppUrlConfig.cancelAppUrl,
+                nativeApp = PayPalNativeApp(appUrl = DemoConstants.APP_URL)
             )
 
             val payPalSetupRequest = PayPalSetupRequestBody(
