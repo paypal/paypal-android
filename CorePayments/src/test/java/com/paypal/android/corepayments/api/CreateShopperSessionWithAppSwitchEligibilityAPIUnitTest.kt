@@ -11,6 +11,7 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
 import com.paypal.android.corepayments.model.TokenType
 import io.mockk.coEvery
 import io.mockk.mockk
