@@ -22,7 +22,8 @@ enum class Environment {
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val venmoCheckoutBaseUrl: String
         get() = when (this) {
-            LIVE, SANDBOX -> "https://account.venmo.com/go/web/paypal"
+            LIVE -> "https://account.venmo.com/go/web/paypal"
+            SANDBOX -> "https://account.ext.live.venmo.com/go/web/paypal" // ToDo: update new url after fixed in sandbox
             CUSTOM -> customVenmoCheckoutBaseUrl
         }
 
