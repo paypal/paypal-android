@@ -344,7 +344,7 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
-        appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
+        appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         val launchUri = shopperSession.getLaunchUri(orderId, TokenType.ORDER_ID)
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -390,7 +390,7 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
-        appSwitchEnabled = shopperSession.appSwitchEligible && deviceInspector.isPayPalInstalled
+        appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         val launchUri = shopperSession.getLaunchUri(setupTokenId, TokenType.VAULT_ID)
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -470,7 +470,7 @@ class PayPalWebCheckoutClient internal constructor(
             cancelAppUrl = urlConfig.cancelAppUrl,
             fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
             paymentType = userAction.toExternalPaymentType(),
-            paypalNativeAppInstalled = deviceInspector.isPayPalInstalled,
+            paypalNativeAppInstalled = canAttemptPayPalAppSwitch(),
             countryCode = userIdentity?.phone?.countryCode,
             nationalNumber = userIdentity?.phone?.nationalNumber,
             buyerEmailAddressMerchantPassed = userIdentity?.email,
@@ -609,6 +609,22 @@ class PayPalWebCheckoutClient internal constructor(
     // endregion
 
     // region Private Helpers
+
+    /**
+     * Whether an app-switch attempt into the PayPal app is worth making.
+     *
+     * [DeviceInspector.isPayPalInstalled] alone isn't sufficient: the PayPal app can be
+     * installed and enabled but still not be the app-switch URI's default handler if the user
+     * has unchecked "Open supported links" for it in Android's App Links settings. In that case
+     * the OS resolves the app-switch URI to a browser instead of the app, so choosing the
+     * app-switch [redirectUrl][CreateShopperSessionWithAppSwitchEligibilityResponse.redirectUrl]
+     * over [checkoutFallbackUrl][CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl]
+     * would open a URL that isn't meant to be loaded standalone, landing on an error page. This
+     * mirrors the `deviceInspector.isPayPalInstalled() && resolvePayPalUseCase()` guard used by
+     * the Braintree Android SDK.
+     */
+    private fun canAttemptPayPalAppSwitch(): Boolean =
+        deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
 
     /**
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and

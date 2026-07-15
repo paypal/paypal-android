@@ -2436,6 +2436,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
                 payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
@@ -2501,6 +2502,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
                 payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
@@ -2535,6 +2537,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
             every {
                 payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
