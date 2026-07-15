@@ -2138,7 +2138,6 @@ class PayPalWebCheckoutClientUnitTest {
                 fallbackSchemeUrl = any(),
                 paymentType = any(),
                 paypalNativeAppInstalled = any(),
-                fallbackUrl = any(),
                 countryCode = any(),
                 nationalNumber = any(),
             )
@@ -2168,7 +2167,6 @@ class PayPalWebCheckoutClientUnitTest {
                     fallbackSchemeUrl = any(),
                     paymentType = any(),
                     paypalNativeAppInstalled = any(),
-                    fallbackUrl = any(),
                     countryCode = any(),
                     nationalNumber = any(),
                 )
@@ -2200,7 +2198,6 @@ class PayPalWebCheckoutClientUnitTest {
                     fallbackSchemeUrl = any(),
                     paymentType = any(),
                     paypalNativeAppInstalled = any(),
-                    fallbackUrl = any(),
                     countryCode = any(),
                     nationalNumber = any(),
                 )

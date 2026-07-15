@@ -471,7 +471,6 @@ class PayPalWebCheckoutClient internal constructor(
             fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
             paymentType = userAction.toExternalPaymentType(),
             paypalNativeAppInstalled = deviceInspector.isPayPalInstalled,
-            fallbackUrl = baseUrl,
             countryCode = userIdentity?.phone?.countryCode,
             nationalNumber = userIdentity?.phone?.nationalNumber,
             buyerEmailAddressMerchantPassed = userIdentity?.email,

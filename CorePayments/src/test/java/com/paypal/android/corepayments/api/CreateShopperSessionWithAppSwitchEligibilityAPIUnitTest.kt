@@ -117,7 +117,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             fallbackSchemeUrl = null,
             paymentType = "CONTINUE",
             paypalNativeAppInstalled = true,
-            fallbackUrl = "https://sandbox.paypal.com/"
         )
 
         // Then: the response is parsed successfully (previously failed with a JSON parse error
@@ -156,7 +155,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 fallbackSchemeUrl = null,
                 paymentType = "CONTINUE",
                 paypalNativeAppInstalled = true,
-                fallbackUrl = "https://sandbox.paypal.com/",
                 countryCode = "1",
                 nationalNumber = "4155551234"
             )
@@ -183,7 +181,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 fallbackSchemeUrl = null,
                 paymentType = "CONTINUE",
                 paypalNativeAppInstalled = true,
-                fallbackUrl = "https://sandbox.paypal.com/"
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -208,7 +205,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 fallbackSchemeUrl = null,
                 paymentType = "CONTINUE",
                 paypalNativeAppInstalled = true,
-                fallbackUrl = "https://sandbox.paypal.com/",
                 buyerEmailAddressMerchantPassed = "shopper@example.com",
                 existingPayPalSessionId = "11F1-7BDF-BCAACEF2-91A9-A556CD2372A8",
             )
@@ -238,7 +234,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 fallbackSchemeUrl = null,
                 paymentType = "CONTINUE",
                 paypalNativeAppInstalled = true,
-                fallbackUrl = "https://sandbox.paypal.com/",
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -264,7 +259,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             fallbackSchemeUrl = null,
             paymentType = "CONTINUE",
             paypalNativeAppInstalled = true,
-            fallbackUrl = "https://sandbox.paypal.com/"
         )
 
         // Then: the original error is passed through unchanged as an APIResult.Failure — the

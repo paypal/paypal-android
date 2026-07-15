@@ -53,8 +53,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      * @param fallbackSchemeUrl Custom URL scheme used as fallback.
      * @param paymentType GraphQL paymentType value (e.g. "CONTINUE", "PAY_NOW").
      * @param paypalNativeAppInstalled Whether the PayPal native app is installed.
-     * @param fallbackUrl Base URL used to construct
-     * [CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl].
      * @param countryCode Country calling code for the shopper's phone number (e.g. "1").
      * @param nationalNumber National (subscriber) number for the shopper's phone number.
      * @param buyerEmailAddressMerchantPassed The shopper's email address, as passed by the
@@ -69,7 +67,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         fallbackSchemeUrl: String?,
         paymentType: String,
         paypalNativeAppInstalled: Boolean,
-        fallbackUrl: String,
         countryCode: String? = null,
         nationalNumber: String? = null,
         buyerEmailAddressMerchantPassed: String? = null,
@@ -88,7 +85,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
             buyerEmailAddressMerchantPassed = buyerEmailAddressMerchantPassed,
             existingPayPalSessionId = existingPayPalSessionId,
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
-        return sendGraphQLRequestWithLSATAuthentication(graphQLRequest, fallbackUrl)
+        return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
     }
 
     private suspend fun createGraphQLRequest(
@@ -158,7 +155,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
 
     private suspend fun sendGraphQLRequestWithLSATAuthentication(
         graphQLRequest: GraphQLRequest<CreateShopperSessionVariables>,
-        fallbackUrl: String,
     ): APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse> {
         val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
         return if (tokenResult is APIResult.Failure) {
@@ -179,7 +175,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     if (data == null) {
                         APIResult.Failure(APIClientError.noResponseData(graphQLResult.correlationId))
                     } else {
-                        APIResult.Success(data.toResponse(fallbackUrl))
+                        APIResult.Success(data.toResponse())
                     }
                 }
                 is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
@@ -200,15 +196,13 @@ private fun TokenType.toGraphQLTokenType(): String = when (this) {
     TokenType.BILLING_TOKEN -> "BILLING_TOKEN"
 }
 
-private fun CreateShopperSessionData.toResponse(
-    fallbackUrl: String
-): CreateShopperSessionWithAppSwitchEligibilityResponse {
+private fun CreateShopperSessionData.toResponse(): CreateShopperSessionWithAppSwitchEligibilityResponse {
     val appSwitch = appSwitchEligibilityResponse
     val session = shopperSessionResponse
     return CreateShopperSessionWithAppSwitchEligibilityResponse(
         appSwitchEligible = appSwitch?.appSwitchEligible ?: false,
-        redirectUrl = appSwitch?.checkoutUrls?.redirectURL ?: fallbackUrl,
-        checkoutFallbackUrl = appSwitch?.checkoutUrls?.checkoutFallbackUrl ?: fallbackUrl,
+        redirectUrl = appSwitch?.checkoutUrls?.redirectURL ?: "",
+        checkoutFallbackUrl = appSwitch?.checkoutUrls?.checkoutFallbackUrl ?: "",
         ineligibleReason = appSwitch?.ineligibleReason,
         matchedAuthenticationMethods = emptyList(),
         shopperSessionConfig = ShopperSessionConfig(
