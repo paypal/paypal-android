@@ -4,8 +4,6 @@
 
 * CorePayments
   * **Breaking**: `CoreConfig` constructor now requires `merchantId` parameter. Update initialization: `CoreConfig(clientId, environment, merchantId)`
-  * Add `X-App-Guid` header to GraphQL requests for improved tracking and compliance
-  * Simplify `Environment` enum with `when` expressions
 * Venmo
   * Add `VenmoClient.isEligible(buyerCountry: String)` suspend function to check Venmo payment eligibility. Returns `VenmoEligibilityResult.Eligible`, 
     `VenmoEligibilityResult.Ineligible(reason: String)`, or `VenmoEligibilityResult.Error(error: PayPalSDKError)`
@@ -17,12 +15,6 @@
     * `VenmoFinishStartResult.Canceled` when user cancels payment
     * `VenmoFinishStartResult.NoResult` when intent is unrelated to Venmo flow
     * `VenmoFinishStartResult.Failure` for errors
-* PayPalWebPayments
-  * Add `appSwitchWhenEligible` property to `PayPalWebCheckoutRequest` to control app switch behavior
-  * Add `appSwitchWhenEligible` property to `PayPalWebVaultRequest` to control app switch behavior
-  * Add `appLinkUrl` property to `PayPalWebCheckoutRequest` to specify app link URL for return-to-app flow
-  * Add `appLinkUrl` property to `PayPalWebVaultRequest` to specify app link URL for return-to-app flow
-  * Deprecate `urlScheme` property in `PayPalWebCheckoutClient` — use `fallbackUrlScheme` in `PayPalWebCheckoutRequest` and `PayPalWebVaultRequest` instead
 
 ## 2.3.0 (2025-11-03)
 * PayPalWebPayments
