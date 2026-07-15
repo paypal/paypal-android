@@ -44,7 +44,7 @@ internal data class CreateShopperSessionShopperSessionInput(
     val returnAppUrl: String,
     val cancelAppUrl: String,
     val fallbackUrlScheme: String?,
-    val sdkVersion: String?,
+    val sdkVersion: String,
     val phone: CreateShopperSessionPhone? = null,
 )
 
