@@ -20,6 +20,7 @@ import com.paypal.android.corepayments.model.CreateShopperSessionGraphQLResponse
 import com.paypal.android.corepayments.model.CreateShopperSessionPhone
 import com.paypal.android.corepayments.model.CreateShopperSessionShopperSessionInput
 import com.paypal.android.corepayments.model.CreateShopperSessionVariables
+import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
@@ -48,13 +49,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      *
      * @param token The order or setup token (used as contextId).
      * @param tokenType The type of token (ORDER_ID, VAULT_ID, etc.).
-     * @param returnAppUrl Deep-link URL to return to the app on success.
-     * @param cancelAppUrl Deep-link URL to return to the app on cancellation.
-     * @param fallbackSchemeUrl Custom URL scheme used as fallback.
-     * @param paymentType GraphQL paymentType value (e.g. "CONTINUE", "PAY_NOW").
+     * @param params The app-switch return URLs and payment context for the session.
      * @param paypalNativeAppInstalled Whether the PayPal native app is installed.
-     * @param countryCode Country calling code for the shopper's phone number (e.g. "1").
-     * @param nationalNumber National (subscriber) number for the shopper's phone number.
      * @param buyerEmailAddressMerchantPassed The shopper's email address, as passed by the
      * merchant, used by the backend to pre-identify the shopper.
      * @param existingPayPalSessionId A server-side shopper session id from a previous session.
@@ -62,26 +58,16 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     suspend operator fun invoke(
         token: String,
         tokenType: TokenType,
-        returnAppUrl: String,
-        cancelAppUrl: String,
-        fallbackSchemeUrl: String?,
-        paymentType: String,
+        params: CreateShopperSessionWithAppSwitchEligibilityParams,
         paypalNativeAppInstalled: Boolean,
-        countryCode: String? = null,
-        nationalNumber: String? = null,
         buyerEmailAddressMerchantPassed: String? = null,
         existingPayPalSessionId: String? = null,
     ): APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse> {
         val graphQLRequest = createGraphQLRequest(
             token = token,
             tokenType = tokenType,
-            returnAppUrl = returnAppUrl,
-            cancelAppUrl = cancelAppUrl,
-            fallbackSchemeUrl = fallbackSchemeUrl,
-            paymentType = paymentType,
+            params = params,
             paypalNativeAppInstalled = paypalNativeAppInstalled,
-            countryCode = countryCode,
-            nationalNumber = nationalNumber,
             buyerEmailAddressMerchantPassed = buyerEmailAddressMerchantPassed,
             existingPayPalSessionId = existingPayPalSessionId,
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
@@ -91,13 +77,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
     private suspend fun createGraphQLRequest(
         token: String,
         tokenType: TokenType,
-        returnAppUrl: String,
-        cancelAppUrl: String,
-        fallbackSchemeUrl: String?,
-        paymentType: String,
+        params: CreateShopperSessionWithAppSwitchEligibilityParams,
         paypalNativeAppInstalled: Boolean,
-        countryCode: String? = null,
-        nationalNumber: String? = null,
         buyerEmailAddressMerchantPassed: String? = null,
         existingPayPalSessionId: String? = null,
     ): GraphQLRequest<CreateShopperSessionVariables>? {
@@ -121,7 +102,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     integrationChannel = INTEGRATION_CHANNEL,
                     isWebLLSEligible = false,
                     isWebView = false,
-                    paymentType = paymentType,
+                    paymentType = params.paymentType,
                 ),
                 merchantOptInForAppSwitch = true,
                 osType = OS_TYPE,
@@ -131,14 +112,14 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                 shoppersSessionId = existingPayPalSessionId,
             ),
             shopperSessionInput = CreateShopperSessionShopperSessionInput(
-                returnAppUrl = returnAppUrl,
-                cancelAppUrl = cancelAppUrl,
-                fallbackUrlScheme = fallbackSchemeUrl,
+                returnAppUrl = params.returnAppUrl,
+                cancelAppUrl = params.cancelAppUrl,
+                fallbackUrlScheme = params.fallbackSchemeUrl,
                 sdkVersion = BuildConfig.CLIENT_SDK_VERSION,
-                phone = if (countryCode != null && nationalNumber != null) {
+                phone = if (params.countryCode != null && params.nationalNumber != null) {
                     CreateShopperSessionPhone(
-                        countryCode = countryCode,
-                        nationalNumber = nationalNumber,
+                        countryCode = params.countryCode,
+                        nationalNumber = params.nationalNumber,
                     )
                 } else {
                     null

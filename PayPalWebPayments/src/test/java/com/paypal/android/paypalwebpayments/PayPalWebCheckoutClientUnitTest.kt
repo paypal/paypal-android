@@ -2133,13 +2133,10 @@ class PayPalWebCheckoutClientUnitTest {
             createShopperSessionAPI(
                 token = any(),
                 tokenType = any(),
-                returnAppUrl = any(),
-                cancelAppUrl = any(),
-                fallbackSchemeUrl = any(),
-                paymentType = any(),
+                params = any(),
                 paypalNativeAppInstalled = any(),
-                countryCode = any(),
-                nationalNumber = any(),
+                buyerEmailAddressMerchantPassed = any(),
+                existingPayPalSessionId = any(),
             )
         } returns APIResult.Success(fakeSessionResponse)
 
@@ -2162,13 +2159,10 @@ class PayPalWebCheckoutClientUnitTest {
                 createShopperSessionAPI(
                     token = any(),
                     tokenType = any(),
-                    returnAppUrl = any(),
-                    cancelAppUrl = any(),
-                    fallbackSchemeUrl = any(),
-                    paymentType = any(),
+                    params = any(),
                     paypalNativeAppInstalled = any(),
-                    countryCode = any(),
-                    nationalNumber = any(),
+                    buyerEmailAddressMerchantPassed = any(),
+                    existingPayPalSessionId = any(),
                 )
             } returns APIResult.Failure(sessionError)
 
@@ -2193,13 +2187,10 @@ class PayPalWebCheckoutClientUnitTest {
                 createShopperSessionAPI(
                     token = any(),
                     tokenType = any(),
-                    returnAppUrl = any(),
-                    cancelAppUrl = any(),
-                    fallbackSchemeUrl = any(),
-                    paymentType = any(),
+                    params = any(),
                     paypalNativeAppInstalled = any(),
-                    countryCode = any(),
-                    nationalNumber = any(),
+                    buyerEmailAddressMerchantPassed = any(),
+                    existingPayPalSessionId = any(),
                 )
             } throws lsatError
 

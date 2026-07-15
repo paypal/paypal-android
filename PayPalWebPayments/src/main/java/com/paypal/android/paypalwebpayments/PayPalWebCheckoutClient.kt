@@ -16,6 +16,7 @@ import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchElig
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
@@ -128,13 +129,13 @@ class PayPalWebCheckoutClient internal constructor(
      * launching checkout. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure].
      *
-     * @param context The Context to launch the PayPal checkout from.
+     * @param activity The Activity to launch the PayPal checkout from.
      * @param orderId The id of the order to be approved.
      * @param callback Callback to receive the auth-challenge result.
      */
     @Suppress("TooGenericExceptionCaught")
     fun start(
-        context: Context,
+        activity: Activity,
         orderId: String,
         callback: PayPalWebStartCallback,
     ) {
@@ -158,13 +159,13 @@ class PayPalWebCheckoutClient internal constructor(
 
                 val result = if (shopperSession != null) {
                     launchCheckoutWithShopperSession(
-                        context = context,
+                        activity = activity,
                         shopperSession = shopperSession,
                         orderId = orderId,
                     )
                 } else {
                     launchCheckoutViaPatchCCOFallback(
-                        context = context,
+                        activity = activity,
                         orderId = orderId,
                     )
                 }
@@ -192,13 +193,13 @@ class PayPalWebCheckoutClient internal constructor(
      * launching the vault flow. If [createPayPalSession] was never called the callback receives a
      * [PayPalPresentAuthChallengeResult.Failure].
      *
-     * @param context The context to launch the PayPal vault flow from.
+     * @param activity The Activity to launch the PayPal vault flow from.
      * @param setupTokenId The setup token id associated with the vault approval.
      * @param callback Callback to receive the vault result.
      */
     @Suppress("TooGenericExceptionCaught")
     fun vault(
-        context: Context,
+        activity: Activity,
         setupTokenId: String,
         callback: PayPalWebVaultCallback,
     ) {
@@ -222,13 +223,13 @@ class PayPalWebCheckoutClient internal constructor(
 
                 val result = if (shopperSession != null) {
                     launchVaultWithSession(
-                        context = context,
+                        activity = activity,
                         shopperSession = shopperSession,
                         setupTokenId = setupTokenId,
                     )
                 } else {
                     launchVaultViaPatchCCOFallback(
-                        context = context,
+                        activity = activity,
                         setupTokenId = setupTokenId,
                     )
                 }
@@ -335,12 +336,12 @@ class PayPalWebCheckoutClient internal constructor(
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
      * otherwise falls back to Chrome Custom Tabs.
      *
-     * @param context The Context needed to launch the checkout UI.
+     * @param activity The Activity needed to launch the checkout UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param orderId The order id to approve.
      */
     private fun launchCheckoutWithShopperSession(
-        context: Context,
+        activity: Activity,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
@@ -348,7 +349,7 @@ class PayPalWebCheckoutClient internal constructor(
         val launchUri = shopperSession.getLaunchUri(orderId, TokenType.ORDER_ID)
 
         val result = payPalWebLauncher.launchWithUrl(
-            context = context,
+            context = activity,
             uri = launchUri,
             token = orderId,
             tokenType = TokenType.ORDER_ID,
@@ -381,12 +382,12 @@ class PayPalWebCheckoutClient internal constructor(
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
      * otherwise falls back to Chrome Custom Tabs.
      *
-     * @param context The Context needed to launch the vault UI.
+     * @param activity The Activity needed to launch the vault UI.
      * @param shopperSession The resolved shopper session containing launch URLs and eligibility.
      * @param setupTokenId The setup token id to approve.
      */
     private fun launchVaultWithSession(
-        context: Context,
+        activity: Activity,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
@@ -394,7 +395,7 @@ class PayPalWebCheckoutClient internal constructor(
         val launchUri = shopperSession.getLaunchUri(setupTokenId, TokenType.VAULT_ID)
 
         val result = payPalWebLauncher.launchWithUrl(
-            context = context,
+            context = activity,
             uri = launchUri,
             token = setupTokenId,
             tokenType = TokenType.VAULT_ID,
@@ -432,7 +433,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     @Suppress("UnusedPrivateMember")
     private suspend fun launchCheckoutViaPatchCCOFallback(
-        context: Context,
+        activity: Activity,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
         TODO("Re-implement checkout fallback for session-creation failure (patchCCO fallback removed)")
@@ -449,7 +450,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     @Suppress("UnusedPrivateMember")
     private suspend fun launchVaultViaPatchCCOFallback(
-        context: Context,
+        activity: Activity,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
         TODO("Re-implement vault fallback for session-creation failure (patchCCO fallback removed)")
@@ -466,13 +467,15 @@ class PayPalWebCheckoutClient internal constructor(
         val result = createShopperSessionAPI(
             token = token,
             tokenType = tokenType,
-            returnAppUrl = urlConfig.returnAppUrl,
-            cancelAppUrl = urlConfig.cancelAppUrl,
-            fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
-            paymentType = userAction.toExternalPaymentType(),
+            params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                returnAppUrl = urlConfig.returnAppUrl,
+                cancelAppUrl = urlConfig.cancelAppUrl,
+                fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
+                paymentType = userAction.toExternalPaymentType(),
+                countryCode = userIdentity?.phone?.countryCode,
+                nationalNumber = userIdentity?.phone?.nationalNumber,
+            ),
             paypalNativeAppInstalled = canAttemptPayPalAppSwitch(),
-            countryCode = userIdentity?.phone?.countryCode,
-            nationalNumber = userIdentity?.phone?.nationalNumber,
             buyerEmailAddressMerchantPassed = userIdentity?.email,
             existingPayPalSessionId = userIdentity?.existingPayPalSessionId,
         )

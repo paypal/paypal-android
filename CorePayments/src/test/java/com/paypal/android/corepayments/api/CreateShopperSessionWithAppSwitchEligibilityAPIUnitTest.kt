@@ -112,10 +112,12 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         val result = sut(
             token = "fake-order-id",
             tokenType = TokenType.ORDER_ID,
-            returnAppUrl = "https://example.com/return",
-            cancelAppUrl = "https://example.com/cancel",
-            fallbackSchemeUrl = null,
-            paymentType = "CONTINUE",
+            params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+            ),
             paypalNativeAppInstalled = true,
         )
 
@@ -150,13 +152,15 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             sut(
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnAppUrl = "https://example.com/return",
-                cancelAppUrl = "https://example.com/cancel",
-                fallbackSchemeUrl = null,
-                paymentType = "CONTINUE",
+                params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                    returnAppUrl = "https://example.com/return",
+                    cancelAppUrl = "https://example.com/cancel",
+                    fallbackSchemeUrl = null,
+                    paymentType = "CONTINUE",
+                    countryCode = "1",
+                    nationalNumber = "4155551234"
+                ),
                 paypalNativeAppInstalled = true,
-                countryCode = "1",
-                nationalNumber = "4155551234"
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -176,10 +180,12 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             sut(
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnAppUrl = "https://example.com/return",
-                cancelAppUrl = "https://example.com/cancel",
-                fallbackSchemeUrl = null,
-                paymentType = "CONTINUE",
+                params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                    returnAppUrl = "https://example.com/return",
+                    cancelAppUrl = "https://example.com/cancel",
+                    fallbackSchemeUrl = null,
+                    paymentType = "CONTINUE",
+                ),
                 paypalNativeAppInstalled = true,
             )
 
@@ -200,10 +206,12 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             sut(
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnAppUrl = "https://example.com/return",
-                cancelAppUrl = "https://example.com/cancel",
-                fallbackSchemeUrl = null,
-                paymentType = "CONTINUE",
+                params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                    returnAppUrl = "https://example.com/return",
+                    cancelAppUrl = "https://example.com/cancel",
+                    fallbackSchemeUrl = null,
+                    paymentType = "CONTINUE",
+                ),
                 paypalNativeAppInstalled = true,
                 buyerEmailAddressMerchantPassed = "shopper@example.com",
                 existingPayPalSessionId = "11F1-7BDF-BCAACEF2-91A9-A556CD2372A8",
@@ -229,10 +237,12 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
             sut(
                 token = "fake-order-id",
                 tokenType = TokenType.ORDER_ID,
-                returnAppUrl = "https://example.com/return",
-                cancelAppUrl = "https://example.com/cancel",
-                fallbackSchemeUrl = null,
-                paymentType = "CONTINUE",
+                params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                    returnAppUrl = "https://example.com/return",
+                    cancelAppUrl = "https://example.com/cancel",
+                    fallbackSchemeUrl = null,
+                    paymentType = "CONTINUE",
+                ),
                 paypalNativeAppInstalled = true,
             )
 
@@ -254,10 +264,12 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         val result = sut(
             token = "fake-order-id",
             tokenType = TokenType.ORDER_ID,
-            returnAppUrl = "https://example.com/return",
-            cancelAppUrl = "https://example.com/cancel",
-            fallbackSchemeUrl = null,
-            paymentType = "CONTINUE",
+            params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+            ),
             paypalNativeAppInstalled = true,
         )
 
