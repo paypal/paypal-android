@@ -2432,7 +2432,7 @@ class PayPalWebCheckoutClientUnitTest {
     // MARK: - Additional coverage: app-switch-eligible redirectUrl, failure analytics, noReturnToAppStrategyError
 
     @Test
-    fun `start() with orderId uses redirectUrl instead of checkoutFallbackUrl when session is app-switch eligible and app is installed`() =
+    fun `start() with orderId prefers redirectUrl over checkoutFallbackUrl when app-switch eligible and installed`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns true
@@ -2463,7 +2463,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `start() with orderId uses checkoutFallbackUrl when session is app-switch eligible but PayPal app is not installed`() =
+    fun `start() with orderId uses checkoutFallbackUrl when app-switch eligible but not installed`() =
         runTest {
             // Regression test for DTPPMOBILE-543: the backend can report a shopper session as
             // app-switch eligible even when the PayPal app isn't installed on this device. In

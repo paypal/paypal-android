@@ -14,11 +14,6 @@ class DeviceInspector(private val context: Context) {
         get() = isAppInstalled(PAYPAL_APP_PACKAGE)
 
     private fun isAppInstalled(packageName: String): Boolean = runCatching {
-        // getApplicationInfo() only throws NameNotFoundException when the package is fully
-        // removed. If the app has merely been disabled (e.g. via `pm disable-user`, which is how
-        // many preloaded/system apps are "uninstalled" for testing on real devices), the call
-        // still succeeds and returns an ApplicationInfo with enabled == false. Treat that the
-        // same as not installed, since the app can't actually be app-switched into.
         context.packageManager.getApplicationInfo(packageName, 0).enabled
     }.getOrDefault(false)
 
