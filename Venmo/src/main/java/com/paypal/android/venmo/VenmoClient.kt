@@ -166,6 +166,7 @@ class VenmoClient internal constructor(
             }
 
             else -> {
+                analytics.notify(VenmoCheckoutEvent.FAIL, orderId.takeIf { it.isNotEmpty() })
                 VenmoFinishStartResult.Failure(
                     PayPalSDKError(
                         code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
