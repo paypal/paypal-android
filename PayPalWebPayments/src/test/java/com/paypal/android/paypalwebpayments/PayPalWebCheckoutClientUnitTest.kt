@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
+import com.paypal.android.corepayments.SessionIdRepository
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
@@ -2649,4 +2650,32 @@ class PayPalWebCheckoutClientUnitTest {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             }
         }
+
+    @Test
+    fun `createPayPalSession passes the per-app-start sessionId as the contextId token`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        coEvery {
+            createShopperSessionAPI(
+                token = any(),
+                tokenType = any(),
+                params = any(),
+            )
+        } returns APIResult.Success(fakeSessionResponse)
+
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // The token passed into the API becomes the contextId; it must be the stored, per-app-start sessionId.
+        coVerify(exactly = 1) {
+            createShopperSessionAPI(
+                token = SessionIdRepository.instance.sessionId,
+                tokenType = TokenType.ORDER_ID,
+                params = any(),
+            )
+        }
+    }
 }

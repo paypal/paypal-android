@@ -135,6 +135,10 @@ public final class com/paypal/android/corepayments/ReturnToAppStrategy$CustomUrl
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/paypal/android/corepayments/SessionIdRepository$Companion {
+	public final fun getInstance ()Lcom/paypal/android/corepayments/SessionIdRepository;
+}
+
 public final class com/paypal/android/corepayments/UpdateClientConfigAPI$Defaults {
 	public static final field INSTANCE Lcom/paypal/android/corepayments/UpdateClientConfigAPI$Defaults;
 	public static final field INTEGRATION_ARTIFACT Ljava/lang/String;

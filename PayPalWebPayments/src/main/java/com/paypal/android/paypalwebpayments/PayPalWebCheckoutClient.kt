@@ -10,6 +10,7 @@ import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.ReturnToAppStrategy
+import com.paypal.android.corepayments.SessionIdRepository
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
@@ -119,7 +120,13 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         returnToAppUrlConfig = urlConfig
         shopperSessionDeferred = applicationScope.async {
-            createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
+            createShopperSessionWithAppSwitchEligibility(
+                token = SessionIdRepository.instance.sessionId,
+                tokenType = tokenType,
+                urlConfig = urlConfig,
+                userIdentity = userIdentity,
+                userAction = userAction
+            )
         }
     }
 
