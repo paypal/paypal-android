@@ -118,8 +118,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 cancelAppUrl = "https://example.com/cancel",
                 fallbackSchemeUrl = null,
                 paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
             ),
-            paypalNativeAppInstalled = true,
         )
 
         // Then: the response is parsed successfully (previously failed with a JSON parse error
@@ -159,9 +159,9 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                     fallbackSchemeUrl = null,
                     paymentType = "CONTINUE",
                     paypalNativeAppInstalled = true,
-                countryCode = "1",
-                nationalNumber = "4155551234"),
-                paypalNativeAppInstalled = true,
+                    countryCode = "1",
+                    nationalNumber = "4155551234",
+                ),
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -186,8 +186,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                     cancelAppUrl = "https://example.com/cancel",
                     fallbackSchemeUrl = null,
                     paymentType = "CONTINUE",
+                    paypalNativeAppInstalled = true,
                 ),
-                paypalNativeAppInstalled = true,
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -212,10 +212,10 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                     cancelAppUrl = "https://example.com/cancel",
                     fallbackSchemeUrl = null,
                     paymentType = "CONTINUE",
+                    paypalNativeAppInstalled = true,
+                    buyerEmailAddressMerchantPassed = "shopper@example.com",
+                    existingPayPalSessionId = "11F1-7BDF-BCAACEF2-91A9-A556CD2372A8",
                 ),
-                paypalNativeAppInstalled = true,
-                buyerEmailAddressMerchantPassed = "shopper@example.com",
-                existingPayPalSessionId = "11F1-7BDF-BCAACEF2-91A9-A556CD2372A8",
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -243,8 +243,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                     cancelAppUrl = "https://example.com/cancel",
                     fallbackSchemeUrl = null,
                     paymentType = "CONTINUE",
+                    paypalNativeAppInstalled = true,
                 ),
-                paypalNativeAppInstalled = true,
             )
 
             val requestBody = requestSlot.captured.body.orEmpty()
@@ -270,8 +270,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 cancelAppUrl = "https://example.com/cancel",
                 fallbackSchemeUrl = null,
                 paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
             ),
-            paypalNativeAppInstalled = true,
         )
 
         // Then: the original error is passed through unchanged as an APIResult.Failure — the

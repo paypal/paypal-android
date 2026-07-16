@@ -31,7 +31,6 @@ internal data class CreateShopperSessionExperimentationContext(
     val appSwitchSupported: Boolean,
     val buyerGUID: String?,
     val merchantAccountId: String?,
-    val merchantCountry: String?,
     val integrationChannel: String,
     val isWebLLSEligible: Boolean,
     val isWebView: Boolean,

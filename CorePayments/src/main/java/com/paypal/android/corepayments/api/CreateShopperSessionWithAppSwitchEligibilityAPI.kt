@@ -50,32 +50,16 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      * @param token The order or setup token (used as contextId).
      * @param tokenType The type of token (ORDER_ID, VAULT_ID, etc.).
      * @param params The app-switch return URLs and payment context for the session.
-     * @param paypalNativeAppInstalled Whether the PayPal native app is installed.
-     * @param countryCode Country calling code for the shopper's phone number (e.g. "1").
-     * @param nationalNumber National (subscriber) number for the shopper's phone number.
-     * @param buyerEmailAddressMerchantPassed The shopper's email address, as passed by the
-     * merchant, used by the backend to pre-identify the shopper.
-     * @param existingPayPalSessionId A server-side shopper session id from a previous session.
      */
     suspend operator fun invoke(
         token: String,
         tokenType: TokenType,
         params: CreateShopperSessionWithAppSwitchEligibilityParams,
-        paypalNativeAppInstalled: Boolean,
-        countryCode: String? = null,
-        nationalNumber: String? = null,
-        buyerEmailAddressMerchantPassed: String? = null,
-        existingPayPalSessionId: String? = null,
     ): APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse> {
         val graphQLRequest = createGraphQLRequest(
             token = token,
             tokenType = tokenType,
             params = params,
-            paypalNativeAppInstalled = paypalNativeAppInstalled,
-            countryCode = countryCode,
-            nationalNumber = nationalNumber,
-            buyerEmailAddressMerchantPassed = buyerEmailAddressMerchantPassed,
-            existingPayPalSessionId = existingPayPalSessionId,
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
         return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
     }
@@ -84,11 +68,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         token: String,
         tokenType: TokenType,
         params: CreateShopperSessionWithAppSwitchEligibilityParams,
-        paypalNativeAppInstalled: Boolean,
-        countryCode: String? = null,
-        nationalNumber: String? = null,
-        buyerEmailAddressMerchantPassed: String? = null,
-        existingPayPalSessionId: String? = null,
     ): GraphQLRequest<CreateShopperSessionVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             applicationContext,
@@ -106,7 +85,6 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     appSwitchSupported = true,
                     buyerGUID = null,
                     merchantAccountId = merchantId,
-                    merchantCountry = "US", // TODO: Determine
                     integrationChannel = INTEGRATION_CHANNEL,
                     isWebLLSEligible = false,
                     isWebView = false,
@@ -114,10 +92,10 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                 ),
                 merchantOptInForAppSwitch = true,
                 osType = OS_TYPE,
-                paypalNativeAppInstalled = paypalNativeAppInstalled,
+                paypalNativeAppInstalled = params.paypalNativeAppInstalled,
                 tokenType = tokenType.toGraphQLTokenType(),
-                buyerEmailAddressMerchantPassed = buyerEmailAddressMerchantPassed,
-                shoppersSessionId = existingPayPalSessionId,
+                buyerEmailAddressMerchantPassed = params.buyerEmailAddressMerchantPassed,
+                shoppersSessionId = params.existingPayPalSessionId,
             ),
             shopperSessionInput = CreateShopperSessionShopperSessionInput(
                 returnAppUrl = params.returnAppUrl,

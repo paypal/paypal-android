@@ -628,12 +628,12 @@ class PayPalWebCheckoutClient internal constructor(
                 cancelAppUrl = urlConfig.cancelAppUrl,
                 fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
                 paymentType = userAction.toExternalPaymentType(),
+                paypalNativeAppInstalled = canAttemptPayPalAppSwitch(),
                 countryCode = userIdentity?.phone?.countryCode,
                 nationalNumber = userIdentity?.phone?.nationalNumber,
+                buyerEmailAddressMerchantPassed = userIdentity?.email,
+                existingPayPalSessionId = userIdentity?.existingPayPalSessionId,
             ),
-            paypalNativeAppInstalled = canAttemptPayPalAppSwitch(),
-            buyerEmailAddressMerchantPassed = userIdentity?.email,
-            existingPayPalSessionId = userIdentity?.existingPayPalSessionId,
         )
 
         return when (result) {

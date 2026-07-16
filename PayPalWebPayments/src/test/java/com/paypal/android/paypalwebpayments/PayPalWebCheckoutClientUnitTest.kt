@@ -2134,9 +2134,6 @@ class PayPalWebCheckoutClientUnitTest {
                 token = any(),
                 tokenType = any(),
                 params = any(),
-                paypalNativeAppInstalled = any(),
-                buyerEmailAddressMerchantPassed = any(),
-                existingPayPalSessionId = any(),
             )
         } returns APIResult.Success(fakeSessionResponse)
 
@@ -2160,9 +2157,6 @@ class PayPalWebCheckoutClientUnitTest {
                     token = any(),
                     tokenType = any(),
                     params = any(),
-                    paypalNativeAppInstalled = any(),
-                    buyerEmailAddressMerchantPassed = any(),
-                    existingPayPalSessionId = any(),
                 )
             } returns APIResult.Failure(sessionError)
 
@@ -2188,9 +2182,6 @@ class PayPalWebCheckoutClientUnitTest {
                     token = any(),
                     tokenType = any(),
                     params = any(),
-                    paypalNativeAppInstalled = any(),
-                    buyerEmailAddressMerchantPassed = any(),
-                    existingPayPalSessionId = any(),
                 )
             } throws lsatError
 
