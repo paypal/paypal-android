@@ -15,7 +15,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,7 +89,35 @@ class HttpUnitTest {
         val sut = createHttp(testScheduler)
         val result = sut.send(httpRequest)
 
-        assertSame(httpResponse, result)
+        // Timing is attached by the send() layer, so the response is a copy of the
+        // parser's response with a non-null timing rather than the same instance.
+        assertEquals(httpResponse.status, result.status)
+        assertEquals(httpResponse.body, result.body)
+    }
+
+    @Test
+    fun `send attaches timing to the successful response`() = runTest {
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+
+        val sut = createHttp(testScheduler)
+        val result = sut.send(httpRequest)
+
+        val timing = result.timing
+        assertNotNull(timing)
+        assertTrue(timing!!.endTime >= timing.startTime)
+    }
+
+    @Test
+    fun `send attaches timing to the error response`() = runTest {
+        every { urlConnection.connect() } throws UnknownHostException()
+
+        val httpRequest = HttpRequest(url, HttpMethod.GET)
+        val sut = createHttp(testScheduler)
+        val result = sut.send(httpRequest)
+
+        val timing = result.timing
+        assertNotNull(timing)
+        assertTrue(timing!!.endTime >= timing.startTime)
     }
 
     @Test

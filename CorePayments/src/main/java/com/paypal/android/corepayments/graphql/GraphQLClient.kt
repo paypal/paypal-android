@@ -61,14 +61,21 @@ class GraphQLClient internal constructor(
 
         val httpResponse = http.send(httpRequest)
         val correlationId = httpResponse.headers[PAYPAL_DEBUG_ID]
+        val timing = httpResponse.timing
 
         return when {
             httpResponse.status != HTTP_OK -> {
-                GraphQLResult.Failure(APIClientError.serverResponseError(correlationId))
+                GraphQLResult.Failure(
+                    error = APIClientError.serverResponseError(correlationId),
+                    timing = timing
+                )
             }
 
             httpResponse.body.isNullOrBlank() -> {
-                GraphQLResult.Failure(noResponseData(correlationId))
+                GraphQLResult.Failure(
+                    error = noResponseData(correlationId),
+                    timing = timing
+                )
             }
 
             else -> runCatching {
@@ -76,9 +83,16 @@ class GraphQLClient internal constructor(
                     deserializer = GraphQLResponse.serializer(responseSerializer),
                     string = httpResponse.body
                 )
-                GraphQLResult.Success(response, correlationId = correlationId)
+                GraphQLResult.Success(
+                    response = response,
+                    correlationId = correlationId,
+                    timing = timing
+                )
             }.getOrElse { error ->
-                GraphQLResult.Failure(graphQLJSONParseError(correlationId, error))
+                GraphQLResult.Failure(
+                    error = graphQLJSONParseError(correlationId, error),
+                    timing = timing
+                )
             }
         }
     }

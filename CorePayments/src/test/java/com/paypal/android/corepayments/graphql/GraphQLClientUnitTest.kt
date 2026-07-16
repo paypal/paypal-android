@@ -5,6 +5,7 @@ import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpRequest
+import com.paypal.android.corepayments.HttpRequestTiming
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import io.mockk.coEvery
@@ -114,6 +115,27 @@ internal class GraphQLClientUnitTest {
 
         // Verify HTTP send was called
         coVerify(exactly = 1) { mockHttp.send(any()) }
+    }
+
+    @Test
+    fun `test timing is surfaced on the GraphQL result`() = runTest {
+        // Arrange
+        val graphQLRequest = GraphQLRequest(query = testQuery, variables = testVariables)
+        val timing = HttpRequestTiming(startTime = 1000L, endTime = 1750L)
+        val mockResponse = HttpResponse(
+            status = 200,
+            body = """{"data":{"result":"success"}}""",
+            headers = mapOf(GraphQLClient.PAYPAL_DEBUG_ID to testCorrelationId),
+            timing = timing
+        )
+        coEvery { mockHttp.send(any()) } returns mockResponse
+
+        // Act
+        val result = graphQLClient.send<TestResponse, TestRequest>(graphQLRequest)
+
+        // Assert
+        assertTrue(result is GraphQLResult.Success)
+        assertEquals(timing, (result as GraphQLResult.Success).timing)
     }
 
     @OptIn(InternalSerializationApi::class)

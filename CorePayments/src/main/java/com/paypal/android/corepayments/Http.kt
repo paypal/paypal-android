@@ -20,6 +20,7 @@ internal class Http(
 
     suspend fun send(httpRequest: HttpRequest): HttpResponse =
         withContext(dispatcher) {
+            val startTime = System.currentTimeMillis()
             runCatching {
                 val url = httpRequest.url
                 val connection = url.openConnection() as HttpURLConnection
@@ -45,13 +46,21 @@ internal class Http(
 
                 connection.connect()
                 httpResponseParser.parse(connection)
+            }.map { response ->
+                response.copy(
+                    timing = HttpRequestTiming(startTime = startTime, endTime = System.currentTimeMillis())
+                )
             }.recover {
                 val status = when (it) {
                     is UnknownHostException -> HttpResponse.STATUS_UNKNOWN_HOST
                     is IllegalStateException -> HttpResponse.SERVER_ERROR
                     else -> HttpResponse.STATUS_UNDETERMINED
                 }
-                HttpResponse(status = status, error = it)
+                HttpResponse(
+                    status = status,
+                    error = it,
+                    timing = HttpRequestTiming(startTime = startTime, endTime = System.currentTimeMillis())
+                )
             }.getOrNull()!!
         }
 }

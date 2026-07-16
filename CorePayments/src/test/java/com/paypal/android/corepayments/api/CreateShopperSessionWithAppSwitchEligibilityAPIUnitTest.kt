@@ -5,6 +5,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequest
+import com.paypal.android.corepayments.HttpRequestTiming
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
@@ -138,6 +139,76 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         assertEquals("11F1-7BDF-BCAACEF2-91A9-A556CD2372A8", data.shopperSessionConfig.id)
         assertEquals("", data.shopperSessionConfig.expiresAt)
         assertFalse(data.ineligibleReason != null)
+    }
+
+    @Test
+    fun `invoke propagates GraphQL round-trip timing into APIResult Success`() = runTest {
+        val timing = HttpRequestTiming(startTime = 1000L, endTime = 1500L)
+        coEvery { mockHttp.send(any()) } returns HttpResponse(
+            status = 200,
+            body = """
+                {
+                  "data" : {
+                    "external" : {
+                      "createShopperSessionWithAppSwitchEligibility" : {
+                        "appSwitchEligibilityResponse" : {
+                          "appSwitchEligible" : true,
+                          "ineligibleReason" : null,
+                          "checkoutUrls" : {
+                            "redirectURL" : "https://www.paypal.com/app-switch-checkout",
+                            "checkoutFallbackUrl" : "https://www.paypal.com/checkoutnow"
+                          }
+                        },
+                        "shopperSessionResponse" : { "sessionId" : "abc", "expiresAt" : null }
+                      }
+                    }
+                  }
+                }
+            """.trimIndent(),
+            headers = emptyMap(),
+            timing = timing,
+        )
+
+        val result = sut(
+            token = "fake-order-id",
+            tokenType = TokenType.ORDER_ID,
+            params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
+            ),
+        )
+
+        assertTrue(result is APIResult.Success)
+        assertEquals(timing, (result as APIResult.Success).timing)
+    }
+
+    @Test
+    fun `invoke propagates GraphQL round-trip timing into APIResult Failure`() = runTest {
+        val timing = HttpRequestTiming(startTime = 2000L, endTime = 2600L)
+        coEvery { mockHttp.send(any()) } returns HttpResponse(
+            status = 500,
+            body = null,
+            headers = emptyMap(),
+            timing = timing,
+        )
+
+        val result = sut(
+            token = "fake-order-id",
+            tokenType = TokenType.ORDER_ID,
+            params = CreateShopperSessionWithAppSwitchEligibilityParams(
+                returnAppUrl = "https://example.com/return",
+                cancelAppUrl = "https://example.com/cancel",
+                fallbackSchemeUrl = null,
+                paymentType = "CONTINUE",
+                paypalNativeAppInstalled = true,
+            ),
+        )
+
+        assertTrue(result is APIResult.Failure)
+        assertEquals(timing, (result as APIResult.Failure).timing)
     }
 
     @Test

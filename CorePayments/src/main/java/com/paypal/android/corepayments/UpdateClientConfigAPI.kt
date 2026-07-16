@@ -47,18 +47,23 @@ class UpdateClientConfigAPI(
                     graphQLClient.send<UpdateClientConfigResponse, UpdateClientConfigVariables>(
                         graphQLRequest = graphQLRequest
                     )
+                val timing = graphQLResponse.timing
                 when (graphQLResponse) {
                     is GraphQLResult.Success -> {
                         val correlationId = graphQLResponse.correlationId
                         graphQLResponse.response.data?.let {
-                            UpdateClientConfigResult.Success
+                            UpdateClientConfigResult.Success(timing = timing)
                         } ?: UpdateClientConfigResult.Failure(
-                            APIClientError.noResponseData(correlationId)
+                            error = APIClientError.noResponseData(correlationId),
+                            timing = timing
                         )
                     }
 
                     is GraphQLResult.Failure -> {
-                        UpdateClientConfigResult.Failure(graphQLResponse.error)
+                        UpdateClientConfigResult.Failure(
+                            error = graphQLResponse.error,
+                            timing = timing
+                        )
                     }
                 }
             }
@@ -115,6 +120,13 @@ data class UpdateClientConfigResponse(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class UpdateClientConfigResult {
-    data object Success : UpdateClientConfigResult()
-    data class Failure(val error: PayPalSDKError) : UpdateClientConfigResult()
+
+    /** Round-trip timing of the underlying GraphQL request, when available. */
+    abstract val timing: HttpRequestTiming?
+
+    data class Success(override val timing: HttpRequestTiming? = null) : UpdateClientConfigResult()
+    data class Failure(
+        val error: PayPalSDKError,
+        override val timing: HttpRequestTiming? = null
+    ) : UpdateClientConfigResult()
 }

@@ -11,7 +11,8 @@ data class HttpResponse(
     val status: Int,
     val headers: Map<String, String> = emptyMap(),
     val body: String? = null,
-    val error: Throwable? = null
+    val error: Throwable? = null,
+    val timing: HttpRequestTiming? = null
 ) {
     companion object {
         const val STATUS_UNDETERMINED = -1
