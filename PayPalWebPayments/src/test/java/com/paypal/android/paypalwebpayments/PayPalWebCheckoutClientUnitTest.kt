@@ -2334,7 +2334,14 @@ class PayPalWebCheckoutClientUnitTest {
         sut.finishStart(intent)
 
         // Then
-        verify { analytics.notify(CheckoutEvent.FAILED, "fake-order-id", false) }
+        verify {
+            analytics.notify(
+                CheckoutEvent.FAILED,
+                "fake-order-id",
+                false,
+                errorDescription = "fake-error-description",
+            )
+        }
     }
 
     @Test
@@ -2574,7 +2581,13 @@ class PayPalWebCheckoutClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, "fake-order-id", false)
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    "fake-order-id",
+                    false,
+                    shopperSessionId = "fake-session-id",
+                    errorDescription = "fake error description",
+                )
             }
             verify {
                 callback.onPayPalWebStartResult(match {
@@ -2603,7 +2616,13 @@ class PayPalWebCheckoutClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED, "fake-setup-token-id", false)
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    "fake-setup-token-id",
+                    false,
+                    shopperSessionId = "fake-session-id",
+                    errorDescription = "fake error description",
+                )
             }
             verify {
                 callback.onPayPalWebVaultResult(match {
@@ -2627,7 +2646,14 @@ class PayPalWebCheckoutClientUnitTest {
             sutV3.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            verify { analytics.notify(CheckoutEvent.FAILED, "fake-order-id", false) }
+            verify {
+                analytics.notify(
+                    CheckoutEvent.FAILED,
+                    "fake-order-id",
+                    false,
+                    errorDescription = "session error",
+                )
+            }
         }
 
     @Test
@@ -2645,7 +2671,14 @@ class PayPalWebCheckoutClientUnitTest {
             sutV3.vault(activity, "fake-setup-token-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            verify { analytics.notify(VaultEvent.FAILED, "fake-setup-token-id", false) }
+            verify {
+                analytics.notify(
+                    VaultEvent.FAILED,
+                    "fake-setup-token-id",
+                    false,
+                    errorDescription = "session error",
+                )
+            }
         }
 
     @Test

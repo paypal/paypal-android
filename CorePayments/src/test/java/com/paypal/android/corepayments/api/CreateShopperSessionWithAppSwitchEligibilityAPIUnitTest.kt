@@ -158,9 +158,9 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                     cancelAppUrl = "https://example.com/cancel",
                     fallbackSchemeUrl = null,
                     paymentType = "CONTINUE",
-                    countryCode = "1",
-                    nationalNumber = "4155551234"
-                ),
+                    paypalNativeAppInstalled = true,
+                countryCode = "1",
+                nationalNumber = "4155551234"),
                 paypalNativeAppInstalled = true,
             )
 

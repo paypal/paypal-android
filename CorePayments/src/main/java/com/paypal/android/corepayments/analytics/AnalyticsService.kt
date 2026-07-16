@@ -44,7 +44,13 @@ class AnalyticsService internal constructor(
         name: String,
         orderId: String? = null,
         buttonType: String? = null,
-        appSwitchEnabled: Boolean = false
+        appSwitchEnabled: Boolean = false,
+        shopperSessionId: String? = null,
+        appSwitchUrl: String? = null,
+        errorDescription: String? = null,
+        startTime: Long? = null,
+        isCachedSession: Boolean? = null,
+        isVaultRequest: Boolean? = null
     ) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
@@ -58,7 +64,13 @@ class AnalyticsService internal constructor(
                     timestamp,
                     orderId = orderId,
                     buttonType = buttonType,
-                    appSwitchEnabled = appSwitchEnabled
+                    appSwitchEnabled = appSwitchEnabled,
+                    shopperSessionId = shopperSessionId,
+                    appSwitchUrl = appSwitchUrl,
+                    errorDescription = errorDescription,
+                    startTime = startTime,
+                    isCachedSession = isCachedSession,
+                    isVaultRequest = isVaultRequest
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->

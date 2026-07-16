@@ -51,6 +51,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
      * @param tokenType The type of token (ORDER_ID, VAULT_ID, etc.).
      * @param params The app-switch return URLs and payment context for the session.
      * @param paypalNativeAppInstalled Whether the PayPal native app is installed.
+     * @param countryCode Country calling code for the shopper's phone number (e.g. "1").
+     * @param nationalNumber National (subscriber) number for the shopper's phone number.
      * @param buyerEmailAddressMerchantPassed The shopper's email address, as passed by the
      * merchant, used by the backend to pre-identify the shopper.
      * @param existingPayPalSessionId A server-side shopper session id from a previous session.
@@ -60,6 +62,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         tokenType: TokenType,
         params: CreateShopperSessionWithAppSwitchEligibilityParams,
         paypalNativeAppInstalled: Boolean,
+        countryCode: String? = null,
+        nationalNumber: String? = null,
         buyerEmailAddressMerchantPassed: String? = null,
         existingPayPalSessionId: String? = null,
     ): APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse> {
@@ -68,6 +72,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
             tokenType = tokenType,
             params = params,
             paypalNativeAppInstalled = paypalNativeAppInstalled,
+            countryCode = countryCode,
+            nationalNumber = nationalNumber,
             buyerEmailAddressMerchantPassed = buyerEmailAddressMerchantPassed,
             existingPayPalSessionId = existingPayPalSessionId,
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
@@ -79,6 +85,8 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
         tokenType: TokenType,
         params: CreateShopperSessionWithAppSwitchEligibilityParams,
         paypalNativeAppInstalled: Boolean,
+        countryCode: String? = null,
+        nationalNumber: String? = null,
         buyerEmailAddressMerchantPassed: String? = null,
         existingPayPalSessionId: String? = null,
     ): GraphQLRequest<CreateShopperSessionVariables>? {
