@@ -9,11 +9,14 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.PayPalSDKErrorCode
 import com.paypal.android.corepayments.UpdateClientConfigAPI
+import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.GetFundingEligibility
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabOptions
 import com.paypal.android.corepayments.browserswitch.ChromeCustomTabsClient
 import com.paypal.android.corepayments.browserswitch.LaunchChromeCustomTabResult
 import com.paypal.android.corepayments.model.APIResult
+import com.paypal.android.venmo.analytics.VenmoAnalytics
+import com.paypal.android.venmo.analytics.VenmoCheckoutEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,6 +29,7 @@ class VenmoClient internal constructor(
     private val ccoAPI: UpdateClientConfigAPI,
     private val getFundingEligibility: GetFundingEligibility,
     private val chromeCustomTabsClient: ChromeCustomTabsClient,
+    private val analytics: VenmoAnalytics,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob())
 ) {
 
@@ -48,6 +52,7 @@ class VenmoClient internal constructor(
         coreConfig = config,
         ccoAPI = UpdateClientConfigAPI(context, config),
         getFundingEligibility = GetFundingEligibility(config),
+        analytics = VenmoAnalytics(AnalyticsService(context, config)),
         chromeCustomTabsClient = ChromeCustomTabsClient()
     )
 
@@ -90,6 +95,8 @@ class VenmoClient internal constructor(
     ): VenmoStartResult {
         require(orderId.isNotBlank()) { "Order ID cannot be blank" }
 
+        analytics.notify(VenmoCheckoutEvent.START, orderId)
+
         // Update client config; ignore result as transaction should proceed regardless
         ccoAPI.updateClientConfig(
             tokenId = orderId,
@@ -105,8 +112,13 @@ class VenmoClient internal constructor(
         return try {
             val cctOptions = ChromeCustomTabOptions(launchUri = appSwitchUri)
             when (chromeCustomTabsClient.launch(activity, cctOptions)) {
-                LaunchChromeCustomTabResult.Success -> VenmoStartResult.Success
+                LaunchChromeCustomTabResult.Success -> {
+                    analytics.notify(VenmoCheckoutEvent.LAUNCH_SUCCESS, orderId)
+                    VenmoStartResult.Success
+                }
+
                 LaunchChromeCustomTabResult.ActivityNotFound -> {
+                    analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId)
                     val error = PayPalSDKError(
                         code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                         errorDescription = "Unable to launch Venmo app or web browser"
@@ -115,6 +127,7 @@ class VenmoClient internal constructor(
                 }
             }
         } catch (e: Exception) {
+            analytics.notify(VenmoCheckoutEvent.LAUNCH_FAILED, orderId)
             val error = PayPalSDKError(
                 code = PayPalSDKErrorCode.CHECKOUT_ERROR.ordinal,
                 errorDescription = e.message ?: "Failed to launch Venmo"
@@ -132,12 +145,14 @@ class VenmoClient internal constructor(
 
         return when {
             canceled -> {
+                analytics.notify(VenmoCheckoutEvent.CANCELED, orderId.takeIf { it.isNotEmpty() })
                 VenmoFinishStartResult.Canceled(orderId.takeIf { it.isNotEmpty() })
             }
 
             approved -> {
                 val payerId = deepLinkUri.getQueryParameter(PAYER_ID_PARAM)
                 if (payerId.isNullOrEmpty()) {
+                    analytics.notify(VenmoCheckoutEvent.FAIL, orderId.takeIf { it.isNotEmpty() })
                     VenmoFinishStartResult.Failure(
                         PayPalSDKError(
                             code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
@@ -145,11 +160,13 @@ class VenmoClient internal constructor(
                         )
                     )
                 } else {
+                    analytics.notify(VenmoCheckoutEvent.SUCCESS, orderId)
                     VenmoFinishStartResult.Success(orderId, payerId, true)
                 }
             }
 
             else -> {
+                analytics.notify(VenmoCheckoutEvent.FAIL, orderId.takeIf { it.isNotEmpty() })
                 VenmoFinishStartResult.Failure(
                     PayPalSDKError(
                         code = PayPalSDKErrorCode.DATA_PARSING_ERROR.ordinal,
