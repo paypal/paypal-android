@@ -841,13 +841,29 @@ class PayPalWebCheckoutClient internal constructor(
             checkoutFallbackUrl.toUri()
         }.appendTokenQueryParam(token, tokenType)
 
-        return if (shopperSessionConfig.id.isNotBlank()) {
+        val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
             launchUri.buildUpon()
                 .appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
                 .build()
         } else {
             launchUri
         }
+
+        return uriWithSessionId.appendObservabilityQueryParams(tokenType)
+    }
+
+    private fun Uri.appendObservabilityQueryParams(tokenType: TokenType): Uri {
+        val flowType = when (tokenType) {
+            TokenType.ORDER_ID -> "ecs"
+            TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "va"
+        }
+        return buildUpon()
+            .appendQueryParameter("source", "pda")
+            .appendQueryParameter("merchant", coreConfig.merchantId)
+            .appendQueryParameter("flow_type", flowType)
+            .appendQueryParameter("funding_source", PayPalWebCheckoutFundingSource.PAYPAL.value)
+            .appendQueryParameter("switch_initiated_time", System.currentTimeMillis().toString())
+            .build()
     }
 
     private fun buildPayPalCheckoutUri(
