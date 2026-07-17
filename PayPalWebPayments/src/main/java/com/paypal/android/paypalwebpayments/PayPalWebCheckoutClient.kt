@@ -674,9 +674,6 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(
                     CreatePayPalSessionEvent.SUCCEEDED,
                     shopperSessionId = result.data.shopperSessionConfig.id,
-                    // Matches iOS: true when the merchant seeded this call with an existing
-                    // server-side session id (PayPalUserIdentity.existingPayPalSessionId),
-                    // meaning the session was reused rather than created fresh.
                     isCachedSession = userIdentity?.existingPayPalSessionId != null,
                     isVaultRequest = isVaultRequest,
                     startTime = startTime,
