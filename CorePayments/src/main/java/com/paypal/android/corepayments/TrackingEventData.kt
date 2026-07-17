@@ -60,5 +60,17 @@ internal data class TrackingEventParams(
     @SerialName("button_type")
     val buttonType: String? = null,
     @SerialName("app_switch_enabled")
-    val appSwitchEnabled: Boolean = false
+    val appSwitchEnabled: Boolean? = null,
+    @SerialName("shopper_session_id")
+    val shopperSessionId: String? = null,
+    @SerialName("app_switch_url")
+    val appSwitchUrl: String? = null,
+    @SerialName("error_description")
+    val errorDescription: String? = null,
+    @SerialName("start_time")
+    val startTime: String? = null,
+    @SerialName("is_cached_session")
+    val isCachedSession: Boolean? = null,
+    @SerialName("is_vault_request")
+    val isVaultRequest: Boolean? = null
 )
