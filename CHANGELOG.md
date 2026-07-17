@@ -9,7 +9,6 @@
   * Add `PayPalWebCheckoutClient.vault(context, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
   * Deprecate `PayPalWebCheckoutClient.start(activity, request, callback)` — use `createPayPalSession()` followed by `start(context, orderId, callback)` instead
   * Deprecate `PayPalWebCheckoutClient.vault(activity, request, callback)` — use `createPayPalSession()` followed by `vault(context, setupTokenId, callback)` instead
-  * Fix: app switch (via `createPayPalSession()` / `start()` / `vault()`) is now only attempted when the installed PayPal app meets a minimum supported version; older, incompatible versions fall back to Chrome Custom Tabs checkout
 
 * Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
   used to re-open app after approving order
