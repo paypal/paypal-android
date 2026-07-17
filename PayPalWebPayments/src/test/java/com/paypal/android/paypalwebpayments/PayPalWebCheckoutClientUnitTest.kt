@@ -31,6 +31,7 @@ import io.mockk.slot
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
@@ -1794,6 +1795,37 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
+    fun `start() with orderId includes observability query params on the launch uri`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val uriSlot = slot<Uri>()
+        val beforeMillis = System.currentTimeMillis()
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+        sutV3.start(activity, "fake-order-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+        val afterMillis = System.currentTimeMillis()
+
+        val launchedUri = uriSlot.captured
+        assertEquals("pda", launchedUri.getQueryParameter("source"))
+        assertEquals("fake-merchant-id", launchedUri.getQueryParameter("merchant"))
+        assertEquals("ecs", launchedUri.getQueryParameter("flow_type"))
+        assertEquals("paypal", launchedUri.getQueryParameter("funding_source"))
+
+        val switchInitiatedTime = launchedUri.getQueryParameter("switch_initiated_time")?.toLongOrNull()
+        assertNotNull(switchInitiatedTime)
+        assertTrue(switchInitiatedTime!! in beforeMillis..afterMillis)
+    }
+
+    @Test
     fun `start() with orderId delivers failure without falling back to patchCCO when createShopperSession throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
@@ -1997,6 +2029,38 @@ class PayPalWebCheckoutClientUnitTest {
             )
         }
         verify { callback.onPayPalWebVaultResult(launchResult) }
+    }
+
+    @Test
+    fun `vault() with setupTokenId includes observability query params on the launch uri`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val uriSlot = slot<Uri>()
+        val beforeMillis = System.currentTimeMillis()
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.VAULT_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+        sutV3.vault(activity, "fake-setup-token-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+        val afterMillis = System.currentTimeMillis()
+
+        val launchedUri = uriSlot.captured
+        assertEquals("fake-session-id", launchedUri.getQueryParameter("shopperSessionId"))
+        assertEquals("pda", launchedUri.getQueryParameter("source"))
+        assertEquals("fake-merchant-id", launchedUri.getQueryParameter("merchant"))
+        assertEquals("va", launchedUri.getQueryParameter("flow_type"))
+        assertEquals("paypal", launchedUri.getQueryParameter("funding_source"))
+
+        val switchInitiatedTime = launchedUri.getQueryParameter("switch_initiated_time")?.toLongOrNull()
+        assertNotNull(switchInitiatedTime)
+        assertTrue(switchInitiatedTime!! in beforeMillis..afterMillis)
     }
 
     @Test
