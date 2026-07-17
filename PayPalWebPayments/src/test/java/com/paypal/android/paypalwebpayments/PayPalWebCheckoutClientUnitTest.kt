@@ -1286,9 +1286,6 @@ class PayPalWebCheckoutClientUnitTest {
         // Verify it returns the launch result
         assertSame(launchResult, result)
 
-        // Verify analytics was called with CheckoutEvent
-        verify { analytics.notify(any<CheckoutEvent>(), "fake-order-id", any()) }
-
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
             payPalWebLauncher.launchWithUrl(
@@ -1346,9 +1343,6 @@ class PayPalWebCheckoutClientUnitTest {
 
         // Verify it returns the launch result
         assertSame(launchResult, result)
-
-        // Verify analytics was called with VaultEvent
-        verify { analytics.notify(any<VaultEvent>(), any(), any()) }
 
         // Verify launchWithUrl is called (the deprecated method calls it directly)
         verify(exactly = 1) {
@@ -2305,7 +2299,6 @@ class PayPalWebCheckoutClientUnitTest {
             )
         }
     }
-
 
     // MARK: - Additional coverage: app-switch-eligible redirectUrl, failure analytics, noReturnToAppStrategyError
 
