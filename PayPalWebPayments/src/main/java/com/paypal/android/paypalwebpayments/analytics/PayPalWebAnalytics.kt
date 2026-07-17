@@ -4,19 +4,57 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 
 internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService) {
 
-    fun notify(event: CheckoutEvent, orderId: String?, appSwitchEnabled: Boolean) {
+    fun notify(
+        event: CheckoutEvent,
+        orderId: String?,
+        appSwitchEnabled: Boolean,
+        shopperSessionId: String? = null,
+        appSwitchUrl: String? = null,
+        errorDescription: String? = null,
+    ) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             orderId = orderId,
-            appSwitchEnabled = appSwitchEnabled
+            appSwitchEnabled = appSwitchEnabled,
+            shopperSessionId = shopperSessionId,
+            appSwitchUrl = appSwitchUrl,
+            errorDescription = errorDescription,
         )
     }
 
-    fun notify(event: VaultEvent, setupTokenId: String?, appSwitchEnabled: Boolean) {
+    fun notify(
+        event: VaultEvent,
+        setupTokenId: String?,
+        appSwitchEnabled: Boolean,
+        shopperSessionId: String? = null,
+        appSwitchUrl: String? = null,
+        errorDescription: String? = null,
+    ) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             orderId = setupTokenId,
-            appSwitchEnabled = appSwitchEnabled
+            appSwitchEnabled = appSwitchEnabled,
+            shopperSessionId = shopperSessionId,
+            appSwitchUrl = appSwitchUrl,
+            errorDescription = errorDescription,
+        )
+    }
+
+    fun notify(
+        event: CreatePayPalSessionEvent,
+        shopperSessionId: String? = null,
+        isCachedSession: Boolean? = null,
+        isVaultRequest: Boolean? = null,
+        errorDescription: String? = null,
+        startTime: Long? = null,
+    ) {
+        analyticsService.sendAnalyticsEvent(
+            name = event.value,
+            shopperSessionId = shopperSessionId,
+            isCachedSession = isCachedSession,
+            isVaultRequest = isVaultRequest,
+            errorDescription = errorDescription,
+            startTime = startTime,
         )
     }
 }
