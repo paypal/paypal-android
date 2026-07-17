@@ -2245,35 +2245,6 @@ class PayPalWebCheckoutClientUnitTest {
     // MARK: - Analytics Tests for appSwitchEnabled
 
     @Test
-    fun `startAsync() sends analytics with appSwitchEnabled false when app switch is not used`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns false
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            sut.startAsync(activity, request)
-
-            // Then
-            verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
-            verify {
-                analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    "fake-order-id",
-                    false
-                )
-            }
-        }
-
-    @Test
     fun `finishStart() sends analytics with appSwitchEnabled false for canceled event`() = runTest {
         // Given
         every { deviceInspector.isPayPalInstalled } returns false
@@ -2335,88 +2306,6 @@ class PayPalWebCheckoutClientUnitTest {
         }
     }
 
-    @Test
-    fun `vaultAsync() sends analytics with appSwitchEnabled false when app switch is not used`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns false
-            val request = PayPalWebVaultRequest(
-                "fake-setup-token-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            sut.vaultAsync(activity, request)
-
-            // Then
-            verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
-            verify {
-                analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                    "fake-setup-token-id",
-                    false
-                )
-            }
-        }
-
-    @Test
-    fun `deprecated start() sends analytics with appSwitchEnabled false`() {
-        // Given
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-
-        // When
-        sut.start(activity, request)
-
-        // Then
-        verify { analytics.notify(CheckoutEvent.STARTED, "fake-order-id", false) }
-        verify {
-            analytics.notify(
-                CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                "fake-order-id",
-                false
-            )
-        }
-    }
-
-    @Test
-    fun `deprecated vault() sends analytics with appSwitchEnabled false`() {
-        // Given
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-
-        // When
-        sut.vault(activity, request)
-
-        // Then
-        verify { analytics.notify(VaultEvent.STARTED, "fake-setup-token-id", false) }
-        verify {
-            analytics.notify(
-                VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED,
-                "fake-setup-token-id",
-                false
-            )
-        }
-    }
 
     // MARK: - Additional coverage: app-switch-eligible redirectUrl, failure analytics, noReturnToAppStrategyError
 
@@ -2573,7 +2462,7 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    CheckoutEvent.BROWSER_PRESENTATION_FAILED,
                     "fake-order-id",
                     false,
                     shopperSessionId = "fake-session-id",
@@ -2608,7 +2497,7 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    VaultEvent.BROWSER_PRESENTATION_FAILED,
                     "fake-setup-token-id",
                     false,
                     shopperSessionId = "fake-session-id",
