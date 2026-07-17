@@ -672,17 +672,6 @@ class PayPalWebCheckoutClient internal constructor(
         return uriWithSessionId.appendObservabilityQueryParams(tokenType)
     }
 
-    /**
-     * Appends query params required by PayPal's app-side observability/latency dashboards
-     * (DTPPMOBILE-503), mirroring the params BT Native SDK, PPCP JS SDK, and iOS's
-     * `PayPalWebCheckoutURLBuilder` already send. Applied to both the app-switch (redirectUrl)
-     * and fallback (checkoutFallbackUrl) launch URIs, since both currently flow through
-     * [getLaunchUri].
-     *
-     * `funding_source` is hardcoded to PayPal, matching iOS's non-deprecated session-based
-     * start()/vault(): the new [createPayPalSession]-based flow has no funding-source parameter
-     * (that only exists on the deprecated [PayPalWebCheckoutRequest]).
-     */
     private fun Uri.appendObservabilityQueryParams(tokenType: TokenType): Uri {
         val flowType = when (tokenType) {
             TokenType.ORDER_ID -> "ecs"
