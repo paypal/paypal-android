@@ -44,7 +44,7 @@ class AnalyticsService internal constructor(
         name: String,
         orderId: String? = null,
         buttonType: String? = null,
-        appSwitchEnabled: Boolean = false,
+        appSwitchEnabled: Boolean? = null,
         shopperSessionId: String? = null,
         appSwitchUrl: String? = null,
         errorDescription: String? = null,
