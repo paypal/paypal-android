@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
@@ -12,6 +13,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -83,17 +85,121 @@ class DeviceInspectorUnitTest {
     }
 
     @Test
-    fun `canResolvePayPalAppSwitch returns true when the PayPal app resolves the app-switch uri`() {
+    fun `payPalAppVersionName returns the installed PayPal app's versionName`() {
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } returns PackageInfo().apply { versionName = "10.1.0" }
+
+        val result = sut.payPalAppVersionName
+
+        assertEquals("10.1.0", result)
+    }
+
+    @Test
+    fun `payPalAppVersionName returns null when PayPal app is not installed`() {
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } throws PackageManager.NameNotFoundException("Package not found")
+
+        val result = sut.payPalAppVersionName
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `payPalAppVersionName returns null when PackageManager throws unexpected exception`() {
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } throws RuntimeException("Unexpected error")
+
+        val result = sut.payPalAppVersionName
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `canResolvePayPalAppSwitch returns true when the PayPal app resolves the uri and meets the min version`() {
         val resolveInfo = ResolveInfo().apply {
             activityInfo = ActivityInfo().apply { packageName = DeviceInspector.PAYPAL_APP_PACKAGE }
         }
         every {
             packageManager.resolveActivity(any(), PackageManager.MATCH_DEFAULT_ONLY)
         } returns resolveInfo
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } returns PackageInfo().apply { versionName = "9.1.0" }
 
         val result = sut.canResolvePayPalAppSwitch()
 
         assertTrue(result)
+    }
+
+    @Test
+    fun `canResolvePayPalAppSwitch returns true when installed version is exactly the minimum major version`() {
+        val resolveInfo = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply { packageName = DeviceInspector.PAYPAL_APP_PACKAGE }
+        }
+        every {
+            packageManager.resolveActivity(any(), PackageManager.MATCH_DEFAULT_ONLY)
+        } returns resolveInfo
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } returns PackageInfo().apply { versionName = "9.0.0" }
+
+        val result = sut.canResolvePayPalAppSwitch()
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `canResolvePayPalAppSwitch returns false when the resolved app's version is below the minimum`() {
+        val resolveInfo = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply { packageName = DeviceInspector.PAYPAL_APP_PACKAGE }
+        }
+        every {
+            packageManager.resolveActivity(any(), PackageManager.MATCH_DEFAULT_ONLY)
+        } returns resolveInfo
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } returns PackageInfo().apply { versionName = "8.9.9" }
+
+        val result = sut.canResolvePayPalAppSwitch()
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `canResolvePayPalAppSwitch returns false when the resolved app's version can't be determined`() {
+        val resolveInfo = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply { packageName = DeviceInspector.PAYPAL_APP_PACKAGE }
+        }
+        every {
+            packageManager.resolveActivity(any(), PackageManager.MATCH_DEFAULT_ONLY)
+        } returns resolveInfo
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } throws PackageManager.NameNotFoundException("Package not found")
+
+        val result = sut.canResolvePayPalAppSwitch()
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `canResolvePayPalAppSwitch returns false when the resolved app's version has an unparseable major segment`() {
+        val resolveInfo = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply { packageName = DeviceInspector.PAYPAL_APP_PACKAGE }
+        }
+        every {
+            packageManager.resolveActivity(any(), PackageManager.MATCH_DEFAULT_ONLY)
+        } returns resolveInfo
+        every {
+            packageManager.getPackageInfo(DeviceInspector.PAYPAL_APP_PACKAGE, 0)
+        } returns PackageInfo().apply { versionName = "not-a-version" }
+
+        val result = sut.canResolvePayPalAppSwitch()
+
+        assertFalse(result)
     }
 
     @Test

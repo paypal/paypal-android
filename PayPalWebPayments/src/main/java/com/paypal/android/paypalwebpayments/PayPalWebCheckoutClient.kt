@@ -805,6 +805,9 @@ class PayPalWebCheckoutClient internal constructor(
      * would open a URL that isn't meant to be loaded standalone, landing on an error page. This
      * mirrors the `deviceInspector.isPayPalInstalled() && resolvePayPalUseCase()` guard used by
      * the Braintree Android SDK.
+     *
+     * [DeviceInspector.canResolvePayPalAppSwitch] additionally requires the installed PayPal app
+     * to meet a minimum supported version — see its doc for details.
      */
     private fun canAttemptPayPalAppSwitch(): Boolean =
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
