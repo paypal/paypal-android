@@ -119,7 +119,6 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         returnToAppUrlConfig = urlConfig
         shopperSessionDeferred = applicationScope.async {
-            // TODO - Follow up and set token correctly.
             createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
         }
     }
@@ -143,19 +142,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         val deferred = shopperSessionDeferred
         if (deferred == null) {
-            applicationScope.launch(Dispatchers.Main) {
-                analytics.notify(
-                    CheckoutEvent.SESSION_NOT_STARTED,
-                    orderId,
-                    appSwitchEnabled,
-                    errorDescription = "startPayPalSession() must be called before start(). "
-                )
-                callback.onPayPalWebStartResult(
-                    PayPalPresentAuthChallengeResult.Failure(
-                        PayPalWebCheckoutError.sessionNotCreatedError
-                    )
-                )
-            }
+            notifyCheckoutSessionNotStarted(orderId, callback)
             return
         }
         checkoutOrderId = orderId
@@ -164,7 +151,11 @@ class PayPalWebCheckoutClient internal constructor(
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
                 shopperSessionId = shopperSession?.shopperSessionConfig?.id
-                analytics.notify(CheckoutEvent.STARTED, checkoutOrderId, appSwitchEnabled, shopperSessionId = shopperSessionId)
+                analytics.notify(CheckoutEvent.STARTED,
+                    checkoutOrderId,
+                    appSwitchEnabled,
+                    shopperSessionId = shopperSessionId,
+                )
 
                 val result = if (shopperSession != null) {
                     launchCheckoutWithShopperSession(
@@ -201,6 +192,20 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
+    private fun notifyCheckoutSessionNotStarted(orderId: String, callback: PayPalWebStartCallback) {
+        applicationScope.launch(Dispatchers.Main) {
+            analytics.notify(
+                CheckoutEvent.SESSION_NOT_STARTED,
+                orderId,
+                appSwitchEnabled,
+                errorDescription = "startPayPalSession() must be called before start(). "
+            )
+            callback.onPayPalWebStartResult(
+                PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.sessionNotCreatedError)
+            )
+        }
+    }
+
     /**
      * Initiates PayPal vault using the session pre-warmed by [createPayPalSession].
      *
@@ -220,19 +225,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         val deferred = shopperSessionDeferred
         if (deferred == null) {
-            applicationScope.launch(Dispatchers.Main) {
-                analytics.notify(
-                    VaultEvent.SESSION_NOT_STARTED,
-                    setupTokenId,
-                    appSwitchEnabled,
-                    errorDescription = "startPayPalSession() must be called before vault()."
-                )
-                callback.onPayPalWebVaultResult(
-                    PayPalPresentAuthChallengeResult.Failure(
-                        PayPalWebCheckoutError.sessionNotCreatedError
-                    )
-                )
-            }
+            notifyVaultSessionNotStarted(setupTokenId, callback)
             return
         }
         vaultSetupTokenId = setupTokenId
@@ -240,7 +233,13 @@ class PayPalWebCheckoutClient internal constructor(
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                analytics.notify(VaultEvent.STARTED, vaultSetupTokenId, appSwitchEnabled)
+                shopperSessionId = shopperSession?.shopperSessionConfig?.id
+                analytics.notify(
+                    VaultEvent.STARTED,
+                    vaultSetupTokenId,
+                    appSwitchEnabled,
+                    shopperSessionId = shopperSessionId,
+                )
 
                 val result = if (shopperSession != null) {
                     launchVaultWithSession(
@@ -274,6 +273,20 @@ class PayPalWebCheckoutClient internal constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun notifyVaultSessionNotStarted(setupTokenId: String, callback: PayPalWebVaultCallback) {
+        applicationScope.launch(Dispatchers.Main) {
+            analytics.notify(
+                VaultEvent.SESSION_NOT_STARTED,
+                setupTokenId,
+                appSwitchEnabled,
+                errorDescription = "startPayPalSession() must be called before vault(). "
+            )
+            callback.onPayPalWebVaultResult(
+                PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.sessionNotCreatedError)
+            )
         }
     }
 
@@ -442,7 +455,14 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = TokenType.ORDER_ID,
             returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
         )
+        logCheckoutPresentAuthChallengeResult(result, launchUri.toString())
+        return result
+    }
 
+    private fun logCheckoutPresentAuthChallengeResult(
+        result: PayPalPresentAuthChallengeResult,
+        launchUrl: String,
+    ) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 if (appSwitchEnabled) {
@@ -451,7 +471,7 @@ class PayPalWebCheckoutClient internal constructor(
                         checkoutOrderId,
                         appSwitchEnabled,
                         shopperSessionId = shopperSessionId,
-                        appSwitchUrl = launchUri.toString(),
+                        appSwitchUrl = launchUrl,
                     )
                 } else {
                     analytics.notify(
@@ -470,7 +490,7 @@ class PayPalWebCheckoutClient internal constructor(
                         checkoutOrderId,
                         appSwitchEnabled,
                         shopperSessionId = shopperSessionId,
-                        appSwitchUrl = launchUri.toString(),
+                        appSwitchUrl = launchUrl,
                         errorDescription = result.error.errorDescription,
                     )
                 } else {
@@ -484,7 +504,6 @@ class PayPalWebCheckoutClient internal constructor(
                 }
             }
         }
-        return result
     }
 
     /**
@@ -529,7 +548,14 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = TokenType.VAULT_ID,
             returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
         )
+        logVaultPresentAuthChallengeResult(result, launchUri.toString())
+        return result
+    }
 
+    private fun logVaultPresentAuthChallengeResult(
+        result: PayPalPresentAuthChallengeResult,
+        launchUrl: String,
+    ) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 if (appSwitchEnabled) {
@@ -538,7 +564,7 @@ class PayPalWebCheckoutClient internal constructor(
                         vaultSetupTokenId,
                         appSwitchEnabled,
                         shopperSessionId = shopperSessionId,
-                        appSwitchUrl = launchUri.toString(),
+                        appSwitchUrl = launchUrl,
                     )
                 } else {
                     analytics.notify(
@@ -557,7 +583,7 @@ class PayPalWebCheckoutClient internal constructor(
                         vaultSetupTokenId,
                         appSwitchEnabled,
                         shopperSessionId = shopperSessionId,
-                        appSwitchUrl = launchUri.toString(),
+                        appSwitchUrl = launchUrl,
                         errorDescription = result.error.errorDescription,
                     )
                 } else {
@@ -571,7 +597,6 @@ class PayPalWebCheckoutClient internal constructor(
                 }
             }
         }
-        return result
     }
 
     /**
