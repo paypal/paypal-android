@@ -231,7 +231,7 @@ class PayPalWebCheckoutClient internal constructor(
         )
         val deferred = shopperSessionDeferred
         if (deferred == null) {
-            notifyVaultSessionNotStarted( callback)
+            notifyVaultSessionNotStarted(callback)
             return
         }
         applicationScope.launch {

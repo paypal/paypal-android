@@ -56,7 +56,11 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         )
     }
 
-    fun notify(event: CreatePayPalSessionEvent, params: AppSwitchAnalyticsEventParams, errorDescription: String? = null) {
+    fun notify(
+        event: CreatePayPalSessionEvent,
+        params: AppSwitchAnalyticsEventParams,
+        errorDescription: String? = null,
+    ) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             shopperSessionId = params.shopperSessionId,

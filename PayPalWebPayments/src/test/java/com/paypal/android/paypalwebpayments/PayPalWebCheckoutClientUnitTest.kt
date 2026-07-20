@@ -2473,26 +2473,25 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = match<AppSwitchAnalyticsEventParams> {
-                        it.checkoutOrderId == "fake-order-id" &&
-                            it.shopperSessionId == "fake-session-id" &&
-                            it.shopperSessionExpiration == "" &&
-                            it.matchedAuthenticationMethods == emptyList<String>() &&
-                            it.fallbackUrl == "" &&
-                            it.isCachedSession == false &&
-                            it.appSwitchEligible == false &&
-                            it.ineligibleReason == "" &&
-                            it.userActionValue == "CONTINUE" &&
-                            it.appSwitchEnabled == false &&
-                            it.isVaultRequest == false &&
-                            it.merchantId == "fake-merchant-id" &&
-                            it.bnCode == null &&
-                            it.clientId == "fake-client-id" &&
-                            it.paypalNativeAppInstalled == "false" &&
-                            it.returnAppUrl == "https://example.com/paypal-return" &&
-                            it.cancelAppUrl == "https://example.com/paypal-cancel" &&
-                            it.fallbackSchemeUrl == "com.example.app://paypal"
-                    },
+                    params = AppSwitchAnalyticsEventParams(
+                        checkoutOrderId = "fake-order-id",
+                        shopperSessionId = "fake-session-id",
+                        shopperSessionExpiration = "",
+                        matchedAuthenticationMethods = emptyList(),
+                        fallbackUrl = "",
+                        isCachedSession = false,
+                        appSwitchEligible = false,
+                        ineligibleReason = "",
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVaultRequest = false,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalNativeAppInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "fake error description",
                 )
             }
@@ -2525,26 +2524,25 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = match<AppSwitchAnalyticsEventParams> {
-                        it.vaultSetupTokenId == "fake-setup-token-id" &&
-                            it.shopperSessionId == "fake-session-id" &&
-                            it.shopperSessionExpiration == "" &&
-                            it.matchedAuthenticationMethods == emptyList<String>() &&
-                            it.fallbackUrl == "" &&
-                            it.isCachedSession == false &&
-                            it.appSwitchEligible == false &&
-                            it.ineligibleReason == "" &&
-                            it.userActionValue == "CONTINUE" &&
-                            it.appSwitchEnabled == false &&
-                            it.isVaultRequest == true &&
-                            it.merchantId == "fake-merchant-id" &&
-                            it.bnCode == null &&
-                            it.clientId == "fake-client-id" &&
-                            it.paypalNativeAppInstalled == "false" &&
-                            it.returnAppUrl == "https://example.com/paypal-return" &&
-                            it.cancelAppUrl == "https://example.com/paypal-cancel" &&
-                            it.fallbackSchemeUrl == "com.example.app://paypal"
-                    },
+                    params = AppSwitchAnalyticsEventParams(
+                        vaultSetupTokenId = "fake-setup-token-id",
+                        shopperSessionId = "fake-session-id",
+                        shopperSessionExpiration = "",
+                        matchedAuthenticationMethods = emptyList(),
+                        fallbackUrl = "",
+                        isCachedSession = false,
+                        appSwitchEligible = false,
+                        ineligibleReason = "",
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVaultRequest = true,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalNativeAppInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "fake error description",
                 )
             }
@@ -2573,26 +2571,19 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     CheckoutEvent.FAILED,
-                    params = match<AppSwitchAnalyticsEventParams> {
-                        it.checkoutOrderId == "fake-order-id" &&
-                            it.isCachedSession == false &&
-                            it.userActionValue == "CONTINUE" &&
-                            it.shopperSessionId == null &&
-                            it.appSwitchEligible == null &&
-                            it.ineligibleReason == null &&
-                            it.fallbackUrl == null &&
-                            it.shopperSessionExpiration == null &&
-                            it.matchedAuthenticationMethods == null &&
-                            it.appSwitchEnabled == false &&
-                            it.isVaultRequest == false &&
-                            it.merchantId == "fake-merchant-id" &&
-                            it.bnCode == null &&
-                            it.clientId == "fake-client-id" &&
-                            it.paypalNativeAppInstalled == "false" &&
-                            it.returnAppUrl == "https://example.com/paypal-return" &&
-                            it.cancelAppUrl == "https://example.com/paypal-cancel" &&
-                            it.fallbackSchemeUrl == "com.example.app://paypal"
-                    },
+                    params = AppSwitchAnalyticsEventParams(
+                        checkoutOrderId = "fake-order-id",
+                        isCachedSession = false,
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVaultRequest = false,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalNativeAppInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "session error",
                 )
             }
@@ -2616,26 +2607,19 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     VaultEvent.FAILED,
-                    params = match<AppSwitchAnalyticsEventParams> {
-                        it.vaultSetupTokenId == "fake-setup-token-id" &&
-                            it.isCachedSession == false &&
-                            it.userActionValue == "CONTINUE" &&
-                            it.shopperSessionId == null &&
-                            it.appSwitchEligible == null &&
-                            it.ineligibleReason == null &&
-                            it.fallbackUrl == null &&
-                            it.shopperSessionExpiration == null &&
-                            it.matchedAuthenticationMethods == null &&
-                            it.appSwitchEnabled == false &&
-                            it.isVaultRequest == true &&
-                            it.merchantId == "fake-merchant-id" &&
-                            it.bnCode == null &&
-                            it.clientId == "fake-client-id" &&
-                            it.paypalNativeAppInstalled == "false" &&
-                            it.returnAppUrl == "https://example.com/paypal-return" &&
-                            it.cancelAppUrl == "https://example.com/paypal-cancel" &&
-                            it.fallbackSchemeUrl == "com.example.app://paypal"
-                    },
+                    params = AppSwitchAnalyticsEventParams(
+                        vaultSetupTokenId = "fake-setup-token-id",
+                        isCachedSession = false,
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVaultRequest = true,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalNativeAppInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "session error",
                 )
             }
