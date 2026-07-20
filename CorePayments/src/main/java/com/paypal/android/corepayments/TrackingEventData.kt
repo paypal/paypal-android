@@ -63,14 +63,38 @@ internal data class TrackingEventParams(
     val appSwitchEnabled: Boolean? = null,
     @SerialName("shopper_session_id")
     val shopperSessionId: String? = null,
+    @SerialName("shopper_session_expiration_at")
+    val shopperSessionExpiration: String? = null,
+    @SerialName("matched_authentication_methods")
+    val matchedAuthenticationMethods: List<String>? = null,
     @SerialName("app_switch_url")
     val appSwitchUrl: String? = null,
+    @SerialName("checkout_fallback_url")
+    val fallbackUrl: String? = null,
     @SerialName("error_description")
     val errorDescription: String? = null,
-    @SerialName("start_time")
-    val startTime: String? = null,
     @SerialName("is_cached_session")
     val isCachedSession: Boolean? = null,
     @SerialName("is_vault_request")
-    val isVaultRequest: Boolean? = null
+    val isVaultRequest: Boolean? = null,
+    @SerialName("app_switch_eligible")
+    val appSwitchEligible: Boolean? = null,
+    @SerialName("ineligible_reason")
+    val ineligibleReason: String? = null,
+    @SerialName("merchant_id")
+    val merchantId: String? = null,
+    @SerialName("bn_code")
+    val bnCode: String? = null,
+    @SerialName("client_id")
+    val eventClientId: String? = null,
+    @SerialName("user_action")
+    val userAction: String? = null,
+    @SerialName("paypal_native_app_installed")
+    val paypalNativeAppInstalled: String? = null,
+    @SerialName("return_app_url")
+    val returnAppUrl: String? = null,
+    @SerialName("cancel_app_url")
+    val cancelAppUrl: String? = null,
+    @SerialName("fallback_scheme_url")
+    val fallbackSchemeUrl: String? = null,
 )

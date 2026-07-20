@@ -16,10 +16,10 @@ internal enum class CheckoutEvent(val value: String) {
     APP_SWITCH_FAILED(   "paypal-web-payments:checkout:app-switch-open:failed"),
     APP_SWITCH_CANCELED( "paypal-web-payments:checkout:app-switch:canceled"),
 
-    BROWSER_PRESENTATION_STARTED("paypal-web-payments:checkout:browser-presentation:started"),
-    BROWSER_PRESENTATION_SUCCEEDED("paypal-web-payments:checkout:browser-presentation:succeeded"),
-    BROWSER_PRESENTATION_FAILED("paypal-web-payments:checkout:browser-presentation:failed"),
-    BROWSER_PRESENTATION_CANCELED("paypal-web-payments:checkout:browser-presentation:canceled"),
+    AUTH_CHALLENGE_PRESENTATION_STARTED("paypal-web-payments:checkout:auth-challenge-presentation:started"),
+    AUTH_CHALLENGE_PRESENTATION_SUCCEEDED("paypal-web-payments:checkout:auth-challenge-presentation:succeeded"),
+    AUTH_CHALLENGE_PRESENTATION_FAILED("paypal-web-payments:checkout:auth-challenge-presentation:failed"),
+    AUTH_CHALLENGE_PRESENTATION_CANCELED("paypal-web-payments:checkout:auth-challenge-presentation:canceled"),
 
     HANDLE_RETURN_STARTED(  "paypal-web-payments:checkout:handle-return:started"),
     HANDLE_RETURN_SUCCEEDED("paypal-web-payments:checkout:handle-return:succeeded"),

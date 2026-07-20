@@ -4,57 +4,78 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 
 internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService) {
 
-    fun notify(
-        event: CheckoutEvent,
-        orderId: String?,
-        appSwitchEnabled: Boolean,
-        shopperSessionId: String? = null,
-        appSwitchUrl: String? = null,
-        errorDescription: String? = null,
-    ) {
+    fun notify(event: CheckoutEvent, params: AppSwitchAnalyticsEventParams, errorDescription: String? = null) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
-            orderId = orderId,
-            appSwitchEnabled = appSwitchEnabled,
-            shopperSessionId = shopperSessionId,
-            appSwitchUrl = appSwitchUrl,
+            orderId = params.checkoutOrderId,
+            appSwitchEnabled = params.appSwitchEnabled,
+            shopperSessionId = params.shopperSessionId,
+            shopperSessionExpiration = params.shopperSessionExpiration,
+            matchedAuthenticationMethods = params.matchedAuthenticationMethods,
+            appSwitchUrl = params.appSwitchUrl,
+            fallbackUrl = params.fallbackUrl,
             errorDescription = errorDescription,
+            isCachedSession = params.isCachedSession,
+            isVaultRequest = params.isVaultRequest,
+            appSwitchEligible = params.appSwitchEligible,
+            ineligibleReason = params.ineligibleReason,
+            merchantId = params.merchantId,
+            bnCode = params.bnCode,
+            clientId = params.clientId,
+            userAction = params.userActionValue,
+            paypalNativeAppInstalled = params.paypalNativeAppInstalled,
+            returnAppUrl = params.returnAppUrl,
+            cancelAppUrl = params.cancelAppUrl,
+            fallbackSchemeUrl = params.fallbackSchemeUrl,
         )
     }
 
-    fun notify(
-        event: VaultEvent,
-        setupTokenId: String?,
-        appSwitchEnabled: Boolean,
-        shopperSessionId: String? = null,
-        appSwitchUrl: String? = null,
-        errorDescription: String? = null,
-    ) {
+    fun notify(event: VaultEvent, params: AppSwitchAnalyticsEventParams, errorDescription: String? = null) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
-            orderId = setupTokenId,
-            appSwitchEnabled = appSwitchEnabled,
-            shopperSessionId = shopperSessionId,
-            appSwitchUrl = appSwitchUrl,
+            orderId = params.vaultSetupTokenId,
+            appSwitchEnabled = params.appSwitchEnabled,
+            shopperSessionId = params.shopperSessionId,
+            shopperSessionExpiration = params.shopperSessionExpiration,
+            matchedAuthenticationMethods = params.matchedAuthenticationMethods,
+            appSwitchUrl = params.appSwitchUrl,
+            fallbackUrl = params.fallbackUrl,
             errorDescription = errorDescription,
+            isCachedSession = params.isCachedSession,
+            isVaultRequest = params.isVaultRequest,
+            appSwitchEligible = params.appSwitchEligible,
+            ineligibleReason = params.ineligibleReason,
+            merchantId = params.merchantId,
+            bnCode = params.bnCode,
+            clientId = params.clientId,
+            userAction = params.userActionValue,
+            paypalNativeAppInstalled = params.paypalNativeAppInstalled,
+            returnAppUrl = params.returnAppUrl,
+            cancelAppUrl = params.cancelAppUrl,
+            fallbackSchemeUrl = params.fallbackSchemeUrl,
         )
     }
 
-    fun notify(
-        event: CreatePayPalSessionEvent,
-        shopperSessionId: String? = null,
-        isCachedSession: Boolean? = null,
-        isVaultRequest: Boolean? = null,
-        errorDescription: String? = null,
-        startTime: Long? = null,
-    ) {
+    fun notify(event: CreatePayPalSessionEvent, params: AppSwitchAnalyticsEventParams, errorDescription: String? = null) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
-            shopperSessionId = shopperSessionId,
-            isCachedSession = isCachedSession,
-            isVaultRequest = isVaultRequest,
+            shopperSessionId = params.shopperSessionId,
+            shopperSessionExpiration = params.shopperSessionExpiration,
+            matchedAuthenticationMethods = params.matchedAuthenticationMethods,
+            fallbackUrl = params.fallbackUrl,
+            isCachedSession = params.isCachedSession,
+            isVaultRequest = params.isVaultRequest,
             errorDescription = errorDescription,
-            startTime = startTime,
+            appSwitchEligible = params.appSwitchEligible,
+            ineligibleReason = params.ineligibleReason,
+            merchantId = params.merchantId,
+            bnCode = params.bnCode,
+            clientId = params.clientId,
+            userAction = params.userActionValue,
+            paypalNativeAppInstalled = params.paypalNativeAppInstalled,
+            returnAppUrl = params.returnAppUrl,
+            cancelAppUrl = params.cancelAppUrl,
+            fallbackSchemeUrl = params.fallbackSchemeUrl,
         )
     }
 }

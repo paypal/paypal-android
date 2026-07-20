@@ -47,11 +47,23 @@ internal class TrackingEventsAPI constructor(
             buttonType = event.buttonType,
             appSwitchEnabled = event.appSwitchEnabled,
             shopperSessionId = event.shopperSessionId,
+            shopperSessionExpiration = event.shopperSessionExpirationAt,
+            matchedAuthenticationMethods = event.matchedAuthenticationMethods,
             appSwitchUrl = event.appSwitchUrl,
+            fallbackUrl = event.checkoutFallbackUrl,
             errorDescription = event.errorDescription,
-            startTime = event.startTime?.toString(),
             isCachedSession = event.isCachedSession,
-            isVaultRequest = event.isVaultRequest
+            isVaultRequest = event.isVaultRequest,
+            appSwitchEligible = event.appSwitchEligible,
+            ineligibleReason = event.ineligibleReason,
+            merchantId = event.merchantId,
+            bnCode = event.bnCode,
+            eventClientId = event.clientId,
+            userAction = event.userAction,
+            paypalNativeAppInstalled = event.paypalNativeAppInstalled,
+            returnAppUrl = event.returnAppUrl,
+            cancelAppUrl = event.cancelAppUrl,
+            fallbackSchemeUrl = event.fallbackSchemeUrl,
         )
 
         val events = TrackingEvents(eventParams = eventParams)

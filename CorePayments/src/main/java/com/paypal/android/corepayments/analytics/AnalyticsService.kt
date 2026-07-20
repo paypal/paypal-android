@@ -46,11 +46,23 @@ class AnalyticsService internal constructor(
         buttonType: String? = null,
         appSwitchEnabled: Boolean? = null,
         shopperSessionId: String? = null,
+        shopperSessionExpiration: String? = null,
+        matchedAuthenticationMethods: List<String>? = null,
         appSwitchUrl: String? = null,
+        fallbackUrl: String? = null,
         errorDescription: String? = null,
-        startTime: Long? = null,
         isCachedSession: Boolean? = null,
-        isVaultRequest: Boolean? = null
+        isVaultRequest: Boolean? = null,
+        appSwitchEligible: Boolean? = null,
+        ineligibleReason: String? = null,
+        merchantId: String? = null,
+        bnCode: String? = null,
+        clientId: String? = null,
+        userAction: String? = null,
+        paypalNativeAppInstalled: String? = null,
+        returnAppUrl: String? = null,
+        cancelAppUrl: String? = null,
+        fallbackSchemeUrl: String? = null,
     ) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
@@ -66,11 +78,23 @@ class AnalyticsService internal constructor(
                     buttonType = buttonType,
                     appSwitchEnabled = appSwitchEnabled,
                     shopperSessionId = shopperSessionId,
+                    shopperSessionExpirationAt = shopperSessionExpiration,
+                    matchedAuthenticationMethods = matchedAuthenticationMethods,
                     appSwitchUrl = appSwitchUrl,
+                    checkoutFallbackUrl = fallbackUrl,
                     errorDescription = errorDescription,
-                    startTime = startTime,
                     isCachedSession = isCachedSession,
-                    isVaultRequest = isVaultRequest
+                    isVaultRequest = isVaultRequest,
+                    appSwitchEligible = appSwitchEligible,
+                    ineligibleReason = ineligibleReason,
+                    merchantId = merchantId,
+                    bnCode = bnCode,
+                    clientId = clientId,
+                    userAction = userAction,
+                    paypalNativeAppInstalled = paypalNativeAppInstalled,
+                    returnAppUrl = returnAppUrl,
+                    cancelAppUrl = cancelAppUrl,
+                    fallbackSchemeUrl = fallbackSchemeUrl,
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->
