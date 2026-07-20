@@ -52,6 +52,10 @@ dependencies {
     implementation libs.kotlinx.coroutinesAndroid
 
     testImplementation libs.junit
+    testImplementation libs.mockk
+    testImplementation libs.kotlinx.coroutinesTest
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.core
 
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso

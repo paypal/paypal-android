@@ -54,7 +54,7 @@ class UpdateClientConfigAPIUnitTest {
     fun `updateClientConfig() returns Success when resource loading and GraphQL call succeed with valid data`() =
         runTest {
             // Arrange
-            val mockResponse = UpdateClientConfigResponse("success")
+            val mockResponse = UpdateClientConfigResponse(data = "success")
             val mockGraphQLResponse = GraphQLResponse(data = mockResponse)
             val mockGraphQLResult = GraphQLResult.Success(mockGraphQLResponse, testCorrelationId)
 
@@ -121,7 +121,7 @@ class UpdateClientConfigAPIUnitTest {
     @Test
     fun `updateClientConfig() returns Success when GraphQL response has valid data`() = runTest {
         // Arrange
-        val mockResponse = UpdateClientConfigResponse("updated")
+        val mockResponse = UpdateClientConfigResponse(data = "updated")
         val mockGraphQLResponse = GraphQLResponse(data = mockResponse)
         val mockGraphQLResult = GraphQLResult.Success(mockGraphQLResponse, testCorrelationId)
 
@@ -141,7 +141,7 @@ class UpdateClientConfigAPIUnitTest {
     }
 
     @Test
-    fun `updateClientConfig() returns Failure when GraphQL response has null data`() = runTest {
+    fun `updateClientConfig() returns Success when GraphQL response has null data`() = runTest {
         // Arrange
         val mockGraphQLResponse = GraphQLResponse<UpdateClientConfigResponse>(data = null)
         val mockGraphQLResult = GraphQLResult.Success(mockGraphQLResponse, testCorrelationId)
@@ -158,18 +158,7 @@ class UpdateClientConfigAPIUnitTest {
         val result = updateClientConfigAPI.updateClientConfig(testOrderId, testFundingSource)
 
         // Assert
-        assertTrue("Result should be Failure", result is UpdateClientConfigResult.Failure)
-        val failure = result as UpdateClientConfigResult.Failure
-        assertEquals(
-            "Error code should be NO_RESPONSE_DATA",
-            PayPalSDKErrorCode.NO_RESPONSE_DATA.ordinal,
-            failure.error.code
-        )
-        assertEquals("Correlation ID should match", testCorrelationId, failure.error.correlationId)
-        assertTrue(
-            "Error description should mention missing data",
-            failure.error.errorDescription.contains("missing HTTP response data")
-        )
+        assertTrue("Result should be Success", result is UpdateClientConfigResult.Success)
     }
 
     @Test
@@ -209,11 +198,7 @@ class UpdateClientConfigAPIUnitTest {
         // Assert
         assertTrue("Result should be Failure", result is UpdateClientConfigResult.Failure)
         val failure = result as UpdateClientConfigResult.Failure
-        assertEquals("Error code should be 0", 0, failure.error.code)
-        assertTrue(
-            "Error description should mention GraphQL query resource",
-            failure.error.errorDescription.contains("Failed to load GraphQL query resource")
-        )
+        assertEquals("Error should be the resource loading error", resourceError, failure.error)
 
         // Verify GraphQL client was not called when resource loading fails
         coVerify(exactly = 0) {

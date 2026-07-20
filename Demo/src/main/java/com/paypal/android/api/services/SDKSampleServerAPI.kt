@@ -33,7 +33,10 @@ private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 // TODO: consider refactoring each method into a "use case"
 // Ref: https://developer.android.com/topic/architecture/domain-layer#use-cases-kotlin
 @Suppress("TooManyFunctions")
-class SDKSampleServerAPI {
+class SDKSampleServerAPI(
+    /** Overrides [MerchantIntegration.DEFAULT]'s base URL when non-null and non-blank. */
+    private val customMerchantBaseUrl: String? = null
+) {
 
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
@@ -41,6 +44,9 @@ class SDKSampleServerAPI {
 
         val clientId: String
             get() = SELECTED_MERCHANT_INTEGRATION.clientId
+
+        val merchantId: String
+            get() = SELECTED_MERCHANT_INTEGRATION.merchantId
     }
 
     @JvmSuppressWildcards
@@ -80,9 +86,14 @@ class SDKSampleServerAPI {
 
     init {
         val serviceMap = mutableMapOf<MerchantIntegration, RetrofitService>()
-        val allMerchantIntegrations = MerchantIntegration.entries.toTypedArray()
-        for (merchant in allMerchantIntegrations) {
-            serviceMap[merchant] = createService(merchant.baseUrl)
+        for (merchant in MerchantIntegration.entries) {
+            val baseUrl =
+                if (merchant == MerchantIntegration.DEFAULT && !customMerchantBaseUrl.isNullOrBlank()) {
+                    customMerchantBaseUrl
+                } else {
+                    merchant.baseUrl
+                }
+            serviceMap[merchant] = createService(baseUrl)
         }
         this.serviceMap = serviceMap
     }

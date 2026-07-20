@@ -49,12 +49,7 @@ class UpdateClientConfigAPI(
                     )
                 when (graphQLResponse) {
                     is GraphQLResult.Success -> {
-                        val correlationId = graphQLResponse.correlationId
-                        graphQLResponse.response.data?.let {
-                            UpdateClientConfigResult.Success
-                        } ?: UpdateClientConfigResult.Failure(
-                            APIClientError.noResponseData(correlationId)
-                        )
+                        UpdateClientConfigResult.Success
                     }
 
                     is GraphQLResult.Failure -> {
@@ -64,9 +59,7 @@ class UpdateClientConfigAPI(
             }
 
             is LoadRawResourceResult.Failure -> {
-                UpdateClientConfigResult.Failure(
-                    PayPalSDKError(0, "Failed to load GraphQL query resource")
-                )
+                UpdateClientConfigResult.Failure(result.error)
             }
         }
     }
@@ -110,7 +103,7 @@ data class UpdateClientConfigVariables(
 @OptIn(InternalSerializationApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class UpdateClientConfigResponse(
-    val updateClientConfig: String
+    val data: String? = null
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

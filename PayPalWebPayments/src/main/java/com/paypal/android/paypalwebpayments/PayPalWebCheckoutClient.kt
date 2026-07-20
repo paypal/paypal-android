@@ -242,7 +242,7 @@ class PayPalWebCheckoutClient internal constructor(
 
     /**
      * Confirm PayPal payment source for an order with callback.
-     *
+     *ƒ
      * @param activity The activity to launch the PayPal web checkout from
      * @param request [PayPalWebCheckoutRequest] for requesting an order approval
      * @param callback [PayPalWebStartCallback] to receive the result
@@ -533,11 +533,13 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
+    // With V3, we won't need base url, it'll be returned as part of shopper session.
+    // Leaving for deprecated method support.
     private val baseUrl: String
         get() = when (coreConfig.environment) {
             Environment.LIVE -> "https://paypal.com/"
-            Environment.SANDBOX -> "https://sandbox.paypal.com/"
-    }
+            else -> "https://sandbox.paypal.com/"
+        }
 
     private suspend fun getLaunchUri(
         context: Context,

@@ -7,7 +7,7 @@ class CoreConfigUnitTest {
 
     @Test
     fun `it should default to SANDBOX environment`() {
-        val sut = CoreConfig("fake-client-id")
+        val sut = CoreConfig("fake-client-id", merchantId = "fake-merchant-id")
         assertEquals(Environment.SANDBOX, sut.environment)
     }
 }

@@ -7,7 +7,6 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.R
 import com.paypal.android.corepayments.ResourceLoader
-import com.paypal.android.corepayments.common.Headers
 import com.paypal.android.corepayments.graphql.GraphQLClient
 import com.paypal.android.corepayments.graphql.GraphQLRequest
 import com.paypal.android.corepayments.graphql.GraphQLResult
@@ -22,30 +21,43 @@ import kotlinx.serialization.InternalSerializationApi
 class GetFundingEligibility internal constructor(
     private val graphQLClient: GraphQLClient,
     private val resourceLoader: ResourceLoader,
-    private val authenticationSecureTokenServiceAPI: AuthenticationSecureTokenServiceAPI,
+    private val coreConfig: CoreConfig,
 ) {
 
     constructor(coreConfig: CoreConfig) : this(
         graphQLClient = GraphQLClient(coreConfig),
         resourceLoader = ResourceLoader(),
-        authenticationSecureTokenServiceAPI = AuthenticationSecureTokenServiceAPI(coreConfig),
+        coreConfig = coreConfig
     )
 
     suspend operator fun invoke(
         context: Context,
         clientId: String,
-        merchantId: List<String>? = null,
-        buyerCountry: String? = null,
-        currency: String? = null
+        fundingSources: List<String>,
+        merchantIds: List<String>,
+        buyerCountry: String
     ): APIResult<FundingEligibility> {
+        require(clientId.isNotBlank()) { "Client ID cannot be blank" }
+        require(fundingSources.isNotEmpty()) { "Funding sources cannot be empty" }
+        require(fundingSources.all { it.isNotBlank() }) { "Funding source values cannot be blank" }
+        require(merchantIds.isNotEmpty()) { "Merchant IDs cannot be empty" }
+        require(merchantIds.all { it.isNotBlank() }) { "Merchant ID values cannot be blank" }
+        require(buyerCountry.isNotBlank()) { "Buyer country cannot be blank" }
+
         val graphQLRequest = createGraphQLRequest(
-            context = context
+            context = context,
+            fundingSources = fundingSources,
+            merchantIds = merchantIds,
+            buyerCountry = buyerCountry
         ) ?: return APIResult.Failure(APIClientError.dataParsingError(correlationId = null))
-        return sendGraphQLRequestWithLSATAuthentication(graphQLRequest)
+        return sendGraphQLRequest(graphQLRequest)
     }
 
     private suspend fun createGraphQLRequest(
-        context: Context
+        context: Context,
+        fundingSources: List<String>,
+        merchantIds: List<String>,
+        buyerCountry: String
     ): GraphQLRequest<GetFundingEligibilityVariables>? {
         val resourceResult = resourceLoader.loadRawResource(
             context,
@@ -58,8 +70,9 @@ class GetFundingEligibility internal constructor(
         }
 
         val variables = GetFundingEligibilityVariables(
-            merchantID = listOf("V9YP27HFNG2LW"),
-            enableFunding = listOf("VENMO"),
+            merchantID = merchantIds,
+            buyerCountry = buyerCountry,
+            enableFunding = fundingSources,
         )
 
         return GraphQLRequest(
@@ -69,44 +82,38 @@ class GetFundingEligibility internal constructor(
         )
     }
 
-    private fun parseResponse(response: GetFundingEligibilityResponse): FundingEligibility? {
-        val fundingEligibilityData = response.fundingEligibility
-
-        return fundingEligibilityData?.let {
-            FundingEligibility(
-                venmoEligible = it.venmo?.eligible ?: false
-            )
-        }
+    private fun parseResponse(response: GetFundingEligibilityResponse): FundingEligibility {
+        return FundingEligibility(
+            venmoEligible = response.fundingEligibility?.venmo?.eligible ?: false
+        )
     }
 
-    private suspend fun sendGraphQLRequestWithLSATAuthentication(
+    private suspend fun sendGraphQLRequest(
         graphQLRequest: GraphQLRequest<GetFundingEligibilityVariables>
     ): APIResult<FundingEligibility> {
-        val tokenResult = authenticationSecureTokenServiceAPI.createLowScopedAccessToken()
-        if (tokenResult is APIResult.Failure) {
-            return APIResult.Failure(tokenResult.error)
-        }
-        val token = (tokenResult as APIResult.Success).data
         val graphQLResult = graphQLClient.send<
                 GetFundingEligibilityResponse,
                 GetFundingEligibilityVariables>(
-            graphQLRequest,
-            additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $token")
+            graphQLRequest
         )
         return when (graphQLResult) {
             is GraphQLResult.Success -> {
-                graphQLResult.response.data?.let { responseData ->
-                    parseResponse(responseData)?.let { fundingEligibility ->
-                        APIResult.Success(data = fundingEligibility)
-                    } ?: APIResult.Failure(
-                        APIClientError.dataParsingError(graphQLResult.correlationId)
-                    )
-                } ?: APIResult.Failure(
-                    APIClientError.noResponseData(graphQLResult.correlationId)
-                )
+                handleSuccessResponse(graphQLResult)
             }
 
             is GraphQLResult.Failure -> APIResult.Failure(graphQLResult.error)
         }
+    }
+
+    private fun handleSuccessResponse(
+        graphQLResult: GraphQLResult.Success<GetFundingEligibilityResponse>
+    ): APIResult<FundingEligibility> {
+        val responseData = graphQLResult.response.data
+            ?: return APIResult.Failure(
+                APIClientError.noResponseData(graphQLResult.correlationId)
+            )
+
+        val fundingEligibility = parseResponse(responseData)
+        return APIResult.Success(data = fundingEligibility)
     }
 }
