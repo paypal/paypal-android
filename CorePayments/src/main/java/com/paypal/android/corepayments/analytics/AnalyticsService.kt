@@ -40,6 +40,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
+    @Suppress("LongParameterList")
     fun sendAnalyticsEvent(
         name: String,
         orderId: String? = null,
@@ -53,6 +54,10 @@ class AnalyticsService internal constructor(
         errorDescription: String? = null,
         isCachedSession: Boolean? = null,
         isVaultRequest: Boolean? = null,
+        endTime: Long? = null,
+        endpoint: String? = null,
+        presentationType: String? = null,
+        flow: String? = null,
         appSwitchEligible: Boolean? = null,
         ineligibleReason: String? = null,
         merchantId: String? = null,
@@ -95,6 +100,10 @@ class AnalyticsService internal constructor(
                     returnAppUrl = returnAppUrl,
                     cancelAppUrl = cancelAppUrl,
                     fallbackSchemeUrl = fallbackSchemeUrl,
+                    endTime = endTime,
+                    endpoint = endpoint,
+                    presentationType = presentationType,
+                    flow = flow
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->

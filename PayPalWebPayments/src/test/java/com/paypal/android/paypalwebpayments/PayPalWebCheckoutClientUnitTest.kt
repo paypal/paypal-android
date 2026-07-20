@@ -5,9 +5,11 @@ import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
+import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
@@ -20,7 +22,10 @@ import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
+import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
+import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
+import com.paypal.android.paypalwebpayments.analytics.PresentationType
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -32,6 +37,7 @@ import io.mockk.slot
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertSame
 import junit.framework.TestCase.assertTrue
@@ -1789,6 +1795,37 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
+    fun `start() with orderId includes observability query params on the launch uri`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val uriSlot = slot<Uri>()
+        val beforeMillis = System.currentTimeMillis()
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+        sutV3.start(activity, "fake-order-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+        val afterMillis = System.currentTimeMillis()
+
+        val launchedUri = uriSlot.captured
+        assertEquals("pda", launchedUri.getQueryParameter("source"))
+        assertEquals("fake-merchant-id", launchedUri.getQueryParameter("merchant"))
+        assertEquals("ecs", launchedUri.getQueryParameter("flow_type"))
+        assertEquals("paypal", launchedUri.getQueryParameter("funding_source"))
+
+        val switchInitiatedTime = launchedUri.getQueryParameter("switch_initiated_time")?.toLongOrNull()
+        assertNotNull(switchInitiatedTime)
+        assertTrue(switchInitiatedTime!! in beforeMillis..afterMillis)
+    }
+
+    @Test
     fun `start() with orderId delivers failure without falling back to patchCCO when createShopperSession throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
@@ -1995,6 +2032,38 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
+    fun `vault() with setupTokenId includes observability query params on the launch uri`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val uriSlot = slot<Uri>()
+        val beforeMillis = System.currentTimeMillis()
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.VAULT_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+        sutV3.vault(activity, "fake-setup-token-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+        val afterMillis = System.currentTimeMillis()
+
+        val launchedUri = uriSlot.captured
+        assertEquals("fake-session-id", launchedUri.getQueryParameter("shopperSessionId"))
+        assertEquals("pda", launchedUri.getQueryParameter("source"))
+        assertEquals("fake-merchant-id", launchedUri.getQueryParameter("merchant"))
+        assertEquals("va", launchedUri.getQueryParameter("flow_type"))
+        assertEquals("paypal", launchedUri.getQueryParameter("funding_source"))
+
+        val switchInitiatedTime = launchedUri.getQueryParameter("switch_initiated_time")?.toLongOrNull()
+        assertNotNull(switchInitiatedTime)
+        assertTrue(switchInitiatedTime!! in beforeMillis..afterMillis)
+    }
+
+    @Test
     fun `vault() with setupTokenId delivers failure without patchCCO fallback when createShopperSession throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
@@ -2191,6 +2260,61 @@ class PayPalWebCheckoutClientUnitTest {
             }.exceptionOrNull()
 
             assertSame(lsatError, thrown)
+        }
+
+    @Test
+    fun `createShopperSessionWithAppSwitchEligibility() emits api-request-latency with CREATE_SESSION timing`() =
+        runTest {
+            coEvery {
+                createShopperSessionAPI(
+                    token = any(),
+                    tokenType = any(),
+                    params = any(),
+                )
+            } returns APIResult.Success(
+                fakeSessionResponse,
+                roundTripTiming = HttpRoundTripTiming(startTime = 1000L, endTime = 1500L)
+            )
+
+            sut.createShopperSessionWithAppSwitchEligibility(
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                urlConfig = fakeUrlConfig,
+                userIdentity = fakeUserIdentity,
+                userAction = PayPalUserAction.CONTINUE,
+            )
+
+            verify(exactly = 1) {
+                analytics.notifyApiRequestLatency(
+                    endpoint = LatencyEndpoint.CREATE_SESSION,
+                    startTime = 1000L,
+                    endTime = 1500L
+                )
+            }
+        }
+
+    @Test
+    fun `createShopperSessionWithAppSwitchEligibility() does not emit api-request-latency when timing is absent`() =
+        runTest {
+            coEvery {
+                createShopperSessionAPI(
+                    token = any(),
+                    tokenType = any(),
+                    params = any(),
+                )
+            } returns APIResult.Success(fakeSessionResponse) // roundTripTiming defaults to null
+
+            sut.createShopperSessionWithAppSwitchEligibility(
+                token = "fake-order-id",
+                tokenType = TokenType.ORDER_ID,
+                urlConfig = fakeUrlConfig,
+                userIdentity = fakeUserIdentity,
+                userAction = PayPalUserAction.CONTINUE,
+            )
+
+            verify(exactly = 0) {
+                analytics.notifyApiRequestLatency(any(), any(), any())
+            }
         }
 
     @Test
@@ -2576,4 +2700,189 @@ class PayPalWebCheckoutClientUnitTest {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             }
         }
+    // MARK: - Latency Analytics Tests
+
+    @Test
+    fun `start() emits user-perceived-latency with checkout flow and browser presentation`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+            // fakeSessionResponse is not app-switch eligible -> browser presentation
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify(exactly = 1) {
+                analytics.notifyUserPerceivedLatency(
+                    flow = LatencyFlow.CHECKOUT,
+                    presentationType = PresentationType.BROWSER,
+                    startTime = any(),
+                    endTime = any()
+                )
+            }
+        }
+
+    @Test
+    fun `start() emits user-perceived-latency with app-switch presentation when eligible and installed`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+            val appSwitchEligibleResponse = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = "https://example.com/app-switch-redirect",
+            )
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(appSwitchEligibleResponse)
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify(exactly = 1) {
+                analytics.notifyUserPerceivedLatency(
+                    flow = LatencyFlow.CHECKOUT,
+                    presentationType = PresentationType.APP_SWITCH,
+                    startTime = any(),
+                    endTime = any()
+                )
+            }
+        }
+
+    @Test
+    fun `start() emits user-perceived-latency with error presentation on launch failure`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val sdkError = PayPalSDKError(123, "fake error description")
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
+
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify(exactly = 1) {
+                analytics.notifyUserPerceivedLatency(
+                    flow = LatencyFlow.CHECKOUT,
+                    presentationType = PresentationType.ERROR,
+                    startTime = any(),
+                    endTime = any()
+                )
+            }
+        }
+
+    @Test
+    fun `start() emits user-perceived-latency with error presentation when session not created`() =
+        runTest {
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+
+            sut.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify(exactly = 1) {
+                analytics.notifyUserPerceivedLatency(
+                    flow = LatencyFlow.CHECKOUT,
+                    presentationType = PresentationType.ERROR,
+                    startTime = any(),
+                    endTime = any()
+                )
+            }
+        }
+
+    @Test
+    fun `vault() emits user-perceived-latency with vault flow`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify(exactly = 1) {
+                analytics.notifyUserPerceivedLatency(
+                    flow = LatencyFlow.VAULT,
+                    presentationType = any(),
+                    startTime = any(),
+                    endTime = any()
+                )
+            }
+        }
+
+    @Test
+    fun `startAsync() emits api-request-latency using updateClientConfig timing`() = runTest {
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+        coEvery {
+            updateClientConfigAPI.updateClientConfig(any(), any())
+        } returns UpdateClientConfigResult.Success(HttpRoundTripTiming(1000L, 1500L))
+
+        val request = PayPalWebCheckoutRequest(
+            "fake-order-id",
+            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+        )
+        sut.startAsync(activity, request)
+
+        verify(exactly = 1) {
+            analytics.notifyApiRequestLatency(
+                endpoint = LatencyEndpoint.UPDATE_CLIENT_CONFIG,
+                startTime = 1000L,
+                endTime = 1500L
+            )
+        }
+    }
+
+    @Test
+    fun `startAsync() does not emit api-request-latency when timing is absent`() = runTest {
+        every {
+            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth state")
+
+        coEvery {
+            updateClientConfigAPI.updateClientConfig(any(), any())
+        } returns UpdateClientConfigResult.Success(roundTripTiming = null)
+
+        val request = PayPalWebCheckoutRequest(
+            "fake-order-id",
+            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+        )
+        sut.startAsync(activity, request)
+
+        verify(exactly = 0) {
+            analytics.notifyApiRequestLatency(any(), any(), any())
+        }
+    }
 }
