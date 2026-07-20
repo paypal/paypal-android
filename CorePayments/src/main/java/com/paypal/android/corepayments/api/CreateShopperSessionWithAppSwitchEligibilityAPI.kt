@@ -134,7 +134,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                 graphQLRequest,
                 additionalHeaders = mapOf(Headers.AUTHORIZATION to "Bearer $lsat")
             )
-            val timing = graphQLResult.timing
+            val roundTripTiming = graphQLResult.roundTripTiming
             when (graphQLResult) {
                 is GraphQLResult.Success -> {
                     val data = graphQLResult.response.data
@@ -143,18 +143,18 @@ class CreateShopperSessionWithAppSwitchEligibilityAPI internal constructor(
                     if (data == null) {
                         APIResult.Failure(
                             error = APIClientError.noResponseData(graphQLResult.correlationId),
-                            timing = timing
+                            roundTripTiming = roundTripTiming
                         )
                     } else {
                         APIResult.Success(
                             data = data.toResponse(),
-                            timing = timing
+                            roundTripTiming = roundTripTiming
                         )
                     }
                 }
                 is GraphQLResult.Failure -> APIResult.Failure(
                     error = graphQLResult.error,
-                    timing = timing
+                    roundTripTiming = roundTripTiming
                 )
             }
         }

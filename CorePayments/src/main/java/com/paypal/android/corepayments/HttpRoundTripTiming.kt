@@ -13,7 +13,7 @@ import androidx.annotation.RestrictTo
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class HttpRequestTiming(
+data class HttpRoundTripTiming(
     val startTime: Long,
     val endTime: Long
 )

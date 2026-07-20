@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.paypal.android.corepayments.HttpRequestTiming
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
@@ -2272,7 +2272,7 @@ class PayPalWebCheckoutClientUnitTest {
                 )
             } returns APIResult.Success(
                 fakeSessionResponse,
-                timing = HttpRequestTiming(startTime = 1000L, endTime = 1500L)
+                roundTripTiming = HttpRoundTripTiming(startTime = 1000L, endTime = 1500L)
             )
 
             sut.createShopperSessionWithAppSwitchEligibility(
@@ -2301,7 +2301,7 @@ class PayPalWebCheckoutClientUnitTest {
                     tokenType = any(),
                     params = any(),
                 )
-            } returns APIResult.Success(fakeSessionResponse) // timing defaults to null
+            } returns APIResult.Success(fakeSessionResponse) // roundTripTiming defaults to null
 
             sut.createShopperSessionWithAppSwitchEligibility(
                 token = "fake-order-id",
@@ -2857,7 +2857,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         coEvery {
             updateClientConfigAPI.updateClientConfig(any(), any())
-        } returns UpdateClientConfigResult.Success(HttpRequestTiming(1000L, 1500L))
+        } returns UpdateClientConfigResult.Success(HttpRoundTripTiming(1000L, 1500L))
 
         val request = PayPalWebCheckoutRequest(
             "fake-order-id",
@@ -2882,7 +2882,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         coEvery {
             updateClientConfigAPI.updateClientConfig(any(), any())
-        } returns UpdateClientConfigResult.Success(timing = null)
+        } returns UpdateClientConfigResult.Success(roundTripTiming = null)
 
         val request = PayPalWebCheckoutRequest(
             "fake-order-id",

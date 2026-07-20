@@ -102,9 +102,9 @@ class HttpUnitTest {
         val sut = createHttp(testScheduler)
         val result = sut.send(httpRequest)
 
-        val timing = result.timing
-        assertNotNull(timing)
-        assertTrue(timing!!.endTime >= timing.startTime)
+        val roundTripTiming = result.roundTripTiming
+        assertNotNull(roundTripTiming)
+        assertTrue(roundTripTiming!!.endTime >= roundTripTiming.startTime)
     }
 
     @Test
@@ -115,9 +115,9 @@ class HttpUnitTest {
         val sut = createHttp(testScheduler)
         val result = sut.send(httpRequest)
 
-        val timing = result.timing
-        assertNotNull(timing)
-        assertTrue(timing!!.endTime >= timing.startTime)
+        val roundTripTiming = result.roundTripTiming
+        assertNotNull(roundTripTiming)
+        assertTrue(roundTripTiming!!.endTime >= roundTripTiming.startTime)
     }
 
     @Test

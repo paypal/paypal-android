@@ -5,7 +5,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequest
-import com.paypal.android.corepayments.HttpRequestTiming
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
@@ -143,7 +143,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
 
     @Test
     fun `invoke propagates GraphQL round-trip timing into APIResult Success`() = runTest {
-        val timing = HttpRequestTiming(startTime = 1000L, endTime = 1500L)
+        val roundTripTiming = HttpRoundTripTiming(startTime = 1000L, endTime = 1500L)
         coEvery { mockHttp.send(any()) } returns HttpResponse(
             status = 200,
             body = """
@@ -166,7 +166,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
                 }
             """.trimIndent(),
             headers = emptyMap(),
-            timing = timing,
+            roundTripTiming = roundTripTiming,
         )
 
         val result = sut(
@@ -182,17 +182,17 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         )
 
         assertTrue(result is APIResult.Success)
-        assertEquals(timing, (result as APIResult.Success).timing)
+        assertEquals(roundTripTiming, (result as APIResult.Success).roundTripTiming)
     }
 
     @Test
     fun `invoke propagates GraphQL round-trip timing into APIResult Failure`() = runTest {
-        val timing = HttpRequestTiming(startTime = 2000L, endTime = 2600L)
+        val roundTripTiming = HttpRoundTripTiming(startTime = 2000L, endTime = 2600L)
         coEvery { mockHttp.send(any()) } returns HttpResponse(
             status = 500,
             body = null,
             headers = emptyMap(),
-            timing = timing,
+            roundTripTiming = roundTripTiming,
         )
 
         val result = sut(
@@ -208,7 +208,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         )
 
         assertTrue(result is APIResult.Failure)
-        assertEquals(timing, (result as APIResult.Failure).timing)
+        assertEquals(roundTripTiming, (result as APIResult.Failure).roundTripTiming)
     }
 
     @Test

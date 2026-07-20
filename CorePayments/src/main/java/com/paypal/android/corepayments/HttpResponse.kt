@@ -12,7 +12,7 @@ data class HttpResponse(
     val headers: Map<String, String> = emptyMap(),
     val body: String? = null,
     val error: Throwable? = null,
-    val timing: HttpRequestTiming? = null
+    val roundTripTiming: HttpRoundTripTiming? = null
 ) {
     companion object {
         const val STATUS_UNDETERMINED = -1

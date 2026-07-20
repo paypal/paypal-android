@@ -61,20 +61,20 @@ class GraphQLClient internal constructor(
 
         val httpResponse = http.send(httpRequest)
         val correlationId = httpResponse.headers[PAYPAL_DEBUG_ID]
-        val timing = httpResponse.timing
+        val roundTripTiming = httpResponse.roundTripTiming
 
         return when {
             httpResponse.status != HTTP_OK -> {
                 GraphQLResult.Failure(
                     error = APIClientError.serverResponseError(correlationId),
-                    timing = timing
+                    roundTripTiming = roundTripTiming
                 )
             }
 
             httpResponse.body.isNullOrBlank() -> {
                 GraphQLResult.Failure(
                     error = noResponseData(correlationId),
-                    timing = timing
+                    roundTripTiming = roundTripTiming
                 )
             }
 
@@ -86,12 +86,12 @@ class GraphQLClient internal constructor(
                 GraphQLResult.Success(
                     response = response,
                     correlationId = correlationId,
-                    timing = timing
+                    roundTripTiming = roundTripTiming
                 )
             }.getOrElse { error ->
                 GraphQLResult.Failure(
                     error = graphQLJSONParseError(correlationId, error),
-                    timing = timing
+                    roundTripTiming = roundTripTiming
                 )
             }
         }

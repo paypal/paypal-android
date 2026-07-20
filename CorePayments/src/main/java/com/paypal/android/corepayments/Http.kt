@@ -48,7 +48,7 @@ internal class Http(
                 httpResponseParser.parse(connection)
             }.map { response ->
                 response.copy(
-                    timing = HttpRequestTiming(startTime = startTime, endTime = System.currentTimeMillis())
+                    roundTripTiming = HttpRoundTripTiming(startTime = startTime, endTime = System.currentTimeMillis())
                 )
             }.recover {
                 val status = when (it) {
@@ -59,7 +59,7 @@ internal class Http(
                 HttpResponse(
                     status = status,
                     error = it,
-                    timing = HttpRequestTiming(startTime = startTime, endTime = System.currentTimeMillis())
+                    roundTripTiming = HttpRoundTripTiming(startTime = startTime, endTime = System.currentTimeMillis())
                 )
             }.getOrNull()!!
         }

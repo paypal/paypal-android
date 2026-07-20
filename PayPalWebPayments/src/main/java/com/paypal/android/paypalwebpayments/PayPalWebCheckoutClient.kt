@@ -9,7 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
-import com.paypal.android.corepayments.HttpRequestTiming
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -685,7 +685,7 @@ class PayPalWebCheckoutClient internal constructor(
             ),
         )
 
-        notifyApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.timing)
+        notifyApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.roundTripTiming)
 
         return when (result) {
             is APIResult.Success -> {
@@ -745,7 +745,7 @@ class PayPalWebCheckoutClient internal constructor(
             }
 
             val updateConfigResult = updateConfigDeferred.await() // waits for completion
-            notifyApiRequestLatency(LatencyEndpoint.UPDATE_CLIENT_CONFIG, updateConfigResult.timing)
+            notifyApiRequestLatency(LatencyEndpoint.UPDATE_CLIENT_CONFIG, updateConfigResult.roundTripTiming)
             launchUriDeferred.await() // returns launch URI
         }
 
@@ -986,8 +986,8 @@ class PayPalWebCheckoutClient internal constructor(
         )
     }
 
-    private fun notifyApiRequestLatency(endpoint: String, timing: HttpRequestTiming?) {
-        timing?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime) }
+    private fun notifyApiRequestLatency(endpoint: String, roundTripTiming: HttpRoundTripTiming?) {
+        roundTripTiming?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime) }
     }
 
     // endregion
