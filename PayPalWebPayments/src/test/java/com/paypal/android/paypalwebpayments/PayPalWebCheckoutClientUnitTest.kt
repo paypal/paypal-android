@@ -1692,7 +1692,7 @@ class PayPalWebCheckoutClientUnitTest {
         matchedAuthenticationMethods = emptyList(),
         shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
     )
-    
+
     private fun placeholderTokenUrl(
         baseUrl: String,
         tokenType: String,
