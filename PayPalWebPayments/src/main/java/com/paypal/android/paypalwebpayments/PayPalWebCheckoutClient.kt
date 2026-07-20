@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -22,7 +23,10 @@ import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
+import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
+import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
+import com.paypal.android.paypalwebpayments.analytics.PresentationType
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
@@ -140,8 +144,10 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String,
         callback: PayPalWebStartCallback,
     ) {
+        val startTime = System.currentTimeMillis()
         val deferred = shopperSessionDeferred
         if (deferred == null) {
+            notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
             notifyCheckoutSessionNotStarted(orderId, callback)
             return
         }
@@ -162,6 +168,7 @@ class PayPalWebCheckoutClient internal constructor(
                         activity = activity,
                         shopperSession = shopperSession,
                         orderId = orderId,
+                        startTime = startTime,
                     )
                 } else {
                     launchCheckoutViaPatchCCOFallback(
@@ -223,8 +230,10 @@ class PayPalWebCheckoutClient internal constructor(
         setupTokenId: String,
         callback: PayPalWebVaultCallback,
     ) {
+        val startTime = System.currentTimeMillis()
         val deferred = shopperSessionDeferred
         if (deferred == null) {
+            notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
             notifyVaultSessionNotStarted(setupTokenId, callback)
             return
         }
@@ -246,6 +255,7 @@ class PayPalWebCheckoutClient internal constructor(
                         activity = activity,
                         shopperSession = shopperSession,
                         setupTokenId = setupTokenId,
+                        startTime = startTime,
                     )
                 } else {
                     launchVaultViaPatchCCOFallback(
@@ -436,6 +446,7 @@ class PayPalWebCheckoutClient internal constructor(
         activity: Activity,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         orderId: String,
+        startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         val launchUri = shopperSession.getLaunchUri(orderId, TokenType.ORDER_ID)
@@ -455,6 +466,7 @@ class PayPalWebCheckoutClient internal constructor(
                 shopperSessionId = shopperSessionId,
             )
         }
+        val endTime = System.currentTimeMillis()
 
         val result = payPalWebLauncher.launchWithUrl(
             context = activity,
@@ -464,6 +476,7 @@ class PayPalWebCheckoutClient internal constructor(
             returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
         )
         logCheckoutPresentAuthChallengeResult(result, launchUri.toString())
+        notifyUserPerceivedLatency(LatencyFlow.CHECKOUT, result, startTime, endTime)
         return result
     }
 
@@ -528,9 +541,11 @@ class PayPalWebCheckoutClient internal constructor(
         activity: Activity,
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
+        startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         val launchUri = shopperSession.getLaunchUri(setupTokenId, TokenType.VAULT_ID)
+        val endTime = System.currentTimeMillis()
 
         if (appSwitchEnabled) {
             analytics.notify(
@@ -557,6 +572,7 @@ class PayPalWebCheckoutClient internal constructor(
             returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
         )
         logVaultPresentAuthChallengeResult(result, launchUri.toString())
+        notifyUserPerceivedLatency(LatencyFlow.VAULT, result, startTime, endTime)
         return result
     }
 
@@ -669,6 +685,8 @@ class PayPalWebCheckoutClient internal constructor(
             ),
         )
 
+        notifyApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.roundTripTiming)
+
         return when (result) {
             is APIResult.Success -> {
                 analytics.notify(
@@ -726,7 +744,8 @@ class PayPalWebCheckoutClient internal constructor(
                 )
             }
 
-            updateConfigDeferred.await() // waits for completion, ignores result
+            val updateConfigResult = updateConfigDeferred.await() // waits for completion
+            notifyApiRequestLatency(LatencyEndpoint.UPDATE_CLIENT_CONFIG, updateConfigResult.roundTripTiming)
             launchUriDeferred.await() // returns launch URI
         }
 
@@ -921,6 +940,34 @@ class PayPalWebCheckoutClient internal constructor(
         return requestStrategy ?: urlScheme?.let {
             ReturnToAppStrategy.CustomUrlScheme(urlScheme)
         }
+    }
+
+    private fun notifyUserPerceivedLatency(
+        flow: String,
+        result: PayPalPresentAuthChallengeResult,
+        startTime: Long,
+        endTime: Long
+    ) {
+        val presentationType = when (result) {
+            is PayPalPresentAuthChallengeResult.Success ->
+                if (appSwitchEnabled) PresentationType.APP_SWITCH else PresentationType.BROWSER
+
+            is PayPalPresentAuthChallengeResult.Failure -> PresentationType.ERROR
+        }
+        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime)
+    }
+
+    private fun notifyUserPerceivedLatencyError(flow: String, startTime: Long) {
+        analytics.notifyUserPerceivedLatency(
+            flow = flow,
+            presentationType = PresentationType.ERROR,
+            startTime = startTime,
+            endTime = System.currentTimeMillis()
+        )
+    }
+
+    private fun notifyApiRequestLatency(endpoint: String, roundTripTiming: HttpRoundTripTiming?) {
+        roundTripTiming?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime) }
     }
 
     // endregion
