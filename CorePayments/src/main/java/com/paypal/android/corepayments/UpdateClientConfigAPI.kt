@@ -47,18 +47,23 @@ class UpdateClientConfigAPI(
                     graphQLClient.send<UpdateClientConfigResponse, UpdateClientConfigVariables>(
                         graphQLRequest = graphQLRequest
                     )
+                val roundTripTiming = graphQLResponse.roundTripTiming
                 when (graphQLResponse) {
                     is GraphQLResult.Success -> {
                         val correlationId = graphQLResponse.correlationId
                         graphQLResponse.response.data?.let {
-                            UpdateClientConfigResult.Success
+                            UpdateClientConfigResult.Success(roundTripTiming = roundTripTiming)
                         } ?: UpdateClientConfigResult.Failure(
-                            APIClientError.noResponseData(correlationId)
+                            error = APIClientError.noResponseData(correlationId),
+                            roundTripTiming = roundTripTiming
                         )
                     }
 
                     is GraphQLResult.Failure -> {
-                        UpdateClientConfigResult.Failure(graphQLResponse.error)
+                        UpdateClientConfigResult.Failure(
+                            error = graphQLResponse.error,
+                            roundTripTiming = roundTripTiming
+                        )
                     }
                 }
             }
@@ -115,6 +120,13 @@ data class UpdateClientConfigResponse(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class UpdateClientConfigResult {
-    data object Success : UpdateClientConfigResult()
-    data class Failure(val error: PayPalSDKError) : UpdateClientConfigResult()
+
+    /** Round-trip timing of the underlying GraphQL request, when available. */
+    abstract val roundTripTiming: HttpRoundTripTiming?
+
+    data class Success(override val roundTripTiming: HttpRoundTripTiming? = null) : UpdateClientConfigResult()
+    data class Failure(
+        val error: PayPalSDKError,
+        override val roundTripTiming: HttpRoundTripTiming? = null
+    ) : UpdateClientConfigResult()
 }
