@@ -19,6 +19,7 @@ import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateVenmoOrderUseCase
 import com.paypal.android.venmo.VenmoClient
 import com.paypal.android.venmo.VenmoFinishStartResult
+import com.paypal.android.venmo.VenmoStartResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,11 +79,13 @@ class PayWithVenmoViewModel @Inject constructor(
         get() = (createOrderState as? ActionState.Success)?.value
 
     fun checkEligibility() {
-        viewModelScope.launch {
-            checkEligibilityState = ActionState.Loading
-            val result = venmoClient.isEligible(buyerCountry = "US")
-            checkEligibilityState = ActionState.Success(result)
-        }
+        checkEligibilityState = ActionState.Loading
+        venmoClient.isEligible(
+            buyerCountry = "US",
+            callback = { result ->
+                checkEligibilityState = ActionState.Success(result)
+            }
+        )
     }
 
     fun createOrder() {
@@ -106,14 +109,21 @@ class PayWithVenmoViewModel @Inject constructor(
             payWithVenmoState = ActionState.Failure(Exception("Create an order to continue."))
             return
         }
-        viewModelScope.launch {
-            payWithVenmoState = ActionState.Loading
-            try {
-                venmoClient.start(activity, orderId)
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                payWithVenmoState = ActionState.Failure(e)
+        payWithVenmoState = ActionState.Loading
+        venmoClient.start(
+            activity = activity,
+            orderId = orderId,
+            callback = { result ->
+                when (result) {
+                    is VenmoStartResult.Success -> {
+                        // App switch initiated successfully, waiting for callback
+                    }
+                    is VenmoStartResult.Failure -> {
+                        payWithVenmoState = ActionState.Failure(result.error)
+                    }
+                }
             }
-        }
+        )
     }
 
     fun finishVenmo(intent: Intent) {
