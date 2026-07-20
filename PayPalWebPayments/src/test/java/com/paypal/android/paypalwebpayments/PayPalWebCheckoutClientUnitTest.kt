@@ -46,7 +46,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -1846,10 +1845,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     // --- LLD Section 3.8 fallback-to-patchCCO behavior ---
 
-    @Ignore(
-        "patchCCO fallback removed pending re-implementation; " +
-            "see TODO in PayPalWebCheckoutClient.launchCheckoutViaPatchCCOFallback"
-    )
     @Test
     fun `start() falls back to patchCCO when shopper session fetch reports a session-creation-or-network failure`() =
         runTest {
@@ -1905,10 +1900,6 @@ class PayPalWebCheckoutClientUnitTest {
             verify { callback.onPayPalWebStartResult(launchResult) }
         }
 
-    @Ignore(
-        "patchCCO fallback removed pending re-implementation; " +
-            "see TODO in PayPalWebCheckoutClient.launchCheckoutViaPatchCCOFallback"
-    )
     @Test
     fun `start() appends token and strips a trailing ampersand from the patchCCO launch url`() =
         runTest {
@@ -2084,10 +2075,6 @@ class PayPalWebCheckoutClientUnitTest {
 
     // --- LLD Section 3.8 fallback-to-patchCCO behavior ---
 
-    @Ignore(
-        "patchCCO fallback removed pending re-implementation; " +
-            "see TODO in PayPalWebCheckoutClient.launchVaultViaPatchCCOFallback"
-    )
     @Test
     fun `vault() falls back to patchCCO when shopper session fetch reports a session-creation-or-network failure`() =
         runTest {
@@ -2143,10 +2130,6 @@ class PayPalWebCheckoutClientUnitTest {
             verify { callback.onPayPalWebVaultResult(launchResult) }
         }
 
-    @Ignore(
-        "patchCCO fallback removed pending re-implementation; " +
-            "see TODO in PayPalWebCheckoutClient.launchVaultViaPatchCCOFallback"
-    )
     @Test
     fun `vault() falls back to a vault URI, not a checkout URI, when patchCCO has no launch url`() =
         runTest {

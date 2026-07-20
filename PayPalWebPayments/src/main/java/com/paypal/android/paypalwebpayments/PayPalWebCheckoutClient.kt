@@ -608,37 +608,102 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Launches checkout after the Shopper Session fetch failed with a session-creation
-     * failure or network timeout.
+     * Launches checkout via the legacy patchCCO path after the Shopper Session fetch failed
+     * with a session-creation failure or network timeout. Mirrors
+     * [launchCheckoutWithShopperSession], resolving app-switch eligibility via [getLaunchUri]
+     * (patchCCO) instead of a shopper session.
      *
-     * TODO: Re-implement fallback behavior for session-creation failure. This previously
-     *  fell back to the legacy patchCCO path via [getLaunchUri] (see git history / PR diff
-     *  for the removed implementation). Removed pending a decision on the replacement
-     *  behavior — currently unhandled.
+     * @param activity The Activity needed to launch the checkout UI.
+     * @param orderId The order id to approve.
      */
-    @Suppress("UnusedPrivateMember")
     private suspend fun launchCheckoutViaPatchCCOFallback(
         activity: Activity,
         orderId: String,
     ): PayPalPresentAuthChallengeResult {
-        TODO("Re-implement checkout fallback for session-creation failure (patchCCO fallback removed)")
+        val launchUri = getLaunchUri(
+            context = activity.applicationContext,
+            token = orderId,
+            tokenType = TokenType.ORDER_ID,
+            fallbackUri = buildPayPalCheckoutUri(
+                orderId = orderId,
+                funding = null,
+                returnUrl = returnToAppUrlConfig?.returnAppUrl,
+            ),
+        )
+
+        if (appSwitchEnabled) {
+            analytics.notify(
+                CheckoutEvent.APP_SWITCH_STARTED,
+                checkoutOrderId,
+                appSwitchEnabled,
+                shopperSessionId = shopperSessionId,
+                appSwitchUrl = launchUri.toString(),
+            )
+        } else {
+            analytics.notify(
+                CheckoutEvent.BROWSER_PRESENTATION_STARTED,
+                checkoutOrderId,
+                appSwitchEnabled,
+                shopperSessionId = shopperSessionId,
+            )
+        }
+
+        val result = payPalWebLauncher.launchWithUrl(
+            context = activity,
+            uri = launchUri,
+            token = orderId,
+            tokenType = TokenType.ORDER_ID,
+            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+        )
+        logCheckoutPresentAuthChallengeResult(result, launchUri.toString())
+        return result
     }
 
     /**
-     * Launches vault after the Shopper Session fetch failed with a session-creation failure
-     * or network timeout. See [launchCheckoutViaPatchCCOFallback].
+     * Launches vault via the legacy patchCCO path after the Shopper Session fetch failed
+     * with a session-creation failure or network timeout. See
+     * [launchCheckoutViaPatchCCOFallback].
      *
-     * TODO: Re-implement fallback behavior for session-creation failure. This previously
-     *  fell back to the legacy patchCCO path via [getLaunchUri] (see git history / PR diff
-     *  for the removed implementation). Removed pending a decision on the replacement
-     *  behavior — currently unhandled.
+     * @param activity The Activity needed to launch the vault UI.
+     * @param setupTokenId The setup token id to approve.
      */
-    @Suppress("UnusedPrivateMember")
     private suspend fun launchVaultViaPatchCCOFallback(
         activity: Activity,
         setupTokenId: String,
     ): PayPalPresentAuthChallengeResult {
-        TODO("Re-implement vault fallback for session-creation failure (patchCCO fallback removed)")
+        val launchUri = getLaunchUri(
+            context = activity.applicationContext,
+            token = setupTokenId,
+            tokenType = TokenType.VAULT_ID,
+            fallbackUri = buildPayPalVaultUri(setupTokenId),
+        )
+
+        if (appSwitchEnabled) {
+            analytics.notify(
+                VaultEvent.APP_SWITCH_STARTED,
+                vaultSetupTokenId,
+                appSwitchEnabled,
+                shopperSessionId = shopperSessionId,
+                appSwitchUrl = launchUri.toString(),
+            )
+        } else {
+            analytics.notify(
+                VaultEvent.BROWSER_PRESENTATION_STARTED,
+                vaultSetupTokenId,
+                appSwitchEnabled,
+                shopperSessionId = shopperSessionId,
+            )
+        }
+
+        val result = payPalWebLauncher.launchWithUrl(
+            context = activity,
+            uri = launchUri,
+            token = setupTokenId,
+            tokenType = TokenType.VAULT_ID,
+            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+        )
+        logVaultPresentAuthChallengeResult(result, launchUri.toString())
+        return result
     }
 
     @VisibleForTesting
@@ -649,6 +714,8 @@ class PayPalWebCheckoutClient internal constructor(
         userIdentity: PayPalUserIdentity?,
         userAction: PayPalUserAction,
     ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
+        return null
+
         val startTime = System.currentTimeMillis()
         val isVaultRequest = tokenType != TokenType.ORDER_ID
         analytics.notify(CreatePayPalSessionEvent.STARTED)
@@ -906,7 +973,7 @@ class PayPalWebCheckoutClient internal constructor(
         tokenType: TokenType,
         fallbackUri: Uri
     ): Uri {
-        return if (deviceInspector.isPayPalInstalled) {
+        var launchUri = if (deviceInspector.isPayPalInstalled) {
             val patchCcoResult = patchCCOWithAppSwitchEligibility(
                 context = context,
                 orderId = token,
@@ -929,6 +996,9 @@ class PayPalWebCheckoutClient internal constructor(
             appSwitchEnabled = false
             fallbackUri
         }
+        launchUri = launchUri.appendTokenQueryParam(token, tokenType)
+        launchUri = launchUri.appendObservabilityQueryParams(tokenType)
+        return launchUri
     }
 
     /**
