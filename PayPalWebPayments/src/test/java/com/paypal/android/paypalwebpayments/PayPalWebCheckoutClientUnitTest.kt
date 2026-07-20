@@ -1692,14 +1692,7 @@ class PayPalWebCheckoutClientUnitTest {
         matchedAuthenticationMethods = emptyList(),
         shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
     )
-
-    // getLaunchUri() fills in the token value by concatenating it onto the end of the
-    // backend-provided redirectUrl/checkoutFallbackUrl query string (see
-    // PayPalWebCheckoutClient.getLaunchUri) rather than appending a "key=value" pair itself. So
-    // fixtures must already end in an empty "key=" placeholder for the resulting URL's token to
-    // be readable back out via Uri.getQueryParameter. Use CHECKOUT_TOKEN/"token" fixtures for
-    // checkout (orderId) flows, and VAULT_ID/"vault_id" (app-switch redirect) or
-    // "approval_session_id" (web fallback) fixtures for vault (setupTokenId) flows.
+    
     private fun placeholderTokenUrl(
         baseUrl: String,
         tokenType: String,
