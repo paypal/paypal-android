@@ -1702,16 +1702,6 @@ class PayPalWebCheckoutClientUnitTest {
         baseUrl: String,
         tokenType: String,
         tokenKey: String,
-        extraQuery: String? = null,
-    ): String {
-        val extra = extraQuery?.let { "$it&" }.orEmpty()
-        return "$baseUrl?${extra}appSwitchEligible=true&tokenType=$tokenType&$tokenKey="
-    }
-
-    private fun placeholderTokenUrl(
-        baseUrl: String,
-        tokenType: String,
-        tokenKey: String,
     ): String {
         return "$baseUrl?appSwitchEligible=true&tokenType=$tokenType&$tokenKey="
     }
