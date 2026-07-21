@@ -19,6 +19,7 @@ import com.google.android.material.shape.RoundedCornerTreatment
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.ui.R
 
@@ -233,8 +234,7 @@ abstract class PaymentButton<C : PaymentButtonColor> @JvmOverloads constructor(
             listener?.onClick(view)
             analyticsService.sendAnalyticsEvent(
                 "payment-button:tapped",
-                orderId = null,
-                buttonType = fundingType.buttonType
+                AnalyticsEventData(buttonType = fundingType.buttonType)
             )
         }
     }

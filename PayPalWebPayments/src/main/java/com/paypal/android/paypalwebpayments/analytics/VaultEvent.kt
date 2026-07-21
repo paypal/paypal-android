@@ -16,10 +16,10 @@ internal enum class VaultEvent(val value: String) {
     APP_SWITCH_FAILED(   "paypal-web-payments:vault-wo-purchase:app-switch-open:failed"),
     APP_SWITCH_CANCELED( "paypal-web-payments:vault-wo-purchase:app-switch:canceled"),
 
-    BROWSER_PRESENTATION_STARTED("paypal-web-payments:vault-wo-purchase:browser-presentation:started"),
-    BROWSER_PRESENTATION_SUCCEEDED("paypal-web-payments:vault-wo-purchase:browser-presentation:succeeded"),
-    BROWSER_PRESENTATION_FAILED("paypal-web-payments:vault-wo-purchase:browser-presentation:failed"),
-    BROWSER_PRESENTATION_CANCELED("paypal-web-payments:vault-wo-purchase:browser-presentation:canceled"),
+    AUTH_CHALLENGE_PRESENTATION_STARTED("paypal-web-payments:vault-wo-purchase:auth-challenge-presentation:started"),
+    AUTH_CHALLENGE_PRESENTATION_SUCCEEDED("paypal-web-payments:vault-wo-purchase:auth-challenge-presentation:succeeded"),
+    AUTH_CHALLENGE_PRESENTATION_FAILED("paypal-web-payments:vault-wo-purchase:auth-challenge-presentation:failed"),
+    AUTH_CHALLENGE_PRESENTATION_CANCELED("paypal-web-payments:vault-wo-purchase:auth-challenge-presentation:canceled"),
 
     HANDLE_RETURN_STARTED(  "paypal-web-payments:vault-wo-purchase:handle-return:started"),
     HANDLE_RETURN_SUCCEEDED("paypal-web-payments:vault-wo-purchase:handle-return:succeeded"),
