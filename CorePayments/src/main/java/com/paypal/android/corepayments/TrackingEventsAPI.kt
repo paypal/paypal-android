@@ -51,7 +51,11 @@ internal class TrackingEventsAPI constructor(
             errorDescription = event.errorDescription,
             startTime = event.startTime?.toString(),
             isCachedSession = event.isCachedSession,
-            isVaultRequest = event.isVaultRequest
+            isVaultRequest = event.isVaultRequest,
+            endTime = event.endTime?.toString(),
+            endpoint = event.endpoint,
+            presentationType = event.presentationType,
+            flow = event.flow
         )
 
         val events = TrackingEvents(eventParams = eventParams)
