@@ -843,7 +843,8 @@ class PayPalWebCheckoutClient internal constructor(
         }
         val paramName = when (tokenType) {
             TokenType.ORDER_ID -> "token"
-            TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "approval_session_id"
+            TokenType.VAULT_ID -> "approval_session_id"
+            TokenType.BILLING_TOKEN -> "ba_token"
         }
         return trimmedUri.buildUpon()
             .appendQueryParameter(paramName, token)
