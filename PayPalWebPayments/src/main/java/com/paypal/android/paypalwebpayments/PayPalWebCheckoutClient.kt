@@ -552,20 +552,9 @@ class PayPalWebCheckoutClient internal constructor(
         )
 
         if (appSwitchEnabled) {
-            analytics.notify(
-                CheckoutEvent.APP_SWITCH_STARTED,
-                checkoutOrderId,
-                appSwitchEnabled,
-                shopperSessionId = shopperSessionId,
-                appSwitchUrl = launchUri.toString(),
-            )
+            analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, appSwitchAnalyticsEventParams)
         } else {
-            analytics.notify(
-                CheckoutEvent.BROWSER_PRESENTATION_STARTED,
-                checkoutOrderId,
-                appSwitchEnabled,
-                shopperSessionId = shopperSessionId,
-            )
+            analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, appSwitchAnalyticsEventParams)
         }
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -575,7 +564,7 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = TokenType.ORDER_ID,
             returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
         )
-        logCheckoutPresentAuthChallengeResult(result, launchUri.toString())
+        logCheckoutPresentAuthChallengeResult(result)
         return result
     }
 
@@ -599,20 +588,10 @@ class PayPalWebCheckoutClient internal constructor(
         )
 
         if (appSwitchEnabled) {
-            analytics.notify(
-                VaultEvent.APP_SWITCH_STARTED,
-                vaultSetupTokenId,
-                appSwitchEnabled,
-                shopperSessionId = shopperSessionId,
-                appSwitchUrl = launchUri.toString(),
-            )
+            analytics.notify(VaultEvent.APP_SWITCH_STARTED, appSwitchAnalyticsEventParams)
         } else {
             analytics.notify(
-                VaultEvent.BROWSER_PRESENTATION_STARTED,
-                vaultSetupTokenId,
-                appSwitchEnabled,
-                shopperSessionId = shopperSessionId,
-            )
+                VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, appSwitchAnalyticsEventParams)
         }
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -622,7 +601,7 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = TokenType.VAULT_ID,
             returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
         )
-        logVaultPresentAuthChallengeResult(result, launchUri.toString())
+        logVaultPresentAuthChallengeResult(result)
         return result
     }
 
