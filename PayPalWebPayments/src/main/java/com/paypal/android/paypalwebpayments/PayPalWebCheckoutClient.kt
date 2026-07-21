@@ -528,10 +528,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Launches checkout via the legacy patchCCO path after the Shopper Session fetch failed
-     * with a session-creation failure or network timeout. Mirrors
-     * [launchCheckoutWithShopperSession], resolving app-switch eligibility via [getLaunchUri]
-     * (patchCCO) instead of a shopper session.
+     * Launches checkout via the legacy patchCCO path.
      *
      * @param activity The Activity needed to launch the checkout UI.
      * @param orderId The order id to approve.
@@ -569,9 +566,7 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     /**
-     * Launches vault via the legacy patchCCO path after the Shopper Session fetch failed
-     * with a session-creation failure or network timeout. See
-     * [launchCheckoutViaPatchCCOFallback].
+     * Launches vault via the patchCCO path after the Shopper Session.
      *
      * @param activity The Activity needed to launch the vault UI.
      * @param setupTokenId The setup token id to approve.
