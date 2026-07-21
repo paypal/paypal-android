@@ -12,9 +12,9 @@ import com.paypal.android.uishared.enums.StoreInVaultOption
 
 @Composable
 fun StoreInVaultOptionForm(
-    shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
-    onShouldVaultChanged: (StoreInVaultOption) -> Unit = {},
     modifier: Modifier = Modifier,
+    shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
+    onShouldVaultChanged: (StoreInVaultOption) -> Unit = {}
 ) {
     EnumOptionList(
         title = stringResource(id = R.string.store_in_vault),

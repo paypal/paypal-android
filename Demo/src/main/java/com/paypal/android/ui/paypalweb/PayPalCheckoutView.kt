@@ -100,9 +100,9 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             onOrderIntentChange = { value -> viewModel.intentOption = value },
         )
         StoreInVaultOptionForm(
+            modifier = Modifier.fillMaxWidth(),
             shouldVault = uiState.shouldVaultOption,
-            onShouldVaultChanged = { value -> viewModel.shouldVault = value },
-            modifier = Modifier.fillMaxWidth()
+            onShouldVaultChanged = { value -> viewModel.shouldVault = value }
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
