@@ -35,4 +35,5 @@ data class AnalyticsEventData(
     val returnAppUrl: String? = null,
     val cancelAppUrl: String? = null,
     val fallbackSchemeUrl: String? = null,
+    val linkType: String? = null
 )

@@ -107,4 +107,6 @@ internal data class TrackingEventParams(
     val cancelAppUrl: String? = null,
     @SerialName("fallback_scheme_url")
     val fallbackSchemeUrl: String? = null,
+    @SerialName("link_type")
+    val linkType: String? = null
 )

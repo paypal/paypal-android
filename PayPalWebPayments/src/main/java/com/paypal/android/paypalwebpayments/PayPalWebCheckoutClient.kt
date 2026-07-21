@@ -10,6 +10,7 @@ import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpRoundTripTiming
+import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -22,6 +23,10 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
+import com.paypal.android.corepayments.usecase.GetAppLinksCompatibleBrowserUseCase
+import com.paypal.android.corepayments.usecase.GetDefaultAppUseCase
+import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase
+import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase.ReturnLinkTypeResult
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
@@ -57,6 +62,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val createShopperSessionAPI: CreateShopperSessionWithAppSwitchEligibilityAPI,
+    private val getReturnLinkTypeUseCase: GetReturnLinkTypeUseCase,
     private val urlScheme: String? = null,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
 ) {
@@ -85,6 +91,7 @@ class PayPalWebCheckoutClient internal constructor(
             configuration,
             context.applicationContext,
         ),
+        getReturnLinkTypeUseCase = buildReturnLinkTypeUseCase(context.applicationContext),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
@@ -419,6 +426,8 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
         val launchUri = shopperSession.getLaunchUri(orderId)
+        val (returnToAppStrategy, resolvedLinkType) = resolveReturnLinkStrategy()
+        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = resolvedLinkType)
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
@@ -432,7 +441,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = orderId,
             tokenType = TokenType.ORDER_ID,
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+            returnToAppStrategy = returnToAppStrategy,
         )
         logCheckoutPresentAuthChallengeResult(result)
         notifyUserPerceivedLatency(LatencyFlow.CHECKOUT, result, startTime, endTime)
@@ -484,6 +493,8 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
+        val (returnToAppStrategy, resolvedLinkType) = resolveReturnLinkStrategy()
+        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = resolvedLinkType)
         val endTime = System.currentTimeMillis()
 
         if (appSwitchEnabled) {
@@ -498,7 +509,7 @@ class PayPalWebCheckoutClient internal constructor(
             uri = launchUri,
             token = setupTokenId,
             tokenType = TokenType.VAULT_ID,
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(returnToAppUrlConfig?.returnAppUrl ?: ""),
+            returnToAppStrategy = returnToAppStrategy,
         )
         notifyUserPerceivedLatency(LatencyFlow.VAULT, result, startTime, endTime)
         logVaultPresentAuthChallengeResult(result)
@@ -741,6 +752,34 @@ class PayPalWebCheckoutClient internal constructor(
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
 
     /**
+     * Decides, at launch time, whether to return to the merchant app via an App Link or via the
+     * custom URL scheme fallback, based on whether an App Link return will actually route on this
+     * device (@see [GetReturnLinkTypeUseCase]).
+     *
+     * Falls back to [ReturnToAppStrategy.AppLink] when no [ReturnToAppUrlConfig.fallbackSchemeUrl]
+     * was supplied by the merchant, since there is no custom scheme to switch to. The returned
+     * [LinkType] reflects the strategy actually chosen and is reported via the `link_type`
+     * analytics param.
+     */
+    private fun resolveReturnLinkStrategy(): Pair<ReturnToAppStrategy, LinkType> {
+        val appLinkUrl = returnToAppUrlConfig?.returnAppUrl.orEmpty()
+        val fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl
+        val appLinkReturnUri = appLinkUrl.takeIf { it.isNotBlank() }?.toUri()
+
+        return when (getReturnLinkTypeUseCase(appLinkReturnUri = appLinkReturnUri)) {
+            ReturnLinkTypeResult.APP_LINK ->
+                ReturnToAppStrategy.AppLink(appLinkUrl) to LinkType.APP_LINK
+
+            ReturnLinkTypeResult.DEEP_LINK ->
+                if (!fallbackSchemeUrl.isNullOrBlank()) {
+                    ReturnToAppStrategy.CustomUrlScheme(fallbackSchemeUrl) to LinkType.DEEP_LINK
+                } else {
+                    ReturnToAppStrategy.AppLink(appLinkUrl) to LinkType.APP_LINK
+                }
+        }
+    }
+
+    /**
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
      * appends the given token as a query param.
      */
@@ -952,6 +991,7 @@ class PayPalWebCheckoutClient internal constructor(
             configuration,
             context.applicationContext,
         ),
+        getReturnLinkTypeUseCase = buildReturnLinkTypeUseCase(context.applicationContext),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
 
@@ -1145,6 +1185,22 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     // endregion
+
+    private companion object {
+        /**
+         * Builds a [GetReturnLinkTypeUseCase] wired with its two collaborators from an application
+         * [Context], following the SDK's manual dependency-injection convention.
+         */
+        private fun buildReturnLinkTypeUseCase(applicationContext: Context): GetReturnLinkTypeUseCase {
+            val getDefaultAppUseCase = GetDefaultAppUseCase(applicationContext.packageManager)
+            return GetReturnLinkTypeUseCase(
+                applicationContext = applicationContext,
+                deviceInspector = DeviceInspector(applicationContext),
+                getDefaultAppUseCase = getDefaultAppUseCase,
+                getAppLinksCompatibleBrowserUseCase = GetAppLinksCompatibleBrowserUseCase(getDefaultAppUseCase),
+            )
+        }
+    }
 }
 
 private fun PayPalUserAction.toExternalPaymentType(): String = when (this) {
