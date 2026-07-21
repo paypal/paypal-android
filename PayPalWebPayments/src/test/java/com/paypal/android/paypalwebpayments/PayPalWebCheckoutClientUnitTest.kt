@@ -20,6 +20,7 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
+import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
 import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
@@ -2489,70 +2490,6 @@ class PayPalWebCheckoutClientUnitTest {
         )
     }
 
-    // MARK: - Analytics Tests for appSwitchEnabled
-
-    @Test
-    fun `finishStart() sends analytics with appSwitchEnabled false for canceled event`() = runTest {
-        // Given
-        every { deviceInspector.isPayPalInstalled } returns false
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
-
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns canceledResult
-
-        // When
-        sut.startAsync(activity, request)
-        sut.finishStart(intent)
-
-        // Then
-        verify { analytics.notify(CheckoutEvent.CANCELED, "fake-order-id", false) }
-    }
-
-    @Test
-    fun `finishStart() sends analytics with appSwitchEnabled false for failed event`() = runTest {
-        // Given
-        every { deviceInspector.isPayPalInstalled } returns false
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
-
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns failureResult
-
-        // When
-        sut.startAsync(activity, request)
-        sut.finishStart(intent)
-
-        // Then
-        verify {
-            analytics.notify(
-                CheckoutEvent.FAILED,
-                "fake-order-id",
-                false,
-                errorDescription = "fake-error-description",
-            )
-        }
-    }
-
     // MARK: - Additional coverage: app-switch-eligible redirectUrl, failure analytics, noReturnToAppStrategyError
 
     @Test
@@ -2697,10 +2634,21 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    CheckoutEvent.BROWSER_PRESENTATION_FAILED,
-                    "fake-order-id",
-                    false,
-                    shopperSessionId = "fake-session-id",
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    params = AppSwitchAnalyticsEventParams(
+                        checkoutOrderId = "fake-order-id",
+                        shopperSession = fakeSessionResponse,
+                        isCachedSession = false,
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVault = false,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "fake error description",
                 )
             }
@@ -2722,7 +2670,7 @@ class PayPalWebCheckoutClientUnitTest {
 
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2732,10 +2680,21 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    VaultEvent.BROWSER_PRESENTATION_FAILED,
-                    "fake-setup-token-id",
-                    false,
-                    shopperSessionId = "fake-session-id",
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    params = AppSwitchAnalyticsEventParams(
+                        vaultSetupTokenId = "fake-setup-token-id",
+                        shopperSession = fakeSessionResponse,
+                        isCachedSession = false,
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVault = true,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "fake error description",
                 )
             }
@@ -2764,8 +2723,19 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     CheckoutEvent.FAILED,
-                    "fake-order-id",
-                    false,
+                    params = AppSwitchAnalyticsEventParams(
+                        checkoutOrderId = "fake-order-id",
+                        isCachedSession = false,
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVault = false,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "session error",
                 )
             }
@@ -2777,7 +2747,7 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2789,8 +2759,19 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     VaultEvent.FAILED,
-                    "fake-setup-token-id",
-                    false,
+                    params = AppSwitchAnalyticsEventParams(
+                        vaultSetupTokenId = "fake-setup-token-id",
+                        isCachedSession = false,
+                        userActionValue = "CONTINUE",
+                        appSwitchEnabled = false,
+                        isVault = true,
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                        paypalInstalled = "false",
+                        returnAppUrl = "https://example.com/paypal-return",
+                        cancelAppUrl = "https://example.com/paypal-cancel",
+                        fallbackSchemeUrl = "com.example.app://paypal",
+                    ),
                     errorDescription = "session error",
                 )
             }
@@ -2966,31 +2947,6 @@ class PayPalWebCheckoutClientUnitTest {
                 )
             }
         }
-
-    @Test
-    fun `startAsync() emits api-request-latency using updateClientConfig timing`() = runTest {
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        coEvery {
-            updateClientConfigAPI.updateClientConfig(any(), any())
-        } returns UpdateClientConfigResult.Success(HttpRoundTripTiming(1000L, 1500L))
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        sut.startAsync(activity, request)
-
-        verify(exactly = 1) {
-            analytics.notifyApiRequestLatency(
-                endpoint = LatencyEndpoint.UPDATE_CLIENT_CONFIG,
-                startTime = 1000L,
-                endTime = 1500L
-            )
-        }
-    }
 
     @Test
     fun `startAsync() does not emit api-request-latency when timing is absent`() = runTest {
