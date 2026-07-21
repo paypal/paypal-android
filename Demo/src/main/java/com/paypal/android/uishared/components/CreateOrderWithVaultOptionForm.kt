@@ -29,11 +29,9 @@ fun CreateOrderWithVaultOptionForm(
             onSelectedOptionChange = { onIntentOptionChanged(it) },
             selectedOption = orderIntent
         )
-        EnumOptionList(
-            title = stringResource(id = R.string.store_in_vault),
-            stringArrayResId = R.array.store_in_vault_options,
-            onSelectedOptionChange = { onShouldVaultChanged(it) },
-            selectedOption = shouldVault
+        StoreInVaultOptionForm(
+            shouldVault = shouldVault,
+            onShouldVaultChanged = onShouldVaultChanged
         )
     }
 }

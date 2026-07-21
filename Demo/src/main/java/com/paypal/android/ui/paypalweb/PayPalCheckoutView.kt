@@ -25,11 +25,10 @@ import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
-import com.paypal.android.uishared.components.LabeledSwitch
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.StepHeader
-import com.paypal.android.uishared.enums.StoreInVaultOption
+import com.paypal.android.uishared.components.StoreInVaultOptionForm
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
@@ -100,13 +99,9 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
         )
-        LabeledSwitch(
-            title = stringResource(R.string.store_in_vault),
-            checked = uiState.shouldVaultOption == StoreInVaultOption.ON_SUCCESS,
-            onCheckedChange = { checked ->
-                viewModel.shouldVault =
-                    if (checked) StoreInVaultOption.ON_SUCCESS else StoreInVaultOption.NO
-            },
+        StoreInVaultOptionForm(
+            shouldVault = uiState.shouldVaultOption,
+            onShouldVaultChanged = { value -> viewModel.shouldVault = value },
             modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
