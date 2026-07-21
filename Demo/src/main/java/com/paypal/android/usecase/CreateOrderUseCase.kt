@@ -1,6 +1,5 @@
 package com.paypal.android.usecase
 
-import com.paypal.android.DemoConstants
 import com.paypal.android.DemoConstants.returnToAppUrlConfig
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
