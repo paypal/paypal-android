@@ -1701,9 +1701,8 @@ class PayPalWebCheckoutClientUnitTest {
     private fun placeholderTokenUrl(
         baseUrl: String,
         tokenType: String,
-        tokenKey: String,
     ): String {
-        return "$baseUrl?appSwitchEligible=true&tokenType=$tokenType&$tokenKey="
+        return "$baseUrl?appSwitchEligible=true&tokenType=$tokenType&"
     }
 
     // --- start(activity, orderId, callback) ---
@@ -1787,7 +1786,6 @@ class PayPalWebCheckoutClientUnitTest {
                 checkoutFallbackUrl = placeholderTokenUrl(
                     "https://example.com/fallback",
                     tokenType = "CHECKOUT_TOKEN",
-                    tokenKey = "token",
                 ),
                 shopperSessionConfig = ShopperSessionConfig("", "")
             )
@@ -2455,12 +2453,10 @@ class PayPalWebCheckoutClientUnitTest {
                 redirectUrl = placeholderTokenUrl(
                     "https://example.com/app-switch-redirect",
                     tokenType = "CHECKOUT_TOKEN",
-                    tokenKey = "token",
                 ),
                 checkoutFallbackUrl = placeholderTokenUrl(
                     "https://example.com/fallback",
                     tokenType = "CHECKOUT_TOKEN",
-                    tokenKey = "token",
                 ),
             )
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
@@ -2493,12 +2489,10 @@ class PayPalWebCheckoutClientUnitTest {
                 redirectUrl = placeholderTokenUrl(
                     "https://www.paypal.com/app-switch-checkout",
                     tokenType = "CHECKOUT_TOKEN",
-                    tokenKey = "token",
                 ),
                 checkoutFallbackUrl = placeholderTokenUrl(
                     "https://www.paypal.com/checkoutnow",
                     tokenType = "CHECKOUT_TOKEN",
-                    tokenKey = "token",
                 ),
             )
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
@@ -2529,17 +2523,15 @@ class PayPalWebCheckoutClientUnitTest {
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
                 appSwitchEligible = true,
-                // The redirectUrl (native app-switch) and checkoutFallbackUrl (web fallback) use
-                // different placeholder keys for the vault flow: vault_id vs approval_session_id.
+                // Both redirectUrl (native app-switch) and checkoutFallbackUrl (web fallback) use
+                // the same "approval_session_id" query param for the vault flow.
                 redirectUrl = placeholderTokenUrl(
                     "https://example.com/app-switch-vault-redirect",
                     tokenType = "VAULT_ID",
-                    tokenKey = "vault_id",
                 ),
                 checkoutFallbackUrl = placeholderTokenUrl(
                     "https://example.com/fallback",
                     tokenType = "VAULT_ID",
-                    tokenKey = "approval_session_id",
                 ),
             )
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
@@ -2554,9 +2546,8 @@ class PayPalWebCheckoutClientUnitTest {
 
             val launchedUri = uriSlot.captured
             assertTrue(launchedUri.toString().startsWith("https://example.com/app-switch-vault-redirect"))
-            // This flow uses redirectUrl (app-switch), whose placeholder key is vault_id.
-            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("vault_id"))
-            assertNull(launchedUri.getQueryParameter("approval_session_id"))
+            // VAULT_ID tokens are always appended under "approval_session_id".
+            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("approval_session_id"))
             assertNull(launchedUri.getQueryParameter("token"))
         }
 

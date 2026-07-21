@@ -850,7 +850,6 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-
     private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(
         token: String,
         tokenType: TokenType,
