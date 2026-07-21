@@ -54,6 +54,7 @@ internal class TrackingEventsAPI constructor(
             errorDescription = event.errorDescription,
             isCachedSession = event.isCachedSession,
             isVault = event.isVault,
+            startTime = event.startTime?.toString(),
             endTime = event.endTime?.toString(),
             endpoint = event.endpoint,
             presentationType = event.presentationType,

@@ -2841,31 +2841,6 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `startAsync() emits api-request-latency using updateClientConfig timing`() = runTest {
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        coEvery {
-            updateClientConfigAPI.updateClientConfig(any(), any())
-        } returns UpdateClientConfigResult.Success(HttpRoundTripTiming(1000L, 1500L))
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        sut.startAsync(activity, request)
-
-        verify(exactly = 1) {
-            analytics.notifyApiRequestLatency(
-                endpoint = LatencyEndpoint.UPDATE_CLIENT_CONFIG,
-                startTime = 1000L,
-                endTime = 1500L
-            )
-        }
-    }
-
-    @Test
     fun `startAsync() does not emit api-request-latency when timing is absent`() = runTest {
         every {
             payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())

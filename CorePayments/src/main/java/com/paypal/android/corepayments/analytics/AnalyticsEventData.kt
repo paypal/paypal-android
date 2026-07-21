@@ -16,6 +16,7 @@ internal data class AnalyticsEventData(
     val errorDescription: String? = null,
     val isCachedSession: Boolean? = null,
     val isVault: Boolean? = null,
+    val startTime: Long? = null,
     val endTime: Long? = null,
     val endpoint: String? = null,
     val presentationType: String? = null,

@@ -87,7 +87,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         analyticsService.sendAnalyticsEvent(
             name = LatencyEvent.API_REQUEST_LATENCY.value,
             endpoint = endpoint,
-//            startTime = startTime,
+            startTime = startTime,
             endTime = endTime
         )
     }
@@ -102,7 +102,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
             name = LatencyEvent.USER_PERCEIVED_LATENCY.value,
             flow = flow,
             presentationType = presentationType,
-//            startTime = startTime,
+            startTime = startTime,
             endTime = endTime
         )
     }
