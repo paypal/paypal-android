@@ -478,7 +478,13 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns successResult
 
-            sut.startAsync(activity, PayPalWebCheckoutRequest("fake-order-id"))
+            sut.startAsync(
+                activity,
+                PayPalWebCheckoutRequest(
+                    "fake-order-id",
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+                )
+            )
         sut.finishStart(intent)
         assertNull(sut.finishStart(intent))
     }
@@ -503,7 +509,13 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns failureResult
 
-            sut.startAsync(activity, PayPalWebCheckoutRequest("fake-order-id"))
+            sut.startAsync(
+                activity,
+                PayPalWebCheckoutRequest(
+                    "fake-order-id",
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+                )
+            )
         sut.finishStart(intent)
         assertNull(sut.finishStart(intent))
     }
@@ -527,7 +539,13 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
         } returns canceledResult
 
-            sut.startAsync(activity, PayPalWebCheckoutRequest("fake-order-id"))
+            sut.startAsync(
+                activity,
+                PayPalWebCheckoutRequest(
+                    "fake-order-id",
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+                )
+            )
         sut.finishStart(intent)
         assertNull(sut.finishStart(intent))
     }
@@ -1031,7 +1049,13 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns successResult
 
-            sut.vaultAsync(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultAsync(
+                activity,
+                PayPalWebVaultRequest(
+                    "fake-setup-token-id",
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+                )
+            )
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
@@ -1055,7 +1079,13 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
 
-            sut.vaultAsync(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultAsync(
+                activity,
+                PayPalWebVaultRequest(
+                    "fake-setup-token-id",
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+                )
+            )
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
@@ -1078,7 +1108,13 @@ class PayPalWebCheckoutClientUnitTest {
             payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
         } returns PayPalWebCheckoutFinishVaultResult.Canceled
 
-            sut.vaultAsync(activity, PayPalWebVaultRequest("fake-setup-token-id"))
+            sut.vaultAsync(
+                activity,
+                PayPalWebVaultRequest(
+                    "fake-setup-token-id",
+                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
+                )
+            )
         sut.finishVault(intent)
         assertNull(sut.finishVault(intent))
     }
