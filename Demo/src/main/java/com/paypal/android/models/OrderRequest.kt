@@ -7,4 +7,5 @@ import kotlinx.serialization.Serializable
 data class OrderRequest(
     val intent: OrderIntent,
     val shouldVaultOnSuccess: Boolean,
+    val includePayPalExperienceContext: Boolean = false,
 )

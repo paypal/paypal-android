@@ -116,7 +116,8 @@ class PayPalCheckoutViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = OrderRequest(
                 intent = _uiState.value.intentOption,
-                shouldVaultOnSuccess = false
+                shouldVaultOnSuccess = false,
+                includePayPalExperienceContext = true
             )
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }

@@ -1,11 +1,15 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
 import com.paypal.android.api.model.serialization.Card
 import com.paypal.android.api.model.serialization.CardAttributes
+import com.paypal.android.api.model.serialization.NativeApp
 import com.paypal.android.api.model.serialization.OrderPaymentSource
 import com.paypal.android.api.model.serialization.OrderRequestBody
+import com.paypal.android.api.model.serialization.PayPalOrderExperienceContext
+import com.paypal.android.api.model.serialization.PayPalPaymentSource
 import com.paypal.android.api.model.serialization.PurchaseUnit
 import com.paypal.android.api.model.serialization.Vault
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -24,6 +28,21 @@ class CreateOrderUseCase @Inject constructor(
             request.shouldVaultOnSuccess -> {
                 OrderPaymentSource(
                     card = Card(attributes = CardAttributes(vault = Vault(storeInVault = "ON_SUCCESS")))
+                )
+            }
+
+            request.includePayPalExperienceContext -> {
+                val urlConfig = DemoConstants.returnToAppUrlConfig
+                OrderPaymentSource(
+                    paypal = PayPalPaymentSource(
+                        experienceContext = PayPalOrderExperienceContext(
+                            returnUrl = urlConfig.returnAppUrl,
+                            cancelUrl = urlConfig.cancelAppUrl,
+                            nativeApp = NativeApp(
+                                appUrl = urlConfig.fallbackSchemeUrl ?: urlConfig.returnAppUrl
+                            )
+                        )
+                    )
                 )
             }
 

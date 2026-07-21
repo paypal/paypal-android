@@ -730,8 +730,6 @@ class PayPalWebCheckoutClient internal constructor(
         userIdentity: PayPalUserIdentity?,
         userAction: PayPalUserAction,
     ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
-        return null
-
         val startTime = System.currentTimeMillis()
         val isVaultRequest = tokenType != TokenType.ORDER_ID
         analytics.notify(CreatePayPalSessionEvent.STARTED)
@@ -903,9 +901,7 @@ class PayPalWebCheckoutClient internal constructor(
         tokenType: TokenType,
     ): Uri {
         val launchUri = if (appSwitchEnabled) redirectUrl.toUri() else checkoutFallbackUrl.toUri()
-        val uriWithToken = launchUri.buildUpon()
-            .encodedQuery(launchUri.encodedQuery.orEmpty() + Uri.encode(token))
-            .build()
+        val uriWithToken = launchUri.appendTokenQueryParam(token)
 
         val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
             uriWithToken.buildUpon()
@@ -916,6 +912,10 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
         return uriWithSessionId.appendObservabilityQueryParams(tokenType)
+    }
+
+    private fun Uri.appendTokenQueryParam(token: String): Uri {
+        return buildUpon().encodedQuery(encodedQuery.orEmpty() + Uri.encode(token)).build()
     }
 
     private fun Uri.appendObservabilityQueryParams(tokenType: TokenType): Uri {
@@ -995,7 +995,7 @@ class PayPalWebCheckoutClient internal constructor(
             appSwitchEnabled = false
             fallbackUri
         }
-        launchUri = launchUri.appendTokenQueryParam(token, tokenType)
+        launchUri = launchUri.appendTokenQueryParam(token)
         launchUri = launchUri.appendObservabilityQueryParams(tokenType)
         return launchUri
     }
