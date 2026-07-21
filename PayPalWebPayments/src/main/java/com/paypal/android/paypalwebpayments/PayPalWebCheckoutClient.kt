@@ -70,10 +70,6 @@ class PayPalWebCheckoutClient internal constructor(
     @VisibleForTesting
     internal var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
-
-    // The TokenType passed to createPayPalSession() (v3) — read by getLaunchUri() when building
-    // the launch uri, so it reflects the real token type instead of a value hardcoded per
-    // start()/vault() call site.
     private var sessionTokenType: TokenType? = null
 
     constructor(
@@ -843,7 +839,10 @@ class PayPalWebCheckoutClient internal constructor(
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
      * appends the given token as a query param.
      */
-    private fun Uri.appendTokenQueryParam(token: String, tokenType: TokenType): Uri {
+    private fun Uri.appendTokenQueryParam(token: String): Uri {
+        val tokenType = requireNotNull(sessionTokenType) {
+            "sessionTokenType must be set by createPayPalSession() before appendTokenQueryParam() is called."
+        }
         val trimmedUri = if (toString().endsWith("&")) {
             toString().dropLast(1).toUri()
         } else {
@@ -860,14 +859,11 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
-        val tokenType = requireNotNull(sessionTokenType) {
-            "sessionTokenType must be set by createPayPalSession() before getLaunchUri() is called."
-        }
         val launchUri = if (appSwitchEnabled) {
             redirectUrl.toUri()
         } else {
             checkoutFallbackUrl.toUri()
-        }.appendTokenQueryParam(token, tokenType)
+        }.appendTokenQueryParam(token)
 
         val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
             launchUri.buildUpon()
@@ -877,10 +873,13 @@ class PayPalWebCheckoutClient internal constructor(
             launchUri
         }
 
-        return uriWithSessionId.appendObservabilityQueryParams(tokenType)
+        return uriWithSessionId.appendObservabilityQueryParams()
     }
 
-    private fun Uri.appendObservabilityQueryParams(tokenType: TokenType): Uri {
+    private fun Uri.appendObservabilityQueryParams(): Uri {
+        val tokenType = requireNotNull(sessionTokenType) {
+            "sessionTokenType must be set by createPayPalSession() before appendObservabilityQueryParams() is called."
+        }
         val flowType = when (tokenType) {
             TokenType.ORDER_ID -> "ecs"
             TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "va"
