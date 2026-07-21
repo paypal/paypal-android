@@ -57,4 +57,28 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
             startTime = startTime,
         )
     }
+
+    fun notifyApiRequestLatency(endpoint: String, startTime: Long, endTime: Long) {
+        analyticsService.sendAnalyticsEvent(
+            name = LatencyEvent.API_REQUEST_LATENCY.value,
+            endpoint = endpoint,
+            startTime = startTime,
+            endTime = endTime
+        )
+    }
+
+    fun notifyUserPerceivedLatency(
+        flow: String,
+        presentationType: String,
+        startTime: Long,
+        endTime: Long
+    ) {
+        analyticsService.sendAnalyticsEvent(
+            name = LatencyEvent.USER_PERCEIVED_LATENCY.value,
+            flow = flow,
+            presentationType = presentationType,
+            startTime = startTime,
+            endTime = endTime
+        )
+    }
 }

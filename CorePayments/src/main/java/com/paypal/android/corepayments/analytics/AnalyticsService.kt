@@ -40,6 +40,7 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
+    @Suppress("LongParameterList")
     fun sendAnalyticsEvent(
         name: String,
         orderId: String? = null,
@@ -50,7 +51,11 @@ class AnalyticsService internal constructor(
         errorDescription: String? = null,
         startTime: Long? = null,
         isCachedSession: Boolean? = null,
-        isVaultRequest: Boolean? = null
+        isVaultRequest: Boolean? = null,
+        endTime: Long? = null,
+        endpoint: String? = null,
+        presentationType: String? = null,
+        flow: String? = null
     ) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
@@ -70,7 +75,11 @@ class AnalyticsService internal constructor(
                     errorDescription = errorDescription,
                     startTime = startTime,
                     isCachedSession = isCachedSession,
-                    isVaultRequest = isVaultRequest
+                    isVaultRequest = isVaultRequest,
+                    endTime = endTime,
+                    endpoint = endpoint,
+                    presentationType = presentationType,
+                    flow = flow
                 )
                 val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
                 response.error?.message?.let { errorMessage ->

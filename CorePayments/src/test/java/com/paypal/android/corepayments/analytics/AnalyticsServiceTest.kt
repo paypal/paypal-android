@@ -110,6 +110,32 @@ class AnalyticsServiceTest {
         assertEquals("live", analyticsEventData.environment)
     }
 
+    @Test
+    fun `sendAnalyticsEvent forwards latency params into AnalyticsEventData`() = runTest {
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
+
+        sut = createAnalyticsService(environment, testScheduler)
+        sut.sendAnalyticsEvent(
+            name = "paypal-web-payments:api-request-latency",
+            startTime = 1000L,
+            endTime = 1500L,
+            endpoint = "/v2/checkout/orders",
+            presentationType = "app-switch",
+            flow = "checkout"
+        )
+        advanceUntilIdle()
+
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals(1000L, analyticsEventData.startTime)
+        assertEquals(1500L, analyticsEventData.endTime)
+        assertEquals("/v2/checkout/orders", analyticsEventData.endpoint)
+        assertEquals("app-switch", analyticsEventData.presentationType)
+        assertEquals("checkout", analyticsEventData.flow)
+    }
+
     private fun createAnalyticsService(
         environment: Environment,
         testScheduler: TestCoroutineScheduler

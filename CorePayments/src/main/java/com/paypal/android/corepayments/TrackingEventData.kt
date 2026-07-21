@@ -72,5 +72,13 @@ internal data class TrackingEventParams(
     @SerialName("is_cached_session")
     val isCachedSession: Boolean? = null,
     @SerialName("is_vault_request")
-    val isVaultRequest: Boolean? = null
+    val isVaultRequest: Boolean? = null,
+    @SerialName("end_time")
+    val endTime: String? = null,
+    @SerialName("endpoint")
+    val endpoint: String? = null,
+    @SerialName("presentation_type")
+    val presentationType: String? = null,
+    @SerialName("flow")
+    val flow: String? = null
 )
