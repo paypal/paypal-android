@@ -995,7 +995,6 @@ class PayPalWebCheckoutClient internal constructor(
             appSwitchEnabled = false
             fallbackUri
         }
-        launchUri = launchUri.appendTokenQueryParam(token)
         launchUri = launchUri.appendObservabilityQueryParams(tokenType)
         return launchUri
     }
