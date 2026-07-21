@@ -2,7 +2,6 @@ package com.paypal.android.paypalwebpayments
 
 import android.content.Intent
 import android.net.Uri
-import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
@@ -1706,41 +1705,6 @@ class PayPalWebCheckoutClientUnitTest {
         return "$baseUrl?appSwitchEligible=true&tokenType=${tokenType.name}&"
     }
 
-    private fun PayPalWebCheckoutClient.appendTokenQueryParamForTest(
-        uri: Uri,
-        token: String,
-        tokenType: TokenType,
-    ): Uri {
-        val method = PayPalWebCheckoutClient::class.java.getDeclaredMethod(
-            "appendTokenQueryParam",
-            Uri::class.java,
-            String::class.java,
-            TokenType::class.java,
-        )
-        method.isAccessible = true
-        return method.invoke(this, uri, token, tokenType) as Uri
-    }
-
-    @Test
-    fun `appendTokenQueryParam uses ba_token as the param name for BILLING_TOKEN`() {
-        val sutV3 = makeSutWithUrlScheme()
-        val baseUri = placeholderTokenUrl(
-            "https://example.com/app-switch-billing-agreement",
-            tokenType = TokenType.BILLING_TOKEN,
-        ).toUri()
-
-        val result = sutV3.appendTokenQueryParamForTest(
-            baseUri,
-            "fake-billing-token",
-            TokenType.BILLING_TOKEN,
-        )
-
-        assertTrue(result.toString().startsWith("https://example.com/app-switch-billing-agreement"))
-        assertEquals("fake-billing-token", result.getQueryParameter("ba_token"))
-        assertNull(result.getQueryParameter("approval_session_id"))
-        assertNull(result.getQueryParameter("token"))
-    }
-
     // --- start(activity, orderId, callback) ---
 
     @Test
@@ -2057,7 +2021,7 @@ class PayPalWebCheckoutClientUnitTest {
 
         val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
         sutV3.createPayPalSession(
-            tokenType = TokenType.ORDER_ID,
+            tokenType = TokenType.VAULT_ID,
             userIdentity = fakeUserIdentity,
             urlConfig = fakeUrlConfig,
         )
@@ -2115,7 +2079,7 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2162,7 +2126,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2212,7 +2176,7 @@ class PayPalWebCheckoutClientUnitTest {
             } returns launchResult
 
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2371,7 +2335,7 @@ class PayPalWebCheckoutClientUnitTest {
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2572,7 +2536,7 @@ class PayPalWebCheckoutClientUnitTest {
             )
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2584,6 +2548,47 @@ class PayPalWebCheckoutClientUnitTest {
             assertTrue(launchedUri.toString().startsWith("https://example.com/app-switch-vault-redirect"))
             // VAULT_ID tokens are always appended under "approval_session_id".
             assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("approval_session_id"))
+            assertNull(launchedUri.getQueryParameter("token"))
+        }
+
+    @Test
+    fun `vault() with setupTokenId uses ba_token as the param name when session tokenType is BILLING_TOKEN`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+            val uriSlot = slot<Uri>()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val appSwitchEligibleResponse = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-billing-agreement",
+                    tokenType = TokenType.BILLING_TOKEN,
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/fallback",
+                    tokenType = TokenType.BILLING_TOKEN,
+                ),
+            )
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            // The session's tokenType (from createPayPalSession) drives getLaunchUri(), not the
+            // vault()/start() call site itself.
+            sutV3.createPayPalSession(
+                tokenType = TokenType.BILLING_TOKEN,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(appSwitchEligibleResponse)
+            sutV3.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val launchedUri = uriSlot.captured
+            assertTrue(launchedUri.toString().startsWith("https://example.com/app-switch-billing-agreement"))
+            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("ba_token"))
+            assertNull(launchedUri.getQueryParameter("approval_session_id"))
             assertNull(launchedUri.getQueryParameter("token"))
         }
 
@@ -2633,7 +2638,7 @@ class PayPalWebCheckoutClientUnitTest {
 
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2688,7 +2693,7 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )
@@ -2860,7 +2865,7 @@ class PayPalWebCheckoutClientUnitTest {
 
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
+                tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
                 urlConfig = fakeUrlConfig,
             )

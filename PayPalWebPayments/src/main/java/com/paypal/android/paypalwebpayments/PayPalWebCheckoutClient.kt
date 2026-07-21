@@ -71,6 +71,11 @@ class PayPalWebCheckoutClient internal constructor(
     internal var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
 
+    // The TokenType passed to createPayPalSession() (v3) — read by getLaunchUri() when building
+    // the launch uri, so it reflects the real token type instead of a value hardcoded per
+    // start()/vault() call site.
+    private var sessionTokenType: TokenType? = null
+
     constructor(
         context: Context,
         configuration: CoreConfig
@@ -110,7 +115,9 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * Fire and forget — returns immediately.
      *
-     * @param tokenType Whether the session is for an order (checkout) or a setup token (vault).
+     * @param tokenType Whether the session is for an order (checkout), a setup token (vault), or
+     * a billing agreement token. This also determines the query param name used for the token on
+     * the launch uri built by [start]/[vault] (see [appendTokenQueryParam]).
      * @param userIdentity Shopper identity used to pre-identify the payer.
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
      * @param userAction Controls the call-to-action label on the PayPal checkout page.
@@ -121,6 +128,7 @@ class PayPalWebCheckoutClient internal constructor(
         urlConfig: ReturnToAppUrlConfig,
         userAction: PayPalUserAction = PayPalUserAction.CONTINUE,
     ) {
+        sessionTokenType = tokenType
         returnToAppUrlConfig = urlConfig
         shopperSessionDeferred = applicationScope.async {
             createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
@@ -449,7 +457,7 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        val launchUri = shopperSession.getLaunchUri(orderId, TokenType.ORDER_ID)
+        val launchUri = shopperSession.getLaunchUri(orderId)
         if (appSwitchEnabled) {
             analytics.notify(
                 CheckoutEvent.APP_SWITCH_STARTED,
@@ -544,7 +552,7 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        val launchUri = shopperSession.getLaunchUri(setupTokenId, TokenType.VAULT_ID)
+        val launchUri = shopperSession.getLaunchUri(setupTokenId)
         val endTime = System.currentTimeMillis()
 
         if (appSwitchEnabled) {
@@ -851,10 +859,10 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(
-        token: String,
-        tokenType: TokenType,
-    ): Uri {
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
+        val tokenType = requireNotNull(sessionTokenType) {
+            "sessionTokenType must be set by createPayPalSession() before getLaunchUri() is called."
+        }
         val launchUri = if (appSwitchEnabled) {
             redirectUrl.toUri()
         } else {
