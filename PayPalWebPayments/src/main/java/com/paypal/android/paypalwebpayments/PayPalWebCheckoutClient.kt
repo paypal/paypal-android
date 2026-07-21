@@ -148,7 +148,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         analyticsEventParams = analyticsEventParams.copy(
             checkoutOrderId = orderId,
-            isVaultRequest = false,
+            isVault = false,
         )
         val startTime = System.currentTimeMillis()
         val deferred = shopperSessionDeferred
@@ -168,7 +168,7 @@ class PayPalWebCheckoutClient internal constructor(
                     appSwitchEligible = shopperSession?.appSwitchEligible,
                     ineligibleReason = shopperSession?.ineligibleReason,
                     fallbackUrl = shopperSession?.checkoutFallbackUrl,
-                    paypalNativeAppInstalled = canAttemptPayPalAppSwitch().toString(),
+                    paypalInstalled = canAttemptPayPalAppSwitch().toString(),
                 )
                 analytics.notify(CheckoutEvent.STARTED, params = analyticsEventParams)
 
@@ -234,7 +234,7 @@ class PayPalWebCheckoutClient internal constructor(
     ) {
         analyticsEventParams = analyticsEventParams.copy(
             vaultSetupTokenId = setupTokenId,
-            isVaultRequest = true,
+            isVault = true,
         )
         val startTime = System.currentTimeMillis()
         val deferred = shopperSessionDeferred
@@ -254,7 +254,7 @@ class PayPalWebCheckoutClient internal constructor(
                     appSwitchEligible = shopperSession?.appSwitchEligible,
                     ineligibleReason = shopperSession?.ineligibleReason,
                     fallbackUrl = shopperSession?.checkoutFallbackUrl,
-                    paypalNativeAppInstalled = canAttemptPayPalAppSwitch().toString(),
+                    paypalInstalled = canAttemptPayPalAppSwitch().toString(),
                 )
                 analytics.notify(VaultEvent.STARTED, params = analyticsEventParams)
 
@@ -562,11 +562,11 @@ class PayPalWebCheckoutClient internal constructor(
         analyticsEventParams = analyticsEventParams.copy(
             isCachedSession = userIdentity?.existingPayPalSessionId != null,
             userActionValue = userAction.toExternalPaymentType(),
-            isVaultRequest = isVaultRequest,
+            isVault = isVaultRequest,
             merchantId = coreConfig.merchantId,
             bnCode = coreConfig.bnCode,
             clientId = coreConfig.clientId,
-            paypalNativeAppInstalled = canAttemptPayPalAppSwitch().toString(),
+            paypalInstalled = canAttemptPayPalAppSwitch().toString(),
             returnAppUrl = urlConfig.returnAppUrl,
             cancelAppUrl = urlConfig.cancelAppUrl,
             fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
@@ -753,18 +753,17 @@ class PayPalWebCheckoutClient internal constructor(
         token: String,
         tokenType: TokenType,
     ): Uri {
-        val launchUri = if (appSwitchEnabled) {
-            redirectUrl.toUri()
-        } else {
-            checkoutFallbackUrl.toUri()
-        }.appendTokenQueryParam(token, tokenType)
+        val launchUri = if (appSwitchEnabled) redirectUrl.toUri() else checkoutFallbackUrl.toUri()
+        val uriWithToken = launchUri.buildUpon()
+            .encodedQuery(launchUri.encodedQuery.orEmpty() + Uri.encode(token))
+            .build()
 
         val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
-            launchUri.buildUpon()
+            uriWithToken.buildUpon()
                 .appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
                 .build()
         } else {
-            launchUri
+            uriWithToken
         }
 
         return uriWithSessionId.appendObservabilityQueryParams(tokenType)

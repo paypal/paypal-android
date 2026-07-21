@@ -75,8 +75,8 @@ internal data class TrackingEventParams(
     val errorDescription: String? = null,
     @SerialName("is_cached_session")
     val isCachedSession: Boolean? = null,
-    @SerialName("is_vault_request")
-    val isVaultRequest: Boolean? = null,
+    @SerialName("is_vault")
+    val isVault: Boolean? = null,
     @SerialName("end_time")
     val endTime: String? = null,
     @SerialName("endpoint")
@@ -97,8 +97,8 @@ internal data class TrackingEventParams(
     val eventClientId: String? = null,
     @SerialName("user_action")
     val userAction: String? = null,
-    @SerialName("paypal_native_app_installed")
-    val paypalNativeAppInstalled: String? = null,
+    @SerialName("paypal_installed")
+    val paypalInstalled: String? = null,
     @SerialName("return_app_url")
     val returnAppUrl: String? = null,
     @SerialName("cancel_app_url")
