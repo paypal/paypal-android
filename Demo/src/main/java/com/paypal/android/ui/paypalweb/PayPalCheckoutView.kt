@@ -28,6 +28,7 @@ import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
 import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.components.StoreInVaultOptionForm
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
@@ -97,6 +98,11 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
         CreateOrderForm(
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
+        )
+        StoreInVaultOptionForm(
+            modifier = Modifier.fillMaxWidth(),
+            shouldVault = uiState.shouldVaultOption,
+            onShouldVaultChanged = { value -> viewModel.shouldVault = value }
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
