@@ -40,74 +40,25 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-    @Suppress("LongParameterList")
-    fun sendAnalyticsEvent(
-        name: String,
-        orderId: String? = null,
-        buttonType: String? = null,
-        appSwitchEnabled: Boolean? = null,
-        shopperSessionId: String? = null,
-        shopperSessionExpiration: String? = null,
-        matchedAuthenticationMethods: List<String>? = null,
-        appSwitchUrl: String? = null,
-        fallbackUrl: String? = null,
-        errorDescription: String? = null,
-        isCachedSession: Boolean? = null,
-        isVault: Boolean? = null,
-        startTime: Long? = null,
-        endTime: Long? = null,
-        endpoint: String? = null,
-        presentationType: String? = null,
-        flow: String? = null,
-        appSwitchEligible: Boolean? = null,
-        ineligibleReason: String? = null,
-        merchantId: String? = null,
-        bnCode: String? = null,
-        clientId: String? = null,
-        userAction: String? = null,
-        paypalInstalled: String? = null,
-        returnAppUrl: String? = null,
-        cancelAppUrl: String? = null,
-        fallbackSchemeUrl: String? = null,
-    ) {
+    /**
+     * Sends an analytics event described by [eventData]. Callers only need to populate the fields
+     * relevant to their event; [eventData]'s [AnalyticsEventData.environment],
+     * [AnalyticsEventData.eventName], and [AnalyticsEventData.timestamp] are overwritten below
+     * regardless of what's passed in.
+     */
+    fun sendAnalyticsEvent(name: String, eventData: AnalyticsEventData = AnalyticsEventData()) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
             val timestamp = System.currentTimeMillis()
             try {
                 val deviceData = deviceInspector.inspect()
-                val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
-                    name,
-                    timestamp,
-                    orderId = orderId,
-                    buttonType = buttonType,
-                    appSwitchEnabled = appSwitchEnabled,
-                    shopperSessionId = shopperSessionId,
-                    shopperSessionExpirationAt = shopperSessionExpiration,
-                    matchedAuthenticationMethods = matchedAuthenticationMethods,
-                    appSwitchUrl = appSwitchUrl,
-                    checkoutFallbackUrl = fallbackUrl,
-                    errorDescription = errorDescription,
-                    isCachedSession = isCachedSession,
-                    isVault = isVault,
-                    startTime = startTime,
-                    appSwitchEligible = appSwitchEligible,
-                    ineligibleReason = ineligibleReason,
-                    merchantId = merchantId,
-                    bnCode = bnCode,
-                    clientId = clientId,
-                    userAction = userAction,
-                    paypalInstalled = paypalInstalled,
-                    returnAppUrl = returnAppUrl,
-                    cancelAppUrl = cancelAppUrl,
-                    fallbackSchemeUrl = fallbackSchemeUrl,
-                    endTime = endTime,
-                    endpoint = endpoint,
-                    presentationType = presentationType,
-                    flow = flow
+                val fullEventData = eventData.copy(
+                    environment = environment.name.lowercase(),
+                    eventName = name,
+                    timestamp = timestamp,
                 )
-                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
+                val response = trackingEventsAPI.sendEvent(fullEventData, deviceData)
                 response.error?.message?.let { errorMessage ->
                     Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
                 }

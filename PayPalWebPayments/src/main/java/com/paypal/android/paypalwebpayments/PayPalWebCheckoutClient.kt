@@ -62,7 +62,7 @@ class PayPalWebCheckoutClient internal constructor(
 ) {
 
     private var appSwitchEnabled: Boolean = false
-    private var appSwitchAnalyticsEventParams = newAppSwitchAnalyticsEventParams()
+    private var appSwitchAnalyticsEventParams = createAppSwitchAnalyticsEventParams()
 
     // Shopper Session id (v3) — set by createPayPalSession(), awaited by start() / vault()
     @VisibleForTesting
@@ -605,12 +605,7 @@ class PayPalWebCheckoutClient internal constructor(
         return when (result) {
             is APIResult.Success -> {
                 appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
-                    shopperSessionId = result.data.shopperSessionConfig.id,
-                    shopperSessionExpiration = result.data.shopperSessionConfig.expiresAt,
-                    matchedAuthenticationMethods = result.data.matchedAuthenticationMethods,
-                    fallbackUrl = result.data.checkoutFallbackUrl,
-                    appSwitchEligible = result.data.appSwitchEligible,
-                    ineligibleReason = result.data.ineligibleReason,
+                    shopperSession = result.data,
                 )
                 analytics.notify(CreatePayPalSessionEvent.SUCCEEDED, params = appSwitchAnalyticsEventParams)
                 result.data
@@ -884,21 +879,16 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse?
     ) {
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
-            shopperSessionId = shopperSession?.shopperSessionConfig?.id,
-            shopperSessionExpiration = shopperSession?.shopperSessionConfig?.expiresAt,
-            matchedAuthenticationMethods = shopperSession?.matchedAuthenticationMethods,
-            appSwitchEligible = shopperSession?.appSwitchEligible,
-            ineligibleReason = shopperSession?.ineligibleReason,
-            fallbackUrl = shopperSession?.checkoutFallbackUrl,
+            shopperSession = shopperSession,
             paypalInstalled = canAttemptPayPalAppSwitch().toString(),
         )
     }
 
     private fun resetAppSwitchAnalyticsEventParams() {
-        appSwitchAnalyticsEventParams = newAppSwitchAnalyticsEventParams()
+        appSwitchAnalyticsEventParams = createAppSwitchAnalyticsEventParams()
     }
 
-    private fun newAppSwitchAnalyticsEventParams() = AppSwitchAnalyticsEventParams(
+    private fun createAppSwitchAnalyticsEventParams() = AppSwitchAnalyticsEventParams(
         merchantId = coreConfig.merchantId,
         bnCode = coreConfig.bnCode,
         clientId = coreConfig.clientId,

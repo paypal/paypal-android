@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import androidx.core.content.res.use
+import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.paymentbuttons.error.createFormattedIllegalArgumentException
 import com.paypal.android.ui.R
 import com.paypal.android.paymentbuttons.PayPalCreditButtonColor.BLACK
@@ -55,8 +56,7 @@ class PayPalCreditButton @JvmOverloads constructor(
         contentDescription = context.getString(R.string.paypal_payment_credit_button_description)
         analyticsService.sendAnalyticsEvent(
             "payment-button:initialized",
-            orderId = null,
-            buttonType = PaymentButtonFundingType.PAYPAL_CREDIT.buttonType
+            AnalyticsEventData(buttonType = PaymentButtonFundingType.PAYPAL_CREDIT.buttonType)
         )
     }
 

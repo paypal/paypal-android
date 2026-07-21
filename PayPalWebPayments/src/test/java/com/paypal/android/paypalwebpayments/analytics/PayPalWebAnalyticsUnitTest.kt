@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments.analytics
 
+import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.mockk
 import io.mockk.verify
@@ -31,9 +32,11 @@ class PayPalWebAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = LatencyEvent.API_REQUEST_LATENCY.value,
-                endpoint = LatencyEndpoint.CREATE_ORDER,
-                startTime = 1000L,
-                endTime = 1500L
+                eventData = AnalyticsEventData(
+                    endpoint = LatencyEndpoint.CREATE_ORDER,
+                    startTime = 1000L,
+                    endTime = 1500L
+                )
             )
         }
     }
@@ -50,10 +53,12 @@ class PayPalWebAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = LatencyEvent.USER_PERCEIVED_LATENCY.value,
-                flow = LatencyFlow.CHECKOUT,
-                presentationType = PresentationType.APP_SWITCH,
-                startTime = 2000L,
-                endTime = 2200L
+                eventData = AnalyticsEventData(
+                    flow = LatencyFlow.CHECKOUT,
+                    presentationType = PresentationType.APP_SWITCH,
+                    startTime = 2000L,
+                    endTime = 2200L
+                )
             )
         }
     }

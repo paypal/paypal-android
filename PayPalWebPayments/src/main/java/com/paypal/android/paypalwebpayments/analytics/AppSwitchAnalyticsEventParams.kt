@@ -1,5 +1,7 @@
 package com.paypal.android.paypalwebpayments.analytics
 
+import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
+
 /**
  * Bundles every value [PayPalWebAnalytics.notify] needs to log an analytics event, so it can be
  * threaded through as a single argument instead of a long list of individual parameters.
@@ -19,40 +21,15 @@ internal data class AppSwitchAnalyticsEventParams(
     val vaultSetupTokenId: String? = null,
 
     /**
-     * Id of the shopper session returned by [PayPalWebCheckoutClient.createPayPalSession].
+     * The shopper session returned by [PayPalWebCheckoutClient.createPayPalSession].
      */
-    val shopperSessionId: String? = null,
+    val shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse? = null,
 
     /**
      * Whether the shopper session was resolved from an existing PayPal session
      * ([PayPalUserIdentity.existingPayPalSessionId]) rather than freshly created.
      */
     val isCachedSession: Boolean? = null,
-
-    /**
-     * Expiration timestamp of the shopper session.
-     */
-    val shopperSessionExpiration: String? = null,
-
-    /**
-     * Authentication methods the shopper session matched for the shopper.
-     */
-    val matchedAuthenticationMethods: List<String>? = null,
-
-    /**
-     * Whether the shopper session indicated eligibility for a PayPal app switch.
-     */
-    val appSwitchEligible: Boolean? = null,
-
-    /**
-     * Reason the shopper session was not eligible for app switch, when [appSwitchEligible] is false.
-     */
-    val ineligibleReason: String? = null,
-
-    /**
-     * Fallback URL to present in a browser/webview when an app switch isn't used or isn't eligible.
-     */
-    val fallbackUrl: String? = null,
 
     /**
      * The call-to-action label requested for the PayPal checkout page, from [PayPalUserAction].

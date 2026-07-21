@@ -64,7 +64,7 @@ internal data class TrackingEventParams(
     @SerialName("shopper_session_id")
     val shopperSessionId: String? = null,
     @SerialName("shopper_session_expiration_at")
-    val shopperSessionExpiration: String? = null,
+    val shopperSessionExpirationAt: String? = null,
     @SerialName("matched_authentication_methods")
     val matchedAuthenticationMethods: List<String>? = null,
     @SerialName("app_switch_url")
