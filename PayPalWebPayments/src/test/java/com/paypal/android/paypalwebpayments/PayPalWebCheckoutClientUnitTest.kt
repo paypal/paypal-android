@@ -1698,6 +1698,14 @@ class PayPalWebCheckoutClientUnitTest {
         shopperSessionConfig = ShopperSessionConfig("fake-session-id", "")
     )
 
+    private fun placeholderTokenUrl(
+        baseUrl: String,
+        tokenType: String,
+        tokenKey: String,
+    ): String {
+        return "$baseUrl?appSwitchEligible=true&tokenType=$tokenType&$tokenKey="
+    }
+
     // --- start(activity, orderId, callback) ---
 
     @Test
@@ -1776,6 +1784,11 @@ class PayPalWebCheckoutClientUnitTest {
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
             val blankIdResponse = fakeSessionResponse.copy(
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/fallback",
+                    tokenType = "CHECKOUT_TOKEN",
+                    tokenKey = "token",
+                ),
                 shopperSessionConfig = ShopperSessionConfig("", "")
             )
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
@@ -2439,8 +2452,16 @@ class PayPalWebCheckoutClientUnitTest {
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
                 appSwitchEligible = true,
-                redirectUrl = "https://example.com/app-switch-redirect",
-                checkoutFallbackUrl = "https://example.com/fallback",
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-redirect",
+                    tokenType = "CHECKOUT_TOKEN",
+                    tokenKey = "token",
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/fallback",
+                    tokenType = "CHECKOUT_TOKEN",
+                    tokenKey = "token",
+                ),
             )
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             sutV3.createPayPalSession(
@@ -2460,11 +2481,6 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId uses checkoutFallbackUrl when app-switch eligible but not installed`() =
         runTest {
-            // Regression test for DTPPMOBILE-543: the backend can report a shopper session as
-            // app-switch eligible even when the PayPal app isn't installed on this device. In
-            // that case we must not open the native app-switch redirectUrl (e.g.
-            // app-switch-checkout) in a Custom Tab, since that page errors out when it isn't
-            // handed off to the native app. We should fall back to checkoutFallbackUrl instead.
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns false
             val uriSlot = slot<Uri>()
@@ -2474,8 +2490,16 @@ class PayPalWebCheckoutClientUnitTest {
 
             val appSwitchEligibleButNotInstalledResponse = fakeSessionResponse.copy(
                 appSwitchEligible = true,
-                redirectUrl = "https://www.paypal.com/app-switch-checkout",
-                checkoutFallbackUrl = "https://www.paypal.com/checkoutnow",
+                redirectUrl = placeholderTokenUrl(
+                    "https://www.paypal.com/app-switch-checkout",
+                    tokenType = "CHECKOUT_TOKEN",
+                    tokenKey = "token",
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://www.paypal.com/checkoutnow",
+                    tokenType = "CHECKOUT_TOKEN",
+                    tokenKey = "token",
+                ),
             )
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             sutV3.createPayPalSession(
@@ -2505,8 +2529,18 @@ class PayPalWebCheckoutClientUnitTest {
 
             val appSwitchEligibleResponse = fakeSessionResponse.copy(
                 appSwitchEligible = true,
-                redirectUrl = "https://example.com/app-switch-vault-redirect",
-                checkoutFallbackUrl = "https://example.com/fallback",
+                // The redirectUrl (native app-switch) and checkoutFallbackUrl (web fallback) use
+                // different placeholder keys for the vault flow: vault_id vs approval_session_id.
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-vault-redirect",
+                    tokenType = "VAULT_ID",
+                    tokenKey = "vault_id",
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/fallback",
+                    tokenType = "VAULT_ID",
+                    tokenKey = "approval_session_id",
+                ),
             )
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
@@ -2520,42 +2554,10 @@ class PayPalWebCheckoutClientUnitTest {
 
             val launchedUri = uriSlot.captured
             assertTrue(launchedUri.toString().startsWith("https://example.com/app-switch-vault-redirect"))
-            // Vault identifies the session via approval_session_id, not token (see
-            // PayPalWebLauncher.URL_PARAM_APPROVAL_SESSION_ID, which is what's read back out of
-            // the return deep link) — regression coverage for the vault-lands-on-error-page bug.
-            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("approval_session_id"))
+            // This flow uses redirectUrl (app-switch), whose placeholder key is vault_id.
+            assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("vault_id"))
+            assertNull(launchedUri.getQueryParameter("approval_session_id"))
             assertNull(launchedUri.getQueryParameter("token"))
-        }
-
-    @Test
-    fun `start() with orderId strips trailing ampersand from redirectUrl before appending query params`() =
-        runTest {
-            val sutV3 = makeSutWithUrlScheme()
-            every { deviceInspector.isPayPalInstalled } returns true
-            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
-            val uriSlot = slot<Uri>()
-            every {
-                payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
-            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
-
-            val trailingAmpersandResponse = fakeSessionResponse.copy(
-                appSwitchEligible = true,
-                redirectUrl = "https://example.com/app-switch-redirect?existing=1&",
-            )
-            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-            sutV3.createPayPalSession(
-                tokenType = TokenType.ORDER_ID,
-                userIdentity = fakeUserIdentity,
-                urlConfig = fakeUrlConfig,
-            )
-            sutV3.shopperSessionDeferred = CompletableDeferred(trailingAmpersandResponse)
-            sutV3.start(activity, "fake-order-id", callback)
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            val launchedUri = uriSlot.captured
-            assertFalse(launchedUri.toString().contains("&&"))
-            assertEquals("1", launchedUri.getQueryParameter("existing"))
-            assertEquals("fake-order-id", launchedUri.getQueryParameter("token"))
         }
 
     @Test
