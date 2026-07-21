@@ -22,6 +22,7 @@ import com.paypal.android.paypalwebpayments.PayPalUserIdentity
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutClient
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFinishStartResult
 import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
+import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CompleteOrderUseCase
 import com.paypal.android.usecase.CreateOrderUseCase
@@ -60,6 +61,12 @@ class PayPalCheckoutViewModel @Inject constructor(
         get() = _uiState.value.intentOption
         set(value) {
             _uiState.update { it.copy(intentOption = value) }
+        }
+
+    var shouldVault: StoreInVaultOption
+        get() = _uiState.value.shouldVaultOption
+        set(value) {
+            _uiState.update { it.copy(shouldVaultOption = value) }
         }
 
     private var createOrderState
@@ -114,10 +121,10 @@ class PayPalCheckoutViewModel @Inject constructor(
         createPayPalSession()
         viewModelScope.launch {
             createOrderState = ActionState.Loading
-            val orderRequest = OrderRequest(
-                intent = _uiState.value.intentOption,
-                shouldVaultOnSuccess = false
-            )
+            val orderRequest = _uiState.value.run {
+                val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
+                OrderRequest(intentOption, shouldVault)
+            }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
     }
