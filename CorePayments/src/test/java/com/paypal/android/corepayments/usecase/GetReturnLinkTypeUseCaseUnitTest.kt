@@ -2,8 +2,8 @@ package com.paypal.android.corepayments.usecase
 
 import android.content.Context
 import android.net.Uri
+import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.common.DeviceInspector
-import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase.ReturnLinkTypeResult
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -45,7 +45,7 @@ class GetReturnLinkTypeUseCaseUnitTest {
         every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
         every { getAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
-        assertEquals(ReturnLinkTypeResult.APP_LINK, sut(appLinkReturnUri, checkoutUri))
+        assertEquals(LinkType.APP_LINK, sut(appLinkReturnUri, checkoutUri))
     }
 
     @Test
@@ -54,7 +54,7 @@ class GetReturnLinkTypeUseCaseUnitTest {
         every { deviceInspector.canResolvePayPalAppSwitch() } returns true
         every { getAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
-        assertEquals(ReturnLinkTypeResult.APP_LINK, sut(appLinkReturnUri, checkoutUri))
+        assertEquals(LinkType.APP_LINK, sut(appLinkReturnUri, checkoutUri))
     }
 
     @Test
@@ -64,7 +64,7 @@ class GetReturnLinkTypeUseCaseUnitTest {
         every { deviceInspector.canResolvePayPalAppSwitch() } returns false
         every { getAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
-        assertEquals(ReturnLinkTypeResult.DEEP_LINK, sut(appLinkReturnUri, checkoutUri))
+        assertEquals(LinkType.DEEP_LINK, sut(appLinkReturnUri, checkoutUri))
     }
 
     @Test
@@ -73,13 +73,13 @@ class GetReturnLinkTypeUseCaseUnitTest {
         every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
         every { getAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
-        assertEquals(ReturnLinkTypeResult.DEEP_LINK, sut(appLinkReturnUri, checkoutUri))
+        assertEquals(LinkType.DEEP_LINK, sut(appLinkReturnUri, checkoutUri))
     }
 
     @Test
     fun `DEEP_LINK when the app link return uri is null`() {
         every { getAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
-        assertEquals(ReturnLinkTypeResult.DEEP_LINK, sut(appLinkReturnUri = null, checkoutUri = checkoutUri))
+        assertEquals(LinkType.DEEP_LINK, sut(appLinkReturnUri = null, checkoutUri = checkoutUri))
     }
 }

@@ -21,7 +21,6 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase
-import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase.ReturnLinkTypeResult
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
@@ -107,7 +106,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun beforeEach() {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        every { getReturnLinkTypeUseCase(any(), any()) } returns ReturnLinkTypeResult.APP_LINK
+        every { getReturnLinkTypeUseCase(any(), any()) } returns LinkType.APP_LINK
         sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -1811,7 +1810,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() uses AppLink strategy and reports link_type applink when return link type is APP_LINK`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            every { getReturnLinkTypeUseCase(any(), any()) } returns ReturnLinkTypeResult.APP_LINK
+            every { getReturnLinkTypeUseCase(any(), any()) } returns LinkType.APP_LINK
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -1847,7 +1846,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() uses CustomUrlScheme strategy and reports link_type deeplink when return link type is DEEP_LINK`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            every { getReturnLinkTypeUseCase(any(), any()) } returns ReturnLinkTypeResult.DEEP_LINK
+            every { getReturnLinkTypeUseCase(any(), any()) } returns LinkType.DEEP_LINK
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")

@@ -4,19 +4,17 @@ import android.content.Context
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
+import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.common.DeviceInspector
 
 /**
  * Decides which return-link strategy to use when navigating from App Switch or the browser back
  * into the merchant app after a checkout/vault flow.
  *
- * Returns [ReturnLinkTypeResult.APP_LINK] when the merchant app is the verified default handler for
+ * Returns [LinkType.APP_LINK] when the merchant app is the verified default handler for
  * its own App Link return URL AND either the first-party PayPal app or an App-Links-compatible
- * browser will honor the return. Otherwise returns [ReturnLinkTypeResult.DEEP_LINK], signalling that
+ * browser will honor the return. Otherwise returns [LinkType.DEEP_LINK], signalling that
  * the custom URL scheme fallback should be used instead.
- *
- * Mirrors braintree_android's `GetReturnLinkTypeUseCase`, reusing [DeviceInspector] for the
- * PayPal-app app-switch check.
  *
  * @suppress
  */
@@ -28,11 +26,6 @@ class GetReturnLinkTypeUseCase(
     private val getAppLinksCompatibleBrowserUseCase: GetAppLinksCompatibleBrowserUseCase,
 ) {
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    enum class ReturnLinkTypeResult {
-        APP_LINK, DEEP_LINK
-    }
-
     /**
      * @param appLinkReturnUri The merchant's App Link return URL (`returnAppUrl`).
      * @param checkoutUri The checkout URL used to probe whether the default browser is
@@ -41,10 +34,10 @@ class GetReturnLinkTypeUseCase(
     operator fun invoke(
         appLinkReturnUri: Uri?,
         checkoutUri: Uri = DEFAULT_CHECKOUT_URI.toUri(),
-    ): ReturnLinkTypeResult {
+    ): LinkType {
         val appLinkWillRoute = isMerchantDefaultHandler(appLinkReturnUri) &&
             (deviceInspector.canResolvePayPalAppSwitch() || getAppLinksCompatibleBrowserUseCase(checkoutUri))
-        return if (appLinkWillRoute) ReturnLinkTypeResult.APP_LINK else ReturnLinkTypeResult.DEEP_LINK
+        return if (appLinkWillRoute) LinkType.APP_LINK else LinkType.DEEP_LINK
     }
 
     /**

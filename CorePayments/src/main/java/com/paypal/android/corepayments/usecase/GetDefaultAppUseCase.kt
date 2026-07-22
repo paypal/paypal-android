@@ -9,8 +9,6 @@ import androidx.annotation.RestrictTo
  * Returns the package name of the default application that handles [uri], or `null` if none can be
  * resolved.
  *
- * Mirrors braintree_android's `GetDefaultAppUseCase`.
- *
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

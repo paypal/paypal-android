@@ -17,6 +17,7 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
+import com.paypal.android.corepayments.linkType
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
@@ -26,7 +27,6 @@ import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventPar
 import com.paypal.android.corepayments.usecase.GetAppLinksCompatibleBrowserUseCase
 import com.paypal.android.corepayments.usecase.GetDefaultAppUseCase
 import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase
-import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase.ReturnLinkTypeResult
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
@@ -426,8 +426,8 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
         val launchUri = shopperSession.getLaunchUri(orderId)
-        val (returnToAppStrategy, resolvedLinkType) = resolveReturnLinkStrategy()
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = resolvedLinkType)
+        val returnToAppStrategy = resolveReturnLinkStrategy()
+        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
@@ -493,8 +493,8 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
-        val (returnToAppStrategy, resolvedLinkType) = resolveReturnLinkStrategy()
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = resolvedLinkType)
+        val returnToAppStrategy = resolveReturnLinkStrategy()
+        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
         val endTime = System.currentTimeMillis()
 
         if (appSwitchEnabled) {
@@ -741,9 +741,7 @@ class PayPalWebCheckoutClient internal constructor(
      * the OS resolves the app-switch URI to a browser instead of the app, so choosing the
      * app-switch [redirectUrl][CreateShopperSessionWithAppSwitchEligibilityResponse.redirectUrl]
      * over [checkoutFallbackUrl][CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl]
-     * would open a URL that isn't meant to be loaded standalone, landing on an error page. This
-     * mirrors the `deviceInspector.isPayPalInstalled() && resolvePayPalUseCase()` guard used by
-     * the Braintree Android SDK.
+     * would open a URL that isn't meant to be loaded standalone, landing on an error page.
      *
      * [DeviceInspector.canResolvePayPalAppSwitch] additionally requires the installed PayPal app
      * to meet a minimum supported version — see its doc for details.
@@ -757,24 +755,22 @@ class PayPalWebCheckoutClient internal constructor(
      * device (@see [GetReturnLinkTypeUseCase]).
      *
      * Falls back to [ReturnToAppStrategy.AppLink] when no [ReturnToAppUrlConfig.fallbackSchemeUrl]
-     * was supplied by the merchant, since there is no custom scheme to switch to. The returned
-     * [LinkType] reflects the strategy actually chosen and is reported via the `link_type`
-     * analytics param.
+     * was supplied by the merchant, since there is no custom scheme to switch to. The chosen
+     * strategy's [ReturnToAppStrategy.linkType] is reported via the `link_type` analytics param.
      */
-    private fun resolveReturnLinkStrategy(): Pair<ReturnToAppStrategy, LinkType> {
+    private fun resolveReturnLinkStrategy(): ReturnToAppStrategy {
         val appLinkUrl = returnToAppUrlConfig?.returnAppUrl.orEmpty()
         val fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl
         val appLinkReturnUri = appLinkUrl.takeIf { it.isNotBlank() }?.toUri()
 
         return when (getReturnLinkTypeUseCase(appLinkReturnUri = appLinkReturnUri)) {
-            ReturnLinkTypeResult.APP_LINK ->
-                ReturnToAppStrategy.AppLink(appLinkUrl) to LinkType.APP_LINK
+            LinkType.APP_LINK -> ReturnToAppStrategy.AppLink(appLinkUrl)
 
-            ReturnLinkTypeResult.DEEP_LINK ->
+            LinkType.DEEP_LINK ->
                 if (!fallbackSchemeUrl.isNullOrBlank()) {
-                    ReturnToAppStrategy.CustomUrlScheme(fallbackSchemeUrl) to LinkType.DEEP_LINK
+                    ReturnToAppStrategy.CustomUrlScheme(fallbackSchemeUrl)
                 } else {
-                    ReturnToAppStrategy.AppLink(appLinkUrl) to LinkType.APP_LINK
+                    ReturnToAppStrategy.AppLink(appLinkUrl)
                 }
         }
     }

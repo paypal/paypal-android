@@ -7,8 +7,6 @@ import androidx.annotation.RestrictTo
  * Checks whether the device's default handler for [browserUri] is a browser known to honor Android
  * App Links, based on a static list of pre-tested browsers.
  *
- * Mirrors braintree_android's `GetAppLinksCompatibleBrowserUseCase`.
- *
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

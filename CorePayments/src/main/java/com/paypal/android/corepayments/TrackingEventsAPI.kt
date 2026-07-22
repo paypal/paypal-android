@@ -70,7 +70,6 @@ internal class TrackingEventsAPI constructor(
             cancelAppUrl = event.cancelAppUrl,
             fallbackSchemeUrl = event.fallbackSchemeUrl,
             linkType = event.linkType
-
         )
 
         val events = TrackingEvents(eventParams = eventParams)
