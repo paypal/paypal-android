@@ -3,7 +3,6 @@ package com.paypal.android.paypalwebpayments
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import com.paypal.android.corepayments.BrowserSwitchRequestCodes
 import com.paypal.android.corepayments.CaptureDeepLinkResult
 import com.paypal.android.corepayments.DeepLink
@@ -112,15 +111,9 @@ internal class PayPalWebLauncher(
         }
     }
 
-    private fun logReturnLinkType(flow: String, returnUri: Uri) {
-        val linkType = if (returnUri.scheme == "https") "applink" else "deeplink"
-        Log.d("[PayPal SDK]", "$flow return via $linkType — returnUri=$returnUri")
-    }
-
     private fun parseWebCheckoutSuccessResult(
         deepLink: DeepLink
     ): PayPalWebCheckoutFinishStartResult {
-        logReturnLinkType("checkout", deepLink.uri)
         val metadata = deepLink.originalOptions.metadata
         return if (metadata == null) {
             val unknownError = PayPalWebCheckoutError.unknownError
@@ -146,7 +139,6 @@ internal class PayPalWebLauncher(
     private fun parseVaultSuccessResult(
         deepLink: DeepLink
     ): PayPalWebCheckoutFinishVaultResult {
-        logReturnLinkType("vault", deepLink.uri)
         val requestMetadata = deepLink.originalOptions.metadata
         return if (requestMetadata == null) {
             PayPalWebCheckoutFinishVaultResult.Failure(PayPalWebCheckoutError.unknownError)
