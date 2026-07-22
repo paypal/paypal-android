@@ -7,9 +7,7 @@ import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
-import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
-import com.paypal.android.corepayments.UpdateClientConfigResult
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
 import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
@@ -83,11 +81,9 @@ class PayPalWebCheckoutClientUnitTest {
     @MockK
     private val deviceInspector: DeviceInspector = mockk(relaxed = true)
     private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
-    private val urlScheme = "com.example.app"
 
     @MockK
     private val updateClientConfigAPI: UpdateClientConfigAPI = mockk(relaxed = true)
-    private val appLinkUrl = "https://example.com/"
 
     private val intent = Intent()
 
@@ -117,1597 +113,25 @@ class PayPalWebCheckoutClientUnitTest {
     fun afterEach() {
         Dispatchers.resetMain()
     }
-
-    @Test
-    fun `startAsync() launches PayPal web checkout`() = runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        sut.startAsync(activity, request)
-
-        // Verify launchWithUrl is called with correct parameters
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-        }
-    }
-
-    @Test
-    fun `startAsync() notifies merchant of browser switch failure`() = runTest {
-        val sdkError = PayPalSDKError(123, "fake error description")
-        val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val appLinkUrl = "https://example.com/return"
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val result = sut.startAsync(activity, request)
-        assertSame(launchResult, result)
-    }
-
-    @Test
-    fun `vaultAsync() launches PayPal web checkout`() = runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val appLinkUrl = "https://example.com/vault/return"
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        sut.vaultAsync(activity, request)
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-        }
-    }
-
-    @Test
-    fun `vaultAsync() notifies merchant of browser switch failure`() = runTest {
-        val sdkError = PayPalSDKError(123, "fake error description")
-        val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val appLinkUrl = "https://example.com/vault/return"
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val result = sut.vaultAsync(activity, request) as PayPalPresentAuthChallengeResult.Failure
-
-        assertSame(sdkError, result.error)
-    }
-
-    @Test
-    fun `finishStart() with merchant provided auth state forwards success result from auth launcher`() {
-        val successResult =
-            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns successResult
-
-        val result = sut.finishStart(intent, "auth state")
-        assertSame(successResult, result)
-    }
-
-    @Test
-    fun `finishStart() with merchant provided auth state forwards error result from auth launcher`() {
-        val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns failureResult
-
-        val result = sut.finishStart(intent, "auth state")
-        assertSame(failureResult, result)
-    }
-
-    @Test
-    fun `finishStart() with merchant provided auth state forwards cancellation result from auth launcher`() {
-        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns canceledResult
-
-        val result = sut.finishStart(intent, "auth state")
-        assertSame(canceledResult, result)
-    }
-
     @Test
     fun `finishStart() with session auth state returns null when start has not been called`() {
         assertNull(sut.finishStart(intent))
     }
-
-    @Test
-    fun `finishStart() with session auth state forwards success result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns successResult
-
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            sut.startAsync(activity, request)
-        val result = sut.finishStart(intent)
-        assertSame(successResult, result)
-    }
-
-    @Test
-    fun `finishStart() with restored session auth state forwards success result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns successResult
-
-            val launchWithUrlClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-                deviceInspector = deviceInspector,
-                coreConfig = coreConfig,
-                urlScheme = urlScheme,
-                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-        )
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-            launchWithUrlClient.startAsync(activity, request)
-
-            sut.restore(launchWithUrlClient.instanceState)
-        val result = sut.finishStart(intent)
-        assertSame(successResult, result)
-    }
-
-    @Test
-    fun `finishStart() with session auth state forwards error result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns failureResult
-
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            sut.startAsync(activity, request)
-        val result = sut.finishStart(intent)
-        assertSame(failureResult, result)
-    }
-
-    @Test
-    fun `finishStart() with restored session auth state forwards error result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns failureResult
-
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            sut.startAsync(activity, request)
-        val result = sut.finishStart(intent)
-        assertSame(failureResult, result)
-    }
-
-    @Test
-    fun `finishStart() with session auth state forwards cancellation result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns canceledResult
-
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            sut.startAsync(activity, request)
-        val result = sut.finishStart(intent)
-        assertSame(canceledResult, result)
-    }
-
-    @Test
-    fun `finishStart() with restored session auth state forwards cancellation result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns canceledResult
-
-            val launchWithUrlClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-                deviceInspector = deviceInspector,
-                coreConfig = coreConfig,
-                urlScheme = urlScheme,
-                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI
-        )
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-            launchWithUrlClient.startAsync(activity, request)
-
-            sut.restore(launchWithUrlClient.instanceState)
-        val result = sut.finishStart(intent)
-        assertSame(canceledResult, result)
-    }
-
-    @Test
-    fun `finishStart() with session auth state clears session to prevent delivering success event twice`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns successResult
-
-            sut.startAsync(
-                activity,
-                PayPalWebCheckoutRequest(
-                    "fake-order-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        sut.finishStart(intent)
-        assertNull(sut.finishStart(intent))
-    }
-
-    @Test
-    fun `finishStart() with session auth state clears session to prevent delivering error event twice`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        val failureResult = PayPalWebCheckoutFinishStartResult.Failure(error, null)
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns failureResult
-
-            sut.startAsync(
-                activity,
-                PayPalWebCheckoutRequest(
-                    "fake-order-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        sut.finishStart(intent)
-        assertNull(sut.finishStart(intent))
-    }
-
-    @Test
-    fun `finishStart() with session auth state clears session to prevent delivering cancellation event twice`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
-        every {
-            payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth state")
-        } returns canceledResult
-
-            sut.startAsync(
-                activity,
-                PayPalWebCheckoutRequest(
-                    "fake-order-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        sut.finishStart(intent)
-        assertNull(sut.finishStart(intent))
-    }
-
-    @Test
-    fun `finishVault() with merchant provided auth forwards vault success from PayPal web launcher`() {
-        val successResult =
-            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns successResult
-
-        val result = sut.finishVault(intent, "auth state")
-                as PayPalWebCheckoutFinishVaultResult.Success
-        assertSame("fake-approval-session-id", result.approvalSessionId)
-    }
-
-    @Test
-    fun `finishVault() with merchant provided auth notifies merchant of vault failure`() {
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-        val result = sut.finishVault(intent, "auth state")
-                as PayPalWebCheckoutFinishVaultResult.Failure
-        assertSame(error, result.error)
-    }
-
-    @Test
-    fun `finishVault with merchant provided auth forwards vault cancellation`() {
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-        val result = sut.finishVault(intent, "auth state")
-        assertTrue(result is PayPalWebCheckoutFinishVaultResult.Canceled)
-    }
-
-    @Test
-    fun `finishVault with merchant provided auth forwards no result`() {
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.NoResult
-
-        val result = sut.finishVault(intent, "auth state")
-        assertTrue(result is PayPalWebCheckoutFinishVaultResult.NoResult)
-    }
-
-    @Test
-    fun `start() falls back to web checkout when app switch is enabled but URL is null`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns true
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val appSwitchResponse = createAppSwitchEligibilityResponse(null)
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            coEvery {
-                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
-            } returns APIResult.Success(appSwitchResponse)
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.startAsync(activity, request)
-
-            // Then
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
-    @Test
-    fun `start() falls back to web checkout when app switch is enabled but empty URL is returned`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns true
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val appSwitchResponse = createAppSwitchEligibilityResponse("")
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            coEvery {
-                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
-            } returns APIResult.Success(appSwitchResponse)
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.startAsync(activity, request)
-
-            // Then
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
     // VAULT APP SWITCH TESTS
-    @Test
-    fun `vault() falls back to web vault when app switch is enabled but empty URL is returned`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns true
-            val request = PayPalWebVaultRequest(
-                "fake-setup-token-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val appSwitchResponse = createAppSwitchEligibilityResponse("")
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            coEvery {
-                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
-            } returns APIResult.Success(appSwitchResponse)
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.vaultAsync(activity, request)
-
-            // Then
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
-    @Test
-    fun `vault() falls back to web vault when app switch request fails`() = runTest {
-        // Given
-        every { deviceInspector.isPayPalInstalled } returns true
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-        coEvery {
-            patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
-        } returns APIResult.Failure(PayPalSDKError(1001, "Test vault failure"))
-
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        // When
-        val result = sut.vaultAsync(activity, request)
-
-        // Then
-        verify {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = any()
-            )
-        }
-        assertSame(launchResult, result)
-    }
-
-    @Test
-    fun `start() skips app switch when app switch enabled but PayPal app not installed`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns false
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.startAsync(activity, request)
-
-            // Then
-            coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
-            }
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
-    @Test
-    fun `vault() skips app switch when app switch enabled but PayPal app not installed`() =
-        runTest {
-            // Given
-            every { deviceInspector.isPayPalInstalled } returns false
-            val request = PayPalWebVaultRequest(
-                "fake-setup-token-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            } returns launchResult
-
-            // When
-            val result = sut.vaultAsync(activity, request)
-
-            // Then
-            coVerify(exactly = 0) {
-                patchCCOWithAppSwitchEligibility.invoke(any(), any(), any(), any(), any())
-            }
-            verify {
-                payPalWebLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnToAppStrategy = any()
-                )
-            }
-            assertSame(launchResult, result)
-        }
-
     @Test
     fun `finishVault() with session auth state returns null when start has not been called`() {
         assertNull(sut.finishVault(intent))
     }
-
-    @Test
-    fun `finishVault() with session auth state forwards success result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI
-        )
-
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns successResult
-
-            previousClient.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-
-            sut.restore(previousClient.instanceState)
-            val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
-            assertSame("fake-approval-session-id", result.approvalSessionId)
-        }
-
-    @Test
-    fun `finishVault() with restored session auth state forwards success result from auth launcher`() =
-        runTest {
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-        val previousClient = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI
-        )
-
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-            val successResult =
-                PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-            every {
-                payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns successResult
-
-            previousClient.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-
-        sut.restore(previousClient.instanceState)
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Success
-        assertSame("fake-approval-session-id", result.approvalSessionId)
-    }
-
-    @Test
-    fun `finishVault() with session auth state forwards error result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
-        assertSame(error, result.error)
-    }
-
-    @Test
-    fun `finishVault() with restored session auth state forwards error result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-
-            sut.restore(sut.instanceState)
-        val result = sut.finishVault(intent) as PayPalWebCheckoutFinishVaultResult.Failure
-        assertSame(error, result.error)
-    }
-
-    @Test
-    fun `finishVault() with session auth state forwards cancellation result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        val result = sut.finishVault(intent)
-        assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
-    }
-
-    @Test
-    fun `finishVault() with restored session auth state forwards cancellation result from auth launcher`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-
-            sut.restore(sut.instanceState)
-        val result = sut.finishVault(intent)
-        assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
-    }
-
-    @Test
-    fun `finishVault() with session auth state clears session to prevent delivering success event twice`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val successResult =
-            PayPalWebCheckoutFinishVaultResult.Success("fake-approval-session-id")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns successResult
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        sut.finishVault(intent)
-        assertNull(sut.finishVault(intent))
-    }
-
-    @Test
-    fun `finishVault() with session auth state clears session to prevent delivering error event twice`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        val error = PayPalSDKError(123, "fake-error-description")
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Failure(error)
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        sut.finishVault(intent)
-        assertNull(sut.finishVault(intent))
-    }
-
-    @Test
-    fun `finishVault() with session auth state clears session to prevent delivering cancellation event twice`() =
-        runTest {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-            every {
-                payPalWebLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-        every {
-            payPalWebLauncher.completeVaultAuthRequest(intent, "auth state")
-        } returns PayPalWebCheckoutFinishVaultResult.Canceled
-
-            sut.vaultAsync(
-                activity,
-                PayPalWebVaultRequest(
-                    "fake-setup-token-id",
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            )
-        sut.finishVault(intent)
-        assertNull(sut.finishVault(intent))
-    }
-
-    @Test
-    @Suppress("DEPRECATION")
-    fun `start() with deprecated urlScheme constructor passes urlScheme to launcher`() = runTest {
-        val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
-        val clientWithUrlScheme = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = mockLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            urlScheme = urlScheme
-        )
-
-        val request = PayPalWebCheckoutRequest("fake-order-id")
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-        every {
-            mockLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        // When
-        clientWithUrlScheme.startAsync(activity, request)
-
-        // Then
-        verify {
-            mockLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(urlScheme)
-            )
-        }
-    }
-
-    @Test
-    @Suppress("DEPRECATION")
-    fun `vault() with deprecated urlScheme constructor passes urlScheme to launcher`() = runTest {
-        val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
-        val clientWithUrlScheme = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = mockLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            urlScheme = urlScheme
-        )
-
-        val request = PayPalWebVaultRequest("fake-setup-token-id")
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-        every {
-            mockLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        // When
-        clientWithUrlScheme.vaultAsync(activity, request)
-
-        // Then
-        verify {
-            mockLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(urlScheme)
-            )
-        }
-    }
-
-    @Test
-    @Suppress("DEPRECATION")
-    fun `start() with deprecated urlScheme constructor and AppLink in request prioritizes AppLink`() =
-        runTest {
-            val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
-            val clientWithUrlScheme = PayPalWebCheckoutClient(
-                analytics = analytics,
-                payPalWebLauncher = mockLauncher,
-                sessionStore = PayPalWebCheckoutSessionStore(),
-                updateClientConfigAPI = updateClientConfigAPI,
-                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-                deviceInspector = deviceInspector,
-                coreConfig = coreConfig,
-                urlScheme = urlScheme
-            )
-
-            val appLinkUrl = "https://example.com/return"
-            val request = PayPalWebCheckoutRequest(
-                "fake-order-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                mockLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-            // When
-            clientWithUrlScheme.startAsync(activity, request)
-
-            // Then
-            verify {
-                mockLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-order-id",
-                    tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            }
-        }
-
-    @Test
-    @Suppress("DEPRECATION")
-    fun `vault() with deprecated urlScheme constructor and AppLink in request prioritizes AppLink`() =
-        runTest {
-            val mockLauncher = mockk<PayPalWebLauncher>(relaxed = true)
-            val clientWithUrlScheme = PayPalWebCheckoutClient(
-                analytics = analytics,
-                payPalWebLauncher = mockLauncher,
-                sessionStore = PayPalWebCheckoutSessionStore(),
-                updateClientConfigAPI = updateClientConfigAPI,
-                patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-                deviceInspector = deviceInspector,
-                coreConfig = coreConfig,
-                urlScheme = urlScheme
-            )
-
-            val appLinkUrl = "https://example.com/vault/return"
-            val request = PayPalWebVaultRequest(
-                "fake-setup-token-id",
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-
-            every {
-                mockLauncher.launchWithUrl(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } returns launchResult
-
-            // When
-            clientWithUrlScheme.vaultAsync(activity, request)
-
-            // Then
-            verify {
-                mockLauncher.launchWithUrl(
-                    context = activity,
-                    uri = any(),
-                    token = "fake-setup-token-id",
-                    tokenType = TokenType.VAULT_ID,
-                    returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-                )
-            }
-        }
-
     // MARK: - Tests for Deprecated Methods
-
-    @Test
-    fun `deprecated start() calls analytics and launchWithUrl correctly`() {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val result = sut.start(activity, request)
-
-        // Verify it returns the launch result
-        assertSame(launchResult, result)
-
-        // Verify launchWithUrl is called (the deprecated method calls it directly)
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-        }
-    }
-
-    @Test
-    fun `deprecated start() handles failure correctly`() {
-        val sdkError = PayPalSDKError(123, "fake error description")
-        val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val result = sut.start(activity, request) as PayPalPresentAuthChallengeResult.Failure
-
-        assertSame(sdkError, result.error)
-    }
-
-    @Test
-    fun `deprecated vault() calls analytics and launchWithUrl correctly`() {
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val appLinkUrl = "https://example.com/vault/return"
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val result = sut.vault(activity, request)
-
-        // Verify it returns the launch result
-        assertSame(launchResult, result)
-
-        // Verify launchWithUrl is called (the deprecated method calls it directly)
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-            )
-        }
-    }
-
-    @Test
-    fun `deprecated vault() handles failure correctly`() {
-        val sdkError = PayPalSDKError(123, "fake error description")
-        val launchResult = PayPalPresentAuthChallengeResult.Failure(sdkError)
-        every {
-            payPalWebLauncher.launchWithUrl(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns launchResult
-
-        val appLinkUrl = "https://example.com/vault/return"
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        val result = sut.vault(activity, request) as PayPalPresentAuthChallengeResult.Failure
-
-        assertSame(sdkError, result.error)
-    }
-
     // MARK: - Tests for Callback-based Methods
     // Note: Callback-based methods use applicationScope.launch which doesn't integrate well
     // with test coroutine dispatchers, so these are tested implicitly through the methods they call
-
-    @Test
-    fun `start() with callback method exists and can be called`() {
-        // This test just verifies the callback method can be called without throwing
-        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-
-        // Mock the async dependencies to avoid side effects
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        // This should not throw an exception
-        sut.start(activity, request, callback)
-    }
-
-    @Test
-    fun `vault() with callback method exists and can be called`() {
-        // This test just verifies the callback method can be called without throwing
-        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-        val request = PayPalWebVaultRequest(
-            "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-
-        // Mock the async dependencies to avoid side effects
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        // This should not throw an exception
-        sut.vault(activity, request, callback)
-    }
-
     // Tests for returnToAppStrategy functionality
-
-    @Test
-    fun `startAsync() uses CustomUrlScheme when provided`() = runTest {
-        val fallbackScheme = "com.example.fallback"
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            orderId = "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-        )
-        sut.startAsync(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-            )
-        }
-    }
-
-    @Test
-    fun `startAsync() uses default urlScheme when returnToAppStrategy is null`() = runTest {
-        // Create a client with urlScheme
-        val clientWithUrlScheme = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            urlScheme = urlScheme
-        )
-
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            orderId = "fake-order-id",
-            returnToAppStrategy = null
-        )
-        clientWithUrlScheme.startAsync(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(urlScheme)
-            )
-        }
-    }
-
-    @Test
-    @Suppress("DEPRECATION")
-    fun `start() with deprecated method uses CustomUrlScheme when provided`() {
-        val fallbackScheme = "com.example.fallback"
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            orderId = "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-        )
-        sut.start(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-            )
-        }
-    }
-
-    @Test
-    fun `startAsync() with CustomUrlScheme uses CustomUrlScheme when provided`() = runTest {
-        val fallbackScheme = "com.example.fallback"
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebCheckoutRequest(
-            orderId = "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-        )
-        sut.startAsync(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-order-id",
-                tokenType = TokenType.ORDER_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-            )
-        }
-    }
-
-    @Test
-    fun `vaultAsync() uses CustomUrlScheme when provided`() = runTest {
-        val fallbackScheme = "com.example.fallback"
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebVaultRequest(
-            setupTokenId = "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-        )
-        sut.vaultAsync(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-            )
-        }
-    }
-
-    @Test
-    fun `vaultAsync() uses default urlScheme when returnToAppStrategy is null`() = runTest {
-        // Create a client with urlScheme
-        val clientWithUrlScheme = PayPalWebCheckoutClient(
-            analytics = analytics,
-            payPalWebLauncher = payPalWebLauncher,
-            sessionStore = PayPalWebCheckoutSessionStore(),
-            updateClientConfigAPI = updateClientConfigAPI,
-            patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
-            createShopperSessionAPI = createShopperSessionAPI,
-            deviceInspector = deviceInspector,
-            coreConfig = coreConfig,
-            urlScheme = urlScheme
-        )
-
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebVaultRequest(
-            setupTokenId = "fake-setup-token-id",
-            returnToAppStrategy = null
-        )
-        clientWithUrlScheme.vaultAsync(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(urlScheme)
-            )
-        }
-    }
-
-    @Test
-    @Suppress("DEPRECATION")
-    fun `vault() with deprecated method uses CustomUrlScheme when provided`() {
-        val fallbackScheme = "com.example.fallback"
-        val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns launchResult
-
-        val request = PayPalWebVaultRequest(
-            setupTokenId = "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-        )
-        sut.vault(activity, request)
-
-        verify(exactly = 1) {
-            payPalWebLauncher.launchWithUrl(
-                context = activity,
-                uri = any(),
-                token = "fake-setup-token-id",
-                tokenType = TokenType.VAULT_ID,
-                returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-            )
-        }
-    }
-
-    @Test
-    fun `vault() with callback uses CustomUrlScheme when provided`() {
-        // This test verifies the callback method can be called with CustomUrlScheme without throwing
-        val fallbackScheme = "com.example.fallback"
-        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        val request = PayPalWebVaultRequest(
-            setupTokenId = "fake-setup-token-id",
-            returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)
-        )
-
-        // This should not throw an exception
-        sut.vault(activity, request, callback)
-    }
-
-    @Test
-    fun `vault() with callback uses default urlScheme when returnToAppStrategy is null`() {
-        // This test verifies the callback method can be called with null returnToAppStrategy without throwing
-        val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        val request = PayPalWebVaultRequest(
-            setupTokenId = "fake-setup-token-id",
-            returnToAppStrategy = null
-        )
-
-        // This should not throw an exception
-        sut.vault(activity, request, callback)
-    }
-
     // MARK: - V3 Methods (createPayPalSession / start(orderId) / vault(setupTokenId))
 
-    // Build a client with urlScheme so launchCheckoutWithSession / launchVaultWithSession
-    // can resolve a ReturnToAppStrategy via the fallback path.
     // Inject test-controlled applicationScope so coroutines launched by v3 methods
     // run on the test scheduler and are drained by testDispatcher.scheduler.advanceUntilIdle().
-    private fun makeSutWithUrlScheme(): PayPalWebCheckoutClient = PayPalWebCheckoutClient(
+    private fun makeSutWithTestScope(): PayPalWebCheckoutClient = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
             sessionStore = PayPalWebCheckoutSessionStore(),
@@ -1716,7 +140,6 @@ class PayPalWebCheckoutClientUnitTest {
             createShopperSessionAPI = createShopperSessionAPI,
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
-            urlScheme = urlScheme,
             applicationScope = CoroutineScope(SupervisorJob() + testDispatcher),
     )
 
@@ -1762,7 +185,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() with orderId launches checkout when session resolves successfully`() = runTest {
-        val sutV3 = makeSutWithUrlScheme()
+        val sutV3 = makeSutWithTestScope()
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
@@ -1791,7 +214,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId includes shopperSessionId in the launch uri when the session id is non-blank`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val uriSlot = slot<Uri>()
             every {
                 payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
@@ -1813,7 +236,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId omits shopperSessionId from the launch uri when the session id is blank`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val uriSlot = slot<Uri>()
             every {
                 payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
@@ -1843,7 +266,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `start() with orderId includes observability query params on the launch uri`() = runTest {
-        val sutV3 = makeSutWithUrlScheme()
+        val sutV3 = makeSutWithTestScope()
         val uriSlot = slot<Uri>()
         val beforeMillis = System.currentTimeMillis()
         every {
@@ -1875,7 +298,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId delivers failure without falling back to patchCCO when createShopperSession throws`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
@@ -1906,7 +329,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() falls back to patchCCO when shopper session fetch reports a session-creation-or-network failure`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -1965,7 +388,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() appends token and strips a trailing ampersand from the patchCCO launch url`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -2004,7 +427,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId clears session deferred so a second call returns SESSION_NOT_CREATED`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
@@ -2052,7 +475,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `vault() with setupTokenId launches vault when session resolves successfully`() = runTest {
-        val sutV3 = makeSutWithUrlScheme()
+        val sutV3 = makeSutWithTestScope()
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
         every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
@@ -2080,7 +503,7 @@ class PayPalWebCheckoutClientUnitTest {
 
     @Test
     fun `vault() with setupTokenId includes observability query params on the launch uri`() = runTest {
-        val sutV3 = makeSutWithUrlScheme()
+        val sutV3 = makeSutWithTestScope()
         val uriSlot = slot<Uri>()
         val beforeMillis = System.currentTimeMillis()
         every {
@@ -2113,7 +536,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId delivers failure without patchCCO fallback when createShopperSession throws`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -2144,7 +567,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() falls back to patchCCO when shopper session fetch reports a session-creation-or-network failure`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -2203,7 +626,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() falls back to a vault URI, not a checkout URI, when patchCCO has no launch url`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns false
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -2367,7 +790,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId clears session deferred so a second call returns SESSION_NOT_CREATED`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns
                 PayPalPresentAuthChallengeResult.Success("auth-state")
 
@@ -2400,20 +823,12 @@ class PayPalWebCheckoutClientUnitTest {
         ineligibleReason = if (launchUrl.isNullOrEmpty()) "App switch not eligible" else null
     )
 
-    private fun createAppSwitchEligibilityResponse(redirectURL: String?): AppSwitchEligibility {
-        return AppSwitchEligibility(
-            appSwitchEligible = true,
-            launchUrl = redirectURL,
-            ineligibleReason = null
-        )
-    }
-
     // MARK: - Additional coverage: app-switch-eligible redirectUrl, failure analytics, noReturnToAppStrategyError
 
     @Test
     fun `start() with orderId prefers redirectUrl over checkoutFallbackUrl when app-switch eligible and installed`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
@@ -2450,7 +865,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId uses checkoutFallbackUrl when app-switch eligible but not installed`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns false
             val uriSlot = slot<Uri>()
             every {
@@ -2486,7 +901,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId uses redirectUrl when session is app-switch eligible and app is installed`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
@@ -2527,7 +942,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId uses ba_token as the param name when session tokenType is BILLING_TOKEN`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             val uriSlot = slot<Uri>()
@@ -2568,7 +983,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId notifies checkout failure analytics when launch fails after session resolves`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val sdkError = PayPalSDKError(123, "fake error description")
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
@@ -2614,7 +1029,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId notifies vault failure analytics when launch fails after session resolves`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val sdkError = PayPalSDKError(123, "fake error description")
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
@@ -2660,7 +1075,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() with orderId notifies checkout failure analytics when the shopper session fetch throws`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
@@ -2696,7 +1111,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() with setupTokenId notifies vault failure analytics when the shopper session fetch throws`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -2728,44 +1143,12 @@ class PayPalWebCheckoutClientUnitTest {
                 )
             }
         }
-
-    @Test
-    fun `startAsync() delivers noReturnToAppStrategyError when strategy and urlScheme are absent`() =
-        runTest {
-            val request = PayPalWebCheckoutRequest(
-                orderId = "fake-order-id",
-                returnToAppStrategy = null
-            )
-
-            val result = sut.startAsync(activity, request) as PayPalPresentAuthChallengeResult.Failure
-
-            assertSame(PayPalWebCheckoutError.noReturnToAppStrategyError, result.error)
-            verify(exactly = 0) {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            }
-        }
-
-    @Test
-    fun `vaultAsync() delivers noReturnToAppStrategyError when strategy and urlScheme are absent`() =
-        runTest {
-            val request = PayPalWebVaultRequest(
-                setupTokenId = "fake-setup-token-id",
-                returnToAppStrategy = null
-            )
-
-            val result = sut.vaultAsync(activity, request) as PayPalPresentAuthChallengeResult.Failure
-
-            assertSame(PayPalWebCheckoutError.noReturnToAppStrategyError, result.error)
-            verify(exactly = 0) {
-                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-            }
-        }
     // MARK: - Latency Analytics Tests
 
     @Test
     fun `start() emits user-perceived-latency with checkout flow and browser presentation`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
@@ -2794,7 +1177,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() emits user-perceived-latency with app-switch presentation when eligible and installed`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every { deviceInspector.isPayPalInstalled } returns true
             every { deviceInspector.canResolvePayPalAppSwitch() } returns true
             every {
@@ -2828,7 +1211,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `start() emits user-perceived-latency with error presentation on launch failure`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             val sdkError = PayPalSDKError(123, "fake error description")
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
@@ -2875,7 +1258,7 @@ class PayPalWebCheckoutClientUnitTest {
     @Test
     fun `vault() emits user-perceived-latency with vault flow`() =
         runTest {
-            val sutV3 = makeSutWithUrlScheme()
+            val sutV3 = makeSutWithTestScope()
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
@@ -2899,25 +1282,4 @@ class PayPalWebCheckoutClientUnitTest {
                 )
             }
         }
-
-    @Test
-    fun `startAsync() does not emit api-request-latency when timing is absent`() = runTest {
-        every {
-            payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
-        } returns PayPalPresentAuthChallengeResult.Success("auth state")
-
-        coEvery {
-            updateClientConfigAPI.updateClientConfig(any(), any())
-        } returns UpdateClientConfigResult.Success(roundTripTiming = null)
-
-        val request = PayPalWebCheckoutRequest(
-            "fake-order-id",
-            returnToAppStrategy = ReturnToAppStrategy.AppLink(appLinkUrl)
-        )
-        sut.startAsync(activity, request)
-
-        verify(exactly = 0) {
-            analytics.notifyApiRequestLatency(any(), any(), any())
-        }
-    }
 }
