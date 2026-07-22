@@ -257,7 +257,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `completeCheckoutAuthRequest() parses checkout failure when Payer Id is blank`() {
+    fun `completeCheckoutAuthRequest() parses cancellation when Payer Id is blank and no opType`() {
         val originalOptions = BrowserSwitchOptions(
             targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
             requestCode = PAYPAL_CHECKOUT,
@@ -270,10 +270,8 @@ class PayPalWebLauncherUnitTest {
 
         sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-                as PayPalWebCheckoutFinishStartResult.Failure
-        val expectedDescription =
-            "Result did not contain the expected data. Payer ID or Order ID is null."
-        assertEquals(expectedDescription, result.error.errorDescription)
+                as PayPalWebCheckoutFinishStartResult.Canceled
+        assertEquals("fake-order-id", result.orderId)
     }
 
     @Test
