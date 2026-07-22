@@ -8,7 +8,7 @@ import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
 
 /**
  * Resolves the [ReturnToAppUrlConfig] to send to the server for the given [LinkType], which the
- * caller obtains from [com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase].
+ * caller obtains from [com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase].
  *
  * - [LinkType.APP_LINK]: the config is returned unchanged, so the merchant's https
  *   [ReturnToAppUrlConfig.returnAppUrl] / [ReturnToAppUrlConfig.cancelAppUrl] are used.

@@ -4,23 +4,23 @@ import android.content.Context
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
-import com.paypal.android.corepayments.LinkType
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.common.DeviceInspector
 
 /**
- * Decides which return-link strategy to use when navigating from App Switch or the browser back
- * into the merchant app after a checkout/vault flow.
+ * Decides how to return to the merchant app after a checkout/vault flow, returning the concrete
+ * [ReturnToAppStrategy] to use.
  *
- * Returns [LinkType.APP_LINK] when the merchant app is the verified default handler for
- * its own App Link return URL AND either the first-party PayPal app or an App-Links-compatible
- * browser will honor the return. Also returns [LinkType.APP_LINK] when no custom URL scheme fallback
- * is available, since there is nothing to deep-link to. Otherwise returns [LinkType.DEEP_LINK],
- * signalling that the custom URL scheme fallback should be used instead.
+ * Returns [ReturnToAppStrategy.AppLink] when the merchant app is the verified default handler for its
+ * own App Link return URL AND either the first-party PayPal app or an App-Links-compatible browser
+ * will honor the return. Also returns [ReturnToAppStrategy.AppLink] when no custom URL scheme fallback
+ * is available, since there is nothing to deep-link to. Otherwise returns
+ * [ReturnToAppStrategy.CustomUrlScheme], signalling that the custom URL scheme fallback should be used.
  *
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class GetReturnLinkTypeUseCase(
+class GetReturnToAppStrategyUseCase(
     private val applicationContext: Context,
     private val deviceInspector: DeviceInspector,
     private val getDefaultApp: GetDefaultAppUseCase,
@@ -32,7 +32,8 @@ class GetReturnLinkTypeUseCase(
      *   treated as "no App Link", so the return can only ever be a deep link (or App Link if there is
      *   also no fallback scheme).
      * @param fallbackSchemeUrl The merchant's custom URL scheme fallback. When null or blank there is
-     *   no scheme to deep-link to, so [LinkType.APP_LINK] is returned regardless of App Link routing.
+     *   no scheme to deep-link to, so [ReturnToAppStrategy.AppLink] is returned regardless of App Link
+     *   routing.
      * @param checkoutUri The checkout URL used to probe whether the default browser is
      *   App-Links-compatible. Defaults to PayPal's checkout URL.
      */
@@ -40,20 +41,20 @@ class GetReturnLinkTypeUseCase(
         appLinkReturnUrl: String?,
         fallbackSchemeUrl: String?,
         checkoutUri: Uri = DEFAULT_CHECKOUT_URI,
-    ): LinkType {
+    ): ReturnToAppStrategy {
         // Without a custom URL scheme there is nothing to deep-link to, so App Link is the only
         // possible return type. Short-circuit before doing any package-manager probing.
         if (fallbackSchemeUrl.isNullOrBlank()) {
-            return LinkType.APP_LINK
+            return ReturnToAppStrategy.AppLink(appLinkReturnUrl.orEmpty())
         }
 
         val shouldRouteToAppLink = isMerchantDefaultHandlerForReturnUrl(appLinkReturnUrl) &&
             canLaunchIntoAppLinkAwareTarget(checkoutUri)
 
         return if (shouldRouteToAppLink) {
-            LinkType.APP_LINK
+            ReturnToAppStrategy.AppLink(appLinkReturnUrl.orEmpty())
         } else {
-            LinkType.DEEP_LINK
+            ReturnToAppStrategy.CustomUrlScheme(fallbackSchemeUrl)
         }
     }
 

@@ -4,14 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpRoundTripTiming
-import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -26,7 +24,7 @@ import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
 import com.paypal.android.corepayments.usecase.GetDefaultAppUseCase
-import com.paypal.android.corepayments.usecase.GetReturnLinkTypeUseCase
+import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase
 import com.paypal.android.corepayments.usecase.HasAppLinksCompatibleBrowserUseCase
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
@@ -65,7 +63,7 @@ class PayPalWebCheckoutClient internal constructor(
     private val updateClientConfigAPI: UpdateClientConfigAPI,
     private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val createShopperSessionAPI: CreateShopperSessionWithAppSwitchEligibilityAPI,
-    private val getReturnLinkTypeUseCase: GetReturnLinkTypeUseCase,
+    private val getReturnToAppStrategyUseCase: GetReturnToAppStrategyUseCase,
     private val getEffectiveReturnUrlConfigUseCase: GetEffectiveReturnUrlConfigUseCase,
     private val urlScheme: String? = null,
     private val applicationScope: CoroutineScope = CoroutineScope(SupervisorJob()),
@@ -95,7 +93,7 @@ class PayPalWebCheckoutClient internal constructor(
             configuration,
             context.applicationContext,
         ),
-        getReturnLinkTypeUseCase = buildReturnLinkTypeUseCase(context.applicationContext),
+        getReturnToAppStrategyUseCase = buildReturnToAppStrategyUseCase(context.applicationContext),
         getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
@@ -431,7 +429,10 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
         val launchUri = shopperSession.getLaunchUri(orderId)
-        val returnToAppStrategy = resolveReturnLinkStrategy()
+        val returnToAppStrategy = getReturnToAppStrategyUseCase(
+            appLinkReturnUrl = returnToAppUrlConfig?.returnAppUrl,
+            fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl,
+        )
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
@@ -498,7 +499,10 @@ class PayPalWebCheckoutClient internal constructor(
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
-        val returnToAppStrategy = resolveReturnLinkStrategy()
+        val returnToAppStrategy = getReturnToAppStrategyUseCase(
+            appLinkReturnUrl = returnToAppUrlConfig?.returnAppUrl,
+            fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl,
+        )
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
         val endTime = System.currentTimeMillis()
 
@@ -591,13 +595,13 @@ class PayPalWebCheckoutClient internal constructor(
     ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
         val isVaultRequest = tokenType != TokenType.ORDER_ID
 
-        val linkType = getReturnLinkTypeUseCase(
+        val returnToAppStrategy = getReturnToAppStrategyUseCase(
             appLinkReturnUrl = urlConfig.returnAppUrl,
             fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
         )
         val effectiveUrlConfig = getEffectiveReturnUrlConfigUseCase(
             urlConfig = urlConfig,
-            linkType = linkType
+            linkType = returnToAppStrategy.linkType
         )
 
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
@@ -765,43 +769,6 @@ class PayPalWebCheckoutClient internal constructor(
      */
     private fun canAttemptPayPalAppSwitch(): Boolean =
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
-
-    /**
-     * Decides, at launch time, whether to return to the merchant app via an App Link or via the
-     * custom URL scheme fallback, based on whether an App Link return will actually route on this
-     * device (@see [GetReturnLinkTypeUseCase]).
-     *
-     * [GetReturnLinkTypeUseCase] resolves to [LinkType.APP_LINK] when no
-     * [ReturnToAppUrlConfig.fallbackSchemeUrl] was supplied by the merchant, since there is no custom
-     * scheme to switch to. The chosen strategy's [ReturnToAppStrategy.linkType] is reported via the
-     * `link_type` analytics param.
-     */
-    private fun resolveReturnLinkStrategy(): ReturnToAppStrategy {
-        val appLinkUrl = returnToAppUrlConfig?.returnAppUrl.orEmpty()
-        val fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl
-
-        val strategy = when (
-            getReturnLinkTypeUseCase(
-                appLinkReturnUrl = appLinkUrl,
-                fallbackSchemeUrl = fallbackSchemeUrl,
-            )
-        ) {
-            LinkType.APP_LINK -> ReturnToAppStrategy.AppLink(appLinkUrl)
-
-            // DEEP_LINK is only returned when a non-blank fallback scheme is present.
-            LinkType.DEEP_LINK -> ReturnToAppStrategy.CustomUrlScheme(
-                requireNotNull(fallbackSchemeUrl) { "DEEP_LINK requires a non-null fallback scheme" }
-            )
-        }
-
-        Log.d(
-            "[PayPal SDK]",
-            "resolveReturnLinkStrategy: linkType=${strategy.linkType.stringValue}, " +
-                "returnUrl=${strategy.returnUrl}"
-        )
-
-        return strategy
-    }
 
     /**
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
@@ -1015,7 +982,7 @@ class PayPalWebCheckoutClient internal constructor(
             configuration,
             context.applicationContext,
         ),
-        getReturnLinkTypeUseCase = buildReturnLinkTypeUseCase(context.applicationContext),
+        getReturnToAppStrategyUseCase = buildReturnToAppStrategyUseCase(context.applicationContext),
         getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
@@ -1213,12 +1180,12 @@ class PayPalWebCheckoutClient internal constructor(
 
     private companion object {
         /**
-         * Builds a [GetReturnLinkTypeUseCase] wired with its two collaborators from an application
+         * Builds a [GetReturnToAppStrategyUseCase] wired with its collaborators from an application
          * [Context], following the SDK's manual dependency-injection convention.
          */
-        private fun buildReturnLinkTypeUseCase(applicationContext: Context): GetReturnLinkTypeUseCase {
+        private fun buildReturnToAppStrategyUseCase(applicationContext: Context): GetReturnToAppStrategyUseCase {
             val getDefaultAppUseCase = GetDefaultAppUseCase(applicationContext.packageManager)
-            return GetReturnLinkTypeUseCase(
+            return GetReturnToAppStrategyUseCase(
                 applicationContext = applicationContext,
                 deviceInspector = DeviceInspector(applicationContext),
                 getDefaultApp = getDefaultAppUseCase,

@@ -2,7 +2,7 @@ package com.paypal.android.corepayments.usecase
 
 import android.content.Context
 import android.net.Uri
-import com.paypal.android.corepayments.LinkType
+import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.common.DeviceInspector
 import io.mockk.every
 import io.mockk.mockk
@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Suppress("MaxLineLength")
 @RunWith(RobolectricTestRunner::class)
-class GetReturnLinkTypeUseCaseUnitTest {
+class GetReturnToAppStrategyUseCaseUnitTest {
 
     private val applicationContext: Context = mockk()
     private val deviceInspector: DeviceInspector = mockk()
@@ -27,14 +27,14 @@ class GetReturnLinkTypeUseCaseUnitTest {
     private val checkoutUri: Uri = Uri.parse("https://www.paypal.com/checkout")
     private val fallbackScheme = "com.merchant.app.paypal"
 
-    private lateinit var sut: GetReturnLinkTypeUseCase
+    private lateinit var sut: GetReturnToAppStrategyUseCase
 
     @Before
     fun beforeEach() {
         every { applicationContext.packageName } returns merchantPackageName
         every { deviceInspector.canResolvePayPalAppSwitch() } returns false
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
-        sut = GetReturnLinkTypeUseCase(
+        sut = GetReturnToAppStrategyUseCase(
             applicationContext,
             deviceInspector,
             getDefaultAppUseCase,
@@ -43,70 +43,76 @@ class GetReturnLinkTypeUseCaseUnitTest {
     }
 
     @Test
-    fun `APP_LINK when merchant is default handler and an App-Links-compatible browser is available`() {
+    fun `AppLink when merchant is default handler and an App-Links-compatible browser is available`() {
         every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
-        assertEquals(LinkType.APP_LINK, sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
+        assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
     }
 
     @Test
-    fun `APP_LINK when merchant is default handler and the PayPal app can app switch`() {
+    fun `AppLink when merchant is default handler and the PayPal app can app switch`() {
         every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
         every { deviceInspector.canResolvePayPalAppSwitch() } returns true
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
-        assertEquals(LinkType.APP_LINK, sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
+        assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
     }
 
     @Test
-    fun `DEEP_LINK when merchant is default handler but no compatible browser or first-party app`() {
+    fun `CustomUrlScheme when merchant is default handler but no compatible browser or first-party app`() {
         // AC1: default links disabled at the browser level -> fall back to deep link
         every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
         every { deviceInspector.canResolvePayPalAppSwitch() } returns false
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
-        assertEquals(LinkType.DEEP_LINK, sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
+        assertEquals(
+            ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
+            sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
+        )
     }
 
     @Test
-    fun `DEEP_LINK when merchant app is not the default handler for its own return uri`() {
+    fun `CustomUrlScheme when merchant app is not the default handler for its own return uri`() {
         // AC1: "Open supported links" unchecked for the merchant app -> not verified -> deep link
         every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
-        assertEquals(LinkType.DEEP_LINK, sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
+        assertEquals(
+            ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
+            sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
+        )
     }
 
     @Test
-    fun `DEEP_LINK when the app link return url is null`() {
+    fun `CustomUrlScheme when the app link return url is null`() {
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
         assertEquals(
-            LinkType.DEEP_LINK,
+            ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
             sut(appLinkReturnUrl = null, fallbackSchemeUrl = fallbackScheme, checkoutUri = checkoutUri)
         )
     }
 
     @Test
-    fun `APP_LINK when App Links won't route but no fallback scheme is available`() {
+    fun `AppLink when App Links won't route but no fallback scheme is available`() {
         // Deep-link conditions, but there is no custom scheme to switch to -> App Link.
         every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
         assertEquals(
-            LinkType.APP_LINK,
+            ReturnToAppStrategy.AppLink(appLinkReturnUrl),
             sut(appLinkReturnUrl, fallbackSchemeUrl = null, checkoutUri = checkoutUri)
         )
     }
 
     @Test
-    fun `APP_LINK when App Links won't route but fallback scheme is blank`() {
+    fun `AppLink when App Links won't route but fallback scheme is blank`() {
         every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
         assertEquals(
-            LinkType.APP_LINK,
+            ReturnToAppStrategy.AppLink(appLinkReturnUrl),
             sut(appLinkReturnUrl, fallbackSchemeUrl = "  ", checkoutUri = checkoutUri)
         )
     }
@@ -117,6 +123,6 @@ class GetReturnLinkTypeUseCaseUnitTest {
         // The stub matches the default checkout URI (paypal.com/checkout), which equals checkoutUri.
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
-        assertEquals(LinkType.APP_LINK, sut(appLinkReturnUrl, fallbackScheme))
+        assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme))
     }
 }
