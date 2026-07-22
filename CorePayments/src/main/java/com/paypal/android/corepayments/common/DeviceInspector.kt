@@ -36,8 +36,13 @@ class DeviceInspector(private val context: Context) {
      * major version that supports this SDK's app-switch flow. If the installed app's version
      * can't be determined, this fails closed (returns false) rather than risk switching into a
      * build that doesn't support it.
+     *
+     *@param requireMinVersion Whether to also gate on [APP_SWITCH_MIN_MAJOR_VERSION]
      */
-    fun canResolvePayPalAppSwitch(uri: Uri = DEFAULT_APP_SWITCH_URI): Boolean {
+    fun canResolvePayPalAppSwitch(
+        uri: Uri = DEFAULT_APP_SWITCH_URI,
+        requireMinVersion: Boolean = true
+    ): Boolean {
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             addCategory(Intent.CATEGORY_BROWSABLE)
         }
@@ -46,7 +51,7 @@ class DeviceInspector(private val context: Context) {
             PackageManager.MATCH_DEFAULT_ONLY
         )
         val resolvesToPayPalApp = resolvedActivity?.activityInfo?.packageName == PAYPAL_APP_PACKAGE
-        return resolvesToPayPalApp && isAppSwitchSupportedVersion(payPalAppVersionName)
+        return resolvesToPayPalApp && (!requireMinVersion || isAppSwitchSupportedVersion(payPalAppVersionName))
     }
 
     /**

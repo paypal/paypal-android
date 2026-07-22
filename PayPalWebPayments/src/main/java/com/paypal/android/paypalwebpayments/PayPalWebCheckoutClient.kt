@@ -776,8 +776,9 @@ class PayPalWebCheckoutClient internal constructor(
      * [DeviceInspector.canResolvePayPalAppSwitch] additionally requires the installed PayPal app
      * to meet a minimum supported version — see its doc for details.
      */
-    private fun canAttemptPayPalAppSwitch(): Boolean =
-        deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
+    private fun canAttemptPayPalAppSwitch(requireMinVersion: Boolean = true): Boolean =
+        deviceInspector.isPayPalInstalled &&
+                deviceInspector.canResolvePayPalAppSwitch(requireMinVersion = requireMinVersion)
 
     /**
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
@@ -883,12 +884,12 @@ class PayPalWebCheckoutClient internal constructor(
                 orderId = token,
                 tokenType = tokenType,
                 merchantOptInForAppSwitch = true,
-                paypalNativeAppInstalled = true
+                paypalNativeAppInstalled = canAttemptPayPalAppSwitch(requireMinVersion = false)
             )
             when (patchCcoResult) {
                 is APIResult.Success -> {
                     appSwitchEnabled = patchCcoResult.data.appSwitchEligible
-                    patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
+                    patchCcoResult.data.launchUrl?.toUri()?.appendTokenQueryParam(token) ?: fallbackUri
                 }
 
                 is APIResult.Failure -> {
