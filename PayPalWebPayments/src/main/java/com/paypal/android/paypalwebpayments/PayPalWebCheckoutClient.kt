@@ -889,7 +889,7 @@ class PayPalWebCheckoutClient internal constructor(
             when (patchCcoResult) {
                 is APIResult.Success -> {
                     appSwitchEnabled = patchCcoResult.data.appSwitchEligible
-                    patchCcoResult.data.launchUrl?.toUri()?.appendTokenQueryParam(token) ?: fallbackUri
+                    patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
                 }
 
                 is APIResult.Failure -> {
