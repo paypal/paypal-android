@@ -121,16 +121,17 @@ internal class PayPalWebLauncher(
         } else {
             val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
             val opType = deepLink.uri.getQueryParameter("opType")
-            if (opType == "cancel") {
-                PayPalWebCheckoutFinishStartResult.Canceled(orderId)
-            } else {
-                val payerId = deepLink.uri.getQueryParameter("PayerID")
-                if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
-                    val malformedResultError = PayPalWebCheckoutError.malformedResultError
-                    PayPalWebCheckoutFinishStartResult.Failure(malformedResultError, orderId)
-                } else {
+            val payerId = deepLink.uri.getQueryParameter("PayerID")
+            when {
+                opType == "cancel" -> PayPalWebCheckoutFinishStartResult.Canceled(orderId)
+                !orderId.isNullOrBlank() && !payerId.isNullOrBlank() ->
                     PayPalWebCheckoutFinishStartResult.Success(orderId, payerId)
-                }
+                orderId.isNullOrBlank() ->
+                    PayPalWebCheckoutFinishStartResult.Failure(
+                        PayPalWebCheckoutError.malformedResultError,
+                        orderId
+                    )
+                else -> PayPalWebCheckoutFinishStartResult.Canceled(orderId)
             }
         }
     }
