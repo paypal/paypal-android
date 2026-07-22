@@ -29,7 +29,8 @@ class DeviceInspector(private val context: Context) {
 
     /**
      * Whether [uri] actually resolves to the PayPal app, not just whether it's installed — the
-     * user may have unchecked "Open supported links" for it.
+     * user may have unchecked "Open supported links" for it. Mirrors Braintree Android's
+     * `ResolvePayPalUseCase`.
      *
      * Also requires the installed PayPal app to meet [APP_SWITCH_MIN_MAJOR_VERSION], the minimum
      * major version that supports this SDK's app-switch flow. If the installed app's version
