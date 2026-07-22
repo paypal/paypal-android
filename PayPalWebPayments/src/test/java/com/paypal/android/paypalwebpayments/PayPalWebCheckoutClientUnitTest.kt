@@ -17,6 +17,7 @@ import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.model.APIResult
 import com.paypal.android.corepayments.model.AppSwitchEligibility
 import com.paypal.android.corepayments.model.AppSwitchEligibilityData
+import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityParams
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
@@ -29,6 +30,7 @@ import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.PresentationType
 import com.paypal.android.paypalwebpayments.analytics.VaultEvent
+import com.paypal.android.paypalwebpayments.usecase.GetEffectiveReturnUrlConfigUseCase
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -106,7 +108,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun beforeEach() {
         MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        every { getReturnLinkTypeUseCase(any(), any()) } returns LinkType.APP_LINK
+        every { getReturnLinkTypeUseCase(any(), any(), any()) } returns LinkType.APP_LINK
         sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -115,6 +117,7 @@ class PayPalWebCheckoutClientUnitTest {
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
             deviceInspector = deviceInspector,
             coreConfig = coreConfig
         )
@@ -333,6 +336,7 @@ class PayPalWebCheckoutClientUnitTest {
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
             launchWithUrlClient.startAsync(activity, request)
@@ -457,7 +461,8 @@ class PayPalWebCheckoutClientUnitTest {
                 urlScheme = urlScheme,
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
-            getReturnLinkTypeUseCase = getReturnLinkTypeUseCase
+            getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         )
         val request = PayPalWebCheckoutRequest("fake-order-id")
             launchWithUrlClient.startAsync(activity, request)
@@ -840,7 +845,8 @@ class PayPalWebCheckoutClientUnitTest {
             coreConfig = coreConfig,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
-            getReturnLinkTypeUseCase = getReturnLinkTypeUseCase
+            getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         )
 
             every {
@@ -886,7 +892,8 @@ class PayPalWebCheckoutClientUnitTest {
             coreConfig = coreConfig,
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
-            getReturnLinkTypeUseCase = getReturnLinkTypeUseCase
+            getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         )
 
             every {
@@ -1142,6 +1149,7 @@ class PayPalWebCheckoutClientUnitTest {
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme
@@ -1187,6 +1195,7 @@ class PayPalWebCheckoutClientUnitTest {
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme
@@ -1233,6 +1242,7 @@ class PayPalWebCheckoutClientUnitTest {
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
                 deviceInspector = deviceInspector,
                 coreConfig = coreConfig,
                 urlScheme = urlScheme
@@ -1283,6 +1293,7 @@ class PayPalWebCheckoutClientUnitTest {
                 patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
                 deviceInspector = deviceInspector,
                 coreConfig = coreConfig,
                 urlScheme = urlScheme
@@ -1516,6 +1527,7 @@ class PayPalWebCheckoutClientUnitTest {
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme
@@ -1630,6 +1642,7 @@ class PayPalWebCheckoutClientUnitTest {
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme
@@ -1732,6 +1745,7 @@ class PayPalWebCheckoutClientUnitTest {
             patchCCOWithAppSwitchEligibility = patchCCOWithAppSwitchEligibility,
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnLinkTypeUseCase = getReturnLinkTypeUseCase,
+            getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
             deviceInspector = deviceInspector,
             coreConfig = coreConfig,
             urlScheme = urlScheme,
@@ -1810,7 +1824,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() uses AppLink strategy and reports link_type applink when return link type is APP_LINK`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            every { getReturnLinkTypeUseCase(any(), any()) } returns LinkType.APP_LINK
+            every { getReturnLinkTypeUseCase(any(), any(), any()) } returns LinkType.APP_LINK
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -1846,7 +1860,7 @@ class PayPalWebCheckoutClientUnitTest {
     fun `start() uses CustomUrlScheme strategy and reports link_type deeplink when return link type is DEEP_LINK`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            every { getReturnLinkTypeUseCase(any(), any()) } returns LinkType.DEEP_LINK
+            every { getReturnLinkTypeUseCase(any(), any(), any()) } returns LinkType.DEEP_LINK
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -3012,4 +3026,64 @@ class PayPalWebCheckoutClientUnitTest {
             analytics.notifyApiRequestLatency(any(), any(), any())
         }
     }
+
+    @Test
+    fun `createShopperSession sends custom-scheme return urls when deep-link is resolved`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { getReturnLinkTypeUseCase(any(), any(), any()) } returns LinkType.DEEP_LINK
+            val urlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = "https://example.com/paypal-return",
+                cancelAppUrl = "https://example.com/paypal-cancel",
+                fallbackSchemeUrl = "com.example.app",
+            )
+            val paramsSlot = slot<CreateShopperSessionWithAppSwitchEligibilityParams>()
+            coEvery {
+                createShopperSessionAPI(any(), any(), capture(paramsSlot))
+            } returns APIResult.Success(fakeSessionResponse)
+
+            sutV3.createShopperSessionWithAppSwitchEligibility(
+                token = "fake-token",
+                tokenType = TokenType.ORDER_ID,
+                urlConfig = urlConfig,
+                userIdentity = fakeUserIdentity,
+                userAction = PayPalUserAction.CONTINUE,
+            )
+
+            // Deep-link chosen -> server must be told to redirect via the custom scheme, so the
+            // return/cancel URLs sent to the shopper session are custom-scheme, not the merchant https.
+            val expectedBase = "com.example.app://x-callback-url/paypal-sdk/paypal-checkout"
+            assertEquals(expectedBase, paramsSlot.captured.returnAppUrl)
+            assertEquals("$expectedBase/cancel", paramsSlot.captured.cancelAppUrl)
+            // The raw fallback scheme is still forwarded unchanged.
+            assertEquals("com.example.app", paramsSlot.captured.fallbackSchemeUrl)
+        }
+
+    @Test
+    fun `createShopperSession sends merchant https return urls when app-link is resolved`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { getReturnLinkTypeUseCase(any(), any(), any()) } returns LinkType.APP_LINK
+            val urlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = "https://example.com/paypal-return",
+                cancelAppUrl = "https://example.com/paypal-cancel",
+                fallbackSchemeUrl = "com.example.app",
+            )
+            val paramsSlot = slot<CreateShopperSessionWithAppSwitchEligibilityParams>()
+            coEvery {
+                createShopperSessionAPI(any(), any(), capture(paramsSlot))
+            } returns APIResult.Success(fakeSessionResponse)
+
+            sutV3.createShopperSessionWithAppSwitchEligibility(
+                token = "fake-token",
+                tokenType = TokenType.ORDER_ID,
+                urlConfig = urlConfig,
+                userIdentity = fakeUserIdentity,
+                userAction = PayPalUserAction.CONTINUE,
+            )
+
+            // App-link chosen -> the merchant's https return/cancel URLs are sent unchanged.
+            assertEquals("https://example.com/paypal-return", paramsSlot.captured.returnAppUrl)
+            assertEquals("https://example.com/paypal-cancel", paramsSlot.captured.cancelAppUrl)
+        }
 }

@@ -10,7 +10,7 @@ import androidx.annotation.RestrictTo
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class GetAppLinksCompatibleBrowserUseCase(
+class HasAppLinksCompatibleBrowserUseCase(
     private val getDefaultAppUseCase: GetDefaultAppUseCase,
 ) {
 

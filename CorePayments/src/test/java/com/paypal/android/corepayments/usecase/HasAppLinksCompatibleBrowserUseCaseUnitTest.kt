@@ -11,15 +11,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class GetAppLinksCompatibleBrowserUseCaseUnitTest {
+class HasAppLinksCompatibleBrowserUseCaseUnitTest {
 
     private val getDefaultAppUseCase: GetDefaultAppUseCase = mockk()
     private val uri: Uri = Uri.parse("https://www.paypal.com/checkout")
-    private lateinit var sut: GetAppLinksCompatibleBrowserUseCase
+    private lateinit var sut: HasAppLinksCompatibleBrowserUseCase
 
     @Before
     fun beforeEach() {
-        sut = GetAppLinksCompatibleBrowserUseCase(getDefaultAppUseCase)
+        sut = HasAppLinksCompatibleBrowserUseCase(getDefaultAppUseCase)
     }
 
     @Test
