@@ -68,6 +68,7 @@ class PayPalWebCheckoutClient internal constructor(
     @VisibleForTesting
     internal var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>? = null
     private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
+    private var sessionTokenType: TokenType? = null
 
     constructor(
         context: Context,
@@ -108,7 +109,9 @@ class PayPalWebCheckoutClient internal constructor(
      *
      * Fire and forget — returns immediately.
      *
-     * @param tokenType Whether the session is for an order (checkout) or a setup token (vault).
+     * @param tokenType Whether the session is for an order (checkout), a setup token (vault), or
+     * a billing agreement token. This also determines the query param name used for the token on
+     * the launch uri built by [start]/[vault] (see [appendTokenQueryParam]).
      * @param userIdentity Shopper identity used to pre-identify the payer.
      * @param urlConfig Return-to-app URLs used after checkout completes or is cancelled.
      * @param userAction Controls the call-to-action label on the PayPal checkout page.
@@ -120,6 +123,7 @@ class PayPalWebCheckoutClient internal constructor(
         userAction: PayPalUserAction = PayPalUserAction.CONTINUE,
     ) {
         resetAppSwitchAnalyticsEventParams()
+        sessionTokenType = tokenType
         returnToAppUrlConfig = urlConfig
         shopperSessionDeferred = applicationScope.async {
             createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
@@ -414,7 +418,7 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
-        val launchUri = shopperSession.getLaunchUri(orderId, TokenType.ORDER_ID)
+        val launchUri = shopperSession.getLaunchUri(orderId)
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
@@ -479,7 +483,7 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
-        val launchUri = shopperSession.getLaunchUri(setupTokenId, TokenType.VAULT_ID)
+        val launchUri = shopperSession.getLaunchUri(setupTokenId)
         val endTime = System.currentTimeMillis()
 
         if (appSwitchEnabled) {
@@ -736,27 +740,51 @@ class PayPalWebCheckoutClient internal constructor(
     private fun canAttemptPayPalAppSwitch(): Boolean =
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
 
-    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(
-        token: String,
-        tokenType: TokenType,
-    ): Uri {
-        val launchUri = if (appSwitchEnabled) redirectUrl.toUri() else checkoutFallbackUrl.toUri()
-        val uriWithToken = launchUri.buildUpon()
-            .encodedQuery(launchUri.encodedQuery.orEmpty() + Uri.encode(token))
+    /**
+     * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
+     * appends the given token as a query param.
+     */
+    private fun Uri.appendTokenQueryParam(token: String): Uri {
+        val tokenType = requireNotNull(sessionTokenType) {
+            "sessionTokenType must be set by createPayPalSession() before appendTokenQueryParam() is called."
+        }
+        val trimmedUri = if (toString().endsWith("&")) {
+            toString().dropLast(1).toUri()
+        } else {
+            this
+        }
+        val paramName = when (tokenType) {
+            TokenType.ORDER_ID -> "token"
+            TokenType.VAULT_ID -> "approval_session_id"
+            TokenType.BILLING_TOKEN -> "ba_token"
+        }
+        return trimmedUri.buildUpon()
+            .appendQueryParameter(paramName, token)
             .build()
+    }
+
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
+        val launchUri = if (appSwitchEnabled) {
+            redirectUrl.toUri()
+        } else {
+            checkoutFallbackUrl.toUri()
+        }.appendTokenQueryParam(token)
 
         val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
-            uriWithToken.buildUpon()
+            launchUri.buildUpon()
                 .appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
                 .build()
         } else {
-            uriWithToken
+            launchUri
         }
 
-        return uriWithSessionId.appendObservabilityQueryParams(tokenType)
+        return uriWithSessionId.appendObservabilityQueryParams()
     }
 
-    private fun Uri.appendObservabilityQueryParams(tokenType: TokenType): Uri {
+    private fun Uri.appendObservabilityQueryParams(): Uri {
+        val tokenType = requireNotNull(sessionTokenType) {
+            "sessionTokenType must be set by createPayPalSession() before appendObservabilityQueryParams() is called."
+        }
         val flowType = when (tokenType) {
             TokenType.ORDER_ID -> "ecs"
             TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "va"
