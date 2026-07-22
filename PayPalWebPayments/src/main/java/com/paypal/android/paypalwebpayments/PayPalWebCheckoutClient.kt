@@ -741,7 +741,9 @@ class PayPalWebCheckoutClient internal constructor(
      * the OS resolves the app-switch URI to a browser instead of the app, so choosing the
      * app-switch [redirectUrl][CreateShopperSessionWithAppSwitchEligibilityResponse.redirectUrl]
      * over [checkoutFallbackUrl][CreateShopperSessionWithAppSwitchEligibilityResponse.checkoutFallbackUrl]
-     * would open a URL that isn't meant to be loaded standalone, landing on an error page.
+     * would open a URL that isn't meant to be loaded standalone, landing on an error page. This
+     * mirrors the `deviceInspector.isPayPalInstalled() && resolvePayPalUseCase()` guard used by
+     * the Braintree Android SDK.
      *
      * [DeviceInspector.canResolvePayPalAppSwitch] additionally requires the installed PayPal app
      * to meet a minimum supported version — see its doc for details.
