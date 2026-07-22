@@ -33,4 +33,10 @@ internal object PayPalWebCheckoutError {
         code = PayPalWebCheckoutErrorCode.SESSION_NOT_CREATED.ordinal,
         errorDescription = "PayPal Session must be created. Call createPayPalSession()"
     )
+
+    // 5. PayPal Session creation failed
+    val sessionCreationFailedError = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.SESSION_CREATION_FAILED.ordinal,
+        errorDescription = "Failed to create PayPal Session"
+    )
 }

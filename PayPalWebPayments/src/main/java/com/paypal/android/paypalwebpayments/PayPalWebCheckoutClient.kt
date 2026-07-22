@@ -10,6 +10,7 @@ import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpRoundTripTiming
+import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.UpdateClientConfigAPI
 import com.paypal.android.corepayments.analytics.AnalyticsService
@@ -166,21 +167,18 @@ class PayPalWebCheckoutClient internal constructor(
                 setShopperSessionAnalyticsParams(shopperSession)
                 analytics.notify(CheckoutEvent.STARTED, params = appSwitchAnalyticsEventParams)
 
-                val result = if (shopperSession != null) {
-                    launchCheckoutWithShopperSession(
+                if (shopperSession != null) {
+                    val result = launchCheckoutWithShopperSession(
                         activity = activity,
                         shopperSession = shopperSession,
                         orderId = orderId,
                         startTime = startTime,
                     )
+                    withContext(Dispatchers.Main) {
+                        callback.onPayPalWebStartResult(result)
+                    }
                 } else {
-                    launchCheckoutViaPatchCCOFallback(
-                        activity = activity,
-                        orderId = orderId,
-                    )
-                }
-                withContext(Dispatchers.Main) {
-                    callback.onPayPalWebStartResult(result)
+                    throw PayPalWebCheckoutError.sessionCreationFailedError
                 }
             } catch (e: Exception) {
                 analytics.notify(
@@ -192,7 +190,7 @@ class PayPalWebCheckoutClient internal constructor(
                 withContext(Dispatchers.Main) {
                     callback.onPayPalWebStartResult(
                         PayPalPresentAuthChallengeResult.Failure(
-                            PayPalWebCheckoutError.browserSwitchError(e)
+                            e as? PayPalSDKError ?: PayPalWebCheckoutError.browserSwitchError(e)
                         )
                     )
                 }
@@ -249,21 +247,18 @@ class PayPalWebCheckoutClient internal constructor(
                 setShopperSessionAnalyticsParams(shopperSession)
                 analytics.notify(VaultEvent.STARTED, params = appSwitchAnalyticsEventParams)
 
-                val result = if (shopperSession != null) {
-                    launchVaultWithSession(
+                if (shopperSession != null) {
+                    val result = launchVaultWithSession(
                         activity = activity,
                         shopperSession = shopperSession,
                         setupTokenId = setupTokenId,
                         startTime = startTime,
                     )
+                    withContext(Dispatchers.Main) {
+                        callback.onPayPalWebVaultResult(result)
+                    }
                 } else {
-                    launchVaultViaPatchCCOFallback(
-                        activity = activity,
-                        setupTokenId = setupTokenId,
-                    )
-                }
-                withContext(Dispatchers.Main) {
-                    callback.onPayPalWebVaultResult(result)
+                    throw PayPalWebCheckoutError.sessionCreationFailedError
                 }
             } catch (e: Exception) {
                 analytics.notify(
@@ -275,7 +270,7 @@ class PayPalWebCheckoutClient internal constructor(
                 withContext(Dispatchers.Main) {
                     callback.onPayPalWebVaultResult(
                         PayPalPresentAuthChallengeResult.Failure(
-                            PayPalWebCheckoutError.browserSwitchError(e)
+                            e as? PayPalSDKError ?: PayPalWebCheckoutError.browserSwitchError(e)
                         )
                     )
                 }
@@ -529,40 +524,6 @@ class PayPalWebCheckoutClient internal constructor(
                 )
             }
         }
-    }
-
-    /**
-     * Launches checkout after the Shopper Session fetch failed with a session-creation
-     * failure or network timeout.
-     *
-     * TODO: Re-implement fallback behavior for session-creation failure. This previously
-     *  fell back to the legacy patchCCO path via [getLaunchUri] (see git history / PR diff
-     *  for the removed implementation). Removed pending a decision on the replacement
-     *  behavior — currently unhandled.
-     */
-    @Suppress("UnusedPrivateMember")
-    private suspend fun launchCheckoutViaPatchCCOFallback(
-        activity: Activity,
-        orderId: String,
-    ): PayPalPresentAuthChallengeResult {
-        TODO("Re-implement checkout fallback for session-creation failure (patchCCO fallback removed)")
-    }
-
-    /**
-     * Launches vault after the Shopper Session fetch failed with a session-creation failure
-     * or network timeout. See [launchCheckoutViaPatchCCOFallback].
-     *
-     * TODO: Re-implement fallback behavior for session-creation failure. This previously
-     *  fell back to the legacy patchCCO path via [getLaunchUri] (see git history / PR diff
-     *  for the removed implementation). Removed pending a decision on the replacement
-     *  behavior — currently unhandled.
-     */
-    @Suppress("UnusedPrivateMember")
-    private suspend fun launchVaultViaPatchCCOFallback(
-        activity: Activity,
-        setupTokenId: String,
-    ): PayPalPresentAuthChallengeResult {
-        TODO("Re-implement vault fallback for session-creation failure (patchCCO fallback removed)")
     }
 
     @VisibleForTesting
