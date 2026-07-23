@@ -19,8 +19,13 @@ data class PayPalUiState(
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
     val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
 ) {
-    val isCreateOrderSuccessful: Boolean
-        get() = createOrderState is ActionState.Success
+    val checkoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception>
+        get() = when (createOrderState) {
+            is ActionState.Idle -> ActionState.Idle
+            is ActionState.Loading -> ActionState.Loading
+            is ActionState.Failure -> createOrderState
+            is ActionState.Success -> payPalWebCheckoutState
+        }
 
     val isPayPalWebCheckoutSuccessful: Boolean
         get() = payPalWebCheckoutState is ActionState.Success

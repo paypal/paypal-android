@@ -43,7 +43,7 @@ fun PayPalCheckoutView(
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {
         // Auto-scroll once the user has started the flow; avoids scrolling on initial render
-        if (uiState.createOrderState !is ActionState.Idle) {
+        if (uiState.checkoutState !is ActionState.Idle) {
             scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
@@ -66,23 +66,21 @@ fun PayPalCheckoutView(
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_CreateOrder(uiState, viewModel)
-        if (uiState.isCreateOrderSuccessful) {
-            Step2_StartPayPalCheckout(uiState, viewModel)
-        }
+        Step1_CheckoutWithPayPal(uiState, viewModel)
         if (uiState.isPayPalWebCheckoutSuccessful) {
-            Step3_CompleteOrder(uiState, viewModel)
+            Step2_CompleteOrder(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+private fun Step1_CheckoutWithPayPal(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create an Order")
+        StepHeader(stepNumber = 1, title = stringResource(R.string.launch_paypal))
         PayPalUserIdentityForm(
             userIdentity = uiState.userIdentity,
             onUserIdentityChange = { value -> viewModel.userIdentity = value },
@@ -104,38 +102,19 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             shouldVault = uiState.shouldVaultOption,
             onShouldVaultChanged = { value -> viewModel.shouldVault = value }
         )
-        ActionButtonColumn(
-            defaultTitle = "CREATE ORDER",
-            successTitle = "ORDER CREATED",
-            state = uiState.createOrderState,
-            onClick = { viewModel.createOrder() },
-            modifier = Modifier
-                .fillMaxWidth()
-        ) { state ->
-            when (state) {
-                is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> OrderView(order = state.value)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
-    val context = LocalContext.current
-    Column(
-        verticalArrangement = UIConstants.spacingMedium,
-    ) {
-        StepHeader(stepNumber = 2, title = stringResource(R.string.launch_paypal))
         StartPayPalWebCheckoutForm(
             fundingSource = uiState.fundingSource,
             onFundingSourceChange = { value -> viewModel.fundingSource = value },
         )
+        // Single tap: createPayPalSession() -> create order -> start PayPal checkout.
+        // createPayPalSession() must fire on the buyer's checkout-intent tap, not earlier.
         ActionButtonColumn(
-            defaultTitle = "START CHECKOUT",
+            defaultTitle = "CHECKOUT WITH PAYPAL",
             successTitle = "CHECKOUT COMPLETE",
-            state = uiState.payPalWebCheckoutState,
-            onClick = { context.getActivityOrNull()?.let { viewModel.startCheckout(it) } },
+            state = uiState.checkoutState,
+            onClick = {
+                context.getActivityOrNull()?.let { viewModel.createOrderAndStartCheckout(it) }
+            },
             modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {
@@ -149,12 +128,12 @@ private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalC
 }
 
 @Composable
-private fun Step3_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
+private fun Step2_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutViewModel) {
     val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Complete Order")
+        StepHeader(stepNumber = 2, title = "Complete Order")
         ActionButtonColumn(
             defaultTitle = "COMPLETE ORDER",
             successTitle = "ORDER COMPLETED",

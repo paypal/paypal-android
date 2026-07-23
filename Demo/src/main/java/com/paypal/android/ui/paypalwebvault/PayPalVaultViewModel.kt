@@ -84,34 +84,38 @@ class PayPalVaultViewModel @Inject constructor(
         )
     }
 
-    fun createSetupToken() {
-        createPayPalSession()
-        viewModelScope.launch {
-            createSetupTokenState = ActionState.Loading
-            createSetupTokenState = createPayPalSetupTokenUseCase().mapToActionState()
-        }
-    }
-
     private val createdSetupToken: PayPalSetupToken?
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
-    fun vaultSetupToken(activity: ComponentActivity) {
-        val setupTokenId = createdSetupToken?.id
+    /**
+     * Triggered by a single button tap: pre-warms the PayPal session, creates the setup token,
+     * and — on success — immediately starts PayPal vault with that setup token.
+     * createPayPalSession() must be called from the buyer's vault-intent tap (not earlier), so
+     * this all happens within one click handler rather than across separate buttons.
+     */
+    fun createSetupTokenAndVault(activity: ComponentActivity) {
+        createPayPalSession()
+        viewModelScope.launch {
+            createSetupTokenState = ActionState.Loading
+            val result = createPayPalSetupTokenUseCase().mapToActionState()
+            createSetupTokenState = result
+            (result as? ActionState.Success)?.value?.id?.let { setupTokenId ->
+                vaultSetupTokenId(activity, setupTokenId)
+            }
+        }
+    }
 
-        if (setupTokenId == null) {
-            vaultPayPalState = ActionState.Failure(Exception("Create a setup token to continue."))
-        } else {
-            vaultPayPalState = ActionState.Loading
+    private fun vaultSetupTokenId(activity: ComponentActivity, setupTokenId: String) {
+        vaultPayPalState = ActionState.Loading
 
-            paypalClient.vault(activity, setupTokenId) { result ->
-                when (result) {
-                    is PayPalPresentAuthChallengeResult.Success -> {
-                        // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
-                    }
-
-                    is PayPalPresentAuthChallengeResult.Failure ->
-                        vaultPayPalState = ActionState.Failure(result.error)
+        paypalClient.vault(activity, setupTokenId) { result ->
+            when (result) {
+                is PayPalPresentAuthChallengeResult.Success -> {
+                    // do nothing; wait for user to authenticate PayPal vault in Chrome Custom Tab
                 }
+
+                is PayPalPresentAuthChallengeResult.Failure ->
+                    vaultPayPalState = ActionState.Failure(result.error)
             }
         }
     }

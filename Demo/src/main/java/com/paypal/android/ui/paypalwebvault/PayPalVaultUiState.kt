@@ -14,8 +14,13 @@ data class PayPalVaultUiState(
     val vaultPayPalState: ActionState<PayPalWebCheckoutFinishVaultResult.Success, Exception> = ActionState.Idle,
     val createPaymentTokenState: ActionState<PayPalPaymentToken, Exception> = ActionState.Idle,
 ) {
-    val isCreateSetupTokenSuccessful: Boolean
-        get() = createSetupTokenState is ActionState.Success
+    val vaultState: ActionState<PayPalWebCheckoutFinishVaultResult.Success, Exception>
+        get() = when (createSetupTokenState) {
+            is ActionState.Idle -> ActionState.Idle
+            is ActionState.Loading -> ActionState.Loading
+            is ActionState.Failure -> createSetupTokenState
+            is ActionState.Success -> vaultPayPalState
+        }
 
     val isVaultPayPalSuccessful: Boolean
         get() = vaultPayPalState is ActionState.Success

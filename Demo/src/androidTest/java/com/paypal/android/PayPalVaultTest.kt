@@ -57,11 +57,12 @@ class PayPalVaultTest {
 
         robot
             .navigateToPayPalVault()
-            .vaultWithAppSwitch(
+            .vaultWithPayPal(
                 appSwitchEnabled = appSwitchEnabled,
-                returnToAppStrategy = returnToAppStrategy
+                returnToAppStrategy = returnToAppStrategy,
+                email = TestConfig.TEST_EMAIL,
+                password = TestConfig.TEST_PASSWORD
             )
-            .startVaultWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
             .createPaymentToken()
 
         Log.d(TAG, "✅ Test completed successfully!")

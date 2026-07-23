@@ -22,7 +22,6 @@ import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.PayPalPaymentTokenView
-import com.paypal.android.uishared.components.PayPalSetupTokenView
 import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.PropertyView
 import com.paypal.android.uishared.components.StepHeader
@@ -40,7 +39,7 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {
         // Auto-scroll once the user has started the flow; avoids scrolling on initial render
-        if (uiState.createSetupTokenState !is ActionState.Idle) {
+        if (uiState.vaultState !is ActionState.Idle) {
             scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
@@ -63,26 +62,24 @@ fun PayPalVaultView(viewModel: PayPalVaultViewModel = hiltViewModel()) {
             .padding(horizontal = contentPadding)
             .verticalScroll(scrollState)
     ) {
-        Step1_CreateSetupToken(uiState, viewModel)
-        if (uiState.isCreateSetupTokenSuccessful) {
-            Step2_VaultPayPal(uiState, viewModel)
-        }
+        Step1_VaultWithPayPal(uiState, viewModel)
         if (uiState.isVaultPayPalSuccessful) {
-            Step3_CreatePaymentToken(uiState, viewModel)
+            Step2_CreatePaymentToken(uiState, viewModel)
         }
         Spacer(modifier = Modifier.size(contentPadding))
     }
 }
 
 @Composable
-private fun Step1_CreateSetupToken(
+private fun Step1_VaultWithPayPal(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 1, title = "Create Setup Token")
+        StepHeader(stepNumber = 1, title = "Vault PayPal")
         PayPalUserIdentityForm(
             userIdentity = uiState.userIdentity,
             onUserIdentityChange = { value -> viewModel.userIdentity = value },
@@ -96,36 +93,12 @@ private fun Step1_CreateSetupToken(
             modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
-            defaultTitle = "CREATE SETUP TOKEN",
-            successTitle = "SETUP TOKEN CREATED",
-            state = uiState.createSetupTokenState,
-            onClick = { viewModel.createSetupToken() }
-        ) { state ->
-            when (state) {
-                is CompletedActionState.Failure -> ErrorView(error = state.value)
-                is CompletedActionState.Success -> PayPalSetupTokenView(setupToken = state.value)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Step2_VaultPayPal(
-    uiState: PayPalVaultUiState,
-    viewModel: PayPalVaultViewModel
-) {
-    val context = LocalContext.current
-    Column(
-        verticalArrangement = UIConstants.spacingMedium,
-    ) {
-        StepHeader(stepNumber = 2, title = "Vault PayPal")
-        ActionButtonColumn(
-            defaultTitle = "VAULT PAYPAL",
+            defaultTitle = "VAULT WITH PAYPAL",
             successTitle = "PAYPAL VAULTED",
-            state = uiState.vaultPayPalState,
+            state = uiState.vaultState,
             onClick = {
                 context.getActivityOrNull()?.let { activity ->
-                    viewModel.vaultSetupToken(activity)
+                    viewModel.createSetupTokenAndVault(activity)
                 }
             }
         ) { state ->
@@ -138,14 +111,14 @@ private fun Step2_VaultPayPal(
 }
 
 @Composable
-private fun Step3_CreatePaymentToken(
+private fun Step2_CreatePaymentToken(
     uiState: PayPalVaultUiState,
     viewModel: PayPalVaultViewModel
 ) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
     ) {
-        StepHeader(stepNumber = 3, title = "Create Payment Token")
+        StepHeader(stepNumber = 2, title = "Create Payment Token")
         ActionButtonColumn(
             defaultTitle = "CREATE PAYMENT TOKEN",
             successTitle = "PAYMENT TOKEN CREATED",

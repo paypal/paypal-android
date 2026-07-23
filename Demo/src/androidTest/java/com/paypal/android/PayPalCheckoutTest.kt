@@ -58,12 +58,13 @@ class PayPalCheckoutTest {
 
         checkoutRobot
             .navigateToPayPalCheckout()
-            .createOrder(
+            .checkoutWithPayPal(
                 appSwitchEnabled = appSwitchEnabled,
                 intent = intent,
-                returnToAppStrategy = returnToAppStrategy
+                returnToAppStrategy = returnToAppStrategy,
+                email = TestConfig.TEST_EMAIL,
+                password = TestConfig.TEST_PASSWORD
             )
-            .startCheckoutWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
             .completeOrder()
 
         Log.d(TAG, "✅ Test completed successfully!")

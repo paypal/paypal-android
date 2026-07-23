@@ -56,7 +56,7 @@ class DemoRobot(
         )
         composeTestRule.onNodeWithText("PayPal Checkout").performClick()
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("Create an Order"),
+            hasText("Launch PayPal"),
             TIMEOUT_LONG_MS
         )
     }
@@ -89,22 +89,47 @@ class DemoRobot(
         )
     }
 
-    fun createOrder(
+    fun clickCheckoutWithPayPal() = apply {
+        composeTestRule.waitUntilExactlyOneExists(hasText("CHECKOUT WITH PAYPAL"), TIMEOUT_LONG_MS)
+        composeTestRule.onNode(hasScrollAction())
+            .performScrollToNode(hasText("CHECKOUT WITH PAYPAL"))
+        composeTestRule.onNodeWithText("CHECKOUT WITH PAYPAL").performClick()
+    }
+
+    /**
+     * Exercises the PayPal Checkout view's single button, which triggers
+     * createPayPalSession(), order creation, and PayPalWebCheckoutClient.start() all from
+     * one tap, then completes the login/approval flow in the browser.
+     */
+    fun checkoutWithPayPal(
         appSwitchEnabled: Boolean,
         intent: String,
-        returnToAppStrategy: ReturnToAppStrategyOption
+        returnToAppStrategy: ReturnToAppStrategyOption,
+        email: String,
+        password: String,
     ) = apply {
         setAppSwitch(appSwitchEnabled)
         setIntent(intent)
         setReturnToAppStrategyOption(returnToAppStrategy)
-        clickCreateOrder()
-        verifyOrderCreated()
+        clickCheckoutWithPayPal()
 
-        // Verify the "ID" label exists, which indicates OrderView is displayed
-        composeTestRule.waitUntilExactlyOneExists(hasText("ID"), TIMEOUT_LONG_MS)
+        // Delegate to web page robot for login
+        Log.d(TAG, "🚪 Starting PayPal checkout with login for email: $email")
+        webPageRobot.checkout(email, password)
+
+        // Wait for return to app and checkout completion
+        waitForAppToReturn()
+
+        composeTestRule.waitUntilExactlyOneExists(hasText("CHECKOUT COMPLETE"), TIMEOUT_LONG_MS)
+
+        // Verify Order ID and Payer ID labels are present
+        composeTestRule.waitUntilExactlyOneExists(hasText("Order ID"))
+        composeTestRule.waitUntilExactlyOneExists(hasText("Payer ID"))
+
         Log.d(
             TAG,
-            "✅ Order created successfully with intent: $intent, returnToAppStrategy: $returnToAppStrategy"
+            "🚀 PayPal checkout with login completed successfully with intent: $intent, " +
+                    "returnToAppStrategy: $returnToAppStrategy"
         )
     }
 
@@ -130,37 +155,6 @@ class DemoRobot(
             StoreInVaultOption.NO -> "NO"
         }
         composeTestRule.onNodeWithText(optionText).performClick()
-    }
-
-    fun startCheckoutWithLogin(email: String, password: String) = apply {
-        // Wait for Step 2 to appear
-        composeTestRule.waitUntilExactlyOneExists(
-            hasText("Launch PayPal"),
-            TIMEOUT_LONG_MS
-        )
-
-        // Click on "START CHECKOUT" button
-        composeTestRule.onNode(hasScrollAction())
-            .performScrollToNode(hasText("START CHECKOUT"))
-
-        composeTestRule
-            .waitUntilExactlyOneExists(hasText("START CHECKOUT"), TIMEOUT_LONG_MS)
-        composeTestRule.onNodeWithText("START CHECKOUT").performClick()
-
-        // Delegate to web page robot for login
-        Log.d(TAG, "🚪 Starting PayPal checkout with login for email: $email")
-        webPageRobot.checkout(email, password)
-
-        // Wait for return to app and checkout completion
-        waitForAppToReturn()
-
-        composeTestRule.waitUntilExactlyOneExists(hasText("CHECKOUT COMPLETE"), TIMEOUT_LONG_MS)
-
-        // Verify Order ID and Payer ID labels are present
-        composeTestRule.waitUntilExactlyOneExists(hasText("Order ID"))
-        composeTestRule.waitUntilExactlyOneExists(hasText("Payer ID"))
-
-        Log.d(TAG, "🚀 PayPal checkout with login completed successfully")
     }
 
     fun completeOrder(intent: String? = null) = apply {
@@ -194,22 +188,42 @@ class DemoRobot(
         )
         composeTestRule.onNodeWithText("Paypal Vault").performClick()
         composeTestRule.waitUntilExactlyOneExists(
-            hasText("Create Setup Token")
+            hasText("Vault PayPal")
         )
     }
 
-    fun vaultWithAppSwitch(
+    fun clickVaultWithPayPal() = apply {
+        composeTestRule.waitUntilExactlyOneExists(hasText("VAULT WITH PAYPAL"), TIMEOUT_LONG_MS)
+        composeTestRule.onNodeWithText("VAULT WITH PAYPAL").performClick()
+    }
+
+    /**
+     * Exercises the PayPal Vault view's single button, which triggers createPayPalSession(),
+     * setup token creation, and PayPalWebCheckoutClient.vault() all from one tap, then completes
+     * the login/approval flow in the browser.
+     */
+    fun vaultWithPayPal(
         appSwitchEnabled: Boolean,
-        returnToAppStrategy: ReturnToAppStrategyOption
+        returnToAppStrategy: ReturnToAppStrategyOption,
+        email: String,
+        password: String,
     ) = apply {
         setAppSwitch(appSwitchEnabled)
         setReturnToAppStrategyOption(returnToAppStrategy)
-        clickCreateSetupToken()
-        verifySetupTokenCreated()
+        clickVaultWithPayPal()
+
+        webPageRobot.checkout(email, password)
+
+        // Wait for return to app and vault completion
+        waitForAppToReturn()
+
+        // Wait for vault to complete and verify success
+        composeTestRule.waitUntilExactlyOneExists(hasText("PAYPAL VAULTED"), TIMEOUT_LONG_MS)
+        composeTestRule.waitUntilExactlyOneExists(hasText("Approval Session ID"))
 
         Log.d(
             TAG,
-            "✅ Setup token created successfully with appSwitch: $appSwitchEnabled, " +
+            "🚀 PayPal vault with login completed successfully with appSwitch: $appSwitchEnabled, " +
                     "returnToAppStrategy: $returnToAppStrategy"
         )
     }
@@ -227,28 +241,6 @@ class DemoRobot(
             hasText("SETUP TOKEN CREATED"),
             TIMEOUT_LONG_MS
         )
-    }
-
-    fun startVaultWithLogin(email: String, password: String) = apply {
-        // Wait for Step 2 to appear
-        composeTestRule.waitUntilExactlyOneExists(
-            hasText("VAULT PAYPAL")
-        )
-
-        // Click on "START VAULT" button
-        composeTestRule.waitUntilExactlyOneExists(hasText("VAULT PAYPAL"))
-        composeTestRule.onNodeWithText("VAULT PAYPAL").performClick()
-
-        webPageRobot.checkout(email, password)
-
-        // Wait for return to app and vault completion
-        waitForAppToReturn()
-
-        // Wait for vault to complete and verify success
-        composeTestRule.waitUntilExactlyOneExists(hasText("PAYPAL VAULTED"), TIMEOUT_LONG_MS)
-        composeTestRule.waitUntilExactlyOneExists(hasText("Approval Session ID"))
-
-        Log.d(TAG, "🚀 PayPal vault with login completed successfully")
     }
 
     fun createPaymentToken() = apply {

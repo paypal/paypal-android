@@ -117,7 +117,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         )
     }
 
-    fun createOrder() {
+    fun createOrderAndStartCheckout(activity: ComponentActivity) {
         createPayPalSession()
         viewModelScope.launch {
             createOrderState = ActionState.Loading
@@ -125,16 +125,11 @@ class PayPalCheckoutViewModel @Inject constructor(
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
                 OrderRequest(intentOption, shouldVault)
             }
-            createOrderState = createOrderUseCase(orderRequest).mapToActionState()
-        }
-    }
-
-    fun startCheckout(activity: ComponentActivity) {
-        val orderId = createdOrder?.id
-        if (orderId == null) {
-            payPalWebCheckoutState = ActionState.Failure(Exception("Create an order to continue."))
-        } else {
-            startCheckoutWithOrderId(activity, orderId)
+            val result = createOrderUseCase(orderRequest).mapToActionState()
+            createOrderState = result
+            (result as? ActionState.Success)?.value?.id?.let { orderId ->
+                startCheckoutWithOrderId(activity, orderId)
+            }
         }
     }
 
