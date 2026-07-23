@@ -190,7 +190,7 @@ class PayPalWebCheckoutClient internal constructor(
                 withContext(Dispatchers.Main) {
                     callback.onPayPalWebStartResult(
                         PayPalPresentAuthChallengeResult.Failure(
-                            e as? PayPalSDKError ?: PayPalWebCheckoutError.browserSwitchError(e)
+                            e as? PayPalSDKError ?: PayPalWebCheckoutError.unknownError
                         )
                     )
                 }
@@ -270,7 +270,7 @@ class PayPalWebCheckoutClient internal constructor(
                 withContext(Dispatchers.Main) {
                     callback.onPayPalWebVaultResult(
                         PayPalPresentAuthChallengeResult.Failure(
-                            e as? PayPalSDKError ?: PayPalWebCheckoutError.browserSwitchError(e)
+                            e as? PayPalSDKError ?: PayPalWebCheckoutError.unknownError
                         )
                     )
                 }
