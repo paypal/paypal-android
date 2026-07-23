@@ -1873,6 +1873,29 @@ class PayPalWebCheckoutClientUnitTest {
     }
 
     @Test
+    fun `start() with orderId appends platform query param when app switch is not enabled`() = runTest {
+        val sutV3 = makeSutWithUrlScheme()
+        val uriSlot = slot<Uri>()
+        every { deviceInspector.isPayPalInstalled } returns false
+        every {
+            payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+        } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+        val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+        sutV3.createPayPalSession(
+            tokenType = TokenType.ORDER_ID,
+            userIdentity = fakeUserIdentity,
+            urlConfig = fakeUrlConfig,
+        )
+        // appSwitchEligible = false on fakeSessionResponse ensures appSwitchEnabled resolves to false
+        sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+        sutV3.start(activity, "fake-order-id", callback)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("android", uriSlot.captured.getQueryParameter("platform"))
+    }
+
+    @Test
     fun `start() with orderId delivers failure without falling back to patchCCO when createShopperSession throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
