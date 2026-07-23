@@ -701,6 +701,17 @@ class PayPalWebCheckoutClient internal constructor(
     private fun canAttemptPayPalAppSwitch(): Boolean =
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
 
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
+        return if (appSwitchEnabled) {
+            redirectUrl.toUri()
+        } else {
+            checkoutFallbackUrl.toUri()
+        }.appendTokenQueryParam(token)
+            .appendShopperSessionIdQueryParam(shopperSessionConfig.id)
+            .appendObservabilityQueryParams()
+            .appendPlatformQueryParam()
+    }
+
     /**
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
      * appends the given token as a query param.
@@ -724,24 +735,22 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
-        val launchUri = if (appSwitchEnabled) {
-            redirectUrl.toUri()
-        } else {
-            checkoutFallbackUrl.toUri()
-        }.appendTokenQueryParam(token)
-
-        val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
-            launchUri.buildUpon()
-                .appendQueryParameter("shopperSessionId", shopperSessionConfig.id)
+    /**
+     * Appends shopperSessionId as a query param to a URI if it is not empty.
+     */
+    private fun Uri.appendShopperSessionIdQueryParam(shopperSessionId: String): Uri {
+        return if (shopperSessionId.isNotBlank()) {
+            buildUpon()
+                .appendQueryParameter("shopperSessionId", shopperSessionId)
                 .build()
         } else {
-            launchUri
+            this
         }
-
-        return uriWithSessionId.appendObservabilityQueryParams()
     }
 
+    /**
+     * Appends query params that are needed for observability on PayPal app.
+     */
     private fun Uri.appendObservabilityQueryParams(): Uri {
         val tokenType = requireNotNull(sessionTokenType) {
             "sessionTokenType must be set by createPayPalSession() before appendObservabilityQueryParams() is called."
@@ -757,6 +766,18 @@ class PayPalWebCheckoutClient internal constructor(
             .appendQueryParameter("funding_source", PayPalWebCheckoutFundingSource.PAYPAL.value)
             .appendQueryParameter("switch_initiated_time", System.currentTimeMillis().toString())
             .build()
+    }
+
+    /**
+     * Appends platform as a query param to browser switch urls, to be aligned with the iOS SDK.
+     * The iOS sdk appends this to fix an issue with redirecting back to merchant app.
+     */
+    private fun Uri.appendPlatformQueryParam(): Uri {
+        return if (!appSwitchEnabled) {
+            buildUpon().appendQueryParameter("platform", "android").build()
+        } else {
+            this
+        }
     }
 
     private fun buildPayPalCheckoutUri(
