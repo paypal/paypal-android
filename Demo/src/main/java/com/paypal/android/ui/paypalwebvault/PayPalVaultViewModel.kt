@@ -87,12 +87,6 @@ class PayPalVaultViewModel @Inject constructor(
     private val createdSetupToken: PayPalSetupToken?
         get() = (createSetupTokenState as? ActionState.Success)?.value
 
-    /**
-     * Triggered by a single button tap: pre-warms the PayPal session, creates the setup token,
-     * and — on success — immediately starts PayPal vault with that setup token.
-     * createPayPalSession() must be called from the buyer's vault-intent tap (not earlier), so
-     * this all happens within one click handler rather than across separate buttons.
-     */
     fun createSetupTokenAndVault(activity: ComponentActivity) {
         createPayPalSession()
         viewModelScope.launch {

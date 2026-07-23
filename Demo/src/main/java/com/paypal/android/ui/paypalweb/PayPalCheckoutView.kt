@@ -106,8 +106,6 @@ private fun Step1_CheckoutWithPayPal(uiState: PayPalUiState, viewModel: PayPalCh
             fundingSource = uiState.fundingSource,
             onFundingSourceChange = { value -> viewModel.fundingSource = value },
         )
-        // Single tap: createPayPalSession() -> create order -> start PayPal checkout.
-        // createPayPalSession() must fire on the buyer's checkout-intent tap, not earlier.
         ActionButtonColumn(
             defaultTitle = "CHECKOUT WITH PAYPAL",
             successTitle = "CHECKOUT COMPLETE",
