@@ -702,56 +702,42 @@ class PayPalWebCheckoutClient internal constructor(
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
 
     private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
-        return if (appSwitchEnabled) {
-            redirectUrl.toUri()
-        } else {
-            checkoutFallbackUrl.toUri()
-        }.appendTokenQueryParam(token)
-            .appendShopperSessionIdQueryParam(shopperSessionConfig.id)
-            .appendObservabilityQueryParams()
-            .appendPlatformQueryParam()
+        val launchUrl = if (appSwitchEnabled) redirectUrl else checkoutFallbackUrl
+        // Drop a trailing '&' so appendQueryParameter doesn't produce a double separator.
+        val baseUri = launchUrl.removeSuffix("&").toUri()
+        return baseUri.buildUpon().apply {
+            appendTokenQueryParam(token)
+            appendShopperSessionIdQueryParam(shopperSessionConfig.id)
+            appendObservabilityQueryParams()
+            appendPlatformQueryParam()
+        }.build()
     }
 
-    /**
-     * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
-     * appends the given token as a query param.
-     */
-    private fun Uri.appendTokenQueryParam(token: String): Uri {
+    private fun Uri.Builder.appendTokenQueryParam(token: String) {
         val tokenType = requireNotNull(sessionTokenType) {
             "sessionTokenType must be set by createPayPalSession() before appendTokenQueryParam() is called."
-        }
-        val trimmedUri = if (toString().endsWith("&")) {
-            toString().dropLast(1).toUri()
-        } else {
-            this
         }
         val paramName = when (tokenType) {
             TokenType.ORDER_ID -> "token"
             TokenType.VAULT_ID -> "approval_session_id"
             TokenType.BILLING_TOKEN -> "ba_token"
         }
-        return trimmedUri.buildUpon()
-            .appendQueryParameter(paramName, token)
-            .build()
+        appendQueryParameter(paramName, token)
     }
 
     /**
-     * Appends shopperSessionId as a query param to a URI if it is not empty.
+     * Appends shopperSessionId as a query param if it is not blank.
      */
-    private fun Uri.appendShopperSessionIdQueryParam(shopperSessionId: String): Uri {
-        return if (shopperSessionId.isNotBlank()) {
-            buildUpon()
-                .appendQueryParameter("shopperSessionId", shopperSessionId)
-                .build()
-        } else {
-            this
+    private fun Uri.Builder.appendShopperSessionIdQueryParam(shopperSessionId: String) {
+        if (shopperSessionId.isNotBlank()) {
+            appendQueryParameter("shopperSessionId", shopperSessionId)
         }
     }
 
     /**
      * Appends query params that are needed for observability on PayPal app.
      */
-    private fun Uri.appendObservabilityQueryParams(): Uri {
+    private fun Uri.Builder.appendObservabilityQueryParams() {
         val tokenType = requireNotNull(sessionTokenType) {
             "sessionTokenType must be set by createPayPalSession() before appendObservabilityQueryParams() is called."
         }
@@ -759,24 +745,20 @@ class PayPalWebCheckoutClient internal constructor(
             TokenType.ORDER_ID -> "ecs"
             TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "va"
         }
-        return buildUpon()
-            .appendQueryParameter("source", "pda")
-            .appendQueryParameter("merchant", coreConfig.merchantId)
-            .appendQueryParameter("flow_type", flowType)
-            .appendQueryParameter("funding_source", PayPalWebCheckoutFundingSource.PAYPAL.value)
-            .appendQueryParameter("switch_initiated_time", System.currentTimeMillis().toString())
-            .build()
+        appendQueryParameter("source", "pda")
+        appendQueryParameter("merchant", coreConfig.merchantId)
+        appendQueryParameter("flow_type", flowType)
+        appendQueryParameter("funding_source", PayPalWebCheckoutFundingSource.PAYPAL.value)
+        appendQueryParameter("switch_initiated_time", System.currentTimeMillis().toString())
     }
 
     /**
      * Appends platform as a query param to browser switch urls, to be aligned with the iOS SDK.
      * The iOS sdk appends this to fix an issue with redirecting back to merchant app.
      */
-    private fun Uri.appendPlatformQueryParam(): Uri {
-        return if (!appSwitchEnabled) {
-            buildUpon().appendQueryParameter("platform", "android").build()
-        } else {
-            this
+    private fun Uri.Builder.appendPlatformQueryParam() {
+        if (!appSwitchEnabled) {
+            appendQueryParameter("platform", "android")
         }
     }
 
