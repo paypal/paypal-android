@@ -71,7 +71,7 @@ internal data class TrackingEventParams(
     val appSwitchUrl: String? = null,
     @SerialName("checkout_fallback_url")
     val fallbackUrl: String? = null,
-    @SerialName("error_description")
+    @SerialName("error_desc")
     val errorDescription: String? = null,
     @SerialName("is_cached_session")
     val isCachedSession: Boolean? = null,
