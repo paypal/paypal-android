@@ -25,6 +25,7 @@ import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
+import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
 import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
@@ -2367,12 +2368,23 @@ class PayPalWebCheckoutClientUnitTest {
         )
 
         assertSame(fakeSessionResponse, outcome)
+        verify {
+            analytics.notify(
+                CreatePayPalSessionEvent.SUCCEEDED,
+                params = match {
+                    it.linkType == LinkType.APP_LINK && it.shopperSession === fakeSessionResponse
+                },
+            )
+        }
     }
 
     @Test
     fun `createShopperSessionWithAppSwitchEligibility() returns null on a session-creation-or-network failure`() =
         runTest {
             val sessionError = PayPalSDKError(5, "server responded with an error")
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.CustomUrlScheme("com.example.app")
             coEvery {
                 createShopperSessionAPI(
                     token = any(),
@@ -2390,6 +2402,13 @@ class PayPalWebCheckoutClientUnitTest {
             )
 
             assertNull(outcome)
+            verify {
+                analytics.notify(
+                    CreatePayPalSessionEvent.FAILED,
+                    params = match { it.linkType == LinkType.DEEP_LINK },
+                    errorDescription = sessionError.errorDescription,
+                )
+            }
         }
 
     @Test
@@ -2799,6 +2818,7 @@ class PayPalWebCheckoutClientUnitTest {
                         returnAppUrl = "https://example.com/paypal-return",
                         cancelAppUrl = "https://example.com/paypal-cancel",
                         fallbackSchemeUrl = "com.example.app://paypal",
+                        linkType = LinkType.APP_LINK,
                     ),
                     errorDescription = "session error",
                 )
@@ -2835,6 +2855,7 @@ class PayPalWebCheckoutClientUnitTest {
                         returnAppUrl = "https://example.com/paypal-return",
                         cancelAppUrl = "https://example.com/paypal-cancel",
                         fallbackSchemeUrl = "com.example.app://paypal",
+                        linkType = LinkType.APP_LINK,
                     ),
                     errorDescription = "session error",
                 )
@@ -3115,6 +3136,12 @@ class PayPalWebCheckoutClientUnitTest {
             assertEquals("$expectedBase/cancel", paramsSlot.captured.cancelAppUrl)
             // The raw fallback scheme is still forwarded unchanged.
             assertEquals("com.example.app", paramsSlot.captured.fallbackSchemeUrl)
+            verify {
+                analytics.notify(
+                    CreatePayPalSessionEvent.STARTED,
+                    params = match { it.linkType == LinkType.DEEP_LINK },
+                )
+            }
         }
 
     @Test
@@ -3145,5 +3172,11 @@ class PayPalWebCheckoutClientUnitTest {
             // App-link chosen -> the merchant's https return/cancel URLs are sent unchanged.
             assertEquals("https://example.com/paypal-return", paramsSlot.captured.returnAppUrl)
             assertEquals("https://example.com/paypal-cancel", paramsSlot.captured.cancelAppUrl)
+            verify {
+                analytics.notify(
+                    CreatePayPalSessionEvent.STARTED,
+                    params = match { it.linkType == LinkType.APP_LINK },
+                )
+            }
         }
 }

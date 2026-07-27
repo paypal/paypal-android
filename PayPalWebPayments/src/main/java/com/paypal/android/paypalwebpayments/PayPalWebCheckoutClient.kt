@@ -473,13 +473,15 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
-        val launchUri = shopperSession.getLaunchUri(orderId)
         val returnToAppStrategy = getReturnToAppStrategyUseCase(
             appLinkReturnUrl = returnToAppUrlConfig?.returnAppUrl,
             fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl,
         )
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
+        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
+            appSwitchEnabled = appSwitchEnabled,
+            linkType = returnToAppStrategy.linkType,
+        )
+        val launchUri = shopperSession.getLaunchUri(orderId)
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
             analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
@@ -543,14 +545,15 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
-        val launchUri = shopperSession.getLaunchUri(setupTokenId)
         val returnToAppStrategy = getReturnToAppStrategyUseCase(
             appLinkReturnUrl = returnToAppUrlConfig?.returnAppUrl,
             fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl,
         )
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
-        val endTime = System.currentTimeMillis()
+        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
+            appSwitchEnabled = appSwitchEnabled,
+            linkType = returnToAppStrategy.linkType,
+        )
+        val launchUri = shopperSession.getLaunchUri(setupTokenId)
 
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
@@ -558,6 +561,7 @@ class PayPalWebCheckoutClient internal constructor(
         } else {
             analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
         }
+        val endTime = System.currentTimeMillis()
 
         val result = payPalWebLauncher.launchWithUrl(
             context = activity,
@@ -661,6 +665,7 @@ class PayPalWebCheckoutClient internal constructor(
             returnAppUrl = effectiveUrlConfig.returnAppUrl,
             cancelAppUrl = effectiveUrlConfig.cancelAppUrl,
             fallbackSchemeUrl = effectiveUrlConfig.fallbackSchemeUrl,
+            linkType = returnToAppStrategy.linkType,
         )
         analytics.notify(CreatePayPalSessionEvent.STARTED, params = appSwitchAnalyticsEventParams)
 
