@@ -72,11 +72,39 @@ class PayPalWebCheckoutClient internal constructor(
     private var appSwitchEnabled: Boolean = false
     private var appSwitchAnalyticsEventParams = createAppSwitchAnalyticsEventParams()
 
-    // Shopper Session id (v3) — set by createPayPalSession(), awaited by start() / vault()
+    private val shopperSessionPrewarmLock = Any()
+    private var activeShopperSessionPrewarm: ShopperSessionPrewarm? = null
+
+    // Test hook for replacing only the response deferred while preserving the strategy and
+    // analytics context paired with the active prewarm.
     @VisibleForTesting
-    internal var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>? = null
-    private var returnToAppUrlConfig: ReturnToAppUrlConfig? = null
-    private var sessionTokenType: TokenType? = null
+    internal var shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>?
+        get() = synchronized(shopperSessionPrewarmLock) {
+            activeShopperSessionPrewarm?.shopperSessionDeferred
+        }
+        set(value) {
+            synchronized(shopperSessionPrewarmLock) {
+                activeShopperSessionPrewarm = value?.let {
+                    checkNotNull(activeShopperSessionPrewarm) {
+                        "createPayPalSession() must be called before replacing shopperSessionDeferred."
+                    }.copy(shopperSessionDeferred = it)
+                }
+            }
+        }
+
+    private data class ShopperSessionPrewarm(
+        val shopperSessionDeferred: Deferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>,
+        val requestContextDeferred: Deferred<ShopperSessionRequestContext>,
+    )
+
+    private data class ShopperSessionRequestContext(
+        val returnToAppStrategy: ReturnToAppStrategy,
+        val effectiveUrlConfig: ReturnToAppUrlConfig,
+        val analyticsEventParams: AppSwitchAnalyticsEventParams,
+        val paymentType: String,
+        val paypalNativeAppInstalled: Boolean,
+        val tokenType: TokenType,
+    )
 
     constructor(
         context: Context,
@@ -132,12 +160,23 @@ class PayPalWebCheckoutClient internal constructor(
         urlConfig: ReturnToAppUrlConfig,
         userAction: PayPalUserAction = PayPalUserAction.CONTINUE,
     ) {
-        resetAppSwitchAnalyticsEventParams()
-        sessionTokenType = tokenType
-        returnToAppUrlConfig = urlConfig
-        shopperSessionDeferred = applicationScope.async {
-            createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
+        val requestContextDeferred = applicationScope.async {
+            createShopperSessionRequestContext(tokenType, urlConfig, userIdentity, userAction)
         }
+        val sessionDeferred = applicationScope.async {
+            createShopperSessionWithAppSwitchEligibility(
+                token = "ppcp_android",
+                tokenType = tokenType,
+                userIdentity = userIdentity,
+                requestContext = requestContextDeferred.await(),
+            )
+        }
+        setActiveShopperSessionPrewarm(
+            ShopperSessionPrewarm(
+                shopperSessionDeferred = sessionDeferred,
+                requestContextDeferred = requestContextDeferred,
+            )
+        )
     }
 
     /**
@@ -157,24 +196,29 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String,
         callback: PayPalWebStartCallback,
     ) {
-        val deferred = shopperSessionDeferred
+        val prewarm = getActiveShopperSessionPrewarm()
         val startTime = System.currentTimeMillis()
-        if (deferred == null) {
+        if (prewarm == null) {
             resetAppSwitchAnalyticsEventParams()
             notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
             notifyCheckoutSessionNotStarted(orderId, callback)
             return
         }
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
-            checkoutOrderId = orderId,
-            isVault = false,
-        )
         applicationScope.launch {
+            var eventParams = createAppSwitchAnalyticsEventParams().copy(
+                checkoutOrderId = orderId,
+                isVault = false,
+            )
             try {
-                val shopperSession = deferred.await()
-                shopperSessionDeferred = null
-                setShopperSessionAnalyticsParams(shopperSession)
-                analytics.notify(CheckoutEvent.STARTED, params = appSwitchAnalyticsEventParams)
+                val requestContext = prewarm.requestContextDeferred.await()
+                eventParams = requestContext.analyticsEventParams.copy(
+                    checkoutOrderId = orderId,
+                    isVault = false,
+                )
+                val shopperSession = prewarm.shopperSessionDeferred.await()
+                clearActiveShopperSessionPrewarm(prewarm)
+                eventParams = eventParams.withShopperSessionAnalyticsParams(shopperSession)
+                analytics.notify(CheckoutEvent.STARTED, params = eventParams)
 
                 val result = if (shopperSession != null) {
                     launchCheckoutWithShopperSession(
@@ -182,6 +226,9 @@ class PayPalWebCheckoutClient internal constructor(
                         shopperSession = shopperSession,
                         orderId = orderId,
                         startTime = startTime,
+                        returnToAppStrategy = requestContext.returnToAppStrategy,
+                        sessionTokenType = requestContext.tokenType,
+                        eventParams = eventParams,
                     )
                 } else {
                     launchCheckoutViaPatchCCOFallback(
@@ -195,10 +242,10 @@ class PayPalWebCheckoutClient internal constructor(
             } catch (e: Exception) {
                 analytics.notify(
                     event = CheckoutEvent.FAILED,
-                    params = appSwitchAnalyticsEventParams,
+                    params = eventParams,
                     errorDescription = e.message
                 )
-                shopperSessionDeferred = null
+                clearActiveShopperSessionPrewarm(prewarm)
                 withContext(Dispatchers.Main) {
                     callback.onPayPalWebStartResult(
                         PayPalPresentAuthChallengeResult.Failure(
@@ -241,23 +288,28 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebVaultCallback,
     ) {
         val startTime = System.currentTimeMillis()
-        val deferred = shopperSessionDeferred
-        if (deferred == null) {
+        val prewarm = getActiveShopperSessionPrewarm()
+        if (prewarm == null) {
             resetAppSwitchAnalyticsEventParams()
             notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
             notifyVaultSessionNotStarted(setupTokenId, callback)
             return
         }
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
-            vaultSetupTokenId = setupTokenId,
-            isVault = true,
-        )
         applicationScope.launch {
+            var eventParams = createAppSwitchAnalyticsEventParams().copy(
+                vaultSetupTokenId = setupTokenId,
+                isVault = true,
+            )
             try {
-                val shopperSession = deferred.await()
-                shopperSessionDeferred = null
-                setShopperSessionAnalyticsParams(shopperSession)
-                analytics.notify(VaultEvent.STARTED, params = appSwitchAnalyticsEventParams)
+                val requestContext = prewarm.requestContextDeferred.await()
+                eventParams = requestContext.analyticsEventParams.copy(
+                    vaultSetupTokenId = setupTokenId,
+                    isVault = true,
+                )
+                val shopperSession = prewarm.shopperSessionDeferred.await()
+                clearActiveShopperSessionPrewarm(prewarm)
+                eventParams = eventParams.withShopperSessionAnalyticsParams(shopperSession)
+                analytics.notify(VaultEvent.STARTED, params = eventParams)
 
                 val result = if (shopperSession != null) {
                     launchVaultWithSession(
@@ -265,6 +317,9 @@ class PayPalWebCheckoutClient internal constructor(
                         shopperSession = shopperSession,
                         setupTokenId = setupTokenId,
                         startTime = startTime,
+                        returnToAppStrategy = requestContext.returnToAppStrategy,
+                        sessionTokenType = requestContext.tokenType,
+                        eventParams = eventParams,
                     )
                 } else {
                     launchVaultViaPatchCCOFallback(
@@ -278,10 +333,10 @@ class PayPalWebCheckoutClient internal constructor(
             } catch (e: Exception) {
                 analytics.notify(
                     event = VaultEvent.FAILED,
-                    params = appSwitchAnalyticsEventParams,
+                    params = eventParams,
                     errorDescription = e.message
                 )
-                shopperSessionDeferred = null
+                clearActiveShopperSessionPrewarm(prewarm)
                 withContext(Dispatchers.Main) {
                     callback.onPayPalWebVaultResult(
                         PayPalPresentAuthChallengeResult.Failure(
@@ -425,20 +480,27 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         orderId: String,
         startTime: Long,
+        returnToAppStrategy: ReturnToAppStrategy,
+        sessionTokenType: TokenType,
+        eventParams: AppSwitchAnalyticsEventParams,
     ): PayPalPresentAuthChallengeResult {
-        appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
-        val launchUri = shopperSession.getLaunchUri(orderId)
-        val returnToAppStrategy = getReturnToAppStrategyUseCase(
-            appLinkReturnUrl = returnToAppUrlConfig?.returnAppUrl,
-            fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl,
+        val isAppSwitchEnabled = returnToAppStrategy is ReturnToAppStrategy.AppLink &&
+            shopperSession.appSwitchEligible &&
+            canAttemptPayPalAppSwitch()
+        var launchEventParams = eventParams.copy(
+            appSwitchEnabled = isAppSwitchEnabled,
+            linkType = returnToAppStrategy.linkType,
         )
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
-        if (appSwitchEnabled) {
-            appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
-            analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
+        val launchUri = shopperSession.getLaunchUri(
+            token = orderId,
+            tokenType = sessionTokenType,
+            appSwitchEnabled = isAppSwitchEnabled,
+        )
+        if (isAppSwitchEnabled) {
+            launchEventParams = launchEventParams.copy(appSwitchUrl = launchUri.toString())
+            analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = launchEventParams)
         } else {
-            analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = launchEventParams)
         }
         val endTime = System.currentTimeMillis()
 
@@ -449,31 +511,42 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = TokenType.ORDER_ID,
             returnToAppStrategy = returnToAppStrategy,
         )
-        logCheckoutPresentAuthChallengeResult(result)
-        notifyUserPerceivedLatency(LatencyFlow.CHECKOUT, result, startTime, endTime)
+        logCheckoutPresentAuthChallengeResult(result, isAppSwitchEnabled, launchEventParams)
+        notifyUserPerceivedLatency(
+            LatencyFlow.CHECKOUT,
+            result,
+            startTime,
+            endTime,
+            isAppSwitchEnabled,
+        )
+        publishActiveFlowAnalytics(launchEventParams, isAppSwitchEnabled)
         return result
     }
 
-    private fun logCheckoutPresentAuthChallengeResult(result: PayPalPresentAuthChallengeResult) {
+    private fun logCheckoutPresentAuthChallengeResult(
+        result: PayPalPresentAuthChallengeResult,
+        isAppSwitchEnabled: Boolean,
+        eventParams: AppSwitchAnalyticsEventParams,
+    ) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
-                val event = if (appSwitchEnabled) {
+                val event = if (isAppSwitchEnabled) {
                     CheckoutEvent.APP_SWITCH_SUCCEEDED
                 } else {
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
                 }
-                analytics.notify(event, params = appSwitchAnalyticsEventParams)
+                analytics.notify(event, params = eventParams)
                 sessionStore.authState = result.authState
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
-                val event = if (appSwitchEnabled) {
+                val event = if (isAppSwitchEnabled) {
                     CheckoutEvent.APP_SWITCH_FAILED
                 } else {
                     CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
                 }
                 analytics.notify(
                     event,
-                    params = appSwitchAnalyticsEventParams,
+                    params = eventParams,
                     errorDescription = result.error.errorDescription
                 )
             }
@@ -495,22 +568,29 @@ class PayPalWebCheckoutClient internal constructor(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
         setupTokenId: String,
         startTime: Long,
+        returnToAppStrategy: ReturnToAppStrategy,
+        sessionTokenType: TokenType,
+        eventParams: AppSwitchAnalyticsEventParams,
     ): PayPalPresentAuthChallengeResult {
-        appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled)
-        val launchUri = shopperSession.getLaunchUri(setupTokenId)
-        val returnToAppStrategy = getReturnToAppStrategyUseCase(
-            appLinkReturnUrl = returnToAppUrlConfig?.returnAppUrl,
-            fallbackSchemeUrl = returnToAppUrlConfig?.fallbackSchemeUrl,
+        val isAppSwitchEnabled = returnToAppStrategy is ReturnToAppStrategy.AppLink &&
+            shopperSession.appSwitchEligible &&
+            canAttemptPayPalAppSwitch()
+        var launchEventParams = eventParams.copy(
+            appSwitchEnabled = isAppSwitchEnabled,
+            linkType = returnToAppStrategy.linkType,
         )
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(linkType = returnToAppStrategy.linkType)
+        val launchUri = shopperSession.getLaunchUri(
+            token = setupTokenId,
+            tokenType = sessionTokenType,
+            appSwitchEnabled = isAppSwitchEnabled,
+        )
         val endTime = System.currentTimeMillis()
 
-        if (appSwitchEnabled) {
-            appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
-            analytics.notify(VaultEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
+        if (isAppSwitchEnabled) {
+            launchEventParams = launchEventParams.copy(appSwitchUrl = launchUri.toString())
+            analytics.notify(VaultEvent.APP_SWITCH_STARTED, params = launchEventParams)
         } else {
-            analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = launchEventParams)
         }
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -520,31 +600,42 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = TokenType.VAULT_ID,
             returnToAppStrategy = returnToAppStrategy,
         )
-        notifyUserPerceivedLatency(LatencyFlow.VAULT, result, startTime, endTime)
-        logVaultPresentAuthChallengeResult(result)
+        notifyUserPerceivedLatency(
+            LatencyFlow.VAULT,
+            result,
+            startTime,
+            endTime,
+            isAppSwitchEnabled,
+        )
+        logVaultPresentAuthChallengeResult(result, isAppSwitchEnabled, launchEventParams)
+        publishActiveFlowAnalytics(launchEventParams, isAppSwitchEnabled)
         return result
     }
 
-    private fun logVaultPresentAuthChallengeResult(result: PayPalPresentAuthChallengeResult) {
+    private fun logVaultPresentAuthChallengeResult(
+        result: PayPalPresentAuthChallengeResult,
+        isAppSwitchEnabled: Boolean,
+        eventParams: AppSwitchAnalyticsEventParams,
+    ) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
-                val event = if (appSwitchEnabled) {
+                val event = if (isAppSwitchEnabled) {
                     VaultEvent.APP_SWITCH_SUCCEEDED
                 } else {
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
                 }
-                analytics.notify(event, params = appSwitchAnalyticsEventParams)
+                analytics.notify(event, params = eventParams)
                 sessionStore.authState = result.authState
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
-                val event = if (appSwitchEnabled) {
+                val event = if (isAppSwitchEnabled) {
                     VaultEvent.APP_SWITCH_FAILED
                 } else {
                     VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
                 }
                 analytics.notify(
                     event,
-                    params = appSwitchAnalyticsEventParams,
+                    params = eventParams,
                     errorDescription = result.error.errorDescription
                 )
             }
@@ -593,8 +684,28 @@ class PayPalWebCheckoutClient internal constructor(
         userIdentity: PayPalUserIdentity?,
         userAction: PayPalUserAction,
     ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
-        val isVaultRequest = tokenType != TokenType.ORDER_ID
+        val requestContext = createShopperSessionRequestContext(
+            tokenType = tokenType,
+            urlConfig = urlConfig,
+            userIdentity = userIdentity,
+            userAction = userAction,
+        )
+        appSwitchAnalyticsEventParams = requestContext.analyticsEventParams
+        return createShopperSessionWithAppSwitchEligibility(
+            token = token,
+            tokenType = tokenType,
+            userIdentity = userIdentity,
+            requestContext = requestContext,
+        )
+    }
 
+    private fun createShopperSessionRequestContext(
+        tokenType: TokenType,
+        urlConfig: ReturnToAppUrlConfig,
+        userIdentity: PayPalUserIdentity?,
+        userAction: PayPalUserAction,
+    ): ShopperSessionRequestContext {
+        val isVaultRequest = tokenType != TokenType.ORDER_ID
         val returnToAppStrategy = getReturnToAppStrategyUseCase(
             appLinkReturnUrl = urlConfig.returnAppUrl,
             fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
@@ -603,30 +714,47 @@ class PayPalWebCheckoutClient internal constructor(
             urlConfig = urlConfig,
             linkType = returnToAppStrategy.linkType
         )
-
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
+        val paypalNativeAppInstalled = canAttemptPayPalAppSwitch()
+        val paymentType = userAction.toExternalPaymentType()
+        val analyticsEventParams = createAppSwitchAnalyticsEventParams().copy(
             isCachedSession = userIdentity?.existingPayPalSessionId != null,
-            userActionValue = userAction.toExternalPaymentType(),
+            userActionValue = paymentType,
             isVault = isVaultRequest,
-            merchantId = coreConfig.merchantId,
-            bnCode = coreConfig.bnCode,
-            clientId = coreConfig.clientId,
-            paypalInstalled = canAttemptPayPalAppSwitch().toString(),
+            paypalInstalled = paypalNativeAppInstalled.toString(),
             returnAppUrl = effectiveUrlConfig.returnAppUrl,
             cancelAppUrl = effectiveUrlConfig.cancelAppUrl,
             fallbackSchemeUrl = effectiveUrlConfig.fallbackSchemeUrl,
+            linkType = returnToAppStrategy.linkType,
         )
-        analytics.notify(CreatePayPalSessionEvent.STARTED, params = appSwitchAnalyticsEventParams)
+
+        return ShopperSessionRequestContext(
+            returnToAppStrategy = returnToAppStrategy,
+            effectiveUrlConfig = effectiveUrlConfig,
+            analyticsEventParams = analyticsEventParams,
+            paymentType = paymentType,
+            paypalNativeAppInstalled = paypalNativeAppInstalled,
+            tokenType = tokenType,
+        )
+    }
+
+    private suspend fun createShopperSessionWithAppSwitchEligibility(
+        token: String,
+        tokenType: TokenType,
+        userIdentity: PayPalUserIdentity?,
+        requestContext: ShopperSessionRequestContext,
+    ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
+        val analyticsEventParams = requestContext.analyticsEventParams
+        analytics.notify(CreatePayPalSessionEvent.STARTED, params = analyticsEventParams)
 
         val result = createShopperSessionAPI(
             token = token,
             tokenType = tokenType,
             params = CreateShopperSessionWithAppSwitchEligibilityParams(
-                returnAppUrl = effectiveUrlConfig.returnAppUrl,
-                cancelAppUrl = effectiveUrlConfig.cancelAppUrl,
-                fallbackSchemeUrl = effectiveUrlConfig.fallbackSchemeUrl,
-                paymentType = userAction.toExternalPaymentType(),
-                paypalNativeAppInstalled = canAttemptPayPalAppSwitch(),
+                returnAppUrl = requestContext.effectiveUrlConfig.returnAppUrl,
+                cancelAppUrl = requestContext.effectiveUrlConfig.cancelAppUrl,
+                fallbackSchemeUrl = requestContext.effectiveUrlConfig.fallbackSchemeUrl,
+                paymentType = requestContext.paymentType,
+                paypalNativeAppInstalled = requestContext.paypalNativeAppInstalled,
                 countryCode = userIdentity?.phone?.countryCode,
                 nationalNumber = userIdentity?.phone?.nationalNumber,
                 buyerEmailAddressMerchantPassed = userIdentity?.email,
@@ -638,17 +766,17 @@ class PayPalWebCheckoutClient internal constructor(
 
         return when (result) {
             is APIResult.Success -> {
-                appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
+                val succeededEventParams = analyticsEventParams.copy(
                     shopperSession = result.data,
                 )
-                analytics.notify(CreatePayPalSessionEvent.SUCCEEDED, params = appSwitchAnalyticsEventParams)
+                analytics.notify(CreatePayPalSessionEvent.SUCCEEDED, params = succeededEventParams)
                 result.data
             }
             // Session creation failure / network timeout: fall back to patchCCO.
             is APIResult.Failure -> {
                 analytics.notify(
                     CreatePayPalSessionEvent.FAILED,
-                    params = appSwitchAnalyticsEventParams,
+                    params = analyticsEventParams,
                     errorDescription = result.error.errorDescription,
                 )
                 null
@@ -770,14 +898,34 @@ class PayPalWebCheckoutClient internal constructor(
     private fun canAttemptPayPalAppSwitch(): Boolean =
         deviceInspector.isPayPalInstalled && deviceInspector.canResolvePayPalAppSwitch()
 
+    private fun setActiveShopperSessionPrewarm(prewarm: ShopperSessionPrewarm) {
+        synchronized(shopperSessionPrewarmLock) {
+            activeShopperSessionPrewarm = prewarm
+        }
+    }
+
+    private fun getActiveShopperSessionPrewarm(): ShopperSessionPrewarm? =
+        synchronized(shopperSessionPrewarmLock) {
+            activeShopperSessionPrewarm
+        }
+
+    /**
+     * Clears a consumed prewarm without discarding a newer session that may have been created
+     * while the captured deferred was still in flight.
+     */
+    private fun clearActiveShopperSessionPrewarm(consumedPrewarm: ShopperSessionPrewarm) {
+        synchronized(shopperSessionPrewarmLock) {
+            if (activeShopperSessionPrewarm === consumedPrewarm) {
+                activeShopperSessionPrewarm = null
+            }
+        }
+    }
+
     /**
      * Drops a trailing '&' (so appendQueryParameter doesn't produce a double separator) and
      * appends the given token as a query param.
      */
-    private fun Uri.appendTokenQueryParam(token: String): Uri {
-        val tokenType = requireNotNull(sessionTokenType) {
-            "sessionTokenType must be set by createPayPalSession() before appendTokenQueryParam() is called."
-        }
+    private fun Uri.appendTokenQueryParam(token: String, tokenType: TokenType): Uri {
         val trimmedUri = if (toString().endsWith("&")) {
             toString().dropLast(1).toUri()
         } else {
@@ -793,12 +941,16 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(token: String): Uri {
+    private fun CreateShopperSessionWithAppSwitchEligibilityResponse.getLaunchUri(
+        token: String,
+        tokenType: TokenType,
+        appSwitchEnabled: Boolean,
+    ): Uri {
         val launchUri = if (appSwitchEnabled) {
             redirectUrl.toUri()
         } else {
             checkoutFallbackUrl.toUri()
-        }.appendTokenQueryParam(token)
+        }.appendTokenQueryParam(token, tokenType)
 
         val uriWithSessionId = if (shopperSessionConfig.id.isNotBlank()) {
             launchUri.buildUpon()
@@ -808,13 +960,10 @@ class PayPalWebCheckoutClient internal constructor(
             launchUri
         }
 
-        return uriWithSessionId.appendObservabilityQueryParams()
+        return uriWithSessionId.appendObservabilityQueryParams(tokenType)
     }
 
-    private fun Uri.appendObservabilityQueryParams(): Uri {
-        val tokenType = requireNotNull(sessionTokenType) {
-            "sessionTokenType must be set by createPayPalSession() before appendObservabilityQueryParams() is called."
-        }
+    private fun Uri.appendObservabilityQueryParams(tokenType: TokenType): Uri {
         val flowType = when (tokenType) {
             TokenType.ORDER_ID -> "ecs"
             TokenType.VAULT_ID, TokenType.BILLING_TOKEN -> "va"
@@ -909,11 +1058,12 @@ class PayPalWebCheckoutClient internal constructor(
         flow: String,
         result: PayPalPresentAuthChallengeResult,
         startTime: Long,
-        endTime: Long
+        endTime: Long,
+        isAppSwitchEnabled: Boolean,
     ) {
         val presentationType = when (result) {
             is PayPalPresentAuthChallengeResult.Success ->
-                if (appSwitchEnabled) PresentationType.APP_SWITCH else PresentationType.BROWSER
+                if (isAppSwitchEnabled) PresentationType.APP_SWITCH else PresentationType.BROWSER
 
             is PayPalPresentAuthChallengeResult.Failure -> PresentationType.ERROR
         }
@@ -933,13 +1083,20 @@ class PayPalWebCheckoutClient internal constructor(
         roundTripTiming?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime) }
     }
 
-    private fun setShopperSessionAnalyticsParams(
+    private fun AppSwitchAnalyticsEventParams.withShopperSessionAnalyticsParams(
         shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse?
-    ) {
-        appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
+    ): AppSwitchAnalyticsEventParams =
+        copy(
             shopperSession = shopperSession,
             paypalInstalled = canAttemptPayPalAppSwitch().toString(),
         )
+
+    private fun publishActiveFlowAnalytics(
+        eventParams: AppSwitchAnalyticsEventParams,
+        isAppSwitchEnabled: Boolean,
+    ) {
+        appSwitchAnalyticsEventParams = eventParams
+        appSwitchEnabled = isAppSwitchEnabled
     }
 
     private fun resetAppSwitchAnalyticsEventParams() {

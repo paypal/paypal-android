@@ -25,6 +25,7 @@ import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
+import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
 import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
@@ -2367,12 +2368,23 @@ class PayPalWebCheckoutClientUnitTest {
         )
 
         assertSame(fakeSessionResponse, outcome)
+        verify {
+            analytics.notify(
+                CreatePayPalSessionEvent.SUCCEEDED,
+                params = match {
+                    it.linkType == LinkType.APP_LINK && it.shopperSession === fakeSessionResponse
+                },
+            )
+        }
     }
 
     @Test
     fun `createShopperSessionWithAppSwitchEligibility() returns null on a session-creation-or-network failure`() =
         runTest {
             val sessionError = PayPalSDKError(5, "server responded with an error")
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.CustomUrlScheme("com.example.app")
             coEvery {
                 createShopperSessionAPI(
                     token = any(),
@@ -2390,6 +2402,13 @@ class PayPalWebCheckoutClientUnitTest {
             )
 
             assertNull(outcome)
+            verify {
+                analytics.notify(
+                    CreatePayPalSessionEvent.FAILED,
+                    params = match { it.linkType == LinkType.DEEP_LINK },
+                    errorDescription = sessionError.errorDescription,
+                )
+            }
         }
 
     @Test
@@ -2558,6 +2577,255 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
+    fun `start() with orderId uses browser fallback when deep-link return is selected`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl!!)
+            val uriSlot = slot<Uri>()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val appSwitchEligibleResponse = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-redirect",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/browser-fallback",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+            )
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(appSwitchEligibleResponse)
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertTrue(uriSlot.captured.toString().startsWith("https://example.com/browser-fallback"))
+            verify {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    params = match {
+                        !it.appSwitchEnabled && it.linkType == LinkType.DEEP_LINK
+                    },
+                )
+            }
+            verify(exactly = 0) {
+                analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = any())
+            }
+        }
+
+    @Test
+    fun `start() uses the latest prewarm strategy when an older prewarm completes last`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+
+            val appLinkConfig = fakeUrlConfig.copy(
+                returnAppUrl = "https://example.com/old-return",
+                cancelAppUrl = "https://example.com/old-cancel",
+                fallbackSchemeUrl = "com.example.old",
+            )
+            val deepLinkConfig = fakeUrlConfig.copy(
+                returnAppUrl = "https://example.com/latest-return",
+                cancelAppUrl = "https://example.com/latest-cancel",
+                fallbackSchemeUrl = "com.example.latest",
+            )
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.AppLink(appLinkConfig.returnAppUrl) andThen
+                ReturnToAppStrategy.CustomUrlScheme(deepLinkConfig.fallbackSchemeUrl!!)
+
+            val oldSession = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/old-app-switch",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/old-browser-fallback",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+            )
+            val latestSession = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/latest-app-switch",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/latest-browser-fallback",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+            )
+            val oldApiResult =
+                CompletableDeferred<APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse>>()
+            val latestApiResult =
+                CompletableDeferred<APIResult<CreateShopperSessionWithAppSwitchEligibilityResponse>>()
+            val expectedDeepLinkReturnUrl =
+                "com.example.latest://x-callback-url/paypal-sdk/paypal-checkout"
+            coEvery {
+                createShopperSessionAPI(
+                    token = "ppcp_android",
+                    tokenType = TokenType.ORDER_ID,
+                    params = match { it.returnAppUrl == appLinkConfig.returnAppUrl },
+                )
+            } coAnswers { oldApiResult.await() }
+            coEvery {
+                createShopperSessionAPI(
+                    token = "ppcp_android",
+                    tokenType = TokenType.ORDER_ID,
+                    params = match { it.returnAppUrl == expectedDeepLinkReturnUrl },
+                )
+            } coAnswers { latestApiResult.await() }
+
+            val launchUri = slot<Uri>()
+            val launchedStrategy = slot<ReturnToAppStrategy>()
+            every {
+                payPalWebLauncher.launchWithUrl(
+                    any(),
+                    capture(launchUri),
+                    any(),
+                    any(),
+                    capture(launchedStrategy),
+                )
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = appLinkConfig,
+            )
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = deepLinkConfig,
+            )
+            testDispatcher.scheduler.runCurrent()
+
+            latestApiResult.complete(APIResult.Success(latestSession))
+            testDispatcher.scheduler.runCurrent()
+            oldApiResult.complete(APIResult.Success(oldSession))
+            testDispatcher.scheduler.runCurrent()
+
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.start(activity, "latest-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertTrue(
+                launchUri.captured.toString()
+                    .startsWith("https://example.com/latest-browser-fallback")
+            )
+            assertEquals(
+                ReturnToAppStrategy.CustomUrlScheme("com.example.latest"),
+                launchedStrategy.captured,
+            )
+            verify {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    params = match {
+                        !it.appSwitchEnabled &&
+                            it.linkType == LinkType.DEEP_LINK &&
+                            it.returnAppUrl == expectedDeepLinkReturnUrl
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `start() keeps captured analytics when a newer prewarm starts while its session is pending`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val firstUrlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = "https://first.example.com/return",
+                cancelAppUrl = "https://first.example.com/cancel",
+                fallbackSchemeUrl = "com.example.first://paypal",
+            )
+            val secondUrlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = "https://second.example.com/return",
+                cancelAppUrl = "https://second.example.com/cancel",
+                fallbackSchemeUrl = "com.example.second",
+            )
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.AppLink(firstUrlConfig.returnAppUrl) andThen
+                ReturnToAppStrategy.CustomUrlScheme(secondUrlConfig.fallbackSchemeUrl!!)
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val firstSession = fakeSessionResponse.copy(
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://first.example.com/checkout",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+            )
+            val secondSession = fakeSessionResponse.copy(
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://second.example.com/checkout",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+            )
+            val firstSessionDeferred =
+                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
+            val firstCallback = mockk<PayPalWebStartCallback>(relaxed = true)
+            val secondCallback = mockk<PayPalWebStartCallback>(relaxed = true)
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = PayPalUserIdentity(existingPayPalSessionId = "first-session-id"),
+                urlConfig = firstUrlConfig,
+                userAction = PayPalUserAction.PAY_NOW,
+            )
+            sutV3.shopperSessionDeferred = firstSessionDeferred
+            sutV3.start(activity, "first-order-id", firstCallback)
+            testDispatcher.scheduler.runCurrent()
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = secondUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(secondSession)
+            firstSessionDeferred.complete(firstSession)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analytics.notify(
+                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    params = match {
+                        it.checkoutOrderId == "first-order-id" &&
+                            it.shopperSession === firstSession &&
+                            it.isCachedSession == true &&
+                            it.userActionValue == "PAY" &&
+                            it.isVault == false &&
+                            it.linkType == LinkType.APP_LINK &&
+                            it.returnAppUrl == firstUrlConfig.returnAppUrl &&
+                            it.cancelAppUrl == firstUrlConfig.cancelAppUrl &&
+                            it.fallbackSchemeUrl == firstUrlConfig.fallbackSchemeUrl
+                    },
+                )
+            }
+            verify { firstCallback.onPayPalWebStartResult(any()) }
+
+            // Completing A must not clear the newer, still-active B prewarm.
+            sutV3.start(activity, "second-order-id", secondCallback)
+            testDispatcher.scheduler.advanceUntilIdle()
+            verify { secondCallback.onPayPalWebStartResult(any()) }
+        }
+
+    @Test
     fun `start() with orderId uses checkoutFallbackUrl when app-switch eligible but not installed`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
@@ -2632,6 +2900,137 @@ class PayPalWebCheckoutClientUnitTest {
             // VAULT_ID tokens are always appended under "approval_session_id".
             assertEquals("fake-setup-token-id", launchedUri.getQueryParameter("approval_session_id"))
             assertNull(launchedUri.getQueryParameter("token"))
+        }
+
+    @Test
+    fun `vault() with setupTokenId uses browser fallback when deep-link return is selected`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl!!)
+            val uriSlot = slot<Uri>()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val appSwitchEligibleResponse = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-vault-redirect",
+                    tokenType = TokenType.VAULT_ID,
+                ),
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://example.com/browser-vault-fallback",
+                    tokenType = TokenType.VAULT_ID,
+                ),
+            )
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(appSwitchEligibleResponse)
+            sutV3.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertTrue(uriSlot.captured.toString().startsWith("https://example.com/browser-vault-fallback"))
+            verify {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    params = match {
+                        !it.appSwitchEnabled && it.linkType == LinkType.DEEP_LINK
+                    },
+                )
+            }
+            verify(exactly = 0) {
+                analytics.notify(VaultEvent.APP_SWITCH_STARTED, params = any())
+            }
+        }
+
+    @Test
+    fun `vault() keeps captured analytics when a newer prewarm starts while its session is pending`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val firstUrlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = "https://first.example.com/vault-return",
+                cancelAppUrl = "https://first.example.com/vault-cancel",
+                fallbackSchemeUrl = "com.example.first://vault",
+            )
+            val secondUrlConfig = ReturnToAppUrlConfig(
+                returnAppUrl = "https://second.example.com/vault-return",
+                cancelAppUrl = "https://second.example.com/vault-cancel",
+                fallbackSchemeUrl = "com.example.second",
+            )
+            every {
+                getReturnToAppStrategyUseCase(any(), any(), any())
+            } returns ReturnToAppStrategy.AppLink(firstUrlConfig.returnAppUrl) andThen
+                ReturnToAppStrategy.CustomUrlScheme(secondUrlConfig.fallbackSchemeUrl!!)
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val firstSession = fakeSessionResponse.copy(
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://first.example.com/vault",
+                    tokenType = TokenType.VAULT_ID,
+                ),
+            )
+            val secondSession = fakeSessionResponse.copy(
+                checkoutFallbackUrl = placeholderTokenUrl(
+                    "https://second.example.com/vault",
+                    tokenType = TokenType.VAULT_ID,
+                ),
+            )
+            val firstSessionDeferred =
+                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
+            val firstCallback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            val secondCallback = mockk<PayPalWebVaultCallback>(relaxed = true)
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = PayPalUserIdentity(existingPayPalSessionId = "first-session-id"),
+                urlConfig = firstUrlConfig,
+                userAction = PayPalUserAction.SETUP_NOW,
+            )
+            sutV3.shopperSessionDeferred = firstSessionDeferred
+            sutV3.vault(activity, "first-setup-token-id", firstCallback)
+            testDispatcher.scheduler.runCurrent()
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = secondUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(secondSession)
+            firstSessionDeferred.complete(firstSession)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analytics.notify(
+                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    params = match {
+                        it.vaultSetupTokenId == "first-setup-token-id" &&
+                            it.shopperSession === firstSession &&
+                            it.isCachedSession == true &&
+                            it.userActionValue == "COMMIT" &&
+                            it.isVault == true &&
+                            it.linkType == LinkType.APP_LINK &&
+                            it.returnAppUrl == firstUrlConfig.returnAppUrl &&
+                            it.cancelAppUrl == firstUrlConfig.cancelAppUrl &&
+                            it.fallbackSchemeUrl == firstUrlConfig.fallbackSchemeUrl
+                    },
+                )
+            }
+            verify { firstCallback.onPayPalWebVaultResult(any()) }
+
+            // Completing A must not clear the newer, still-active B prewarm.
+            sutV3.vault(activity, "second-setup-token-id", secondCallback)
+            testDispatcher.scheduler.advanceUntilIdle()
+            verify { secondCallback.onPayPalWebVaultResult(any()) }
         }
 
     @Test
@@ -2799,6 +3198,7 @@ class PayPalWebCheckoutClientUnitTest {
                         returnAppUrl = "https://example.com/paypal-return",
                         cancelAppUrl = "https://example.com/paypal-cancel",
                         fallbackSchemeUrl = "com.example.app://paypal",
+                        linkType = LinkType.APP_LINK,
                     ),
                     errorDescription = "session error",
                 )
@@ -2835,6 +3235,7 @@ class PayPalWebCheckoutClientUnitTest {
                         returnAppUrl = "https://example.com/paypal-return",
                         cancelAppUrl = "https://example.com/paypal-cancel",
                         fallbackSchemeUrl = "com.example.app://paypal",
+                        linkType = LinkType.APP_LINK,
                     ),
                     errorDescription = "session error",
                 )
@@ -3065,6 +3466,12 @@ class PayPalWebCheckoutClientUnitTest {
             assertEquals("$expectedBase/cancel", paramsSlot.captured.cancelAppUrl)
             // The raw fallback scheme is still forwarded unchanged.
             assertEquals("com.example.app", paramsSlot.captured.fallbackSchemeUrl)
+            verify {
+                analytics.notify(
+                    CreatePayPalSessionEvent.STARTED,
+                    params = match { it.linkType == LinkType.DEEP_LINK },
+                )
+            }
         }
 
     @Test
@@ -3095,5 +3502,11 @@ class PayPalWebCheckoutClientUnitTest {
             // App-link chosen -> the merchant's https return/cancel URLs are sent unchanged.
             assertEquals("https://example.com/paypal-return", paramsSlot.captured.returnAppUrl)
             assertEquals("https://example.com/paypal-cancel", paramsSlot.captured.cancelAppUrl)
+            verify {
+                analytics.notify(
+                    CreatePayPalSessionEvent.STARTED,
+                    params = match { it.linkType == LinkType.APP_LINK },
+                )
+            }
         }
 }
