@@ -17,7 +17,9 @@ data class PayPalUiState(
     val userAction: PayPalUserAction = PayPalUserAction.PAY_NOW,
     val payPalWebCheckoutState: ActionState<PayPalWebCheckoutFinishStartResult.Success, Exception> = ActionState.Idle,
     val completeOrderState: ActionState<Order, Exception> = ActionState.Idle,
-    val fundingSource: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL,
+    // Drives payment_source.paypal.experience_context.payment_method_selected on order creation
+    // (Step 1).
+    val paymentMethodOption: PayPalWebCheckoutFundingSource = PayPalWebCheckoutFundingSource.PAYPAL_CREDIT,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success

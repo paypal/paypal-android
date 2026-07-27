@@ -1,26 +1,8 @@
 package com.paypal.android.ui.paypalweb
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import com.paypal.android.R
-import com.paypal.android.paypalwebpayments.PayPalWebCheckoutFundingSource
-import com.paypal.android.uishared.components.EnumOptionList
-import com.paypal.android.utils.UIConstants
-
-@Composable
-fun StartPayPalWebCheckoutForm(
-    fundingSource: PayPalWebCheckoutFundingSource,
-    onFundingSourceChange: (PayPalWebCheckoutFundingSource) -> Unit,
-) {
-    Column(
-        verticalArrangement = UIConstants.spacingMedium
-    ) {
-        EnumOptionList(
-            title = stringResource(id = R.string.pay_pal_funding_source_title),
-            stringArrayResId = R.array.pay_pal_funding_source_options,
-            onSelectedOptionChange = onFundingSourceChange,
-            selectedOption = fundingSource
-        )
-    }
-}
+// Intentionally left empty. The "FUNDING SOURCE" form previously defined here (Step 2 of the
+// PayPal Checkout demo) was removed since it was dead code: startCheckoutWithOrderId calls the
+// 2-arg PayPalWebCheckoutClient.start(activity, orderId) overload, which never consumed the
+// selected funding source. Payment method selection now happens in Step 1 via
+// PayPalUiState.paymentMethodOption, which is sent as payment_source.paypal.experience_context
+// .payment_method_selected on order creation.

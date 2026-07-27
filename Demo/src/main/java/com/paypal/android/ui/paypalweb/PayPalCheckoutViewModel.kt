@@ -90,10 +90,10 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(completeOrderState = value) }
         }
 
-    var fundingSource: PayPalWebCheckoutFundingSource
-        get() = _uiState.value.fundingSource
+    var paymentMethodOption: PayPalWebCheckoutFundingSource
+        get() = _uiState.value.paymentMethodOption
         set(value) {
-            _uiState.update { it.copy(fundingSource = value) }
+            _uiState.update { it.copy(paymentMethodOption = value) }
         }
 
     var userIdentity: PayPalUserIdentity?
@@ -123,10 +123,19 @@ class PayPalCheckoutViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = _uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault)
+                OrderRequest(intentOption, shouldVault, paymentMethodOption.toPaymentMethodSelected())
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
+    }
+
+    // Maps the SDK's browser-facing PayPalWebCheckoutFundingSource enum to the string value the
+    // backend expects for payment_source.paypal.experience_context.payment_method_selected
+    // (matches XOSphere's PaymentMethod enum: PAYPAL / PAYPAL_PAY_LATER / PAYPAL_CREDIT).
+    private fun PayPalWebCheckoutFundingSource.toPaymentMethodSelected(): String = when (this) {
+        PayPalWebCheckoutFundingSource.PAYPAL_CREDIT -> "PAYPAL_CREDIT"
+        PayPalWebCheckoutFundingSource.PAY_LATER -> "PAYPAL_PAY_LATER"
+        PayPalWebCheckoutFundingSource.PAYPAL -> "PAYPAL"
     }
 
     fun startCheckout(activity: ComponentActivity) {

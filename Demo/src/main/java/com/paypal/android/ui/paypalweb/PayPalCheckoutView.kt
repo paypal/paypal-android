@@ -99,6 +99,13 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
         )
+        EnumOptionList(
+            title = stringResource(R.string.payment_method_title),
+            stringArrayResId = R.array.pay_pal_funding_source_options,
+            onSelectedOptionChange = { value -> viewModel.paymentMethodOption = value },
+            selectedOption = uiState.paymentMethodOption,
+            modifier = Modifier.fillMaxWidth()
+        )
         StoreInVaultOptionForm(
             modifier = Modifier.fillMaxWidth(),
             shouldVault = uiState.shouldVaultOption,
@@ -127,10 +134,6 @@ private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalC
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 2, title = stringResource(R.string.launch_paypal))
-        StartPayPalWebCheckoutForm(
-            fundingSource = uiState.fundingSource,
-            onFundingSourceChange = { value -> viewModel.fundingSource = value },
-        )
         ActionButtonColumn(
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",

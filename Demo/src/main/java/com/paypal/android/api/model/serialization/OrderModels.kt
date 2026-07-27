@@ -59,7 +59,8 @@ data class PayPalAttributes(
 data class PayPalOrderExperienceContext(
     val returnUrl: String,
     val cancelUrl: String,
-    val nativeApp: NativeApp? = null
+    val nativeApp: NativeApp? = null,
+    val paymentMethodSelected: String? = null
 )
 
 @Serializable

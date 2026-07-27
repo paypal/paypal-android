@@ -22,27 +22,29 @@ class CreateOrderUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
-        val paymentSource = when {
-            request.shouldVaultOnSuccess -> {
-                OrderPaymentSource(
-                    paypal = PayPalPaymentSource(
-                        attributes = PayPalAttributes(
-                            vault = Vault(
-                                storeInVault = "ON_SUCCESS",
-                                usageType = "MERCHANT",
-                                customerType = "CONSUMER"
-                            )
-                        ),
-                        experienceContext = PayPalOrderExperienceContext(
-                            returnUrl = returnToAppUrlConfig.returnAppUrl,
-                            cancelUrl = returnToAppUrlConfig.cancelAppUrl
+        // Matches XOSphere's PPCP Direct integration, which always sends
+        // payment_source.paypal.experience_context.payment_method_selected on order creation
+        // (PAYPAL / PAYPAL_PAY_LATER / PAYPAL_CREDIT depending on what the shopper selects).
+        val paymentSource = OrderPaymentSource(
+            paypal = PayPalPaymentSource(
+                attributes = if (request.shouldVaultOnSuccess) {
+                    PayPalAttributes(
+                        vault = Vault(
+                            storeInVault = "ON_SUCCESS",
+                            usageType = "MERCHANT",
+                            customerType = "CONSUMER"
                         )
                     )
+                } else {
+                    null
+                },
+                experienceContext = PayPalOrderExperienceContext(
+                    returnUrl = returnToAppUrlConfig.returnAppUrl,
+                    cancelUrl = returnToAppUrlConfig.cancelAppUrl,
+                    paymentMethodSelected = request.paymentMethodSelected
                 )
-            }
-
-            else -> null
-        }
+            )
+        )
         return withContext(Dispatchers.IO) {
             val amount = Amount(
                 currencyCode = "USD",
