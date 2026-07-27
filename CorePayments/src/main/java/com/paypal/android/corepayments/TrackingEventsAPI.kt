@@ -25,7 +25,6 @@ internal class TrackingEventsAPI constructor(
         event: AnalyticsEventData,
         deviceData: DeviceData
     ): APIRequest {
-
         val eventParams = TrackingEventParams(
             appId = deviceData.appId,
             appName = deviceData.appName,

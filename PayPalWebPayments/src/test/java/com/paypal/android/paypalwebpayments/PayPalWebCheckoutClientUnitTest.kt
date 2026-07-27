@@ -2008,6 +2008,36 @@ class PayPalWebCheckoutClientUnitTest {
             }
         }
 
+    @Test
+    fun `start() with orderId delivers SESSION_CREATION_FAILED when shopperSession resolves to null`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            // null represents a session-creation failure / network timeout (any non-LSAT
+            // APIResult.Failure from createShopperSessionWithAppSwitchEligibility).
+            sutV3.shopperSessionDeferred =
+                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
+                    .also { it.complete(null) }
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            coVerify(exactly = 0) {
+                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
+            }
+            verify {
+                callback.onPayPalWebStartResult(match {
+                    it is PayPalPresentAuthChallengeResult.Failure &&
+                        it.error.code == PayPalWebCheckoutError.sessionCreationFailedError.code &&
+                        it.error.errorDescription == PayPalWebCheckoutError.sessionCreationFailedError.errorDescription
+                })
+            }
+        }
+
     // --- LLD Section 3.8 fallback-to-patchCCO behavior ---
 
     @Ignore(
@@ -2243,6 +2273,36 @@ class PayPalWebCheckoutClientUnitTest {
             }
             verify {
                 callback.onPayPalWebVaultResult(match { it is PayPalPresentAuthChallengeResult.Failure })
+            }
+        }
+
+    @Test
+    fun `vault() with setupTokenId delivers SESSION_CREATION_FAILED when shopperSession resolves to null`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            // null represents a session-creation failure / network timeout (any non-LSAT
+            // APIResult.Failure from createShopperSessionWithAppSwitchEligibility).
+            sutV3.shopperSessionDeferred =
+                CompletableDeferred<CreateShopperSessionWithAppSwitchEligibilityResponse?>()
+                    .also { it.complete(null) }
+            sutV3.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            coVerify(exactly = 0) {
+                patchCCOWithAppSwitchEligibility(any(), any(), any(), any(), any())
+            }
+            verify {
+                callback.onPayPalWebVaultResult(match {
+                    it is PayPalPresentAuthChallengeResult.Failure &&
+                        it.error.code == PayPalWebCheckoutError.sessionCreationFailedError.code &&
+                        it.error.errorDescription == PayPalWebCheckoutError.sessionCreationFailedError.errorDescription
+                })
             }
         }
 
