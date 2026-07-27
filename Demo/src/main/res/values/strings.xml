@@ -40,6 +40,7 @@
         <item>ON_SUCCESS</item>
     </string-array>
 
+    <string name="amount_title">AMOUNT (USD)</string>
     <string name="launch_paypal">Launch PayPal</string>
     <string-array name="pay_pal_funding_source_options">
         <item>PAYPAL_CREDIT</item>

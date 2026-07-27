@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.AmountForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
@@ -110,6 +111,11 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             modifier = Modifier.fillMaxWidth(),
             shouldVault = uiState.shouldVaultOption,
             onShouldVaultChanged = { value -> viewModel.shouldVault = value }
+        )
+        AmountForm(
+            amount = uiState.amount,
+            onAmountChange = { value -> viewModel.amount = value },
+            modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",

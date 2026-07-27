@@ -96,6 +96,12 @@ class PayPalCheckoutViewModel @Inject constructor(
             _uiState.update { it.copy(paymentMethodOption = value) }
         }
 
+    var amount: String
+        get() = _uiState.value.amount
+        set(value) {
+            _uiState.update { it.copy(amount = value) }
+        }
+
     var userIdentity: PayPalUserIdentity?
         get() = _uiState.value.userIdentity
         set(value) {
@@ -123,7 +129,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = _uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault, paymentMethodOption.toPaymentMethodSelected())
+                OrderRequest(intentOption, shouldVault, amount, paymentMethodOption.toPaymentMethodSelected())
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }

@@ -48,7 +48,7 @@ class CreateOrderUseCase @Inject constructor(
         return withContext(Dispatchers.IO) {
             val amount = Amount(
                 currencyCode = "USD",
-                value = "10.99"
+                value = request.amount
             )
 
             val purchaseUnit = PurchaseUnit(
