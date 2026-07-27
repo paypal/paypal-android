@@ -6,4 +6,5 @@ internal enum class PayPalWebCheckoutErrorCode {
     BROWSER_SWITCH,
     NO_RETURN_TO_APP_STRATEGY,
     SESSION_NOT_CREATED,
+    SESSION_CREATION_FAILED,
 }
