@@ -17,6 +17,9 @@ import com.paypal.android.corepayments.common.DeviceInspector
  * is available, since there is nothing to deep-link to. Otherwise returns
  * [ReturnToAppStrategy.CustomUrlScheme], signalling that the custom URL scheme fallback should be used.
  *
+ * Throws [IllegalArgumentException] when neither an App Link return URL nor a fallback scheme is
+ * provided, since there would be no way to return to the merchant app at all.
+ *
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -36,12 +39,19 @@ class GetReturnToAppStrategyUseCase(
      *   routing.
      * @param checkoutUri The checkout URL used to probe whether the default browser is
      *   App-Links-compatible. Defaults to PayPal's checkout URL.
+     *
+     * @throws IllegalArgumentException when both [appLinkReturnUrl] and [fallbackSchemeUrl] are null
+     *   or blank, since there would be no usable return route back to the merchant app.
      */
     operator fun invoke(
         appLinkReturnUrl: String?,
         fallbackSchemeUrl: String?,
         checkoutUri: Uri = DEFAULT_CHECKOUT_URI,
     ): ReturnToAppStrategy {
+        require(!appLinkReturnUrl.isNullOrBlank() || !fallbackSchemeUrl.isNullOrBlank()) {
+            "Either appLinkReturnUrl or fallbackSchemeUrl must be provided to return to the merchant app."
+        }
+
         // Without a custom URL scheme there is nothing to deep-link to, so App Link is the only
         // possible return type. Short-circuit before doing any package-manager probing.
         if (fallbackSchemeUrl.isNullOrBlank()) {

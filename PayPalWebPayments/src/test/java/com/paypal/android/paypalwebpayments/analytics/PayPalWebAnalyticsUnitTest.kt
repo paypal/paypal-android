@@ -77,7 +77,7 @@ class PayPalWebAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = CheckoutEvent.APP_SWITCH_STARTED.value,
-                eventData = match { it.linkType == "applink" && it.orderId == "fake-order-id" },
+                eventData = match { it.linkType == "app_link" && it.orderId == "fake-order-id" },
             )
         }
     }
@@ -95,7 +95,7 @@ class PayPalWebAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED.value,
-                eventData = match { it.linkType == "deeplink" && it.orderId == "fake-setup-token-id" },
+                eventData = match { it.linkType == "deep_link" && it.orderId == "fake-setup-token-id" },
             )
         }
     }

@@ -7,6 +7,7 @@ import com.paypal.android.corepayments.common.DeviceInspector
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -115,6 +116,20 @@ class GetReturnToAppStrategyUseCaseUnitTest {
             ReturnToAppStrategy.AppLink(appLinkReturnUrl),
             sut(appLinkReturnUrl, fallbackSchemeUrl = "  ", checkoutUri = checkoutUri)
         )
+    }
+
+    @Test
+    fun `throws when both appLinkReturnUrl and fallbackSchemeUrl are null`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            sut(appLinkReturnUrl = null, fallbackSchemeUrl = null, checkoutUri = checkoutUri)
+        }
+    }
+
+    @Test
+    fun `throws when both appLinkReturnUrl and fallbackSchemeUrl are blank`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            sut(appLinkReturnUrl = "  ", fallbackSchemeUrl = "  ", checkoutUri = checkoutUri)
+        }
     }
 
     @Test

@@ -14,8 +14,10 @@ class HasAppLinksCompatibleBrowserUseCase(
     private val getDefaultAppUseCase: GetDefaultAppUseCase,
 ) {
 
-    operator fun invoke(browserUri: Uri?): Boolean =
-        APP_LINK_COMPATIBLE_BROWSERS.any { getDefaultAppUseCase(browserUri)?.contains(it) == true }
+    operator fun invoke(browserUri: Uri?): Boolean {
+        val defaultApp = getDefaultAppUseCase(browserUri) ?: return false
+        return APP_LINK_COMPATIBLE_BROWSERS.any { defaultApp.contains(it) }
+    }
 
     private companion object {
         private val APP_LINK_COMPATIBLE_BROWSERS = listOf(

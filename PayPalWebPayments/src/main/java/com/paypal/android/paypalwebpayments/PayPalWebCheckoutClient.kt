@@ -135,6 +135,14 @@ class PayPalWebCheckoutClient internal constructor(
         resetAppSwitchAnalyticsEventParams()
         sessionTokenType = tokenType
         returnToAppUrlConfig = urlConfig
+
+        // Neither returnAppUrl nor fallbackSchemeUrl is usable — fail fast instead of starting a
+        // shopper-session fetch; start()/vault() re-check this to report the error.
+        if (!urlConfig.isValid()) {
+            shopperSessionDeferred = null
+            return
+        }
+
         shopperSessionDeferred = applicationScope.async {
             createShopperSessionWithAppSwitchEligibility("ppcp_android", tokenType, urlConfig, userIdentity, userAction)
         }
@@ -157,8 +165,15 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String,
         callback: PayPalWebStartCallback,
     ) {
-        val deferred = shopperSessionDeferred
         val startTime = System.currentTimeMillis()
+        val urlConfig = returnToAppUrlConfig
+        if (urlConfig != null && !urlConfig.isValid()) {
+            resetAppSwitchAnalyticsEventParams()
+            notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
+            notifyCheckoutReturnToAppUrlConfigInvalid(orderId, callback)
+            return
+        }
+        val deferred = shopperSessionDeferred
         if (deferred == null) {
             resetAppSwitchAnalyticsEventParams()
             notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
@@ -210,6 +225,18 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
+    private fun notifyCheckoutReturnToAppUrlConfigInvalid(orderId: String, callback: PayPalWebStartCallback) {
+        applicationScope.launch(Dispatchers.Main) {
+            val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
+            analytics.notify(
+                CheckoutEvent.FAILED,
+                params = appSwitchAnalyticsEventParams.copy(checkoutOrderId = orderId),
+                errorDescription = error.errorDescription
+            )
+            callback.onPayPalWebStartResult(PayPalPresentAuthChallengeResult.Failure(error))
+        }
+    }
+
     private fun notifyCheckoutSessionNotStarted(orderId: String, callback: PayPalWebStartCallback) {
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
@@ -241,6 +268,13 @@ class PayPalWebCheckoutClient internal constructor(
         callback: PayPalWebVaultCallback,
     ) {
         val startTime = System.currentTimeMillis()
+        val urlConfig = returnToAppUrlConfig
+        if (urlConfig != null && !urlConfig.isValid()) {
+            resetAppSwitchAnalyticsEventParams()
+            notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
+            notifyVaultReturnToAppUrlConfigInvalid(setupTokenId, callback)
+            return
+        }
         val deferred = shopperSessionDeferred
         if (deferred == null) {
             resetAppSwitchAnalyticsEventParams()
@@ -290,6 +324,18 @@ class PayPalWebCheckoutClient internal constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun notifyVaultReturnToAppUrlConfigInvalid(setupTokenId: String, callback: PayPalWebVaultCallback) {
+        applicationScope.launch(Dispatchers.Main) {
+            val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
+            analytics.notify(
+                VaultEvent.FAILED,
+                params = appSwitchAnalyticsEventParams.copy(vaultSetupTokenId = setupTokenId),
+                errorDescription = error.errorDescription
+            )
+            callback.onPayPalWebVaultResult(PayPalPresentAuthChallengeResult.Failure(error))
         }
     }
 
@@ -951,6 +997,13 @@ class PayPalWebCheckoutClient internal constructor(
         bnCode = coreConfig.bnCode,
         clientId = coreConfig.clientId,
     )
+
+    /**
+     * True when this config has a usable App Link return URL or a fallback scheme, so there is a
+     * way to return to the merchant app after checkout/vault.
+     */
+    private fun ReturnToAppUrlConfig.isValid(): Boolean =
+        returnAppUrl.isNotBlank() || !fallbackSchemeUrl.isNullOrBlank()
     // endregion
 
     // region Deprecated Methods

@@ -2842,6 +2842,56 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
+    fun `start() with orderId delivers returnToAppUrlConfigMissingError when neither returnAppUrl nor fallbackSchemeUrl is set`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = null)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = invalidUrlConfig,
+            )
+
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                callback.onPayPalWebStartResult(match {
+                    it is PayPalPresentAuthChallengeResult.Failure &&
+                        it.error.code == PayPalWebCheckoutError.returnToAppUrlConfigMissingError.code
+                })
+            }
+            // The misconfiguration is caught before any network call is attempted.
+            coVerify(exactly = 0) { createShopperSessionAPI(any(), any(), any()) }
+        }
+
+    @Test
+    fun `vault() with setupTokenId delivers returnToAppUrlConfigMissingError when neither returnAppUrl nor fallbackSchemeUrl is set`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = null)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = invalidUrlConfig,
+            )
+
+            sutV3.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                callback.onPayPalWebVaultResult(match {
+                    it is PayPalPresentAuthChallengeResult.Failure &&
+                        it.error.code == PayPalWebCheckoutError.returnToAppUrlConfigMissingError.code
+                })
+            }
+            // The misconfiguration is caught before any network call is attempted.
+            coVerify(exactly = 0) { createShopperSessionAPI(any(), any(), any()) }
+        }
+
+    @Test
     fun `startAsync() delivers noReturnToAppStrategyError when strategy and urlScheme are absent`() =
         runTest {
             val request = PayPalWebCheckoutRequest(
