@@ -59,7 +59,7 @@ class GetReturnToAppStrategyUseCase(
     operator fun invoke(
         appLinkReturnUrl: String?,
         fallbackSchemeUrl: String?,
-        checkoutUri: Uri = DEFAULT_CHECKOUT_URI,
+        checkoutUri: Uri = DEFAULT_BROWSER_PROBE_URI,
     ): ReturnToAppStrategy {
         require(!appLinkReturnUrl.isNullOrBlank() || !fallbackSchemeUrl.isNullOrBlank()) {
             "Either appLinkReturnUrl or fallbackSchemeUrl must be provided to return to the merchant app."
@@ -106,7 +106,9 @@ class GetReturnToAppStrategyUseCase(
         // A neutral https URL used only to probe the device's default browser: its default handler
         // reveals whether an App Link return would route. This must not be an app-link-verified path
         // for any PayPal-owned app, or it would resolve to that app instead of a browser and defeat
-        // the probe.
-        private val DEFAULT_CHECKOUT_URI = "https://www.paypal.com/checkout".toUri()
+        // the probe. paypal.com is verified domain-wide (assetlinks.json grants "handle_all_urls" with
+        // no path scoping) for the PayPal app, so it can't be used here. example.com is guaranteed to
+        // have no first-party app link claim.
+        private val DEFAULT_BROWSER_PROBE_URI = "https://example.com/checkout".toUri()
     }
 }

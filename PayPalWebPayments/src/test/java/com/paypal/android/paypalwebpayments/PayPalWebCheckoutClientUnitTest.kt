@@ -2923,7 +2923,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `start() with orderId delivers returnToAppUrlConfigMissingError when neither returnAppUrl nor fallbackSchemeUrl is set`() =
+    fun `start() delivers returnToAppUrlConfigMissingError when returnAppUrl and fallbackSchemeUrl are missing`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
@@ -2948,7 +2948,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `vault() with setupTokenId delivers returnToAppUrlConfigMissingError when neither returnAppUrl nor fallbackSchemeUrl is set`() =
+    fun `vault() delivers returnToAppUrlConfigMissingError when returnAppUrl and fallbackSchemeUrl are missing`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)

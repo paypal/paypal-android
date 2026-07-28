@@ -4,7 +4,10 @@ import com.paypal.android.corepayments.LinkType
 import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class GetEffectiveReturnUrlConfigUseCaseUnitTest {
 
     private val sut = GetEffectiveReturnUrlConfigUseCase()

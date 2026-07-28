@@ -25,7 +25,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
     private val merchantPackageName = "com.merchant.app"
     private val appLinkReturnUrl = "https://merchant.com/return"
     private val appLinkReturnUri: Uri = Uri.parse(appLinkReturnUrl)
-    private val checkoutUri: Uri = Uri.parse("https://www.paypal.com/checkout")
+    private val checkoutUri: Uri = Uri.parse("https://example.com/checkout")
     private val fallbackScheme = "com.merchant.app.paypal"
 
     private lateinit var sut: GetReturnToAppStrategyUseCase
@@ -135,7 +135,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
     @Test
     fun `uses the default checkout uri when none is provided`() {
         every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
-        // The stub matches the default checkout URI (paypal.com/checkout), which equals checkoutUri.
+        // The stub matches the default checkout URI (example.com/checkout), which equals checkoutUri.
         every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
 
         assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme))
