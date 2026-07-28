@@ -333,13 +333,6 @@ class PayPalWebCheckoutClient internal constructor(
             params = appSwitchAnalyticsEventParams,
             errorDescription = errorDescription
         )
-        // Reaching CANCELED here means a matching return deep link was already received (i.e. the
-        // app switch/browser round trip succeeded) and the shopper canceled on the ModXO page
-        // itself. APP_SWITCH_CANCELED should only represent the app switch itself being canceled,
-        // so it must not be logged for this ModXO cancellation.
-        if (checkoutResult == PayPalEvent.CANCELED && !appSwitchEnabled) {
-            analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED, params = appSwitchAnalyticsEventParams)
-        }
     }
 
     /**
@@ -385,13 +378,6 @@ class PayPalWebCheckoutClient internal constructor(
             params = appSwitchAnalyticsEventParams,
             errorDescription = errorDescription
         )
-        // Reaching CANCELED here means a matching return deep link was already received (i.e. the
-        // app switch/browser round trip succeeded) and the shopper canceled on the ModXO page
-        // itself. APP_SWITCH_CANCELED should only represent the app switch itself being canceled,
-        // so it must not be logged for this ModXO cancellation.
-        if (vaultResult == PayPalEvent.CANCELED && !appSwitchEnabled) {
-            analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED, params = appSwitchAnalyticsEventParams)
-        }
     }
 
     /**

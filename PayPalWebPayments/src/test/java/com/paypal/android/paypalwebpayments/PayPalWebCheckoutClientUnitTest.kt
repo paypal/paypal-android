@@ -2791,7 +2791,7 @@ class PayPalWebCheckoutClientUnitTest {
     // MARK: - app-switch:canceled should only represent a canceled app switch, not a ModXO cancel
 
     @Test
-    fun `finishStart() does not log APP_SWITCH_CANCELED when app switch succeeded but shopper canceled on ModXO`() =
+    fun `finishStart() only logs the generic CANCELED event when app switch succeeded but shopper canceled on ModXO`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns true
@@ -2828,16 +2828,13 @@ class PayPalWebCheckoutClientUnitTest {
             val result = sutV3.finishStart(intent)
             assertSame(canceledResult, result)
 
-            verify(exactly = 0) {
-                analytics.notify(PayPalEvent.APP_SWITCH_CANCELED, any())
-            }
-            verify {
+            verify(exactly = 1) {
                 analytics.notify(PayPalEvent.CANCELED, any(), any())
             }
         }
 
     @Test
-    fun `finishVault() does not log APP_SWITCH_CANCELED when app switch succeeded but shopper canceled on ModXO`() =
+    fun `finishVault() only logs the generic CANCELED event when app switch succeeded but shopper canceled on ModXO`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns true
@@ -2870,16 +2867,13 @@ class PayPalWebCheckoutClientUnitTest {
             val result = sutV3.finishVault(intent)
             assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
 
-            verify(exactly = 0) {
-                analytics.notify(PayPalEvent.APP_SWITCH_CANCELED, any())
-            }
-            verify {
+            verify(exactly = 1) {
                 analytics.notify(PayPalEvent.CANCELED, any(), any())
             }
         }
 
     @Test
-    fun `finishStart() still logs AUTH_CHALLENGE_PRESENTATION_CANCELED when non app-switch auth challenge is canceled`() =
+    fun `finishStart() only logs the generic CANCELED event when the non app-switch flow is canceled`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every { deviceInspector.isPayPalInstalled } returns false
@@ -2904,8 +2898,8 @@ class PayPalWebCheckoutClientUnitTest {
 
             sutV3.finishStart(intent)
 
-            verify {
-                analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED, any())
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.CANCELED, any(), any())
             }
         }
 
