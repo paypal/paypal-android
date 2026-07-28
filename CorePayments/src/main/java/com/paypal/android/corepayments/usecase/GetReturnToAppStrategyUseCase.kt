@@ -31,6 +31,19 @@ class GetReturnToAppStrategyUseCase(
 ) {
 
     /**
+     * Builds a [GetReturnToAppStrategyUseCase] wired with its collaborators from an application
+     * [Context], following the SDK's manual dependency-injection convention.
+     */
+    constructor(applicationContext: Context) : this(
+        applicationContext = applicationContext,
+        deviceInspector = DeviceInspector(applicationContext),
+        getDefaultApp = GetDefaultAppUseCase(applicationContext.packageManager),
+        hasAppLinksCompatibleBrowser = HasAppLinksCompatibleBrowserUseCase(
+            GetDefaultAppUseCase(applicationContext.packageManager)
+        ),
+    )
+
+    /**
      * @param appLinkReturnUrl The merchant's App Link return URL (`returnAppUrl`). Null or blank is
      *   treated as "no App Link", so the return can only ever be a deep link (or App Link if there is
      *   also no fallback scheme).

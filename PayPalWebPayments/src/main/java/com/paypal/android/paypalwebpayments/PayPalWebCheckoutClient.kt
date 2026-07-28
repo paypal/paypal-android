@@ -24,9 +24,7 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
-import com.paypal.android.corepayments.usecase.GetDefaultAppUseCase
 import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase
-import com.paypal.android.corepayments.usecase.HasAppLinksCompatibleBrowserUseCase
 import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
@@ -94,7 +92,7 @@ class PayPalWebCheckoutClient internal constructor(
             configuration,
             context.applicationContext,
         ),
-        getReturnToAppStrategyUseCase = buildReturnToAppStrategyUseCase(context.applicationContext),
+        getReturnToAppStrategyUseCase = GetReturnToAppStrategyUseCase(context.applicationContext),
         getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
@@ -1001,7 +999,7 @@ class PayPalWebCheckoutClient internal constructor(
             configuration,
             context.applicationContext,
         ),
-        getReturnToAppStrategyUseCase = buildReturnToAppStrategyUseCase(context.applicationContext),
+        getReturnToAppStrategyUseCase = GetReturnToAppStrategyUseCase(context.applicationContext),
         getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
         updateClientConfigAPI = UpdateClientConfigAPI(context, configuration),
     )
@@ -1196,22 +1194,6 @@ class PayPalWebCheckoutClient internal constructor(
     }
 
     // endregion
-
-    private companion object {
-        /**
-         * Builds a [GetReturnToAppStrategyUseCase] wired with its collaborators from an application
-         * [Context], following the SDK's manual dependency-injection convention.
-         */
-        private fun buildReturnToAppStrategyUseCase(applicationContext: Context): GetReturnToAppStrategyUseCase {
-            val getDefaultAppUseCase = GetDefaultAppUseCase(applicationContext.packageManager)
-            return GetReturnToAppStrategyUseCase(
-                applicationContext = applicationContext,
-                deviceInspector = DeviceInspector(applicationContext),
-                getDefaultApp = getDefaultAppUseCase,
-                hasAppLinksCompatibleBrowser = HasAppLinksCompatibleBrowserUseCase(getDefaultAppUseCase),
-            )
-        }
-    }
 }
 
 private fun PayPalUserAction.toExternalPaymentType(): String = when (this) {

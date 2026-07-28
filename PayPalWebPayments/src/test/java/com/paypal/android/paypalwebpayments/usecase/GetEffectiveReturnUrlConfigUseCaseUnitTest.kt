@@ -26,6 +26,20 @@ class GetEffectiveReturnUrlConfigUseCaseUnitTest {
     }
 
     @Test
+    fun `deep-link preserves merchant query params from the original return and cancel urls`() {
+        val configWithQueryParams = urlConfig.copy(
+            returnAppUrl = "https://example.com/paypal-return?ref=123",
+            cancelAppUrl = "https://example.com/paypal-cancel?ref=123",
+        )
+
+        val result = sut(configWithQueryParams, LinkType.DEEP_LINK)
+
+        val base = "com.example.app://x-callback-url/paypal-sdk/paypal-checkout"
+        assertEquals("$base?ref=123", result.returnAppUrl)
+        assertEquals("$base/cancel?ref=123", result.cancelAppUrl)
+    }
+
+    @Test
     fun `app-link returns merchant https config unchanged`() {
         val result = sut(urlConfig, LinkType.APP_LINK)
 
