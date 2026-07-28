@@ -1,6 +1,9 @@
 package com.paypal.android.corepayments.usecase
 
 import android.content.Context
+import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.common.DeviceInspector
@@ -18,9 +21,8 @@ import org.robolectric.RobolectricTestRunner
 class GetReturnToAppStrategyUseCaseUnitTest {
 
     private val applicationContext: Context = mockk()
+    private val packageManager: PackageManager = mockk()
     private val deviceInspector: DeviceInspector = mockk()
-    private val getDefaultAppUseCase: GetDefaultAppUseCase = mockk()
-    private val hasAppLinksCompatibleBrowserUseCase: HasAppLinksCompatibleBrowserUseCase = mockk()
 
     private val merchantPackageName = "com.merchant.app"
     private val appLinkReturnUrl = "https://merchant.com/return"
@@ -33,29 +35,79 @@ class GetReturnToAppStrategyUseCaseUnitTest {
     @Before
     fun beforeEach() {
         every { applicationContext.packageName } returns merchantPackageName
+        every { applicationContext.packageManager } returns packageManager
         every { deviceInspector.canResolvePayPalAppSwitch() } returns false
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
-        sut = GetReturnToAppStrategyUseCase(
-            applicationContext,
-            deviceInspector,
-            getDefaultAppUseCase,
-            hasAppLinksCompatibleBrowserUseCase,
-        )
+        stubDefaultApp(checkoutUri, packageName = null)
+        sut = GetReturnToAppStrategyUseCase(applicationContext, deviceInspector)
+    }
+
+    /** Stubs the resolved default handler's package name for [uri], or `null` if none resolves. */
+    private fun stubDefaultApp(uri: Uri, packageName: String?) {
+        val resolveInfo = packageName?.let {
+            ResolveInfo().apply { activityInfo = ActivityInfo().apply { this.packageName = it } }
+        }
+        every {
+            packageManager.resolveActivity(match { it.data == uri }, PackageManager.MATCH_DEFAULT_ONLY)
+        } returns resolveInfo
     }
 
     @Test
     fun `AppLink when merchant is default handler and an App-Links-compatible browser is available`() {
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
+        stubDefaultApp(appLinkReturnUri, merchantPackageName)
+        stubDefaultApp(checkoutUri, "com.android.chrome")
 
         assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
     }
 
     @Test
+    fun `AppLink when default handler is each App-Links-compatible browser`() {
+        val compatibleBrowsers = listOf(
+            "com.android.chrome",
+            "com.android.chrome.canary", // substring match
+            "com.brave.browser",
+            "com.sec.android.app.sbrowser",
+            "org.mozilla.firefox",
+            "com.microsoft.emmx",
+        )
+
+        compatibleBrowsers.forEach { browser ->
+            stubDefaultApp(appLinkReturnUri, merchantPackageName)
+            stubDefaultApp(checkoutUri, browser)
+
+            assertEquals(
+                "expected $browser to be treated as App-Links-compatible",
+                ReturnToAppStrategy.AppLink(appLinkReturnUrl),
+                sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
+            )
+        }
+    }
+
+    @Test
+    fun `CustomUrlScheme when default handler is a browser not on the allowlist`() {
+        val incompatibleBrowsers = listOf(
+            "com.opera.browser",
+            "com.duckduckgo.mobile.android",
+            "com.yandex.browser",
+            "com.mi.globalbrowser",
+            "com.some.unknown.app",
+        )
+
+        incompatibleBrowsers.forEach { browser ->
+            stubDefaultApp(appLinkReturnUri, merchantPackageName)
+            stubDefaultApp(checkoutUri, browser)
+
+            assertEquals(
+                "expected $browser to be treated as incompatible",
+                ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
+                sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
+            )
+        }
+    }
+
+    @Test
     fun `AppLink when merchant is default handler and the PayPal app can app switch`() {
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
+        stubDefaultApp(appLinkReturnUri, merchantPackageName)
         every { deviceInspector.canResolvePayPalAppSwitch() } returns true
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
         assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
     }
@@ -63,9 +115,8 @@ class GetReturnToAppStrategyUseCaseUnitTest {
     @Test
     fun `CustomUrlScheme when merchant is default handler but no compatible browser or first-party app`() {
         // AC1: default links disabled at the browser level -> fall back to deep link
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
+        stubDefaultApp(appLinkReturnUri, merchantPackageName)
         every { deviceInspector.canResolvePayPalAppSwitch() } returns false
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
 
         assertEquals(
             ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
@@ -76,8 +127,8 @@ class GetReturnToAppStrategyUseCaseUnitTest {
     @Test
     fun `CustomUrlScheme when merchant app is not the default handler for its own return uri`() {
         // AC1: "Open supported links" unchecked for the merchant app -> not verified -> deep link
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
+        stubDefaultApp(appLinkReturnUri, "com.other.app")
+        stubDefaultApp(checkoutUri, "com.android.chrome")
 
         assertEquals(
             ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
@@ -87,7 +138,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
 
     @Test
     fun `CustomUrlScheme when the app link return url is null`() {
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
+        stubDefaultApp(checkoutUri, "com.android.chrome")
 
         assertEquals(
             ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
@@ -98,8 +149,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
     @Test
     fun `AppLink when App Links won't route but no fallback scheme is available`() {
         // Deep-link conditions, but there is no custom scheme to switch to -> App Link.
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
+        stubDefaultApp(appLinkReturnUri, "com.other.app")
 
         assertEquals(
             ReturnToAppStrategy.AppLink(appLinkReturnUrl),
@@ -109,8 +159,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
 
     @Test
     fun `AppLink when App Links won't route but fallback scheme is blank`() {
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns "com.other.app"
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns false
+        stubDefaultApp(appLinkReturnUri, "com.other.app")
 
         assertEquals(
             ReturnToAppStrategy.AppLink(appLinkReturnUrl),
@@ -134,9 +183,9 @@ class GetReturnToAppStrategyUseCaseUnitTest {
 
     @Test
     fun `uses the default checkout uri when none is provided`() {
-        every { getDefaultAppUseCase(appLinkReturnUri) } returns merchantPackageName
+        stubDefaultApp(appLinkReturnUri, merchantPackageName)
         // The stub matches the default checkout URI (example.com/checkout), which equals checkoutUri.
-        every { hasAppLinksCompatibleBrowserUseCase(checkoutUri) } returns true
+        stubDefaultApp(checkoutUri, "com.android.chrome")
 
         assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme))
     }

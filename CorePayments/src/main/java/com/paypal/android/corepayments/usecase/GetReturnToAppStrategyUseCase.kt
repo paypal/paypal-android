@@ -1,6 +1,8 @@
 package com.paypal.android.corepayments.usecase
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
@@ -26,8 +28,6 @@ import com.paypal.android.corepayments.common.DeviceInspector
 class GetReturnToAppStrategyUseCase(
     private val applicationContext: Context,
     private val deviceInspector: DeviceInspector,
-    private val getDefaultApp: GetDefaultAppUseCase,
-    private val hasAppLinksCompatibleBrowser: HasAppLinksCompatibleBrowserUseCase,
 ) {
 
     /**
@@ -37,10 +37,6 @@ class GetReturnToAppStrategyUseCase(
     constructor(applicationContext: Context) : this(
         applicationContext = applicationContext,
         deviceInspector = DeviceInspector(applicationContext),
-        getDefaultApp = GetDefaultAppUseCase(applicationContext.packageManager),
-        hasAppLinksCompatibleBrowser = HasAppLinksCompatibleBrowserUseCase(
-            GetDefaultAppUseCase(applicationContext.packageManager)
-        ),
     )
 
     /**
@@ -102,6 +98,28 @@ class GetReturnToAppStrategyUseCase(
         return appLinkReturnUri != null && applicationContext.packageName == getDefaultApp(appLinkReturnUri)
     }
 
+    /**
+     * True when the resolved default handler for [browserUri] is a browser known to honor Android
+     * App Links, based on a static list of pre-tested browsers.
+     */
+    private fun hasAppLinksCompatibleBrowser(browserUri: Uri?): Boolean {
+        val defaultApp = getDefaultApp(browserUri) ?: return false
+        return APP_LINK_COMPATIBLE_BROWSERS.any { defaultApp.contains(it) }
+    }
+
+    /**
+     * Returns the package name of the default application that handles [uri], or `null` if none can
+     * be resolved.
+     */
+    private fun getDefaultApp(uri: Uri?): String? {
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addCategory(Intent.CATEGORY_BROWSABLE)
+        }
+        val resolveInfo = applicationContext.packageManager
+            .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        return resolveInfo?.activityInfo?.packageName
+    }
+
     private companion object {
         // A neutral https URL used only to probe the device's default browser: its default handler
         // reveals whether an App Link return would route. This must not be an app-link-verified path
@@ -110,5 +128,14 @@ class GetReturnToAppStrategyUseCase(
         // no path scoping) for the PayPal app, so it can't be used here. example.com is guaranteed to
         // have no first-party app link claim.
         private val DEFAULT_BROWSER_PROBE_URI = "https://example.com/checkout".toUri()
+
+        // Pre-tested browsers for app links compatibility.
+        private val APP_LINK_COMPATIBLE_BROWSERS = listOf(
+            "com.android.chrome",
+            "com.brave.browser",
+            "com.sec.android.app.sbrowser",
+            "org.mozilla.firefox",
+            "com.microsoft.emmx",
+        )
     }
 }
