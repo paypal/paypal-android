@@ -9,16 +9,11 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 internal data class AppSwitchAnalyticsEventParams(
 
     /**
-     * The order id being approved. Set by [PayPalWebCheckoutClient.start] for a checkout flow.
-     * Mutually exclusive with [vaultSetupTokenId].
+     * The id being approved — an order id for a checkout flow (set by
+     * [PayPalWebCheckoutClient.start]) or a setup token id for a vault flow (set by
+     * [PayPalWebCheckoutClient.vault]). Which one it is can be determined from [isVault].
      */
-    val checkoutOrderId: String? = null,
-
-    /**
-     * The setup token id being approved. Set by [PayPalWebCheckoutClient.vault] for a vault flow.
-     * Mutually exclusive with [checkoutOrderId].
-     */
-    val vaultSetupTokenId: String? = null,
+    val orderId: String? = null,
 
     /**
      * The shopper session returned by [PayPalWebCheckoutClient.createPayPalSession].

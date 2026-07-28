@@ -2,7 +2,7 @@
 
 package com.paypal.android.paypalwebpayments.analytics
 
-internal enum class CheckoutEvent(val value: String) {
+internal enum class PayPalEvent(val value: String) {
     // @formatter:off
     STARTED("paypal-web-payments:checkout:started"),
     SUCCEEDED("paypal-web-payments:checkout:succeeded"),

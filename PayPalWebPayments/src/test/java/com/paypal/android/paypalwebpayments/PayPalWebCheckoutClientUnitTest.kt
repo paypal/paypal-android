@@ -21,12 +21,11 @@ import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
-import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
 import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
+import com.paypal.android.paypalwebpayments.analytics.PayPalEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.PresentationType
-import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -2646,9 +2645,9 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
                     params = AppSwitchAnalyticsEventParams(
-                        checkoutOrderId = "fake-order-id",
+                        orderId = "fake-order-id",
                         shopperSession = fakeSessionResponse,
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
@@ -2692,9 +2691,9 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
                     params = AppSwitchAnalyticsEventParams(
-                        vaultSetupTokenId = "fake-setup-token-id",
+                        orderId = "fake-setup-token-id",
                         shopperSession = fakeSessionResponse,
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
@@ -2734,9 +2733,9 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    CheckoutEvent.FAILED,
+                    PayPalEvent.FAILED,
                     params = AppSwitchAnalyticsEventParams(
-                        checkoutOrderId = "fake-order-id",
+                        orderId = "fake-order-id",
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
                         appSwitchEnabled = false,
@@ -2770,9 +2769,9 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 analytics.notify(
-                    VaultEvent.FAILED,
+                    PayPalEvent.FAILED,
                     params = AppSwitchAnalyticsEventParams(
-                        vaultSetupTokenId = "fake-setup-token-id",
+                        orderId = "fake-setup-token-id",
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
                         appSwitchEnabled = false,
@@ -2786,6 +2785,127 @@ class PayPalWebCheckoutClientUnitTest {
                     ),
                     errorDescription = "session error",
                 )
+            }
+        }
+
+    // MARK: - app-switch:canceled should only represent a canceled app switch, not a ModXO cancel
+
+    @Test
+    fun `finishStart() does not log APP_SWITCH_CANCELED when app switch succeeded but shopper canceled on ModXO`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val appSwitchEligibleResponse = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-redirect",
+                    tokenType = TokenType.ORDER_ID,
+                ),
+            )
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(appSwitchEligibleResponse)
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // The app switch round trip succeeded (a matching return deep link came back), but the
+            // shopper canceled on the ModXO page itself — this must NOT be logged as an
+            // app-switch cancellation.
+            val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
+            every {
+                payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth-state")
+            } returns canceledResult
+
+            val result = sutV3.finishStart(intent)
+            assertSame(canceledResult, result)
+
+            verify(exactly = 0) {
+                analytics.notify(PayPalEvent.APP_SWITCH_CANCELED, any())
+            }
+            verify {
+                analytics.notify(PayPalEvent.CANCELED, any(), any())
+            }
+        }
+
+    @Test
+    fun `finishVault() does not log APP_SWITCH_CANCELED when app switch succeeded but shopper canceled on ModXO`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns true
+            every { deviceInspector.canResolvePayPalAppSwitch() } returns true
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val appSwitchEligibleResponse = fakeSessionResponse.copy(
+                appSwitchEligible = true,
+                redirectUrl = placeholderTokenUrl(
+                    "https://example.com/app-switch-redirect",
+                    tokenType = TokenType.VAULT_ID,
+                ),
+            )
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(appSwitchEligibleResponse)
+            sutV3.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            every {
+                payPalWebLauncher.completeVaultAuthRequest(intent, "auth-state")
+            } returns PayPalWebCheckoutFinishVaultResult.Canceled
+
+            val result = sutV3.finishVault(intent)
+            assertSame(PayPalWebCheckoutFinishVaultResult.Canceled, result)
+
+            verify(exactly = 0) {
+                analytics.notify(PayPalEvent.APP_SWITCH_CANCELED, any())
+            }
+            verify {
+                analytics.notify(PayPalEvent.CANCELED, any(), any())
+            }
+        }
+
+    @Test
+    fun `finishStart() still logs AUTH_CHALLENGE_PRESENTATION_CANCELED when non app-switch auth challenge is canceled`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every { deviceInspector.isPayPalInstalled } returns false
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val canceledResult = PayPalWebCheckoutFinishStartResult.Canceled("fake-order-id")
+            every {
+                payPalWebLauncher.completeCheckoutAuthRequest(intent, "auth-state")
+            } returns canceledResult
+
+            sutV3.finishStart(intent)
+
+            verify {
+                analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED, any())
             }
         }
 

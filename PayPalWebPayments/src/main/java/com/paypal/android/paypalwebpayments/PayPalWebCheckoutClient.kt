@@ -23,13 +23,12 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.returnUrl
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
-import com.paypal.android.paypalwebpayments.analytics.CheckoutEvent
 import com.paypal.android.paypalwebpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
 import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
+import com.paypal.android.paypalwebpayments.analytics.PayPalEvent
 import com.paypal.android.paypalwebpayments.analytics.PayPalWebAnalytics
 import com.paypal.android.paypalwebpayments.analytics.PresentationType
-import com.paypal.android.paypalwebpayments.analytics.VaultEvent
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -157,7 +156,7 @@ class PayPalWebCheckoutClient internal constructor(
             return
         }
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
-            checkoutOrderId = orderId,
+            orderId = orderId,
             isVault = false,
         )
         applicationScope.launch {
@@ -165,7 +164,7 @@ class PayPalWebCheckoutClient internal constructor(
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
                 setShopperSessionAnalyticsParams(shopperSession)
-                analytics.notify(CheckoutEvent.STARTED, params = appSwitchAnalyticsEventParams)
+                analytics.notify(PayPalEvent.STARTED, params = appSwitchAnalyticsEventParams)
 
                 if (shopperSession != null) {
                     val result = launchCheckoutWithShopperSession(
@@ -182,7 +181,7 @@ class PayPalWebCheckoutClient internal constructor(
                 }
             } catch (e: Exception) {
                 analytics.notify(
-                    event = CheckoutEvent.FAILED,
+                    event = PayPalEvent.FAILED,
                     params = appSwitchAnalyticsEventParams,
                     errorDescription = e.message
                 )
@@ -201,8 +200,8 @@ class PayPalWebCheckoutClient internal constructor(
     private fun notifyCheckoutSessionNotStarted(orderId: String, callback: PayPalWebStartCallback) {
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
-                CheckoutEvent.SESSION_NOT_STARTED,
-                params = appSwitchAnalyticsEventParams.copy(checkoutOrderId = orderId),
+                PayPalEvent.SESSION_NOT_STARTED,
+                params = appSwitchAnalyticsEventParams.copy(orderId = orderId),
                 errorDescription = "startPayPalSession() must be called before start()."
             )
             callback.onPayPalWebStartResult(
@@ -237,7 +236,7 @@ class PayPalWebCheckoutClient internal constructor(
             return
         }
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
-            vaultSetupTokenId = setupTokenId,
+            orderId = setupTokenId,
             isVault = true,
         )
         applicationScope.launch {
@@ -245,7 +244,7 @@ class PayPalWebCheckoutClient internal constructor(
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
                 setShopperSessionAnalyticsParams(shopperSession)
-                analytics.notify(VaultEvent.STARTED, params = appSwitchAnalyticsEventParams)
+                analytics.notify(PayPalEvent.STARTED, params = appSwitchAnalyticsEventParams)
 
                 if (shopperSession != null) {
                     val result = launchVaultWithSession(
@@ -262,7 +261,7 @@ class PayPalWebCheckoutClient internal constructor(
                 }
             } catch (e: Exception) {
                 analytics.notify(
-                    event = VaultEvent.FAILED,
+                    event = PayPalEvent.FAILED,
                     params = appSwitchAnalyticsEventParams,
                     errorDescription = e.message
                 )
@@ -281,8 +280,8 @@ class PayPalWebCheckoutClient internal constructor(
     private fun notifyVaultSessionNotStarted(setupTokenId: String, callback: PayPalWebVaultCallback) {
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
-                VaultEvent.SESSION_NOT_STARTED,
-                params = appSwitchAnalyticsEventParams.copy(vaultSetupTokenId = setupTokenId),
+                PayPalEvent.SESSION_NOT_STARTED,
+                params = appSwitchAnalyticsEventParams.copy(orderId = setupTokenId),
                 errorDescription = "startPayPalSession() must be called before vault()."
             )
             callback.onPayPalWebVaultResult(
@@ -301,7 +300,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun finishStart(intent: Intent): PayPalWebCheckoutFinishStartResult? =
         sessionStore.authState?.let { authState ->
-            analytics.notify(CheckoutEvent.HANDLE_RETURN_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = appSwitchAnalyticsEventParams)
             val result = payPalWebLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
             if (result != PayPalWebCheckoutFinishStartResult.NoResult) {
@@ -313,13 +312,13 @@ class PayPalWebCheckoutClient internal constructor(
     private fun logCheckoutResult(result: PayPalWebCheckoutFinishStartResult) {
         val (handleReturnResult, checkoutResult, errorDescription) = when (result) {
             is PayPalWebCheckoutFinishStartResult.Success ->
-                Triple(CheckoutEvent.HANDLE_RETURN_SUCCEEDED, CheckoutEvent.SUCCEEDED, null)
+                Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.SUCCEEDED, null)
 
             is PayPalWebCheckoutFinishStartResult.Canceled ->
-                Triple(CheckoutEvent.HANDLE_RETURN_SUCCEEDED, CheckoutEvent.CANCELED, null)
+                Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.CANCELED, null)
 
             is PayPalWebCheckoutFinishStartResult.Failure ->
-                Triple(CheckoutEvent.HANDLE_RETURN_FAILED, CheckoutEvent.FAILED, result.error.errorDescription)
+                Triple(PayPalEvent.HANDLE_RETURN_FAILED, PayPalEvent.FAILED, result.error.errorDescription)
 
             PayPalWebCheckoutFinishStartResult.NoResult -> return // no analytics tracking required at the moment
         }
@@ -334,12 +333,12 @@ class PayPalWebCheckoutClient internal constructor(
             params = appSwitchAnalyticsEventParams,
             errorDescription = errorDescription
         )
-        if (checkoutResult == CheckoutEvent.CANCELED) {
-            val event = when (appSwitchEnabled) {
-                true -> CheckoutEvent.APP_SWITCH_CANCELED
-                else -> CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED
-            }
-            analytics.notify(event, params = appSwitchAnalyticsEventParams)
+        // Reaching CANCELED here means a matching return deep link was already received (i.e. the
+        // app switch/browser round trip succeeded) and the shopper canceled on the ModXO page
+        // itself. APP_SWITCH_CANCELED should only represent the app switch itself being canceled,
+        // so it must not be logged for this ModXO cancellation.
+        if (checkoutResult == PayPalEvent.CANCELED && !appSwitchEnabled) {
+            analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED, params = appSwitchAnalyticsEventParams)
         }
     }
 
@@ -353,7 +352,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     fun finishVault(intent: Intent): PayPalWebCheckoutFinishVaultResult? =
         sessionStore.authState?.let { authState ->
-            analytics.notify(VaultEvent.HANDLE_RETURN_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = appSwitchAnalyticsEventParams)
             val result = payPalWebLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
             if (result != PayPalWebCheckoutFinishVaultResult.NoResult) {
@@ -365,13 +364,13 @@ class PayPalWebCheckoutClient internal constructor(
     private fun logVaultResult(result: PayPalWebCheckoutFinishVaultResult) {
         val (handleReturnResult, vaultResult, errorDescription) = when (result) {
             is PayPalWebCheckoutFinishVaultResult.Success ->
-                Triple(VaultEvent.HANDLE_RETURN_SUCCEEDED, VaultEvent.SUCCEEDED, null)
+                Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.SUCCEEDED, null)
 
             PayPalWebCheckoutFinishVaultResult.Canceled ->
-                Triple(VaultEvent.HANDLE_RETURN_SUCCEEDED, VaultEvent.CANCELED, null)
+                Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.CANCELED, null)
 
             is PayPalWebCheckoutFinishVaultResult.Failure ->
-                Triple(VaultEvent.HANDLE_RETURN_FAILED, VaultEvent.FAILED, result.error.errorDescription)
+                Triple(PayPalEvent.HANDLE_RETURN_FAILED, PayPalEvent.FAILED, result.error.errorDescription)
 
             PayPalWebCheckoutFinishVaultResult.NoResult -> return // no analytics tracking required at the moment
         }
@@ -386,12 +385,12 @@ class PayPalWebCheckoutClient internal constructor(
             params = appSwitchAnalyticsEventParams,
             errorDescription = errorDescription
         )
-        if (vaultResult == VaultEvent.CANCELED) {
-            val event = when (appSwitchEnabled) {
-                true -> VaultEvent.APP_SWITCH_CANCELED
-                else -> VaultEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED
-            }
-            analytics.notify(event, params = appSwitchAnalyticsEventParams)
+        // Reaching CANCELED here means a matching return deep link was already received (i.e. the
+        // app switch/browser round trip succeeded) and the shopper canceled on the ModXO page
+        // itself. APP_SWITCH_CANCELED should only represent the app switch itself being canceled,
+        // so it must not be logged for this ModXO cancellation.
+        if (vaultResult == PayPalEvent.CANCELED && !appSwitchEnabled) {
+            analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_CANCELED, params = appSwitchAnalyticsEventParams)
         }
     }
 
@@ -416,9 +415,9 @@ class PayPalWebCheckoutClient internal constructor(
         val launchUri = shopperSession.getLaunchUri(orderId)
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
-            analytics.notify(CheckoutEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(PayPalEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
         } else {
-            analytics.notify(CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
         }
         val endTime = System.currentTimeMillis()
 
@@ -438,18 +437,18 @@ class PayPalWebCheckoutClient internal constructor(
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 val event = if (appSwitchEnabled) {
-                    CheckoutEvent.APP_SWITCH_SUCCEEDED
+                    PayPalEvent.APP_SWITCH_SUCCEEDED
                 } else {
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
                 }
                 analytics.notify(event, params = appSwitchAnalyticsEventParams)
                 sessionStore.authState = result.authState
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
                 val event = if (appSwitchEnabled) {
-                    CheckoutEvent.APP_SWITCH_FAILED
+                    PayPalEvent.APP_SWITCH_FAILED
                 } else {
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
                 }
                 analytics.notify(
                     event,
@@ -483,9 +482,9 @@ class PayPalWebCheckoutClient internal constructor(
 
         if (appSwitchEnabled) {
             appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(appSwitchUrl = launchUri.toString())
-            analytics.notify(VaultEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(PayPalEvent.APP_SWITCH_STARTED, params = appSwitchAnalyticsEventParams)
         } else {
-            analytics.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
+            analytics.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = appSwitchAnalyticsEventParams)
         }
 
         val result = payPalWebLauncher.launchWithUrl(
@@ -504,18 +503,18 @@ class PayPalWebCheckoutClient internal constructor(
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 val event = if (appSwitchEnabled) {
-                    VaultEvent.APP_SWITCH_SUCCEEDED
+                    PayPalEvent.APP_SWITCH_SUCCEEDED
                 } else {
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_SUCCEEDED
                 }
                 analytics.notify(event, params = appSwitchAnalyticsEventParams)
                 sessionStore.authState = result.authState
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
                 val event = if (appSwitchEnabled) {
-                    VaultEvent.APP_SWITCH_FAILED
+                    PayPalEvent.APP_SWITCH_FAILED
                 } else {
-                    VaultEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
                 }
                 analytics.notify(
                     event,
