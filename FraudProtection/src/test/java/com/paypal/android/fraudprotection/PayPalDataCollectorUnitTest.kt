@@ -128,14 +128,6 @@ class PayPalDataCollectorUnitTest {
     }
 
     @Test
-    fun `when setLogging is called, System is called with correct value`() {
-        val sut =
-            PayPalDataCollector(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
-        sut.setLogging(true)
-        assertEquals(System.getProperty("magnes.debug.mode"), true.toString())
-    }
-
-    @Test
     fun `collectDeviceData forwards hasUserLocationConsent value`() {
         val appGUID = UUID.randomUUID().toString()
         val mockMagnesSDK = mockk<MagnesSDK>(relaxed = true)
