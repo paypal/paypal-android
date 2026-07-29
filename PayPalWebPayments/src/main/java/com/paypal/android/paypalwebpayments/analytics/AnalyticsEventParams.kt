@@ -51,19 +51,19 @@ internal data class AnalyticsEventParams(
 
     /**
      * Merchant id from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of
-     * the owning [PayPalWebCheckoutClient] instance — preserved across resets.
+     * the owning [PayPalWebCheckoutClient] instance
      */
     val merchantId: String? = null,
 
     /**
      * BN code from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of the
-     * owning [PayPalWebCheckoutClient] instance — preserved across resets.
+     * owning [PayPalWebCheckoutClient] instance
      */
     val bnCode: String? = null,
 
     /**
      * Client id from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of the
-     * owning [PayPalWebCheckoutClient] instance — preserved across resets.
+     * owning [PayPalWebCheckoutClient] instance
      */
     val clientId: String? = null,
 
