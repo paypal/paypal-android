@@ -174,14 +174,14 @@ class PayPalWebCheckoutClient internal constructor(
             orderIdOrSetupTokenId = orderId,
             isVault = false,
         )
-        if (deferred == null) {
-            notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
-            notifyCheckoutSessionNotStarted(callback)
-            return
-        }
         if (urlConfig != null && !urlConfig.isValid()) {
             notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
             notifyCheckoutReturnToAppUrlConfigInvalid(orderId, callback)
+            return
+        }
+        if (deferred == null) {
+            notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
+            notifyCheckoutSessionNotStarted(callback)
             return
         }
         applicationScope.launch {
@@ -249,14 +249,14 @@ class PayPalWebCheckoutClient internal constructor(
             orderIdOrSetupTokenId = setupTokenId,
             isVault = true,
         )
-        if (deferred == null) {
-            notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
-            notifyVaultSessionNotStarted(callback)
-            return
-        }
         if (urlConfig != null && !urlConfig.isValid()) {
             notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
             notifyVaultReturnToAppUrlConfigInvalid(setupTokenId, callback)
+            return
+        }
+        if (deferred == null) {
+            notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
+            notifyVaultSessionNotStarted(callback)
             return
         }
         applicationScope.launch {
@@ -407,7 +407,10 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = getReturnToAppStrategyOrNull()
             ?: return handleReturnToAppStrategyFailure(startTime = startTime, isVault = false)
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        analyticsEventParams = analyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled, linkType = returnToAppStrategy.linkType)
+        analyticsEventParams = analyticsEventParams.copy(
+            appSwitchEnabled = appSwitchEnabled,
+            linkType = returnToAppStrategy.linkType,
+        )
         val launchUri = shopperSession.getLaunchUri(orderId)
         if (appSwitchEnabled) {
             analyticsEventParams = analyticsEventParams.copy(appSwitchUrl = launchUri.toString())
@@ -475,7 +478,10 @@ class PayPalWebCheckoutClient internal constructor(
         val returnToAppStrategy = getReturnToAppStrategyOrNull()
             ?: return handleReturnToAppStrategyFailure(startTime = startTime, isVault = true)
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        analyticsEventParams = analyticsEventParams.copy(appSwitchEnabled = appSwitchEnabled, linkType = returnToAppStrategy.linkType)
+        analyticsEventParams = analyticsEventParams.copy(
+            appSwitchEnabled = appSwitchEnabled,
+            linkType = returnToAppStrategy.linkType,
+        )
         val launchUri = shopperSession.getLaunchUri(setupTokenId)
 
         if (appSwitchEnabled) {

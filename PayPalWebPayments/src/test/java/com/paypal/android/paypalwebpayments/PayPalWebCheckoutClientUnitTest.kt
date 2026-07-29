@@ -1927,7 +1927,7 @@ class PayPalWebCheckoutClientUnitTest {
             }
             verify {
                 analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
                     params = match { it.linkType == LinkType.APP_LINK },
                 )
             }
@@ -1967,7 +1967,7 @@ class PayPalWebCheckoutClientUnitTest {
             }
             verify {
                 analytics.notify(
-                    CheckoutEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
+                    PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED,
                     params = match { it.linkType == LinkType.DEEP_LINK },
                 )
             }
