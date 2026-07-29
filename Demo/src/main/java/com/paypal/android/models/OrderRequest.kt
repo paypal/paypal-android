@@ -9,4 +9,5 @@ data class OrderRequest(
     val shouldVaultOnSuccess: Boolean,
     val amount: String = "10.99",
     val paymentMethodSelected: String = "PAYPAL_CREDIT",
+    val userAction: String = "PAY_NOW",
 )

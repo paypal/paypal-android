@@ -46,8 +46,13 @@ data class Vault(
 
 @Serializable
 data class PayPalPaymentSource(
+    val usageType: String? = null,
+    val emailAddress: String? = null,
+    val experienceContext: PayPalOrderExperienceContext? = null,
+    val usagePattern: String? = null,
+    val billingPlan: String? = null,
     val attributes: PayPalAttributes? = null,
-    val experienceContext: PayPalOrderExperienceContext? = null
+    val token: String? = null
 )
 
 @Serializable
@@ -59,11 +64,21 @@ data class PayPalAttributes(
 data class PayPalOrderExperienceContext(
     val returnUrl: String,
     val cancelUrl: String,
-    val nativeApp: NativeApp? = null,
-    val paymentMethodSelected: String? = null
+    val paymentMethodSelected: String? = null,
+    val userAction: String? = null,
+    val appSwitchContext: AppSwitchContext? = null
+)
+
+@Serializable
+data class AppSwitchContext(
+    val nativeApp: NativeApp
 )
 
 @Serializable
 data class NativeApp(
-    val appUrl: String
+    val appUrl: String? = null,
+    val returnAppUrl: String,
+    val cancelAppUrl: String,
+    val osType: String,
+    val osVersion: Int
 )

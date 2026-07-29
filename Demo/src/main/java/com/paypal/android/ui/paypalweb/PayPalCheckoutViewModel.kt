@@ -129,7 +129,13 @@ class PayPalCheckoutViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = _uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault, amount, paymentMethodOption.toPaymentMethodSelected())
+                OrderRequest(
+                    intentOption,
+                    shouldVault,
+                    amount,
+                    paymentMethodOption.toPaymentMethodSelected(),
+                    userAction.toUserActionSelected()
+                )
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -143,6 +149,11 @@ class PayPalCheckoutViewModel @Inject constructor(
         PayPalWebCheckoutFundingSource.PAY_LATER -> "PAYPAL_PAY_LATER"
         PayPalWebCheckoutFundingSource.PAYPAL -> "PAYPAL"
     }
+
+    // PayPalUserAction's enum names already match the string values the backend expects for
+    // payment_source.paypal.experience_context.user_action (matches XOSphere's UserAction.value:
+    // CONTINUE / PAY_NOW / SETUP_NOW).
+    private fun PayPalUserAction.toUserActionSelected(): String = name
 
     fun startCheckout(activity: ComponentActivity) {
         val orderId = createdOrder?.id
