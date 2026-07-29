@@ -19,7 +19,7 @@ class DeviceInspector(private val context: Context) {
      * installed or its version can't be read. Uses [android.content.pm.PackageInfo.longVersionCode]
      * on API 28+ and falls back to the deprecated `versionCode` int below that.
      */
-    private val payPalAppVersionCode: Long?
+    private val payPalAppVersionCode: Long
         get() = runCatching {
             val packageInfo = context.packageManager.getPackageInfo(PAYPAL_APP_PACKAGE, 0)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -28,7 +28,7 @@ class DeviceInspector(private val context: Context) {
                 @Suppress("DEPRECATION")
                 packageInfo.versionCode.toLong()
             }
-        }.getOrNull()
+        }.getOrDefault(0)
 
     private fun isAppInstalled(packageName: String): Boolean = runCatching {
         context.packageManager.getApplicationInfo(packageName, 0).enabled
@@ -55,8 +55,7 @@ class DeviceInspector(private val context: Context) {
             PackageManager.MATCH_DEFAULT_ONLY
         )
         val resolvesToPayPalApp = resolvedActivity?.activityInfo?.packageName == PAYPAL_APP_PACKAGE
-        return resolvesToPayPalApp &&
-                payPalAppVersionCode?.let { it > MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE } ?: false
+        return resolvesToPayPalApp && payPalAppVersionCode > MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE
     }
 
     fun isDeepLinkConfiguredInManifest(returnUrlScheme: String): Boolean {
