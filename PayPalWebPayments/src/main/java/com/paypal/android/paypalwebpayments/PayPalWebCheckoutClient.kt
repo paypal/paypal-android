@@ -12,7 +12,6 @@ import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import com.paypal.android.corepayments.api.CreateShopperSessionWithAppSwitchEligibilityAPI
-import com.paypal.android.corepayments.api.PatchCCOWithAppSwitchEligibility
 import com.paypal.android.corepayments.common.DeviceInspector
 import com.paypal.android.corepayments.linkType
 import com.paypal.android.corepayments.model.APIResult
@@ -54,7 +53,6 @@ class PayPalWebCheckoutClient internal constructor(
     private val sessionStore: PayPalWebCheckoutSessionStore,
     private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
-    private val patchCCOWithAppSwitchEligibility: PatchCCOWithAppSwitchEligibility,
     private val createShopperSessionAPI: CreateShopperSessionWithAppSwitchEligibilityAPI,
     private val getReturnToAppStrategyUseCase: GetReturnToAppStrategyUseCase,
     private val getEffectiveReturnUrlConfigUseCase: GetEffectiveReturnUrlConfigUseCase,
@@ -79,7 +77,6 @@ class PayPalWebCheckoutClient internal constructor(
         sessionStore = PayPalWebCheckoutSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
-        patchCCOWithAppSwitchEligibility = PatchCCOWithAppSwitchEligibility(configuration),
         createShopperSessionAPI = CreateShopperSessionWithAppSwitchEligibilityAPI(
             configuration,
             context.applicationContext,
@@ -695,37 +692,6 @@ class PayPalWebCheckoutClient internal constructor(
             .appendQueryParameter("funding_source", PayPalWebCheckoutFundingSource.PAYPAL.value)
             .appendQueryParameter("switch_initiated_time", System.currentTimeMillis().toString())
             .build()
-    }
-
-    private suspend fun getLaunchUri(
-        context: Context,
-        token: String,
-        tokenType: TokenType,
-        fallbackUri: Uri
-    ): Uri {
-        return if (deviceInspector.isPayPalInstalled) {
-            val patchCcoResult = patchCCOWithAppSwitchEligibility(
-                context = context,
-                orderId = token,
-                tokenType = tokenType,
-                merchantOptInForAppSwitch = true,
-                paypalNativeAppInstalled = true
-            )
-            when (patchCcoResult) {
-                is APIResult.Success -> {
-                    appSwitchEnabled = patchCcoResult.data.appSwitchEligible
-                    patchCcoResult.data.launchUrl?.toUri() ?: fallbackUri
-                }
-
-                is APIResult.Failure -> {
-                    appSwitchEnabled = false
-                    fallbackUri
-                }
-            }
-        } else {
-            appSwitchEnabled = false
-            fallbackUri
-        }
     }
 
     private fun notifyUserPerceivedLatency(
