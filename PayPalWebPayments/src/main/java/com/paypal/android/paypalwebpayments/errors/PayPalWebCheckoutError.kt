@@ -39,4 +39,11 @@ internal object PayPalWebCheckoutError {
         code = PayPalWebCheckoutErrorCode.SESSION_CREATION_FAILED.ordinal,
         errorDescription = "Failed to create PayPal Session"
     )
+
+    // 6. Neither returnAppUrl nor fallbackSchemeUrl was provided on ReturnToAppUrlConfig.
+    val returnToAppUrlConfigMissingError = PayPalSDKError(
+        code = PayPalWebCheckoutErrorCode.RETURN_TO_APP_URL_CONFIG_MISSING.ordinal,
+        errorDescription = "ReturnToAppUrlConfig must set returnAppUrl or fallbackSchemeUrl. " +
+            "At least one is required to return to the merchant app after checkout."
+    )
 }

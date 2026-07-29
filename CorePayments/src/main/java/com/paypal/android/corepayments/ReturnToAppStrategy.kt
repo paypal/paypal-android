@@ -25,6 +25,13 @@ sealed class ReturnToAppStrategy {
     data class CustomUrlScheme(val urlScheme: String) : ReturnToAppStrategy()
 }
 
+val ReturnToAppStrategy.linkType: LinkType
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    get() = when (this) {
+        is ReturnToAppStrategy.AppLink -> LinkType.APP_LINK
+        is ReturnToAppStrategy.CustomUrlScheme -> LinkType.DEEP_LINK
+    }
+
 /**
  * Builds return URL from return to app strategy.
  */

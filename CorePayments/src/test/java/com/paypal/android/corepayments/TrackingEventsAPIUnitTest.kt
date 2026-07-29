@@ -134,4 +134,36 @@ class TrackingEventsAPIUnitTest {
         val actualBody = apiRequestSlot.captured.body!!
         JSONAssert.assertEquals(JSONObject(expectedBody), JSONObject(actualBody), false)
     }
+
+    @Test
+    fun `sendEvent() serializes linkType under the link_type JSON key`() = runTest {
+        coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
+
+        val event = AnalyticsEventData(
+            environment = "fake-environment",
+            eventName = "paypal-web-payments:checkout:app-switch:started",
+            timestamp = 123L,
+            orderId = "fake-order-id",
+            appSwitchEnabled = true,
+            linkType = "applink"
+        )
+        sut.sendEvent(event, deviceData)
+
+        // language=JSON
+        val expectedBody = """
+            {
+                "events": {
+                    "event_params": {
+                        "event_name": "paypal-web-payments:checkout:app-switch:started",
+                        "order_id": "fake-order-id",
+                        "app_switch_enabled": true,
+                        "link_type": "applink"
+                    }
+                }
+            }
+            """
+
+        val actualBody = apiRequestSlot.captured.body!!
+        JSONAssert.assertEquals(JSONObject(expectedBody), JSONObject(actualBody), false)
+    }
 }
