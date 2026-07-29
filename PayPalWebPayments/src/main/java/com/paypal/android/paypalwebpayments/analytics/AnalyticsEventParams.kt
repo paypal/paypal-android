@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments.analytics
 
+import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 
 /**
@@ -86,4 +87,10 @@ internal data class AnalyticsEventParams(
      * Custom URL scheme used as a deep-link fallback when returning via app link isn't available.
      */
     val fallbackSchemeUrl: String? = null,
+
+    /**
+     * The return-link strategy actually chosen for the launch (App Link vs deep link), reported via
+     * the `link_type` analytics param. Set once the strategy is resolved at launch time.
+     */
+    val linkType: LinkType? = null,
 )
