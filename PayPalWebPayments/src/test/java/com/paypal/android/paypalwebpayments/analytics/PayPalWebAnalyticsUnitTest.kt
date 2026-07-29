@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments.analytics
 
+import com.paypal.android.corepayments.LinkType
 import com.paypal.android.corepayments.analytics.AnalyticsEventData
 import com.paypal.android.corepayments.analytics.AnalyticsService
 import io.mockk.mockk
@@ -59,6 +60,42 @@ class PayPalWebAnalyticsUnitTest {
                     startTime = 2000L,
                     endTime = 2200L
                 )
+            )
+        }
+    }
+
+    @Test
+    fun `notify forwards linkType to the analytics service for checkout events`() {
+        val params = AppSwitchAnalyticsEventParams(
+            checkoutOrderId = "fake-order-id",
+            appSwitchEnabled = true,
+            linkType = LinkType.APP_LINK,
+        )
+
+        sut.notify(CheckoutEvent.APP_SWITCH_STARTED, params = params)
+
+        verify {
+            analyticsService.sendAnalyticsEvent(
+                name = CheckoutEvent.APP_SWITCH_STARTED.value,
+                eventData = match { it.linkType == "applink" && it.orderId == "fake-order-id" },
+            )
+        }
+    }
+
+    @Test
+    fun `notify forwards linkType to the analytics service for vault events`() {
+        val params = AppSwitchAnalyticsEventParams(
+            vaultSetupTokenId = "fake-setup-token-id",
+            appSwitchEnabled = false,
+            linkType = LinkType.DEEP_LINK,
+        )
+
+        sut.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = params)
+
+        verify {
+            analyticsService.sendAnalyticsEvent(
+                name = VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED.value,
+                eventData = match { it.linkType == "deeplink" && it.orderId == "fake-setup-token-id" },
             )
         }
     }

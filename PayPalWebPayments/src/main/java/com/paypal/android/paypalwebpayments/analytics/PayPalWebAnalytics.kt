@@ -89,4 +89,5 @@ private fun AppSwitchAnalyticsEventParams.toAnalyticsEventData(
     returnAppUrl = returnAppUrl,
     cancelAppUrl = cancelAppUrl,
     fallbackSchemeUrl = fallbackSchemeUrl,
+    linkType = linkType?.stringValue,
 )

@@ -13,7 +13,7 @@
   * Removed deprecated `PayPalWebCheckoutClient.finishStart(intent, authState)` — use `PayPalWebCheckoutClient.finishStart(intent)` instead
   * Removed deprecated `PayPalWebCheckoutClient.finishVault(intent, authState)` — use `PayPalWebCheckoutClient.finishVault(intent)` instead
   * Removed `authState` from public API of `PayPalPresentAuthChallengeResult.Success`
-  * Add `PayPalWebCheckoutClient.createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`
+  * Add `PayPalWebCheckoutClient.createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`; `urlConfig.fallbackSchemeUrl` is a mandatory field
   * Add `PayPalPhoneNumber(countryCode, nationalNumber)` and change `PayPalUserIdentity.phone` from `String?` to `PayPalPhoneNumber?` — the shopper's phone number is now sent to the `createShopperSessionWithAppSwitchEligibility` GraphQL mutation
   * Add `PayPalWebCheckoutClient.start(activity, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
   * Add `PayPalWebCheckoutClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
