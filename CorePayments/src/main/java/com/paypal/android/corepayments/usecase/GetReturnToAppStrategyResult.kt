@@ -14,6 +14,7 @@ sealed class GetReturnToAppStrategyResult {
     /**
      * A [returnToAppStrategy] was resolved.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Success(val returnToAppStrategy: ReturnToAppStrategy) : GetReturnToAppStrategyResult()
 
     /**
@@ -21,5 +22,6 @@ sealed class GetReturnToAppStrategyResult {
      *
      * @property error Human-readable description of why a strategy couldn't be resolved.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failure(val error: String) : GetReturnToAppStrategyResult()
 }
