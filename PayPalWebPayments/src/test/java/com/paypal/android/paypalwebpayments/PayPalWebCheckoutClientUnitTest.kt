@@ -20,7 +20,7 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
-import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
+import com.paypal.android.paypalwebpayments.analytics.AnalyticsEventParams
 import com.paypal.android.paypalwebpayments.analytics.LatencyEndpoint
 import com.paypal.android.paypalwebpayments.analytics.LatencyFlow
 import com.paypal.android.paypalwebpayments.analytics.PayPalEvent
@@ -1760,6 +1760,76 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
+    fun `start() with orderId logs SESSION_NOT_STARTED with merchant config populated even when createPayPalSession was never called`() =
+        runTest {
+            val callback = mockk<PayPalWebStartCallback>(relaxed = true)
+
+            sut.start(activity, "fake-order-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Merchant config (merchantId/clientId) must be present even on the very first
+            // misuse, before createPayPalSession() has ever run once for this client instance.
+            verify {
+                analytics.notify(
+                    PayPalEvent.SESSION_NOT_STARTED,
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "fake-order-id",
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                    ),
+                    errorDescription = "startPayPalSession() must be called before start().",
+                )
+            }
+        }
+
+    @Test
+    fun `start() with orderId does not leak stale analytics params from a previous session into SESSION_NOT_STARTED`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            // First, complete a full, successful createPayPalSession() + start() cycle, which
+            // consumes shopperSessionDeferred and leaves analyticsEventParams populated with
+            // this order's shopperSession/isVault/appSwitchEnabled/urlConfig fields.
+            val firstCallback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.start(activity, "first-order-id", firstCallback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Now call start() again for a different order, without a fresh createPayPalSession()
+            // call — shopperSessionDeferred is null again, so this hits the SESSION_NOT_STARTED
+            // path. None of the first order's leftover fields should appear on this event.
+            val secondCallback = mockk<PayPalWebStartCallback>(relaxed = true)
+            sutV3.start(activity, "second-order-id", secondCallback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analytics.notify(
+                    PayPalEvent.SESSION_NOT_STARTED,
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "second-order-id",
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                    ),
+                    errorDescription = "startPayPalSession() must be called before start().",
+                )
+            }
+            verify {
+                secondCallback.onPayPalWebStartResult(match {
+                    it is PayPalPresentAuthChallengeResult.Failure &&
+                        it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
+                })
+            }
+        }
+
+    @Test
     fun `start() with orderId launches checkout when session resolves successfully`() = runTest {
         val sutV3 = makeSutWithUrlScheme()
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -2073,6 +2143,75 @@ class PayPalWebCheckoutClientUnitTest {
 
             verify {
                 callback.onPayPalWebVaultResult(match {
+                    it is PayPalPresentAuthChallengeResult.Failure &&
+                        it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
+                })
+            }
+        }
+
+    @Test
+    fun `vault() with setupTokenId logs SESSION_NOT_STARTED with merchant config populated even when createPayPalSession was never called`() =
+        runTest {
+            val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
+
+            sut.vault(activity, "fake-setup-token-id", callback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analytics.notify(
+                    PayPalEvent.SESSION_NOT_STARTED,
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "fake-setup-token-id",
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                    ),
+                    errorDescription = "startPayPalSession() must be called before vault().",
+                )
+            }
+        }
+
+    @Test
+    fun `vault() with setupTokenId does not leak stale analytics params from a previous session into SESSION_NOT_STARTED`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth-state")
+
+            // First, complete a full, successful createPayPalSession() + vault() cycle, which
+            // consumes shopperSessionDeferred and leaves analyticsEventParams populated with
+            // this setup token's shopperSession/isVault/appSwitchEnabled/urlConfig fields.
+            val firstCallback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.vault(activity, "first-setup-token-id", firstCallback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            // Now call vault() again for a different setup token, without a fresh
+            // createPayPalSession() call — shopperSessionDeferred is null again, so this hits
+            // the SESSION_NOT_STARTED path. None of the first session's leftover fields should
+            // appear on this event.
+            val secondCallback = mockk<PayPalWebVaultCallback>(relaxed = true)
+            sutV3.vault(activity, "second-setup-token-id", secondCallback)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            verify {
+                analytics.notify(
+                    PayPalEvent.SESSION_NOT_STARTED,
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "second-setup-token-id",
+                        merchantId = "fake-merchant-id",
+                        clientId = "fake-client-id",
+                    ),
+                    errorDescription = "startPayPalSession() must be called before vault().",
+                )
+            }
+            verify {
+                secondCallback.onPayPalWebVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalWebCheckoutError.sessionNotCreatedError.code
                 })
@@ -2646,8 +2785,8 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = AppSwitchAnalyticsEventParams(
-                        orderId = "fake-order-id",
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "fake-order-id",
                         shopperSession = fakeSessionResponse,
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
@@ -2692,8 +2831,8 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED,
-                    params = AppSwitchAnalyticsEventParams(
-                        orderId = "fake-setup-token-id",
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "fake-setup-token-id",
                         shopperSession = fakeSessionResponse,
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
@@ -2734,8 +2873,8 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     PayPalEvent.FAILED,
-                    params = AppSwitchAnalyticsEventParams(
-                        orderId = "fake-order-id",
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "fake-order-id",
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
                         appSwitchEnabled = false,
@@ -2770,8 +2909,8 @@ class PayPalWebCheckoutClientUnitTest {
             verify {
                 analytics.notify(
                     PayPalEvent.FAILED,
-                    params = AppSwitchAnalyticsEventParams(
-                        orderId = "fake-setup-token-id",
+                    params = AnalyticsEventParams(
+                        orderIdOrSetupTokenId = "fake-setup-token-id",
                         isCachedSession = false,
                         userActionValue = "CONTINUE",
                         appSwitchEnabled = false,

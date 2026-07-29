@@ -5,11 +5,11 @@ import com.paypal.android.corepayments.analytics.AnalyticsService
 
 internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService) {
 
-    fun notify(event: PayPalEvent, params: AppSwitchAnalyticsEventParams, errorDescription: String? = null) {
+    fun notify(event: PayPalEvent, params: AnalyticsEventParams, errorDescription: String? = null) {
         analyticsService.sendAnalyticsEvent(
             name = event.value,
             eventData = params.toAnalyticsEventData(
-                orderId = params.orderId,
+                orderId = params.orderIdOrSetupTokenId,
                 errorDescription = errorDescription,
             ),
         )
@@ -17,7 +17,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
 
     fun notify(
         event: CreatePayPalSessionEvent,
-        params: AppSwitchAnalyticsEventParams,
+        params: AnalyticsEventParams,
         errorDescription: String? = null,
     ) {
         analyticsService.sendAnalyticsEvent(
@@ -55,7 +55,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
     }
 }
 
-private fun AppSwitchAnalyticsEventParams.toAnalyticsEventData(
+private fun AnalyticsEventParams.toAnalyticsEventData(
     orderId: String? = null,
     errorDescription: String? = null,
 ) = AnalyticsEventData(
