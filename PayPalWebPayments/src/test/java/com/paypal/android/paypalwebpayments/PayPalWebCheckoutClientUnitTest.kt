@@ -1760,7 +1760,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `start() with orderId logs SESSION_NOT_STARTED with merchant config populated even when createPayPalSession was never called`() =
+    fun `start() with orderId logs merchant config in SESSION_NOT_STARTED without createPayPalSession`() =
         runTest {
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
 
@@ -1774,6 +1774,7 @@ class PayPalWebCheckoutClientUnitTest {
                     PayPalEvent.SESSION_NOT_STARTED,
                     params = AnalyticsEventParams(
                         orderIdOrSetupTokenId = "fake-order-id",
+                        isVault = false,
                         merchantId = "fake-merchant-id",
                         clientId = "fake-client-id",
                     ),
@@ -1783,7 +1784,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `start() with orderId does not leak stale analytics params from a previous session into SESSION_NOT_STARTED`() =
+    fun `start() with orderId does not leak stale params from a previous session into SESSION_NOT_STARTED`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
@@ -1815,6 +1816,7 @@ class PayPalWebCheckoutClientUnitTest {
                     PayPalEvent.SESSION_NOT_STARTED,
                     params = AnalyticsEventParams(
                         orderIdOrSetupTokenId = "second-order-id",
+                        isVault = false,
                         merchantId = "fake-merchant-id",
                         clientId = "fake-client-id",
                     ),
@@ -2150,7 +2152,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `vault() with setupTokenId logs SESSION_NOT_STARTED with merchant config populated even when createPayPalSession was never called`() =
+    fun `vault() with setupTokenId logs merchant config in SESSION_NOT_STARTED without createPayPalSession`() =
         runTest {
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
 
@@ -2162,6 +2164,7 @@ class PayPalWebCheckoutClientUnitTest {
                     PayPalEvent.SESSION_NOT_STARTED,
                     params = AnalyticsEventParams(
                         orderIdOrSetupTokenId = "fake-setup-token-id",
+                        isVault = true,
                         merchantId = "fake-merchant-id",
                         clientId = "fake-client-id",
                     ),
@@ -2171,7 +2174,7 @@ class PayPalWebCheckoutClientUnitTest {
         }
 
     @Test
-    fun `vault() with setupTokenId does not leak stale analytics params from a previous session into SESSION_NOT_STARTED`() =
+    fun `vault() with setupTokenId does not leak stale params from a previous session into SESSION_NOT_STARTED`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
@@ -2204,6 +2207,7 @@ class PayPalWebCheckoutClientUnitTest {
                     PayPalEvent.SESSION_NOT_STARTED,
                     params = AnalyticsEventParams(
                         orderIdOrSetupTokenId = "second-setup-token-id",
+                        isVault = true,
                         merchantId = "fake-merchant-id",
                         clientId = "fake-client-id",
                     ),

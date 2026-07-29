@@ -151,14 +151,16 @@ class PayPalWebCheckoutClient internal constructor(
         val startTime = System.currentTimeMillis()
         if (deferred == null) {
             initAnalyticsEventParams()
-            notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
-            notifyCheckoutSessionNotStarted(orderId, callback)
-            return
         }
         analyticsEventParams = analyticsEventParams.copy(
             orderIdOrSetupTokenId = orderId,
             isVault = false,
         )
+        if (deferred == null) {
+            notifyUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
+            notifyCheckoutSessionNotStarted(callback)
+            return
+        }
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
@@ -197,11 +199,11 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
-    private fun notifyCheckoutSessionNotStarted(orderId: String, callback: PayPalWebStartCallback) {
+    private fun notifyCheckoutSessionNotStarted(callback: PayPalWebStartCallback) {
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
                 PayPalEvent.SESSION_NOT_STARTED,
-                params = analyticsEventParams.copy(orderIdOrSetupTokenId = orderId),
+                params = analyticsEventParams,
                 errorDescription = "startPayPalSession() must be called before start()."
             )
             callback.onPayPalWebStartResult(
@@ -231,14 +233,16 @@ class PayPalWebCheckoutClient internal constructor(
         val deferred = shopperSessionDeferred
         if (deferred == null) {
             initAnalyticsEventParams()
-            notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
-            notifyVaultSessionNotStarted(setupTokenId, callback)
-            return
         }
         analyticsEventParams = analyticsEventParams.copy(
             orderIdOrSetupTokenId = setupTokenId,
             isVault = true,
         )
+        if (deferred == null) {
+            notifyUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
+            notifyVaultSessionNotStarted(callback)
+            return
+        }
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
@@ -277,11 +281,11 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
-    private fun notifyVaultSessionNotStarted(setupTokenId: String, callback: PayPalWebVaultCallback) {
+    private fun notifyVaultSessionNotStarted(callback: PayPalWebVaultCallback) {
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
                 PayPalEvent.SESSION_NOT_STARTED,
-                params = analyticsEventParams.copy(orderIdOrSetupTokenId = setupTokenId),
+                params = analyticsEventParams,
                 errorDescription = "startPayPalSession() must be called before vault()."
             )
             callback.onPayPalWebVaultResult(
