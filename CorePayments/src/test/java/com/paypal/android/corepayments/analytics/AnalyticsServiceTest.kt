@@ -57,7 +57,7 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
+        sut.sendAnalyticsEvent("sample.event.name", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
@@ -72,7 +72,7 @@ class AnalyticsServiceTest {
 
         val timeBeforeEventSent = System.currentTimeMillis()
         sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("sample.event.name", "fake-order-id")
+        sut.sendAnalyticsEvent("sample.event.name", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val actualTimestamp = analyticsEventDataSlot.captured.timestamp
@@ -88,7 +88,7 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         sut = createAnalyticsService(environment, testScheduler)
-        sut.sendAnalyticsEvent("fake-event", "fake-order-id")
+        sut.sendAnalyticsEvent("fake-event", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
@@ -103,11 +103,39 @@ class AnalyticsServiceTest {
         } returns httpSuccessResponse
 
         sut = createAnalyticsService(Environment.LIVE, testScheduler)
-        sut.sendAnalyticsEvent("fake-event", "fake-order-id")
+        sut.sendAnalyticsEvent("fake-event", AnalyticsEventData(orderId = "fake-order-id"))
         advanceUntilIdle()
 
         val analyticsEventData = analyticsEventDataSlot.captured
         assertEquals("live", analyticsEventData.environment)
+    }
+
+    @Test
+    fun `sendAnalyticsEvent forwards latency params into AnalyticsEventData`() = runTest {
+        val analyticsEventDataSlot = slot<AnalyticsEventData>()
+        coEvery {
+            trackingEventsAPI.sendEvent(capture(analyticsEventDataSlot), deviceData)
+        } returns httpSuccessResponse
+
+        sut = createAnalyticsService(environment, testScheduler)
+        sut.sendAnalyticsEvent(
+            name = "paypal-web-payments:api-request-latency",
+            eventData = AnalyticsEventData(
+                startTime = 1000L,
+                endTime = 1500L,
+                endpoint = "/v2/checkout/orders",
+                presentationType = "app-switch",
+                flow = "checkout"
+            )
+        )
+        advanceUntilIdle()
+
+        val analyticsEventData = analyticsEventDataSlot.captured
+        assertEquals(1000L, analyticsEventData.startTime)
+        assertEquals(1500L, analyticsEventData.endTime)
+        assertEquals("/v2/checkout/orders", analyticsEventData.endpoint)
+        assertEquals("app-switch", analyticsEventData.presentationType)
+        assertEquals("checkout", analyticsEventData.flow)
     }
 
     private fun createAnalyticsService(

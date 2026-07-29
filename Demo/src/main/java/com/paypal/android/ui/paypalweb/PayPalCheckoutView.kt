@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import com.paypal.android.uishared.state.ActionState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,7 +26,9 @@ import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
 import com.paypal.android.uishared.components.OrderView
+import com.paypal.android.uishared.components.PayPalUserIdentityForm
 import com.paypal.android.uishared.components.StepHeader
+import com.paypal.android.uishared.components.StoreInVaultOptionForm
 import com.paypal.android.uishared.state.CompletedActionState
 import com.paypal.android.utils.OnLifecycleOwnerResumeEffect
 import com.paypal.android.utils.OnNewIntentEffect
@@ -39,8 +42,10 @@ fun PayPalCheckoutView(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     LaunchedEffect(scrollState.maxValue) {
-        // continuously scroll to bottom of the list when event state is updated
-        scrollState.animateScrollTo(scrollState.maxValue)
+        // Auto-scroll once the user has started the flow; avoids scrolling on initial render
+        if (uiState.createOrderState !is ActionState.Idle) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
     }
 
     val context = LocalContext.current
@@ -78,15 +83,26 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 1, title = "Create an Order")
+        PayPalUserIdentityForm(
+            userIdentity = uiState.userIdentity,
+            onUserIdentityChange = { value -> viewModel.userIdentity = value },
+            modifier = Modifier.fillMaxWidth()
+        )
+        EnumOptionList(
+            title = stringResource(R.string.user_action_title),
+            stringArrayResId = R.array.user_action_options,
+            onSelectedOptionChange = { value -> viewModel.userAction = value },
+            selectedOption = uiState.userAction,
+            modifier = Modifier.fillMaxWidth()
+        )
         CreateOrderForm(
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
         )
-        EnumOptionList(
-            title = stringResource(id = R.string.return_to_app_strategy_title),
-            stringArrayResId = R.array.deep_link_strategy_options,
-            onSelectedOptionChange = { value -> viewModel.returnToAppStrategyOption = value },
-            selectedOption = uiState.returnToAppStrategyOption
+        StoreInVaultOptionForm(
+            modifier = Modifier.fillMaxWidth(),
+            shouldVault = uiState.shouldVaultOption,
+            onShouldVaultChanged = { value -> viewModel.shouldVault = value }
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
@@ -120,8 +136,7 @@ private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalC
             successTitle = "CHECKOUT COMPLETE",
             state = uiState.payPalWebCheckoutState,
             onClick = { context.getActivityOrNull()?.let { viewModel.startCheckout(it) } },
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)
@@ -145,8 +160,7 @@ private fun Step3_CompleteOrder(uiState: PayPalUiState, viewModel: PayPalCheckou
             successTitle = "ORDER COMPLETED",
             state = uiState.completeOrderState,
             onClick = { viewModel.completeOrder(context) },
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) { state ->
             when (state) {
                 is CompletedActionState.Failure -> ErrorView(error = state.value)

@@ -1,6 +1,5 @@
 package com.paypal.android.paypalwebpayments
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -32,7 +31,7 @@ internal class PayPalWebLauncher(
     }
 
     fun launchWithUrl(
-        activity: Activity,
+        context: Context,
         uri: Uri,
         token: String,
         tokenType: TokenType,
@@ -46,7 +45,7 @@ internal class PayPalWebLauncher(
             appLinkUrl = (returnToAppStrategy as? ReturnToAppStrategy.AppLink)?.appLinkUrl,
             metadata = metadata
         )
-        return launchBrowserSwitch(activity, options)
+        return launchBrowserSwitch(context, options)
     }
 
     private fun getRequestCode(tokenType: TokenType): Int {
@@ -69,10 +68,10 @@ internal class PayPalWebLauncher(
     }
 
     private fun launchBrowserSwitch(
-        activity: Activity,
+        context: Context,
         options: BrowserSwitchOptions
     ): PayPalPresentAuthChallengeResult =
-        when (val startResult = browserSwitchClient.start(activity, options)) {
+        when (val startResult = browserSwitchClient.start(context, options)) {
             is BrowserSwitchStartResult.Success -> {
                 val pendingState = BrowserSwitchPendingState(options)
                 PayPalPresentAuthChallengeResult.Success(pendingState.toBase64EncodedJSON())
@@ -122,16 +121,17 @@ internal class PayPalWebLauncher(
         } else {
             val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
             val opType = deepLink.uri.getQueryParameter("opType")
-            if (opType == "cancel") {
-                PayPalWebCheckoutFinishStartResult.Canceled(orderId)
-            } else {
-                val payerId = deepLink.uri.getQueryParameter("PayerID")
-                if (orderId.isNullOrBlank() || payerId.isNullOrBlank()) {
-                    val malformedResultError = PayPalWebCheckoutError.malformedResultError
-                    PayPalWebCheckoutFinishStartResult.Failure(malformedResultError, orderId)
-                } else {
+            val payerId = deepLink.uri.getQueryParameter("PayerID")
+            when {
+                opType == "cancel" -> PayPalWebCheckoutFinishStartResult.Canceled(orderId)
+                !orderId.isNullOrBlank() && !payerId.isNullOrBlank() ->
                     PayPalWebCheckoutFinishStartResult.Success(orderId, payerId)
-                }
+                orderId.isNullOrBlank() ->
+                    PayPalWebCheckoutFinishStartResult.Failure(
+                        PayPalWebCheckoutError.malformedResultError,
+                        orderId
+                    )
+                else -> PayPalWebCheckoutFinishStartResult.Canceled(orderId)
             }
         }
     }

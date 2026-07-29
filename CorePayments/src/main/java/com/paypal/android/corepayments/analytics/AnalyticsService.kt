@@ -40,27 +40,25 @@ class AnalyticsService internal constructor(
                 CoroutineScope(dispatcher)
             )
 
-    fun sendAnalyticsEvent(
-        name: String,
-        orderId: String? = null,
-        buttonType: String? = null,
-        appSwitchEnabled: Boolean = false
-    ) {
+    /**
+     * Sends an analytics event described by [eventData]. Callers only need to populate the fields
+     * relevant to their event; [eventData]'s [AnalyticsEventData.environment],
+     * [AnalyticsEventData.eventName], and [AnalyticsEventData.timestamp] are overwritten below
+     * regardless of what's passed in.
+     */
+    fun sendAnalyticsEvent(name: String, eventData: AnalyticsEventData = AnalyticsEventData()) {
         // TODO: send analytics event using WorkManager (supports coroutines) to avoid lint error
         // thrown because we don't use the Deferred result
         scope.launch {
             val timestamp = System.currentTimeMillis()
             try {
                 val deviceData = deviceInspector.inspect()
-                val analyticsEventData = AnalyticsEventData(
-                    environment.name.lowercase(),
-                    name,
-                    timestamp,
-                    orderId = orderId,
-                    buttonType = buttonType,
-                    appSwitchEnabled = appSwitchEnabled
+                val fullEventData = eventData.copy(
+                    environment = environment.name.lowercase(),
+                    eventName = name,
+                    timestamp = timestamp,
                 )
-                val response = trackingEventsAPI.sendEvent(analyticsEventData, deviceData)
+                val response = trackingEventsAPI.sendEvent(fullEventData, deviceData)
                 response.error?.message?.let { errorMessage ->
                     Log.d("[PayPal SDK]", "Failed to send analytics: $errorMessage")
                 }

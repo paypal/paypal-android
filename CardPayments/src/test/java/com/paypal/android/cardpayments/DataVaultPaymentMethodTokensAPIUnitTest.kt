@@ -36,7 +36,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class DataVaultPaymentMethodTokensAPIUnitTest {
 
-    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
 
     private val resourceLoader = ResourceLoader()
     private val context = ApplicationProvider.getApplicationContext<Application>()

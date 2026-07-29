@@ -26,8 +26,8 @@ class RestClientUnitTest {
 
     private val httpSuccessResponse = HttpResponse(200)
 
-    private val sandboxConfig = CoreConfig("fake-sandbox-client-id", Environment.SANDBOX)
-    private val liveConfig = CoreConfig("fake-live-client-id", Environment.LIVE)
+    private val sandboxConfig = CoreConfig("fake-sandbox-client-id", "fake-merchant-id", Environment.SANDBOX)
+    private val liveConfig = CoreConfig("fake-live-client-id", "fake-merchant-id", Environment.LIVE)
 
     private lateinit var http: Http
     private lateinit var httpRequestSlot: CapturingSlot<HttpRequest>

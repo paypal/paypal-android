@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.cardpayments.Card
@@ -16,14 +17,13 @@ import com.paypal.android.cardpayments.CardVaultRequest
 import com.paypal.android.cardpayments.CardVaultResult
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.corepayments.CoreConfig
+import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.DateString
 import com.paypal.android.ui.approveorder.SetupTokenInfo
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreateCardPaymentTokenUseCase
 import com.paypal.android.usecase.CreateCardSetupTokenUseCase
-import com.paypal.android.utils.ReturnUrlFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,11 +36,17 @@ import javax.inject.Inject
 class VaultCardViewModel @Inject constructor(
     @ApplicationContext val applicationContext: Context,
     val createSetupTokenUseCase: CreateCardSetupTokenUseCase,
-    val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase
+    val createPaymentTokenUseCase: CreateCardPaymentTokenUseCase,
+    private val customEnvironmentRepository: CustomEnvironmentRepository,
 ) : ViewModel() {
 
-    private val coreConfig = CoreConfig(SDKSampleServerAPI.clientId)
-    private val cardClient = CardClient(applicationContext, coreConfig)
+    private fun buildCoreConfig(): CoreConfig =
+        customEnvironmentRepository.getCoreConfig(
+            CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
+        )
+
+    // Held as a field so completeAuthChallenge uses the same instance that started the vault flow.
+    private var cardClient: CardClient? = null
 
     private val _uiState = MutableStateFlow(VaultCardUiState())
     val uiState = _uiState.asStateFlow()
@@ -90,12 +96,6 @@ class VaultCardViewModel @Inject constructor(
             _uiState.update { it.copy(scaOption = value) }
         }
 
-    var returnToAppStrategy: ReturnToAppStrategyOption
-        get() = _uiState.value.returnToAppStrategy
-        set(value) {
-            _uiState.update { it.copy(returnToAppStrategy = value) }
-        }
-
     fun prefillCard(testCard: TestCard) {
         val card = testCard.card
         _uiState.update { currentState ->
@@ -111,12 +111,8 @@ class VaultCardViewModel @Inject constructor(
         viewModelScope.launch {
             createSetupTokenState = ActionState.Loading
             val sca = _uiState.value.scaOption
-            val returnToAppStrategy = _uiState.value.returnToAppStrategy
-            createSetupTokenState =
-                createSetupTokenUseCase(
-                    sca,
-                    returnToAppStrategy.toReturnToAppStrategy()
-                ).mapToActionState()
+
+            createSetupTokenState = createSetupTokenUseCase(sca).mapToActionState()
         }
     }
 
@@ -135,10 +131,9 @@ class VaultCardViewModel @Inject constructor(
     private fun updateSetupTokenWithId(activity: ComponentActivity, setupTokenId: String) {
         updateSetupTokenState = ActionState.Loading
         val card = parseCard(_uiState.value)
-        val returnUrl =
-            ReturnUrlFactory.createGenericReturnUrl(returnToAppStrategy.toReturnToAppStrategy())
-        val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnUrl)
-        cardClient.vault(cardVaultRequest) { result ->
+        val returnAppUrl = DemoConstants.returnToAppUrlConfig.returnAppUrl
+        val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnAppUrl)
+        cardClient?.vault(cardVaultRequest) { result ->
             when (result) {
                 is CardVaultResult.Success -> {
                     val setupTokenInfo = result.run {
@@ -188,7 +183,8 @@ class VaultCardViewModel @Inject constructor(
         activity: ComponentActivity,
         authChallenge: CardAuthChallenge
     ) {
-        when (val result = cardClient.presentAuthChallenge(activity, authChallenge)) {
+        val client = cardClient ?: CardClient(applicationContext, buildCoreConfig())
+        when (val result = client.presentAuthChallenge(activity, authChallenge)) {
             is CardPresentAuthChallengeResult.Success -> {
                 // do nothing; wait for user to authenticate PayPal checkout in Chrome Custom Tab
             }
@@ -199,7 +195,8 @@ class VaultCardViewModel @Inject constructor(
     }
 
     fun completeAuthChallenge(intent: Intent) {
-        cardClient.finishVault(intent)?.let { vaultResult ->
+        val client = cardClient ?: CardClient(applicationContext, buildCoreConfig())
+        client.finishVault(intent)?.let { vaultResult ->
             when (vaultResult) {
                 is CardFinishVaultResult.Success -> {
                     val setupTokenInfo = vaultResult.run {
