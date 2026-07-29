@@ -10,7 +10,7 @@ import com.paypal.android.corepayments.common.DeviceInspector
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,7 +56,8 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         stubDefaultApp(appLinkReturnUri, merchantPackageName)
         stubDefaultApp(checkoutUri, "com.android.chrome")
 
-        assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
+        val expected = GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl))
+        assertEquals(expected, sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
     }
 
     @Test
@@ -76,7 +77,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
 
             assertEquals(
                 "expected $browser to be treated as App-Links-compatible",
-                ReturnToAppStrategy.AppLink(appLinkReturnUrl),
+                GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl)),
                 sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
             )
         }
@@ -98,7 +99,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
 
             assertEquals(
                 "expected $browser to be treated as incompatible",
-                ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
+                GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)),
                 sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
             )
         }
@@ -109,7 +110,8 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         stubDefaultApp(appLinkReturnUri, merchantPackageName)
         every { deviceInspector.canResolvePayPalAppSwitch() } returns true
 
-        assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
+        val expected = GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl))
+        assertEquals(expected, sut(appLinkReturnUrl, fallbackScheme, checkoutUri))
     }
 
     @Test
@@ -119,7 +121,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         every { deviceInspector.canResolvePayPalAppSwitch() } returns false
 
         assertEquals(
-            ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
+            GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)),
             sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
         )
     }
@@ -131,18 +133,18 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         stubDefaultApp(checkoutUri, "com.android.chrome")
 
         assertEquals(
-            ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
+            GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)),
             sut(appLinkReturnUrl, fallbackScheme, checkoutUri)
         )
     }
 
     @Test
-    fun `CustomUrlScheme when the app link return url is null`() {
+    fun `CustomUrlScheme when the app link return url is blank`() {
         stubDefaultApp(checkoutUri, "com.android.chrome")
 
         assertEquals(
-            ReturnToAppStrategy.CustomUrlScheme(fallbackScheme),
-            sut(appLinkReturnUrl = null, fallbackSchemeUrl = fallbackScheme, checkoutUri = checkoutUri)
+            GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.CustomUrlScheme(fallbackScheme)),
+            sut(appLinkReturnUrl = "", fallbackSchemeUrl = fallbackScheme, checkoutUri = checkoutUri)
         )
     }
 
@@ -152,8 +154,8 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         stubDefaultApp(appLinkReturnUri, "com.other.app")
 
         assertEquals(
-            ReturnToAppStrategy.AppLink(appLinkReturnUrl),
-            sut(appLinkReturnUrl, fallbackSchemeUrl = null, checkoutUri = checkoutUri)
+            GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl)),
+            sut(appLinkReturnUrl, fallbackSchemeUrl = "", checkoutUri = checkoutUri)
         )
     }
 
@@ -162,23 +164,24 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         stubDefaultApp(appLinkReturnUri, "com.other.app")
 
         assertEquals(
-            ReturnToAppStrategy.AppLink(appLinkReturnUrl),
+            GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl)),
             sut(appLinkReturnUrl, fallbackSchemeUrl = "  ", checkoutUri = checkoutUri)
         )
     }
 
     @Test
-    fun `throws when both appLinkReturnUrl and fallbackSchemeUrl are null`() {
-        assertThrows(IllegalArgumentException::class.java) {
-            sut(appLinkReturnUrl = null, fallbackSchemeUrl = null, checkoutUri = checkoutUri)
-        }
+    fun `Failure when both appLinkReturnUrl and fallbackSchemeUrl are blank`() {
+        val result = sut(appLinkReturnUrl = "", fallbackSchemeUrl = "", checkoutUri = checkoutUri)
+
+        assertTrue(result is GetReturnToAppStrategyResult.Failure)
+        assertTrue((result as GetReturnToAppStrategyResult.Failure).error.isNotBlank())
     }
 
     @Test
-    fun `throws when both appLinkReturnUrl and fallbackSchemeUrl are blank`() {
-        assertThrows(IllegalArgumentException::class.java) {
-            sut(appLinkReturnUrl = "  ", fallbackSchemeUrl = "  ", checkoutUri = checkoutUri)
-        }
+    fun `Failure when both appLinkReturnUrl and fallbackSchemeUrl are whitespace`() {
+        val result = sut(appLinkReturnUrl = "  ", fallbackSchemeUrl = "  ", checkoutUri = checkoutUri)
+
+        assertTrue(result is GetReturnToAppStrategyResult.Failure)
     }
 
     @Test
@@ -187,6 +190,7 @@ class GetReturnToAppStrategyUseCaseUnitTest {
         // The stub matches the default checkout URI (example.com/checkout), which equals checkoutUri.
         stubDefaultApp(checkoutUri, "com.android.chrome")
 
-        assertEquals(ReturnToAppStrategy.AppLink(appLinkReturnUrl), sut(appLinkReturnUrl, fallbackScheme))
+        val expected = GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl))
+        assertEquals(expected, sut(appLinkReturnUrl, fallbackScheme))
     }
 }

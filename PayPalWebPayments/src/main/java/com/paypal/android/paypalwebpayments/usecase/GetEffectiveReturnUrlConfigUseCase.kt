@@ -1,5 +1,6 @@
 package com.paypal.android.paypalwebpayments.usecase
 
+import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.LinkType
@@ -15,12 +16,11 @@ import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
  *   [ReturnToAppUrlConfig.returnAppUrl] / [ReturnToAppUrlConfig.cancelAppUrl] are used.
  * - [LinkType.DEEP_LINK]: a copy with custom-scheme return/cancel URLs derived from
  *   [ReturnToAppUrlConfig.fallbackSchemeUrl], so PayPal redirects via the scheme the client
- *   captures. The success URL reuses [ReturnToAppStrategy.CustomUrlScheme]'s convention
- *   (`scheme://x-callback-url/paypal-sdk/paypal-checkout`); the cancel URL appends a `cancel` path
- *   segment, which both return parsers detect (checkout: no PayerID on cancel; vault: path contains
- *   "cancel"). Any query params the merchant set on [ReturnToAppUrlConfig.returnAppUrl] /
- *   [ReturnToAppUrlConfig.cancelAppUrl] are preserved by appending them to the corresponding
- *   custom-scheme URL. [ReturnToAppUrlConfig.fallbackSchemeUrl] is preserved.
+ *   captures. Both URLs reuse [ReturnToAppStrategy.CustomUrlScheme]'s convention
+ *   (`scheme://x-callback-url/paypal-sdk/paypal-checkout`). Any query params the merchant set on
+ *   [ReturnToAppUrlConfig.returnAppUrl] / [ReturnToAppUrlConfig.cancelAppUrl] are preserved by
+ *   appending them to the corresponding custom-scheme URL. [ReturnToAppUrlConfig.fallbackSchemeUrl]
+ *   is preserved.
  *
  * Sending the chosen return URL to the server before the payment call mirrors the Braintree flow —
  * the client's device-only decision can't be made server-side, so it must be communicated through
@@ -35,17 +35,16 @@ class GetEffectiveReturnUrlConfigUseCase {
         urlConfig: ReturnToAppUrlConfig,
         linkType: LinkType
     ): ReturnToAppUrlConfig {
-        if (urlConfig.fallbackSchemeUrl.isNullOrBlank()) {
+        if (urlConfig.fallbackSchemeUrl.isBlank()) {
             return urlConfig
         }
 
         return when (linkType) {
             LinkType.DEEP_LINK -> {
-                val scheme = urlConfig.fallbackSchemeUrl
-                val successBaseUrl = ReturnToAppStrategy.CustomUrlScheme(scheme).returnUrl
+                val successBaseUri = ReturnToAppStrategy.CustomUrlScheme(urlConfig.fallbackSchemeUrl).returnUrl.toUri()
                 urlConfig.copy(
-                    returnAppUrl = successBaseUrl.withQueryFrom(urlConfig.returnAppUrl),
-                    cancelAppUrl = "$successBaseUrl/cancel".withQueryFrom(urlConfig.cancelAppUrl),
+                    returnAppUrl = successBaseUri.withQueryFrom(urlConfig.returnAppUrl).toString(),
+                    cancelAppUrl = successBaseUri.withQueryFrom(urlConfig.cancelAppUrl).toString(),
                 )
             }
 
@@ -57,8 +56,8 @@ class GetEffectiveReturnUrlConfigUseCase {
      * Appends the query string from [originalUrl], if any, so merchant-supplied query params on the
      * original https return/cancel URL carry over to the custom-scheme URL.
      */
-    private fun String.withQueryFrom(originalUrl: String): String {
+    private fun Uri.withQueryFrom(originalUrl: String): Uri {
         val query = originalUrl.toUri().query
-        return if (query.isNullOrBlank()) this else "$this?$query"
+        return if (query.isNullOrBlank()) this else buildUpon().encodedQuery(query).build()
     }
 }

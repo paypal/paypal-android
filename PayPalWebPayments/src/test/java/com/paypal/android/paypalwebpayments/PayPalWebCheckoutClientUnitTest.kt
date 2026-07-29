@@ -21,6 +21,7 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
 import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEligibilityResponse
 import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
+import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyResult
 import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase
 import com.paypal.android.paypalwebpayments.errors.PayPalWebCheckoutError
 import com.paypal.android.paypalwebpayments.analytics.AppSwitchAnalyticsEventParams
@@ -111,7 +112,7 @@ class PayPalWebCheckoutClientUnitTest {
         Dispatchers.setMain(testDispatcher)
         every {
             getReturnToAppStrategyUseCase(any(), any(), any())
-        } returns ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl)
+        } returns GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl))
         sut = PayPalWebCheckoutClient(
             analytics = analytics,
             payPalWebLauncher = payPalWebLauncher,
@@ -1829,7 +1830,7 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
                 getReturnToAppStrategyUseCase(any(), any(), any())
-            } returns ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl)
+            } returns GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl))
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -1867,7 +1868,9 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
                 getReturnToAppStrategyUseCase(any(), any(), any())
-            } returns ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl!!)
+            } returns GetReturnToAppStrategyResult.Success(
+                ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl)
+            )
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
@@ -1888,7 +1891,7 @@ class PayPalWebCheckoutClientUnitTest {
                     uri = any(),
                     token = "fake-order-id",
                     tokenType = TokenType.ORDER_ID,
-                    returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl!!)
+                    returnToAppStrategy = ReturnToAppStrategy.CustomUrlScheme(fakeUrlConfig.fallbackSchemeUrl)
                 )
             }
             verify {
@@ -2444,7 +2447,7 @@ class PayPalWebCheckoutClientUnitTest {
             val sessionError = PayPalSDKError(5, "server responded with an error")
             every {
                 getReturnToAppStrategyUseCase(any(), any(), any())
-            } returns ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            } returns GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.CustomUrlScheme("com.example.app"))
             coEvery {
                 createShopperSessionAPI(
                     token = any(),
@@ -2927,7 +2930,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
-            val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = null)
+            val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = "")
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -2952,7 +2955,7 @@ class PayPalWebCheckoutClientUnitTest {
         runTest {
             val sutV3 = makeSutWithUrlScheme()
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
-            val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = null)
+            val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = "")
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -3170,7 +3173,7 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
                 getReturnToAppStrategyUseCase(any(), any(), any())
-            } returns ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+            } returns GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.CustomUrlScheme("com.example.app"))
             val urlConfig = ReturnToAppUrlConfig(
                 returnAppUrl = "https://example.com/paypal-return",
                 cancelAppUrl = "https://example.com/paypal-cancel",
@@ -3193,7 +3196,7 @@ class PayPalWebCheckoutClientUnitTest {
             // return/cancel URLs sent to the shopper session are custom-scheme, not the merchant https.
             val expectedBase = "com.example.app://x-callback-url/paypal-sdk/paypal-checkout"
             assertEquals(expectedBase, paramsSlot.captured.returnAppUrl)
-            assertEquals("$expectedBase/cancel", paramsSlot.captured.cancelAppUrl)
+            assertEquals(expectedBase, paramsSlot.captured.cancelAppUrl)
             // The raw fallback scheme is still forwarded unchanged.
             assertEquals("com.example.app", paramsSlot.captured.fallbackSchemeUrl)
             verify {
@@ -3210,7 +3213,9 @@ class PayPalWebCheckoutClientUnitTest {
             val sutV3 = makeSutWithUrlScheme()
             every {
                 getReturnToAppStrategyUseCase(any(), any(), any())
-            } returns ReturnToAppStrategy.AppLink("https://example.com/paypal-return")
+            } returns GetReturnToAppStrategyResult.Success(
+                ReturnToAppStrategy.AppLink("https://example.com/paypal-return")
+            )
             val urlConfig = ReturnToAppUrlConfig(
                 returnAppUrl = "https://example.com/paypal-return",
                 cancelAppUrl = "https://example.com/paypal-cancel",
