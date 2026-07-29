@@ -40,7 +40,7 @@ class DeviceInspector(private val context: Context) {
      * `ResolvePayPalUseCase`.
      *
      * Also requires the installed PayPal app's version code to be newer than
-     * [MIN_VERSION_CODE_APP_SWITCH] — PayPal app v10.6.0
+     * [MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE] — PayPal app v10.6.0
      * (build 1160090131), the last Play Store build shipped *without* the required
      * app-switch changes this SDK relies on. If the installed app's version code can't be
      * determined, this fails closed (returns false) rather than risk switching into a build that
@@ -55,15 +55,9 @@ class DeviceInspector(private val context: Context) {
             PackageManager.MATCH_DEFAULT_ONLY
         )
         val resolvesToPayPalApp = resolvedActivity?.activityInfo?.packageName == PAYPAL_APP_PACKAGE
-        return resolvesToPayPalApp && isAppSwitchSupportedVersionCode(payPalAppVersionCode)
+        return resolvesToPayPalApp &&
+                payPalAppVersionCode?.let { it > MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE } ?: false
     }
-
-    /**
-     * Checks whether [versionCode] is newer than
-     * [MIN_VERSION_CODE_APP_SWITCH]. Returns false if [versionCode] is null.
-     */
-    private fun isAppSwitchSupportedVersionCode(versionCode: Long?): Boolean =
-        versionCode != null && versionCode > MIN_VERSION_CODE_APP_SWITCH
 
     fun isDeepLinkConfiguredInManifest(returnUrlScheme: String): Boolean {
         val testUri = "$returnUrlScheme://".toUri()
@@ -78,7 +72,7 @@ class DeviceInspector(private val context: Context) {
     companion object {
         const val PAYPAL_APP_PACKAGE = "com.paypal.android.p2pmobile"
         private const val PAYPAL_APP_SWITCH_URL = "https://www.paypal.com/app-switch-checkout"
-        private const val MIN_VERSION_CODE_APP_SWITCH = 1_160_090_131L
+        private const val MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE = 1_160_090_131L
         private val DEFAULT_APP_SWITCH_URI: Uri
             get() = PAYPAL_APP_SWITCH_URL.toUri()
     }
