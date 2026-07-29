@@ -18,18 +18,11 @@
   * Add `PayPalPhoneNumber(countryCode, nationalNumber)` and change `PayPalUserIdentity.phone` from `String?` to `PayPalPhoneNumber?` — the shopper's phone number is now sent to the `createShopperSessionWithAppSwitchEligibility` GraphQL mutation
   * Add `PayPalWebCheckoutClient.start(activity, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
   * Add `PayPalWebCheckoutClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
-  * Deprecate `PayPalWebCheckoutClient.start(activity, request, callback)` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
+  * Removed deprecated `PayPalWebCheckoutClient.start(activity, request, callback)` and `PayPalWebCheckoutRequest` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
   * Deprecate `PayPalWebCheckoutClient.vault(activity, request, callback)` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
 * FraudProtection
   * Removed deprecated `PayPalDataCollector.collectDeviceData(context, clientMetadataId)` and `collectDeviceData(context, clientMetadataId, additionalData)` overloads — use `collectDeviceData(context, PayPalDataCollectorRequest)` instead
   * Removed deprecated `PayPalDataCollector.setLogging(Boolean)`
-
-* Adds new property `appLinkUrl` in `PayPalWebCheckoutRequest` to specify app link url that will be
-  used to re-open app after approving order
-* Adds new property `appLinkUrl` in `PayPalWebVaultRequest` to specify app link url that will be
-  used to re-open app after vaulting
-* Deprecates `urlScheme` property in `PayPalWebCheckoutClient` instead use `fallbackUrlScheme` in
-  `PayPalWebCheckoutRequest` and `PayPalWebVaultRequest`
 
 ## 2.3.0 (2025-11-03)
 * PayPalWebPayments
