@@ -12,14 +12,13 @@
   * Removed deprecated `PayPalWebCheckoutClient.vault(activity, request)` — use `PayPalWebCheckoutClient.vault(activity, request, callback)` or `vaultAsync()` instead
   * Removed deprecated `PayPalWebCheckoutClient.finishStart(intent, authState)` — use `PayPalWebCheckoutClient.finishStart(intent)` instead
   * Removed deprecated `PayPalWebCheckoutClient.finishVault(intent, authState)` — use `PayPalWebCheckoutClient.finishVault(intent)` instead
-  * Removed deprecated `approveVaultHref` from `PayPalWebVaultRequest`
   * Removed `authState` from public API of `PayPalPresentAuthChallengeResult.Success`
   * Add `PayPalWebCheckoutClient.createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`
   * Add `PayPalPhoneNumber(countryCode, nationalNumber)` and change `PayPalUserIdentity.phone` from `String?` to `PayPalPhoneNumber?` — the shopper's phone number is now sent to the `createShopperSessionWithAppSwitchEligibility` GraphQL mutation
   * Add `PayPalWebCheckoutClient.start(activity, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
   * Add `PayPalWebCheckoutClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
   * Removed deprecated `PayPalWebCheckoutClient.start(activity, request, callback)` and `PayPalWebCheckoutRequest` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
-  * Deprecate `PayPalWebCheckoutClient.vault(activity, request, callback)` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
+  * Removed deprecated `PayPalWebCheckoutClient.vault(activity, request, callback)` and `PayPalWebVaultRequest` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
 * FraudProtection
   * Removed deprecated `PayPalDataCollector.collectDeviceData(context, clientMetadataId)` and `collectDeviceData(context, clientMetadataId, additionalData)` overloads — use `collectDeviceData(context, PayPalDataCollectorRequest)` instead
   * Removed deprecated `PayPalDataCollector.setLogging(Boolean)`

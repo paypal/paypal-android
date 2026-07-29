@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
 import com.paypal.android.corepayments.HttpRoundTripTiming
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ReturnToAppStrategy
@@ -577,43 +575,6 @@ class PayPalWebCheckoutClient internal constructor(
         }
     }
 
-    // Used by deprecated vault() methods
-    @VisibleForTesting
-    internal suspend fun vaultAsync(
-        activity: Activity,
-        request: PayPalWebVaultRequest
-    ): PayPalPresentAuthChallengeResult {
-        val returnToAppStrategy = request.returnToAppStrategy
-            ?: return PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.noReturnToAppStrategyError)
-
-        val launchUri = withContext(Dispatchers.IO) {
-            getLaunchUri(
-                context = activity.applicationContext,
-                token = request.setupTokenId,
-                tokenType = TokenType.VAULT_ID,
-                fallbackUri = buildPayPalVaultUri(request.setupTokenId)
-            )
-        }
-
-        val result = payPalWebLauncher.launchWithUrl(
-            context = activity,
-            uri = launchUri,
-            token = request.setupTokenId,
-            tokenType = TokenType.VAULT_ID,
-            returnToAppStrategy = returnToAppStrategy
-        )
-
-        when (result) {
-            is PayPalPresentAuthChallengeResult.Success -> {
-                // update auth state value in session store
-                sessionStore.authState = result.authState
-            }
-
-            is PayPalPresentAuthChallengeResult.Failure -> {}
-        }
-
-        return result
-    }
     // endregion
 
     // region Private Helpers
@@ -695,23 +656,6 @@ class PayPalWebCheckoutClient internal constructor(
             .build()
     }
 
-    private fun buildPayPalVaultUri(
-        setupTokenId: String
-    ): Uri {
-        return baseUrl.toUri()
-            .buildUpon()
-            .appendPath("agreements")
-            .appendPath("approve")
-            .appendQueryParameter("approval_session_id", setupTokenId)
-            .build()
-    }
-
-    private val baseUrl: String
-        get() = when (coreConfig.environment) {
-            Environment.LIVE -> "https://paypal.com/"
-            else -> "https://sandbox.paypal.com/"
-        }
-
     private suspend fun getLaunchUri(
         context: Context,
         token: String,
@@ -789,31 +733,6 @@ class PayPalWebCheckoutClient internal constructor(
         bnCode = coreConfig.bnCode,
         clientId = coreConfig.clientId,
     )
-    // endregion
-
-    // region Deprecated Methods
-
-    /**
-     * Vault PayPal as a payment method with callback.
-     *
-     * @param activity the ComponentActivity to launch the auth challenge from
-     * @param request [PayPalWebVaultRequest] for vaulting PayPal as a payment method
-     * @param callback callback to receive the result
-     */
-    @Deprecated(
-        message = "Use createPayPalSession() followed by vault(activity, setupTokenId, callback) instead.",
-        replaceWith = ReplaceWith("vault(activity, request.setupTokenId, callback)")
-    )
-    fun vault(
-        activity: ComponentActivity,
-        request: PayPalWebVaultRequest,
-        callback: PayPalWebVaultCallback
-    ) {
-        applicationScope.launch(Dispatchers.Main) {
-            callback.onPayPalWebVaultResult(vaultAsync(activity, request))
-        }
-    }
-
     // endregion
 }
 
