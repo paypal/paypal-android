@@ -416,28 +416,10 @@ class PayPalWebCheckoutClient internal constructor(
         orderId: String,
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
-        val urlConfig = returnToAppUrlConfig ?: return handleReturnToAppStrategyFailure(
-            latencyFlow = LatencyFlow.CHECKOUT,
-            startTime = startTime,
-            logPresentAuthChallengeResult = ::logCheckoutPresentAuthChallengeResult,
-        )
+        // Shouldn't return null in practice: start() already validates urlConfig before reaching here.
+        val returnToAppStrategy = getReturnToAppStrategyOrNull()
+            ?: return handleReturnToAppStrategyFailure(startTime = startTime, isVault = false)
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        val returnToAppStrategy = when (
-            val result = getReturnToAppStrategyUseCase(
-                appLinkReturnUrl = urlConfig.returnAppUrl,
-                fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
-            )
-        ) {
-            is GetReturnToAppStrategyResult.Success -> result.returnToAppStrategy
-            is GetReturnToAppStrategyResult.Failure -> {
-                // Shouldn't happen: start() already validates urlConfig before reaching here.
-                return handleReturnToAppStrategyFailure(
-                    latencyFlow = LatencyFlow.CHECKOUT,
-                    startTime = startTime,
-                    logPresentAuthChallengeResult = ::logCheckoutPresentAuthChallengeResult,
-                )
-            }
-        }
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
             appSwitchEnabled = appSwitchEnabled,
             linkType = returnToAppStrategy.linkType,
@@ -505,28 +487,10 @@ class PayPalWebCheckoutClient internal constructor(
         setupTokenId: String,
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
-        val urlConfig = returnToAppUrlConfig ?: return handleReturnToAppStrategyFailure(
-            latencyFlow = LatencyFlow.VAULT,
-            startTime = startTime,
-            logPresentAuthChallengeResult = ::logVaultPresentAuthChallengeResult,
-        )
+        // Shouldn't return null in practice: vault() already validates urlConfig before reaching here.
+        val returnToAppStrategy = getReturnToAppStrategyOrNull()
+            ?: return handleReturnToAppStrategyFailure(startTime = startTime, isVault = true)
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
-        val returnToAppStrategy = when (
-            val result = getReturnToAppStrategyUseCase(
-                appLinkReturnUrl = urlConfig.returnAppUrl,
-                fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
-            )
-        ) {
-            is GetReturnToAppStrategyResult.Success -> result.returnToAppStrategy
-            is GetReturnToAppStrategyResult.Failure -> {
-                // Shouldn't happen: vault() already validates urlConfig before reaching here.
-                return handleReturnToAppStrategyFailure(
-                    latencyFlow = LatencyFlow.VAULT,
-                    startTime = startTime,
-                    logPresentAuthChallengeResult = ::logVaultPresentAuthChallengeResult,
-                )
-            }
-        }
         appSwitchAnalyticsEventParams = appSwitchAnalyticsEventParams.copy(
             appSwitchEnabled = appSwitchEnabled,
             linkType = returnToAppStrategy.linkType,
@@ -589,24 +553,7 @@ class PayPalWebCheckoutClient internal constructor(
     ): CreateShopperSessionWithAppSwitchEligibilityResponse? {
         val isVaultRequest = tokenType != TokenType.ORDER_ID
 
-        val returnToAppStrategy = when (
-            val result = getReturnToAppStrategyUseCase(
-                appLinkReturnUrl = urlConfig.returnAppUrl,
-                fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
-            )
-        ) {
-            is GetReturnToAppStrategyResult.Success -> result.returnToAppStrategy
-            is GetReturnToAppStrategyResult.Failure -> {
-                // Shouldn't happen: createPayPalSession() already validates urlConfig before
-                // starting this fetch.
-                analytics.notify(
-                    CreatePayPalSessionEvent.FAILED,
-                    params = appSwitchAnalyticsEventParams,
-                    errorDescription = result.error,
-                )
-                return null
-            }
-        }
+        val returnToAppStrategy = resolveShopperSessionReturnToAppStrategy(urlConfig) ?: return null
         val effectiveUrlConfig = getEffectiveReturnUrlConfigUseCase(
             urlConfig = urlConfig,
             linkType = returnToAppStrategy.linkType
@@ -659,6 +606,33 @@ class PayPalWebCheckoutClient internal constructor(
                     CreatePayPalSessionEvent.FAILED,
                     params = appSwitchAnalyticsEventParams,
                     errorDescription = result.error.errorDescription,
+                )
+                null
+            }
+        }
+    }
+
+    /**
+     * Resolves the [ReturnToAppStrategy] to use for the shopper session request, or `null` when
+     * [GetReturnToAppStrategyUseCase] returns a [GetReturnToAppStrategyResult.Failure] — this
+     * shouldn't happen in practice, since [createPayPalSession] already validates [urlConfig]
+     * before starting this fetch. Reports [CreatePayPalSessionEvent.FAILED] on failure.
+     */
+    private fun resolveShopperSessionReturnToAppStrategy(
+        urlConfig: ReturnToAppUrlConfig,
+    ): ReturnToAppStrategy? {
+        return when (
+            val result = getReturnToAppStrategyUseCase(
+                appLinkReturnUrl = urlConfig.returnAppUrl,
+                fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
+            )
+        ) {
+            is GetReturnToAppStrategyResult.Success -> result.returnToAppStrategy
+            is GetReturnToAppStrategyResult.Failure -> {
+                analytics.notify(
+                    CreatePayPalSessionEvent.FAILED,
+                    params = appSwitchAnalyticsEventParams,
+                    errorDescription = result.error,
                 )
                 null
             }
@@ -1023,20 +997,44 @@ class PayPalWebCheckoutClient internal constructor(
      * [GetReturnToAppStrategyUseCase] fails. This shouldn't happen in practice, since start()/vault()
      * already validate the [ReturnToAppUrlConfig] before checkout/vault launch is attempted.
      *
-     * @param latencyFlow [LatencyFlow.CHECKOUT] or [LatencyFlow.VAULT], used for latency reporting.
-     * @param logPresentAuthChallengeResult [logCheckoutPresentAuthChallengeResult] or
-     *   [logVaultPresentAuthChallengeResult], used to report the failure via analytics.
+     * @param startTime Used for latency reporting.
+     * @param isVault Selects the vault or checkout flow: which [LatencyFlow] to report latency
+     *   against, and whether the failure is logged via [logVaultPresentAuthChallengeResult] or
+     *   [logCheckoutPresentAuthChallengeResult].
      */
     private fun handleReturnToAppStrategyFailure(
-        latencyFlow: String,
         startTime: Long,
-        logPresentAuthChallengeResult: (PayPalPresentAuthChallengeResult) -> Unit,
+        isVault: Boolean
     ): PayPalPresentAuthChallengeResult {
         val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
         val failureResult = PayPalPresentAuthChallengeResult.Failure(error)
-        logPresentAuthChallengeResult(failureResult)
+        if (isVault) {
+            logVaultPresentAuthChallengeResult(failureResult)
+        } else {
+            logCheckoutPresentAuthChallengeResult(failureResult)
+        }
+        val latencyFlow = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
         notifyUserPerceivedLatency(latencyFlow, failureResult, startTime, System.currentTimeMillis())
         return failureResult
+    }
+
+    /**
+     * Resolves the [ReturnToAppStrategy] to use for launching checkout/vault, or `null` when it
+     * can't be resolved — either because [returnToAppUrlConfig] hasn't been set, or because
+     * [GetReturnToAppStrategyUseCase] itself returned a [GetReturnToAppStrategyResult.Failure].
+     * Callers should treat a `null` result as a failure via [handleReturnToAppStrategyFailure].
+     */
+    private fun getReturnToAppStrategyOrNull(): ReturnToAppStrategy? {
+        val urlConfig = returnToAppUrlConfig ?: return null
+        return when (
+            val result = getReturnToAppStrategyUseCase(
+                appLinkReturnUrl = urlConfig.returnAppUrl,
+                fallbackSchemeUrl = urlConfig.fallbackSchemeUrl,
+            )
+        ) {
+            is GetReturnToAppStrategyResult.Success -> result.returnToAppStrategy
+            is GetReturnToAppStrategyResult.Failure -> null
+        }
     }
     // endregion
 

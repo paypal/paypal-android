@@ -64,19 +64,19 @@ class GetReturnToAppStrategyUseCase(
             )
         }
 
-        // Without a custom URL scheme there is nothing to deep-link to, so App Link is the only
-        // possible return type. Short-circuit before doing any package-manager probing.
-        if (fallbackSchemeUrl.isBlank()) {
-            return GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(appLinkReturnUrl))
-        }
-
-        val shouldRouteToAppLink = isMerchantDefaultHandlerForReturnUrl(appLinkReturnUrl) &&
-            canLaunchIntoAppLinkAwareTarget(checkoutUri)
-
-        val returnToAppStrategy = if (shouldRouteToAppLink) {
+        val returnToAppStrategy = if (fallbackSchemeUrl.isBlank()) {
+            // Without a custom URL scheme there is nothing to deep-link to, so App Link is the only
+            // possible return type. Short-circuit before doing any package-manager probing.
             ReturnToAppStrategy.AppLink(appLinkReturnUrl)
         } else {
-            ReturnToAppStrategy.CustomUrlScheme(fallbackSchemeUrl)
+            val shouldRouteToAppLink = isMerchantDefaultHandlerForReturnUrl(appLinkReturnUrl) &&
+                canLaunchIntoAppLinkAwareTarget(checkoutUri)
+
+            if (shouldRouteToAppLink) {
+                ReturnToAppStrategy.AppLink(appLinkReturnUrl)
+            } else {
+                ReturnToAppStrategy.CustomUrlScheme(fallbackSchemeUrl)
+            }
         }
         return GetReturnToAppStrategyResult.Success(returnToAppStrategy)
     }
