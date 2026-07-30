@@ -179,11 +179,10 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
-                    val result = launch(
+                    val result = launchCheckout(
                         activity = activity,
                         shopperSession = shopperSession,
-                        token = orderId,
-                        tokenType = TokenType.ORDER_ID,
+                        orderId = orderId,
                         startTime = startTime,
                     )
                     withContext(Dispatchers.Main) {
@@ -254,11 +253,10 @@ class PayPalWebCheckoutClient internal constructor(
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
-                    val result = launch(
+                    val result = launchVault(
                         activity = activity,
                         shopperSession = shopperSession,
-                        token = setupTokenId,
-                        tokenType = TokenType.VAULT_ID,
+                        setupTokenId = setupTokenId,
                         startTime = startTime,
                     )
                     withContext(Dispatchers.Main) {
@@ -324,6 +322,28 @@ class PayPalWebCheckoutClient internal constructor(
         }
 
     /**
+     * Launches the PayPal checkout UI after the shopper session has been resolved. @see [launch].
+     */
+    private fun launchCheckout(
+        activity: Activity,
+        shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
+        orderId: String,
+        startTime: Long,
+    ): PayPalPresentAuthChallengeResult =
+        launch(activity, shopperSession, orderId, TokenType.ORDER_ID, startTime)
+
+    /**
+     * Launches the PayPal vault UI after the shopper session has been resolved. @see [launch].
+     */
+    private fun launchVault(
+        activity: Activity,
+        shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse,
+        setupTokenId: String,
+        startTime: Long,
+    ): PayPalPresentAuthChallengeResult =
+        launch(activity, shopperSession, setupTokenId, TokenType.VAULT_ID, startTime)
+
+    /**
      * Launches the PayPal checkout/vault UI after the shopper session has been resolved.
      *
      * Attempts a PayPal app switch (App Link) if the PayPal app is installed and eligible;
@@ -343,6 +363,7 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         val isVault = tokenType == TokenType.VAULT_ID
+        val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
 
         // Shouldn't return null in practice: start()/vault() already validate urlConfig before here.
         val returnToAppStrategy = getReturnToAppStrategyOrNull()
@@ -371,7 +392,6 @@ class PayPalWebCheckoutClient internal constructor(
         logPresentAuthChallengeResult(result)
 
         // If failed to launch, log latency with error.
-        val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
         if (result is PayPalPresentAuthChallengeResult.Failure) {
             logUserPerceivedLatencyError(flowType, startTime, token, shopperSession.shopperSessionConfig.id)
         } else {
@@ -522,8 +542,6 @@ class PayPalWebCheckoutClient internal constructor(
         if (shopperSessionId.isNotBlank()) {
             appendQueryParameter("shopperSessionId", shopperSessionId)
         }
-
-        appendObservabilityQueryParams()
     }
 
     /**
