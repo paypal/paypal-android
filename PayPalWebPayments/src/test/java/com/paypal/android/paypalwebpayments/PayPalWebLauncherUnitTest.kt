@@ -257,7 +257,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `completeCheckoutAuthRequest() parses cancellation when Payer Id is blank and no opType`() {
+    fun `completeCheckoutAuthRequest() parses cancellation when Payer Id is blank and path is not a cancel path`() {
         val originalOptions = BrowserSwitchOptions(
             targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
             requestCode = PAYPAL_CHECKOUT,
@@ -315,7 +315,7 @@ class PayPalWebLauncherUnitTest {
     }
 
     @Test
-    fun `completeCheckoutAuthRequest() parses checkout cancellation deep link url indicates failure`() {
+    fun `completeCheckoutAuthRequest() parses cancellation when deep link path contains the word cancel`() {
         val originalOptions = BrowserSwitchOptions(
             targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
             requestCode = PAYPAL_CHECKOUT,
@@ -324,11 +324,12 @@ class PayPalWebLauncherUnitTest {
             metadata = createCheckoutMetadata("fake-order-id")
         )
         val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
-        intent.data = "com.example.app://testurl.com/checkout?opType=cancel".toUri()
+        intent.data = "com.example.app://testurl.com/checkout/cancel?PayerID=fake-payer-id".toUri()
 
         sut = PayPalWebLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-        assertTrue(result is PayPalWebCheckoutFinishStartResult.Canceled)
+                as PayPalWebCheckoutFinishStartResult.Canceled
+        assertEquals("fake-order-id", result.orderId)
     }
 
     @Test
