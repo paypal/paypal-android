@@ -10,11 +10,7 @@ data class CreateShopperSessionWithAppSwitchEligibilityResponse(
     val ineligibleReason: String?,
     val matchedAuthenticationMethods: List<String>,
     val shopperSessionConfig: ShopperSessionConfig
-) {
-    fun getLaunchUri(): String {
-        return ""
-    }
-}
+)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ShopperSessionConfig(

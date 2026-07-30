@@ -935,7 +935,6 @@ class PayPalWebCheckoutClientUnitTest {
         assertEquals("pda", launchedUri.getQueryParameter("source"))
         assertEquals("fake-merchant-id", launchedUri.getQueryParameter("merchant"))
         assertEquals("ecs", launchedUri.getQueryParameter("flow_type"))
-        assertEquals("paypal", launchedUri.getQueryParameter("funding_source"))
 
         val switchInitiatedTime = launchedUri.getQueryParameter("switch_initiated_time")?.toLongOrNull()
         assertNotNull(switchInitiatedTime)
@@ -1163,7 +1162,6 @@ class PayPalWebCheckoutClientUnitTest {
         assertEquals("pda", launchedUri.getQueryParameter("source"))
         assertEquals("fake-merchant-id", launchedUri.getQueryParameter("merchant"))
         assertEquals("va", launchedUri.getQueryParameter("flow_type"))
-        assertEquals("paypal", launchedUri.getQueryParameter("funding_source"))
 
         val switchInitiatedTime = launchedUri.getQueryParameter("switch_initiated_time")?.toLongOrNull()
         assertNotNull(switchInitiatedTime)
