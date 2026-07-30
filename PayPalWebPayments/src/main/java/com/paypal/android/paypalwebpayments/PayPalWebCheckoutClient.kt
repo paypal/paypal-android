@@ -696,6 +696,7 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
         endTime: Long
     ) {
+        val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 val event = if (appSwitchEnabled) {
@@ -705,7 +706,6 @@ class PayPalWebCheckoutClient internal constructor(
                 }
                 analytics.notify(event, params = analyticsEventParams)
                 sessionStore.authState = result.authState
-                val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
                 logUserPerceivedLatency(flowType, result, startTime, endTime)
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
@@ -725,7 +725,6 @@ class PayPalWebCheckoutClient internal constructor(
                     params = analyticsEventParams,
                     errorDescription = errorDescription
                 )
-                val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
                 logUserPerceivedLatencyError(flowType, startTime, errorDescription, endTime)
             }
         }
