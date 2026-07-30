@@ -49,6 +49,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         presentationType: String,
         startTime: Long,
         endTime: Long,
+        errorDescription: String? = null,
         params: AnalyticsEventParams = AnalyticsEventParams(),
     ) {
         analyticsService.sendAnalyticsEvent(
@@ -56,6 +57,7 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
             eventData = AnalyticsEventData(
                 orderId = params.orderIdOrSetupTokenId,
                 shopperSessionId = params.shopperSession?.shopperSessionConfig?.id,
+                errorDescription = errorDescription,
                 flow = flow,
                 presentationType = presentationType,
                 startTime = startTime,

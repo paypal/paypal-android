@@ -163,13 +163,11 @@ class PayPalWebCheckoutClient internal constructor(
             isVault = false,
         )
         if (urlConfig != null && !urlConfig.isValid()) {
-            logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
-            notifyCheckoutReturnToAppUrlConfigInvalid(orderId, callback)
+            notifyCheckoutReturnToAppUrlConfigInvalid(orderId, callback, startTime)
             return
         }
         if (deferred == null) {
-            logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime)
-            notifyCheckoutSessionNotStarted(callback)
+            notifyCheckoutSessionNotStarted(callback, startTime)
             return
         }
         applicationScope.launch {
@@ -237,13 +235,11 @@ class PayPalWebCheckoutClient internal constructor(
             isVault = true,
         )
         if (urlConfig != null && !urlConfig.isValid()) {
-            logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
-            notifyVaultReturnToAppUrlConfigInvalid(setupTokenId, callback)
+            notifyVaultReturnToAppUrlConfigInvalid(setupTokenId, callback, startTime)
             return
         }
         if (deferred == null) {
-            logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime)
-            notifyVaultSessionNotStarted(callback)
+            notifyVaultSessionNotStarted(callback, startTime)
             return
         }
         applicationScope.launch {
@@ -363,7 +359,6 @@ class PayPalWebCheckoutClient internal constructor(
         startTime: Long,
     ): PayPalPresentAuthChallengeResult {
         val isVault = tokenType == TokenType.VAULT_ID
-        val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
 
         // Shouldn't return null in practice: start()/vault() already validate urlConfig before here.
         val returnToAppStrategy = getReturnToAppStrategyOrNull()
@@ -389,14 +384,7 @@ class PayPalWebCheckoutClient internal constructor(
             tokenType = tokenType,
             returnToAppStrategy = returnToAppStrategy,
         )
-        logPresentAuthChallengeResult(result)
-
-        // If failed to launch, log latency with error.
-        if (result is PayPalPresentAuthChallengeResult.Failure) {
-            logUserPerceivedLatencyError(flowType, startTime)
-        } else {
-            logUserPerceivedLatency(flowType, result, startTime, endTime)
-        }
+        logPresentAuthChallengeResult(result, isVault, startTime, endTime)
         return result
     }
 
@@ -583,9 +571,7 @@ class PayPalWebCheckoutClient internal constructor(
     ): PayPalPresentAuthChallengeResult {
         val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
         val failureResult = PayPalPresentAuthChallengeResult.Failure(error)
-        val latencyFlow = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
-        logPresentAuthChallengeResult(failureResult)
-        logUserPerceivedLatencyError(latencyFlow, startTime)
+        logPresentAuthChallengeResult(failureResult, isVault, startTime, System.currentTimeMillis())
         return failureResult
     }
 
@@ -704,7 +690,12 @@ class PayPalWebCheckoutClient internal constructor(
     /**
      * Logs the app-switch/auth-challenge success or failure event for a launch [result].
      */
-    private fun logPresentAuthChallengeResult(result: PayPalPresentAuthChallengeResult) {
+    private fun logPresentAuthChallengeResult(
+        result: PayPalPresentAuthChallengeResult,
+        isVault: Boolean,
+        startTime: Long,
+        endTime: Long
+    ) {
         when (result) {
             is PayPalPresentAuthChallengeResult.Success -> {
                 val event = if (appSwitchEnabled) {
@@ -714,6 +705,8 @@ class PayPalWebCheckoutClient internal constructor(
                 }
                 analytics.notify(event, params = analyticsEventParams)
                 sessionStore.authState = result.authState
+                val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
+                logUserPerceivedLatency(flowType, result, startTime, endTime)
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
                 val event = if (appSwitchEnabled) {
@@ -721,16 +714,19 @@ class PayPalWebCheckoutClient internal constructor(
                 } else {
                     PayPalEvent.AUTH_CHALLENGE_PRESENTATION_FAILED
                 }
+                val errorDescription = result.error.errorDescription
                 analytics.notify(
                     event,
                     params = analyticsEventParams,
-                    errorDescription = result.error.errorDescription
+                    errorDescription = errorDescription
                 )
                 analytics.notify(
                     PayPalEvent.FAILED,
                     params = analyticsEventParams,
-                    errorDescription = result.error.errorDescription
+                    errorDescription = errorDescription
                 )
+                val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
+                logUserPerceivedLatencyError(flowType, startTime, errorDescription, endTime)
             }
         }
     }
@@ -750,18 +746,24 @@ class PayPalWebCheckoutClient internal constructor(
 
             is PayPalPresentAuthChallengeResult.Failure -> PresentationType.ERROR
         }
-        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime, analyticsEventParams)
+        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime, params = analyticsEventParams)
     }
 
     /**
      * Logs the user-perceived latency for a launch that failed before a [PayPalPresentAuthChallengeResult] was reached.
      */
-    private fun logUserPerceivedLatencyError(flow: String, startTime: Long) {
+    private fun logUserPerceivedLatencyError(
+        flow: String,
+        startTime: Long,
+        errorDescription: String,
+        endTime: Long = System.currentTimeMillis(),
+    ) {
         analytics.notifyUserPerceivedLatency(
             flow = flow,
             presentationType = PresentationType.ERROR,
             startTime = startTime,
-            endTime = System.currentTimeMillis(),
+            endTime = endTime,
+            errorDescription = errorDescription,
             params = analyticsEventParams,
         )
     }
@@ -779,13 +781,15 @@ class PayPalWebCheckoutClient internal constructor(
      * Logs [PayPalEvent.SESSION_NOT_STARTED] and notifies the merchant that [start] was called
      * before [createPayPalSession].
      */
-    private fun notifyCheckoutSessionNotStarted(callback: PayPalWebStartCallback) {
+    private fun notifyCheckoutSessionNotStarted(callback: PayPalWebStartCallback, startTime: Long) {
+        val errorDescription = "startPayPalSession() must be called before start()."
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
                 PayPalEvent.SESSION_NOT_STARTED,
                 params = analyticsEventParams,
-                errorDescription = "startPayPalSession() must be called before start()."
+                errorDescription = errorDescription
             )
+            logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime, errorDescription)
             callback.onPayPalWebStartResult(
                 PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.sessionNotCreatedError)
             )
@@ -796,13 +800,15 @@ class PayPalWebCheckoutClient internal constructor(
      * Logs [PayPalEvent.SESSION_NOT_STARTED] and notifies the merchant that [vault] was called
      * before [createPayPalSession].
      */
-    private fun notifyVaultSessionNotStarted(callback: PayPalWebVaultCallback) {
+    private fun notifyVaultSessionNotStarted(callback: PayPalWebVaultCallback, startTime: Long) {
+        val errorDescription = "startPayPalSession() must be called before vault()."
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
                 PayPalEvent.SESSION_NOT_STARTED,
                 params = analyticsEventParams,
-                errorDescription = "startPayPalSession() must be called before vault()."
+                errorDescription = errorDescription
             )
+            logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime, errorDescription)
             callback.onPayPalWebVaultResult(
                 PayPalPresentAuthChallengeResult.Failure(PayPalWebCheckoutError.sessionNotCreatedError)
             )
@@ -813,7 +819,11 @@ class PayPalWebCheckoutClient internal constructor(
      * Logs [PayPalEvent.FAILED] and notifies the merchant that [start] was called with a [returnToAppUrlConfig]
      * that has neither a usable return app URL nor a fallback scheme.
      */
-    private fun notifyCheckoutReturnToAppUrlConfigInvalid(orderId: String, callback: PayPalWebStartCallback) {
+    private fun notifyCheckoutReturnToAppUrlConfigInvalid(
+        orderId: String,
+        callback: PayPalWebStartCallback,
+        startTime: Long
+    ) {
         applicationScope.launch(Dispatchers.Main) {
             val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
             analytics.notify(
@@ -821,6 +831,7 @@ class PayPalWebCheckoutClient internal constructor(
                 params = analyticsEventParams.copy(orderIdOrSetupTokenId = orderId),
                 errorDescription = error.errorDescription
             )
+            logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime, error.errorDescription)
             callback.onPayPalWebStartResult(PayPalPresentAuthChallengeResult.Failure(error))
         }
     }
@@ -829,7 +840,11 @@ class PayPalWebCheckoutClient internal constructor(
      * Logs [PayPalEvent.FAILED] and notifies the merchant that [vault] was called with a [returnToAppUrlConfig]
      * that has neither a usable return app URL nor a fallback scheme.
      */
-    private fun notifyVaultReturnToAppUrlConfigInvalid(setupTokenId: String, callback: PayPalWebVaultCallback) {
+    private fun notifyVaultReturnToAppUrlConfigInvalid(
+        setupTokenId: String,
+        callback: PayPalWebVaultCallback,
+        startTime: Long
+    ) {
         applicationScope.launch(Dispatchers.Main) {
             val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
             analytics.notify(
@@ -837,6 +852,7 @@ class PayPalWebCheckoutClient internal constructor(
                 params = analyticsEventParams.copy(orderIdOrSetupTokenId = setupTokenId),
                 errorDescription = error.errorDescription
             )
+            logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime, error.errorDescription)
             callback.onPayPalWebVaultResult(PayPalPresentAuthChallengeResult.Failure(error))
         }
     }

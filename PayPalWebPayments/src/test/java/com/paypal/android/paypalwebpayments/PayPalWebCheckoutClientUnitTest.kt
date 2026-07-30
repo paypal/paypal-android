@@ -1985,6 +1985,7 @@ class PayPalWebCheckoutClientUnitTest {
                     presentationType = PresentationType.ERROR,
                     startTime = any(),
                     endTime = any(),
+                    errorDescription = any(),
                     params = any()
                 )
             }
@@ -2004,6 +2005,7 @@ class PayPalWebCheckoutClientUnitTest {
                     presentationType = PresentationType.ERROR,
                     startTime = any(),
                     endTime = any(),
+                    errorDescription = any(),
                     params = any()
                 )
             }
