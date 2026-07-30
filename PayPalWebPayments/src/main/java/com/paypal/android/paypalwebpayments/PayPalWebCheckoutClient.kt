@@ -325,7 +325,6 @@ class PayPalWebCheckoutClient internal constructor(
             result
         }
 
-
     /**
      * Launches the PayPal checkout/vault UI after the shopper session has been resolved.
      *
@@ -482,7 +481,6 @@ class PayPalWebCheckoutClient internal constructor(
             paypalInstalled = canAttemptPayPalAppSwitch().toString(),
         )
     }
-
 
     /**
      * Whether an app-switch attempt into the PayPal app is worth making — requires not just that
@@ -773,7 +771,6 @@ class PayPalWebCheckoutClient internal constructor(
             )
         }
     }
-
 
     /**
      * Logs [PayPalEvent.SESSION_NOT_STARTED] and notifies the merchant that [vault] was called
