@@ -2051,8 +2051,8 @@ class PayPalWebCheckoutClientUnitTest {
             // Deep-link chosen -> server must be told to redirect via the custom scheme, so the
             // return/cancel URLs sent to the shopper session are custom-scheme, not the merchant https.
             val expectedBase = "com.example.app://x-callback-url/paypal-sdk/paypal-checkout"
-            assertEquals(expectedBase, paramsSlot.captured.returnAppUrl)
-            assertEquals(expectedBase, paramsSlot.captured.cancelAppUrl)
+            assertEquals("$expectedBase/success", paramsSlot.captured.returnAppUrl)
+            assertEquals("$expectedBase/cancel", paramsSlot.captured.cancelAppUrl)
             // The raw fallback scheme is still forwarded unchanged.
             assertEquals("com.example.app", paramsSlot.captured.fallbackSchemeUrl)
             verify {
