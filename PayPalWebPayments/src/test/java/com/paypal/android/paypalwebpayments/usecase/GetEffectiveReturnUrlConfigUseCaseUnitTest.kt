@@ -19,12 +19,12 @@ class GetEffectiveReturnUrlConfigUseCaseUnitTest {
     )
 
     @Test
-    fun `deep-link returns the same custom-scheme url for return and cancel, with fallback preserved`() {
+    fun `deep-link returns distinct success and cancel custom-scheme urls, with fallback preserved`() {
         val result = sut(urlConfig, LinkType.DEEP_LINK)
 
         val base = "com.example.app://x-callback-url/paypal-sdk/paypal-checkout"
-        assertEquals(base, result.returnAppUrl)
-        assertEquals(base, result.cancelAppUrl)
+        assertEquals("$base/success", result.returnAppUrl)
+        assertEquals("$base/cancel", result.cancelAppUrl)
         assertEquals("com.example.app", result.fallbackSchemeUrl)
     }
 
@@ -38,8 +38,8 @@ class GetEffectiveReturnUrlConfigUseCaseUnitTest {
         val result = sut(configWithQueryParams, LinkType.DEEP_LINK)
 
         val base = "com.example.app://x-callback-url/paypal-sdk/paypal-checkout"
-        assertEquals("$base?ref=123", result.returnAppUrl)
-        assertEquals("$base?ref=456", result.cancelAppUrl)
+        assertEquals("$base/success?ref=123", result.returnAppUrl)
+        assertEquals("$base/cancel?ref=456", result.cancelAppUrl)
     }
 
     @Test

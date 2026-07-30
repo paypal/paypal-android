@@ -367,7 +367,7 @@ class PayPalWebCheckoutClient internal constructor(
 
         // Shouldn't return null in practice: start()/vault() already validate urlConfig before here.
         val returnToAppStrategy = getReturnToAppStrategyOrNull()
-            ?: return handleReturnToAppStrategyFailure(startTime, isVault)
+            ?: return handleReturnToAppStrategyFailure(startTime = startTime, isVault = isVault)
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         analyticsEventParams = analyticsEventParams.copy(
             appSwitchEnabled = appSwitchEnabled,
@@ -579,7 +579,7 @@ class PayPalWebCheckoutClient internal constructor(
      */
     private fun handleReturnToAppStrategyFailure(
         startTime: Long,
-        isVault: Boolean,
+        isVault: Boolean
     ): PayPalPresentAuthChallengeResult {
         val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
         val failureResult = PayPalPresentAuthChallengeResult.Failure(error)
@@ -742,7 +742,7 @@ class PayPalWebCheckoutClient internal constructor(
         flow: String,
         result: PayPalPresentAuthChallengeResult,
         startTime: Long,
-        endTime: Long,
+        endTime: Long
     ) {
         val presentationType = when (result) {
             is PayPalPresentAuthChallengeResult.Success ->
