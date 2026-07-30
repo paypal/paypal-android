@@ -30,14 +30,13 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         endpoint: String,
         startTime: Long,
         endTime: Long,
-        orderIdOrSetupTokenId: String? = null,
-        shopperSessionId: String? = null
+        params: AnalyticsEventParams = AnalyticsEventParams(),
     ) {
         analyticsService.sendAnalyticsEvent(
             name = LatencyEvent.API_REQUEST_LATENCY.value,
             eventData = AnalyticsEventData(
-                orderId = orderIdOrSetupTokenId,
-                shopperSessionId = shopperSessionId,
+                orderId = params.orderIdOrSetupTokenId,
+                shopperSessionId = params.shopperSession?.shopperSessionConfig?.id,
                 endpoint = endpoint,
                 startTime = startTime,
                 endTime = endTime,
@@ -50,14 +49,13 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         presentationType: String,
         startTime: Long,
         endTime: Long,
-        orderIdOrSetupTokenId: String? = null,
-        shopperSessionId: String? = null
+        params: AnalyticsEventParams = AnalyticsEventParams(),
     ) {
         analyticsService.sendAnalyticsEvent(
             name = LatencyEvent.USER_PERCEIVED_LATENCY.value,
             eventData = AnalyticsEventData(
-                orderId = orderIdOrSetupTokenId,
-                shopperSessionId = shopperSessionId,
+                orderId = params.orderIdOrSetupTokenId,
+                shopperSessionId = params.shopperSession?.shopperSessionConfig?.id,
                 flow = flow,
                 presentationType = presentationType,
                 startTime = startTime,
