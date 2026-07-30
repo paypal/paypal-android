@@ -26,10 +26,18 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         )
     }
 
-    fun notifyApiRequestLatency(endpoint: String, startTime: Long, endTime: Long) {
+    fun notifyApiRequestLatency(
+        endpoint: String,
+        startTime: Long,
+        endTime: Long,
+        orderIdOrSetupTokenId: String? = null,
+        shopperSessionId: String? = null
+    ) {
         analyticsService.sendAnalyticsEvent(
             name = LatencyEvent.API_REQUEST_LATENCY.value,
             eventData = AnalyticsEventData(
+                orderId = orderIdOrSetupTokenId,
+                shopperSessionId = shopperSessionId,
                 endpoint = endpoint,
                 startTime = startTime,
                 endTime = endTime,
@@ -41,11 +49,15 @@ internal class PayPalWebAnalytics(private val analyticsService: AnalyticsService
         flow: String,
         presentationType: String,
         startTime: Long,
-        endTime: Long
+        endTime: Long,
+        orderIdOrSetupTokenId: String? = null,
+        shopperSessionId: String? = null
     ) {
         analyticsService.sendAnalyticsEvent(
             name = LatencyEvent.USER_PERCEIVED_LATENCY.value,
             eventData = AnalyticsEventData(
+                orderId = orderIdOrSetupTokenId,
+                shopperSessionId = shopperSessionId,
                 flow = flow,
                 presentationType = presentationType,
                 startTime = startTime,

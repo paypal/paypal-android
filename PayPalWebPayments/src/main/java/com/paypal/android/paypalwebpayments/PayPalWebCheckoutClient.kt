@@ -176,7 +176,6 @@ class PayPalWebCheckoutClient internal constructor(
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                setShopperSessionAnalyticsParams(shopperSession)
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -252,7 +251,6 @@ class PayPalWebCheckoutClient internal constructor(
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                setShopperSessionAnalyticsParams(shopperSession)
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -348,7 +346,7 @@ class PayPalWebCheckoutClient internal constructor(
 
         // Shouldn't return null in practice: start()/vault() already validate urlConfig before here.
         val returnToAppStrategy = getReturnToAppStrategyOrNull()
-            ?: return handleReturnToAppStrategyFailure(startTime = startTime, isVault = isVault)
+            ?: return handleReturnToAppStrategyFailure(startTime, isVault, token, shopperSession.shopperSessionConfig.id)
         appSwitchEnabled = shopperSession.appSwitchEligible && canAttemptPayPalAppSwitch()
         analyticsEventParams = analyticsEventParams.copy(
             appSwitchEnabled = appSwitchEnabled,
@@ -375,9 +373,9 @@ class PayPalWebCheckoutClient internal constructor(
         // If failed to launch, log latency with error.
         val flowType = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
         if (result is PayPalPresentAuthChallengeResult.Failure) {
-            logUserPerceivedLatencyError(flowType, startTime)
+            logUserPerceivedLatencyError(flowType, startTime, token, shopperSession.shopperSessionConfig.id)
         } else {
-            logUserPerceivedLatency(flowType, result, startTime, endTime)
+            logUserPerceivedLatency(flowType, result, startTime, endTime, token, shopperSession.shopperSessionConfig.id)
         }
         return result
     }
@@ -441,10 +439,9 @@ class PayPalWebCheckoutClient internal constructor(
             ),
         )
 
-        logApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.roundTripTiming)
-
-        return when (result) {
+        val shopperSessionWithAppSwitchEligibility = when (result) {
             is APIResult.Success -> {
+                setShopperSessionAnalyticsParams(result.data)
                 analyticsEventParams = analyticsEventParams.copy(
                     shopperSession = result.data,
                 )
@@ -461,6 +458,9 @@ class PayPalWebCheckoutClient internal constructor(
                 null
             }
         }
+        // TODO: Might be better to just pass in analyticsEventParams to latency events. Why not.
+        logApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.roundTripTiming, analyticsEventParams.orderIdOrSetupTokenId, analyticsEventParams.shopperSession?.shopperSessionConfig?.id)
+        return shopperSessionWithAppSwitchEligibility
     }
     // endregion
 
@@ -559,16 +559,20 @@ class PayPalWebCheckoutClient internal constructor(
      * @param startTime Used for latency reporting.
      * @param isVault Selects the vault or checkout flow: which [LatencyFlow] to report latency
      *   against, and whether the failure is logged via [logPresentAuthChallengeResult]
+     *  @param token The order id or setup token id associated with the flow.
+     *  @param
      */
     private fun handleReturnToAppStrategyFailure(
         startTime: Long,
-        isVault: Boolean
+        isVault: Boolean,
+        token: String? = null,
+        shopperSessionId: String? = null
     ): PayPalPresentAuthChallengeResult {
         val error = PayPalWebCheckoutError.returnToAppUrlConfigMissingError
         val failureResult = PayPalPresentAuthChallengeResult.Failure(error)
         val latencyFlow = if (isVault) LatencyFlow.VAULT else LatencyFlow.CHECKOUT
         logPresentAuthChallengeResult(failureResult)
-        logUserPerceivedLatencyError(latencyFlow, startTime)
+        logUserPerceivedLatencyError(latencyFlow, startTime, token, shopperSessionId)
         return failureResult
     }
 
@@ -725,7 +729,9 @@ class PayPalWebCheckoutClient internal constructor(
         flow: String,
         result: PayPalPresentAuthChallengeResult,
         startTime: Long,
-        endTime: Long
+        endTime: Long,
+        orderIdOrSetupTokenId: String,
+        shopperSessionId: String
     ) {
         val presentationType = when (result) {
             is PayPalPresentAuthChallengeResult.Success ->
@@ -733,26 +739,28 @@ class PayPalWebCheckoutClient internal constructor(
 
             is PayPalPresentAuthChallengeResult.Failure -> PresentationType.ERROR
         }
-        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime)
+        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime, orderIdOrSetupTokenId, shopperSessionId)
     }
 
     /**
      * Logs the user-perceived latency for a launch that failed before a [PayPalPresentAuthChallengeResult] was reached.
      */
-    private fun logUserPerceivedLatencyError(flow: String, startTime: Long) {
+    private fun logUserPerceivedLatencyError(flow: String, startTime: Long, orderIdOrSetupTokenId: String? = null, shopperSessionId: String? = null) {
         analytics.notifyUserPerceivedLatency(
             flow = flow,
             presentationType = PresentationType.ERROR,
             startTime = startTime,
-            endTime = System.currentTimeMillis()
+            endTime = System.currentTimeMillis(),
+            orderIdOrSetupTokenId = orderIdOrSetupTokenId,
+            shopperSessionId = shopperSessionId
         )
     }
 
     /**
      * Logs the API round-trip latency for [endpoint], if [roundTripTiming] was captured.
      */
-    private fun logApiRequestLatency(endpoint: String, roundTripTiming: HttpRoundTripTiming?) {
-        roundTripTiming?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime) }
+    private fun logApiRequestLatency(endpoint: String, roundTripTiming: HttpRoundTripTiming?, orderIdOrSetupTokenId: String? = null, shopperSessionId: String? = null) {
+        roundTripTiming?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime, orderIdOrSetupTokenId, shopperSessionId) }
     }
 
     /**
