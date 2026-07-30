@@ -66,17 +66,17 @@ class PayPalWebAnalyticsUnitTest {
 
     @Test
     fun `notify forwards linkType to the analytics service for checkout events`() {
-        val params = AppSwitchAnalyticsEventParams(
-            checkoutOrderId = "fake-order-id",
+        val params = AnalyticsEventParams(
+            orderIdOrSetupTokenId = "fake-order-id",
             appSwitchEnabled = true,
             linkType = LinkType.APP_LINK,
         )
 
-        sut.notify(CheckoutEvent.APP_SWITCH_STARTED, params = params)
+        sut.notify(PayPalEvent.APP_SWITCH_STARTED, params = params)
 
         verify {
             analyticsService.sendAnalyticsEvent(
-                name = CheckoutEvent.APP_SWITCH_STARTED.value,
+                name = PayPalEvent.APP_SWITCH_STARTED.value,
                 eventData = match { it.linkType == "applink" && it.orderId == "fake-order-id" },
             )
         }
@@ -84,17 +84,17 @@ class PayPalWebAnalyticsUnitTest {
 
     @Test
     fun `notify forwards linkType to the analytics service for vault events`() {
-        val params = AppSwitchAnalyticsEventParams(
-            vaultSetupTokenId = "fake-setup-token-id",
+        val params = AnalyticsEventParams(
+            orderIdOrSetupTokenId = "fake-setup-token-id",
             appSwitchEnabled = false,
             linkType = LinkType.DEEP_LINK,
         )
 
-        sut.notify(VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = params)
+        sut.notify(PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED, params = params)
 
         verify {
             analyticsService.sendAnalyticsEvent(
-                name = VaultEvent.AUTH_CHALLENGE_PRESENTATION_STARTED.value,
+                name = PayPalEvent.AUTH_CHALLENGE_PRESENTATION_STARTED.value,
                 eventData = match { it.linkType == "deeplink" && it.orderId == "fake-setup-token-id" },
             )
         }

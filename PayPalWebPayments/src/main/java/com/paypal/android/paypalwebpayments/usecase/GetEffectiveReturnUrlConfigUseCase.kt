@@ -41,10 +41,12 @@ class GetEffectiveReturnUrlConfigUseCase {
 
         return when (linkType) {
             LinkType.DEEP_LINK -> {
-                val successBaseUri = ReturnToAppStrategy.CustomUrlScheme(urlConfig.fallbackSchemeUrl).returnUrl.toUri()
+                val baseUrl = ReturnToAppStrategy.CustomUrlScheme(urlConfig.fallbackSchemeUrl).returnUrl
+                val successUri = "$baseUrl/success".toUri()
+                val cancelUri = "$baseUrl/cancel".toUri()
                 urlConfig.copy(
-                    returnAppUrl = successBaseUri.withQueryFrom(urlConfig.returnAppUrl).toString(),
-                    cancelAppUrl = successBaseUri.withQueryFrom(urlConfig.cancelAppUrl).toString(),
+                    returnAppUrl = successUri.withQueryFrom(urlConfig.returnAppUrl).toString(),
+                    cancelAppUrl = cancelUri.withQueryFrom(urlConfig.cancelAppUrl).toString(),
                 )
             }
 

@@ -7,19 +7,14 @@ import com.paypal.android.corepayments.model.CreateShopperSessionWithAppSwitchEl
  * Bundles every value [PayPalWebAnalytics.notify] needs to log an analytics event, so it can be
  * threaded through as a single argument instead of a long list of individual parameters.
  */
-internal data class AppSwitchAnalyticsEventParams(
+internal data class AnalyticsEventParams(
 
     /**
-     * The order id being approved. Set by [PayPalWebCheckoutClient.start] for a checkout flow.
-     * Mutually exclusive with [vaultSetupTokenId].
+     * The id being approved — an order id for a checkout flow (set by
+     * [PayPalWebCheckoutClient.start]) or a setup token id for a vault flow (set by
+     * [PayPalWebCheckoutClient.vault]). Which one it is can be determined from [isVault].
      */
-    val checkoutOrderId: String? = null,
-
-    /**
-     * The setup token id being approved. Set by [PayPalWebCheckoutClient.vault] for a vault flow.
-     * Mutually exclusive with [checkoutOrderId].
-     */
-    val vaultSetupTokenId: String? = null,
+    val orderIdOrSetupTokenId: String? = null,
 
     /**
      * The shopper session returned by [PayPalWebCheckoutClient.createPayPalSession].
@@ -56,19 +51,19 @@ internal data class AppSwitchAnalyticsEventParams(
 
     /**
      * Merchant id from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of
-     * the owning [PayPalWebCheckoutClient] instance — preserved across [reset].
+     * the owning [PayPalWebCheckoutClient] instance
      */
     val merchantId: String? = null,
 
     /**
      * BN code from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of the
-     * owning [PayPalWebCheckoutClient] instance — preserved across [reset].
+     * owning [PayPalWebCheckoutClient] instance
      */
     val bnCode: String? = null,
 
     /**
      * Client id from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of the
-     * owning [PayPalWebCheckoutClient] instance — preserved across [reset].
+     * owning [PayPalWebCheckoutClient] instance
      */
     val clientId: String? = null,
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.core.net.toUri
 
@@ -14,14 +15,20 @@ class DeviceInspector(private val context: Context) {
         get() = isAppInstalled(PAYPAL_APP_PACKAGE)
 
     /**
-     * The installed PayPal app's `versionName` (e.g. "9.1.0"), or `null` if the app isn't
-     * installed or its version can't be read. Callers decide what to do with this (e.g. gating
-     * app-switch eligibility to a minimum major version) — this just surfaces the raw value.
+     * The installed PayPal app's version code (build number), or `null` if the app isn't
+     * installed or its version can't be read. Uses [android.content.pm.PackageInfo.longVersionCode]
+     * on API 28+ and falls back to the deprecated `versionCode` int below that.
      */
-    val payPalAppVersionName: String?
+    private val payPalAppVersionCode: Long
         get() = runCatching {
-            context.packageManager.getPackageInfo(PAYPAL_APP_PACKAGE, 0).versionName
-        }.getOrNull()
+            val packageInfo = context.packageManager.getPackageInfo(PAYPAL_APP_PACKAGE, 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                packageInfo.longVersionCode
+            } else {
+                @Suppress("DEPRECATION")
+                packageInfo.versionCode.toLong()
+            }
+        }.getOrDefault(0)
 
     private fun isAppInstalled(packageName: String): Boolean = runCatching {
         context.packageManager.getApplicationInfo(packageName, 0).enabled
@@ -32,10 +39,12 @@ class DeviceInspector(private val context: Context) {
      * user may have unchecked "Open supported links" for it. Mirrors Braintree Android's
      * `ResolvePayPalUseCase`.
      *
-     * Also requires the installed PayPal app to meet [APP_SWITCH_MIN_MAJOR_VERSION], the minimum
-     * major version that supports this SDK's app-switch flow. If the installed app's version
-     * can't be determined, this fails closed (returns false) rather than risk switching into a
-     * build that doesn't support it.
+     * Also requires the installed PayPal app's version code to be newer than
+     * [MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE] — PayPal app v10.6.0
+     * (build 1160090131), the last Play Store build shipped *without* the required
+     * app-switch changes this SDK relies on. If the installed app's version code can't be
+     * determined, this fails closed (returns false) rather than risk switching into a build that
+     * doesn't support it.
      */
     fun canResolvePayPalAppSwitch(uri: Uri = DEFAULT_APP_SWITCH_URI): Boolean {
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
@@ -46,17 +55,7 @@ class DeviceInspector(private val context: Context) {
             PackageManager.MATCH_DEFAULT_ONLY
         )
         val resolvesToPayPalApp = resolvedActivity?.activityInfo?.packageName == PAYPAL_APP_PACKAGE
-        return resolvesToPayPalApp && isAppSwitchSupportedVersion(payPalAppVersionName)
-    }
-
-    /**
-     * Parses the leading major-version integer from [versionName] (e.g. "9.1.0" -> 9) and
-     * checks whether it meets [APP_SWITCH_MIN_MAJOR_VERSION]. Returns false if [versionName] is
-     * null or its leading segment isn't a parseable integer.
-     */
-    private fun isAppSwitchSupportedVersion(versionName: String?): Boolean {
-        val majorVersion = versionName?.substringBefore('.')?.toIntOrNull()
-        return majorVersion != null && majorVersion >= APP_SWITCH_MIN_MAJOR_VERSION
+        return resolvesToPayPalApp && payPalAppVersionCode > MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE
     }
 
     fun isDeepLinkConfiguredInManifest(returnUrlScheme: String): Boolean {
@@ -72,7 +71,7 @@ class DeviceInspector(private val context: Context) {
     companion object {
         const val PAYPAL_APP_PACKAGE = "com.paypal.android.p2pmobile"
         private const val PAYPAL_APP_SWITCH_URL = "https://www.paypal.com/app-switch-checkout"
-        private const val APP_SWITCH_MIN_MAJOR_VERSION = 9
+        private const val MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE = 1_160_090_131L
         private val DEFAULT_APP_SWITCH_URI: Uri
             get() = PAYPAL_APP_SWITCH_URL.toUri()
     }
