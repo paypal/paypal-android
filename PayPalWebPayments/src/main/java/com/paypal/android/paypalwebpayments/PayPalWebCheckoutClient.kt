@@ -392,9 +392,6 @@ class PayPalWebCheckoutClient internal constructor(
             returnToAppStrategy = returnToAppStrategy,
         )
         logPresentAuthChallengeResult(result)
-        // endTime is captured once above and reused for both outcomes so success and failure
-        // latency are measured the same way; logUserPerceivedLatency() already reports
-        // PresentationType.ERROR for a Failure result.
         logUserPerceivedLatency(flowType, result, startTime, endTime)
         return result
     }
