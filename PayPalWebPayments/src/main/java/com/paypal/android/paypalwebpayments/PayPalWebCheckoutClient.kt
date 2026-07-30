@@ -176,7 +176,6 @@ class PayPalWebCheckoutClient internal constructor(
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                setShopperSessionAnalyticsParams(shopperSession)
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -251,7 +250,6 @@ class PayPalWebCheckoutClient internal constructor(
             try {
                 val shopperSession = deferred.await()
                 shopperSessionDeferred = null
-                setShopperSessionAnalyticsParams(shopperSession)
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -392,7 +390,13 @@ class PayPalWebCheckoutClient internal constructor(
             returnToAppStrategy = returnToAppStrategy,
         )
         logPresentAuthChallengeResult(result)
-        logUserPerceivedLatency(flowType, result, startTime, endTime)
+
+        // If failed to launch, log latency with error.
+        if (result is PayPalPresentAuthChallengeResult.Failure) {
+            logUserPerceivedLatencyError(flowType, startTime)
+        } else {
+            logUserPerceivedLatency(flowType, result, startTime, endTime)
+        }
         return result
     }
 
@@ -455,10 +459,9 @@ class PayPalWebCheckoutClient internal constructor(
             ),
         )
 
-        logApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.roundTripTiming)
-
-        return when (result) {
+        val shopperSessionWithAppSwitchEligibility = when (result) {
             is APIResult.Success -> {
+                setShopperSessionAnalyticsParams(result.data)
                 analyticsEventParams = analyticsEventParams.copy(
                     shopperSession = result.data,
                 )
@@ -475,6 +478,8 @@ class PayPalWebCheckoutClient internal constructor(
                 null
             }
         }
+        logApiRequestLatency(LatencyEndpoint.CREATE_SESSION, result.roundTripTiming)
+        return shopperSessionWithAppSwitchEligibility
     }
     // endregion
 
@@ -745,7 +750,7 @@ class PayPalWebCheckoutClient internal constructor(
 
             is PayPalPresentAuthChallengeResult.Failure -> PresentationType.ERROR
         }
-        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime)
+        analytics.notifyUserPerceivedLatency(flow, presentationType, startTime, endTime, analyticsEventParams)
     }
 
     /**
@@ -756,7 +761,8 @@ class PayPalWebCheckoutClient internal constructor(
             flow = flow,
             presentationType = PresentationType.ERROR,
             startTime = startTime,
-            endTime = System.currentTimeMillis()
+            endTime = System.currentTimeMillis(),
+            params = analyticsEventParams,
         )
     }
 
@@ -764,7 +770,9 @@ class PayPalWebCheckoutClient internal constructor(
      * Logs the API round-trip latency for [endpoint], if [roundTripTiming] was captured.
      */
     private fun logApiRequestLatency(endpoint: String, roundTripTiming: HttpRoundTripTiming?) {
-        roundTripTiming?.let { analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime) }
+        roundTripTiming?.let {
+            analytics.notifyApiRequestLatency(endpoint, it.startTime, it.endTime, analyticsEventParams)
+        }
     }
 
     /**
