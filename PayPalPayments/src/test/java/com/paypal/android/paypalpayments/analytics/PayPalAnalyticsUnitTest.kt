@@ -77,7 +77,7 @@ class PayPalAnalyticsUnitTest {
         verify {
             analyticsService.sendAnalyticsEvent(
                 name = PayPalEvent.APP_SWITCH_STARTED.value,
-                eventData = match { it.linkType == "applink" && it.orderId == "fake-order-id" },
+                eventData = match { it.linkType == "universal" && it.orderId == "fake-order-id" },
             )
         }
     }

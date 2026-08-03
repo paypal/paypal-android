@@ -10,7 +10,7 @@ import androidx.annotation.RestrictTo
  * @suppress
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class LinkType(val stringValue: String) {
-    APP_LINK("applink"),
+enum class LinkType(val analyticsValue: String) {
+    APP_LINK("universal"),
     DEEP_LINK("deeplink"),
 }
