@@ -62,7 +62,7 @@ fun StepHeader(stepNumber: Int, title: String) {
 
 @Preview
 @Composable
-fun PayPalWebViewPreview() {
+fun PayPalViewPreview() {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxWidth()) {
             StepHeader(stepNumber = 99, title = "Title 99")

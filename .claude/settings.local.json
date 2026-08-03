@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote *)",
+      "Bash(git config *)",
+      "Bash(git ls-remote *)",
+      "Bash(git push *)",
+      "Bash(git credential-osxkeychain *)",
+      "Bash(xargs -I{} sh -c 'echo \"===== {} =====\"; cat \"{}\"')",
+      "Bash(./gradlew :Demo:compileDebugKotlin -q)",
+      "Bash(echo \"BUILD OK \\(exit $?\\)\")",
+      "Bash(echo \"BUILD FAILED \\(exit $?\\)\")",
+      "Bash(gh api *)",
+      "Bash(./gradlew :PayPalWebPayments:compileDebugKotlin -q)",
+      "Bash(python3 -)",
+      "Bash(grep *)",
+      "Bash(git stash *)",
+      "Bash(./gradlew :PayPalWebPayments:testDebugUnitTest --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest\" -q)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(./gradlew :PayPalWebPayments:testDebugUnitTest --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest\" --rerun -q)",
+      "Bash(echo \"RUN1 EXIT $?\")",
+      "Bash(echo \"RUN2 EXIT $?\")",
+      "Bash(./gradlew :PayPalWebPayments:testDebugUnitTest --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest.start\\(\\) with orderId delivers SESSION_CREATION_FAILED when shopperSession resolves to null\" --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest.vault\\(\\) with setupTokenId delivers SESSION_CREATION_FAILED when shopperSession resolves to null\" --rerun -q)",
+      "Bash(./gradlew :PayPalWebPayments:testDebugUnitTest --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest\" --rerun)",
+      "Bash(./gradlew :PayPalWebPayments:compileDebugKotlin :PayPalWebPayments:testDebugUnitTest --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest\" --rerun -q)",
+      "Bash(./gradlew :PayPalWebPayments:testDebugUnitTest --tests \"com.paypal.android.paypalwebpayments.PayPalWebCheckoutClientUnitTest\")"
+    ]
+  }
+}

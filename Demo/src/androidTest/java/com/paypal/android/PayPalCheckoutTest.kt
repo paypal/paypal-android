@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 class PayPalCheckoutTest {
 
     companion object {
-        private const val TAG = "PayPalWebCheckoutTest"
+        private const val TAG = "PayPalCheckoutTest"
     }
 
     @get:Rule

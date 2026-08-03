@@ -34,11 +34,11 @@ private val cardFeatures = listOf(
     Feature.CARD_VAULT
 )
 
-private val payPalWebFeatures = listOf(
-    Feature.PAYPAL_WEB,
+private val payPalFeatures = listOf(
+    Feature.PAYPAL,
     Feature.PAYPAL_BUTTONS,
     Feature.PAYPAL_STATIC_BUTTONS,
-    Feature.PAYPAL_WEB_VAULT
+    Feature.PAYPAL_VAULT
 )
 
 @ExperimentalFoundationApi
@@ -62,7 +62,7 @@ fun FeaturesView(
             FeatureGroupHeader("PayPal")
         }
         item {
-            FeatureOptions(payPalWebFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
+            FeatureOptions(payPalFeatures, onSelectedFeatureChange = onSelectedFeatureChange)
         }
     }
 }
