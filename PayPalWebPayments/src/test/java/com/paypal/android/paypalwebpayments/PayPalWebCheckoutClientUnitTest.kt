@@ -1333,7 +1333,8 @@ class PayPalWebCheckoutClientUnitTest {
                 analytics.notifyApiRequestLatency(
                     endpoint = LatencyEndpoint.CREATE_SESSION,
                     startTime = 1000L,
-                    endTime = 1500L
+                    endTime = 1500L,
+                    params = any()
                 )
             }
         }
@@ -1558,6 +1559,10 @@ class PayPalWebCheckoutClientUnitTest {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
 
+            coEvery {
+                createShopperSessionAPI(token = any(), tokenType = any(), params = any())
+            } returns APIResult.Success(fakeSessionResponse)
+
             val callback = mockk<PayPalWebStartCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
@@ -1604,6 +1609,10 @@ class PayPalWebCheckoutClientUnitTest {
             every {
                 payPalWebLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
+
+            coEvery {
+                createShopperSessionAPI(token = any(), tokenType = any(), params = any())
+            } returns APIResult.Success(fakeSessionResponse)
 
             val callback = mockk<PayPalWebVaultCallback>(relaxed = true)
             sutV3.createPayPalSession(
@@ -1908,7 +1917,8 @@ class PayPalWebCheckoutClientUnitTest {
                     flow = LatencyFlow.CHECKOUT,
                     presentationType = PresentationType.BROWSER,
                     startTime = any(),
-                    endTime = any()
+                    endTime = any(),
+                    params = any()
                 )
             }
         }
@@ -1942,7 +1952,8 @@ class PayPalWebCheckoutClientUnitTest {
                     flow = LatencyFlow.CHECKOUT,
                     presentationType = PresentationType.APP_SWITCH,
                     startTime = any(),
-                    endTime = any()
+                    endTime = any(),
+                    params = any()
                 )
             }
         }
@@ -1971,7 +1982,9 @@ class PayPalWebCheckoutClientUnitTest {
                     flow = LatencyFlow.CHECKOUT,
                     presentationType = PresentationType.ERROR,
                     startTime = any(),
-                    endTime = any()
+                    endTime = any(),
+                    errorDescription = any(),
+                    params = any()
                 )
             }
         }
@@ -1989,7 +2002,9 @@ class PayPalWebCheckoutClientUnitTest {
                     flow = LatencyFlow.CHECKOUT,
                     presentationType = PresentationType.ERROR,
                     startTime = any(),
-                    endTime = any()
+                    endTime = any(),
+                    errorDescription = any(),
+                    params = any()
                 )
             }
         }
@@ -2017,7 +2032,8 @@ class PayPalWebCheckoutClientUnitTest {
                     flow = LatencyFlow.VAULT,
                     presentationType = any(),
                     startTime = any(),
-                    endTime = any()
+                    endTime = any(),
+                    params = any()
                 )
             }
         }
