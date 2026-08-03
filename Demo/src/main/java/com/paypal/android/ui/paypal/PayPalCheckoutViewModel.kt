@@ -19,7 +19,7 @@ import com.paypal.android.models.OrderRequest
 import com.paypal.android.paypalpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalpayments.PayPalUserAction
 import com.paypal.android.paypalpayments.PayPalUserIdentity
-import com.paypal.android.paypalpayments.PayPalCheckoutClient
+import com.paypal.android.paypalpayments.PayPalClient
 import com.paypal.android.paypalpayments.PayPalCheckoutFinishStartResult
 import com.paypal.android.paypalpayments.PayPalCheckoutFundingSource
 import com.paypal.android.uishared.enums.StoreInVaultOption
@@ -52,7 +52,7 @@ class PayPalCheckoutViewModel @Inject constructor(
         )
 
     private val payPalDataCollector = PayPalDataCollector(buildCoreConfig())
-    private val paypalClient: PayPalCheckoutClient = PayPalCheckoutClient(applicationContext, buildCoreConfig())
+    private val paypalClient: PayPalClient = PayPalClient(applicationContext, buildCoreConfig())
 
     private val _uiState = MutableStateFlow(PayPalUiState())
     val uiState = _uiState.asStateFlow()

@@ -11,13 +11,13 @@ internal data class AnalyticsEventParams(
 
     /**
      * The id being approved — an order id for a checkout flow (set by
-     * [PayPalCheckoutClient.start]) or a setup token id for a vault flow (set by
-     * [PayPalCheckoutClient.vault]). Which one it is can be determined from [isVault].
+     * [PayPalClient.start]) or a setup token id for a vault flow (set by
+     * [PayPalClient.vault]). Which one it is can be determined from [isVault].
      */
     val orderIdOrSetupTokenId: String? = null,
 
     /**
-     * The shopper session returned by [PayPalCheckoutClient.createPayPalSession].
+     * The shopper session returned by [PayPalClient.createPayPalSession].
      */
     val shopperSession: CreateShopperSessionWithAppSwitchEligibilityResponse? = null,
 
@@ -51,25 +51,25 @@ internal data class AnalyticsEventParams(
 
     /**
      * Merchant id from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of
-     * the owning [PayPalCheckoutClient] instance
+     * the owning [PayPalClient] instance
      */
     val merchantId: String? = null,
 
     /**
      * BN code from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of the
-     * owning [PayPalCheckoutClient] instance
+     * owning [PayPalClient] instance
      */
     val bnCode: String? = null,
 
     /**
      * Client id from [com.paypal.android.corepayments.CoreConfig]. Constant for the lifetime of the
-     * owning [PayPalCheckoutClient] instance
+     * owning [PayPalClient] instance
      */
     val clientId: String? = null,
 
     /**
      * Whether the PayPal native app is installed and able to handle an app switch. See
-     * [PayPalCheckoutClient.canAttemptPayPalAppSwitch].
+     * [PayPalClient.canAttemptPayPalAppSwitch].
      */
     val paypalInstalled: String? = null,
 

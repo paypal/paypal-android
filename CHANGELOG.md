@@ -8,20 +8,20 @@
   * Removed `authState` from public API of `CardPresentAuthChallengeResult.Success`
 * PayPalPayments
   * Renamed the `PayPalWebPayments` module to `PayPalPayments` (Maven artifact `com.paypal.android:paypal-payments`, package `com.paypal.android.paypalpayments`)
-  * Renamed `PayPalWebCheckoutClient` to `PayPalCheckoutClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebStartCallback` to `PayPalStartCallback`, `PayPalWebVaultCallback` to `PayPalVaultCallback`, `PayPalWebCheckoutError(Code)` to `PayPalCheckoutError(Code)`, `PayPalWebCheckoutFinishStartResult` to `PayPalCheckoutFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalCheckoutFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`
+  * Renamed `PayPalWebCheckoutClient` to `PayPalClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebStartCallback` to `PayPalStartCallback`, `PayPalWebVaultCallback` to `PayPalVaultCallback`, `PayPalWebCheckoutError(Code)` to `PayPalCheckoutError(Code)`, `PayPalWebCheckoutFinishStartResult` to `PayPalCheckoutFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalCheckoutFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`
   * Renamed analytics events fired from this module to be prefixed with `pay-pal-payments` instead of `paypal-web-payments`
-  * Removed deprecated `PayPalCheckoutClient(context, configuration, urlScheme)` constructor — use `PayPalCheckoutClient(context, configuration)` and set `returnToAppStrategy` on requests instead
-  * Removed deprecated `PayPalCheckoutClient.start(activity, request)` — use `PayPalCheckoutClient.start(activity, request, callback)` or `startAsync()` instead
-  * Removed deprecated `PayPalCheckoutClient.vault(activity, request)` — use `PayPalCheckoutClient.vault(activity, request, callback)` or `vaultAsync()` instead
-  * Removed deprecated `PayPalCheckoutClient.finishStart(intent, authState)` — use `PayPalCheckoutClient.finishStart(intent)` instead
-  * Removed deprecated `PayPalCheckoutClient.finishVault(intent, authState)` — use `PayPalCheckoutClient.finishVault(intent)` instead
+  * Removed deprecated `PayPalClient(context, configuration, urlScheme)` constructor — use `PayPalClient(context, configuration)` and set `returnToAppStrategy` on requests instead
+  * Removed deprecated `PayPalClient.start(activity, request)` — use `PayPalClient.start(activity, request, callback)` or `startAsync()` instead
+  * Removed deprecated `PayPalClient.vault(activity, request)` — use `PayPalClient.vault(activity, request, callback)` or `vaultAsync()` instead
+  * Removed deprecated `PayPalClient.finishStart(intent, authState)` — use `PayPalClient.finishStart(intent)` instead
+  * Removed deprecated `PayPalClient.finishVault(intent, authState)` — use `PayPalClient.finishVault(intent)` instead
   * Removed `authState` from public API of `PayPalPresentAuthChallengeResult.Success`
-  * Add `PayPalCheckoutClient.createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`; `urlConfig.fallbackSchemeUrl` is a mandatory field
+  * Add `PayPalClient.createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` — establishes a shopper session that must be created prior to calling `start()` or `vault()`; `urlConfig.fallbackSchemeUrl` is a mandatory field
   * Add `PayPalPhoneNumber(countryCode, nationalNumber)` and change `PayPalUserIdentity.phone` from `String?` to `PayPalPhoneNumber?` — the shopper's phone number is now sent to the `createShopperSessionWithAppSwitchEligibility` GraphQL mutation
-  * Add `PayPalCheckoutClient.start(activity, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
-  * Add `PayPalCheckoutClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
-  * Removed deprecated `PayPalCheckoutClient.start(activity, request, callback)` and `PayPalWebCheckoutRequest` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
-  * Removed deprecated `PayPalCheckoutClient.vault(activity, request, callback)` and `PayPalWebVaultRequest` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
+  * Add `PayPalClient.start(activity, orderId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
+  * Add `PayPalClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
+  * Removed deprecated `PayPalClient.start(activity, request, callback)` and `PayPalWebCheckoutRequest` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
+  * Removed deprecated `PayPalClient.vault(activity, request, callback)` and `PayPalWebVaultRequest` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
 * FraudProtection
   * Removed deprecated `PayPalDataCollector.collectDeviceData(context, clientMetadataId)` and `collectDeviceData(context, clientMetadataId, additionalData)` overloads — use `collectDeviceData(context, PayPalDataCollectorRequest)` instead
   * Removed deprecated `PayPalDataCollector.setLogging(Boolean)`

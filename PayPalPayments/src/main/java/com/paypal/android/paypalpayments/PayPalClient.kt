@@ -37,9 +37,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// NEXT MAJOR VERSION: consider renaming this module to PayPalClient since
-// it now offers both checkout and vaulting
-
 /**
  * Use this client to approve an order using PayPal web checkout.
  */
@@ -47,7 +44,7 @@ import kotlinx.coroutines.withContext
     "LongParameterList", // Manual constructor injection, one dependency per collaborator (see adr/2)
     "LargeClass", // Handles start, vault, and shopper-session orchestration for both app-switch link types
 )
-class PayPalCheckoutClient internal constructor(
+class PayPalClient internal constructor(
     private val analytics: PayPalAnalytics,
     private val payPalLauncher: PayPalLauncher,
     private val sessionStore: PayPalCheckoutSessionStore,
@@ -281,7 +278,7 @@ class PayPalCheckoutClient internal constructor(
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalCheckoutClient.start]), call this method to see if a user has
+     * (@see [PayPalClient.start]), call this method to see if a user has
      * successfully authorized a PayPal account as a payment source.
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app
@@ -300,7 +297,7 @@ class PayPalCheckoutClient internal constructor(
 
     /**
      * After a merchant app has re-entered the foreground following an auth challenge
-     * (@see [PayPalCheckoutClient.vault]), call this method to see if a user has
+     * (@see [PayPalClient.vault]), call this method to see if a user has
      * successfully authorized a PayPal account for vaulting.
      *
      * @param [intent] An Android intent that holds the deep link put the merchant app

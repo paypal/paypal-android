@@ -3,7 +3,7 @@
 package com.paypal.android.paypalpayments.analytics
 
 /**
- * Fires from [com.paypal.android.paypalpayments.PayPalCheckoutClient.createPayPalSession],
+ * Fires from [com.paypal.android.paypalpayments.PayPalClient.createPayPalSession],
  * for both the checkout and vault flows, under the same event strings. [PayPalAnalytics]
  * distinguishes which flow fired the event via the `is_vault` param.
  */

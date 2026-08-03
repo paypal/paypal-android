@@ -3,7 +3,7 @@ package com.paypal.android.paypalpayments
 /**
  * Controls the call-to-action label displayed on the PayPal checkout page.
  *
- * Passed to [PayPalCheckoutClient.createPayPalSession].
+ * Passed to [PayPalClient.createPayPalSession].
  */
 enum class PayPalUserAction {
     /** Displays a "Continue" button. Default for most checkout flows. */

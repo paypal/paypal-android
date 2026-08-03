@@ -14,7 +14,7 @@ import com.paypal.android.customenvironment.CustomEnvironmentRepository
 import com.paypal.android.paypalpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalpayments.PayPalUserAction
 import com.paypal.android.paypalpayments.PayPalUserIdentity
-import com.paypal.android.paypalpayments.PayPalCheckoutClient
+import com.paypal.android.paypalpayments.PayPalClient
 import com.paypal.android.paypalpayments.PayPalCheckoutFinishVaultResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
@@ -40,7 +40,7 @@ class PayPalVaultViewModel @Inject constructor(
             CoreConfig(SDKSampleServerAPI.clientId, SDKSampleServerAPI.merchantId)
         )
 
-    private val paypalClient: PayPalCheckoutClient = PayPalCheckoutClient(applicationContext, buildCoreConfig())
+    private val paypalClient: PayPalClient = PayPalClient(applicationContext, buildCoreConfig())
 
     private val _uiState = MutableStateFlow(PayPalVaultUiState())
     val uiState = _uiState.asStateFlow()

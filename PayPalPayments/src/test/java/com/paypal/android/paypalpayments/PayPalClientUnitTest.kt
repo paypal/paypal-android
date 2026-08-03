@@ -59,7 +59,7 @@ import org.robolectric.RobolectricTestRunner
 @Suppress("LargeClass")
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PayPalCheckoutClientUnitTest {
+class PayPalClientUnitTest {
 
     @MockK
     private val activity: FragmentActivity = mockk(relaxed = true)
@@ -82,7 +82,7 @@ class PayPalCheckoutClientUnitTest {
 
     @MockK
     private val payPalLauncher: PayPalLauncher = mockk(relaxed = true)
-    private lateinit var sut: PayPalCheckoutClient
+    private lateinit var sut: PayPalClient
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -93,7 +93,7 @@ class PayPalCheckoutClientUnitTest {
         every {
             getReturnToAppStrategyUseCase(any(), any(), any())
         } returns GetReturnToAppStrategyResult.Success(ReturnToAppStrategy.AppLink(fakeUrlConfig.returnAppUrl))
-        sut = PayPalCheckoutClient(
+        sut = PayPalClient(
             analytics = analytics,
             payPalLauncher = payPalLauncher,
             sessionStore = PayPalCheckoutSessionStore(),
@@ -628,7 +628,7 @@ class PayPalCheckoutClientUnitTest {
 
     // Inject test-controlled applicationScope so coroutines launched by v3 methods
     // run on the test scheduler and are drained by testDispatcher.scheduler.advanceUntilIdle().
-    private fun makeSutWithUrlScheme(): PayPalCheckoutClient = PayPalCheckoutClient(
+    private fun makeSutWithUrlScheme(): PayPalClient = PayPalClient(
             analytics = analytics,
             payPalLauncher = payPalLauncher,
             sessionStore = PayPalCheckoutSessionStore(),

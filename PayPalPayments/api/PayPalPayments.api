@@ -61,10 +61,10 @@ public final class com/paypal/android/paypalpayments/PayPalUserIdentity {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/paypal/android/paypalpayments/PayPalCheckoutClient {
+public final class com/paypal/android/paypalpayments/PayPalClient {
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
 	public final fun createPayPalSession (Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalpayments/PayPalUserIdentity;Lcom/paypal/android/paypalpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalpayments/PayPalUserAction;)V
-	public static synthetic fun createPayPalSession$default (Lcom/paypal/android/paypalpayments/PayPalCheckoutClient;Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalpayments/PayPalUserIdentity;Lcom/paypal/android/paypalpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalpayments/PayPalUserAction;ILjava/lang/Object;)V
+	public static synthetic fun createPayPalSession$default (Lcom/paypal/android/paypalpayments/PayPalClient;Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalpayments/PayPalUserIdentity;Lcom/paypal/android/paypalpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalpayments/PayPalUserAction;ILjava/lang/Object;)V
 	public final fun finishStart (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult;
 	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult;
 	public final fun getInstanceState ()Ljava/lang/String;
