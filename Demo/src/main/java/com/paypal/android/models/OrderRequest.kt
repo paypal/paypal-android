@@ -8,6 +8,6 @@ data class OrderRequest(
     val intent: OrderIntent,
     val shouldVaultOnSuccess: Boolean,
     val amount: String = "10.99",
-    val paymentMethodSelected: String = "PAYPAL_CREDIT",
+    val paymentMethodSelected: String = "PAYPAL",
     val userAction: String = "PAY_NOW",
 )

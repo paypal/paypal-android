@@ -141,18 +141,12 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
     }
 
-    // Maps the SDK's browser-facing PayPalWebCheckoutFundingSource enum to the string value the
-    // backend expects for payment_source.paypal.experience_context.payment_method_selected
-    // (matches XOSphere's PaymentMethod enum: PAYPAL / PAYPAL_PAY_LATER / PAYPAL_CREDIT).
     private fun PayPalWebCheckoutFundingSource.toPaymentMethodSelected(): String = when (this) {
         PayPalWebCheckoutFundingSource.PAYPAL_CREDIT -> "PAYPAL_CREDIT"
         PayPalWebCheckoutFundingSource.PAY_LATER -> "PAYPAL_PAY_LATER"
         PayPalWebCheckoutFundingSource.PAYPAL -> "PAYPAL"
     }
 
-    // PayPalUserAction's enum names already match the string values the backend expects for
-    // payment_source.paypal.experience_context.user_action (matches XOSphere's UserAction.value:
-    // CONTINUE / PAY_NOW / SETUP_NOW).
     private fun PayPalUserAction.toUserActionSelected(): String = name
 
     fun startCheckout(activity: ComponentActivity) {

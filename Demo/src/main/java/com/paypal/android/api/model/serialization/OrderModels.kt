@@ -76,9 +76,5 @@ data class AppSwitchContext(
 
 @Serializable
 data class NativeApp(
-    val appUrl: String? = null,
-    val returnAppUrl: String,
-    val cancelAppUrl: String,
-    val osType: String,
-    val osVersion: Int
+    val appUrl: String
 )
