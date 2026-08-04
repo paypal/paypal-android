@@ -667,13 +667,13 @@ class PayPalClientUnitTest {
     @Test
     fun `start() with orderId delivers SESSION_NOT_CREATED when createPayPalSession not called`() =
         runTest {
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
 
             sut.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalStartResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionNotCreatedError.code
                 })
@@ -683,7 +683,7 @@ class PayPalClientUnitTest {
     @Test
     fun `start() with orderId logs merchant config in SESSION_NOT_STARTED without createPayPalSession`() =
         runTest {
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
 
             sut.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -715,7 +715,7 @@ class PayPalClientUnitTest {
             // First, complete a full, successful createPayPalSession() + start() cycle, which
             // consumes shopperSessionDeferred and leaves analyticsEventParams populated with
             // this order's shopperSession/isVault/appSwitchEnabled/urlConfig fields.
-            val firstCallback = mockk<PayPalStartCallback>(relaxed = true)
+            val firstCallback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -728,7 +728,7 @@ class PayPalClientUnitTest {
             // Now call start() again for a different order, without a fresh createPayPalSession()
             // call — shopperSessionDeferred is null again, so this hits the SESSION_NOT_STARTED
             // path. None of the first order's leftover fields should appear on this event.
-            val secondCallback = mockk<PayPalStartCallback>(relaxed = true)
+            val secondCallback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.start(activity, "second-order-id", secondCallback)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -745,7 +745,7 @@ class PayPalClientUnitTest {
                 )
             }
             verify {
-                secondCallback.onPayPalStartResult(match {
+                secondCallback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionNotCreatedError.code
                 })
@@ -758,7 +758,7 @@ class PayPalClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
         every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
-        val callback = mockk<PayPalStartCallback>(relaxed = true)
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
         sutV3.createPayPalSession(
             tokenType = TokenType.ORDER_ID,
             userIdentity = fakeUserIdentity,
@@ -777,7 +777,7 @@ class PayPalClientUnitTest {
                 returnToAppStrategy = any()
             )
         }
-        verify { callback.onPayPalStartResult(launchResult) }
+        verify { callback.onPayPalResult(launchResult) }
     }
 
     @Test
@@ -791,7 +791,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -831,7 +831,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -867,7 +867,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -896,7 +896,7 @@ class PayPalClientUnitTest {
                 ),
                 shopperSessionConfig = ShopperSessionConfig("", "")
             )
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -920,7 +920,7 @@ class PayPalClientUnitTest {
             payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
         } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
-        val callback = mockk<PayPalStartCallback>(relaxed = true)
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
         sutV3.createPayPalSession(
             tokenType = TokenType.ORDER_ID,
             userIdentity = fakeUserIdentity,
@@ -946,7 +946,7 @@ class PayPalClientUnitTest {
     fun `start() with orderId delivers failure when createShopperSession throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -959,7 +959,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalStartResult(match { it is PayPalPresentAuthChallengeResult.Failure })
+                callback.onPayPalResult(match { it is PayPalPresentAuthChallengeResult.Failure })
             }
         }
 
@@ -967,7 +967,7 @@ class PayPalClientUnitTest {
     fun `start() with orderId delivers SESSION_CREATION_FAILED when shopperSession resolves to null`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -982,7 +982,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalStartResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionCreationFailedError.code &&
                         it.error.errorDescription == PayPalError.sessionCreationFailedError.errorDescription
@@ -1003,8 +1003,8 @@ class PayPalClientUnitTest {
                 urlConfig = fakeUrlConfig,
             )
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
-            val callback1 = mockk<PayPalStartCallback>(relaxed = true)
-            val callback2 = mockk<PayPalStartCallback>(relaxed = true)
+            val callback1 = mockk<PayPalResultCallback>(relaxed = true)
+            val callback2 = mockk<PayPalResultCallback>(relaxed = true)
 
             sutV3.start(activity, "fake-order-id", callback1)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -1014,7 +1014,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback2.onPayPalStartResult(match {
+                callback2.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionNotCreatedError.code
                 })
@@ -1026,13 +1026,13 @@ class PayPalClientUnitTest {
     @Test
     fun `vault() with setupTokenId delivers SESSION_NOT_CREATED when createPayPalSession not called`() =
         runTest {
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
 
             sut.vault(activity, "fake-setup-token-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalVaultResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionNotCreatedError.code
                 })
@@ -1042,7 +1042,7 @@ class PayPalClientUnitTest {
     @Test
     fun `vault() with setupTokenId logs merchant config in SESSION_NOT_STARTED without createPayPalSession`() =
         runTest {
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
 
             sut.vault(activity, "fake-setup-token-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -1072,7 +1072,7 @@ class PayPalClientUnitTest {
             // First, complete a full, successful createPayPalSession() + vault() cycle, which
             // consumes shopperSessionDeferred and leaves analyticsEventParams populated with
             // this setup token's shopperSession/isVault/appSwitchEnabled/urlConfig fields.
-            val firstCallback = mockk<PayPalVaultCallback>(relaxed = true)
+            val firstCallback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1086,7 +1086,7 @@ class PayPalClientUnitTest {
             // createPayPalSession() call — shopperSessionDeferred is null again, so this hits
             // the SESSION_NOT_STARTED path. None of the first session's leftover fields should
             // appear on this event.
-            val secondCallback = mockk<PayPalVaultCallback>(relaxed = true)
+            val secondCallback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.vault(activity, "second-setup-token-id", secondCallback)
             testDispatcher.scheduler.advanceUntilIdle()
 
@@ -1103,7 +1103,7 @@ class PayPalClientUnitTest {
                 )
             }
             verify {
-                secondCallback.onPayPalVaultResult(match {
+                secondCallback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionNotCreatedError.code
                 })
@@ -1116,7 +1116,7 @@ class PayPalClientUnitTest {
         val launchResult = PayPalPresentAuthChallengeResult.Success("auth-state")
         every { payPalLauncher.launchWithUrl(any(), any(), any(), any(), any()) } returns launchResult
 
-        val callback = mockk<PayPalVaultCallback>(relaxed = true)
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
         sutV3.createPayPalSession(
             tokenType = TokenType.VAULT_ID,
             userIdentity = fakeUserIdentity,
@@ -1135,7 +1135,7 @@ class PayPalClientUnitTest {
                 returnToAppStrategy = any()
             )
         }
-        verify { callback.onPayPalVaultResult(launchResult) }
+        verify { callback.onPayPalResult(launchResult) }
     }
 
     @Test
@@ -1147,7 +1147,7 @@ class PayPalClientUnitTest {
             payPalLauncher.launchWithUrl(any(), capture(uriSlot), any(), any(), any())
         } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
-        val callback = mockk<PayPalVaultCallback>(relaxed = true)
+        val callback = mockk<PayPalResultCallback>(relaxed = true)
         sutV3.createPayPalSession(
             tokenType = TokenType.VAULT_ID,
             userIdentity = fakeUserIdentity,
@@ -1174,7 +1174,7 @@ class PayPalClientUnitTest {
     fun `vault() with setupTokenId delivers failure when createShopperSession throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1187,7 +1187,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalVaultResult(match { it is PayPalPresentAuthChallengeResult.Failure })
+                callback.onPayPalResult(match { it is PayPalPresentAuthChallengeResult.Failure })
             }
         }
 
@@ -1195,7 +1195,7 @@ class PayPalClientUnitTest {
     fun `vault() with setupTokenId delivers SESSION_CREATION_FAILED when shopperSession resolves to null`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1210,7 +1210,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalVaultResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionCreationFailedError.code &&
                         it.error.errorDescription == PayPalError.sessionCreationFailedError.errorDescription
@@ -1378,8 +1378,8 @@ class PayPalClientUnitTest {
                 urlConfig = fakeUrlConfig,
             )
             sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
-            val callback1 = mockk<PayPalVaultCallback>(relaxed = true)
-            val callback2 = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback1 = mockk<PayPalResultCallback>(relaxed = true)
+            val callback2 = mockk<PayPalResultCallback>(relaxed = true)
 
             sutV3.vault(activity, "fake-setup-token-id", callback1)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -1388,7 +1388,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback2.onPayPalVaultResult(match {
+                callback2.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.sessionNotCreatedError.code
                 })
@@ -1419,7 +1419,7 @@ class PayPalClientUnitTest {
                     tokenType = TokenType.ORDER_ID,
                 ),
             )
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1455,7 +1455,7 @@ class PayPalClientUnitTest {
                     tokenType = TokenType.ORDER_ID,
                 ),
             )
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1494,7 +1494,7 @@ class PayPalClientUnitTest {
                     tokenType = TokenType.VAULT_ID,
                 ),
             )
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1533,7 +1533,7 @@ class PayPalClientUnitTest {
                     tokenType = TokenType.BILLING_TOKEN,
                 ),
             )
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             // The session's tokenType (from createPayPalSession) drives getLaunchUri(), not the
             // vault()/start() call site itself.
             sutV3.createPayPalSession(
@@ -1565,7 +1565,7 @@ class PayPalClientUnitTest {
                 createShopperSessionAPI(token = any(), tokenType = any(), params = any())
             } returns APIResult.Success(fakeSessionResponse)
 
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1597,7 +1597,7 @@ class PayPalClientUnitTest {
                 )
             }
             verify {
-                callback.onPayPalStartResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure && it.error === sdkError
                 })
             }
@@ -1616,7 +1616,7 @@ class PayPalClientUnitTest {
                 createShopperSessionAPI(token = any(), tokenType = any(), params = any())
             } returns APIResult.Success(fakeSessionResponse)
 
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1648,7 +1648,7 @@ class PayPalClientUnitTest {
                 )
             }
             verify {
-                callback.onPayPalVaultResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure && it.error === sdkError
                 })
             }
@@ -1658,7 +1658,7 @@ class PayPalClientUnitTest {
     fun `start() with orderId notifies checkout failure analytics when the shopper session fetch throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1695,7 +1695,7 @@ class PayPalClientUnitTest {
     fun `vault() with setupTokenId notifies vault failure analytics when the shopper session fetch throws`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1747,7 +1747,7 @@ class PayPalClientUnitTest {
                     tokenType = TokenType.ORDER_ID,
                 ),
             )
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1790,7 +1790,7 @@ class PayPalClientUnitTest {
                     tokenType = TokenType.VAULT_ID,
                 ),
             )
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,
@@ -1821,7 +1821,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth-state")
 
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1847,7 +1847,7 @@ class PayPalClientUnitTest {
     fun `start() delivers returnToAppUrlConfigMissingError when returnAppUrl and fallbackSchemeUrl are missing`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = "")
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
@@ -1859,7 +1859,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalStartResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.returnToAppUrlConfigMissingError.code
                 })
@@ -1872,7 +1872,7 @@ class PayPalClientUnitTest {
     fun `vault() delivers returnToAppUrlConfigMissingError when returnAppUrl and fallbackSchemeUrl are missing`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             val invalidUrlConfig = fakeUrlConfig.copy(returnAppUrl = "", fallbackSchemeUrl = "")
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -1884,7 +1884,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             verify {
-                callback.onPayPalVaultResult(match {
+                callback.onPayPalResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
                         it.error.code == PayPalError.returnToAppUrlConfigMissingError.code
                 })
@@ -1904,7 +1904,7 @@ class PayPalClientUnitTest {
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
 
             // fakeSessionResponse is not app-switch eligible -> browser presentation
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1939,7 +1939,7 @@ class PayPalClientUnitTest {
                 appSwitchEligible = true,
                 redirectUrl = "https://example.com/app-switch-redirect",
             )
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1969,7 +1969,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Failure(sdkError)
 
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.ORDER_ID,
                 userIdentity = fakeUserIdentity,
@@ -1994,7 +1994,7 @@ class PayPalClientUnitTest {
     @Test
     fun `start() emits user-perceived-latency with error presentation when session not created`() =
         runTest {
-            val callback = mockk<PayPalStartCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
 
             sut.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
@@ -2019,7 +2019,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns PayPalPresentAuthChallengeResult.Success("auth state")
 
-            val callback = mockk<PayPalVaultCallback>(relaxed = true)
+            val callback = mockk<PayPalResultCallback>(relaxed = true)
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
                 userIdentity = fakeUserIdentity,

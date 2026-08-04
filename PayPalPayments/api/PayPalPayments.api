@@ -23,8 +23,8 @@ public final class com/paypal/android/paypalpayments/PayPalClient {
 	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalFinishVaultResult;
 	public final fun getInstanceState ()Ljava/lang/String;
 	public final fun restore (Ljava/lang/String;)V
-	public final fun start (Landroid/app/Activity;Ljava/lang/String;Lcom/paypal/android/paypalpayments/PayPalStartCallback;)V
-	public final fun vault (Landroid/app/Activity;Ljava/lang/String;Lcom/paypal/android/paypalpayments/PayPalVaultCallback;)V
+	public final fun start (Landroid/app/Activity;Ljava/lang/String;Lcom/paypal/android/paypalpayments/PayPalResultCallback;)V
+	public final fun vault (Landroid/app/Activity;Ljava/lang/String;Lcom/paypal/android/paypalpayments/PayPalResultCallback;)V
 }
 
 public abstract class com/paypal/android/paypalpayments/PayPalFinishStartResult {
@@ -111,8 +111,8 @@ public final class com/paypal/android/paypalpayments/PayPalPresentAuthChallengeR
 public final class com/paypal/android/paypalpayments/PayPalPresentAuthChallengeResult$Success : com/paypal/android/paypalpayments/PayPalPresentAuthChallengeResult {
 }
 
-public abstract interface class com/paypal/android/paypalpayments/PayPalStartCallback {
-	public abstract fun onPayPalStartResult (Lcom/paypal/android/paypalpayments/PayPalPresentAuthChallengeResult;)V
+public abstract interface class com/paypal/android/paypalpayments/PayPalResultCallback {
+	public abstract fun onPayPalResult (Lcom/paypal/android/paypalpayments/PayPalPresentAuthChallengeResult;)V
 }
 
 public final class com/paypal/android/paypalpayments/PayPalUserAction : java/lang/Enum {
@@ -139,10 +139,6 @@ public final class com/paypal/android/paypalpayments/PayPalUserIdentity {
 	public final fun getPhone ()Lcom/paypal/android/paypalpayments/PayPalPhoneNumber;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class com/paypal/android/paypalpayments/PayPalVaultCallback {
-	public abstract fun onPayPalVaultResult (Lcom/paypal/android/paypalpayments/PayPalPresentAuthChallengeResult;)V
 }
 
 public final class com/paypal/android/paypalpayments/ReturnToAppUrlConfig {

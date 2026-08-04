@@ -147,7 +147,7 @@ class PayPalClient internal constructor(
     fun start(
         activity: Activity,
         orderId: String,
-        callback: PayPalStartCallback,
+        callback: PayPalResultCallback,
     ) {
         val startTime = System.currentTimeMillis()
         val urlConfig = returnToAppUrlConfig
@@ -181,7 +181,7 @@ class PayPalClient internal constructor(
                         startTime = startTime,
                     )
                     withContext(Dispatchers.Main) {
-                        callback.onPayPalStartResult(result)
+                        callback.onPayPalResult(result)
                     }
                 } else {
                     throw PayPalError.sessionCreationFailedError
@@ -194,7 +194,7 @@ class PayPalClient internal constructor(
                 )
                 shopperSessionDeferred = null
                 withContext(Dispatchers.Main) {
-                    callback.onPayPalStartResult(
+                    callback.onPayPalResult(
                         PayPalPresentAuthChallengeResult.Failure(
                             e as? PayPalSDKError ?: PayPalError.unknownError
                         )
@@ -219,7 +219,7 @@ class PayPalClient internal constructor(
     fun vault(
         activity: Activity,
         setupTokenId: String,
-        callback: PayPalVaultCallback,
+        callback: PayPalResultCallback,
     ) {
         val startTime = System.currentTimeMillis()
         val urlConfig = returnToAppUrlConfig
@@ -253,7 +253,7 @@ class PayPalClient internal constructor(
                         startTime = startTime,
                     )
                     withContext(Dispatchers.Main) {
-                        callback.onPayPalVaultResult(result)
+                        callback.onPayPalResult(result)
                     }
                 } else {
                     throw PayPalError.sessionCreationFailedError
@@ -266,7 +266,7 @@ class PayPalClient internal constructor(
                 )
                 shopperSessionDeferred = null
                 withContext(Dispatchers.Main) {
-                    callback.onPayPalVaultResult(
+                    callback.onPayPalResult(
                         PayPalPresentAuthChallengeResult.Failure(
                             e as? PayPalSDKError ?: PayPalError.unknownError
                         )
@@ -777,7 +777,7 @@ class PayPalClient internal constructor(
      * Logs [PayPalEvent.SESSION_NOT_STARTED] and notifies the merchant that [start] was called
      * before [createPayPalSession].
      */
-    private fun notifyCheckoutSessionNotStarted(callback: PayPalStartCallback, startTime: Long) {
+    private fun notifyCheckoutSessionNotStarted(callback: PayPalResultCallback, startTime: Long) {
         val errorDescription = "startPayPalSession() must be called before start()."
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
@@ -786,7 +786,7 @@ class PayPalClient internal constructor(
                 errorDescription = errorDescription
             )
             logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime, errorDescription)
-            callback.onPayPalStartResult(
+            callback.onPayPalResult(
                 PayPalPresentAuthChallengeResult.Failure(PayPalError.sessionNotCreatedError)
             )
         }
@@ -796,7 +796,7 @@ class PayPalClient internal constructor(
      * Logs [PayPalEvent.SESSION_NOT_STARTED] and notifies the merchant that [vault] was called
      * before [createPayPalSession].
      */
-    private fun notifyVaultSessionNotStarted(callback: PayPalVaultCallback, startTime: Long) {
+    private fun notifyVaultSessionNotStarted(callback: PayPalResultCallback, startTime: Long) {
         val errorDescription = "startPayPalSession() must be called before vault()."
         applicationScope.launch(Dispatchers.Main) {
             analytics.notify(
@@ -805,7 +805,7 @@ class PayPalClient internal constructor(
                 errorDescription = errorDescription
             )
             logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime, errorDescription)
-            callback.onPayPalVaultResult(
+            callback.onPayPalResult(
                 PayPalPresentAuthChallengeResult.Failure(PayPalError.sessionNotCreatedError)
             )
         }
@@ -817,7 +817,7 @@ class PayPalClient internal constructor(
      */
     private fun notifyCheckoutReturnToAppUrlConfigInvalid(
         orderId: String,
-        callback: PayPalStartCallback,
+        callback: PayPalResultCallback,
         startTime: Long
     ) {
         applicationScope.launch(Dispatchers.Main) {
@@ -828,7 +828,7 @@ class PayPalClient internal constructor(
                 errorDescription = error.errorDescription
             )
             logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime, error.errorDescription)
-            callback.onPayPalStartResult(PayPalPresentAuthChallengeResult.Failure(error))
+            callback.onPayPalResult(PayPalPresentAuthChallengeResult.Failure(error))
         }
     }
 
@@ -838,7 +838,7 @@ class PayPalClient internal constructor(
      */
     private fun notifyVaultReturnToAppUrlConfigInvalid(
         setupTokenId: String,
-        callback: PayPalVaultCallback,
+        callback: PayPalResultCallback,
         startTime: Long
     ) {
         applicationScope.launch(Dispatchers.Main) {
@@ -849,7 +849,7 @@ class PayPalClient internal constructor(
                 errorDescription = error.errorDescription
             )
             logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime, error.errorDescription)
-            callback.onPayPalVaultResult(PayPalPresentAuthChallengeResult.Failure(error))
+            callback.onPayPalResult(PayPalPresentAuthChallengeResult.Failure(error))
         }
     }
     // endregion
