@@ -35,7 +35,7 @@ private val cardFeatures = listOf(
 )
 
 private val payPalFeatures = listOf(
-    Feature.PAYPAL,
+    Feature.PAYPAL_CHECKOUT,
     Feature.PAYPAL_BUTTONS,
     Feature.PAYPAL_STATIC_BUTTONS,
     Feature.PAYPAL_VAULT

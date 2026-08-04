@@ -114,7 +114,7 @@ fun DemoApp() {
                         onUseTestCardClick = { navController.navigate(DemoAppDestinations.SELECT_TEST_CARD) }
                     )
                 }
-                composable(DemoAppDestinations.PAYPAL) {
+                composable(DemoAppDestinations.PAYPAL_CHECKOUT) {
                     PayPalCheckoutView()
                 }
                 composable(DemoAppDestinations.PAYPAL_VAULT) {
