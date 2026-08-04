@@ -7,8 +7,8 @@ object DemoConstants {
     const val APP_CUSTOM_URL_SCHEME = "com.paypal.android.demo"
 
     val returnToAppUrlConfig = ReturnToAppUrlConfig(
-        returnAppUrl = "$APP_URL/paypal-return",
-        cancelAppUrl = "$APP_URL/paypal-cancel",
+        returnAppUrl = "$APP_URL/success?platform=Android",
+        cancelAppUrl = "$APP_URL/cancel?platform=Android",
         fallbackSchemeUrl = APP_CUSTOM_URL_SCHEME
     )
 }
