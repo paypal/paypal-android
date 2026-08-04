@@ -9,7 +9,6 @@
 * PayPalPayments
   * Renamed the `PayPalWebPayments` module to `PayPalPayments` (Maven artifact `com.paypal.android:paypal-payments`, package `com.paypal.android.paypalpayments`)
   * Renamed `PayPalWebCheckoutClient` to `PayPalClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebStartCallback` to `PayPalStartCallback`, `PayPalWebVaultCallback` to `PayPalVaultCallback`, `PayPalWebCheckoutError(Code)` to `PayPalCheckoutError(Code)`, `PayPalWebCheckoutFinishStartResult` to `PayPalCheckoutFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalCheckoutFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`
-  * Renamed analytics events fired from this module to be prefixed with `pay-pal-payments` instead of `paypal-web-payments`
   * Removed deprecated `PayPalClient(context, configuration, urlScheme)` constructor — use `PayPalClient(context, configuration)` and set `returnToAppStrategy` on requests instead
   * Removed deprecated `PayPalClient.start(activity, request)` — use `PayPalClient.start(activity, request, callback)` or `startAsync()` instead
   * Removed deprecated `PayPalClient.vault(activity, request)` — use `PayPalClient.vault(activity, request, callback)` or `vaultAsync()` instead

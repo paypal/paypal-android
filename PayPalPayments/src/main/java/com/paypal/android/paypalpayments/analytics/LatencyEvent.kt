@@ -3,8 +3,8 @@
 package com.paypal.android.paypalpayments.analytics
 
 internal enum class LatencyEvent(val value: String) {
-    API_REQUEST_LATENCY("pay-pal-payments:api-request-latency"),
-    USER_PERCEIVED_LATENCY("pay-pal-payments:user-perceived-latency"),
+    API_REQUEST_LATENCY("paypal-payments:api-request-latency"),
+    USER_PERCEIVED_LATENCY("paypal-payments:user-perceived-latency"),
 }
 
 internal object PresentationType {

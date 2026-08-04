@@ -119,7 +119,7 @@ class AnalyticsServiceTest {
 
         sut = createAnalyticsService(environment, testScheduler)
         sut.sendAnalyticsEvent(
-            name = "pay-pal-payments:api-request-latency",
+            name = "paypal-payments:api-request-latency",
             eventData = AnalyticsEventData(
                 startTime = 1000L,
                 endTime = 1500L,

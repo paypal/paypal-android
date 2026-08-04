@@ -9,8 +9,8 @@ package com.paypal.android.paypalpayments.analytics
  */
 internal enum class CreatePayPalSessionEvent(val value: String) {
     // @formatter:off
-    STARTED(  "pay-pal-payments:create-paypal-session:started"),
-    SUCCEEDED("pay-pal-payments:create-paypal-session:succeeded"),
-    FAILED(   "pay-pal-payments:create-paypal-session:failed"),
+    STARTED(  "paypal-payments:create-paypal-session:started"),
+    SUCCEEDED("paypal-payments:create-paypal-session:succeeded"),
+    FAILED(   "paypal-payments:create-paypal-session:failed"),
     // @formatter:on
 }
