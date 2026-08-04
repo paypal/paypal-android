@@ -13,7 +13,7 @@ import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import com.paypal.android.corepayments.captureDeepLink
 import com.paypal.android.corepayments.model.TokenType
-import com.paypal.android.paypalpayments.errors.PayPalCheckoutError
+import com.paypal.android.paypalpayments.errors.PayPalError
 import org.json.JSONObject
 
 // TODO: consider renaming PayPalLauncher to PayPalAuthChallengeLauncher
@@ -78,7 +78,7 @@ internal class PayPalLauncher(
             }
 
             is BrowserSwitchStartResult.Failure -> {
-                val error = PayPalCheckoutError.browserSwitchError(startResult.error)
+                val error = PayPalError.browserSwitchError(startResult.error)
                 PayPalPresentAuthChallengeResult.Failure(error)
             }
         }
@@ -86,54 +86,54 @@ internal class PayPalLauncher(
     fun completeCheckoutAuthRequest(
         intent: Intent,
         authState: String
-    ): PayPalCheckoutFinishStartResult {
+    ): PayPalFinishStartResult {
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
         return when (val result = captureDeepLink(requestCode, intent, authState)) {
             is CaptureDeepLinkResult.Success -> parseWebCheckoutSuccessResult(result.deepLink)
             is CaptureDeepLinkResult.Failure ->
-                PayPalCheckoutFinishStartResult.Failure(result.reason, orderId = null)
+                PayPalFinishStartResult.Failure(result.reason, orderId = null)
 
-            is CaptureDeepLinkResult.Ignore -> PayPalCheckoutFinishStartResult.NoResult
+            is CaptureDeepLinkResult.Ignore -> PayPalFinishStartResult.NoResult
         }
     }
 
     fun completeVaultAuthRequest(
         intent: Intent,
         authState: String
-    ): PayPalCheckoutFinishVaultResult {
+    ): PayPalFinishVaultResult {
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
         return when (val result = captureDeepLink(requestCode, intent, authState)) {
             is CaptureDeepLinkResult.Success -> parseVaultSuccessResult(result.deepLink)
             is CaptureDeepLinkResult.Failure ->
-                PayPalCheckoutFinishVaultResult.Failure(result.reason)
+                PayPalFinishVaultResult.Failure(result.reason)
 
-            is CaptureDeepLinkResult.Ignore -> PayPalCheckoutFinishVaultResult.NoResult
+            is CaptureDeepLinkResult.Ignore -> PayPalFinishVaultResult.NoResult
         }
     }
 
     private fun parseWebCheckoutSuccessResult(
         deepLink: DeepLink
-    ): PayPalCheckoutFinishStartResult {
+    ): PayPalFinishStartResult {
         val metadata = deepLink.originalOptions.metadata
         return if (metadata == null) {
-            val unknownError = PayPalCheckoutError.unknownError
-            PayPalCheckoutFinishStartResult.Failure(unknownError, null)
+            val unknownError = PayPalError.unknownError
+            PayPalFinishStartResult.Failure(unknownError, null)
         } else {
             val orderId = metadata.optString(METADATA_KEY_ORDER_ID)
             val payerId = deepLink.uri.getQueryParameter("PayerID")
             val isCancelUrl = deepLink.uri.path?.contains("cancel") ?: false
             if (isCancelUrl) {
-                PayPalCheckoutFinishStartResult.Canceled(orderId)
+                PayPalFinishStartResult.Canceled(orderId)
             } else {
                 when {
                     !orderId.isNullOrBlank() && !payerId.isNullOrBlank() ->
-                        PayPalCheckoutFinishStartResult.Success(orderId, payerId)
+                        PayPalFinishStartResult.Success(orderId, payerId)
                     orderId.isNullOrBlank() ->
-                        PayPalCheckoutFinishStartResult.Failure(
-                            PayPalCheckoutError.malformedResultError,
+                        PayPalFinishStartResult.Failure(
+                            PayPalError.malformedResultError,
                             orderId
                         )
-                    else -> PayPalCheckoutFinishStartResult.Canceled(orderId)
+                    else -> PayPalFinishStartResult.Canceled(orderId)
                 }
             }
         }
@@ -141,21 +141,21 @@ internal class PayPalLauncher(
 
     private fun parseVaultSuccessResult(
         deepLink: DeepLink
-    ): PayPalCheckoutFinishVaultResult {
+    ): PayPalFinishVaultResult {
         val requestMetadata = deepLink.originalOptions.metadata
         return if (requestMetadata == null) {
-            PayPalCheckoutFinishVaultResult.Failure(PayPalCheckoutError.unknownError)
+            PayPalFinishVaultResult.Failure(PayPalError.unknownError)
         } else {
             val isCancelUrl = deepLink.uri.path?.contains("cancel") ?: false
             if (isCancelUrl) {
-                PayPalCheckoutFinishVaultResult.Canceled
+                PayPalFinishVaultResult.Canceled
             } else {
                 val approvalSessionId =
                     deepLink.uri.getQueryParameter(URL_PARAM_APPROVAL_SESSION_ID)
                 if (approvalSessionId.isNullOrEmpty()) {
-                    PayPalCheckoutFinishVaultResult.Failure(PayPalCheckoutError.malformedResultError)
+                    PayPalFinishVaultResult.Failure(PayPalError.malformedResultError)
                 } else {
-                    PayPalCheckoutFinishVaultResult.Success(approvalSessionId)
+                    PayPalFinishVaultResult.Success(approvalSessionId)
                 }
             }
         }

@@ -2,47 +2,47 @@ package com.paypal.android.paypalpayments.errors
 
 import com.paypal.android.corepayments.PayPalSDKError
 
-internal object PayPalCheckoutError {
+internal object PayPalError {
 
     // 0. An unknown error occurred.
     val unknownError = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.UNKNOWN.ordinal,
+        code = PayPalErrorCode.UNKNOWN.ordinal,
         errorDescription = "An unknown error occurred. Contact developer.paypal.com/support."
     )
 
     // 1. Result did not contain the expected data.
     val malformedResultError = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.MALFORMED_RESULT.ordinal,
+        code = PayPalErrorCode.MALFORMED_RESULT.ordinal,
         errorDescription = "Result did not contain the expected data. Payer ID or Order ID is null."
     )
 
     // 2. An error occurred while browser switching
     fun browserSwitchError(cause: Exception) = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.BROWSER_SWITCH.ordinal,
+        code = PayPalErrorCode.BROWSER_SWITCH.ordinal,
         errorDescription = cause.message ?: "Unable to Browser Switch"
     )
 
     // 3. ReturnToAppStrategy or urlScheme is required
     val noReturnToAppStrategyError = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
+        code = PayPalErrorCode.NO_RETURN_TO_APP_STRATEGY.ordinal,
         errorDescription = "ReturnToAppStrategy or urlScheme is required. "
     )
 
     // 4. PayPal Session was not created
     val sessionNotCreatedError = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.SESSION_NOT_CREATED.ordinal,
+        code = PayPalErrorCode.SESSION_NOT_CREATED.ordinal,
         errorDescription = "PayPal Session must be created. Call createPayPalSession()"
     )
 
     // 5. PayPal Session creation failed
     val sessionCreationFailedError = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.SESSION_CREATION_FAILED.ordinal,
+        code = PayPalErrorCode.SESSION_CREATION_FAILED.ordinal,
         errorDescription = "Failed to create PayPal Session"
     )
 
     // 6. Neither returnAppUrl nor fallbackSchemeUrl was provided on ReturnToAppUrlConfig.
     val returnToAppUrlConfigMissingError = PayPalSDKError(
-        code = PayPalCheckoutErrorCode.RETURN_TO_APP_URL_CONFIG_MISSING.ordinal,
+        code = PayPalErrorCode.RETURN_TO_APP_URL_CONFIG_MISSING.ordinal,
         errorDescription = "ReturnToAppUrlConfig must set returnAppUrl or fallbackSchemeUrl. " +
             "At least one is required to return to the merchant app after checkout."
     )

@@ -20,7 +20,7 @@ import com.paypal.android.paypalpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalpayments.PayPalUserAction
 import com.paypal.android.paypalpayments.PayPalUserIdentity
 import com.paypal.android.paypalpayments.PayPalClient
-import com.paypal.android.paypalpayments.PayPalCheckoutFinishStartResult
+import com.paypal.android.paypalpayments.PayPalFinishStartResult
 import com.paypal.android.paypalpayments.PayPalCheckoutFundingSource
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.uishared.state.ActionState
@@ -172,21 +172,21 @@ class PayPalCheckoutViewModel @Inject constructor(
     fun completeAuthChallenge(intent: Intent) =
         paypalClient.finishStart(intent)?.let { payPalAuthResult ->
             when (payPalAuthResult) {
-                is PayPalCheckoutFinishStartResult.Success -> {
+                is PayPalFinishStartResult.Success -> {
                     payPalCheckoutState = ActionState.Success(payPalAuthResult)
                 }
 
-                is PayPalCheckoutFinishStartResult.Canceled -> {
+                is PayPalFinishStartResult.Canceled -> {
                     val error = Exception("USER CANCELED")
                     payPalCheckoutState = ActionState.Failure(error)
                 }
 
-                is PayPalCheckoutFinishStartResult.Failure -> {
+                is PayPalFinishStartResult.Failure -> {
                     Log.i(TAG, "Checkout Error: ${payPalAuthResult.error.errorDescription}")
                     payPalCheckoutState = ActionState.Failure(payPalAuthResult.error)
                 }
 
-                PayPalCheckoutFinishStartResult.NoResult -> {
+                PayPalFinishStartResult.NoResult -> {
                     // no result; re-enable PayPal button so user can retry
                     payPalCheckoutState = ActionState.Idle
                 }

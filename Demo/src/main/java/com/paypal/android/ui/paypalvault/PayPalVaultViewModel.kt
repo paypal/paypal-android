@@ -15,7 +15,7 @@ import com.paypal.android.paypalpayments.PayPalPresentAuthChallengeResult
 import com.paypal.android.paypalpayments.PayPalUserAction
 import com.paypal.android.paypalpayments.PayPalUserIdentity
 import com.paypal.android.paypalpayments.PayPalClient
-import com.paypal.android.paypalpayments.PayPalCheckoutFinishVaultResult
+import com.paypal.android.paypalpayments.PayPalFinishVaultResult
 import com.paypal.android.uishared.state.ActionState
 import com.paypal.android.usecase.CreatePayPalPaymentTokenUseCase
 import com.paypal.android.usecase.CreatePayPalSetupTokenUseCase
@@ -133,12 +133,12 @@ class PayPalVaultViewModel @Inject constructor(
     fun completeAuthChallenge(intent: Intent) {
         paypalClient.finishVault(intent)?.let { result ->
             vaultPayPalState = when (result) {
-                is PayPalCheckoutFinishVaultResult.Success -> ActionState.Success(result)
-                is PayPalCheckoutFinishVaultResult.Failure -> ActionState.Failure(result.error)
-                PayPalCheckoutFinishVaultResult.Canceled ->
+                is PayPalFinishVaultResult.Success -> ActionState.Success(result)
+                is PayPalFinishVaultResult.Failure -> ActionState.Failure(result.error)
+                PayPalFinishVaultResult.Canceled ->
                     ActionState.Failure(Exception("USER CANCELED"))
 
-                PayPalCheckoutFinishVaultResult.NoResult -> {
+                PayPalFinishVaultResult.NoResult -> {
                     // no result; re-enable PayPal button so user can retry
                     ActionState.Idle
                 }

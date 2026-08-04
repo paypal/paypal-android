@@ -8,7 +8,7 @@
   * Removed `authState` from public API of `CardPresentAuthChallengeResult.Success`
 * PayPalPayments
   * Renamed the `PayPalWebPayments` module to `PayPalPayments` (Maven artifact `com.paypal.android:paypal-payments`, package `com.paypal.android.paypalpayments`)
-  * Renamed `PayPalWebCheckoutClient` to `PayPalClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebStartCallback` to `PayPalStartCallback`, `PayPalWebVaultCallback` to `PayPalVaultCallback`, `PayPalWebCheckoutError(Code)` to `PayPalCheckoutError(Code)`, `PayPalWebCheckoutFinishStartResult` to `PayPalCheckoutFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalCheckoutFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`
+  * Renamed `PayPalWebCheckoutClient` to `PayPalClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebStartCallback` to `PayPalStartCallback`, `PayPalWebVaultCallback` to `PayPalVaultCallback`, `PayPalWebCheckoutError(Code)` to `PayPalError(Code)`, `PayPalWebCheckoutSessionStore` to `PayPalSessionStore`, `PayPalWebCheckoutFinishStartResult` to `PayPalFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`
   * Removed deprecated `PayPalClient(context, configuration, urlScheme)` constructor — use `PayPalClient(context, configuration)` and set `returnToAppStrategy` on requests instead
   * Removed deprecated `PayPalClient.start(activity, request)` — use `PayPalClient.start(activity, request, callback)` or `startAsync()` instead
   * Removed deprecated `PayPalClient.vault(activity, request)` — use `PayPalClient.vault(activity, request, callback)` or `vaultAsync()` instead

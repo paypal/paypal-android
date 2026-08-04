@@ -18,7 +18,7 @@ import com.paypal.android.corepayments.model.ShopperSessionConfig
 import com.paypal.android.corepayments.model.TokenType
 import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyResult
 import com.paypal.android.corepayments.usecase.GetReturnToAppStrategyUseCase
-import com.paypal.android.paypalpayments.errors.PayPalCheckoutError
+import com.paypal.android.paypalpayments.errors.PayPalError
 import com.paypal.android.paypalpayments.analytics.CreatePayPalSessionEvent
 import com.paypal.android.paypalpayments.analytics.AnalyticsEventParams
 import com.paypal.android.paypalpayments.analytics.LatencyEndpoint
@@ -96,7 +96,7 @@ class PayPalClientUnitTest {
         sut = PayPalClient(
             analytics = analytics,
             payPalLauncher = payPalLauncher,
-            sessionStore = PayPalCheckoutSessionStore(),
+            sessionStore = PayPalSessionStore(),
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnToAppStrategyUseCase = getReturnToAppStrategyUseCase,
             getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
@@ -125,7 +125,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val successResult =
-                PayPalCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
+                PayPalFinishStartResult.Success("fake-order-id", "fake-payer-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns successResult
@@ -154,7 +154,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val successResult =
-                PayPalCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
+                PayPalFinishStartResult.Success("fake-order-id", "fake-payer-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns successResult
@@ -183,7 +183,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
-            val failureResult = PayPalCheckoutFinishStartResult.Failure(error, null)
+            val failureResult = PayPalFinishStartResult.Failure(error, null)
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns failureResult
@@ -212,7 +212,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
-            val failureResult = PayPalCheckoutFinishStartResult.Failure(error, null)
+            val failureResult = PayPalFinishStartResult.Failure(error, null)
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns failureResult
@@ -240,7 +240,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns launchResult
 
-            val canceledResult = PayPalCheckoutFinishStartResult.Canceled("fake-order-id")
+            val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns canceledResult
@@ -268,7 +268,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns launchResult
 
-            val canceledResult = PayPalCheckoutFinishStartResult.Canceled("fake-order-id")
+            val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns canceledResult
@@ -297,7 +297,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val successResult =
-                PayPalCheckoutFinishStartResult.Success("fake-order-id", "fake-payer-id")
+                PayPalFinishStartResult.Success("fake-order-id", "fake-payer-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns successResult
@@ -325,7 +325,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val error = PayPalSDKError(123, "fake-error-description")
-            val failureResult = PayPalCheckoutFinishStartResult.Failure(error, null)
+            val failureResult = PayPalFinishStartResult.Failure(error, null)
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns failureResult
@@ -352,7 +352,7 @@ class PayPalClientUnitTest {
                 payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
             } returns launchResult
 
-            val canceledResult = PayPalCheckoutFinishStartResult.Canceled("fake-order-id")
+            val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
             } returns canceledResult
@@ -385,7 +385,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val successResult =
-                PayPalCheckoutFinishVaultResult.Success("fake-approval-session-id")
+                PayPalFinishVaultResult.Success("fake-approval-session-id")
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns successResult
@@ -399,7 +399,7 @@ class PayPalClientUnitTest {
             sutV3.vault(activity, "fake-setup-token-id", mockk(relaxed = true))
             testDispatcher.scheduler.advanceUntilIdle()
 
-            val result = sutV3.finishVault(intent) as PayPalCheckoutFinishVaultResult.Success
+            val result = sutV3.finishVault(intent) as PayPalFinishVaultResult.Success
             assertSame("fake-approval-session-id", result.approvalSessionId)
         }
 
@@ -414,7 +414,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val successResult =
-                PayPalCheckoutFinishVaultResult.Success("fake-approval-session-id")
+                PayPalFinishVaultResult.Success("fake-approval-session-id")
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns successResult
@@ -429,7 +429,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             restoredClient.restore(launchWithUrlClient.instanceState)
-            val result = restoredClient.finishVault(intent) as PayPalCheckoutFinishVaultResult.Success
+            val result = restoredClient.finishVault(intent) as PayPalFinishVaultResult.Success
             assertSame("fake-approval-session-id", result.approvalSessionId)
         }
 
@@ -445,7 +445,7 @@ class PayPalClientUnitTest {
             val error = PayPalSDKError(123, "fake-error-description")
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns PayPalCheckoutFinishVaultResult.Failure(error)
+            } returns PayPalFinishVaultResult.Failure(error)
 
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -456,7 +456,7 @@ class PayPalClientUnitTest {
             sutV3.vault(activity, "fake-setup-token-id", mockk(relaxed = true))
             testDispatcher.scheduler.advanceUntilIdle()
 
-            val result = sutV3.finishVault(intent) as PayPalCheckoutFinishVaultResult.Failure
+            val result = sutV3.finishVault(intent) as PayPalFinishVaultResult.Failure
             assertSame(error, result.error)
         }
 
@@ -473,7 +473,7 @@ class PayPalClientUnitTest {
             val error = PayPalSDKError(123, "fake-error-description")
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns PayPalCheckoutFinishVaultResult.Failure(error)
+            } returns PayPalFinishVaultResult.Failure(error)
 
             launchWithUrlClient.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -485,7 +485,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             restoredClient.restore(launchWithUrlClient.instanceState)
-            val result = restoredClient.finishVault(intent) as PayPalCheckoutFinishVaultResult.Failure
+            val result = restoredClient.finishVault(intent) as PayPalFinishVaultResult.Failure
             assertSame(error, result.error)
         }
 
@@ -500,7 +500,7 @@ class PayPalClientUnitTest {
 
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns PayPalCheckoutFinishVaultResult.Canceled
+            } returns PayPalFinishVaultResult.Canceled
 
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -512,7 +512,7 @@ class PayPalClientUnitTest {
             testDispatcher.scheduler.advanceUntilIdle()
 
             val result = sutV3.finishVault(intent)
-            assertSame(PayPalCheckoutFinishVaultResult.Canceled, result)
+            assertSame(PayPalFinishVaultResult.Canceled, result)
         }
 
     @Test
@@ -527,7 +527,7 @@ class PayPalClientUnitTest {
 
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns PayPalCheckoutFinishVaultResult.Canceled
+            } returns PayPalFinishVaultResult.Canceled
 
             launchWithUrlClient.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -540,7 +540,7 @@ class PayPalClientUnitTest {
 
             restoredClient.restore(launchWithUrlClient.instanceState)
             val result = restoredClient.finishVault(intent)
-            assertSame(PayPalCheckoutFinishVaultResult.Canceled, result)
+            assertSame(PayPalFinishVaultResult.Canceled, result)
         }
 
     @Test
@@ -553,7 +553,7 @@ class PayPalClientUnitTest {
             } returns launchResult
 
             val successResult =
-                PayPalCheckoutFinishVaultResult.Success("fake-approval-session-id")
+                PayPalFinishVaultResult.Success("fake-approval-session-id")
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
             } returns successResult
@@ -583,7 +583,7 @@ class PayPalClientUnitTest {
             val error = PayPalSDKError(123, "fake-error-description")
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns PayPalCheckoutFinishVaultResult.Failure(error)
+            } returns PayPalFinishVaultResult.Failure(error)
 
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -609,7 +609,7 @@ class PayPalClientUnitTest {
 
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth state")
-            } returns PayPalCheckoutFinishVaultResult.Canceled
+            } returns PayPalFinishVaultResult.Canceled
 
             sutV3.createPayPalSession(
                 tokenType = TokenType.VAULT_ID,
@@ -631,7 +631,7 @@ class PayPalClientUnitTest {
     private fun makeSutWithUrlScheme(): PayPalClient = PayPalClient(
             analytics = analytics,
             payPalLauncher = payPalLauncher,
-            sessionStore = PayPalCheckoutSessionStore(),
+            sessionStore = PayPalSessionStore(),
             createShopperSessionAPI = createShopperSessionAPI,
             getReturnToAppStrategyUseCase = getReturnToAppStrategyUseCase,
             getEffectiveReturnUrlConfigUseCase = GetEffectiveReturnUrlConfigUseCase(),
@@ -675,7 +675,7 @@ class PayPalClientUnitTest {
             verify {
                 callback.onPayPalStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionNotCreatedError.code
+                        it.error.code == PayPalError.sessionNotCreatedError.code
                 })
             }
         }
@@ -747,7 +747,7 @@ class PayPalClientUnitTest {
             verify {
                 secondCallback.onPayPalStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionNotCreatedError.code
+                        it.error.code == PayPalError.sessionNotCreatedError.code
                 })
             }
         }
@@ -984,8 +984,8 @@ class PayPalClientUnitTest {
             verify {
                 callback.onPayPalStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionCreationFailedError.code &&
-                        it.error.errorDescription == PayPalCheckoutError.sessionCreationFailedError.errorDescription
+                        it.error.code == PayPalError.sessionCreationFailedError.code &&
+                        it.error.errorDescription == PayPalError.sessionCreationFailedError.errorDescription
                 })
             }
         }
@@ -1016,7 +1016,7 @@ class PayPalClientUnitTest {
             verify {
                 callback2.onPayPalStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionNotCreatedError.code
+                        it.error.code == PayPalError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1034,7 +1034,7 @@ class PayPalClientUnitTest {
             verify {
                 callback.onPayPalVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionNotCreatedError.code
+                        it.error.code == PayPalError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1105,7 +1105,7 @@ class PayPalClientUnitTest {
             verify {
                 secondCallback.onPayPalVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionNotCreatedError.code
+                        it.error.code == PayPalError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1212,8 +1212,8 @@ class PayPalClientUnitTest {
             verify {
                 callback.onPayPalVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionCreationFailedError.code &&
-                        it.error.errorDescription == PayPalCheckoutError.sessionCreationFailedError.errorDescription
+                        it.error.code == PayPalError.sessionCreationFailedError.code &&
+                        it.error.errorDescription == PayPalError.sessionCreationFailedError.errorDescription
                 })
             }
         }
@@ -1390,7 +1390,7 @@ class PayPalClientUnitTest {
             verify {
                 callback2.onPayPalVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.sessionNotCreatedError.code
+                        it.error.code == PayPalError.sessionNotCreatedError.code
                 })
             }
         }
@@ -1760,7 +1760,7 @@ class PayPalClientUnitTest {
             // The app switch round trip succeeded (a matching return deep link came back), but the
             // shopper canceled on the ModXO page itself — this must NOT be logged as an
             // app-switch cancellation.
-            val canceledResult = PayPalCheckoutFinishStartResult.Canceled("fake-order-id")
+            val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth-state")
             } returns canceledResult
@@ -1802,10 +1802,10 @@ class PayPalClientUnitTest {
 
             every {
                 payPalLauncher.completeVaultAuthRequest(intent, "auth-state")
-            } returns PayPalCheckoutFinishVaultResult.Canceled
+            } returns PayPalFinishVaultResult.Canceled
 
             val result = sutV3.finishVault(intent)
-            assertSame(PayPalCheckoutFinishVaultResult.Canceled, result)
+            assertSame(PayPalFinishVaultResult.Canceled, result)
 
             verify(exactly = 1) {
                 analytics.notify(PayPalEvent.CANCELED, any(), any())
@@ -1831,7 +1831,7 @@ class PayPalClientUnitTest {
             sutV3.start(activity, "fake-order-id", callback)
             testDispatcher.scheduler.advanceUntilIdle()
 
-            val canceledResult = PayPalCheckoutFinishStartResult.Canceled("fake-order-id")
+            val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
             every {
                 payPalLauncher.completeCheckoutAuthRequest(intent, "auth-state")
             } returns canceledResult
@@ -1861,7 +1861,7 @@ class PayPalClientUnitTest {
             verify {
                 callback.onPayPalStartResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.returnToAppUrlConfigMissingError.code
+                        it.error.code == PayPalError.returnToAppUrlConfigMissingError.code
                 })
             }
             // The misconfiguration is caught before any network call is attempted.
@@ -1886,7 +1886,7 @@ class PayPalClientUnitTest {
             verify {
                 callback.onPayPalVaultResult(match {
                     it is PayPalPresentAuthChallengeResult.Failure &&
-                        it.error.code == PayPalCheckoutError.returnToAppUrlConfigMissingError.code
+                        it.error.code == PayPalError.returnToAppUrlConfigMissingError.code
                 })
             }
             // The misconfiguration is caught before any network call is attempted.

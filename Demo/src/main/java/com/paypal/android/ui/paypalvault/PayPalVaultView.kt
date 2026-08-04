@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
-import com.paypal.android.paypalpayments.PayPalCheckoutFinishVaultResult
+import com.paypal.android.paypalpayments.PayPalFinishVaultResult
 import com.paypal.android.uishared.components.ActionButtonColumn
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
@@ -161,7 +161,7 @@ private fun Step3_CreatePaymentToken(
 }
 
 @Composable
-fun PayPalVaultResultView(result: PayPalCheckoutFinishVaultResult.Success) {
+fun PayPalVaultResultView(result: PayPalFinishVaultResult.Success) {
     Column(
         verticalArrangement = UIConstants.spacingMedium,
         modifier = Modifier.padding(UIConstants.paddingMedium)

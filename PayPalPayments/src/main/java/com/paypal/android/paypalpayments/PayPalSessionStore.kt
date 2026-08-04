@@ -4,7 +4,7 @@ import com.paypal.android.corepayments.SessionStore
 
 private const val KEY_AUTH_STATE = "PayPal.AUTH_STATE"
 
-internal class PayPalCheckoutSessionStore {
+internal class PayPalSessionStore {
     private val properties = SessionStore()
 
     var authState: String?

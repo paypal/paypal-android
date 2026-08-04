@@ -32,7 +32,7 @@ class DemoRobot(
     private val device: UiDevice by lazy {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     }
-    private val webPageRobot = PayPalPageRobot()
+    private val webPageRobot = PayPalWebPageRobot()
 
     companion object {
         private const val TAG = "DemoRobot"

@@ -17,7 +17,7 @@ import com.paypal.android.utils.TestConstants.TIMEOUT_LONG_MS
  * - Two-step login (email -> next -> password)
  * - One-time code redirect after email entry (requires "Try another way" navigation)
  */
-class PayPalPageRobot {
+class PayPalWebPageRobot {
 
     private val device: UiDevice by lazy {
         UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -26,7 +26,7 @@ class PayPalPageRobot {
     private val chromeRobot = ChromeRobot()
 
     companion object {
-        private const val TAG = "PayPalPageRobot"
+        private const val TAG = "PayPalWebPageRobot"
 
         // UI Selectors - Email field
         private val EMAIL_FIELD_SELECTORS = listOf(

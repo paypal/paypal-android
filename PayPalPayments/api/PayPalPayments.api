@@ -5,60 +5,6 @@ public final class com/paypal/android/paypalpayments/BuildConfig {
 	public fun <init> ()V
 }
 
-public abstract class com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult {
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult$Canceled : com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun getOrderId ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult$Failure : com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult {
-	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;Ljava/lang/String;)V
-	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
-	public final fun getOrderId ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult$NoResult : com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult {
-	public static final field INSTANCE Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult$NoResult;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult$Success : com/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun getOrderId ()Ljava/lang/String;
-	public final fun getPayerId ()Ljava/lang/String;
-}
-
-public abstract class com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult {
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult$Canceled : com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult {
-	public static final field INSTANCE Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult$Canceled;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult$Failure : com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult {
-	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
-	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult$NoResult : com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult {
-	public static final field INSTANCE Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult$NoResult;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult$Success : com/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun getApprovalSessionId ()Ljava/lang/String;
-}
-
 public final class com/paypal/android/paypalpayments/PayPalCheckoutFundingSource : java/lang/Enum {
 	public static final field PAYPAL Lcom/paypal/android/paypalpayments/PayPalCheckoutFundingSource;
 	public static final field PAYPAL_CREDIT Lcom/paypal/android/paypalpayments/PayPalCheckoutFundingSource;
@@ -73,12 +19,66 @@ public final class com/paypal/android/paypalpayments/PayPalClient {
 	public fun <init> (Landroid/content/Context;Lcom/paypal/android/corepayments/CoreConfig;)V
 	public final fun createPayPalSession (Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalpayments/PayPalUserIdentity;Lcom/paypal/android/paypalpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalpayments/PayPalUserAction;)V
 	public static synthetic fun createPayPalSession$default (Lcom/paypal/android/paypalpayments/PayPalClient;Lcom/paypal/android/corepayments/model/TokenType;Lcom/paypal/android/paypalpayments/PayPalUserIdentity;Lcom/paypal/android/paypalpayments/ReturnToAppUrlConfig;Lcom/paypal/android/paypalpayments/PayPalUserAction;ILjava/lang/Object;)V
-	public final fun finishStart (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishStartResult;
-	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalCheckoutFinishVaultResult;
+	public final fun finishStart (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalFinishStartResult;
+	public final fun finishVault (Landroid/content/Intent;)Lcom/paypal/android/paypalpayments/PayPalFinishVaultResult;
 	public final fun getInstanceState ()Ljava/lang/String;
 	public final fun restore (Ljava/lang/String;)V
 	public final fun start (Landroid/app/Activity;Ljava/lang/String;Lcom/paypal/android/paypalpayments/PayPalStartCallback;)V
 	public final fun vault (Landroid/app/Activity;Ljava/lang/String;Lcom/paypal/android/paypalpayments/PayPalVaultCallback;)V
+}
+
+public abstract class com/paypal/android/paypalpayments/PayPalFinishStartResult {
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishStartResult$Canceled : com/paypal/android/paypalpayments/PayPalFinishStartResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getOrderId ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishStartResult$Failure : com/paypal/android/paypalpayments/PayPalFinishStartResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;Ljava/lang/String;)V
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+	public final fun getOrderId ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishStartResult$NoResult : com/paypal/android/paypalpayments/PayPalFinishStartResult {
+	public static final field INSTANCE Lcom/paypal/android/paypalpayments/PayPalFinishStartResult$NoResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishStartResult$Success : com/paypal/android/paypalpayments/PayPalFinishStartResult {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getOrderId ()Ljava/lang/String;
+	public final fun getPayerId ()Ljava/lang/String;
+}
+
+public abstract class com/paypal/android/paypalpayments/PayPalFinishVaultResult {
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishVaultResult$Canceled : com/paypal/android/paypalpayments/PayPalFinishVaultResult {
+	public static final field INSTANCE Lcom/paypal/android/paypalpayments/PayPalFinishVaultResult$Canceled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishVaultResult$Failure : com/paypal/android/paypalpayments/PayPalFinishVaultResult {
+	public fun <init> (Lcom/paypal/android/corepayments/PayPalSDKError;)V
+	public final fun getError ()Lcom/paypal/android/corepayments/PayPalSDKError;
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishVaultResult$NoResult : com/paypal/android/paypalpayments/PayPalFinishVaultResult {
+	public static final field INSTANCE Lcom/paypal/android/paypalpayments/PayPalFinishVaultResult$NoResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/paypal/android/paypalpayments/PayPalFinishVaultResult$Success : com/paypal/android/paypalpayments/PayPalFinishVaultResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getApprovalSessionId ()Ljava/lang/String;
 }
 
 public final class com/paypal/android/paypalpayments/PayPalPhoneNumber {

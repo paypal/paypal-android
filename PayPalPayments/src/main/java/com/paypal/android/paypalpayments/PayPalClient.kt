@@ -27,7 +27,7 @@ import com.paypal.android.paypalpayments.analytics.LatencyFlow
 import com.paypal.android.paypalpayments.analytics.PayPalEvent
 import com.paypal.android.paypalpayments.analytics.PayPalAnalytics
 import com.paypal.android.paypalpayments.analytics.PresentationType
-import com.paypal.android.paypalpayments.errors.PayPalCheckoutError
+import com.paypal.android.paypalpayments.errors.PayPalError
 import com.paypal.android.paypalpayments.usecase.GetEffectiveReturnUrlConfigUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -47,7 +47,7 @@ import kotlinx.coroutines.withContext
 class PayPalClient internal constructor(
     private val analytics: PayPalAnalytics,
     private val payPalLauncher: PayPalLauncher,
-    private val sessionStore: PayPalCheckoutSessionStore,
+    private val sessionStore: PayPalSessionStore,
     private val deviceInspector: DeviceInspector,
     private val coreConfig: CoreConfig,
     private val createShopperSessionAPI: CreateShopperSessionWithAppSwitchEligibilityAPI,
@@ -71,7 +71,7 @@ class PayPalClient internal constructor(
     ) : this(
         analytics = PayPalAnalytics(AnalyticsService(context.applicationContext, configuration)),
         payPalLauncher = PayPalLauncher(context),
-        sessionStore = PayPalCheckoutSessionStore(),
+        sessionStore = PayPalSessionStore(),
         deviceInspector = DeviceInspector(context),
         coreConfig = configuration,
         createShopperSessionAPI = CreateShopperSessionWithAppSwitchEligibilityAPI(
@@ -184,7 +184,7 @@ class PayPalClient internal constructor(
                         callback.onPayPalStartResult(result)
                     }
                 } else {
-                    throw PayPalCheckoutError.sessionCreationFailedError
+                    throw PayPalError.sessionCreationFailedError
                 }
             } catch (e: Exception) {
                 analytics.notify(
@@ -196,7 +196,7 @@ class PayPalClient internal constructor(
                 withContext(Dispatchers.Main) {
                     callback.onPayPalStartResult(
                         PayPalPresentAuthChallengeResult.Failure(
-                            e as? PayPalSDKError ?: PayPalCheckoutError.unknownError
+                            e as? PayPalSDKError ?: PayPalError.unknownError
                         )
                     )
                 }
@@ -256,7 +256,7 @@ class PayPalClient internal constructor(
                         callback.onPayPalVaultResult(result)
                     }
                 } else {
-                    throw PayPalCheckoutError.sessionCreationFailedError
+                    throw PayPalError.sessionCreationFailedError
                 }
             } catch (e: Exception) {
                 analytics.notify(
@@ -268,7 +268,7 @@ class PayPalClient internal constructor(
                 withContext(Dispatchers.Main) {
                     callback.onPayPalVaultResult(
                         PayPalPresentAuthChallengeResult.Failure(
-                            e as? PayPalSDKError ?: PayPalCheckoutError.unknownError
+                            e as? PayPalSDKError ?: PayPalError.unknownError
                         )
                     )
                 }
@@ -284,12 +284,12 @@ class PayPalClient internal constructor(
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      */
-    fun finishStart(intent: Intent): PayPalCheckoutFinishStartResult? =
+    fun finishStart(intent: Intent): PayPalFinishStartResult? =
         sessionStore.authState?.let { authState ->
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
-            if (result != PayPalCheckoutFinishStartResult.NoResult) {
+            if (result != PayPalFinishStartResult.NoResult) {
                 sessionStore.clear()
             }
             result
@@ -303,12 +303,12 @@ class PayPalClient internal constructor(
      * @param [intent] An Android intent that holds the deep link put the merchant app
      * back into the foreground after an auth challenge.
      */
-    fun finishVault(intent: Intent): PayPalCheckoutFinishVaultResult? =
+    fun finishVault(intent: Intent): PayPalFinishVaultResult? =
         sessionStore.authState?.let { authState ->
             analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsEventParams)
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
-            if (result != PayPalCheckoutFinishVaultResult.NoResult) {
+            if (result != PayPalFinishVaultResult.NoResult) {
                 sessionStore.clear()
             }
             result
@@ -566,7 +566,7 @@ class PayPalClient internal constructor(
         startTime: Long,
         isVault: Boolean
     ): PayPalPresentAuthChallengeResult {
-        val error = PayPalCheckoutError.returnToAppUrlConfigMissingError
+        val error = PayPalError.returnToAppUrlConfigMissingError
         val failureResult = PayPalPresentAuthChallengeResult.Failure(error)
         logPresentAuthChallengeResult(failureResult, isVault, startTime, System.currentTimeMillis())
         return failureResult
@@ -629,18 +629,18 @@ class PayPalClient internal constructor(
     /**
      * Logs the handle-return event and the corresponding checkout outcome event for a [finishStart] result.
      */
-    private fun logCheckoutResult(result: PayPalCheckoutFinishStartResult) {
+    private fun logCheckoutResult(result: PayPalFinishStartResult) {
         val (handleReturnResult, checkoutResult, errorDescription) = when (result) {
-            is PayPalCheckoutFinishStartResult.Success ->
+            is PayPalFinishStartResult.Success ->
                 Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.SUCCEEDED, null)
 
-            is PayPalCheckoutFinishStartResult.Canceled ->
+            is PayPalFinishStartResult.Canceled ->
                 Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.CANCELED, null)
 
-            is PayPalCheckoutFinishStartResult.Failure ->
+            is PayPalFinishStartResult.Failure ->
                 Triple(PayPalEvent.HANDLE_RETURN_FAILED, PayPalEvent.FAILED, result.error.errorDescription)
 
-            PayPalCheckoutFinishStartResult.NoResult -> return // no analytics tracking required at the moment
+            PayPalFinishStartResult.NoResult -> return // no analytics tracking required at the moment
         }
 
         analytics.notify(
@@ -658,18 +658,18 @@ class PayPalClient internal constructor(
     /**
      * Logs the handle-return event and the corresponding vault outcome event for a [finishVault] result.
      */
-    private fun logVaultResult(result: PayPalCheckoutFinishVaultResult) {
+    private fun logVaultResult(result: PayPalFinishVaultResult) {
         val (handleReturnResult, vaultResult, errorDescription) = when (result) {
-            is PayPalCheckoutFinishVaultResult.Success ->
+            is PayPalFinishVaultResult.Success ->
                 Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.SUCCEEDED, null)
 
-            PayPalCheckoutFinishVaultResult.Canceled ->
+            PayPalFinishVaultResult.Canceled ->
                 Triple(PayPalEvent.HANDLE_RETURN_SUCCEEDED, PayPalEvent.CANCELED, null)
 
-            is PayPalCheckoutFinishVaultResult.Failure ->
+            is PayPalFinishVaultResult.Failure ->
                 Triple(PayPalEvent.HANDLE_RETURN_FAILED, PayPalEvent.FAILED, result.error.errorDescription)
 
-            PayPalCheckoutFinishVaultResult.NoResult -> return // no analytics tracking required at the moment
+            PayPalFinishVaultResult.NoResult -> return // no analytics tracking required at the moment
         }
 
         analytics.notify(
@@ -787,7 +787,7 @@ class PayPalClient internal constructor(
             )
             logUserPerceivedLatencyError(LatencyFlow.CHECKOUT, startTime, errorDescription)
             callback.onPayPalStartResult(
-                PayPalPresentAuthChallengeResult.Failure(PayPalCheckoutError.sessionNotCreatedError)
+                PayPalPresentAuthChallengeResult.Failure(PayPalError.sessionNotCreatedError)
             )
         }
     }
@@ -806,7 +806,7 @@ class PayPalClient internal constructor(
             )
             logUserPerceivedLatencyError(LatencyFlow.VAULT, startTime, errorDescription)
             callback.onPayPalVaultResult(
-                PayPalPresentAuthChallengeResult.Failure(PayPalCheckoutError.sessionNotCreatedError)
+                PayPalPresentAuthChallengeResult.Failure(PayPalError.sessionNotCreatedError)
             )
         }
     }
@@ -821,7 +821,7 @@ class PayPalClient internal constructor(
         startTime: Long
     ) {
         applicationScope.launch(Dispatchers.Main) {
-            val error = PayPalCheckoutError.returnToAppUrlConfigMissingError
+            val error = PayPalError.returnToAppUrlConfigMissingError
             analytics.notify(
                 PayPalEvent.FAILED,
                 params = analyticsEventParams.copy(orderIdOrSetupTokenId = orderId),
@@ -842,7 +842,7 @@ class PayPalClient internal constructor(
         startTime: Long
     ) {
         applicationScope.launch(Dispatchers.Main) {
-            val error = PayPalCheckoutError.returnToAppUrlConfigMissingError
+            val error = PayPalError.returnToAppUrlConfigMissingError
             analytics.notify(
                 PayPalEvent.FAILED,
                 params = analyticsEventParams.copy(orderIdOrSetupTokenId = setupTokenId),

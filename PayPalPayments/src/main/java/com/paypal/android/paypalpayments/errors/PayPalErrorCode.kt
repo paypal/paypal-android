@@ -1,6 +1,6 @@
 package com.paypal.android.paypalpayments.errors
 
-internal enum class PayPalCheckoutErrorCode {
+internal enum class PayPalErrorCode {
     UNKNOWN,
     MALFORMED_RESULT,
     BROWSER_SWITCH,

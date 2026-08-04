@@ -251,7 +251,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-                as PayPalCheckoutFinishStartResult.Success
+                as PayPalFinishStartResult.Success
         assertEquals("fake-order-id", result.orderId)
         assertEquals("fake-payer-id", result.payerId)
     }
@@ -270,7 +270,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-                as PayPalCheckoutFinishStartResult.Canceled
+                as PayPalFinishStartResult.Canceled
         assertEquals("fake-order-id", result.orderId)
     }
 
@@ -288,7 +288,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-                as PayPalCheckoutFinishStartResult.Failure
+                as PayPalFinishStartResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -308,7 +308,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-                as PayPalCheckoutFinishStartResult.Failure
+                as PayPalFinishStartResult.Failure
         val expectedDescription =
             "An unknown error occurred. Contact developer.paypal.com/support."
         assertEquals(expectedDescription, result.error.errorDescription)
@@ -328,7 +328,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeCheckoutAuthRequest(intent, authState)
-                as PayPalCheckoutFinishStartResult.Canceled
+                as PayPalFinishStartResult.Canceled
         assertEquals("fake-order-id", result.orderId)
     }
 
@@ -346,7 +346,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, authState)
-                as PayPalCheckoutFinishVaultResult.Success
+                as PayPalFinishVaultResult.Success
         assertEquals("fake-approval-session-id", result.approvalSessionId)
     }
 
@@ -365,7 +365,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, authState)
-        assertTrue(result is PayPalCheckoutFinishVaultResult.Canceled)
+        assertTrue(result is PayPalFinishVaultResult.Canceled)
     }
 
     @Test
@@ -382,7 +382,7 @@ class PayPalLauncherUnitTest {
 
         sut = PayPalLauncher(browserSwitchClient)
         val result = sut.completeVaultAuthRequest(intent, authState)
-                as PayPalCheckoutFinishVaultResult.Failure
+                as PayPalFinishVaultResult.Failure
         val expectedDescription =
             "Result did not contain the expected data. Payer ID or Order ID is null."
         assertEquals(expectedDescription, result.error.errorDescription)
