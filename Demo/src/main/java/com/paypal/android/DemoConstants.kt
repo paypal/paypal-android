@@ -1,6 +1,6 @@
 package com.paypal.android
 
-import com.paypal.android.paypalwebpayments.ReturnToAppUrlConfig
+import com.paypal.android.paypalpayments.ReturnToAppUrlConfig
 
 object DemoConstants {
     const val APP_URL = "https://ppcp-mobile-demo-sandbox-87bbd7f0a27f.herokuapp.com"

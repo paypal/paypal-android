@@ -103,7 +103,7 @@ class TrackingEventsAPIUnitTest {
 
         val event = AnalyticsEventData(
             environment = "fake-environment",
-            eventName = "paypal-web-payments:api-request-latency",
+            eventName = "paypal-payments:api-request-latency",
             timestamp = 123L,
             orderId = null,
             appSwitchEnabled = false,
@@ -120,7 +120,7 @@ class TrackingEventsAPIUnitTest {
             {
                 "events": {
                     "event_params": {
-                        "event_name": "paypal-web-payments:api-request-latency",
+                        "event_name": "paypal-payments:api-request-latency",
                         "start_time": "1000",
                         "end_time": "1500",
                         "endpoint": "/v2/checkout/orders",
@@ -141,7 +141,7 @@ class TrackingEventsAPIUnitTest {
 
         val event = AnalyticsEventData(
             environment = "fake-environment",
-            eventName = "paypal-web-payments:checkout:app-switch:started",
+            eventName = "paypal-payments:checkout:app-switch:started",
             timestamp = 123L,
             orderId = "fake-order-id",
             appSwitchEnabled = true,
@@ -154,7 +154,7 @@ class TrackingEventsAPIUnitTest {
             {
                 "events": {
                     "event_params": {
-                        "event_name": "paypal-web-payments:checkout:app-switch:started",
+                        "event_name": "paypal-payments:checkout:app-switch:started",
                         "order_id": "fake-order-id",
                         "app_switch_enabled": true,
                         "link_type": "applink"
