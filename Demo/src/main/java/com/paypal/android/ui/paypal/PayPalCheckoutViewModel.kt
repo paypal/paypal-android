@@ -123,7 +123,7 @@ class PayPalCheckoutViewModel @Inject constructor(
             createOrderState = ActionState.Loading
             val orderRequest = _uiState.value.run {
                 val shouldVault = shouldVaultOption == StoreInVaultOption.ON_SUCCESS
-                OrderRequest(intentOption, shouldVault)
+                OrderRequest(intentOption, shouldVault, userAction.toOrderUserAction())
             }
             createOrderState = createOrderUseCase(orderRequest).mapToActionState()
         }
@@ -192,4 +192,10 @@ class PayPalCheckoutViewModel @Inject constructor(
                 }
             }
         }
+}
+
+internal fun PayPalUserAction.toOrderUserAction(): String? = when (this) {
+    PayPalUserAction.PAY_NOW -> "PAY_NOW"
+    PayPalUserAction.CONTINUE -> "CONTINUE"
+    PayPalUserAction.SETUP_NOW -> null
 }

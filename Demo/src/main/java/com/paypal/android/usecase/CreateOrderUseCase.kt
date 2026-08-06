@@ -22,44 +22,44 @@ class CreateOrderUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
-        val paymentSource = when {
-            request.shouldVaultOnSuccess -> {
-                OrderPaymentSource(
-                    paypal = PayPalPaymentSource(
-                        attributes = PayPalAttributes(
-                            vault = Vault(
-                                storeInVault = "ON_SUCCESS",
-                                usageType = "MERCHANT",
-                                customerType = "CONSUMER"
-                            )
-                        ),
-                        experienceContext = PayPalOrderExperienceContext(
-                            returnUrl = returnToAppUrlConfig.returnAppUrl,
-                            cancelUrl = returnToAppUrlConfig.cancelAppUrl
-                        )
-                    )
-                )
-            }
-
-            else -> null
-        }
         return withContext(Dispatchers.IO) {
-            val amount = Amount(
-                currencyCode = "USD",
-                value = "10.99"
-            )
-
-            val purchaseUnit = PurchaseUnit(
-                amount = amount
-            )
-
-            val orderRequestBody = OrderRequestBody(
-                intent = request.intent,
-                purchaseUnits = listOf(purchaseUnit),
-                paymentSource = paymentSource
-            )
-
-            sdkSampleServerAPI.createOrder(orderRequestBody)
+            sdkSampleServerAPI.createOrder(request.toOrderRequestBody())
         }
     }
+}
+
+internal fun OrderRequest.toOrderRequestBody(): OrderRequestBody {
+    val paymentSource = if (shouldVaultOnSuccess || userAction != null) {
+        OrderPaymentSource(
+            paypal = PayPalPaymentSource(
+                attributes = if (shouldVaultOnSuccess) {
+                    PayPalAttributes(
+                        vault = Vault(
+                            storeInVault = "ON_SUCCESS",
+                            usageType = "MERCHANT",
+                            customerType = "CONSUMER"
+                        )
+                    )
+                } else {
+                    null
+                },
+                experienceContext = PayPalOrderExperienceContext(
+                    returnUrl = returnToAppUrlConfig.returnAppUrl,
+                    cancelUrl = returnToAppUrlConfig.cancelAppUrl,
+                    userAction = userAction
+                )
+            )
+        )
+    } else {
+        null
+    }
+    val amount = Amount(
+        currencyCode = "USD",
+        value = "10.99"
+    )
+    return OrderRequestBody(
+        intent = intent,
+        purchaseUnits = listOf(PurchaseUnit(amount)),
+        paymentSource = paymentSource
+    )
 }
