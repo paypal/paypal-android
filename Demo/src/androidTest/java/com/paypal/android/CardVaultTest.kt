@@ -53,10 +53,7 @@ class CardVaultTest {
         }
 
         robot.navigateToCardVault()
-            .createSetupToken(
-                returnToAppStrategy = returnToAppStrategy,
-                sca = sca
-            )
+            .createSetupToken(sca)
             .pickTestCard(testCard.displayName)
             .vaultCard()
             .verify3DSChallenge()
@@ -83,10 +80,7 @@ class CardVaultTest {
             deviceSettingsRobot.setupAppLinksForCurrentApp()
         }
         robot.navigateToCardVault()
-            .createSetupToken(
-                returnToAppStrategy = ReturnToAppStrategyOption.CUSTOM_URL_SCHEME,
-                sca = SCA.SCA_WHEN_REQUIRED
-            )
+            .createSetupToken(SCA.SCA_WHEN_REQUIRED)
             .pickTestCard(testCard.displayName)
             .vaultCard()
             .verifyCardVaulted()

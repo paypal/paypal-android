@@ -51,7 +51,7 @@ class CardApproveOrderTest {
         }
 
         demoRobot.navigateToApproveOrder()
-            .createOrder(intent, returnToAppStrategy)
+            .createOrder(intent)
             .setStoreInVaultOption(storeInVaultOption)
             .pickTestCard(testCard.displayName)
             .setSCA(sca)
@@ -78,7 +78,7 @@ class CardApproveOrderTest {
         }
 
         demoRobot.navigateToApproveOrder()
-            .createOrder(intent, returnToAppStrategy)
+            .createOrder(intent)
             .setStoreInVaultOption(storeInVaultOption)
             .pickTestCard(testCard.displayName)
             .setSCA(SCA.SCA_WHEN_REQUIRED)

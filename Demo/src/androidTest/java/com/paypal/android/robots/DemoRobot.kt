@@ -96,7 +96,6 @@ class DemoRobot(
     ) = apply {
         setAppSwitch(appSwitchEnabled)
         setIntent(intent)
-        setReturnToAppStrategyOption(returnToAppStrategy)
         clickCreateOrder()
         verifyOrderCreated()
 
@@ -106,18 +105,6 @@ class DemoRobot(
             TAG,
             "✅ Order created successfully with intent: $intent, returnToAppStrategy: $returnToAppStrategy"
         )
-    }
-
-    fun setReturnToAppStrategyOption(returnToAppStrategy: ReturnToAppStrategyOption) = apply {
-        composeTestRule.waitUntilExactlyOneExists(
-            hasText("RETURN TO APP STRATEGY"),
-            TIMEOUT_LONG_MS
-        )
-        val strategyText = when (returnToAppStrategy) {
-            ReturnToAppStrategyOption.APP_LINKS -> "APP_LINKS"
-            ReturnToAppStrategyOption.CUSTOM_URL_SCHEME -> "CUSTOM_URL_SCHEME"
-        }
-        composeTestRule.onNodeWithText(strategyText).performClick()
     }
 
     fun setStoreInVaultOption(storeInVaultOption: StoreInVaultOption) = apply {
@@ -203,7 +190,6 @@ class DemoRobot(
         returnToAppStrategy: ReturnToAppStrategyOption
     ) = apply {
         setAppSwitch(appSwitchEnabled)
-        setReturnToAppStrategyOption(returnToAppStrategy)
         clickCreateSetupToken()
         verifySetupTokenCreated()
 
@@ -275,18 +261,15 @@ class DemoRobot(
     }
 
     fun createSetupToken(
-        returnToAppStrategy: ReturnToAppStrategyOption,
         sca: com.paypal.android.cardpayments.threedsecure.SCA
     ) = apply {
         setSCA(sca)
-        setReturnToAppStrategyOption(returnToAppStrategy)
         clickCreateSetupToken()
         verifySetupTokenCreated()
 
         Log.d(
             TAG,
-            "✅ Setup token created successfully with SCA: $sca, " +
-                    "returnToAppStrategy: $returnToAppStrategy"
+            "✅ Setup token created successfully with SCA: $sca"
         )
     }
 
@@ -342,11 +325,9 @@ class DemoRobot(
     }
 
     fun createOrder(
-        intent: String,
-        returnToAppStrategy: ReturnToAppStrategyOption,
+        intent: String
     ) = apply {
         setIntent(intent)
-        setReturnToAppStrategyOption(returnToAppStrategy)
         clickCreateOrder()
         verifyOrderCreated()
 
@@ -354,7 +335,7 @@ class DemoRobot(
         composeTestRule.waitUntilExactlyOneExists(hasText("ID"), TIMEOUT_LONG_MS)
         Log.d(
             TAG,
-            "✅ Order created successfully with intent: $intent, returnToAppStrategy: $returnToAppStrategy"
+            "✅ Order created successfully with intent: $intent"
         )
     }
 
