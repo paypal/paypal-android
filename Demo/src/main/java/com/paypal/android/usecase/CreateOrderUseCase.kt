@@ -28,35 +28,36 @@ class CreateOrderUseCase @Inject constructor(
     }
 }
 
-internal fun OrderRequest.toOrderRequestBody(): OrderRequestBody {
-    val paymentSource = if (shouldVaultOnSuccess || userAction != null) {
-        OrderPaymentSource(
-            paypal = PayPalPaymentSource(
-                attributes = if (shouldVaultOnSuccess) {
-                    PayPalAttributes(
-                        vault = Vault(
-                            storeInVault = "ON_SUCCESS",
-                            usageType = "MERCHANT",
-                            customerType = "CONSUMER"
-                        )
-                    )
-                } else {
-                    null
-                },
-                experienceContext = PayPalOrderExperienceContext(
-                    returnUrl = returnToAppUrlConfig.returnAppUrl,
-                    cancelUrl = returnToAppUrlConfig.cancelAppUrl,
-                    userAction = userAction
-                )
+private fun OrderRequest.toOrderRequestBody(): OrderRequestBody {
+    val vaultAttributes = shouldVaultOnSuccess
+        .takeIf { it }
+        ?.let {
+            val vault = Vault(
+                storeInVault = "ON_SUCCESS",
+                usageType = "MERCHANT",
+                customerType = "CONSUMER"
             )
+            PayPalAttributes(vault = vault)
+        }
+
+    val experienceContext = PayPalOrderExperienceContext(
+        returnUrl = returnToAppUrlConfig.returnAppUrl,
+        cancelUrl = returnToAppUrlConfig.cancelAppUrl,
+        userAction = userAction
+    )
+
+    val paymentSource = OrderPaymentSource(
+        paypal = PayPalPaymentSource(
+            attributes = vaultAttributes,
+            experienceContext = experienceContext
         )
-    } else {
-        null
-    }
+    )
+
     val amount = Amount(
         currencyCode = "USD",
         value = "10.99"
     )
+
     return OrderRequestBody(
         intent = intent,
         purchaseUnits = listOf(PurchaseUnit(amount)),
