@@ -15,7 +15,8 @@ class BrowserSwitchClient internal constructor(
 
     fun start(
         context: Context,
-        options: BrowserSwitchOptions
+        options: BrowserSwitchOptions,
+        onBeforeLaunch: () -> Unit = {}
     ): BrowserSwitchStartResult {
         val activity = context as? Activity
         val returnUrlScheme = options.returnUrlScheme
@@ -28,10 +29,47 @@ class BrowserSwitchClient internal constructor(
             Failure.ManifestDeepLinkConfigurationInvalid
         } else {
             val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
-            when (chromeCustomTabsClient.launch(context, cctOptions)) {
+            when (chromeCustomTabsClient.launch(context, cctOptions, onBeforeLaunch)) {
                 LaunchChromeCustomTabResult.Success -> BrowserSwitchStartResult.Success
                 LaunchChromeCustomTabResult.ActivityNotFound -> Failure.NoWebBrowser
             }
+        }
+    }
+
+    suspend fun startWithSessionTracking(
+        context: Context,
+        options: BrowserSwitchOptions,
+        onTabShown: () -> Unit,
+        onSessionEnded: () -> Unit,
+        onBeforeLaunch: () -> Unit = {}
+    ): BrowserSwitchSessionStartResult {
+        val activity = context as? Activity
+        val returnUrlScheme = options.returnUrlScheme
+        val appLinkUrl = options.appLinkUrl
+        val validationFailure = if (activity != null && activity.isFinishing) {
+            Failure.ActivityIsFinishing
+        } else if (returnUrlScheme == null && appLinkUrl == null) {
+            Failure.ReturnUrlSchemeAndAppLinkUrlBothNull
+        } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
+            Failure.ManifestDeepLinkConfigurationInvalid
+        } else {
+            null
+        }
+        return if (validationFailure != null) {
+            BrowserSwitchSessionStartResult(validationFailure, null)
+        } else {
+            val result = chromeCustomTabsClient.launchWithSessionTracking(
+                context,
+                ChromeCustomTabOptions(options.targetUri),
+                onTabShown,
+                onSessionEnded,
+                onBeforeLaunch
+            )
+            val startResult = when (result.launchResult) {
+                LaunchChromeCustomTabResult.Success -> BrowserSwitchStartResult.Success
+                LaunchChromeCustomTabResult.ActivityNotFound -> Failure.NoWebBrowser
+            }
+            BrowserSwitchSessionStartResult(startResult, result.session)
         }
     }
 

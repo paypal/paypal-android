@@ -5,9 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import com.paypal.android.corepayments.common.DeviceInspector
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -43,19 +46,20 @@ class BrowserSwitchClientUnitTest {
 
     @Test
     fun `it should launch a chrome custom tab on success`() {
+        val onBeforeLaunch = mockk<() -> Unit>(relaxed = true)
         every {
             deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
         } returns true
         every {
-            chromeCustomTabsClient.launch(any(), any())
+            chromeCustomTabsClient.launch(any(), any(), any())
         } returns LaunchChromeCustomTabResult.Success
 
-        val result = sut.start(appContext, browserSwitchOptions)
+        val result = sut.start(appContext, browserSwitchOptions, onBeforeLaunch)
         val expectedCCTOptions =
             ChromeCustomTabOptions(launchUri = "https://example.com/uri".toUri())
 
         assertTrue(result is BrowserSwitchStartResult.Success)
-        verify { chromeCustomTabsClient.launch(appContext, expectedCCTOptions) }
+        verify { chromeCustomTabsClient.launch(appContext, expectedCCTOptions, onBeforeLaunch) }
     }
 
     @Test
@@ -64,7 +68,7 @@ class BrowserSwitchClientUnitTest {
             deviceInspector.isDeepLinkConfiguredInManifest("example.return.url.scheme")
         } returns true
         every {
-            chromeCustomTabsClient.launch(any(), any())
+            chromeCustomTabsClient.launch(any(), any(), any())
         } returns LaunchChromeCustomTabResult.ActivityNotFound
 
         val result = sut.start(appContext, browserSwitchOptions)
@@ -114,5 +118,45 @@ class BrowserSwitchClientUnitTest {
         val message = (result as BrowserSwitchStartResult.Failure).error.message
         val expected = "The properties 'returnUrlScheme' and 'appLinkUrl' cannot both be null."
         assertEquals(expected, message)
+    }
+
+    @Test
+    fun `tracked start preserves validation and delegates callbacks`() = runTest {
+        val onBeforeLaunch = mockk<() -> Unit>(relaxed = true)
+        every { deviceInspector.isDeepLinkConfiguredInManifest(any()) } returns true
+        coEvery {
+            chromeCustomTabsClient.launchWithSessionTracking(any(), any(), any(), any(), any())
+        } returns TrackedChromeCustomTabResult(LaunchChromeCustomTabResult.Success, null)
+
+        val result = sut.startWithSessionTracking(
+            appContext,
+            browserSwitchOptions,
+            {},
+            {},
+            onBeforeLaunch
+        )
+
+        assertTrue(result.startResult is BrowserSwitchStartResult.Success)
+        coVerify(exactly = 1) {
+            chromeCustomTabsClient.launchWithSessionTracking(
+                appContext,
+                ChromeCustomTabOptions(browserSwitchOptions.targetUri),
+                any(),
+                any(),
+                onBeforeLaunch
+            )
+        }
+    }
+
+    @Test
+    fun `tracked start does not bind when validation fails`() = runTest {
+        every { deviceInspector.isDeepLinkConfiguredInManifest(any()) } returns false
+
+        val result = sut.startWithSessionTracking(appContext, browserSwitchOptions, {}, {})
+
+        assertTrue(result.startResult is BrowserSwitchStartResult.Failure)
+        coVerify(exactly = 0) {
+            chromeCustomTabsClient.launchWithSessionTracking(any(), any(), any(), any(), any())
+        }
     }
 }

@@ -16,6 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import org.json.JSONObject
 import org.junit.Before
@@ -47,7 +48,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -73,7 +74,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -99,7 +100,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -125,7 +126,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -151,7 +152,7 @@ class PayPalLauncherUnitTest {
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
-            browserSwitchClient.start(any(), any())
+            browserSwitchClient.start(any(), any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
         val result = sut.launchWithUrl(
@@ -171,7 +172,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -197,7 +198,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -223,7 +224,7 @@ class PayPalLauncherUnitTest {
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
-            browserSwitchClient.start(any(), any())
+            browserSwitchClient.start(any(), any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
         val result = sut.launchWithUrl(
@@ -369,6 +370,27 @@ class PayPalLauncherUnitTest {
     }
 
     @Test
+    fun `completeVaultAuthRequest() parses SDK cancellation marker`() {
+        val originalOptions = BrowserSwitchOptions(
+            targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
+            requestCode = PAYPAL_VAULT,
+            returnUrlScheme = "com.example.app",
+            appLinkUrl = null,
+            metadata = createVaultMetadata("fake-setup-token-id")
+        )
+        val authState = BrowserSwitchPendingState(originalOptions).toBase64EncodedJSON()
+        intent.data = Uri.parse(
+            "com.example.app://testurl.com/checkout?" +
+                "${PayPalReturnToAppLauncher.CANCELLATION_QUERY_PARAM}=true"
+        )
+
+        sut = PayPalLauncher(browserSwitchClient)
+        val result = sut.completeVaultAuthRequest(intent, authState)
+
+        assertTrue(result is PayPalFinishVaultResult.Canceled)
+    }
+
+    @Test
     fun `completeVaultAuthRequest() parses vault failure when approval session id is blank`() {
         val originalOptions = BrowserSwitchOptions(
             targetUri = "https://www.sandbox.paypal.com/checkoutnow".toUri(),
@@ -408,7 +430,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -429,12 +451,34 @@ class PayPalLauncherUnitTest {
     }
 
     @Test
+    fun `launchWithUrl() publishes auth state before browser switch`() {
+        sut = PayPalLauncher(browserSwitchClient)
+        var publishedAuthState: String? = null
+        every { browserSwitchClient.start(activity, any(), any()) } answers {
+            arg<() -> Unit>(2).invoke()
+            assertNotNull(publishedAuthState)
+            BrowserSwitchStartResult.Success
+        }
+
+        val result = sut.launchWithUrl(
+            activity,
+            Uri.parse("https://paypal.com/app-switch"),
+            "order-123",
+            TokenType.ORDER_ID,
+            ReturnToAppStrategy.CustomUrlScheme("custom_url_scheme"),
+            onAuthStateCreated = { publishedAuthState = it }
+        ) as PayPalPresentAuthChallengeResult.Success
+
+        assertEquals(result.authState, publishedAuthState)
+    }
+
+    @Test
     fun `launchWithUrl() launches with VAULT_ID token type and correct request code`() {
         sut = PayPalLauncher(browserSwitchClient)
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -460,7 +504,7 @@ class PayPalLauncherUnitTest {
 
         val browserSwitchError = Exception("error message from browser switch")
         every {
-            browserSwitchClient.start(any(), any())
+            browserSwitchClient.start(any(), any(), any())
         } returns BrowserSwitchStartResult.Failure(browserSwitchError)
 
         val result =
@@ -481,7 +525,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         val appLinkUrl = "https://example.com/return"
@@ -509,7 +553,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         sut.launchWithUrl(
@@ -536,7 +580,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         val appLinkUrl = "https://example.com/vault/return"
@@ -564,7 +608,7 @@ class PayPalLauncherUnitTest {
 
         val slot = slot<BrowserSwitchOptions>()
         every {
-            browserSwitchClient.start(activity, capture(slot))
+            browserSwitchClient.start(activity, capture(slot), any())
         } returns BrowserSwitchStartResult.Success
 
         // Call with CustomUrlScheme
