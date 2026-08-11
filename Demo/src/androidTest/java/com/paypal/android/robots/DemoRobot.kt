@@ -15,6 +15,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.paypal.android.MainActivity
+import com.paypal.android.paypalpayments.PayPalUserAction
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.utils.TestConstants.TIMEOUT_LONG_MS
 
@@ -79,6 +80,11 @@ class DemoRobot(
             hasText("ORDER CREATED"),
             TIMEOUT_LONG_MS
         )
+    }
+
+    fun setUserAction(userAction: PayPalUserAction) = apply {
+        composeTestRule.waitUntilExactlyOneExists(hasText("USER ACTION"), TIMEOUT_LONG_MS)
+        composeTestRule.onNodeWithText(userAction.name).performClick()
     }
 
     fun setStoreInVaultOption(storeInVaultOption: StoreInVaultOption) = apply {
