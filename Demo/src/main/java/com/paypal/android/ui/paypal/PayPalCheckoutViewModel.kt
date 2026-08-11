@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.paypal.android.DemoConstants
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.model.PaymentMethodSelected
+import com.paypal.android.api.model.UserActionSelected
 import com.paypal.android.api.services.SDKSampleServerAPI
 import com.paypal.android.corepayments.CoreConfig
 import com.paypal.android.corepayments.model.TokenType
@@ -141,13 +143,18 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
     }
 
-    private fun PayPalCheckoutFundingSource.toPaymentMethodSelected(): String = when (this) {
-        PayPalCheckoutFundingSource.PAYPAL_CREDIT -> "PAYPAL_CREDIT"
-        PayPalCheckoutFundingSource.PAY_LATER -> "PAYPAL_PAY_LATER"
-        PayPalCheckoutFundingSource.PAYPAL -> "PAYPAL"
-    }
+    private fun PayPalCheckoutFundingSource.toPaymentMethodSelected(): PaymentMethodSelected =
+        when (this) {
+            PayPalCheckoutFundingSource.PAYPAL_CREDIT -> PaymentMethodSelected.PAYPAL_CREDIT
+            PayPalCheckoutFundingSource.PAY_LATER -> PaymentMethodSelected.PAYPAL_PAY_LATER
+            PayPalCheckoutFundingSource.PAYPAL -> PaymentMethodSelected.PAYPAL
+        }
 
-    private fun PayPalUserAction.toUserActionSelected(): String = name
+    private fun PayPalUserAction.toUserActionSelected(): UserActionSelected = when (this) {
+        PayPalUserAction.CONTINUE -> UserActionSelected.CONTINUE
+        PayPalUserAction.PAY_NOW -> UserActionSelected.PAY_NOW
+        PayPalUserAction.SETUP_NOW -> UserActionSelected.SETUP_NOW
+    }
 
     fun startCheckout(activity: ComponentActivity) {
         val orderId = createdOrder?.id
