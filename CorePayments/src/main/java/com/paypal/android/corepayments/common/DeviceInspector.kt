@@ -71,7 +71,7 @@ class DeviceInspector(private val context: Context) {
     companion object {
         const val PAYPAL_APP_PACKAGE = "com.paypal.android.p2pmobile"
         private const val PAYPAL_APP_SWITCH_URL = "https://www.paypal.com/app-switch-checkout"
-        private const val MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE = 1_160_090_131L
+        private const val MIN_APP_SWITCH_COMPATIBLE_PAYPAL_VERSION_CODE = 1_160_090_132L
         private val DEFAULT_APP_SWITCH_URI: Uri
             get() = PAYPAL_APP_SWITCH_URL.toUri()
     }
