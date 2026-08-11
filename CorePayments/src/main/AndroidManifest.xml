@@ -14,8 +14,6 @@
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
         </intent>
-
-        <!-- Needed on Android 11+ to discover browsers that support Custom Tabs. -->
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>

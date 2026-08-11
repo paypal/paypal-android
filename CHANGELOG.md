@@ -22,6 +22,7 @@
   * Add `PayPalClient.vault(activity, setupTokenId, callback)` method (v3) — requires a prior call to `createPayPalSession()`
   * Removed deprecated `PayPalClient.start(activity, request, callback)` and `PayPalWebCheckoutRequest` — use `createPayPalSession()` followed by `start(activity, orderId, callback)` instead
   * Removed deprecated `PayPalClient.vault(activity, request, callback)` and `PayPalWebVaultRequest` — use `createPayPalSession()` followed by `vault(activity, setupTokenId, callback)` instead
+  * Closing a PayPal checkout or vault Chrome Custom Tab with the toolbar X now reports the flow as canceled when supported; unsupported browsers retain the previous fallback behavior
 * FraudProtection
   * Removed deprecated `PayPalDataCollector.collectDeviceData(context, clientMetadataId)` and `collectDeviceData(context, clientMetadataId, additionalData)` overloads — use `collectDeviceData(context, PayPalDataCollectorRequest)` instead
   * Removed deprecated `PayPalDataCollector.setLogging(Boolean)`
