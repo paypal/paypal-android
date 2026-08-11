@@ -133,7 +133,8 @@ class VaultCardViewModel @Inject constructor(
         val card = parseCard(_uiState.value)
         val returnAppUrl = DemoConstants.returnToAppUrlConfig.returnAppUrl
         val cardVaultRequest = CardVaultRequest(setupTokenId, card, returnAppUrl)
-        cardClient?.vault(cardVaultRequest) { result ->
+        val client = cardClient ?: CardClient(applicationContext, buildCoreConfig()).also { cardClient = it }
+        client.vault(cardVaultRequest) { result ->
             when (result) {
                 is CardVaultResult.Success -> {
                     val setupTokenInfo = result.run {
