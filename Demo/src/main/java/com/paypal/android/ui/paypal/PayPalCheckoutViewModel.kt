@@ -141,10 +141,10 @@ class PayPalCheckoutViewModel @Inject constructor(
         }
     }
 
-    private fun PayPalWebCheckoutFundingSource.toPaymentMethodSelected(): String = when (this) {
-        PayPalWebCheckoutFundingSource.PAYPAL_CREDIT -> "PAYPAL_CREDIT"
-        PayPalWebCheckoutFundingSource.PAY_LATER -> "PAYPAL_PAY_LATER"
-        PayPalWebCheckoutFundingSource.PAYPAL -> "PAYPAL"
+    private fun PayPalCheckoutFundingSource.toPaymentMethodSelected(): String = when (this) {
+        PayPalCheckoutFundingSource.PAYPAL_CREDIT -> "PAYPAL_CREDIT"
+        PayPalCheckoutFundingSource.PAY_LATER -> "PAYPAL_PAY_LATER"
+        PayPalCheckoutFundingSource.PAYPAL -> "PAYPAL"
     }
 
     private fun PayPalUserAction.toUserActionSelected(): String = name
