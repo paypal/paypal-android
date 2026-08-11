@@ -305,6 +305,110 @@ class PayPalClientUnitTest {
         }
 
     @Test
+    fun `finishStart() logs handle return once across repeated no result and cancellation`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns launchResult
+
+            val canceledResult = PayPalFinishStartResult.Canceled("fake-order-id")
+            every {
+                payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
+            } returnsMany listOf(
+                PayPalFinishStartResult.NoResult,
+                PayPalFinishStartResult.NoResult,
+                canceledResult,
+            )
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.start(activity, "fake-order-id", mockk(relaxed = true))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertSame(PayPalFinishStartResult.NoResult, sutV3.finishStart(intent))
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
+
+            assertSame(PayPalFinishStartResult.NoResult, sutV3.finishStart(intent))
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
+
+            assertSame(canceledResult, sutV3.finishStart(intent))
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+                analytics.notify(PayPalEvent.HANDLE_RETURN_SUCCEEDED, any(), any())
+                analytics.notify(PayPalEvent.CANCELED, any(), any())
+            }
+        }
+
+    @Test
+    fun `finishStart() logs handle return again after a new auth state is published`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
+            } returns PayPalFinishStartResult.NoResult
+
+            repeat(2) {
+                sutV3.createPayPalSession(
+                    tokenType = TokenType.ORDER_ID,
+                    userIdentity = fakeUserIdentity,
+                    urlConfig = fakeUrlConfig,
+                )
+                sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+                sutV3.start(activity, "fake-order-id", mockk(relaxed = true))
+                testDispatcher.scheduler.advanceUntilIdle()
+
+                assertSame(PayPalFinishStartResult.NoResult, sutV3.finishStart(intent))
+            }
+
+            verify(exactly = 2) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
+        }
+
+    @Test
+    fun `restore() resets handle return started tracking for a pending checkout`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalLauncher.completeCheckoutAuthRequest(intent, "auth state")
+            } returns PayPalFinishStartResult.NoResult
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.ORDER_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.start(activity, "fake-order-id", mockk(relaxed = true))
+            testDispatcher.scheduler.advanceUntilIdle()
+            val instanceState = sutV3.instanceState
+
+            assertSame(PayPalFinishStartResult.NoResult, sutV3.finishStart(intent))
+            sutV3.restore(instanceState)
+            assertSame(PayPalFinishStartResult.NoResult, sutV3.finishStart(intent))
+
+            verify(exactly = 2) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
+        }
+
+    @Test
     fun `finishStart() with session auth state clears session to prevent delivering success event twice`() =
         runTest {
             val sutV3 = makeSutWithUrlScheme()
@@ -558,6 +662,79 @@ class PayPalClientUnitTest {
             restoredClient.restore(launchWithUrlClient.instanceState)
             val result = restoredClient.finishVault(intent)
             assertSame(PayPalFinishVaultResult.Canceled, result)
+        }
+
+    @Test
+    fun `finishVault() logs handle return once across repeated no result and cancellation`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            val launchResult = PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns launchResult
+
+            every {
+                payPalLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returnsMany listOf(
+                PayPalFinishVaultResult.NoResult,
+                PayPalFinishVaultResult.NoResult,
+                PayPalFinishVaultResult.Canceled,
+            )
+
+            sutV3.createPayPalSession(
+                tokenType = TokenType.VAULT_ID,
+                userIdentity = fakeUserIdentity,
+                urlConfig = fakeUrlConfig,
+            )
+            sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+            sutV3.vault(activity, "fake-setup-token-id", mockk(relaxed = true))
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertSame(PayPalFinishVaultResult.NoResult, sutV3.finishVault(intent))
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
+
+            assertSame(PayPalFinishVaultResult.NoResult, sutV3.finishVault(intent))
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
+
+            assertSame(PayPalFinishVaultResult.Canceled, sutV3.finishVault(intent))
+            verify(exactly = 1) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+                analytics.notify(PayPalEvent.HANDLE_RETURN_SUCCEEDED, any(), any())
+                analytics.notify(PayPalEvent.CANCELED, any(), any())
+            }
+        }
+
+    @Test
+    fun `finishVault() logs handle return again after a new auth state is published`() =
+        runTest {
+            val sutV3 = makeSutWithUrlScheme()
+            every {
+                payPalLauncher.launchWithUrl(any(), any(), any(), any(), any())
+            } returns PayPalPresentAuthChallengeResult.Success("auth state")
+            every {
+                payPalLauncher.completeVaultAuthRequest(intent, "auth state")
+            } returns PayPalFinishVaultResult.NoResult
+
+            repeat(2) {
+                sutV3.createPayPalSession(
+                    tokenType = TokenType.VAULT_ID,
+                    userIdentity = fakeUserIdentity,
+                    urlConfig = fakeUrlConfig,
+                )
+                sutV3.shopperSessionDeferred = CompletableDeferred(fakeSessionResponse)
+                sutV3.vault(activity, "fake-setup-token-id", mockk(relaxed = true))
+                testDispatcher.scheduler.advanceUntilIdle()
+
+                assertSame(PayPalFinishVaultResult.NoResult, sutV3.finishVault(intent))
+            }
+
+            verify(exactly = 2) {
+                analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, any(), any())
+            }
         }
 
     @Test

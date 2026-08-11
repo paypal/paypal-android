@@ -59,6 +59,7 @@ class PayPalClient internal constructor(
     private var appSwitchEnabled: Boolean = false
     private var analyticsEventParams: AnalyticsEventParams = AnalyticsEventParams()
     private val finishResultLock = Any()
+    private var handleReturnStartedAuthState: String? = null
 
     // Shopper Session id (v3) — set by createPayPalSession(), awaited by start() / vault()
     @VisibleForTesting
@@ -95,8 +96,9 @@ class PayPalClient internal constructor(
     /**
      * Restore a feature client using instance state. @see [instanceState]
      */
-    fun restore(instanceState: String) {
+    fun restore(instanceState: String) = synchronized(finishResultLock) {
         sessionStore.restore(instanceState)
+        handleReturnStartedAuthState = null
     }
 
     /**
@@ -288,7 +290,7 @@ class PayPalClient internal constructor(
     fun finishStart(intent: Intent): PayPalFinishStartResult? = synchronized(finishResultLock) {
         val authState = sessionStore.authState ?: return@synchronized null
         val analyticsParams = analyticsEventParams
-        analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsParams)
+        notifyHandleReturnStarted(authState, analyticsParams)
         val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
         if (result != PayPalFinishStartResult.NoResult && clearAuthState(authState)) {
             logCheckoutResult(result, analyticsParams)
@@ -307,7 +309,7 @@ class PayPalClient internal constructor(
     fun finishVault(intent: Intent): PayPalFinishVaultResult? = synchronized(finishResultLock) {
         val authState = sessionStore.authState ?: return@synchronized null
         val analyticsParams = analyticsEventParams
-        analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsParams)
+        notifyHandleReturnStarted(authState, analyticsParams)
         val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
         if (result != PayPalFinishVaultResult.NoResult && clearAuthState(authState)) {
             logVaultResult(result, analyticsParams)
@@ -315,9 +317,20 @@ class PayPalClient internal constructor(
         result
     }
 
+    private fun notifyHandleReturnStarted(
+        authState: String,
+        analyticsParams: AnalyticsEventParams,
+    ) = synchronized(finishResultLock) {
+        if (handleReturnStartedAuthState != authState) {
+            handleReturnStartedAuthState = authState
+            analytics.notify(PayPalEvent.HANDLE_RETURN_STARTED, params = analyticsParams)
+        }
+    }
+
     private fun clearAuthState(authState: String): Boolean = synchronized(finishResultLock) {
         if (sessionStore.authState == authState) {
             sessionStore.clear()
+            handleReturnStartedAuthState = null
             true
         } else {
             false
@@ -326,6 +339,7 @@ class PayPalClient internal constructor(
 
     private fun publishAuthState(authState: String) = synchronized(finishResultLock) {
         sessionStore.authState = authState
+        handleReturnStartedAuthState = null
     }
 
     /**
