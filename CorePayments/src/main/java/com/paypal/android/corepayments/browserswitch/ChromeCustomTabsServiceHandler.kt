@@ -15,6 +15,12 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 
+/**
+ * Prepares a Chrome Custom Tab session that reports when the tab is shown and when its session ends.
+ *
+ * The returned tab owns a live browser-service binding. If preparation cannot complete safely, this
+ * handler releases the binding and returns `null` so the caller can launch an untracked tab instead.
+ */
 internal class ChromeCustomTabsServiceHandler(
     private val adapter: CustomTabsAdapter
 ) {

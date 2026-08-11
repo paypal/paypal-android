@@ -18,15 +18,9 @@ class BrowserSwitchClient internal constructor(
         options: BrowserSwitchOptions,
         onBeforeLaunch: () -> Unit = {}
     ): BrowserSwitchStartResult {
-        val activity = context as? Activity
-        val returnUrlScheme = options.returnUrlScheme
-        val appLinkUrl = options.appLinkUrl
-        return if (activity != null && activity.isFinishing) {
-            Failure.ActivityIsFinishing
-        } else if (returnUrlScheme == null && appLinkUrl == null) {
-            Failure.ReturnUrlSchemeAndAppLinkUrlBothNull
-        } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
-            Failure.ManifestDeepLinkConfigurationInvalid
+        val validationFailure = validate(context, options)
+        return if (validationFailure != null) {
+            validationFailure
         } else {
             val cctOptions = ChromeCustomTabOptions(launchUri = options.targetUri)
             when (chromeCustomTabsClient.launch(context, cctOptions, onBeforeLaunch)) {
@@ -43,18 +37,7 @@ class BrowserSwitchClient internal constructor(
         onSessionEnded: () -> Unit,
         onBeforeLaunch: () -> Unit = {}
     ): BrowserSwitchSessionStartResult {
-        val activity = context as? Activity
-        val returnUrlScheme = options.returnUrlScheme
-        val appLinkUrl = options.appLinkUrl
-        val validationFailure = if (activity != null && activity.isFinishing) {
-            Failure.ActivityIsFinishing
-        } else if (returnUrlScheme == null && appLinkUrl == null) {
-            Failure.ReturnUrlSchemeAndAppLinkUrlBothNull
-        } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
-            Failure.ManifestDeepLinkConfigurationInvalid
-        } else {
-            null
-        }
+        val validationFailure = validate(context, options)
         return if (validationFailure != null) {
             BrowserSwitchSessionStartResult(validationFailure, null)
         } else {
@@ -70,6 +53,24 @@ class BrowserSwitchClient internal constructor(
                 LaunchChromeCustomTabResult.ActivityNotFound -> Failure.NoWebBrowser
             }
             BrowserSwitchSessionStartResult(startResult, result.session)
+        }
+    }
+
+    private fun validate(
+        context: Context,
+        options: BrowserSwitchOptions
+    ): BrowserSwitchStartResult.Failure? {
+        val activity = context as? Activity
+        val returnUrlScheme = options.returnUrlScheme
+        val appLinkUrl = options.appLinkUrl
+        return if (activity != null && activity.isFinishing) {
+            Failure.ActivityIsFinishing
+        } else if (returnUrlScheme == null && appLinkUrl == null) {
+            Failure.ReturnUrlSchemeAndAppLinkUrlBothNull
+        } else if (returnUrlScheme != null && !hasValidDeepLinkConfig(returnUrlScheme)) {
+            Failure.ManifestDeepLinkConfigurationInvalid
+        } else {
+            null
         }
     }
 

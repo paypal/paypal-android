@@ -362,6 +362,39 @@ class PayPalLauncherCloseTrackingUnitTest {
     }
 
     @Test
+    fun `untracked launch clears tracked launch and ignores its stale callbacks`() = runTest {
+        val sessionEnded = slot<() -> Unit>()
+        val session = mockk<BrowserSwitchSession>(relaxed = true)
+        coEvery {
+            browserSwitchClient.startWithSessionTracking(
+                activity,
+                any(),
+                any(),
+                capture(sessionEnded),
+                any()
+            )
+        } returns trackedSuccess(session)
+        every {
+            browserSwitchClient.start(activity, any(), any())
+        } returns BrowserSwitchStartResult.Success
+        val tracked = launchTracked("order-id", TokenType.ORDER_ID)
+
+        sut.launchWithUrl(
+            activity,
+            Uri.parse("https://paypal.com/checkout"),
+            "untracked-order-id",
+            TokenType.ORDER_ID,
+            ReturnToAppStrategy.CustomUrlScheme("com.example.app")
+        )
+        sessionEnded.captured.invoke()
+        val staleResult = sut.completeCheckoutAuthRequest(Intent(), tracked.authState)
+
+        assertSame(PayPalFinishStartResult.NoResult, staleResult)
+        verify(exactly = 1) { session.dispose() }
+        verify(exactly = 0) { returnToAppLauncher.launch(any(), any(), any()) }
+    }
+
+    @Test
     fun `app switch launch remains untracked and ignored intent stays no result`() = runTest {
         every { browserSwitchClient.start(activity, any(), any()) } returns BrowserSwitchStartResult.Success
 

@@ -13,7 +13,7 @@ import androidx.browser.customtabs.EngagementSignalsCallback
 
 internal fun createAndroidCustomTabsAdapter(): CustomTabsAdapter = AndroidCustomTabsAdapter()
 
-private class AndroidCustomTabsAdapter : CustomTabsAdapter {
+internal class AndroidCustomTabsAdapter : CustomTabsAdapter {
     override fun getPackageName(context: Context): String? = CustomTabsClient.getPackageName(context, null)
 
     override fun bind(

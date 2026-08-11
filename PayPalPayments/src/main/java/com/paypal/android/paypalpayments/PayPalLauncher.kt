@@ -10,7 +10,6 @@ import com.paypal.android.corepayments.ReturnToAppStrategy
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchClient
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchOptions
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchPendingState
-import com.paypal.android.corepayments.browserswitch.BrowserSwitchSession
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchStartResult
 import com.paypal.android.corepayments.captureDeepLink
 import com.paypal.android.corepayments.model.TokenType
@@ -21,12 +20,10 @@ import org.json.JSONObject
 // TODO: consider renaming PayPalLauncher to PayPalAuthChallengeLauncher
 internal class PayPalLauncher(
     private val browserSwitchClient: BrowserSwitchClient,
-    private val returnToAppLauncher: PayPalReturnToAppLauncher = PayPalReturnToAppLauncher()
+    returnToAppLauncher: PayPalReturnToAppLauncher = PayPalReturnToAppLauncher()
 ) {
 
-    private val activeLaunchLock = Any()
-    private var nextGeneration = 0L
-    private var activeLaunch: TrackedLaunch? = null
+    private val cancellationTracker = PayPalLaunchCancellationTracker(returnToAppLauncher)
 
     constructor(context: Context) : this(BrowserSwitchClient(context))
 
@@ -47,7 +44,7 @@ internal class PayPalLauncher(
         onAuthStateCreated: (String) -> Unit = {},
         onLaunchFailed: (String) -> Unit = {},
     ): PayPalPresentAuthChallengeResult {
-        clearActiveLaunch()
+        cancellationTracker.clear()
         val options = createBrowserSwitchOptions(uri, token, tokenType, returnToAppStrategy)
         val authState = BrowserSwitchPendingState(options).toBase64EncodedJSON()
         return launchBrowserSwitch(
@@ -72,28 +69,28 @@ internal class PayPalLauncher(
     ): PayPalPresentAuthChallengeResult {
         val options = createBrowserSwitchOptions(uri, token, tokenType, returnToAppStrategy)
         val authState = BrowserSwitchPendingState(options).toBase64EncodedJSON()
-        val launch = replaceActiveLaunch(
+        val launch = cancellationTracker.startTracking(
             token,
             getRequestCode(tokenType),
             authState,
             context.applicationContext ?: context,
             cancelUrl
         )
-        armCancellationReturn(authState)
+        cancellationTracker.armCancellationReturn(authState)
         var authStatePublished = false
         val result = try {
             browserSwitchClient.startWithSessionTracking(
                 context,
                 options,
-                onTabShown = { markTabShown(launch.generation) },
-                onSessionEnded = { markSessionEnded(launch.generation) },
+                onTabShown = { cancellationTracker.markTabShown(launch) },
+                onSessionEnded = { cancellationTracker.markSessionEnded(launch) },
                 onBeforeLaunch = {
                     authStatePublished = true
                     onAuthStateCreated(authState)
                 }
             )
         } catch (error: Exception) {
-            clearActiveLaunch(authState)
+            cancellationTracker.clear(authState)
             if (authStatePublished) onLaunchFailed(authState)
             return PayPalPresentAuthChallengeResult.Failure(
                 PayPalError.browserSwitchError(error)
@@ -101,11 +98,11 @@ internal class PayPalLauncher(
         }
         return when (val startResult = result.startResult) {
             BrowserSwitchStartResult.Success -> {
-                retainSession(launch.generation, result.session)
+                cancellationTracker.retainSession(launch, result.session)
                 PayPalPresentAuthChallengeResult.Success(authState)
             }
             is BrowserSwitchStartResult.Failure -> {
-                clearActiveLaunch(authState)
+                cancellationTracker.clear(authState)
                 if (authStatePublished) onLaunchFailed(authState)
                 PayPalPresentAuthChallengeResult.Failure(
                     PayPalError.browserSwitchError(startResult.error)
@@ -187,20 +184,24 @@ internal class PayPalLauncher(
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_CHECKOUT
         return when (val result = captureDeepLink(requestCode, intent, authState)) {
             is CaptureDeepLinkResult.Success -> {
-                clearActiveLaunch(authState)
+                cancellationTracker.clear(authState)
                 parseWebCheckoutSuccessResult(result.deepLink)
             }
             is CaptureDeepLinkResult.Failure -> {
-                clearActiveLaunch(authState)
+                cancellationTracker.clear(authState)
                 PayPalFinishStartResult.Failure(result.reason, orderId = null)
             }
 
-            is CaptureDeepLinkResult.Ignore -> handleIgnoredResult(
-                authState,
-                requestCode,
-                PayPalFinishStartResult.NoResult,
-                { PayPalFinishStartResult.Canceled(it) }
-            )
+            is CaptureDeepLinkResult.Ignore ->
+                when (val cancellation = cancellationTracker.handleReturnToApp(
+                    authState,
+                    requestCode
+                )) {
+                    PayPalLaunchCancellationTracker.Result.NoResult ->
+                        PayPalFinishStartResult.NoResult
+                    is PayPalLaunchCancellationTracker.Result.Canceled ->
+                        PayPalFinishStartResult.Canceled(cancellation.token)
+                }
         }
     }
 
@@ -211,154 +212,23 @@ internal class PayPalLauncher(
         val requestCode = BrowserSwitchRequestCodes.PAYPAL_VAULT
         return when (val result = captureDeepLink(requestCode, intent, authState)) {
             is CaptureDeepLinkResult.Success -> {
-                clearActiveLaunch(authState)
+                cancellationTracker.clear(authState)
                 parseVaultSuccessResult(result.deepLink)
             }
             is CaptureDeepLinkResult.Failure -> {
-                clearActiveLaunch(authState)
+                cancellationTracker.clear(authState)
                 PayPalFinishVaultResult.Failure(result.reason)
             }
 
-            is CaptureDeepLinkResult.Ignore -> handleIgnoredResult(
-                authState,
-                requestCode,
-                PayPalFinishVaultResult.NoResult,
-                { PayPalFinishVaultResult.Canceled }
-            )
-        }
-    }
-
-    private fun replaceActiveLaunch(
-        token: String,
-        requestCode: Int,
-        authState: String,
-        context: Context,
-        cancelUrl: String
-    ): TrackedLaunch {
-        val replacement: TrackedLaunch
-        val previous = synchronized(activeLaunchLock) {
-            replacement = TrackedLaunch(
-                ++nextGeneration,
-                token,
-                requestCode,
-                authState,
-                context,
-                cancelUrl
-            )
-            activeLaunch.also { activeLaunch = replacement }
-        }
-        previous?.session?.dispose()
-        return replacement
-    }
-
-    private fun retainSession(generation: Long, session: BrowserSwitchSession?) {
-        val shouldDispose = synchronized(activeLaunchLock) {
-            val launch = activeLaunch
-            if (launch?.generation == generation && !launch.sessionEnded) {
-                launch.session = session
-                false
-            } else {
-                true
-            }
-        }
-        if (shouldDispose) session?.dispose()
-    }
-
-    private fun markTabShown(generation: Long) {
-        synchronized(activeLaunchLock) {
-            activeLaunch?.takeIf { it.generation == generation }?.returnToAppObserved = false
-        }
-    }
-
-    private fun markSessionEnded(generation: Long) {
-        var session: BrowserSwitchSession? = null
-        var cancellationReturn: (() -> Unit)? = null
-        synchronized(activeLaunchLock) {
-            val launch = activeLaunch?.takeIf { it.generation == generation && !it.sessionEnded }
-            if (launch != null) {
-                launch.sessionEnded = true
-                session = launch.session
-                launch.session = null
-                cancellationReturn = createCancellationReturn(launch)
-            }
-        }
-        session?.dispose()
-        cancellationReturn?.invoke()
-    }
-
-    private fun <T : Any> handleIgnoredResult(
-        authState: String,
-        requestCode: Int,
-        noResult: T,
-        canceledResult: (String) -> T
-    ): T = synchronized(activeLaunchLock) {
-        val launch = activeLaunch?.takeIf {
-            it.authState == authState && it.requestCode == requestCode
-        }
-        when {
-            launch == null -> noResult
-            launch.sessionEnded -> {
-                activeLaunch = null
-                canceledResult(launch.token)
-            }
-            else -> {
-                launch.returnToAppObserved = true
-                noResult
-            }
-        }
-    }
-
-    private fun armCancellationReturn(authState: String) {
-        var cancellationReturn: (() -> Unit)? = null
-        synchronized(activeLaunchLock) {
-            val launch = activeLaunch?.takeIf { it.authState == authState }
-            if (launch != null) {
-                launch.cancellationReturnArmed = true
-                cancellationReturn = createCancellationReturn(launch)
-            }
-        }
-        cancellationReturn?.invoke()
-    }
-
-    private fun createCancellationReturn(launch: TrackedLaunch): (() -> Unit)? {
-        val sessionReturnObserved = launch.sessionEnded && launch.returnToAppObserved
-        val canSchedule = launch.cancellationReturnArmed && !launch.cancellationReturnScheduled
-        return if (sessionReturnObserved && canSchedule && launch.cancelUrl.isNotBlank()) {
-            launch.cancellationReturnScheduled = true
-            val action: () -> Unit = {
-                returnToAppLauncher.launch(launch.context, launch.cancelUrl) {
-                    synchronized(activeLaunchLock) {
-                        activeLaunch?.generation == launch.generation
-                    }
+            is CaptureDeepLinkResult.Ignore ->
+                when (cancellationTracker.handleReturnToApp(authState, requestCode)) {
+                    PayPalLaunchCancellationTracker.Result.NoResult ->
+                        PayPalFinishVaultResult.NoResult
+                    is PayPalLaunchCancellationTracker.Result.Canceled ->
+                        PayPalFinishVaultResult.Canceled
                 }
-            }
-            action
-        } else {
-            null
         }
     }
-
-    private fun clearActiveLaunch(authState: String? = null) {
-        val launch = synchronized(activeLaunchLock) {
-            activeLaunch?.takeIf { authState == null || it.authState == authState }
-                ?.also { activeLaunch = null }
-        }
-        launch?.session?.dispose()
-    }
-
-    private data class TrackedLaunch(
-        val generation: Long,
-        val token: String,
-        val requestCode: Int,
-        val authState: String,
-        val context: Context,
-        val cancelUrl: String,
-        var session: BrowserSwitchSession? = null,
-        var sessionEnded: Boolean = false,
-        var returnToAppObserved: Boolean = false,
-        var cancellationReturnArmed: Boolean = false,
-        var cancellationReturnScheduled: Boolean = false
-    )
 
     private fun parseWebCheckoutSuccessResult(
         deepLink: DeepLink

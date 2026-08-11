@@ -3,6 +3,12 @@ package com.paypal.android.corepayments.browserswitch
 import android.content.Context
 import androidx.browser.customtabs.CustomTabsServiceConnection
 
+/**
+ * Owns a tracked Custom Tab's service binding and guards delivery of its lifecycle callbacks.
+ *
+ * Disposal is idempotent and unbinds a successfully bound service at most once, including when
+ * disposal races with completion of the asynchronous bind operation.
+ */
 internal class SessionBinding(
     private val context: Context,
     private val connection: CustomTabsServiceConnection,
