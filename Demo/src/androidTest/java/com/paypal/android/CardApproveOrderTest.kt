@@ -6,7 +6,6 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.paypal.android.cardpayments.threedsecure.SCA
 import com.paypal.android.robots.DemoRobot
 import com.paypal.android.robots.DeviceSettingsRobot
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.utils.TestCard
 import org.junit.After
@@ -28,6 +27,7 @@ class CardApproveOrderTest {
     fun setUp() {
         deviceSettingsRobot.resetAppLinksToDefaults()
         deviceSettingsRobot.disablePasswordManagers()
+        deviceSettingsRobot.setupAppLinksForCurrentApp()
     }
 
     @After
@@ -41,15 +41,7 @@ class CardApproveOrderTest {
         @TestParameter("VISA_3DS_SUCCESSFUL_AUTH") testCard: TestCard,
         @TestParameter sca: SCA,
         @TestParameter storeInVaultOption: StoreInVaultOption,
-        @TestParameter(
-            "CUSTOM_URL_SCHEME",
-            "APP_LINKS"
-        ) returnToAppStrategy: ReturnToAppStrategyOption,
     ) {
-        if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
-            deviceSettingsRobot.setupAppLinksForCurrentApp()
-        }
-
         demoRobot.navigateToApproveOrder()
             .createOrder(intent)
             .setStoreInVaultOption(storeInVaultOption)
@@ -68,15 +60,7 @@ class CardApproveOrderTest {
             "VISA_NO_3DS",
         ) testCard: TestCard,
         @TestParameter storeInVaultOption: StoreInVaultOption,
-        @TestParameter(
-            "CUSTOM_URL_SCHEME",
-            "APP_LINKS"
-        ) returnToAppStrategy: ReturnToAppStrategyOption,
     ) {
-        if (returnToAppStrategy == ReturnToAppStrategyOption.APP_LINKS) {
-            deviceSettingsRobot.setupAppLinksForCurrentApp()
-        }
-
         demoRobot.navigateToApproveOrder()
             .createOrder(intent)
             .setStoreInVaultOption(storeInVaultOption)
