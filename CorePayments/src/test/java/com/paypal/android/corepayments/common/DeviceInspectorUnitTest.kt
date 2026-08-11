@@ -86,7 +86,7 @@ class DeviceInspectorUnitTest {
     // The PayPal app's app-switch-eligible minimum version code (v10.6.0, build 1160090131),
     // mirrored here since DeviceInspector.MIN_VERSION_CODE_APP_SWITCH is private — behavior is
     // verified only through the public canResolvePayPalAppSwitch() API below.
-    private val minVersionCodeAppSwitch = 1_160_090_131L
+    private val minVersionCodeAppSwitch = 1_160_090_132L
 
     @Test
     fun `canResolvePayPalAppSwitch is true when PayPal app resolves the uri and version code is newer than minimum`() {
