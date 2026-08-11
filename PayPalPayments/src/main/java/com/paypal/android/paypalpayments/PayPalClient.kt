@@ -170,7 +170,6 @@ class PayPalClient internal constructor(
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
-                shopperSessionDeferred = null
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -242,7 +241,6 @@ class PayPalClient internal constructor(
         applicationScope.launch {
             try {
                 val shopperSession = deferred.await()
-                shopperSessionDeferred = null
                 analytics.notify(PayPalEvent.STARTED, params = analyticsEventParams)
 
                 if (shopperSession != null) {
@@ -290,6 +288,7 @@ class PayPalClient internal constructor(
             val result = payPalLauncher.completeCheckoutAuthRequest(intent, authState)
             logCheckoutResult(result)
             if (result != PayPalFinishStartResult.NoResult) {
+                shopperSessionDeferred = null
                 sessionStore.clear()
             }
             result
@@ -309,6 +308,7 @@ class PayPalClient internal constructor(
             val result = payPalLauncher.completeVaultAuthRequest(intent, authState)
             logVaultResult(result)
             if (result != PayPalFinishVaultResult.NoResult) {
+                shopperSessionDeferred = null
                 sessionStore.clear()
             }
             result
@@ -705,6 +705,7 @@ class PayPalClient internal constructor(
                 logUserPerceivedLatency(flowType, result, startTime, endTime)
             }
             is PayPalPresentAuthChallengeResult.Failure -> {
+                shopperSessionDeferred = null
                 val event = if (appSwitchEnabled) {
                     PayPalEvent.APP_SWITCH_FAILED
                 } else {
