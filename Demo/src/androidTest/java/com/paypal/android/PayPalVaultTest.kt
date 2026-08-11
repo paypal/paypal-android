@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.paypal.android.paypalpayments.PayPalUserAction
 import com.paypal.android.robots.DemoRobot
 import com.paypal.android.robots.DeviceSettingsRobot
 import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
@@ -41,6 +42,7 @@ class PayPalVaultTest {
 
     @Test
     fun shouldVaultWith(
+        @TestParameter userAction: PayPalUserAction,
         /*
           * Want to run CUSTOM_URL_SCHEME tests first to ensure app links are configured before they are executed
           * since app links configuration takes time, running CUSTOM_URL_SCHEME gives extra time
@@ -56,6 +58,7 @@ class PayPalVaultTest {
 
         robot
             .navigateToPayPalVault()
+            .setUserAction(userAction)
             .vaultWithAppSwitch()
             .startVaultWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
             .createPaymentToken()
