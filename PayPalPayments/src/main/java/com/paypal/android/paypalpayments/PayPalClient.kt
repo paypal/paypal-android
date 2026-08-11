@@ -542,7 +542,6 @@ class PayPalClient internal constructor(
         appendQueryParameter("source", "pda")
         appendQueryParameter("merchant", coreConfig.merchantId)
         appendQueryParameter("flow_type", flowType)
-        appendQueryParameter("funding_source", PayPalCheckoutFundingSource.PAYPAL.value)
         appendQueryParameter("switch_initiated_time", System.currentTimeMillis().toString())
     }
 

@@ -20,33 +20,32 @@ import javax.inject.Inject
 class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
-
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
-        val paymentSource = when {
-            request.shouldVaultOnSuccess -> {
-                OrderPaymentSource(
-                    paypal = PayPalPaymentSource(
-                        attributes = PayPalAttributes(
-                            vault = Vault(
-                                storeInVault = "ON_SUCCESS",
-                                usageType = "MERCHANT",
-                                customerType = "CONSUMER"
-                            )
-                        ),
-                        experienceContext = PayPalOrderExperienceContext(
-                            returnUrl = returnToAppUrlConfig.returnAppUrl,
-                            cancelUrl = returnToAppUrlConfig.cancelAppUrl
+        val paymentSource = OrderPaymentSource(
+            paypal = PayPalPaymentSource(
+                attributes = if (request.shouldVaultOnSuccess) {
+                    PayPalAttributes(
+                        vault = Vault(
+                            storeInVault = "ON_SUCCESS",
+                            usageType = "MERCHANT",
+                            customerType = "CONSUMER"
                         )
                     )
+                } else {
+                    null
+                },
+                experienceContext = PayPalOrderExperienceContext(
+                    returnUrl = returnToAppUrlConfig.returnAppUrl,
+                    cancelUrl = returnToAppUrlConfig.cancelAppUrl,
+                    paymentMethodSelected = request.paymentMethodSelected,
+                    userAction = request.userAction
                 )
-            }
-
-            else -> null
-        }
+            )
+        )
         return withContext(Dispatchers.IO) {
             val amount = Amount(
                 currencyCode = "USD",
-                value = "10.99"
+                value = request.amount
             )
 
             val purchaseUnit = PurchaseUnit(
