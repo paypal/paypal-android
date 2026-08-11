@@ -39,9 +39,8 @@ class PayPalCheckoutTest {
     }
 
     @Test
-    fun shouldCreateOrderWithIntentAndAppSwitch(
+    fun shouldCreateAndCheckoutOrderWith(
         @TestParameter("AUTHORIZE", "CAPTURE") intent: String,
-        @TestParameter appSwitchEnabled: Boolean,
         /*
           * Want to run CUSTOM_URL_SCHEME tests first to ensure app links are configured before they are executed
           * since app links configuration takes time, running CUSTOM_URL_SCHEME gives extra time
@@ -58,11 +57,7 @@ class PayPalCheckoutTest {
 
         checkoutRobot
             .navigateToPayPalCheckout()
-            .createOrder(
-                appSwitchEnabled = appSwitchEnabled,
-                intent = intent,
-                returnToAppStrategy = returnToAppStrategy
-            )
+            .createOrder(intent)
             .startCheckoutWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
             .completeOrder()
 

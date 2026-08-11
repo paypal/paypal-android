@@ -15,7 +15,6 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.paypal.android.MainActivity
-import com.paypal.android.uishared.enums.ReturnToAppStrategyOption
 import com.paypal.android.uishared.enums.StoreInVaultOption
 import com.paypal.android.utils.TestConstants.TIMEOUT_LONG_MS
 
@@ -61,15 +60,6 @@ class DemoRobot(
         )
     }
 
-    fun setAppSwitch(enabled: Boolean) = apply {
-        composeTestRule.waitUntilExactlyOneExists(
-            hasText("APP SWITCH WHEN AVAILABLE"),
-            TIMEOUT_LONG_MS
-        )
-        val toggleText = if (enabled) "YES" else "NO"
-        composeTestRule.onNodeWithText(toggleText).performClick()
-    }
-
     fun setIntent(intent: String) = apply {
         composeTestRule.waitUntilExactlyOneExists(hasText("INTENT"), TIMEOUT_LONG_MS)
         val currentIntent = if (intent == "AUTHORIZE") "CAPTURE" else "AUTHORIZE"
@@ -79,6 +69,8 @@ class DemoRobot(
 
     fun clickCreateOrder() = apply {
         composeTestRule.waitUntilExactlyOneExists(hasText("CREATE ORDER"), TIMEOUT_LONG_MS)
+        composeTestRule.onNode(hasScrollAction())
+            .performScrollToNode(hasText("CREATE ORDER"))
         composeTestRule.onNodeWithText("CREATE ORDER").performClick()
     }
 
@@ -86,24 +78,6 @@ class DemoRobot(
         composeTestRule.waitUntilExactlyOneExists(
             hasText("ORDER CREATED"),
             TIMEOUT_LONG_MS
-        )
-    }
-
-    fun createOrder(
-        appSwitchEnabled: Boolean,
-        intent: String,
-        returnToAppStrategy: ReturnToAppStrategyOption
-    ) = apply {
-        setAppSwitch(appSwitchEnabled)
-        setIntent(intent)
-        clickCreateOrder()
-        verifyOrderCreated()
-
-        // Verify the "ID" label exists, which indicates OrderView is displayed
-        composeTestRule.waitUntilExactlyOneExists(hasText("ID"), TIMEOUT_LONG_MS)
-        Log.d(
-            TAG,
-            "✅ Order created successfully with intent: $intent, returnToAppStrategy: $returnToAppStrategy"
         )
     }
 
@@ -185,19 +159,11 @@ class DemoRobot(
         )
     }
 
-    fun vaultWithAppSwitch(
-        appSwitchEnabled: Boolean,
-        returnToAppStrategy: ReturnToAppStrategyOption
-    ) = apply {
-        setAppSwitch(appSwitchEnabled)
+    fun vaultWithAppSwitch() = apply {
         clickCreateSetupToken()
         verifySetupTokenCreated()
 
-        Log.d(
-            TAG,
-            "✅ Setup token created successfully with appSwitch: $appSwitchEnabled, " +
-                    "returnToAppStrategy: $returnToAppStrategy"
-        )
+        Log.d(TAG, "✅ Setup token created successfully")
     }
 
     fun clickCreateSetupToken() = apply {

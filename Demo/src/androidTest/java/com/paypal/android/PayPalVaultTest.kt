@@ -41,7 +41,6 @@ class PayPalVaultTest {
 
     @Test
     fun shouldVaultWith(
-        @TestParameter appSwitchEnabled: Boolean,
         /*
           * Want to run CUSTOM_URL_SCHEME tests first to ensure app links are configured before they are executed
           * since app links configuration takes time, running CUSTOM_URL_SCHEME gives extra time
@@ -57,10 +56,7 @@ class PayPalVaultTest {
 
         robot
             .navigateToPayPalVault()
-            .vaultWithAppSwitch(
-                appSwitchEnabled = appSwitchEnabled,
-                returnToAppStrategy = returnToAppStrategy
-            )
+            .vaultWithAppSwitch()
             .startVaultWithLogin(TestConfig.TEST_EMAIL, TestConfig.TEST_PASSWORD)
             .createPaymentToken()
 
