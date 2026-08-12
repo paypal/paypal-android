@@ -3,6 +3,18 @@ package com.paypal.android.paypalpayments
 import android.content.Context
 import com.paypal.android.corepayments.browserswitch.BrowserSwitchSession
 
+/**
+ * Coordinates cancellation signals for at most one active browser-switch launch.
+ *
+ * Session callbacks are correlated by a [Launch] generation, while app returns must match the
+ * active launch's auth state and request code. Replacing or clearing a launch disposes its retained
+ * session, and a session delivered after its launch ended or was replaced is disposed immediately.
+ *
+ * When cancellation return is armed and the cancel URL is not blank, a matching app return observed
+ * before session end causes session end to schedule at most one synthetic cancellation return. A
+ * matching app return handled after session end is reported as [Result.Canceled]; unmatched or
+ * incomplete sequences produce [Result.NoResult].
+ */
 internal class PayPalLaunchCancellationTracker(
     private val returnToAppLauncher: PayPalReturnToAppLauncher
 ) {

@@ -3,6 +3,9 @@ package com.paypal.android.corepayments.browserswitch
 import android.app.Activity
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.paypal.android.corepayments.chromecustomtabs.ChromeCustomTabOptions
+import com.paypal.android.corepayments.chromecustomtabs.ChromeCustomTabsClient
+import com.paypal.android.corepayments.chromecustomtabs.LaunchChromeCustomTabResult
 import com.paypal.android.corepayments.common.DeviceInspector
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

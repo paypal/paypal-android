@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
+import com.paypal.android.corepayments.chromecustomtabs.ChromeCustomTabOptions
+import com.paypal.android.corepayments.chromecustomtabs.ChromeCustomTabsClient
+import com.paypal.android.corepayments.chromecustomtabs.LaunchChromeCustomTabResult
+import com.paypal.android.corepayments.chromecustomtabs.TrackedChromeCustomTabResult
 import com.paypal.android.corepayments.common.DeviceInspector
 import io.mockk.coEvery
 import io.mockk.coVerify

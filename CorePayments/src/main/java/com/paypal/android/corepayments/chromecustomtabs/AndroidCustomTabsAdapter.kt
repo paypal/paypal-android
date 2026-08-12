@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.browserswitch
+package com.paypal.android.corepayments.chromecustomtabs
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,6 +11,7 @@ import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
 import androidx.browser.customtabs.EngagementSignalsCallback
 
+/** AndroidX Browser implementation of the Custom Tabs operations used by the SDK. */
 internal class AndroidCustomTabsAdapter : CustomTabsAdapter {
     override fun getPackageName(context: Context): String? = CustomTabsClient.getPackageName(context, null)
 

@@ -1,4 +1,4 @@
-package com.paypal.android.corepayments.browserswitch
+package com.paypal.android.corepayments.chromecustomtabs
 
 import androidx.browser.customtabs.CustomTabsSession
 

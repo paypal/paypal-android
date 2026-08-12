@@ -1,8 +1,9 @@
-package com.paypal.android.corepayments.browserswitch
+package com.paypal.android.corepayments.chromecustomtabs
 
 import android.content.ActivityNotFoundException
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.paypal.android.corepayments.browserswitch.BrowserSwitchSession
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ChromeCustomTabsClient internal constructor(
