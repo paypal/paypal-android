@@ -11,8 +11,6 @@ import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
 import androidx.browser.customtabs.EngagementSignalsCallback
 
-internal fun createAndroidCustomTabsAdapter(): CustomTabsAdapter = AndroidCustomTabsAdapter()
-
 internal class AndroidCustomTabsAdapter : CustomTabsAdapter {
     override fun getPackageName(context: Context): String? = CustomTabsClient.getPackageName(context, null)
 

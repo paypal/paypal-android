@@ -6,7 +6,7 @@ import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ChromeCustomTabsClient internal constructor(
-    private val adapter: CustomTabsAdapter = createAndroidCustomTabsAdapter(),
+    private val adapter: CustomTabsAdapter = AndroidCustomTabsAdapter(),
     private val serviceHandler: ChromeCustomTabsServiceHandler = ChromeCustomTabsServiceHandler(adapter)
 ) {
 
