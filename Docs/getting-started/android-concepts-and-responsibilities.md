@@ -61,5 +61,5 @@ This page covers the client-side integration model. The server-side order lifecy
 
 ## Next steps
 
-* Start with [Install & Setup](android-install-and-setup.md).
-* New to this guide set? See the [overview](android-readme.md).
+* Start with [Install & Setup](../integration-guides/android-install-and-setup.md).
+* New to this guide set? See the [overview](../README.md).

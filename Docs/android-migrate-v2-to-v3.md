@@ -87,11 +87,11 @@ Use this diff to guide the change:
 
 ## Server-side change
 
-In V2 you set `experienceContext.returnUrl` / `cancelUrl` when creating the order. In V3 those move to the SDK via `ReturnToAppUrlConfig` — **remove them from your Orders v2 create call** for the session-based flow. Your manifest App Link and custom-scheme fallback stay as they were (see [Install & Setup (Android)](android-install-and-setup.md)).
+In V2 you set `experienceContext.returnUrl` / `cancelUrl` when creating the order. In V3 those move to the SDK via `ReturnToAppUrlConfig` — **remove them from your Orders v2 create call** for the session-based flow. Your manifest App Link and custom-scheme fallback stay as they were (see [Install & Setup (Android)](integration-guides/android-install-and-setup.md)).
 
 ## Pay Later / PayPal Credit
 
-In V2, selecting `PAY_LATER` / `PAYPAL_CREDIT` funding required the non-session `start(activity, request: PayPalWebCheckoutRequest, callback)` overload. Both that overload and `PayPalWebCheckoutRequest` were removed in V3. Funding-source selection moves entirely to your server: set `payment_source.paypal.experience_context.payment_method_selected` to `PAYPAL` (default), `PAYPAL_PAY_LATER`, or `PAYPAL_CREDIT` when you create the order — the client-side `createPayPalSession()` → `start(activity, orderId, callback)` flow is identical regardless of funding source. See [PayPal Checkout](android-paypal-checkout.md)'s "Pay Later and PayPal Credit" section for details.
+In V2, selecting `PAY_LATER` / `PAYPAL_CREDIT` funding required the non-session `start(activity, request: PayPalWebCheckoutRequest, callback)` overload. Both that overload and `PayPalWebCheckoutRequest` were removed in V3. Funding-source selection moves entirely to your server: set `payment_source.paypal.experience_context.payment_method_selected` to `PAYPAL` (default), `PAYPAL_PAY_LATER`, or `PAYPAL_CREDIT` when you create the order — the client-side `createPayPalSession()` → `start(activity, orderId, callback)` flow is identical regardless of funding source. See [PayPal Checkout](integration-guides/android-paypal-checkout.md)'s "Pay Later and PayPal Credit" section for details.
 
 ## Verify the upgrade
 
@@ -99,10 +99,10 @@ In V2, selecting `PAY_LATER` / `PAYPAL_CREDIT` funding required the non-session 
 * A sandbox checkout completes end to end: `createPayPalSession()` → `start(activity, orderId, callback)` → `finishStart(intent)` in `onNewIntent` → capture.
 * `PayPalEvent.SESSION_NOT_STARTED` does not fire (confirms `createPayPalSession()` runs before `start()`).
 
-If something breaks after upgrading, see [Troubleshooting (Android)](android-troubleshooting.md).
+If something breaks after upgrading, see [Troubleshooting (Android)](integration-guides/android-troubleshooting.md).
 
 ## Related
 
-* [Install & Setup (Android)](android-install-and-setup.md)
-* [PayPal Checkout — Integration Guide (Android)](android-paypal-checkout.md)
-* [Troubleshooting (Android)](android-troubleshooting.md)
+* [Install & Setup (Android)](integration-guides/android-install-and-setup.md)
+* [PayPal Checkout — Integration Guide (Android)](integration-guides/android-paypal-checkout.md)
+* [Troubleshooting (Android)](integration-guides/android-troubleshooting.md)
