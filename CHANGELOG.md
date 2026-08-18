@@ -6,6 +6,8 @@
   * Removed deprecated `CardClient.finishApproveOrder(intent, authState)` — use `CardClient.finishApproveOrder(intent)` instead
   * Removed deprecated `CardClient.finishVault(intent, authState)` — use `CardClient.finishVault(intent)` instead
   * Removed `authState` from public API of `CardPresentAuthChallengeResult.Success`
+* CorePayments
+  * Renamed `Environment` to `CoreEnvironment` and `CoreConfig.environment` to `CoreConfig.coreEnvironment`
 * PayPalPayments
   * Renamed the `PayPalWebPayments` module to `PayPalPayments` (Maven artifact `com.paypal.android:paypal-payments`, package `com.paypal.android.paypalpayments`)
   * Renamed `PayPalWebCheckoutClient` to `PayPalClient`, `PayPalWebLauncher` to `PayPalLauncher`, `PayPalWebCheckoutError(Code)` to `PayPalError(Code)`, `PayPalWebCheckoutSessionStore` to `PayPalSessionStore`, `PayPalWebCheckoutFinishStartResult` to `PayPalFinishStartResult`, `PayPalWebCheckoutFinishVaultResult` to `PayPalFinishVaultResult`, and `PayPalWebCheckoutFundingSource` to `PayPalCheckoutFundingSource`

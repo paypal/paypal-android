@@ -2,7 +2,7 @@ package com.paypal.android.corepayments.api
 
 import android.content.Context
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import com.paypal.android.corepayments.Http
 import com.paypal.android.corepayments.HttpRequest
 import com.paypal.android.corepayments.HttpRoundTripTiming
@@ -52,7 +52,7 @@ class CreateShopperSessionWithAppSwitchEligibilityAPIUnitTest {
         context = mockk(relaxed = true)
         mockHttp = mockk(relaxed = true)
 
-        val coreConfig = CoreConfig("test-client-id", "fake-merchant-id", Environment.SANDBOX)
+        val coreConfig = CoreConfig("test-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
         graphQLClient = GraphQLClient(coreConfig, mockHttp)
 
         resourceLoader = mockk(relaxed = true)

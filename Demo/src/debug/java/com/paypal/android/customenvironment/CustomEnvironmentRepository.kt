@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.paypal.android.api.services.MerchantIntegration
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -67,8 +67,8 @@ class CustomEnvironmentRepository @Inject constructor(
 
     /**
      * Returns a [CoreConfig] for the active environment.
-     * - [SelectedEnvironment.LIVE] / [SelectedEnvironment.SANDBOX] → the corresponding [Environment].
-     * - [SelectedEnvironment.CUSTOM] with URLs configured → [Environment.CUSTOM] with those URLs.
+     * - [SelectedEnvironment.LIVE] / [SelectedEnvironment.SANDBOX] → the corresponding [CoreEnvironment].
+     * - [SelectedEnvironment.CUSTOM] with URLs configured → [CoreEnvironment.CUSTOM] with those URLs.
      * - [SelectedEnvironment.CUSTOM] without URLs → falls back to [fallbackConfig].
      */
     fun getCoreConfig(fallbackConfig: CoreConfig): CoreConfig {
@@ -78,20 +78,20 @@ class CustomEnvironmentRepository @Inject constructor(
                 CoreConfig(
                     clientId = fallbackConfig.clientId,
                     fallbackConfig.merchantId,
-                    environment = Environment.LIVE
+                    coreEnvironment = CoreEnvironment.LIVE
                 )
             SelectedEnvironment.SANDBOX ->
                 CoreConfig(
                     clientId = fallbackConfig.clientId,
                     fallbackConfig.merchantId,
-                    environment = Environment.SANDBOX
+                    coreEnvironment = CoreEnvironment.SANDBOX
                 )
             SelectedEnvironment.CUSTOM -> if (settings.isValidEnvironment) {
-                Environment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
-                Environment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
+                CoreEnvironment.customRestUrl = settings.customSdkRestUrl.trim().trimEnd('/')
+                CoreEnvironment.customGraphQLUrl = settings.customSdkGraphQLUrl.trim().trimEnd('/')
                 val resolvedClientId = settings.customClientId.trim().ifBlank { fallbackConfig.clientId }
                 val resolvedMerchantId = settings.customMerchantId.trim().ifBlank { fallbackConfig.merchantId }
-                CoreConfig(clientId = resolvedClientId, resolvedMerchantId, environment = Environment.CUSTOM)
+                CoreConfig(clientId = resolvedClientId, resolvedMerchantId, coreEnvironment = CoreEnvironment.CUSTOM)
             } else {
                 fallbackConfig
             }
