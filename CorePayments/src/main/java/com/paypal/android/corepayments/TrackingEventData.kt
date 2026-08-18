@@ -60,5 +60,53 @@ internal data class TrackingEventParams(
     @SerialName("button_type")
     val buttonType: String? = null,
     @SerialName("app_switch_enabled")
-    val appSwitchEnabled: Boolean = false
+    val appSwitchEnabled: Boolean? = null,
+    @SerialName("shopper_session_id")
+    val shopperSessionId: String? = null,
+    @SerialName("shopper_session_expiration_at")
+    val shopperSessionExpirationAt: String? = null,
+    @SerialName("matched_authentication_methods")
+    val matchedAuthenticationMethods: List<String>? = null,
+    @SerialName("app_switch_url")
+    val appSwitchUrl: String? = null,
+    @SerialName("checkout_fallback_url")
+    val fallbackUrl: String? = null,
+    @SerialName("error_desc")
+    val errorDescription: String? = null,
+    @SerialName("is_cached_session")
+    val isCachedSession: Boolean? = null,
+    @SerialName("is_vault")
+    val isVault: Boolean? = null,
+    @SerialName("start_time")
+    val startTime: String? = null,
+    @SerialName("end_time")
+    val endTime: String? = null,
+    @SerialName("endpoint")
+    val endpoint: String? = null,
+    @SerialName("presentation_type")
+    val presentationType: String? = null,
+    @SerialName("flow")
+    val flow: String? = null,
+    @SerialName("app_switch_eligible")
+    val appSwitchEligible: Boolean? = null,
+    @SerialName("ineligible_reason")
+    val ineligibleReason: String? = null,
+    @SerialName("merchant_id")
+    val merchantId: String? = null,
+    @SerialName("bn_code")
+    val bnCode: String? = null,
+    @SerialName("client_id")
+    val eventClientId: String? = null,
+    @SerialName("user_action")
+    val userAction: String? = null,
+    @SerialName("paypal_installed")
+    val paypalInstalled: String? = null,
+    @SerialName("return_app_url")
+    val returnAppUrl: String? = null,
+    @SerialName("cancel_app_url")
+    val cancelAppUrl: String? = null,
+    @SerialName("fallback_scheme_url")
+    val fallbackSchemeUrl: String? = null,
+    @SerialName("link_type")
+    val linkType: String? = null
 )

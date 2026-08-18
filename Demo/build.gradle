@@ -124,7 +124,7 @@ kapt {
 dependencies {
     implementation project(':CardPayments')
     implementation project(':FraudProtection')
-    implementation project(':PayPalWebPayments')
+    implementation project(':PayPalPayments')
     implementation project(':PaymentButtons')
     implementation project(':Venmo')
 

@@ -21,14 +21,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.paypal.android.BuildConfig
+import com.paypal.android.customenvironment.SettingsView
 import com.paypal.android.models.TestCard
 import com.paypal.android.ui.approveorder.ApproveOrderView
 import com.paypal.android.ui.approveorder.ApproveOrderViewModel
 import com.paypal.android.ui.features.FeaturesView
 import com.paypal.android.ui.paypalbuttons.PayPalButtonsView
 import com.paypal.android.ui.paypalstaticbuttons.PayPalStaticButtonsView
-import com.paypal.android.ui.paypalweb.PayPalCheckoutView
-import com.paypal.android.ui.paypalwebvault.PayPalVaultView
+import com.paypal.android.ui.paypal.PayPalCheckoutView
+import com.paypal.android.ui.paypalvault.PayPalVaultView
 import com.paypal.android.ui.selectcard.SelectCardView
 import com.paypal.android.ui.vaultcard.VaultCardView
 import com.paypal.android.ui.vaultcard.VaultCardViewModel
@@ -59,12 +61,18 @@ fun DemoApp() {
             topBar = {
                 val route = navBackStackEntry?.destination?.route
                 val titleText = DemoAppDestinations.titleForDestination(route)
+                val showSettingsIcon = BuildConfig.DEBUG && route != DemoAppDestinations.SETTINGS
                 DemoAppTopBar(
                     title = titleText,
                     shouldDisplayBackButton = shouldDisplayBackButton,
                     onBackButtonClick = {
                         val destinationId = navController.graph.startDestinationId
                         navController.popBackStack(destinationId, false)
+                    },
+                    onSettingsClick = if (showSettingsIcon) {
+                        { navController.navigate(DemoAppDestinations.SETTINGS) }
+                    } else {
+                        null
                     }
                 )
             },
@@ -106,10 +114,10 @@ fun DemoApp() {
                         onUseTestCardClick = { navController.navigate(DemoAppDestinations.SELECT_TEST_CARD) }
                     )
                 }
-                composable(DemoAppDestinations.PAYPAL) {
+                composable(DemoAppDestinations.PAYPAL_CHECKOUT) {
                     PayPalCheckoutView()
                 }
-                composable(DemoAppDestinations.PAYPAL_WEB_VAULT) {
+                composable(DemoAppDestinations.PAYPAL_VAULT) {
                     PayPalVaultView()
                 }
                 composable(DemoAppDestinations.PAYPAL_BUTTONS) {
@@ -124,6 +132,11 @@ fun DemoApp() {
                         prevBackStackEntry?.savedStateHandle?.set("test_card_id", testCardId)
                         navController.popBackStack()
                     })
+                }
+                if (BuildConfig.DEBUG) {
+                    composable(DemoAppDestinations.SETTINGS) {
+                        SettingsView()
+                    }
                 }
             }
         }
