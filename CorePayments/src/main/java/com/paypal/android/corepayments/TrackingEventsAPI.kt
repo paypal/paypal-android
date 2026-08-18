@@ -80,7 +80,7 @@ internal class TrackingEventsAPI constructor(
 
     companion object {
         fun toLiveConfig(config: CoreConfig): CoreConfig =
-            CoreConfig(config.clientId, config.merchantId, environment = Environment.LIVE)
+            CoreConfig(config.clientId, config.merchantId, coreEnvironment = CoreEnvironment.LIVE)
 
         const val PPCP_CLIENTS_SDK = "ppcpclientsdk"
         const val EVENT_SOURCE_MOBILE_NATIVE = "mobile-native"

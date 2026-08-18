@@ -1,6 +1,6 @@
 package com.paypal.android.corepayments
 
-enum class Environment(internal open val url: String, internal open val graphQLEndpoint: String) {
+enum class CoreEnvironment(internal open val url: String, internal open val graphQLEndpoint: String) {
     // TODO: Look into improving the quality of this.
     //  CUSTOM is supposed to be static, but values are dynamic.
     //  url and graphQLEndpoint can be separated out, so that we don't have them dependent on the enum.

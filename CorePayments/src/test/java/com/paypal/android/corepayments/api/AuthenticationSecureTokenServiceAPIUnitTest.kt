@@ -2,7 +2,7 @@ package com.paypal.android.corepayments.api
 
 import com.paypal.android.corepayments.APIRequest
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import com.paypal.android.corepayments.HttpMethod
 import com.paypal.android.corepayments.HttpResponse
 import com.paypal.android.corepayments.RestClient
@@ -30,7 +30,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
 
     @Before
     fun beforeEach() {
-        coreConfig = CoreConfig("test-client-id", "fake-merchant-id", Environment.SANDBOX)
+        coreConfig = CoreConfig("test-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
         restClient = mockk(relaxed = true)
         sut = AuthenticationSecureTokenServiceAPI(coreConfig, restClient)
     }
@@ -205,7 +205,7 @@ class AuthenticationSecureTokenServiceAPIUnitTest {
     fun `createLowScopedAccessToken() creates proper Basic Auth header from client ID`() = runTest {
         // Given
         val clientId = "test-client-123"
-        val configWithCustomClientId = CoreConfig(clientId, "fake-merchant-id", Environment.LIVE)
+        val configWithCustomClientId = CoreConfig(clientId, "fake-merchant-id", CoreEnvironment.LIVE)
         val sutWithCustomConfig =
             AuthenticationSecureTokenServiceAPI(configWithCustomClientId, restClient)
 
