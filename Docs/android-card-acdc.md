@@ -87,8 +87,12 @@ cardClient.approveOrder(request, object : CardApproveOrderCallback {
     override fun onCardApproveOrderResult(result: CardApproveOrderResult) {
         when (result) {
             is CardApproveOrderResult.Success -> captureOrder(result.orderId)
-            is CardApproveOrderResult.AuthorizationRequired ->
-                cardClient.presentAuthChallenge(activity, result.authChallenge)
+            is CardApproveOrderResult.AuthorizationRequired -> {
+                when (val presentResult = cardClient.presentAuthChallenge(activity, result.authChallenge)) {
+                    is CardPresentAuthChallengeResult.Success -> Unit  // challenge launched; resolve it in onNewIntent
+                    is CardPresentAuthChallengeResult.Failure -> showError(presentResult.error)
+                }
+            }
             is CardApproveOrderResult.Failure -> showError(result.error)
         }
     }
@@ -152,8 +156,12 @@ cardClient.vault(vaultRequest, object : CardVaultCallback {
     override fun onCardVaultResult(result: CardVaultResult) {
         when (result) {
             is CardVaultResult.Success -> savePaymentToken(result.setupTokenId)
-            is CardVaultResult.AuthorizationRequired ->
-                cardClient.presentAuthChallenge(activity, result.authChallenge)
+            is CardVaultResult.AuthorizationRequired -> {
+                when (val presentResult = cardClient.presentAuthChallenge(activity, result.authChallenge)) {
+                    is CardPresentAuthChallengeResult.Success -> Unit  // challenge launched; resolve it in onNewIntent
+                    is CardPresentAuthChallengeResult.Failure -> showError(presentResult.error)
+                }
+            }
             is CardVaultResult.Failure -> showError(result.error)
         }
     }
@@ -164,11 +172,12 @@ cardClient.vault(vaultRequest, object : CardVaultCallback {
 
 ## Result handling
 
-Card splits the result across two calls when a challenge is required: `approveOrder()` returns whether a challenge is needed; `finishApproveOrder()` carries the outcome after the buyer returns. (Vault uses `CardVaultResult` / `finishVault()` with the same shape.)
+Card splits the result across three calls when a challenge is required: `approveOrder()` returns whether a challenge is needed; `presentAuthChallenge()` returns whether the challenge was successfully launched; `finishApproveOrder()` carries the outcome after the buyer returns. (Vault uses `CardVaultResult` / `finishVault()` with the same shape.)
 
 | Type | Cases | What you do |
 | --- | --- | --- |
 | `CardApproveOrderResult` / `CardVaultResult` | `Success` / `AuthorizationRequired(authChallenge)` / `Failure(error)` | Success: capture (or store the token). AuthorizationRequired: call `presentAuthChallenge()`. Failure: show the error. |
+| `CardPresentAuthChallengeResult` | `Success` / `Failure(error)` | Returned by `presentAuthChallenge()` itself. Success: the challenge was launched — wait for the buyer to return via `onNewIntent`. Failure: the challenge could not be launched; show the error instead of waiting for a return intent. |
 | `CardFinishApproveOrderResult` / `CardFinishVaultResult` | `Success` / `Failure(error)` / `Canceled` / `NoResult` | Success: capture/store. Canceled: return to checkout. Failure: show the error. NoResult: the intent was not a card 3DS return — ignore it. |
 
 > **Platform note:** Android opens whatever challenge URL comes back on the `payer-action` link. (iOS additionally validates that the challenge URL is a genuine PayPal 3DS page before opening it.)

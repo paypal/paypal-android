@@ -19,15 +19,15 @@ Common problems integrating the PayPal Mobile SDK V3.0.0 on Android, organized b
 
 ## Setup and initialization
 
-`SESSION_NOT_STARTED` returned on `start()` or `vault()`
+`PayPalEvent.SESSION_NOT_STARTED` reported, and the `start()`/`vault()` callback receives a `PayPalError.sessionNotCreatedError` failure
 
 * Likely cause: `createPayPalSession()` was not called first.
-* Fix: call `createPayPalSession(userIdentity, urlConfig, userAction)` in your button's `onClick`, before or alongside order creation. See [PayPal Checkout](android-paypal-checkout.md).
+* Fix: call `createPayPalSession(tokenType, userIdentity, urlConfig, userAction)` in your button's `onClick`, before or alongside order creation. See [PayPal Checkout](android-paypal-checkout.md).
 
 **Auth or configuration errors right after** `start()`
 
-* Likely cause: wrong `environment`, or an invalid/missing `merchantID` (required in V3 and distinct from your client ID).
-* Fix: recheck `CoreConfig` — client ID, `merchantID`, and `Environment.SANDBOX` vs `.LIVE`.
+* Likely cause: wrong `environment`, or an invalid/missing `merchantId` (required in V3 and distinct from your client ID).
+* Fix: recheck `CoreConfig` — `clientId`, `merchantId`, and `Environment.SANDBOX` vs `.LIVE`.
 
 ## Return and redirect
 
@@ -36,10 +36,10 @@ Common problems integrating the PayPal Mobile SDK V3.0.0 on Android, organized b
 * Likely cause: your App Link is not verified, or the return/cancel URLs do not match the host + path prefix your activity is registered for.
 * Fix: verify `/.well-known/assetlinks.json` (with your app's SHA-256), `android:autoVerify="true"`, and _Open supported links_ enabled; keep return/cancel URLs under the registered host + prefix. The required `fallbackSchemeUrl` covers App Link delivery failures.
 
-**The result callback never fires after the buyer returns**
+**No `PayPalFinishStartResult` after the buyer returns**
 
-* Likely cause: the return intent was not forwarded, or the activity relaunches instead of resuming.
-* Fix: call `checkoutClient.handleReturnUrl(intent)` in `onNewIntent`, and set the return activity to `launchMode="singleTop"`.
+* Likely cause: the return intent was not forwarded, or the activity relaunches instead of resuming. Remember that `start()`'s own callback only reports `PayPalPresentAuthChallengeResult` (`Success`/`Failure`) — whether checkout launched, not the outcome; the actual `Success`/`Canceled`/`Failure`/`NoResult` outcome comes from `finishStart(intent)`.
+* Fix: call `checkoutClient.finishStart(intent)` in `onNewIntent`, and set the return activity to `launchMode="singleTop"`.
 
 **Checkout stayed in the browser instead of opening the PayPal app**
 

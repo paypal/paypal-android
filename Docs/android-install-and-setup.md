@@ -16,7 +16,7 @@ dependencies {
     implementation 'com.paypal.android:fraud-protection:X.Y.Z'      // device data (risk signals)
 
     // Add the module(s) for the method(s) you integrate:
-    implementation 'com.paypal.android:paypal-web-payments:X.Y.Z'   // PayPal Checkout + Vault
+    implementation 'com.paypal.android:paypal-payments:X.Y.Z'       // PayPal Checkout + Vault
     implementation 'com.paypal.android:payment-buttons:X.Y.Z'       // PayPal buttons
     // implementation 'com.paypal.android:venmo:X.Y.Z'             // Venmo Checkout
     // implementation 'com.paypal.android:card-payments:X.Y.Z'     // Card (ACDC)
@@ -27,12 +27,12 @@ Replace `X.Y.Z` with the current V3 release.
 
 ## Step 2: Initialize CoreConfig
 
-Every client (`PayPalWebClient`, `VenmoClient`, `CardClient`) is built from a single `CoreConfig`. No network calls occur at initialization.
+Every client (`PayPalClient`, `VenmoClient`, `CardClient`) is built from a single `CoreConfig`. No network calls occur at initialization.
 
 ```kotlin
 val config = CoreConfig(
-    clientID    = "<YOUR_CLIENT_ID>",
-    merchantID  = "<YOUR_MERCHANT_ID>",   // Required — encrypted merchant account ID
+    clientId    = "<YOUR_CLIENT_ID>",
+    merchantId  = "<YOUR_MERCHANT_ID>",   // Required — encrypted merchant account ID, no default
     environment = Environment.SANDBOX,    // Environment.LIVE for production
     bnCode      = null                    // Partner integrations only
 )

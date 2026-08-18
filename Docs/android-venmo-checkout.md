@@ -1,7 +1,5 @@
 This guide shows you how to accept a **Venmo payment** (One-Time Checkout) in your Android app with PayPal Mobile SDK V3.0.0. Venmo checkout uses its own client, `VenmoClient`, and reuses the App Link and fallback scheme you registered in Install & Setup. When the buyer taps your Venmo button, checkout opens the Venmo app if it is installed and the buyer is eligible; otherwise it falls back to a Chrome Custom Tab automatically. **Venmo supports One-Time Checkout only** — vault flows are not supported for Venmo.
 
-> **Status — pre-release.** The `:Venmo` module is present in the Android SDK repo (`main`) but does not yet appear in a published release changelog. Treat this guide as pre-release and confirm the module is included in the SDK version you use. (On iOS, Venmo is not in the published SDK at all — see the iOS guide's status note.)
-
 > **Before you start:** complete [Install & Setup (Android)](android-install-and-setup.md).
 
 ## Overview
@@ -106,8 +104,8 @@ override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     setIntent(intent)
     when (val result = venmoClient.finishStart(intent)) {
-        is VenmoFinishStartResult.Success  -> captureOrder(result.token)   // result.payerId also available
-        is VenmoFinishStartResult.Canceled -> showCheckoutScreen()
+        is VenmoFinishStartResult.Success  -> captureOrder(result.token)   // result.payerId, result.approved also available
+        is VenmoFinishStartResult.Canceled -> showCheckoutScreen()         // result.orderId also available, if present
         is VenmoFinishStartResult.Failure  -> showError(result.error)
         is VenmoFinishStartResult.NoResult -> Unit                         // unrelated intent; ignore
     }
@@ -130,7 +128,7 @@ Venmo splits the result across two calls: `VenmoStartResult` tells you whether t
 | Type | Cases | What you do |
 | --- | --- | --- |
 | `VenmoStartResult` | `Success` / `Failure(error)` | Confirms the switch/Custom Tab opened. A failure here means checkout never launched — show the error. |
-| `VenmoFinishStartResult` | `Success(token, payerId)` / `Canceled` / `Failure(error)` / `NoResult` | Success: capture the order. Canceled: return to your checkout screen. Failure: show the error. NoResult: the intent was not a Venmo return — ignore it. |
+| `VenmoFinishStartResult` | `Success(token, payerId, approved)` / `Canceled(orderId)` / `Failure(error)` / `NoResult` | Success: capture the order; `approved` reflects whether the buyer approved the payment. Canceled: return to your checkout screen — `orderId` is included when available. Failure: show the error. NoResult: the intent was not a Venmo return — ignore it. |
 
 ## Testing and go-live
 
@@ -145,7 +143,7 @@ Follow the same physical-device approach as PayPal App Switch, with two differen
 
 ### Go live
 
-- [ ] Confirm the Venmo module is in your SDK version (this guide is pre-release — see the status note above).
+- [ ] Confirm the `com.paypal.android:venmo` module is included in your SDK dependency.
 - [ ] Gate the Venmo button on `isEligible()`.
 - [ ] Switch `Environment.SANDBOX` to `Environment.LIVE` and use your live client ID and merchant ID.
 - [ ] Verify the App Link return and custom-scheme fallback work in a release build.

@@ -1,20 +1,18 @@
-How to move an existing **PayPal Mobile SDK V2 (2.x)** Android integration to **V3.0.0**. The largest changes are in PayPal Checkout: the client was renamed, checkout is now session-first, `CoreConfig` requires a `merchantID`, and return URLs moved out of the Orders API into a URL config.
-
-> **Preview — confirm before you rely on it.** V3.0.0 is not yet released (published `main` is 2.3.0). This guide is derived from the current V3 integration guides and the published 2.x API; confirm the exact deltas against the official V3 release notes when V3 ships.
+How to move an existing **PayPal Mobile SDK V2 (2.x)** Android integration to **V3.0.0**. The largest changes are in PayPal Checkout: the client was renamed, checkout is now session-first, `CoreConfig` requires a `merchantId`, and return URLs moved out of the Orders API into a URL config.
 
 ## What's changed (PayPal Checkout)
 
 | Area | V2 (2.x) | V3 |
 | --- | --- | --- |
-| Client class | `PayPalWebCheckoutClient` | `PayPalWebClient` |
-| `CoreConfig` | client ID + environment | adds **required** `merchantID`, optional `bnCode` |
-| Session | none | `createPayPalSession()` is **required before** `start()` |
+| Client class | `PayPalWebCheckoutClient` | `PayPalClient` |
+| `CoreConfig` | `clientId` + `environment` | adds **required** `merchantId`, optional `bnCode` |
+| Session | none | `createPayPalSession()` is **required before** `start()` / `vault()` |
 | Return URLs | `urlScheme` on the client + `experienceContext` URLs in the Orders API | `ReturnToAppUrlConfig` passed to `createPayPalSession()`; **not** set in the Orders API |
-| `start()` | `start(activity, request)` | `start(orderId, callback)` |
-| Result | `PayPalWebCheckoutFinishStartResult` via `finishStart(intent)` | `PayPalWebCheckoutResult` (`Success`/`Cancel`/`Failure`) via `PayPalWebStartCallback` |
-| Return handling | `finishStart(intent)` returns the result | `handleReturnUrl(intent)` resolves the `start()` callback |
+| `start()` | `start(activity, request)` | `start(activity, orderId, callback)` |
+| Result | `PayPalWebCheckoutFinishStartResult` via `finishStart(intent)` | `start()`'s callback reports `PayPalPresentAuthChallengeResult` (`Success`/`Failure`) — whether the checkout UI was presented, nothing more. The actual checkout outcome — `PayPalFinishStartResult` (`Success`/`Canceled`/`Failure`/`NoResult`) — is delivered separately by `finishStart(intent)` when the buyer returns |
+| Return handling | `finishStart(intent)` returns the result | Same method name, `finishStart(intent)`, called from `onNewIntent`; now returns `PayPalFinishStartResult?` |
 
-Card (ACDC) and Venmo keep their own clients; the main change they inherit is the `merchantID` on `CoreConfig`. Card's `approveOrder()` / `presentAuthChallenge()` / `finishApproveOrder()` result-type pattern is unchanged from 2.x.
+Card (ACDC) and Venmo keep their own clients; the main change they inherit is the `merchantId` on `CoreConfig`. Card's `approveOrder()` / `presentAuthChallenge()` / `finishApproveOrder()` result-type pattern is unchanged from 2.x.
 
 ## Before you upgrade
 
@@ -23,11 +21,11 @@ Card (ACDC) and Venmo keep their own clients; the main change they inherit is th
 
 ## Update the dependency
 
-Bump each PayPal module to the V3 release (module names are unchanged):
+Bump each PayPal module to the V3 release. The PayPal Checkout artifact is renamed from `paypal-web-payments` to `paypal-payments`; the other module names are unchanged:
 
 ```groovy
 dependencies {
-    implementation 'com.paypal.android:paypal-web-payments:3.0.0'
+    implementation 'com.paypal.android:paypal-payments:3.0.0'   // was paypal-web-payments in V2
     implementation 'com.paypal.android:payment-buttons:3.0.0'
     implementation 'com.paypal.android:fraud-protection:3.0.0'
 }
@@ -39,13 +37,13 @@ Use this diff to guide the change:
 
 ```diff
   val config = CoreConfig(
-      clientID = "<CLIENT_ID>",
-+     merchantID = "<MERCHANT_ID>",   // now required, distinct from your client ID
+      clientId = "<CLIENT_ID>",
++     merchantId = "<MERCHANT_ID>",   // now required, distinct from your client ID
       environment = Environment.SANDBOX
   )
 
 - val client = PayPalWebCheckoutClient(context, config, "my-url-scheme")
-+ val client = PayPalWebClient(context, config)
++ val client = PayPalClient(context, config)
 + val urlConfig = ReturnToAppUrlConfig(
 +     returnAppUrl = "https://example.com/merchant-app/return",
 +     cancelAppUrl = "https://example.com/merchant-app/cancel",
@@ -55,18 +53,18 @@ Use this diff to guide the change:
   fun onPayPalButtonTapped() {
 +     // NEW: prepare the session before start()
 +     client.createPayPalSession(
-+         userIdentity = PayPalUserIdentity.Email(email = "buyer@example.com", phone = null),
++         tokenType = TokenType.ORDER_ID,
++         userIdentity = PayPalUserIdentity(email = "buyer@example.com"),
 +         urlConfig = urlConfig,
 +         userAction = PayPalUserAction.CONTINUE
 +     )
       val orderId = myServer.createOrder()
 -     client.start(this, PayPalWebCheckoutRequest(orderId)) { /* PayPalPresentAuthChallengeResult */ }
-+     client.start(orderId, object : PayPalWebStartCallback {
-+         override fun onPayPalWebStartResult(result: PayPalWebCheckoutResult) {
++     client.start(this, orderId, object : PayPalResultCallback {
++         override fun onPayPalResult(result: PayPalPresentAuthChallengeResult) {
 +             when (result) {
-+                 is PayPalWebCheckoutResult.Success -> captureOrder(result.orderId)
-+                 is PayPalWebCheckoutResult.Cancel  -> showCheckoutScreen()
-+                 is PayPalWebCheckoutResult.Failure -> showError(result.error)
++                 is PayPalPresentAuthChallengeResult.Success -> { /* checkout UI presented; the outcome arrives in onNewIntent */ }
++                 is PayPalPresentAuthChallengeResult.Failure -> showError(result.error)
 +             }
 +         }
 +     })
@@ -76,7 +74,14 @@ Use this diff to guide the change:
       super.onNewIntent(intent)
       setIntent(intent)
 -     client.finishStart(intent)?.let { /* PayPalWebCheckoutFinishStartResult */ }
-+     client.handleReturnUrl(intent)   // resolves the start() callback
++     client.finishStart(intent)?.let { result ->
++         when (result) {
++             is PayPalFinishStartResult.Success -> captureOrder(result.orderId)
++             is PayPalFinishStartResult.Canceled -> showCheckoutScreen()
++             is PayPalFinishStartResult.Failure -> showError(result.error)
++             PayPalFinishStartResult.NoResult -> { /* intent was not a checkout return */ }
++         }
++     }
   }
 ```
 
@@ -86,13 +91,13 @@ In V2 you set `experienceContext.returnUrl` / `cancelUrl` when creating the orde
 
 ## Pay Later / PayPal Credit
 
-Funding-source selection still uses the non-session `start(activity, request: PayPalWebCheckoutRequest, callback)` overload in V3 (it was not removed). If you selected `PAY_LATER` / `PAYPAL_CREDIT` in V2, that code keeps working; the session-based `start(orderId, callback)` hardcodes `PAYPAL`.
+In V2, selecting `PAY_LATER` / `PAYPAL_CREDIT` funding required the non-session `start(activity, request: PayPalWebCheckoutRequest, callback)` overload. Both that overload and `PayPalWebCheckoutRequest` were removed in V3. Funding-source selection moves entirely to your server: set `payment_source.paypal.experience_context.payment_method_selected` to `PAYPAL` (default), `PAYPAL_PAY_LATER`, or `PAYPAL_CREDIT` when you create the order — the client-side `createPayPalSession()` → `start(activity, orderId, callback)` flow is identical regardless of funding source. See [PayPal Checkout](android-paypal-checkout.md)'s "Pay Later and PayPal Credit" section for details.
 
 ## Verify the upgrade
 
-* The project compiles with `PayPalWebClient` and no references to `PayPalWebCheckoutClient` remain.
-* A sandbox checkout completes end to end: `createPayPalSession()` → `start(orderId, callback)` → return via `handleReturnUrl(intent)` → capture.
-* `SESSION_NOT_STARTED` does not occur (confirms `createPayPalSession()` runs before `start()`).
+* The project compiles with `PayPalClient` and no references to `PayPalWebCheckoutClient` remain.
+* A sandbox checkout completes end to end: `createPayPalSession()` → `start(activity, orderId, callback)` → `finishStart(intent)` in `onNewIntent` → capture.
+* `PayPalEvent.SESSION_NOT_STARTED` does not fire (confirms `createPayPalSession()` runs before `start()`).
 
 If something breaks after upgrading, see [Troubleshooting (Android)](android-troubleshooting.md).
 
