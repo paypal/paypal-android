@@ -1,6 +1,6 @@
 # PayPal Android SDK Release Notes
 
-## Unreleased
+## 3.0.0 (2026-08-18)
 
 * CardPayments
   * Removed deprecated `CardClient.finishApproveOrder(intent, authState)` — use `CardClient.finishApproveOrder(intent)` instead
