@@ -32,7 +32,7 @@ class TrackingEventsAPIUnitTest {
         clientOS = "fake client OS"
     )
 
-    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
 
     private lateinit var restClient: RestClient
     private lateinit var apiRequestSlot: CapturingSlot<APIRequest>
@@ -94,6 +94,76 @@ class TrackingEventsAPIUnitTest {
             """
 
         val actualBody = apiRequest.body!!
+        JSONAssert.assertEquals(JSONObject(expectedBody), JSONObject(actualBody), false)
+    }
+
+    @Test
+    fun `sendEvent() serializes latency fields with the expected JSON keys`() = runTest {
+        coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
+
+        val event = AnalyticsEventData(
+            environment = "fake-environment",
+            eventName = "paypal-payments:api-request-latency",
+            timestamp = 123L,
+            orderId = null,
+            appSwitchEnabled = false,
+            startTime = 1000L,
+            endTime = 1500L,
+            endpoint = "/v2/checkout/orders",
+            presentationType = "app-switch",
+            flow = "checkout"
+        )
+        sut.sendEvent(event, deviceData)
+
+        // language=JSON
+        val expectedBody = """
+            {
+                "events": {
+                    "event_params": {
+                        "event_name": "paypal-payments:api-request-latency",
+                        "start_time": "1000",
+                        "end_time": "1500",
+                        "endpoint": "/v2/checkout/orders",
+                        "presentation_type": "app-switch",
+                        "flow": "checkout"
+                    }
+                }
+            }
+            """
+
+        val actualBody = apiRequestSlot.captured.body!!
+        JSONAssert.assertEquals(JSONObject(expectedBody), JSONObject(actualBody), false)
+    }
+
+    @Test
+    fun `sendEvent() serializes linkType under the link_type JSON key`() = runTest {
+        coEvery { restClient.send(capture(apiRequestSlot)) } returns httpSuccessResponse
+
+        val event = AnalyticsEventData(
+            environment = "fake-environment",
+            eventName = "paypal-payments:checkout:app-switch:started",
+            timestamp = 123L,
+            orderId = "fake-order-id",
+            appSwitchEnabled = true,
+            linkType = "applink"
+        )
+        sut.sendEvent(event, deviceData)
+
+        // language=JSON
+        val expectedBody = """
+            {
+                "events": {
+                    "event_params": {
+                        "event_name": "paypal-payments:checkout:app-switch:started",
+                        "order_id": "fake-order-id",
+                        "app_switch_enabled": true,
+                        "link_type": "applink"
+                    }
+                }
+            }
+            """
+
+        val actualBody = apiRequestSlot.captured.body!!
         JSONAssert.assertEquals(JSONObject(expectedBody), JSONObject(actualBody), false)
     }
 }

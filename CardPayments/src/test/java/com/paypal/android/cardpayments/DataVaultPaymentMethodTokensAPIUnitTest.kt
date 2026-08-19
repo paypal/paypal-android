@@ -8,7 +8,7 @@ import com.paypal.android.cardpayments.api.UpdateSetupTokenResponse
 import com.paypal.android.cardpayments.api.UpdateSetupTokenVariables
 import com.paypal.android.corepayments.Address
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import com.paypal.android.corepayments.LoadRawResourceResult
 import com.paypal.android.corepayments.PayPalSDKError
 import com.paypal.android.corepayments.ResourceLoader
@@ -36,7 +36,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class DataVaultPaymentMethodTokensAPIUnitTest {
 
-    private val coreConfig = CoreConfig("fake-client-id", Environment.SANDBOX)
+    private val coreConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
 
     private val resourceLoader = ResourceLoader()
     private val context = ApplicationProvider.getApplicationContext<Application>()

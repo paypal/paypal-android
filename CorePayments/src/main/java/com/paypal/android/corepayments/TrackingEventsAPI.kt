@@ -25,7 +25,6 @@ internal class TrackingEventsAPI constructor(
         event: AnalyticsEventData,
         deviceData: DeviceData
     ): APIRequest {
-
         val eventParams = TrackingEventParams(
             appId = deviceData.appId,
             appName = deviceData.appName,
@@ -45,7 +44,31 @@ internal class TrackingEventsAPI constructor(
             tenantName = TENANT_NAME_PAYPAL,
             orderId = event.orderId,
             buttonType = event.buttonType,
-            appSwitchEnabled = event.appSwitchEnabled
+            appSwitchEnabled = event.appSwitchEnabled,
+            shopperSessionId = event.shopperSessionId,
+            shopperSessionExpirationAt = event.shopperSessionExpiration,
+            matchedAuthenticationMethods = event.matchedAuthenticationMethods,
+            appSwitchUrl = event.appSwitchUrl,
+            fallbackUrl = event.checkoutFallbackUrl,
+            errorDescription = event.errorDescription,
+            isCachedSession = event.isCachedSession,
+            isVault = event.isVault,
+            startTime = event.startTime?.toString(),
+            endTime = event.endTime?.toString(),
+            endpoint = event.endpoint,
+            presentationType = event.presentationType,
+            flow = event.flow,
+            appSwitchEligible = event.appSwitchEligible,
+            ineligibleReason = event.ineligibleReason,
+            merchantId = event.merchantId,
+            bnCode = event.bnCode,
+            eventClientId = event.clientId,
+            userAction = event.userAction,
+            paypalInstalled = event.paypalInstalled,
+            returnAppUrl = event.returnAppUrl,
+            cancelAppUrl = event.cancelAppUrl,
+            fallbackSchemeUrl = event.fallbackSchemeUrl,
+            linkType = event.linkType
         )
 
         val events = TrackingEvents(eventParams = eventParams)
@@ -57,7 +80,7 @@ internal class TrackingEventsAPI constructor(
 
     companion object {
         fun toLiveConfig(config: CoreConfig): CoreConfig =
-            CoreConfig(config.clientId, environment = Environment.LIVE)
+            CoreConfig(config.clientId, config.merchantId, coreEnvironment = CoreEnvironment.LIVE)
 
         const val PPCP_CLIENTS_SDK = "ppcpclientsdk"
         const val EVENT_SOURCE_MOBILE_NATIVE = "mobile-native"
