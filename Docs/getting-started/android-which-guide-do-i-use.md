@@ -8,7 +8,6 @@ Use this to find the right page in the PayPal Mobile SDK V3.0.0 Android guide se
 | Understand how the pieces fit and who is responsible for what | [Concepts & Responsibilities](android-concepts-and-responsibilities.md) |
 | Get the SDK installed and initialized | **[Install & Setup](android-install-and-setup.md)** — do this first |
 | Accept a **PayPal** payment (incl. vault, Pay Later / PayPal Credit) | [PayPal Checkout](../integration-guides/android-paypal-checkout.md) |
-| Accept a **Venmo** payment | [Venmo Checkout](../integration-guides/android-venmo-checkout.md) |
 | Accept a **card** payment / ACDC (incl. vault) | [Card / ACDC](../integration-guides/android-card-acdc.md) |
 | Move an existing 2.x integration to V3 | [Migrate V2 → V3](../android-migrate-v2-to-v3.md) |
 | Diagnose a build or integration failure | [Troubleshooting](../integration-guides/android-troubleshooting.md) |
