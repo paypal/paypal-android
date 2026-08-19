@@ -16,11 +16,11 @@ Use this to find the right page in the PayPal Mobile SDK V3.0.0 Android guide se
 
 **Do I need all three payment methods?** No — each is independent. They all share the same Install & Setup; add only the modules and guides for the methods you support.
 
-**Do I build my own PayPal button?** Use the PayPal-provided button — it's the supported, brand-compliant way to start PayPal (and Venmo) checkout. See PayPal Checkout.
+**Do I build my own PayPal button?** Use the PayPal-provided button — it's the supported, brand-compliant way to start PayPal checkout. See PayPal Checkout.
 
 **Does Card have a button?** No. The SDK ships no card UI — you build your own card fields and pass them to `CardClient`. See Card / ACDC.
 
-**Which methods support vault?** PayPal and Card support vault (with and without purchase); Venmo is one-time only.
+**Which methods support vault?** PayPal and Card both support vault (with and without purchase).
 
 **Where's the full class and method reference?** It's generated from the SDK source (Dokka) and linked from each guide — we don't hand-maintain it here.
 

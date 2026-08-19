@@ -8,8 +8,8 @@ A native SDK is one actor among several. Most integration mistakes come from ass
 | --- | --- |
 | Create and capture the order (and setup/payment tokens for vault) via Orders v2 | **Your server** |
 | Obtain a client ID and merchant ID; enable the payment methods on your account | **You (PayPal Developer Dashboard)** |
-| Render the PayPal/Venmo button, or your own card fields; register return links | **Your app** |
-| Prepare the checkout session, choose app-switch vs. in-app browser, present PayPal/Venmo and the card 3DS challenge, and hand back the result | **The SDK** |
+| Render the PayPal button, or your own card fields; register return links | **Your app** |
+| Prepare the checkout session, choose app-switch vs. in-app browser, present PayPal and the card 3DS challenge, and hand back the result | **The SDK** |
 | Route the buyer back to your app via App Links | **The device / OS** |
 
 **The SDK does not:**
@@ -26,9 +26,9 @@ A native SDK is one actor among several. Most integration mistakes come from ass
 | **Order** | A purchase created on your server via Orders v2. You pass its ID to the SDK; the SDK never creates it. |
 | **Client ID / Merchant ID** | Account credentials from the Developer Dashboard. Both are required to initialize the SDK in V3; the merchant ID is the encrypted merchant account ID, distinct from the client ID. |
 | **Environment** | `SANDBOX` or `LIVE`, set on `CoreConfig`. |
-| **Session** (`createPayPalSession()`) | A prepared PayPal checkout session carrying buyer identity, return URLs, and user action. Required before `start()` / `vault()` for PayPal — not used by Venmo or Card. |
-| **Return URLs & fallback scheme** | Where PayPal/Venmo send the buyer back: an App Link plus an optional custom-scheme fallback — the SDK only requires at least one of the two, but you should always set both, since a buyer whose App Link isn't verified otherwise has no way back. Configured once and passed to the SDK. |
-| **App switch vs. in-app browser** | PayPal/Venmo open the native app when the buyer is eligible and has it installed; otherwise checkout continues in an in-app browser. PayPal decides; both paths return the same way. |
+| **Session** (`createPayPalSession()`) | A prepared PayPal checkout session carrying buyer identity, return URLs, and user action. Required before `start()` / `vault()` for PayPal — not used by Card. |
+| **Return URLs & fallback scheme** | Where PayPal sends the buyer back: an App Link plus an optional custom-scheme fallback — the SDK only requires at least one of the two, but you should always set both, since a buyer whose App Link isn't verified otherwise has no way back. Configured once and passed to the SDK. |
+| **App switch vs. in-app browser** | PayPal opens the native app when the buyer is eligible and has it installed; otherwise checkout continues in an in-app browser. PayPal decides; both paths return the same way. |
 | **Vault / setup token / payment token** | Saving a payment method. Vault with purchase rides on a normal order; vault without purchase uses a setup token. The saved token is retrieved server-side, not from the SDK result. |
 | **Funding source** | For PayPal: standard PayPal, Pay Later, or PayPal Credit. |
 | **Client metadata ID** (device data) | A risk signal the SDK collects and you attach to your create-order request to reduce declines. |
@@ -38,14 +38,14 @@ A native SDK is one actor among several. Most integration mistakes come from ass
 
 Every method follows the same observable arc, with small differences:
 
-1. Your app shows the buyer a way to pay (a PayPal/Venmo button, or your card form).
+1. Your app shows the buyer a way to pay (a PayPal button, or your card form).
 2. On intent, you create the order on your server (for PayPal, you also prepare the session first).
 3. You call the client's `start()` / `approveOrder()` with the order ID.
-4. The buyer approves — in the PayPal/Venmo app, an in-app browser, or (for card) a 3DS challenge if required.
+4. The buyer approves — in the PayPal app, an in-app browser, or (for card) a 3DS challenge if required.
 5. The buyer returns to your app; the SDK delivers a **success**, **cancel**, or **failure** result.
 6. On success, your server captures the order (or you store the setup token).
 
-Method differences: **PayPal** uses the session-first pattern; **Venmo** skips the session and splits its result across two calls; **Card** skips the session, ships no UI, and handles 3DS manually via `presentAuthChallenge()` / `finishApproveOrder()`. Each guide documents its own.
+Method differences: **PayPal** uses the session-first pattern; **Card** skips the session, ships no UI, and handles 3DS manually via `presentAuthChallenge()` / `finishApproveOrder()`. Each guide documents its own.
 
 ## Key behaviors and rules
 

@@ -12,7 +12,7 @@ How to move an existing **PayPal Mobile SDK V2 (2.x)** Android integration to **
 | Result | `PayPalWebCheckoutFinishStartResult` via `finishStart(intent)` | `start()`'s callback reports `PayPalPresentAuthChallengeResult` (`Success`/`Failure`) — whether the checkout UI was presented, nothing more. The actual checkout outcome — `PayPalFinishStartResult` (`Success`/`Canceled`/`Failure`/`NoResult`) — is delivered separately by `finishStart(intent)` when the buyer returns |
 | Return handling | `finishStart(intent)` returns the result | Same method name, `finishStart(intent)`, called from `onNewIntent`; now returns `PayPalFinishStartResult?` |
 
-Card (ACDC) and Venmo keep their own clients; the main change they inherit is the `merchantId` on `CoreConfig`. Card's `approveOrder()` / `presentAuthChallenge()` / `finishApproveOrder()` result-type pattern is unchanged from 2.x.
+Card (ACDC) keeps its own client; the main change it inherits is the `merchantId` on `CoreConfig`. Card's `approveOrder()` / `presentAuthChallenge()` / `finishApproveOrder()` result-type pattern is unchanged from 2.x.
 
 ## Before you upgrade
 

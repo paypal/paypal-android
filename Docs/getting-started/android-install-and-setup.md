@@ -1,4 +1,4 @@
-Complete these core setup steps once. Then integrate any payment method — PayPal Checkout, Venmo, or Card — using its guide; each one starts from the setup here and adds only what is specific to that method.
+Complete these core setup steps once. Then integrate any payment method — PayPal Checkout or Card — using its guide; each one starts from the setup here and adds only what is specific to that method.
 
 ## Requirements
 
@@ -18,7 +18,6 @@ dependencies {
     // Add the module(s) for the method(s) you integrate:
     implementation 'com.paypal.android:paypal-payments:X.Y.Z'       // PayPal Checkout + Vault
     implementation 'com.paypal.android:payment-buttons:X.Y.Z'       // PayPal buttons
-    // implementation 'com.paypal.android:venmo:X.Y.Z'             // Venmo Checkout
     // implementation 'com.paypal.android:card-payments:X.Y.Z'     // Card (ACDC)
 }
 ```
@@ -27,7 +26,7 @@ Replace `X.Y.Z` with the current V3 release.
 
 ## Step 2: Initialize CoreConfig
 
-Every client (`PayPalClient`, `VenmoClient`, `CardClient`) is built from a single `CoreConfig`. No network calls occur at initialization.
+Every client (`PayPalClient`, `CardClient`) is built from a single `CoreConfig`. No network calls occur at initialization.
 
 ```kotlin
 val config = CoreConfig(
@@ -42,7 +41,7 @@ Reuse this `config` across every method client. Switch `CoreEnvironment.SANDBOX`
 
 ## Step 3: Register your return links
 
-PayPal and Venmo checkout send the buyer to the PayPal or Venmo app (or an in-app browser) and back to your app via an Android App Link. Register it on the activity that receives the return. One intent-filter matches on **host + path prefix**, so it covers both your return and cancel URLs:
+PayPal checkout sends the buyer to the PayPal app (or an in-app browser) and back to your app via an Android App Link. Register it on the activity that receives the return. One intent-filter matches on **host + path prefix**, so it covers both your return and cancel URLs:
 
 ```xml
 <activity android:name=".CheckoutActivity" android:exported="true" android:launchMode="singleTop">
