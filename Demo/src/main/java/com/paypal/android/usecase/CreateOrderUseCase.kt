@@ -1,11 +1,13 @@
 package com.paypal.android.usecase
 
+import com.paypal.android.DemoConstants.returnToAppUrlConfig
 import com.paypal.android.api.model.Order
 import com.paypal.android.api.model.serialization.Amount
-import com.paypal.android.api.model.serialization.Card
-import com.paypal.android.api.model.serialization.CardAttributes
 import com.paypal.android.api.model.serialization.OrderPaymentSource
 import com.paypal.android.api.model.serialization.OrderRequestBody
+import com.paypal.android.api.model.serialization.PayPalAttributes
+import com.paypal.android.api.model.serialization.PayPalOrderExperienceContext
+import com.paypal.android.api.model.serialization.PayPalPaymentSource
 import com.paypal.android.api.model.serialization.PurchaseUnit
 import com.paypal.android.api.model.serialization.Vault
 import com.paypal.android.api.services.SDKSampleServerAPI
@@ -18,25 +20,32 @@ import javax.inject.Inject
 class CreateOrderUseCase @Inject constructor(
     private val sdkSampleServerAPI: SDKSampleServerAPI
 ) {
-
     suspend operator fun invoke(request: OrderRequest): SDKSampleServerResult<Order, Exception> {
-        val paymentSource = if (request.shouldVault) {
-            OrderPaymentSource(
-                card = Card(
-                    attributes = CardAttributes(
+        val paymentSource = OrderPaymentSource(
+            paypal = PayPalPaymentSource(
+                attributes = if (request.shouldVaultOnSuccess) {
+                    PayPalAttributes(
                         vault = Vault(
-                            storeInVault = "ON_SUCCESS"
+                            storeInVault = "ON_SUCCESS",
+                            usageType = "MERCHANT",
+                            customerType = "CONSUMER"
                         )
                     )
+                } else {
+                    null
+                },
+                experienceContext = PayPalOrderExperienceContext(
+                    returnUrl = returnToAppUrlConfig.returnAppUrl,
+                    cancelUrl = returnToAppUrlConfig.cancelAppUrl,
+                    paymentMethodSelected = request.paymentMethodSelected,
+                    userAction = request.userAction
                 )
             )
-        } else {
-            null
-        }
+        )
         return withContext(Dispatchers.IO) {
             val amount = Amount(
                 currencyCode = "USD",
-                value = "10.99"
+                value = request.amount
             )
 
             val purchaseUnit = PurchaseUnit(

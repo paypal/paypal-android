@@ -1,6 +1,6 @@
 Welcome to the PayPal Android SDK. This library will help you accept Card and PayPal payments in your Android app.
 
-![Maven Central Version](https://img.shields.io/maven-central/v/com.paypal.android/card-payments) ![Maven SNAPSHOT Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fcom%2Fpaypal%2Fandroid%2Fpaypal-web-payments%2Fmaven-metadata.xml)
+![Maven Central Version](https://img.shields.io/maven-central/v/com.paypal.android/card-payments) ![Maven SNAPSHOT Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fcom%2Fpaypal%2Fandroid%2Fpaypal-payments%2Fmaven-metadata.xml)
 
 ## FAQ
 
@@ -15,19 +15,19 @@ This SDK is written in Kotlin and supports both Kotlin and Java integrations. Se
 
 ## Including the SDK
 You can support a specific payment method by adding its corresponding feature module as a dependency in your app's `build.gradle` file.
-For example, to support both CardPayments and PayPalWebPayments in your app include the following dependencies with the current version:
+For example, to support both CardPayments and PayPalPayments in your app include the following dependencies with the current version:
 
 ![Maven Central Version](https://img.shields.io/maven-central/v/com.paypal.android/card-payments)
 ```groovy
 dependencies {
   implementation 'com.paypal.android:card-payments:<CURRENT-VERSION>'
-  implementation 'com.paypal.android:paypal-web-payments:<CURRENT-VERSION>'
+  implementation 'com.paypal.android:paypal-payments:<CURRENT-VERSION>'
 }
 ```
 
 Snapshot builds of the latest SDK features are published from the `main` branch weekly. The snapshot builds can be used to test upcoming features before they have been released. To include a snapshot build, first add the repository to the top `build.gradle` file in your project.
 
-![Maven SNAPSHOT Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fcom%2Fpaypal%2Fandroid%2Fpaypal-web-payments%2Fmaven-metadata.xml)
+![Maven SNAPSHOT Version](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fcom%2Fpaypal%2Fandroid%2Fpaypal-payments%2Fmaven-metadata.xml)
 ```groovy
 repositories {
     maven {
@@ -50,7 +50,9 @@ The PayPal SDK uses a client ID for authentication. This can be found in your [P
 
 ## Documentation
 
-Documentation for the project can be found [here](https://developer.paypal.com/docs/checkout/advanced/android/).
+Official documentation for the project can be found [here](https://developer.paypal.com/docs/checkout/advanced/android/).
+
+For reference documentation, visit [paypal.github.io/paypal-android](https://paypal.github.io/paypal-android/).
 
 ## Release Process
 This SDK follows [Semantic Versioning](https://semver.org/). This SDK is published to Maven Central. The release process is automated via GitHub Actions.

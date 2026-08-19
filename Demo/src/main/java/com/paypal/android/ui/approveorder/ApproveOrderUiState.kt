@@ -17,7 +17,7 @@ data class ApproveOrderUiState(
     val cardExpirationDate: String = "",
     val cardSecurityCode: String = "",
     val intentOption: OrderIntent = OrderIntent.AUTHORIZE,
-    val shouldVault: StoreInVaultOption = StoreInVaultOption.NO,
+    val shouldVaultOption: StoreInVaultOption = StoreInVaultOption.NO,
 ) {
     val isCreateOrderSuccessful: Boolean
         get() = createOrderState is ActionState.Success

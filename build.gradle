@@ -1,6 +1,18 @@
 buildscript {
+    def versionProps = new Properties()
+    file("version.properties").withInputStream { versionProps.load(it) }
+
+    def major = versionProps.getProperty("major")
+    def minor = versionProps.getProperty("minor")
+    def patch = versionProps.getProperty("patch")
+
+    // Add -SNAPSHOT suffix if it's snapshot publish
+    def isSnapshotBuild = System.getenv('SNAPSHOT_BUILD') == 'true'
+    def suffix = isSnapshotBuild ? '-SNAPSHOT' : ''
+    def sdkVersion = "${major}.${minor}.${patch}${suffix}"
+
     ext.modules = [
-            "sdkVersionName"      : "2.3.0",
+            "sdkVersionName": sdkVersion,
             "demoAppVersionCode"  : 4,
             "androidMinSdkVersion": 23,
             "androidTargetVersion": 35,
@@ -12,17 +24,25 @@ buildscript {
     ]
 }
 
+// Function to load version properties (reusable)
+def loadVersionProperties() {
+    def versionProps = new Properties()
+    file("version.properties").withInputStream { versionProps.load(it) }
+    return versionProps
+}
+
 plugins {
     alias libs.plugins.android.application apply false
     alias libs.plugins.android.library apply false
     alias libs.plugins.dagger.hilt apply false
-    alias libs.plugins.detekt
     alias libs.plugins.gradlePlayPublisher apply false
     alias libs.plugins.kotlinAndroid apply false
     alias libs.plugins.kotlinParcelize apply false
     alias libs.plugins.kotlinKapt apply false
-    alias libs.plugins.nexus.publishPlugin
     alias libs.plugins.binaryCompatibilityValidator apply false
+    alias libs.plugins.detekt
+    alias libs.plugins.dokka
+    alias libs.plugins.nexus.publishPlugin
 }
 
 version modules.sdkVersionName // we add it here so that nexus automatically chooses staging or snapshot repo
@@ -46,13 +66,25 @@ nexusPublishing {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 dependencies {
     detektPlugins libs.detekt.formatting
     detektPlugins libs.detekt.rulesLibraries
+
+    // Ref: https://kotlinlang.org/docs/dokka-gradle.html#aggregate-documentation-output-in-multi-project-builds
+    dokka project(":CorePayments")
+    dokka project(":CardPayments")
+    dokka project(":FraudProtection")
+    dokka project(":PaymentButtons")
+    dokka project(":PayPalPayments")
+    dokkaPlugin libs.dokka.android
+}
+
+dokka {
+    dokkaPublications {
+        html {
+            outputDirectory.set(file('docs/'))
+        }
+    }
 }
 
 detekt {
@@ -61,7 +93,7 @@ detekt {
     input = files(
             "CorePayments/src",
             "CardPayments/src",
-            "PayPalWebPayments/src",
+            "PayPalPayments/src",
             "FraudProtection/src",
             "Demo/src"
     )
@@ -112,11 +144,26 @@ task incrementSnapshotVersion {
 //./gradlew -PversionParam=0.0.1 changeReleaseVersion
 task changeReleaseVersion {
     doLast {
-        def topLevelGradleFile = file('./build.gradle')
-        def topLevelGradleFileText = topLevelGradleFile.getText('UTF-8')
-        def updatedScript =
-                topLevelGradleFileText.replaceFirst(/("sdkVersionName"\s*: )".*",/, '$1"' + versionParam + '",')
-        topLevelGradleFile.write(updatedScript, 'UTF-8')
+        def versionPropsFile = file('./version.properties')
+        def versionProps = loadVersionProperties()
+
+        // Parse the version parameter (e.g., "2.3.0")
+        def versionParts = versionParam.tokenize('.')
+        if (versionParts.size() != 3) {
+            throw new GradleException("Version parameter must be in format major.minor.patch (e.g., 2.3.0)")
+        }
+
+        // Update the version properties
+        versionProps.setProperty('major', versionParts[0])
+        versionProps.setProperty('minor', versionParts[1])
+        versionProps.setProperty('patch', versionParts[2])
+
+        // Write back to version.properties file
+        versionPropsFile.withOutputStream {
+            versionProps.store(it, "Updated by changeReleaseVersion task")
+        }
+
+        println "Updated version.properties to ${versionParam}"
     }
 }
 
@@ -148,7 +195,7 @@ task updateCHANGELOGVersion {
         def date = new Date()
         def formattedDate = date.format('yyyy-MM-dd')
         def changelogFile = new File('CHANGELOG.md')
-        def changelogFileText = changelogFile.text.replaceFirst("## unreleased", "## " + versionParam + " ($formattedDate)")
+        def changelogFileText = changelogFile.text.replaceFirst(/(?i)## unreleased/, "## " + versionParam + " ($formattedDate)")
         changelogFile.write(changelogFileText)
     }
 }

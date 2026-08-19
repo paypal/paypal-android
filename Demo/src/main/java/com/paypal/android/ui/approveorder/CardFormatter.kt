@@ -7,16 +7,16 @@ object CardFormatter {
      * Example: "4000000000001091" -> "4000 0000 0000 1091"
      *
      * @param newCardNumber - card number to format
-     * @param previousCardNumber - previous value that was entered into the card field. This value
+     * @param launchWithUrlCardNumber - launchWithUrl value that was entered into the card field. This value
      * is needed to handle the deletion of characters.
      */
-    fun formatCardNumber(newCardNumber: String, previousCardNumber: String = ""): String {
-        if (newCardNumber.length < previousCardNumber.length) return newCardNumber
+    fun formatCardNumber(newCardNumber: String, launchWithUrlCardNumber: String = ""): String {
+        if (newCardNumber.length < launchWithUrlCardNumber.length) return newCardNumber
         var cardString = newCardNumber.replace(" ", "")
 
         val cardType = getCardType(cardString)
-        return if (previousCardNumber.length == cardType.maxCardLength + cardType.cardNumberIndices.size) {
-            previousCardNumber
+        return if (launchWithUrlCardNumber.length == cardType.maxCardLength + cardType.cardNumberIndices.size) {
+            launchWithUrlCardNumber
         } else {
             for (index in cardType.cardNumberIndices) {
                 if (index <= cardString.length) {

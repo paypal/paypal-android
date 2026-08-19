@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+command_name="$1"
+
+case $command_name in
+  generate_docs)
+    ./gradlew :dokkaGenerate
+    ;;
+
+  serve_docs)
+    DOCS_PORT=8000
+    DOCS_URL="http://localhost:${DOCS_PORT}"
+    echo "Starting local web server to view documentation..."
+    echo ""
+    echo "Documentation will be available at:"
+    echo "  ${DOCS_URL}"
+    echo ""
+    echo "Press Ctrl+C to stop the server"
+    echo ""
+    cd docs && open ${DOCS_URL} && python3 -m http.server ${DOCS_PORT}
+    ;;
+
+  *)
+    echo "Usage: ./ci <command>"
+    echo ""
+    echo "Available commands:"
+    echo "  generate_docs    Generate Dokka reference documentation locally"
+    echo "  serve_docs       Start a local web server to view the documentation"
+    ;;
+esac

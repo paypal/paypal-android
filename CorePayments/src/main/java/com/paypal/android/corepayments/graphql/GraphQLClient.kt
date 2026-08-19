@@ -34,14 +34,14 @@ class GraphQLClient internal constructor(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
+    private val graphQLEndpoint = coreConfig.coreEnvironment.graphQLEndpoint
     private val graphQLURL = "$graphQLEndpoint/graphql"
 
     private val httpRequestHeaders = mutableMapOf(
         "Content-Type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",
-        "Origin" to coreConfig.environment.graphQLEndpoint
+        "Origin" to coreConfig.coreEnvironment.graphQLEndpoint
     )
 
     /**
@@ -52,22 +52,30 @@ class GraphQLClient internal constructor(
     @PublishedApi
     internal suspend fun <R, V> sendInternal(
         graphQLRequest: GraphQLRequest<V>,
+        additionalHeaders: Map<String, String>?,
         variablesSerializer: KSerializer<V>,
         responseSerializer: KSerializer<R>,
     ): GraphQLResult<R> {
-        val httpRequest = createHttpRequest(graphQLRequest, variablesSerializer)
+        val httpRequest = createHttpRequest(graphQLRequest, variablesSerializer, additionalHeaders)
             ?: return GraphQLResult.Failure(error = invalidUrlRequest)
 
         val httpResponse = http.send(httpRequest)
         val correlationId = httpResponse.headers[PAYPAL_DEBUG_ID]
+        val roundTripTiming = httpResponse.roundTripTiming
 
         return when {
             httpResponse.status != HTTP_OK -> {
-                GraphQLResult.Failure(APIClientError.serverResponseError(correlationId))
+                GraphQLResult.Failure(
+                    error = APIClientError.serverResponseError(correlationId),
+                    roundTripTiming = roundTripTiming
+                )
             }
 
             httpResponse.body.isNullOrBlank() -> {
-                GraphQLResult.Failure(noResponseData(correlationId))
+                GraphQLResult.Failure(
+                    error = noResponseData(correlationId),
+                    roundTripTiming = roundTripTiming
+                )
             }
 
             else -> runCatching {
@@ -75,26 +83,35 @@ class GraphQLClient internal constructor(
                     deserializer = GraphQLResponse.serializer(responseSerializer),
                     string = httpResponse.body
                 )
-                GraphQLResult.Success(response, correlationId = correlationId)
+                GraphQLResult.Success(
+                    response = response,
+                    correlationId = correlationId,
+                    roundTripTiming = roundTripTiming
+                )
             }.getOrElse { error ->
-                GraphQLResult.Failure(graphQLJSONParseError(correlationId, error))
+                GraphQLResult.Failure(
+                    error = graphQLJSONParseError(correlationId, error),
+                    roundTripTiming = roundTripTiming
+                )
             }
         }
     }
 
     private fun <V> createHttpRequest(
         graphQLRequest: GraphQLRequest<V>,
-        variablesSerializer: KSerializer<V>
+        variablesSerializer: KSerializer<V>,
+        additionalHeaders: Map<String, String>?
     ): HttpRequest? = runCatching {
         val urlString = graphQLRequest.operationName?.let { "$graphQLURL?$it" } ?: graphQLURL
         val requestBody =
             json.encodeToString(GraphQLRequest.serializer(variablesSerializer), graphQLRequest)
 
+        val combinedHeaders = httpRequestHeaders + (additionalHeaders ?: emptyMap())
         HttpRequest(
             url = URL(urlString),
             method = HttpMethod.POST,
             body = requestBody,
-            headers = httpRequestHeaders
+            headers = combinedHeaders.toMutableMap()
         )
     }.getOrNull()
 
@@ -104,9 +121,10 @@ class GraphQLClient internal constructor(
      */
     @OptIn(InternalSerializationApi::class)
     suspend inline fun <reified R, reified V> send(
-        graphQLRequest: GraphQLRequest<V>
+        graphQLRequest: GraphQLRequest<V>,
+        additionalHeaders: Map<String, String>? = null
     ): GraphQLResult<R> = runCatching {
-        sendInternal(graphQLRequest, serializer<V>(), serializer<R>())
+        sendInternal(graphQLRequest, additionalHeaders, serializer<V>(), serializer<R>())
     }.getOrElse { throwable ->
         val error = when (throwable) {
             is SerializationException -> invalidUrlRequest

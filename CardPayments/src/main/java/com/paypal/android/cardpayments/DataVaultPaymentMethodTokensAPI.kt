@@ -78,8 +78,9 @@ internal class DataVaultPaymentMethodTokensAPI internal constructor(
         )
 
         val graphQLRequest = GraphQLRequest(query, variables, "UpdateVaultSetupToken")
-        val graphQLResponse =
-            graphQLClient.send<UpdateSetupTokenResponse, UpdateSetupTokenVariables>(graphQLRequest)
+        val graphQLResponse = graphQLClient.send<
+                UpdateSetupTokenResponse,
+                UpdateSetupTokenVariables>(graphQLRequest)
         return when (graphQLResponse) {
             is GraphQLResult.Success -> {
                 val response = graphQLResponse.response

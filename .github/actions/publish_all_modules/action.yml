@@ -33,3 +33,4 @@ runs:
         SIGNING_KEY_ID: ${{ inputs.signing_key_id }}
         SIGNING_KEY_PASSWORD: ${{ inputs.signing_key_pwd }}
         SIGNING_KEY_FILE: ${{ inputs.signing_key_file }}
+        SNAPSHOT_BUILD: ${{ env.SNAPSHOT_BUILD }}

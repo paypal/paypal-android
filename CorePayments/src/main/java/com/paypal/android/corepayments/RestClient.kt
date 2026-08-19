@@ -26,7 +26,7 @@ class RestClient internal constructor(
         configuration: CoreConfig,
     ): HttpRequest {
         val path = apiRequest.path
-        val baseUrl = configuration.environment.url
+        val baseUrl = configuration.coreEnvironment.url
 
         val url = URL("$baseUrl/$path")
         val method = apiRequest.method

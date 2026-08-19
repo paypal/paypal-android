@@ -13,7 +13,6 @@ import com.paypal.android.api.model.serialization.toCardPaymentToken
 import com.paypal.android.api.model.serialization.toCardSetupToken
 import com.paypal.android.api.model.serialization.toOrder
 import com.paypal.android.api.model.serialization.toPayPalPaymentToken
-import com.paypal.android.models.OrderRequest
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -34,7 +33,10 @@ private val DEFAULT_ORDER_ID: String? = null // = "your-order-id"
 // TODO: consider refactoring each method into a "use case"
 // Ref: https://developer.android.com/topic/architecture/domain-layer#use-cases-kotlin
 @Suppress("TooManyFunctions")
-class SDKSampleServerAPI {
+class SDKSampleServerAPI(
+    /** Overrides [MerchantIntegration.DEFAULT]'s base URL when non-null and non-blank. */
+    private val customMerchantBaseUrl: String? = null
+) {
 
     companion object {
         // TODO: - require Merchant enum to be specified via UI layer
@@ -42,6 +44,9 @@ class SDKSampleServerAPI {
 
         val clientId: String
             get() = SELECTED_MERCHANT_INTEGRATION.clientId
+
+        val merchantId: String
+            get() = SELECTED_MERCHANT_INTEGRATION.merchantId
     }
 
     @JvmSuppressWildcards
@@ -49,9 +54,6 @@ class SDKSampleServerAPI {
 
         @POST("/orders")
         suspend fun createOrder(@Body orderRequestBody: OrderRequestBody): Order
-
-        @POST("/orders")
-        suspend fun createOrder(@Body order: OrderRequest): Order
 
         @POST("/orders/{orderId}/capture")
         suspend fun captureOrder(
@@ -84,9 +86,13 @@ class SDKSampleServerAPI {
 
     init {
         val serviceMap = mutableMapOf<MerchantIntegration, RetrofitService>()
-        val allMerchantIntegrations = MerchantIntegration.entries.toTypedArray()
-        for (merchant in allMerchantIntegrations) {
-            serviceMap[merchant] = createService(merchant.baseUrl)
+        for (merchant in MerchantIntegration.entries) {
+            val baseUrl = if (merchant == MerchantIntegration.DEFAULT && !customMerchantBaseUrl.isNullOrBlank()) {
+                customMerchantBaseUrl
+            } else {
+                merchant.baseUrl
+            }
+            serviceMap[merchant] = createService(baseUrl)
         }
         this.serviceMap = serviceMap
     }
@@ -124,15 +130,6 @@ class SDKSampleServerAPI {
         } else {
             findService(merchantIntegration).createOrder(orderRequestBody)
         }
-    }
-
-    suspend fun createOrder(
-        orderRequest: OrderRequest,
-        merchantIntegration: MerchantIntegration = SELECTED_MERCHANT_INTEGRATION
-    ) = safeApiCall {
-        DEFAULT_ORDER_ID?.let {
-            Order(it, "CREATED")
-        } ?: findService(merchantIntegration).createOrder(orderRequest)
     }
 
     suspend fun captureOrder(

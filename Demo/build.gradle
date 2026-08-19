@@ -30,6 +30,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLIENT_ID", paypalProperties["CLIENT_ID"] ?: "\"\"")
+
+        // Pass environment variables to instrumentation tests
+        testInstrumentationRunnerArguments([
+                "SANDBOX_ACCOUNT_USERNAME": System.getenv("SANDBOX_ACCOUNT_USERNAME") ?: "test@testng.com",
+                "SANDBOX_ACCOUNT_PASSWORD": System.getenv("SANDBOX_ACCOUNT_PASSWORD") ?: "Testing1"
+        ])
     }
 
     buildFeatures {
@@ -64,6 +70,12 @@ android {
         warningsAsErrors true
     }
 
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
     sourceSets {
         androidTest {
             java.srcDirs += "src/androidTestShared/java"
@@ -73,10 +85,16 @@ android {
     // https://developer.android.com/build/build-variants#groovy
     signingConfigs {
         release {
-            storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'debug.keystore')
-            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'android'
-            keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'androiddebugkey'
-            keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'android'
+            storeFile file(System.getenv('DEMO_KEYSTORE_FILE') ?: 'keystores/debug.keystore')
+            storePassword System.getenv('DEMO_KEYSTORE_PASSWORD') ?: 'debugkeystore'
+            keyAlias System.getenv('DEMO_KEY_ALIAS') ?: 'debug_key'
+            keyPassword System.getenv('DEMO_KEY_PASSWORD') ?: 'debugonly'
+        }
+        debug {
+            storeFile file('keystores/debug.keystore')
+            storePassword 'debugkeystore'
+            keyAlias 'debug_key'
+            keyPassword 'debugonly'
         }
     }
     buildTypes {
@@ -86,6 +104,7 @@ android {
         }
         debug {
             debuggable true
+            signingConfig signingConfigs.debug
         }
     }
 }
@@ -105,7 +124,7 @@ kapt {
 dependencies {
     implementation project(':CardPayments')
     implementation project(':FraudProtection')
-    implementation project(':PayPalWebPayments')
+    implementation project(':PayPalPayments')
     implementation project(':PaymentButtons')
     implementation project(':Venmo')
 
@@ -150,9 +169,12 @@ dependencies {
 
     androidTestImplementation libs.androidx.test.junit
     androidTestImplementation libs.androidx.test.espresso
+    androidTestImplementation libs.androidx.test.espresso.contrib
+    androidTestImplementation libs.androidx.test.espresso.intents
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.test.rules
     androidTestImplementation libs.androidx.test.uiAutomator
+    androidTestImplementation libs.testParameterInjector
 
     // compose ui-test
     androidTestImplementation libs.compose.uiTestJunit4

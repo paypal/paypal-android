@@ -4,6 +4,11 @@ plugins {
     alias libs.plugins.kotlinParcelize
     alias libs.plugins.kotlinSerialization
     alias libs.plugins.binaryCompatibilityValidator
+    alias libs.plugins.dokka
+}
+
+apiValidation {
+    nonPublicMarkers.add("androidx.annotation.RestrictTo")
 }
 
 android {
@@ -55,7 +60,6 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.kotlinx.coroutinesAndroid
     implementation libs.kotlinx.serializationJson
-    implementation libs.braintree.browserSwitch
     implementation libs.lifecycle.commonJava8
     implementation libs.lifecycle.runtimeKtx
 

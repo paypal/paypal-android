@@ -4,4 +4,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <queries>
+        <package android:name="com.paypal.android.p2pmobile" />
+
+        <!-- Needed on Android 11+ so GetReturnToAppStrategyUseCase can resolve the default
+             browser and check whether it supports App Links. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
 </manifest>

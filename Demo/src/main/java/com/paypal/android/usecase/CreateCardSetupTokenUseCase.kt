@@ -1,4 +1,5 @@
 package com.paypal.android.usecase
+import com.paypal.android.DemoConstants
 
 import com.paypal.android.api.model.CardSetupToken
 import com.paypal.android.api.model.serialization.CardDetails
@@ -25,8 +26,8 @@ class CreateCardSetupTokenUseCase @Inject constructor(
                     card = CardDetails(
                         verificationMethod = sca.name,
                         experienceContext = ExperienceContext(
-                            returnUrl = "com.paypal.android.demo://vault/success",
-                            cancelUrl = "com.paypal.android.demo://vault/cancel"
+                            returnUrl = DemoConstants.returnToAppUrlConfig.returnAppUrl,
+                            cancelUrl = DemoConstants.returnToAppUrlConfig.cancelAppUrl
                         )
                     )
                 )
