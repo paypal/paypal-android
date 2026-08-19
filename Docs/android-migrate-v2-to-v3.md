@@ -5,7 +5,7 @@ How to move an existing **PayPal Mobile SDK V2 (2.x)** Android integration to **
 | Area | V2 (2.x) | V3 |
 | --- | --- | --- |
 | Client class | `PayPalWebCheckoutClient` | `PayPalClient` |
-| `CoreConfig` | `clientId` + `environment` | adds **required** `merchantId`, optional `bnCode` |
+| `CoreConfig` | `clientId` + `environment` | adds **required** `merchantId`, optional `bnCode`; `environment` renamed to `coreEnvironment` |
 | Session | none | `createPayPalSession()` is **required before** `start()` / `vault()` |
 | Return URLs | `urlScheme` on the client + `experienceContext` URLs in the Orders API | `ReturnToAppUrlConfig` passed to `createPayPalSession()`; **not** set in the Orders API |
 | `start()` | `start(activity, request)` | `start(activity, orderId, callback)` |
@@ -39,7 +39,8 @@ Use this diff to guide the change:
   val config = CoreConfig(
       clientId = "<CLIENT_ID>",
 +     merchantId = "<MERCHANT_ID>",   // now required, distinct from your client ID
-      environment = Environment.SANDBOX
+-     environment = Environment.SANDBOX
++     coreEnvironment = CoreEnvironment.SANDBOX   // renamed from `environment` in V3
   )
 
 - val client = PayPalWebCheckoutClient(context, config, "my-url-scheme")
@@ -86,6 +87,8 @@ Use this diff to guide the change:
 ```
 
 ## Server-side change
+
+> **Note:** `TokenType` is currently marked internal-only in the SDK (`@RestrictTo(LIBRARY_GROUP)`). This guide shows the call shape `createPayPalSession()` expects; confirm with the SDK team that `TokenType` is public before shipping code that imports it directly.
 
 In V2 you set `experienceContext.returnUrl` / `cancelUrl` when creating the order. In V3 those move to the SDK via `ReturnToAppUrlConfig` — **remove them from your Orders v2 create call** for the session-based flow. Your manifest App Link and custom-scheme fallback stay as they were (see [Install & Setup (Android)](integration-guides/android-install-and-setup.md)).
 

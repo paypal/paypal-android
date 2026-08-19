@@ -27,7 +27,7 @@ A native SDK is one actor among several. Most integration mistakes come from ass
 | **Client ID / Merchant ID** | Account credentials from the Developer Dashboard. Both are required to initialize the SDK in V3; the merchant ID is the encrypted merchant account ID, distinct from the client ID. |
 | **Environment** | `SANDBOX` or `LIVE`, set on `CoreConfig`. |
 | **Session** (`createPayPalSession()`) | A prepared PayPal checkout session carrying buyer identity, return URLs, and user action. Required before `start()` / `vault()` for PayPal — not used by Venmo or Card. |
-| **Return URLs & fallback scheme** | Where PayPal/Venmo send the buyer back: an App Link plus a required custom-scheme fallback. Configured once and passed to the SDK. |
+| **Return URLs & fallback scheme** | Where PayPal/Venmo send the buyer back: an App Link plus an optional custom-scheme fallback — the SDK only requires at least one of the two, but you should always set both, since a buyer whose App Link isn't verified otherwise has no way back. Configured once and passed to the SDK. |
 | **App switch vs. in-app browser** | PayPal/Venmo open the native app when the buyer is eligible and has it installed; otherwise checkout continues in an in-app browser. PayPal decides; both paths return the same way. |
 | **Vault / setup token / payment token** | Saving a payment method. Vault with purchase rides on a normal order; vault without purchase uses a setup token. The saved token is retrieved server-side, not from the SDK result. |
 | **Funding source** | For PayPal: standard PayPal, Pay Later, or PayPal Credit. |

@@ -85,6 +85,8 @@ For the button's colors, labels, shapes, and sizes — and the Pay Later / PayPa
 
 Call this in the button's `onClick`, before or alongside order creation. It returns immediately and prepares the session in the background. Pass `TokenType.ORDER_ID` for One-Time Checkout and Vault with Purchase — both are approved against an order ID (see [Vault without Purchase](#vault-without-purchase) below for the vault-only case).
 
+> **Note:** `TokenType` is currently marked internal-only in the SDK (`@RestrictTo(LIBRARY_GROUP)`). This is the call shape `createPayPalSession()` expects today; confirm with the SDK team that `TokenType` is public before shipping code that imports it directly.
+
 ```kotlin
 import com.paypal.android.corepayments.model.TokenType
 
@@ -136,10 +138,11 @@ override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     setIntent(intent)
     when (val result = checkoutClient.finishStart(intent)) {
-        is PayPalFinishStartResult.Success  -> captureOrder(result.orderId!!)   // result.payerId also available
-        is PayPalFinishStartResult.Canceled -> showCheckoutScreen()
-        is PayPalFinishStartResult.Failure  -> showError(result.error)
+        is PayPalFinishStartResult.Success  -> result.orderId?.let { captureOrder(it) }   // result.payerId also available; both are nullable
+        is PayPalFinishStartResult.Canceled -> showCheckoutScreen()   // result.orderId also available, if present
+        is PayPalFinishStartResult.Failure  -> showError(result.error)   // result.orderId also available, if present
         PayPalFinishStartResult.NoResult    -> Unit   // unrelated intent; ignore
+        null                                 -> Unit   // finishStart() called without a matching start()/vault() call in this process
     }
 }
 ```
@@ -237,6 +240,7 @@ override fun onNewIntent(intent: Intent) {
         PayPalFinishVaultResult.Canceled   -> showVaultScreen()
         is PayPalFinishVaultResult.Failure -> showError(result.error)
         PayPalFinishVaultResult.NoResult   -> Unit   // unrelated intent; ignore
+        null                                -> Unit   // finishVault() called without a matching start()/vault() call in this process
     }
 }
 ```
@@ -256,8 +260,8 @@ Dedicated buttons exist — `PayLaterButton` and `PayPalCreditButton` (`payment-
 | Call | Type | Cases | What you do |
 | --- | --- | --- | --- |
 | `start()` / `vault()` callback | `PayPalPresentAuthChallengeResult` | `Success` / `Failure(error)` | `Success` only confirms the challenge launched. `Failure` means checkout/vault never launched — show the error. `SESSION_NOT_STARTED` means `createPayPalSession()` was not called before `start()` / `vault()` — fix the ordering. |
-| `finishStart(intent)` | `PayPalFinishStartResult` | `Success(orderId, payerId)` / `Canceled` / `Failure(error)` / `NoResult` | Success: capture the order. Canceled: return the buyer to your checkout screen; no charge was made. Failure: show an error. `NoResult`: the intent was not a PayPal return — ignore it. |
-| `finishVault(intent)` | `PayPalFinishVaultResult` | `Success(approvalSessionId)` / `Canceled` / `Failure(error)` / `NoResult` | Success: store the returned `approvalSessionId`. Canceled: return the buyer to your save screen. Failure: show an error. `NoResult`: the intent was not a PayPal return — ignore it. |
+| `finishStart(intent)` | `PayPalFinishStartResult?` | `Success(orderId?, payerId?)` / `Canceled(orderId?)` / `Failure(error, orderId?)` / `NoResult` / `null` | Success: capture the order if `orderId` is present. Canceled: return the buyer to your checkout screen; `orderId` is included when available; no charge was made. Failure: show an error; `orderId` is included when available. `NoResult`: the intent was not a PayPal return — ignore it. `null`: `finishStart()` was called with no matching `start()`/`vault()` call in this process — ignore it. |
+| `finishVault(intent)` | `PayPalFinishVaultResult?` | `Success(approvalSessionId)` / `Canceled` / `Failure(error)` / `NoResult` / `null` | Success: store the returned `approvalSessionId`. Canceled: return the buyer to your save screen. Failure: show an error. `NoResult`: the intent was not a PayPal return — ignore it. `null`: same as above — no matching `start()`/`vault()` call in this process. |
 
 ## Best practices
 
@@ -267,7 +271,7 @@ Dedicated buttons exist — `PayLaterButton` and `PayPalCreditButton` (`payment-
 
 **Handle the return to your app.** Remove the loading indicator as soon as your app returns to the foreground (`onNewIntent` / `onResume`). If the buyer backgrounded the PayPal app without approving or canceling, let them resume rather than restarting checkout.
 
-**Handle redirection to the browser.** Occasionally the OS opens the return in a Chrome tab instead of your app — usually because the App Link is not verified. Your required `fallbackSchemeUrl` covers the common case; as a safeguard, consider website logic that detects a redirected buyer, confirms order status, and guides them back.
+**Handle redirection to the browser.** Occasionally the OS opens the return in a Chrome tab instead of your app — usually because the App Link is not verified. Registering a `fallbackSchemeUrl` alongside your App Link covers the common case; as a safeguard, consider website logic that detects a redirected buyer, confirms order status, and guides them back.
 
 ## Testing and go-live
 
@@ -298,10 +302,10 @@ To test the in-app browser path, use a device without the PayPal app installed, 
 ### Go live
 
 - [ ] Call `createPayPalSession()` on the button tap, before or alongside order creation.
-- [ ] Switch `Environment.SANDBOX` to `Environment.LIVE` and use your live client ID and merchant ID.
+- [ ] Switch `CoreEnvironment.SANDBOX` to `CoreEnvironment.LIVE` and use your live client ID and merchant ID.
 - [ ] Verify the App Link return works in a release build (assetlinks.json hosted and verified).
 - [ ] Verify the custom-scheme fallback (`fallbackSchemeUrl`) is registered and returns the buyer to your app.
-- [ ] Confirm all result variants are handled: `PayPalPresentAuthChallengeResult` (Success, Failure) from `start()`/`vault()`, and `PayPalFinishStartResult` / `PayPalFinishVaultResult` (Success, Canceled, Failure, NoResult) from `finishStart()`/`finishVault()`.
+- [ ] Confirm all result variants are handled: `PayPalPresentAuthChallengeResult` (Success, Failure) from `start()`/`vault()`, and `PayPalFinishStartResult` / `PayPalFinishVaultResult` (Success, Canceled, Failure, NoResult, and `null`) from `finishStart()`/`finishVault()`.
 - [ ] Collect device data and pass the client metadata ID on your Orders v2 request.
 - [ ] Contact your PayPal account team to enable App Switch for production traffic.
 

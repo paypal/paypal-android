@@ -38,7 +38,7 @@ Notes:
 * `GOLD` is the recommended default — PayPal's research shows it converts best. `BLUE` is the preferred alternative; `WHITE`, `BLACK`, and `SILVER` are secondary.
 * `WHITE` renders with an outline for contrast.
 * Stick to these built-in options rather than recoloring or rebuilding the button — they keep you brand-compliant.
-* For Pay Later or PayPal Credit, use `PayLaterButton` or `PayPalCreditButton` (each has its own color enum; `PayLaterButton` also exposes a `paylater_color` XML attribute).
+* For Pay Later or PayPal Credit, use `PayLaterButton` or `PayPalCreditButton`. `PayLaterButton` shares `PayPalButton`'s color enum (`PayPalButtonColor`) and also exposes a `paylater_color` XML attribute; `PayPalCreditButton` has its own distinct enum, `PayPalCreditButtonColor` (`DARK_BLUE`, `BLACK`, `GOLD`, `WHITE`).
 
 ## Handle taps
 
@@ -52,7 +52,7 @@ What happens in `beginCheckout()` — preparing the session, creating the order,
 
 ## Accessibility and localization
 
-The button sets its own content description and localizes its label text, so screen readers announce it correctly. Make sure your layout gives it an adequate touch target and sufficient contrast against its background.
+`PayPalButton` and `PayPalCreditButton` set their own content description so screen readers announce them correctly; `PayLaterButton` currently does not set one — add your own via `android:contentDescription` if you use it. The module ships English strings only today, with no localized string resources. Make sure your layout gives the button an adequate touch target and sufficient contrast against its background.
 
 ## Related
 

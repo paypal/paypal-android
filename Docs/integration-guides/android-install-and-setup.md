@@ -31,14 +31,14 @@ Every client (`PayPalClient`, `VenmoClient`, `CardClient`) is built from a singl
 
 ```kotlin
 val config = CoreConfig(
-    clientId    = "<YOUR_CLIENT_ID>",
-    merchantId  = "<YOUR_MERCHANT_ID>",   // Required — encrypted merchant account ID, no default
-    environment = Environment.SANDBOX,    // Environment.LIVE for production
-    bnCode      = null                    // Partner integrations only
+    clientId       = "<YOUR_CLIENT_ID>",
+    merchantId     = "<YOUR_MERCHANT_ID>",       // Required — encrypted merchant account ID, no default
+    coreEnvironment = CoreEnvironment.SANDBOX,   // CoreEnvironment.LIVE for production
+    bnCode         = null                        // Partner integrations only
 )
 ```
 
-Reuse this `config` across every method client. Switch `Environment.SANDBOX` to `Environment.LIVE` for production.
+Reuse this `config` across every method client. Switch `CoreEnvironment.SANDBOX` to `CoreEnvironment.LIVE` for production.
 
 ## Step 3: Register your return links
 
@@ -55,7 +55,7 @@ PayPal and Venmo checkout send the buyer to the PayPal or Venmo app (or an in-ap
 </activity>
 ```
 
-App Switch also uses a custom URL scheme as a **required** fallback for when the App Link cannot be delivered. Register its scheme separately:
+App Switch also supports a custom URL scheme as a fallback for when the App Link cannot be delivered. The SDK only requires that at least one of `returnAppUrl` / `fallbackSchemeUrl` be non-blank — but registering both is the safer default, since an unverified App Link would otherwise leave the buyer with no way back to your app. Register the fallback scheme separately:
 
 ```xml
 <intent-filter>
@@ -72,7 +72,7 @@ Define the matching URL config once; you pass it to each method's session or che
 val urlConfig = ReturnToAppUrlConfig(
     returnAppUrl      = "https://example.com/merchant-app/return",
     cancelAppUrl      = "https://example.com/merchant-app/cancel",
-    fallbackSchemeUrl = "merchantapp://return"   // Required
+    fallbackSchemeUrl = "merchantapp://return"   // Recommended — at least one of returnAppUrl / fallbackSchemeUrl must be non-blank
 )
 ```
 

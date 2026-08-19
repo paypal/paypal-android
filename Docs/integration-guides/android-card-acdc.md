@@ -196,7 +196,7 @@ Card splits the result across three calls when a challenge is required: `approve
 ### Go live
 
 - [ ] Validate card input in your own UI (Luhn, brand, formatting) — the SDK does not.
-- [ ] Switch `Environment.SANDBOX` to `Environment.LIVE` and use your live client ID and merchant ID.
+- [ ] Switch `CoreEnvironment.SANDBOX` to `CoreEnvironment.LIVE` and use your live client ID and merchant ID.
 - [ ] Verify the 3DS return scheme (`returnUrl`) is registered and returns the buyer to your app.
 - [ ] Confirm all result variants across `approveOrder()` and `finishApproveOrder()` are handled.
 - [ ] Contact your PayPal account team to enable ACDC for production traffic.
