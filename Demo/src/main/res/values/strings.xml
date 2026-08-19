@@ -40,13 +40,15 @@
         <item>ON_SUCCESS</item>
     </string-array>
 
-    <string name="pay_pal_funding_source_title">FUNDING SOURCE</string>
+    <string name="amount_title">AMOUNT (USD)</string>
     <string name="launch_paypal">Launch PayPal</string>
     <string-array name="pay_pal_funding_source_options">
         <item>PAYPAL_CREDIT</item>
         <item>PAY_LATER</item>
         <item>PAYPAL</item>
     </string-array>
+
+    <string name="payment_method_title">PAYMENT METHOD</string>
 
     <string name="user_action_title">USER ACTION</string>
     <string-array name="user_action_options">

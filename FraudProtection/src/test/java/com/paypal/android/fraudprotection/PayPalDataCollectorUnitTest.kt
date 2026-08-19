@@ -3,7 +3,7 @@ package com.paypal.android.fraudprotection
 import android.content.Context
 import android.util.Log
 import com.paypal.android.corepayments.CoreConfig
-import com.paypal.android.corepayments.Environment
+import com.paypal.android.corepayments.CoreEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -23,8 +23,8 @@ import java.util.UUID
 
 class PayPalDataCollectorUnitTest {
 
-    private val sandboxConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.SANDBOX)
-    private val liveConfig = CoreConfig("fake-client-id", "fake-merchant-id", Environment.LIVE)
+    private val sandboxConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.SANDBOX)
+    private val liveConfig = CoreConfig("fake-client-id", "fake-merchant-id", CoreEnvironment.LIVE)
 
     private lateinit var context: Context
 

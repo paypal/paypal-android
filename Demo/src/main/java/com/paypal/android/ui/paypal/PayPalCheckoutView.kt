@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paypal.android.R
 import com.paypal.android.uishared.components.ActionButtonColumn
+import com.paypal.android.uishared.components.AmountForm
 import com.paypal.android.uishared.components.CreateOrderForm
 import com.paypal.android.uishared.components.EnumOptionList
 import com.paypal.android.uishared.components.ErrorView
@@ -99,10 +100,22 @@ private fun Step1_CreateOrder(uiState: PayPalUiState, viewModel: PayPalCheckoutV
             orderIntent = uiState.intentOption,
             onOrderIntentChange = { value -> viewModel.intentOption = value },
         )
+        EnumOptionList(
+            title = stringResource(R.string.payment_method_title),
+            stringArrayResId = R.array.pay_pal_funding_source_options,
+            onSelectedOptionChange = { value -> viewModel.paymentMethodOption = value },
+            selectedOption = uiState.paymentMethodOption,
+            modifier = Modifier.fillMaxWidth()
+        )
         StoreInVaultOptionForm(
             modifier = Modifier.fillMaxWidth(),
             shouldVault = uiState.shouldVaultOption,
             onShouldVaultChanged = { value -> viewModel.shouldVault = value }
+        )
+        AmountForm(
+            amount = uiState.amount,
+            onAmountChange = { value -> viewModel.amount = value },
+            modifier = Modifier.fillMaxWidth()
         )
         ActionButtonColumn(
             defaultTitle = "CREATE ORDER",
@@ -127,10 +140,6 @@ private fun Step2_StartPayPalCheckout(uiState: PayPalUiState, viewModel: PayPalC
         verticalArrangement = UIConstants.spacingMedium,
     ) {
         StepHeader(stepNumber = 2, title = stringResource(R.string.launch_paypal))
-        StartPayPalCheckoutForm(
-            fundingSource = uiState.fundingSource,
-            onFundingSourceChange = { value -> viewModel.fundingSource = value },
-        )
         ActionButtonColumn(
             defaultTitle = "START CHECKOUT",
             successTitle = "CHECKOUT COMPLETE",

@@ -34,14 +34,14 @@ class GraphQLClient internal constructor(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val graphQLEndpoint = coreConfig.environment.graphQLEndpoint
+    private val graphQLEndpoint = coreConfig.coreEnvironment.graphQLEndpoint
     private val graphQLURL = "$graphQLEndpoint/graphql"
 
     private val httpRequestHeaders = mutableMapOf(
         "Content-Type" to "application/json",
         "Accept" to "application/json",
         "x-app-name" to "nativecheckout",
-        "Origin" to coreConfig.environment.graphQLEndpoint
+        "Origin" to coreConfig.coreEnvironment.graphQLEndpoint
     )
 
     /**

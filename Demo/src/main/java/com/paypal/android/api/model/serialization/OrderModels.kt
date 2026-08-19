@@ -1,6 +1,8 @@
 package com.paypal.android.api.model.serialization
 
 import com.paypal.android.api.model.OrderIntent
+import com.paypal.android.api.model.PaymentMethodSelected
+import com.paypal.android.api.model.UserActionSelected
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -46,8 +48,13 @@ data class Vault(
 
 @Serializable
 data class PayPalPaymentSource(
+    val usageType: String? = null,
+    val emailAddress: String? = null,
+    val experienceContext: PayPalOrderExperienceContext? = null,
+    val usagePattern: String? = null,
+    val billingPlan: String? = null,
     val attributes: PayPalAttributes? = null,
-    val experienceContext: PayPalOrderExperienceContext? = null
+    val token: String? = null
 )
 
 @Serializable
@@ -59,7 +66,14 @@ data class PayPalAttributes(
 data class PayPalOrderExperienceContext(
     val returnUrl: String,
     val cancelUrl: String,
-    val nativeApp: NativeApp? = null
+    val paymentMethodSelected: PaymentMethodSelected? = null,
+    val userAction: UserActionSelected? = null,
+    val appSwitchContext: AppSwitchContext? = null
+)
+
+@Serializable
+data class AppSwitchContext(
+    val nativeApp: NativeApp
 )
 
 @Serializable
