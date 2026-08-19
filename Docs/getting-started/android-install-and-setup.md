@@ -85,7 +85,6 @@ Verification checklist: `android:autoVerify="true"` is set; your domain serves a
 With setup done, integrate a payment method:
 
 * **PayPal Checkout** — One-Time Checkout, Vault (with/without purchase), Pay Later / PayPal Credit
-* **Venmo Checkout** — One-Time Checkout
 * **Card (ACDC)** — card payments and vaulting
 
 ## Related
