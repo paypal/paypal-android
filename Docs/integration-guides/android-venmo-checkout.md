@@ -1,6 +1,6 @@
 This guide shows you how to accept a **Venmo payment** (One-Time Checkout) in your Android app with PayPal Mobile SDK V3.0.0. Venmo checkout uses its own client, `VenmoClient`, and returns to your app via the same App Link you registered in Install & Setup. When the buyer taps your Venmo button, checkout opens the Venmo app if it is installed and the buyer is eligible; otherwise it falls back to a Chrome Custom Tab automatically. **Venmo supports One-Time Checkout only** — vault flows are not supported for Venmo.
 
-> **Before you start:** complete [Install & Setup (Android)](android-install-and-setup.md).
+> **Before you start:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md).
 
 ## Overview
 
@@ -27,7 +27,7 @@ sequenceDiagram
 
 ## Before you begin
 
-Complete [Install & Setup (Android)](android-install-and-setup.md). For Venmo specifically:
+Complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). For Venmo specifically:
 
 * Add the `com.paypal.android:venmo` module.
 * Construct the client from the `CoreConfig` you built in setup:
@@ -152,6 +152,6 @@ Follow the same physical-device approach as PayPal App Switch, with two differen
 
 ## Related
 
-* [Install & Setup (Android)](android-install-and-setup.md)
+* [Install & Setup (Android)](../getting-started/android-install-and-setup.md)
 * [Troubleshooting (Android)](android-troubleshooting.md)
 * [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/)

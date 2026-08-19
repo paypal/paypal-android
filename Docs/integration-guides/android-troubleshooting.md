@@ -5,7 +5,7 @@ Common problems integrating the PayPal Mobile SDK V3.0.0 on Android, organized b
 `Failed to resolve: com.paypal.android:...`
 
 * Likely cause: the module or version is not available, or Maven Central is not in your repositories.
-* Fix: confirm `mavenCentral()` is in your repositories and use a current V3 version; add only the modules you use (see [Install & Setup (Android)](android-install-and-setup.md)).
+* Fix: confirm `mavenCentral()` is in your repositories and use a current V3 version; add only the modules you use (see [Install & Setup (Android)](../getting-started/android-install-and-setup.md)).
 
 **Duplicate class or version conflict at build time**
 
@@ -67,13 +67,13 @@ Common problems integrating the PayPal Mobile SDK V3.0.0 on Android, organized b
 
 ## Still stuck
 
-* Re-check [Install & Setup (Android)](android-install-and-setup.md).
+* Re-check [Install & Setup (Android)](../getting-started/android-install-and-setup.md).
 * Look up exact class and method signatures in the generated API reference (Dokka).
 * Run the sample app to compare against a known-good integration.
 * Contact your PayPal account team or support.
 
 ## Related
 
-* [Install & Setup (Android)](android-install-and-setup.md)
+* [Install & Setup (Android)](../getting-started/android-install-and-setup.md)
 * [PayPal Checkout — Integration Guide (Android)](android-paypal-checkout.md)
 * [Card / ACDC — Integration Guide (Android)](android-card-acdc.md)

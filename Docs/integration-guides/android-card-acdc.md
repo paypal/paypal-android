@@ -2,7 +2,7 @@ This guide shows you how to accept a **card payment** — Advanced Credit and De
 
 On Android, presenting the 3D Secure (3DS) challenge is **not** automatic: if PayPal requires a step-up, `approveOrder()` returns an `AuthorizationRequired` result carrying a challenge, and you explicitly call `presentAuthChallenge()`, then `finishApproveOrder(intent)` when the buyer returns.
 
-> **Before you start:** complete [Install & Setup (Android)](android-install-and-setup.md). Card uses a custom-scheme return for the 3DS challenge only — reuse the `merchantapp` scheme you registered there (or register a dedicated one). Card does **not** require App Links.
+> **Before you start:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). Card uses a custom-scheme return for the 3DS challenge only — reuse the `merchantapp` scheme you registered there (or register a dedicated one). Card does **not** require App Links.
 
 ## Overview
 
@@ -32,7 +32,7 @@ sequenceDiagram
 
 ## Before you begin
 
-Complete [Install & Setup (Android)](android-install-and-setup.md). For Card specifically:
+Complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). For Card specifically:
 
 * Add the `com.paypal.android:card-payments` module.
 * Construct the client from the `CoreConfig` you built in setup:
@@ -203,6 +203,6 @@ Card splits the result across three calls when a challenge is required: `approve
 
 ## Related
 
-* [Install & Setup (Android)](android-install-and-setup.md)
+* [Install & Setup (Android)](../getting-started/android-install-and-setup.md)
 * [Troubleshooting (Android)](android-troubleshooting.md)
 * [Orders v2 API](https://developer.paypal.com/docs/api/orders/v2/)

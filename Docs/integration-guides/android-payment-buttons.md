@@ -1,6 +1,6 @@
 The SDK ships PayPal-branded buttons you drop into your layout — `PayPalButton`, `PayLaterButton`, and `PayPalCreditButton` (the `payment-buttons` module). Use these rather than building your own: they carry PayPal's wordmark, brand colors, typography (the PayPalOpen font), and accessibility. This guide covers adding, styling, and wiring a button; for the checkout it triggers, see [PayPal Checkout](android-paypal-checkout.md).
 
-> **Before you begin:** complete [Install & Setup (Android)](android-install-and-setup.md) and add the `com.paypal.android:payment-buttons` module.
+> **Before you begin:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md) and add the `com.paypal.android:payment-buttons` module.
 
 ## Add a button
 
@@ -56,6 +56,6 @@ What happens in `beginCheckout()` — preparing the session, creating the order,
 
 ## Related
 
-* [Install & Setup (Android)](android-install-and-setup.md)
+* [Install & Setup (Android)](../getting-started/android-install-and-setup.md)
 * [PayPal Checkout — Integration Guide (Android)](android-paypal-checkout.md)
 * [Troubleshooting (Android)](android-troubleshooting.md)

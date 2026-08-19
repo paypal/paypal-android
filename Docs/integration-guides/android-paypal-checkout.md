@@ -1,6 +1,6 @@
 This guide shows you how to accept a **PayPal payment** in your Android app with PayPal Mobile SDK V3.0.0 — One-Time Checkout, Vault (with or without a purchase), and Pay Later / PayPal Credit. The **PayPal button** is the highlighted way to start checkout: when the buyer taps it, checkout happens in the PayPal app if they are eligible and have it installed — approving with biometrics or a passkey — then returns to your app through your Android App Link. If the PayPal app is not installed or the buyer is not eligible, checkout continues in a Chrome Custom Tab automatically.
 
-> **Before you start:** complete [Install & Setup (Android)](android-install-and-setup.md). It covers the SDK dependency, `CoreConfig`, and return-link registration shared by every payment method.
+> **Before you start:** complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). It covers the SDK dependency, `CoreConfig`, and return-link registration shared by every payment method.
 
 ## Overview
 
@@ -47,7 +47,7 @@ The SDK handles the client-side of checkout. It does not create or capture order
 
 ## Before you begin
 
-Complete [Install & Setup (Android)](android-install-and-setup.md). For PayPal Checkout specifically:
+Complete [Install & Setup (Android)](../getting-started/android-install-and-setup.md). For PayPal Checkout specifically:
 
 * Add the `com.paypal.android:paypal-payments` and `com.paypal.android:payment-buttons` modules.
 * Construct the client from the `CoreConfig` you built in setup:
@@ -311,7 +311,7 @@ To test the in-app browser path, use a device without the PayPal app installed, 
 
 ## Related
 
-* [Install & Setup (Android)](android-install-and-setup.md)
+* [Install & Setup (Android)](../getting-started/android-install-and-setup.md)
 * [Payment Buttons (Android)](android-payment-buttons.md)
 * [Troubleshooting (Android)](android-troubleshooting.md)
 * [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/)
