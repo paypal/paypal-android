@@ -2,6 +2,7 @@ plugins {
     alias libs.plugins.android.library
     alias libs.plugins.kotlinAndroid
     alias libs.plugins.binaryCompatibilityValidator
+    alias libs.plugins.kotlinSerialization
 }
 
 apiValidation {
@@ -47,7 +48,9 @@ dependencies {
 
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appcompat
-    implementation libs.android.material
+    implementation libs.kotlinx.serializationJson
+    implementation libs.kotlinx.coroutinesAndroid
+    implementation libs.google.playServicesWallet
 
     testImplementation libs.junit
 
